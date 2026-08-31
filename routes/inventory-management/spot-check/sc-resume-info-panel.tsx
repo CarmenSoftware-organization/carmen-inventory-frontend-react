@@ -1,4 +1,3 @@
-
 import { Boxes, Calendar } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { formatDate } from "@/lib/date-utils";
@@ -24,7 +23,7 @@ export function ResumeInfoPanel({ latest, dateFormat }: ResumeInfoPanelProps) {
         />
       </div>
 
-      <div className="text-muted-foreground flex items-center justify-between gap-3 px-3 py-2 text-micro">
+      <div className="text-muted-foreground text-micro flex items-center justify-between gap-3 px-3 py-2">
         <span className="inline-flex items-center gap-1.5">
           <Calendar className="size-3 shrink-0" aria-hidden="true" />
           <span className="font-semibold">{tfl("startDate")}</span>
@@ -32,7 +31,7 @@ export function ResumeInfoPanel({ latest, dateFormat }: ResumeInfoPanelProps) {
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Boxes className="size-3 shrink-0" aria-hidden="true" />
-          <span className="text-foreground tabular-nums font-semibold">
+          <span className="text-foreground font-semibold tabular-nums">
             {latest.counted} / {latest.size}
           </span>
           <span>{tfl("items").toLowerCase()}</span>

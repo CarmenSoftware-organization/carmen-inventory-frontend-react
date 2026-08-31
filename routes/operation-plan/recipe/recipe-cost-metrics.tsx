@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { FieldInput } from "@/components/ui/field";
@@ -77,7 +76,7 @@ export function RecipeCostMetrics({
             errorIconAlign="left"
             {...form.register("carbon_footprint")}
           />
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-micro">
+          <span className="text-muted-foreground text-micro pointer-events-none absolute top-1/2 right-2 -translate-y-1/2">
             {t("kgCo2e")}
           </span>
         </div>

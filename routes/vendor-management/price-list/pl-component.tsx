@@ -21,6 +21,7 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useVendor } from "@/hooks/use-vendor";
+import { useCurrency } from "@/hooks/use-currency";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { PriceList } from "@/types/price-list";
 import SearchInput from "@/components/search-input";
@@ -31,12 +32,13 @@ import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { usePriceListTable } from "./use-pl-table";
 import PriceListCard from "./pl-card";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -79,10 +81,24 @@ export default function PriceListComponent() {
   // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
   // PO_TYPE/CN_TYPE ใน Task 19). filter (status) ใช้ labelKey จริง (status.draft
   // ฯลฯ) จึงใช้ control: "status" ทั่วไปได้ตรง ๆ
+  const { data: currencyData } = useCurrency({ perpage: -1 });
+  // code เป็น literal string จริง — memo กัน reference เปลี่ยนทุก render
+  const currencyOptions = useMemo(
+    () =>
+      (currencyData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({
+          label: c.code,
+          value: `currency_code|string:${c.code}`,
+        })),
+    [currencyData],
+  );
+
   const priceListFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "status",
         labelKey: "common.status",
         options: [
@@ -93,7 +109,23 @@ export default function PriceListComponent() {
         ],
       },
       {
+        key: "currency",
+        control: "custom",
+        labelKey: "field.currency",
+        section: "listView.sectionDocument",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={currencyOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+      {
         key: "vendor",
+        section: "listView.sectionPeople",
         control: "custom",
         labelKey: "field.vendor",
         render: (value, onChange) => (
@@ -106,8 +138,17 @@ export default function PriceListComponent() {
           />
         ),
       },
+      {
+        // กรองที่วันเริ่มมีผล (effective_from_date) — ความหมายเดียวกับคอลัมน์
+        // ช่วงวันที่มีผลบน list ที่เรียงด้วยวันเริ่มเช่นกัน
+        key: "effective_from",
+        control: "date-range",
+        labelKey: "field.effectivePeriod",
+        fieldKey: "effective_from_date",
+        section: "listView.sectionDate",
+      },
     ],
-    [vendorOptions],
+    [vendorOptions, currencyOptions],
   );
 
   const lf = useListFilters({
@@ -210,7 +251,7 @@ export default function PriceListComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={priceListFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -220,6 +261,7 @@ export default function PriceListComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

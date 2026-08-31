@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { X } from "lucide-react";
@@ -66,7 +65,9 @@ export function ScheduleRecipientsField({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggle(id)}
-                      aria-label={tl("remove", { name: nameById.get(id) ?? id })}
+                      aria-label={tl("remove", {
+                        name: nameById.get(id) ?? id,
+                      })}
                       className="disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {nameById.get(id) ?? id}

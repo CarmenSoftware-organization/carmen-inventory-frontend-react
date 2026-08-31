@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
@@ -144,7 +143,7 @@ function CostRow({
     <div className="grid grid-cols-[0.5rem_1fr_2.5rem_auto] items-center gap-2">
       <span className={cn("size-2 rounded-sm", color)} aria-hidden="true" />
       <span className="text-foreground/80 text-xs font-semibold">{label}</span>
-      <span className="text-muted-foreground text-right text-micro font-semibold">
+      <span className="text-muted-foreground text-micro text-right font-semibold">
         {pct.toFixed(0)}%
       </span>
       {input}

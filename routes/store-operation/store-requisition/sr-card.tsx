@@ -1,13 +1,14 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
+  ListCardSendBackRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { SR_STATUS_CONFIG } from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import type { StoreRequisition } from "@/types/store-requisition";
 
 interface SrCardProps {
@@ -33,19 +34,14 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   const ts = useTranslations("status");
   const { dateFormat } = useProfile();
 
-  const config = SR_STATUS_CONFIG[item.doc_status] ?? SR_STATUS_CONFIG.draft;
-
   return (
     <ListCard
       title={item.sr_no}
-      badge={
-        <Badge size="xs" className={config.className}>
-          {ts(item.doc_status)}
-        </Badge>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.doc_status} label={ts(item.doc_status)} />
+      <ListCardSendBackRow lastAction={item.last_action} />
       <ListCardRow label={tfl("date")}>
         <span className="tabular-nums">
           {formatDate(item.sr_date, dateFormat)}
@@ -53,7 +49,11 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
       </ListCardRow>
       {item.sr_type && (
         <ListCardRow label={tfl("type")}>
-          <span className="uppercase">{item.sr_type}</span>
+          <StatusIconLabel
+            status={item.sr_type}
+            label={item.sr_type}
+            className="text-muted-foreground uppercase"
+          />
         </ListCardRow>
       )}
       <ListCardRow label={tfl("fromTo")}>

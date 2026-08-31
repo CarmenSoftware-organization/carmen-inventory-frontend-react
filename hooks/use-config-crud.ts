@@ -53,11 +53,18 @@ export function createConfigCrud<T, TCreate>({
 }: ConfigCrudOptions): {
   useList: (
     params?: ParamsDto,
-    options?: Omit<UseQueryOptions<PaginatedResponse<T>>, "queryKey" | "queryFn">,
+    options?: Omit<
+      UseQueryOptions<PaginatedResponse<T>>,
+      "queryKey" | "queryFn"
+    >,
   ) => UseQueryResult<PaginatedResponse<T>>;
   useById: (id: string | undefined) => UseQueryResult<T>;
   useCreate: () => UseMutationResult<unknown, Error, TCreate>;
-  useUpdate: () => UseMutationResult<unknown, Error, TCreate & { id: string; doc_version?: number }>;
+  useUpdate: () => UseMutationResult<
+    unknown,
+    Error,
+    TCreate & { id: string; doc_version?: number }
+  >;
   useDelete: () => UseMutationResult<unknown, Error, string>;
 } {
   const api = createConfigApi<T, TCreate>({ endpoint, label, updateMethod });
@@ -79,7 +86,10 @@ export function createConfigCrud<T, TCreate>({
    */
   function useList(
     params?: ParamsDto,
-    options?: Omit<UseQueryOptions<PaginatedResponse<T>>, "queryKey" | "queryFn">,
+    options?: Omit<
+      UseQueryOptions<PaginatedResponse<T>>,
+      "queryKey" | "queryFn"
+    >,
   ) {
     const buCode = useBuCode();
 

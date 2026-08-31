@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
@@ -56,14 +56,10 @@ export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
   return (
     <ListCard
       title={docNo}
-      badge={
-        <Badge size="xs" className={statusConfig.className}>
-          {statusConfig.label}
-        </Badge>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.doc_status} label={statusConfig.label} />
       {docDate && (
         <ListCardRow label={tfl("date")}>
           <span className="tabular-nums">

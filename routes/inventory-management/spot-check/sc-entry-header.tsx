@@ -57,14 +57,14 @@ export function ScEntryHeader({
             <ArrowLeft />
           </Button>
           <div className="min-w-0">
-            <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-micro-eyebrow font-semibold tracking-widest uppercase">
+            <span className="bg-primary/10 text-primary text-micro-eyebrow inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold tracking-widest uppercase">
               <ClipboardCheck className="size-2.5" />
               {t("entryTitle")}
             </span>
             <h1 className="text-foreground mt-1 text-base leading-tight font-semibold tracking-tight">
               {locationName || "—"}
             </h1>
-            <p className="text-muted-foreground mt-0.5 text-micro-legal tracking-wide uppercase">
+            <p className="text-muted-foreground text-micro-legal mt-0.5 tracking-wide uppercase">
               {locationCode}
             </p>
           </div>
@@ -75,7 +75,7 @@ export function ScEntryHeader({
               variant={status.variant}
               size="xs"
               className={cn(
-                "gap-1 px-2 text-micro-eyebrow font-semibold tracking-wider uppercase",
+                "text-micro-eyebrow gap-1 px-2 font-semibold tracking-wider uppercase",
                 status.className,
               )}
             >
@@ -104,7 +104,7 @@ export function ScEntryHeader({
 
       <Progress value={percent} variant="auto" className="mt-3 h-1" />
 
-      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-3 text-micro">
+      <div className="text-muted-foreground text-micro mt-2 flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-1">
           <MapPin className="size-2.5" aria-hidden="true" />
           {locationName}

@@ -1,64 +1,89 @@
-export type NotificationCategory =
-  | "system-to-user"
-  | "bu-to-user"
-  | "user-to-user";
+import type { PaginatedResponse } from "@/types/params";
 
 /**
- * Entity kind ที่ notification อ้างถึง — ใช้ map เป็น detail route
- * (`PR` → purchase request, `PO` → purchase order, `SR` → store requisition)
+ * ชนิดเอกสารที่การแจ้งเตือนอ้างถึง — ตรงกับ `enum_notification_doc_type` ฝั่ง platform schema
+ * (`system`/`business_unit` คือประกาศ ไม่ผูกกับเอกสารใด)
  */
-export type NotificationEntityType = "PR" | "PO" | "SR";
+export type NotificationDocType =
+  | "system"
+  | "business_unit"
+  | "purchase_request"
+  | "purchase_order"
+  | "store_requisition"
+  | "good_received_note"
+  | "credit_note";
 
+/** เหตุการณ์ที่ทำให้เกิดการแจ้งเตือน — ตรงกับ `enum_notification_event` */
+export type NotificationEvent = "info" | "workflow" | "comment";
+
+/**
+ * แหล่งของแถว — `personal` = `tb_notification`, `broadcast` = `tb_broadcast_notification`
+ * ต้องส่งกลับไปใน body ของ mark-read เพื่อให้ backend เขียนลงตารางที่ถูก
+ */
 export type NotificationSource = "personal" | "broadcast";
 
 /**
- * Metadata ที่ backend แนบมากับ notification — `id` คือ entity id (เช่น
- * purchase_request.id) ที่ใช้คู่กับ `type` ระดับบนสร้าง deep-link
+ * Metadata ที่ backend แนบมา — write path ใหม่เขียน id เอกสารไว้ที่ `id` เสมอ
+ * ส่วนคีย์รายเอกสารเป็นของแถวก่อน redesign ที่ยังค้างอยู่ในฐาน ไม่มีการผลิตใหม่
  */
 export interface NotificationMetadata {
-  /** Generic entity id (legacy / fallback) */
-  id?: string;
-  /** Entity-specific ids — backend ใส่ key ตาม entity type (PO → po_id, PR → pr_id, SR → sr_id) */
-  po_id?: string;
+  /** id เอกสาร (จาก `doc_id` ของ envelope) — คีย์หลักที่ใช้สร้าง deep-link */
+  id?: string | null;
+  /** @deprecated คีย์เก่าก่อน redesign — อ่านเป็น fallback ของแถวประวัติเท่านั้น */
   pr_id?: string;
+  /** @deprecated ดู `pr_id` */
+  po_id?: string;
+  /** @deprecated ดู `pr_id` */
   sr_id?: string;
-  cn_id?: string;
+  /** @deprecated ดู `pr_id` */
   grn_id?: string;
-  no?: string;
-  po_no?: string;
-  pr_no?: string;
-  sr_no?: string;
-  cn_no?: string;
-  grn_no?: string;
-  type?: string;
+  /** @deprecated ดู `pr_id` */
+  cn_id?: string;
   action?: string;
-  channel?: string;
-  slot?: string;
   current_stage?: string;
   is_fully_approved?: boolean;
-  notification_template_id?: string;
-  vendor_id?: string;
-  vendor_name?: string;
+  [key: string]: unknown;
 }
 
+/** แถวการแจ้งเตือนหนึ่งใบตามที่ gateway ส่งมา (รวมทั้งแถวส่วนตัวและแถวประกาศ) */
 export interface Notification {
   id: string;
   /** `personal` (ส่งตรง to_user_id) หรือ `broadcast` (system-wide) */
   source?: NotificationSource;
-  title: string;
-  message: string;
-  /** Entity type (`PR/PO/SR`) สำหรับ deep-link หรือ string อื่น (free-form notification) */
-  type: NotificationEntityType | string;
-  /** category จาก list endpoint — ใช้ route การ mark-read ไปตารางที่ถูก (broadcast/personal) */
-  category?: NotificationCategory;
-  /** entity reference + action — `metadata.id` ใช้สร้าง URL deep-link */
-  metadata?: NotificationMetadata;
+  /** Document type ของการแจ้งเตือน */
+  doc_type?: NotificationDocType | null;
+  /** Event type ของการแจ้งเตือน */
+  event?: NotificationEvent | null;
+  /** Title ของการแจ้งเตือน */
+  title?: string | null;
+  /** Message/body ของการแจ้งเตือน */
+  message?: string | null;
+  /** Entity reference + action */
+  metadata?: NotificationMetadata | null;
+  /** อ่านแล้วหรือยัง */
   is_read?: boolean;
-  is_sent?: boolean;
+  /** เวลาที่ถูก emit ขึ้น WS — null = ยังไม่เคย emit (เช่นยังตั้งเวลาอยู่) */
+  pushed_at?: string | null;
+  /** Scheduled time (ถ้ากำหนดเวลา) */
   scheduled_at?: string | null;
-  created_at: string;
-  from_user_id?: string;
-  to_user_id?: string;
-  /** Optional explicit URL fallback (ปกติไม่ใช้ — pre-built link จาก backend) */
-  link?: string;
+  /** nullable บนสายจริง — ทุกจุดที่แสดงเวลาต้องกันค่าว่าง */
+  created_at?: string | null;
+  /** User ที่ส่งมา */
+  from_user_id?: string | null;
+  /** User ที่รับ */
+  to_user_id?: string | null;
+}
+
+/**
+ * ค่าสรุปยังไม่ได้อ่าน/อ่านแล้วทั้งชุดผลลัพธ์ — backend สร้างใน try/catch จึงเป็น
+ * optional บนสาย **การไม่มีแปลว่า "สร้างค่าสรุปไม่ได้" ไม่ใช่ศูนย์**
+ */
+export interface NotificationSummary {
+  unread: number;
+  read: number;
+}
+
+/** ซองของ `GET /api/notifications` และ `GET /api/notifications/unread` */
+export interface NotificationListResponse extends PaginatedResponse<Notification> {
+  summary?: NotificationSummary;
 }

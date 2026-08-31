@@ -64,6 +64,7 @@ export function PrtItemFields({
   return (
     <SettingSection
       wide
+      frameless
       title={tfl("items")}
       description={t("itemsDesc")}
       count={itemFields.length}

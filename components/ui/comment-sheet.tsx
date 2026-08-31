@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/image-lightbox";
 import { formatDate } from "@/lib/date-utils";
 import EmptyComponent from "@/components/empty-component";
-import { safeNavigationHref, sanitizeUrl } from "@/lib/utils";
+import { safeImageSrc, safeNavigationHref, sanitizeUrl } from "@/lib/utils";
 
 export interface CommentAttachment {
   size: number;
@@ -147,15 +147,36 @@ const formatCommentTime = (
 
 /**
  * รวม URL สำหรับแสดง attachment — ถ้า server คืน `fileUrl` ใช้ตามนั้น
- * fileUrl เป็น relative path เช่น `/api/{bu}/documents/{token}/download`
- * ต้อง prepend `/api/proxy` เพื่อให้ผ่าน proxy frontend (กรณีไม่ได้ prefix อยู่แล้ว)
- * ถ้าไม่มี fileUrl ให้ derive จาก `fileToken` รูปแบบ `{buCode}/{uuid}`
+ *
+ * Priority:
+ * 1. data URI ชนิดรูปภาพ (`data:image/…` — SVG placeholder หรือ base64) — ใช้ตรงได้เลย
+ * 2. absolute URL (presigned MinIO / https) — ใช้ตรงได้เลย ไม่ต้อง proxy
+ * 3. relative `/api/...` path — prepend `/api/proxy` (เส้นทางเดิมจาก source app)
+ * 4. fallback: derive จาก `fileToken` รูปแบบ `{buCode}/{uuid}`
+ *
+ * ข้อ 1–2 คือเส้นทางที่ใช้งานได้จริงในบริบทนี้ เพราะ URL ที่ได้ถูกส่งให้เบราว์เซอร์
+ * โหลดเอง (`<img src>` / `<a href>`) ซึ่ง **ไม่ผ่าน** `lib/http-client.ts` — ตัว rewrite
+ * `/api/proxy/<rest>` → `${BACKEND_URL}/<rest>` ทำงานเฉพาะชั้น fetch เท่านั้น ข้อ 3–4
+ * จึงเป็นของตกทอดที่เก็บไว้กันรีเกรสชัน ไม่ใช่เส้นทางหลัก
+ *
+ * รับ data URI เฉพาะ `data:image/` — ชนิดอื่น (เช่น `data:text/html`) ตกไปให้
+ * `sanitizeUrl` ปฏิเสธตามเดิม เพราะปลายทางของไฟล์ที่ไม่ใช่รูปคือ `<a href target="_blank">`
  */
 const resolveAttachmentUrl = (
   fileUrl: string,
   fileToken: string,
 ): string | null => {
   if (fileUrl) {
+    // data URI ของรูปภาพ — pass through โดยตรง (sanitizeUrl บล็อก data: ทุกชนิด)
+    if (fileUrl.startsWith("data:image/")) {
+      return fileUrl;
+    }
+    // Absolute URL (presigned MinIO URL / external https) — ใช้โดยตรงโดยไม่ proxy
+    if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+      const safe = sanitizeUrl(fileUrl);
+      if (safe) return safe;
+    }
+    // Relative gateway URL — prepend /api/proxy
     const proxied =
       fileUrl.startsWith("/api/") && !fileUrl.startsWith("/api/proxy/")
         ? `/api/proxy${fileUrl}`
@@ -190,15 +211,19 @@ interface AttachmentImageProps {
 function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   const [errored, setErrored] = useState(false);
   const dimension = size === "sm" ? "size-14" : "size-16";
+  // ด่านสุดท้ายก่อนเข้า <img> — ผู้เรียกทั้งสามที่ส่งของที่ผ่านการตรวจมาแล้ว แต่
+  // ด่านต้องอยู่ตรงนี้ ไม่ใช่ฝากไว้กับผู้เรียก คนเพิ่มที่เรียกคนถัดไปจะไม่รู้กติกา
+  // ไม่ผ่าน = ตกไปกล่อง fallback เหมือนตอนโหลดรูปไม่ขึ้น
+  const safeSrc = safeImageSrc(src);
 
-  if (errored) {
+  if (errored || !safeSrc) {
     return (
       <div
         className={`${dimension} bg-muted text-muted-foreground/70 flex flex-col items-center justify-center gap-0.5 rounded p-1`}
         title={fileName}
       >
         <ImageIcon className="size-4 shrink-0" aria-hidden="true" />
-        <span className="line-clamp-2 w-full text-center text-micro-legal leading-tight break-all">
+        <span className="text-micro-legal line-clamp-2 w-full text-center leading-tight break-all">
           {fileName}
         </span>
       </div>
@@ -208,7 +233,7 @@ function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   return (
     /* plain <img>: ไม่มี @next/next/jsx-a11y plugin ใน Vite eslint config */
     <img
-      src={src}
+      src={safeSrc}
       alt={fileName}
       className={`${dimension} object-cover`}
       loading="lazy"
@@ -448,7 +473,7 @@ export function CommentSheet({
                       {getFullName(c)}
                     </span>
                     <span
-                      className="text-muted-foreground shrink-0 text-micro-legal"
+                      className="text-muted-foreground text-micro-legal shrink-0"
                       title={formatDate(
                         c.audit?.created?.at ?? "",
                         `${dateFormat} HH:mm`,
@@ -565,7 +590,7 @@ export function CommentSheet({
                                   href={safeUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-muted/50 text-muted-foreground hover:bg-muted inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal transition-colors"
+                                  className="bg-muted/50 text-muted-foreground hover:bg-muted text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5 transition-colors"
                                 >
                                   <Paperclip className="size-2.5 shrink-0" />
                                   <span className="truncate">
@@ -640,7 +665,7 @@ export function CommentSheet({
                 return (
                   <div
                     key={file.fileToken}
-                    className="bg-background text-muted-foreground inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal"
+                    className="bg-background text-muted-foreground text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5"
                   >
                     <Paperclip className="size-2.5 shrink-0" />
                     <span className="max-w-32 truncate">{file.fileName}</span>
@@ -684,7 +709,7 @@ export function CommentSheet({
                 return (
                   <div
                     key={`${file.name}-${i}`}
-                    className="bg-background text-muted-foreground inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal"
+                    className="bg-background text-muted-foreground text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5"
                   >
                     <Paperclip className="size-2.5 shrink-0" />
                     <span className="max-w-32 truncate">{file.name}</span>

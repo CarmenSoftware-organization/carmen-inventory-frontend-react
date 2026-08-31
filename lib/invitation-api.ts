@@ -32,7 +32,7 @@ export interface InvitationPreview {
    */
   has_account?: boolean | null;
   /** สถานะของอีเมลจาก backend — ละเอียดกว่า has_account และใช้แทนมันได้ทุกกรณี */
-  account_state?: 'free' | 'reclaimable' | 'owned' | 'conflict' | null;
+  account_state?: "free" | "reclaimable" | "owned" | "conflict" | null;
 }
 
 /**
@@ -46,7 +46,8 @@ export async function getInvitation(token: string): Promise<InvitationPreview> {
   const res = await httpClient.get(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}`,
   );
-  if (!res.ok) throw await ApiError.from(res, "This invitation link is no longer valid");
+  if (!res.ok)
+    throw await ApiError.from(res, "This invitation link is no longer valid");
   const json = await res.json();
   return json?.data ?? json;
 }
@@ -81,7 +82,8 @@ export async function acceptInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept`,
   );
-  if (!res.ok) throw await ApiError.from(res, "Could not accept the invitation");
+  if (!res.ok)
+    throw await ApiError.from(res, "Could not accept the invitation");
 }
 
 /**
@@ -94,5 +96,6 @@ export async function declineInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}/decline`,
   );
-  if (!res.ok) throw await ApiError.from(res, "Could not decline the invitation");
+  if (!res.ok)
+    throw await ApiError.from(res, "Could not decline the invitation");
 }

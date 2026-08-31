@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { Clock } from "lucide-react";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { ApprovalItem } from "@/types/approval";
 import { formatDate } from "@/lib/date-utils";
@@ -10,6 +11,7 @@ import { Link } from "react-router";
 import {
   columnSkeletons,
   indexColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import {
   DataGrid,
@@ -31,11 +33,6 @@ interface ApprovalQueueListProps {
   readonly tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-/**
- * ตารางแสดงคิวรายการเอกสารที่รออนุมัติ (PR/PO/SR)
- * @param props - ข้อมูลรายการ, จำนวนรวม, สถานะโหลด, รูปแบบวันที่, และตัวควบคุมตาราง
- * @returns React element ของตารางคิวอนุมัติ
- */
 export default function ApprovalQueueList({
   items,
   totalRecords,
@@ -47,6 +44,7 @@ export default function ApprovalQueueList({
   "use no memo";
   const t = useTranslations("procurement.approval");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
 
   const DOC_TYPE_CONFIG: Record<
     string,
@@ -93,6 +91,7 @@ export default function ApprovalQueueList({
       },
       meta: { skeleton: columnSkeletons.text },
     },
+    sendbackColumn<ApprovalItem>(tc("sendBack")),
     {
       accessorKey: "doc_type",
       header: tfl("type"),
@@ -134,9 +133,13 @@ export default function ApprovalQueueList({
         const config =
           PR_STATUS_CONFIG[status ?? "draft"] ?? PR_STATUS_CONFIG.draft;
         return (
-          <Badge className={config.className} size="xs">
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={status ?? "draft"}
+            label={config.label}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       size: 100,

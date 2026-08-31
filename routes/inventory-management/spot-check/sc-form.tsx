@@ -27,7 +27,7 @@ import {
   useCreateSpotCheck,
   useDeleteSpotCheck,
   useUpdateSpotCheck,
-} from "@/hooks/use-spot-check";
+} from "./use-spot-check";
 import type { SpotCheck } from "@/types/spot-check";
 import type { ProductLocation } from "@/types/location";
 import type { FormMode } from "@/types/form";
@@ -165,11 +165,16 @@ export function ScForm({
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  const goBack = () => navigate("/inventory-management/spot-check");
+
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate(-1));
+      discard.confirm(goBack);
     } else {
-      navigate(-1);
+      goBack();
     }
   };
 

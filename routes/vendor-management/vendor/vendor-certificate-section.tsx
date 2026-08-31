@@ -1,20 +1,28 @@
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
+import {
+  type ColumnDef,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Award, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { SettingSection } from "@/components/ui/setting-section";
-import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { useCertification } from "@/hooks/use-certification";
 import {
   useDeleteVendorCertificate,
   useVendorCertificates,
-} from "@/hooks/use-vendor-certificate";
+} from "./use-vendor-certificate";
 import type { VendorCertificate } from "@/types/vendor-certificate";
 import { VendorCertificateDialog } from "./vendor-certificate-dialog";
 import { VendorEmptySection } from "./vendor-empty-section";
@@ -35,7 +43,6 @@ export function VendorCertificateSection({
   const t = useTranslations("vendorManagement.vendor");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const ts = useTranslations("status");
   const tt = useTranslations("toast");
   const { dateFormat } = useProfile();
 
@@ -69,8 +76,123 @@ export function VendorCertificateSection({
     });
   };
 
+  const columns = useMemo<ColumnDef<VendorCertificate>[]>(
+    () => [
+      {
+        id: "index",
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+        enableSorting: false,
+        size: 32,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground",
+        },
+      },
+      {
+        id: "certificate_no",
+        header: tfl("certificateNo"),
+        size: 120,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.certificate_no}
+          </span>
+        ),
+      },
+      {
+        id: "certificate",
+        header: tfl("certificate"),
+        size: 200,
+        cell: ({ row }) => (
+          <span className="font-medium">
+            {masterMap.get(row.original.master_certificate_id)?.name ??
+              row.original.master_certificate_id}
+          </span>
+        ),
+      },
+      {
+        id: "issued_date",
+        header: tfl("issuedDate"),
+        size: 120,
+        cell: ({ row }) =>
+          row.original.issued_date
+            ? formatDate(row.original.issued_date, dateFormat)
+            : "—",
+        meta: { cellClassName: "tabular-nums" },
+      },
+      {
+        id: "expiry_date",
+        header: tfl("expiryDate"),
+        size: 120,
+        cell: ({ row }) =>
+          row.original.expiry_date
+            ? formatDate(row.original.expiry_date, dateFormat)
+            : "—",
+        meta: { cellClassName: "tabular-nums" },
+      },
+      {
+        id: "status",
+        header: tfl("status"),
+        size: 100,
+        cell: ({ row }) => <StatusBadge active={!!row.original.is_active} />,
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center",
+        },
+      },
+      ...(readOnly
+        ? []
+        : [
+            {
+              id: "action",
+              header: () => "",
+              cell: ({ row }) => (
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={tc("edit")}
+                    onClick={() => handleEdit(row.original)}
+                  >
+                    <Pencil />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={tc("delete")}
+                    onClick={() => setDeleteItem(row.original)}
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+              ),
+              enableSorting: false,
+              size: 72,
+              meta: {
+                headerClassName: "text-right",
+                cellClassName: "text-right",
+              },
+            } as ColumnDef<VendorCertificate>,
+          ]),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- masterMap สร้างใหม่ทุก render
+    [readOnly, dateFormat, tfl, tc, masterData],
+  );
+
+  const table = useReactTable({
+    data: items,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+  });
+
   return (
     <SettingSection
+      wide
+      frameless
       title={t("certificatesTitle")}
       description={t("certificatesDesc")}
       count={items.length}
@@ -88,115 +210,22 @@ export function VendorCertificateSection({
         ) : undefined
       }
     >
-      <div className="sm:col-span-2">
-        {isLoading && (
-        <div className="mt-2 space-y-2">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-        </div>
-      )}
-
-      {!isLoading && items.length === 0 && (
-        <div className="mt-2">
+      <DataGrid
+        table={table}
+        recordCount={items.length}
+        isLoading={isLoading}
+        emptyMessage={
           <VendorEmptySection
             icon={Award}
             title={t("noCertificates")}
             description={t("noCertificatesDesc")}
           />
-        </div>
-      )}
-
-      {!isLoading && items.length > 0 && (
-        <div className="border-border/60 mt-2 overflow-hidden rounded-lg border">
-          <table className="w-full text-xs">
-            <thead className="bg-muted/60 text-foreground border-b">
-              <tr>
-                <th
-                  scope="col"
-                  className="w-10 px-3 py-2 text-center font-semibold"
-                >
-                  #
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("certificateNo")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("certificate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("issuedDate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("expiryDate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-center font-semibold">
-                  {tfl("status")}
-                </th>
-                {!readOnly && <th scope="col" className="w-16 px-3 py-2" />}
-              </tr>
-            </thead>
-            <tbody className="divide-border/40 divide-y">
-              {items.map((item, index) => (
-                <tr key={item.id} className="hover:bg-muted/20">
-                  <td className="text-muted-foreground px-3 py-1.5 text-center tabular-nums">
-                    {index + 1}
-                  </td>
-                  <td className="text-muted-foreground px-3 py-1.5">
-                    {item.certificate_no}
-                  </td>
-                  <td className="px-3 py-1.5 font-semibold">
-                    {masterMap.get(item.master_certificate_id)?.name ??
-                      item.master_certificate_id}
-                  </td>
-                  <td className="px-3 py-1.5 tabular-nums">
-                    {item.issued_date
-                      ? formatDate(item.issued_date, dateFormat)
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-1.5 tabular-nums">
-                    {item.expiry_date
-                      ? formatDate(item.expiry_date, dateFormat)
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-1.5 text-center">
-                    <Badge
-                      variant={item.is_active ? "success" : "secondary"}
-                      size="xs"
-                    >
-                      {item.is_active ? ts("active") : ts("inactive")}
-                    </Badge>
-                  </td>
-                  {!readOnly && (
-                    <td className="px-3 py-1.5">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon-xs"
-                          aria-label={tc("edit")}
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Pencil className="size-3.5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon-xs"
-                          aria-label={tc("delete")}
-                          onClick={() => setDeleteItem(item)}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      </div>
+        }
+      >
+        <DataGridContainer>
+          <DataGridTable />
+        </DataGridContainer>
+      </DataGrid>
 
       <VendorCertificateDialog
         open={dialogOpen}

@@ -16,6 +16,9 @@ import { readChangelog, rebuildFromTags, renderMarkdown } from "./changelog";
 if (process.argv.includes("--rebuild")) {
   rebuildFromTags();
 } else {
-  writeFileSync(path.resolve(import.meta.dirname, "..", "CHANGELOG.md"), renderMarkdown(readChangelog()));
+  writeFileSync(
+    path.resolve(import.meta.dirname, "..", "CHANGELOG.md"),
+    renderMarkdown(readChangelog()),
+  );
   console.log("✓ render CHANGELOG.md จาก changelog.json แล้ว");
 }

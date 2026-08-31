@@ -35,8 +35,16 @@ interface GroupDef {
   readonly statuses: readonly string[];
 }
 const GROUP_DEFS: readonly GroupDef[] = [
-  { doc: "pr", label: "PR", statuses: ["draft", "in_progress", "approved", "completed"] },
-  { doc: "po", label: "PO", statuses: ["draft", "in_progress", "sent", "completed"] },
+  {
+    doc: "pr",
+    label: "PR",
+    statuses: ["draft", "in_progress", "approved", "completed"],
+  },
+  {
+    doc: "po",
+    label: "PO",
+    statuses: ["draft", "in_progress", "sent", "completed"],
+  },
   { doc: "sr", label: "SR", statuses: ["draft", "in_progress", "completed"] },
 ];
 
@@ -78,7 +86,6 @@ export function normalizeGroupDatasetId(presetId: string): string {
     ? presetId.slice(0, -GROUP_MINE_SUFFIX.length)
     : presetId;
 }
-
 
 export function isGroupDatasetId(id: string): boolean {
   return id.startsWith(GROUP_PREFIX);

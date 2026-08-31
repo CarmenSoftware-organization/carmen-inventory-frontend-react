@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -12,19 +12,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Field,
   FieldGroup,
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
-import { Braces } from "lucide-react";
+import { Braces, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
   useCreateRunningCode,
   useUpdateRunningCode,
-} from "@/hooks/use-running-code";
+} from "./use-running-code";
 import type { RunningCode } from "@/types/running-code";
+import { RunningCodeConfigFields } from "./running-code-config-fields";
+import { parseConfig } from "./running-code-config";
 import {
   createRunningCodeSchema,
   type RunningCodeFormValues,
@@ -60,24 +67,40 @@ export function RunningCodeDialog({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
 
-  const handleFormatJson = () => {
-    const raw = form.getValues("config");
-    if (!raw?.trim()) return;
-    try {
-      const parsed = JSON.parse(raw);
-      form.setValue("config", JSON.stringify(parsed, null, 2), {
-        shouldDirty: true,
-      });
-    } catch {
-      toast.warning(tv("invalidJson", { field: "config" }));
-    }
-  };
-
   const runningCodeSchema = createRunningCodeSchema(tv, tfl);
   const form = useForm<RunningCodeFormValues>({
     resolver: zodResolver(runningCodeSchema) as Resolver<RunningCodeFormValues>,
     defaultValues: getDefaultValues(),
   });
+
+  // ประกาศหลัง `form` — ของเดิมอยู่เหนือ useForm แล้วรอดเพราะเป็น closure ที่เรียก
+  // ตอนคลิก ถ้ามีใครย้ายไปเรียกตอน render เมื่อไหร่จะ throw TDZ ทันที
+  const handleFormatJson = () => {
+    const raw = form.getValues("config");
+    if (!raw?.trim()) return;
+    try {
+      const parsed = JSON.parse(raw);
+      // shouldValidate ด้วย — จัดรูปสำเร็จแปลว่า JSON ถูกแล้ว error เดิมควรหายไป
+      // ไม่ใช่ค้างจนกว่าจะกด submit
+      form.setValue("config", JSON.stringify(parsed, null, 2), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    } catch {
+      toast.warning(tv("invalidJson", { field: tfl("config") }));
+    }
+  };
+
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const configText = form.watch("config");
+  // ตัวช่วยแก้ได้ไหม — JSON พังหรือรูปแบบแปลก ให้ตกไปที่ช่อง JSON อย่างเดียว
+  const editable = useMemo(() => {
+    try {
+      return parseConfig(JSON.parse(configText?.trim() || "{}")) !== null;
+    } catch {
+      return false;
+    }
+  }, [configText]);
 
   useEffect(() => {
     if (open) {
@@ -86,9 +109,24 @@ export function RunningCodeDialog({
   }, [open, runningCode, form]);
 
   const onSubmit = (values: RunningCodeFormValues) => {
+    // schema refine parse ผ่านมาแล้ว แต่ผูกกันแบบไม่มีอะไรบังคับ — วันไหนมีคนแก้
+    // schema ตัวนั้น submit จะ throw ทิ้งกลางทางโดยผู้ใช้ไม่เห็นอะไรเลย กันไว้ที่นี่
+    // แล้วเด้ง error ลงช่อง config ให้เห็นตรงจุด
+    let config: Record<string, unknown> = {};
+    if (values.config?.trim()) {
+      try {
+        config = JSON.parse(values.config);
+      } catch {
+        form.setError("config", {
+          message: tv("invalidJson", { field: tfl("config") }),
+        });
+        return;
+      }
+    }
+
     const payload = {
       type: values.type,
-      config: values.config ? JSON.parse(values.config) : {},
+      config,
       note: values.note,
     };
 
@@ -119,7 +157,7 @@ export function RunningCodeDialog({
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className="gap-3 p-4 sm:max-w-md">
+      <DialogContent className="gap-3 p-4 sm:max-w-lg">
         <DialogHeader className="gap-0 pb-1">
           <DialogTitle className="text-sm">
             {isEdit
@@ -147,31 +185,67 @@ export function RunningCodeDialog({
             </Field>
 
             <Field data-invalid={!!form.formState.errors.config}>
-              <div className="flex items-center justify-between">
-                <FieldLabel htmlFor="rc-config" className="text-xs">
-                  {tfl("config")}
-                </FieldLabel>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  onClick={handleFormatJson}
-                  disabled={isPending}
-                  aria-label="Format JSON"
-                >
-                  <Braces aria-hidden="true" />
-                  Format
-                </Button>
-              </div>
-              <Textarea
-                id="rc-config"
-                placeholder='e.g. {"key":"value"}'
-                className="min-h-24 text-xs"
-                rows={4}
+              <FieldLabel htmlFor="rc-config" className="text-xs">
+                {tfl("config")}
+              </FieldLabel>
+
+              <RunningCodeConfigFields
+                value={configText}
+                onChange={(next) =>
+                  form.setValue("config", next, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
                 disabled={isPending}
-                maxLength={256}
-                {...form.register("config")}
               />
+              {!editable && (
+                <p className="text-muted-foreground text-micro">
+                  {t("configUnreadable")}
+                </p>
+              )}
+
+              {/* JSON ดิบยังอยู่ แต่พับเก็บ — backend รับคีย์อะไรก็ได้ ตัวช่วยข้างบน
+                  รู้จักไม่ครบทุกกรณี ต้องมีทางแก้มือเสมอ · ทั้งสองอ่าน/เขียนค่า
+                  เดียวกัน แก้ทางไหนอีกทางเห็นทันที */}
+              <Collapsible
+                open={advancedOpen || !editable}
+                onOpenChange={setAdvancedOpen}
+              >
+                <CollapsibleTrigger
+                  className="text-muted-foreground hover:text-foreground text-micro flex items-center gap-1"
+                  disabled={!editable}
+                >
+                  <ChevronRight
+                    className={`size-3 transition-transform ${advancedOpen || !editable ? "rotate-90" : ""}`}
+                    aria-hidden="true"
+                  />
+                  {t("advancedConfig")}
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 pt-1.5">
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      onClick={handleFormatJson}
+                      disabled={isPending}
+                    >
+                      <Braces aria-hidden="true" />
+                      {tc("formatJson")}
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="rc-config"
+                    placeholder='e.g. {"key":"value"}'
+                    className="min-h-24 text-xs"
+                    rows={4}
+                    disabled={isPending}
+                    {...form.register("config")}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
               <FieldError>{form.formState.errors.config?.message}</FieldError>
             </Field>
 

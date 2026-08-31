@@ -1,11 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { IntlProvider } from "use-intl";
 import en from "@/messages/en.json";
 import type { ParamsDto } from "@/types/params";
+import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { useDepartmentTable } from "./use-department-table";
+
+// useConfigTable → useCan() → useLicense() reads runtime config — without this
+// it throws "Runtime config not loaded". enforced defaults to false here
+// (shadow mode); this test only cares about the account_code column.
+beforeEach(() => {
+  setRuntimeConfigForTests({ BACKEND_URL: "", X_APP_ID: "app-1" });
+});
 
 const params: ParamsDto = { page: 1, perpage: 10 };
 
@@ -60,9 +68,10 @@ describe("useDepartmentTable — account_code column", () => {
     // (useDataGridState.onSortingChange emits `${id}:${dir}`). Pin id === the
     // backend column name so a future accessorKey/id rename can't emit an
     // unrecognized field. The backend orders by any real tb_department column.
-    expect(column?.id, "account_code column id must equal the backend field").toBe(
-      "account_code",
-    );
+    expect(
+      column?.id,
+      "account_code column id must equal the backend field",
+    ).toBe("account_code");
     expect(column?.getCanSort(), "account_code should be sortable").toBe(true);
   });
 

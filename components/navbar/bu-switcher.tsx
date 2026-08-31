@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -174,7 +173,7 @@ export default function BuSwitcher() {
                 <span className="truncate font-semibold">
                   {bu.alias_name && `${bu.alias_name} -`} {bu.name}
                 </span>
-                <span className="text-muted-foreground truncate text-micro">
+                <span className="text-muted-foreground text-micro truncate">
                   {bu.config?.hotel?.name}
                 </span>
               </div>

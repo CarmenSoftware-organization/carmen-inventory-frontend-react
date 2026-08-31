@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -20,7 +19,7 @@ import SearchInput from "@/components/search-input";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import { useHistoryTable } from "./use-history-table";
-import { useReportHistory } from "@/hooks/use-report-history";
+import { useReportHistory } from "./use-report-history";
 import type { ReportHistory } from "@/types/report-history";
 import HistoryCard from "./history-card";
 

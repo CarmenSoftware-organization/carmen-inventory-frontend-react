@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -90,7 +89,6 @@ export function RecipeCategoryGeneralFields({
           />
           <FieldDescription>{t("parentCategoryDesc")}</FieldDescription>
         </Field>
-
       </div>
 
       <Field className="mt-4">

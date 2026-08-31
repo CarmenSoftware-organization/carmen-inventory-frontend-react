@@ -21,10 +21,7 @@ export function getSubmitLabel(
   return isAdd ? tc("create") : tc("save");
 }
 
-export function getMethodConfig(
-  method: SpotCheckMethod,
-  t: TFn,
-): MethodConfig {
+export function getMethodConfig(method: SpotCheckMethod, t: TFn): MethodConfig {
   switch (method) {
     case "random":
       return {

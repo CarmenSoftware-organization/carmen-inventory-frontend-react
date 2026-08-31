@@ -13,7 +13,7 @@ import type { Location } from "@/types/location";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
-import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 
 interface UseLocationTableOptions {
   data: Location[];
@@ -84,7 +84,7 @@ export function useLocationTable({
         />
       ),
       cell: ({ row }) => (
-        <LocationTypeBadge type={row.original.location_type} />
+        <LocationTypeLabel type={row.original.location_type} />
       ),
       size: 120,
       meta: {
@@ -140,7 +140,9 @@ export function useLocationTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.code },
   });
 }

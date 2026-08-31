@@ -24,7 +24,7 @@ export function AuditCell({ entry, dateTimeFormat }: AuditCellProps) {
         {formatDate(entry.at, dateTimeFormat)}
       </span>
       {entry.name && (
-        <span className="text-muted-foreground truncate text-micro">
+        <span className="text-muted-foreground text-micro truncate">
           {entry.name}
         </span>
       )}

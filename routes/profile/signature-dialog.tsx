@@ -103,8 +103,7 @@ export function SignatureDialog({
 
   // `drawDirty` tracks whether at least one stroke exists (set on stroke start,
   // reset on Clear) — reading padRef during render is disallowed.
-  const canSave =
-    !isSubmitting && (tab === "draw" ? drawDirty : !!uploadFile);
+  const canSave = !isSubmitting && (tab === "draw" ? drawDirty : !!uploadFile);
 
   const handleSave = () => {
     if (tab === "draw") {

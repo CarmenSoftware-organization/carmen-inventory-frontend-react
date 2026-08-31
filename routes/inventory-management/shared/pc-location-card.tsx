@@ -7,6 +7,7 @@ import {
   Eye,
   Play,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,13 +31,25 @@ interface PcLocationCardProps {
   readonly item: PhysicalCountLocation;
   readonly index?: number;
   readonly onAction: (item: PhysicalCountLocation) => void;
+  /** ปิดปุ่มเมื่อยังเปิดรอบตรวจนับไม่ได้ — ใส่ `disabledReason` เป็น tooltip ด้วยเสมอ */
+  readonly disabled?: boolean;
+  readonly disabledReason?: string;
+  /** กำลังสร้างใบนับของ location นี้อยู่ */
+  readonly pending?: boolean;
 }
 
 /**
  * การ์ดแสดง Physical Count Location หนึ่งรายการ (Soft Sheet style)
  * แสดง progress bar, location type และสถานะ complete / in_progress / not_started
  */
-export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
+export function PcLocationCard({
+  item,
+  index,
+  onAction,
+  disabled,
+  disabledReason,
+  pending,
+}: PcLocationCardProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const { dateFormat } = useProfile();
 
@@ -89,7 +102,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
                     : t("notCount"),
               }}
             />
-            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
+            <div className="text-muted-foreground text-micro flex items-center gap-1.5">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>
@@ -98,7 +111,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
         <div className="shrink-0">
           {actionType === "done" ? (
-            <span className="text-muted-foreground inline-flex items-center gap-1 text-micro font-semibold tracking-wider uppercase">
+            <span className="text-muted-foreground text-micro inline-flex items-center gap-1 font-semibold tracking-wider uppercase">
               <CheckCircle2
                 className="text-success-ink size-3"
                 aria-hidden="true"
@@ -110,8 +123,14 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
               size="sm"
               variant={actionVariant}
               onClick={() => onAction(item)}
+              disabled={disabled || pending}
+              title={disabled ? disabledReason : undefined}
             >
-              <ActionIcon className="size-3.5" aria-hidden="true" />
+              {pending ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <ActionIcon className="size-3.5" aria-hidden="true" />
+              )}
               {actionLabel}
               <ChevronRight className="size-3.5" aria-hidden="true" />
             </Button>
@@ -121,7 +140,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
       {/* Row 2: Progress */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-micro">
+        <div className="text-micro flex items-center justify-between">
           <span className="text-muted-foreground tracking-wide uppercase">
             {t("progress")}
           </span>
@@ -133,7 +152,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
       </div>
 
       {/* Row 3: Footer meta */}
-      <div className="border-border/40 text-muted-foreground flex items-center gap-4 border-t pt-2 text-micro">
+      <div className="border-border/40 text-muted-foreground text-micro flex items-center gap-4 border-t pt-2">
         <span className="flex items-center gap-1">
           <Package className="size-2.5" aria-hidden="true" />
           {t("nItems", { count: total })}

@@ -66,7 +66,7 @@ export function WidgetParamsBadges({
         </span>
       )}
       {range && (
-        <span className="text-muted-foreground bg-muted inline-flex items-center rounded-md px-1.5 py-0.5 text-micro-legal font-medium">
+        <span className="text-muted-foreground bg-muted text-micro-legal inline-flex items-center rounded-md px-1.5 py-0.5 font-medium">
           {rangeKey && tRange.has(rangeKey) ? tRange(rangeKey) : range}
         </span>
       )}

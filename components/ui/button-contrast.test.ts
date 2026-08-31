@@ -88,7 +88,8 @@ function labelColour(variant: string, theme: "light" | "dark"): Rgb {
   const dark = /dark:text-(white|black)/.exec(classes)?.[1];
   const base = /(?:^|\s)text-(white|black)/.exec(classes)?.[1];
   const name = theme === "dark" ? (dark ?? base) : base;
-  if (!name) throw new Error(`button.tsx: ${variant} declares no text-white/black`);
+  if (!name)
+    throw new Error(`button.tsx: ${variant} declares no text-white/black`);
   return name === "white" ? WHITE : BLACK;
 }
 
@@ -107,7 +108,11 @@ describe("button variants meet WCAG AA against their own background", () => {
   });
 
   it("destructive passes in dark mode, where it is composited at 60%", () => {
-    const effective = over(token("dark", "destructive"), token("dark", "card"), 0.6);
+    const effective = over(
+      token("dark", "destructive"),
+      token("dark", "card"),
+      0.6,
+    );
     expect(contrast(effective, WHITE)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
   });
 
@@ -184,13 +189,15 @@ describe("no solid semantic background pairs with its own -foreground token", ()
   const SEMANTIC = ["warning", "success", "info"] as const;
 
   function tsxFiles(dir: string): string[] {
-    return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) return tsxFiles(rel);
-      return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx")
-        ? [rel]
-        : [];
-    });
+    return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap(
+      (e) => {
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) return tsxFiles(rel);
+        return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx")
+          ? [rel]
+          : [];
+      },
+    );
   }
 
   const sources = ["components", "routes"]

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -14,7 +14,8 @@ import {
   useUpdateCreditNote,
   useDeleteCreditNote,
   useSubmitCreditNote,
-} from "@/hooks/use-credit-note";
+  cnCommentCrud,
+} from "./use-credit-note";
 import {
   CN_STATUS,
   type CreditNoteDetail,
@@ -42,8 +43,10 @@ import {
   mapItemToPayload,
 } from "./cn-form-schema";
 
-const CnCommentSheet = lazy(() =>
-  import("./cn-comment-sheet").then((mod) => ({ default: mod.CnCommentSheet })),
+const EntityCommentSheet = lazy(() =>
+  import("@/components/share/entity-comment-sheet").then((mod) => ({
+    default: mod.EntityCommentSheet,
+  })),
 );
 
 interface CnFormProps {
@@ -57,7 +60,6 @@ export function CnForm({ creditNote }: CnFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const location = useLocation();
   const buCode = useBuCode();
   const [mode, setMode] = useState<FormMode>(creditNote ? "view" : "add");
   const isView = mode === "view";
@@ -186,14 +188,11 @@ export function CnForm({ creditNote }: CnFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
-      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
-      navGuard.back();
-    } else {
-      navigate("/procurement/credit-note");
-    }
+    navigate("/procurement/credit-note");
   };
 
   const handleBack = () => {
@@ -393,8 +392,9 @@ export function CnForm({ creditNote }: CnFormProps) {
             }}
           />
           <Suspense fallback={null}>
-            <CnCommentSheet
-              cnId={creditNote.id}
+            <EntityCommentSheet
+              crud={cnCommentCrud}
+              entityId={creditNote.id}
               open={showComment}
               onOpenChange={setShowComment}
             />

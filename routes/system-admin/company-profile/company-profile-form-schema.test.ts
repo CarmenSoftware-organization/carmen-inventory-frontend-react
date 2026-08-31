@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import type { BusinessUnitDetail, BusinessUnitConfigItem } from "@/types/business-unit";
+import type {
+  BusinessUnitDetail,
+  BusinessUnitConfigItem,
+} from "@/types/business-unit";
 import {
   toFormValues,
   buildPatch,
@@ -22,7 +25,6 @@ const baseData: BusinessUnitDetail = {
   config: {},
   default_currency_id: "cur-1",
   calculation_method: "average",
-  max_license_users: 3,
   branch_no: null,
   company_name: null,
   company_address_line1: null,
@@ -82,10 +84,13 @@ describe("buildPatch", () => {
     });
   });
 
-  it("costing method / max license users ไม่อยู่ในฟอร์ม จึงไม่มีทางถูกส่ง (read-only)", () => {
+  // max_license_users ถูกถอดออกทั้งจาก type และหน้าจอแล้ว (ที่นั่งมาจากใบ license ที่ carmen-platform)
+  // การ assert ว่ามันเป็น undefined จึงเป็นเทสต์ที่ผ่านโดยไม่พิสูจน์อะไร
+  // max_license_users is gone from both the type and the screen, so asserting it is undefined
+  // would be a test that passes without proving anything.
+  it("costing method ไม่อยู่ในฟอร์ม จึงไม่มีทางถูกส่ง (read-only)", () => {
     const values = toFormValues(baseData) as Record<string, unknown>;
     expect(values.calculation_method).toBeUndefined();
-    expect(values.max_license_users).toBeUndefined();
   });
 
   it("คืน patch ว่างเมื่อไม่มีอะไรเปลี่ยน", () => {

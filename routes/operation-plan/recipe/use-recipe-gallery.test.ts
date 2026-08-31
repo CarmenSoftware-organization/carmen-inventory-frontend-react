@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeAll,
-  beforeEach,
-} from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { IMAGE_MAX_BYTES } from "@/lib/image-upload";
 import { useRecipeGallery } from "./use-recipe-gallery";
@@ -33,11 +26,24 @@ beforeEach(() => {
 });
 
 const initialImages: RecipeImage[] = [
-  { id: "a", url: "https://s/a", alt_text: "A", sort_order: 1, is_primary: false },
-  { id: "b", url: "https://s/b", alt_text: null, sort_order: 0, is_primary: true },
+  {
+    id: "a",
+    url: "https://s/a",
+    alt_text: "A",
+    sort_order: 1,
+    is_primary: false,
+  },
+  {
+    id: "b",
+    url: "https://s/b",
+    alt_text: null,
+    sort_order: 0,
+    is_primary: true,
+  },
 ];
 
-const pngFile = (name = "x.png") => new File(["d"], name, { type: "image/png" });
+const pngFile = (name = "x.png") =>
+  new File(["d"], name, { type: "image/png" });
 
 describe("useRecipeGallery — initial state", () => {
   it("maps server images sorted by sort_order, primary flagged, not dirty", () => {
@@ -82,7 +88,11 @@ describe("useRecipeGallery — addFiles", () => {
   it("rejects gif (backend accepts only jpeg/png/webp)", () => {
     const { result } = renderHook(() => useRecipeGallery([]));
 
-    act(() => result.current.addFiles([new File(["d"], "x.gif", { type: "image/gif" })]));
+    act(() =>
+      result.current.addFiles([
+        new File(["d"], "x.gif", { type: "image/gif" }),
+      ]),
+    );
 
     expect(result.current.items).toHaveLength(0);
     expect(toast.warning).toHaveBeenCalled();
@@ -127,8 +137,12 @@ describe("useRecipeGallery — setPrimary / remove / move", () => {
 
     act(() => result.current.setPrimary("a"));
 
-    expect(result.current.items.find((i) => i.id === "a")?.isPrimary).toBe(true);
-    expect(result.current.items.find((i) => i.id === "b")?.isPrimary).toBe(false);
+    expect(result.current.items.find((i) => i.id === "a")?.isPrimary).toBe(
+      true,
+    );
+    expect(result.current.items.find((i) => i.id === "b")?.isPrimary).toBe(
+      false,
+    );
     expect(result.current.isDirty).toBe(true);
   });
 

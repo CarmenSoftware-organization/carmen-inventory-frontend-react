@@ -17,7 +17,7 @@ import {
   useRequestPriceList,
   useDeleteRequestPriceList,
   useExportRequestPriceList,
-} from "@/hooks/use-request-price-list";
+} from "./use-request-price-list";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -33,12 +33,13 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useRequestPriceListTable } from "./use-rfp-table";
 import RfpCard from "./rfp-card";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -82,6 +83,7 @@ export default function RequestPriceListComponent() {
     () => [
       {
         key: "template",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.template",
         render: (value, onChange) => (
@@ -93,6 +95,14 @@ export default function RequestPriceListComponent() {
             className="w-full"
           />
         ),
+      },
+      {
+        // กรองที่วันเริ่มเปิดรับราคา (start_date) — คอลัมน์เดียวกับที่ list เรียง
+        key: "start_from",
+        control: "date-range",
+        labelKey: "field.effectivePeriod",
+        fieldKey: "start_date",
+        section: "listView.sectionDate",
       },
     ],
     [templateOptions],
@@ -230,7 +240,7 @@ export default function RequestPriceListComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={rfpFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -240,6 +250,7 @@ export default function RequestPriceListComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

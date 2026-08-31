@@ -67,7 +67,15 @@ export function SubTile({ name, parentName, size = 44 }: SubTileProps) {
         aria-hidden
         style={{ display: "block", color: "var(--tile-ink)" }}
       >
-        <TileBase palette={palette ?? { base: "var(--tile-surface)", accent: "var(--tile-accent)", shadow: "var(--tile-shadow)" }} />
+        <TileBase
+          palette={
+            palette ?? {
+              base: "var(--tile-surface)",
+              accent: "var(--tile-accent)",
+              shadow: "var(--tile-shadow)",
+            }
+          }
+        />
         <circle cx="20" cy="20" r="6" fill="currentColor" opacity="0.5" />
       </svg>
     );

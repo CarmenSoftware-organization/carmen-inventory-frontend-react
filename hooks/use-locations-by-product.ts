@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { Location } from "@/types/location";
@@ -29,7 +29,11 @@ export function useLocationsByProduct(
     queryFn: async () => {
       const url = buildUrl(
         API_ENDPOINTS.LOCATIONS_BY_PRODUCT(buCode!, productId!),
-        { perpage: params?.perpage ?? 30, page: params?.page, search: params?.search },
+        {
+          perpage: params?.perpage ?? 30,
+          page: params?.page,
+          search: params?.search,
+        },
       );
       const res = await httpClient.get(url);
       if (!res.ok) throw new Error("Failed to fetch locations");

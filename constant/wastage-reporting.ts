@@ -1,16 +1,14 @@
-import {
-  createStatusConfig,
-  createStatusFilterOptions,
-} from "./status-config";
+import type { DotTone } from "@/components/ui/status-dot-badge";
+import type { WastageStatus } from "@/types/wastage-reporting";
 
-/** Badge variant + label for WR document-level status */
-export const WR_STATUS_CONFIG = createStatusConfig([
-  "pending",
-  "approved",
-  "rejected",
-] as const);
+/** tone ของ StatusDotBadge ต่อสถานะความเสี่ยงของ lot */
+export const WASTAGE_STATUS_TONE: Record<WastageStatus, DotTone> = {
+  expired: "destructive",
+  expiring: "warning",
+};
 
-export const WASTAGE_REPORT_STATUS_OPTIONS = createStatusFilterOptions(
-  "status",
-  WR_STATUS_CONFIG,
-);
+/** ตัวเลือก filter สถานะ — label เป็น literal string ตาม convention StatusFilter */
+export const WASTAGE_STATUS_OPTIONS = [
+  { label: "Expired", value: "status|string:expired" },
+  { label: "Expiring", value: "status|string:expiring" },
+];

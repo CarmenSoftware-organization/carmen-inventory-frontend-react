@@ -12,8 +12,9 @@ import { formatCurrency } from "@/lib/currency-utils";
 import {
   auditColumns,
   columnSkeletons,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 
 interface UsePoTableOptions {
@@ -34,6 +35,7 @@ export function usePoTable({
   onDelete,
 }: UsePoTableOptions) {
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const { dateFormat, dateTimeFormat } = useProfile();
 
   const columns: ColumnDef<PurchaseOrder>[] = [
@@ -47,31 +49,42 @@ export function usePoTable({
           {row.getValue("po_no")}
         </CellAction>
       ),
-      size: 180,
+      size: 140,
       meta: { headerTitle: tfl("poNo"), skeleton: columnSkeletons.text },
     },
+    sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
       id: "vendor_name",
       accessorFn: (row) => row.vendor_name,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 240,
+      size: 200,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
     },
     {
       id: "po_type",
       accessorFn: (row) => row.po_type,
-      header: tfl("poType"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("poType")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
         const type = row.original.po_type ?? PO_TYPE.MANUAL;
         const config = PO_TYPE_CONFIG[type] ?? PO_TYPE_CONFIG[PO_TYPE.MANUAL];
         return (
-          <Badge size="sm" className={config.className}>
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={config.label}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center"
+          />
         );
       },
+      size: 160,
       meta: {
         headerTitle: tfl("poType"),
         skeleton: columnSkeletons.text,
@@ -108,6 +121,7 @@ export function usePoTable({
           className="justify-center"
         />
       ),
+      size: 100,
       cell: ({ row }) => formatDate(row.getValue("order_date"), dateFormat),
       meta: {
         headerTitle: tfl("orderDate"),
@@ -124,6 +138,7 @@ export function usePoTable({
           className="justify-center"
         />
       ),
+      size: 100,
       cell: ({ row }) => formatDate(row.getValue("delivery_date"), dateFormat),
       meta: {
         headerTitle: tfl("deliveryDate"),
@@ -133,15 +148,25 @@ export function usePoTable({
     },
     {
       accessorKey: "po_status",
-      header: tfl("status"),
-      enableSorting: false,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
+      size: 120,
       cell: ({ row }) => {
         const status = row.original.po_status;
         const config = PO_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {
@@ -192,7 +217,9 @@ export function usePoTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.po_no },
   });
 }

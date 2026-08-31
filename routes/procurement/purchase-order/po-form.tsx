@@ -31,15 +31,20 @@ import {
   getDefaultValues,
 } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
-import { usePoPreviousStages } from "@/hooks/use-purchase-order";
+import {
+  poCommentCrud,
+  usePoPreviousStages,
+} from "../shared/use-purchase-order";
 import { usePoDialogState } from "./use-po-dialog-state";
 import { usePoProfileSync } from "./use-po-profile-sync";
 import { usePoFormHandlers } from "./use-po-form-handlers";
 // action ของ workflow ใช้คำชุดเดียวกับ PR (workflow engine ตัวเดียวกัน)
 import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 
-const PoCommentSheet = lazy(() =>
-  import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
+const EntityCommentSheet = lazy(() =>
+  import("@/components/share/entity-comment-sheet").then((mod) => ({
+    default: mod.EntityCommentSheet,
+  })),
 );
 
 const WorkflowHistoryTimeline = lazy(() =>
@@ -275,8 +280,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
             onConfirm={handleDeleteConfirm}
           />
           <Suspense fallback={null}>
-            <PoCommentSheet
-              poId={purchaseOrder.id}
+            <EntityCommentSheet
+              crud={poCommentCrud}
+              entityId={purchaseOrder.id}
               open={showComment}
               onOpenChange={dialogs.setShowComment}
             />

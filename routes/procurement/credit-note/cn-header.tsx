@@ -1,17 +1,8 @@
 import { useTranslations } from "use-intl";
-import {
-  History,
-  Pencil,
-  Save,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
-import { PrintDocumentButton } from "@/components/print-document-button";
-import { useCreditNoteComments } from "@/hooks/use-credit-note";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
+import { useCreditNoteComments } from "./use-credit-note";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -19,9 +10,9 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -56,7 +47,6 @@ export function CnHeader({
   onShowComment,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useCreditNoteComments(creditNote?.id);
@@ -81,20 +71,25 @@ export function CnHeader({
 
   const statusCfg = creditNote ? CN_STATUS_CONFIG[creditNote.doc_status] : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะกับรุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {statusCfg && (
-        <Badge className={statusCfg.className} size="sm">
-          {statusCfg.label ?? creditNote?.doc_status}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {statusCfg && creditNote && (
+        <StatusIconLabel
+          status={creditNote.doc_status}
+          label={statusCfg.label ?? creditNote.doc_status}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
-      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด */}
       {creditNote?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {creditNote.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (
@@ -168,27 +163,22 @@ export function CnHeader({
         </>
       )}
 
-      {/* Always (มี record) — comment + print */}
+      {/* Always (มี record) — comment / activity / print ยุบอยู่ในเมนู ⋯ */}
       {creditNote && (
-        <CommentButton count={comments?.length} onClick={onShowComment} />
-      )}
-      {creditNote && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(creditNote.id, creditNote.cn_no)}
-        >
-          <History />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && creditNote?.id && (
-        <PrintDocumentButton
-          documentType="CN"
-          documentId={creditNote.id}
-          filters={
-            creditNote.cn_no ? { DocumentNo: creditNote.cn_no } : undefined
+        <DocActionsMenu
+          onComment={onShowComment}
+          commentCount={comments?.length}
+          activity={{ id: creditNote.id, label: creditNote.cn_no }}
+          print={
+            isView && creditNote.id
+              ? {
+                  documentType: "CN",
+                  documentId: creditNote.id,
+                  filters: creditNote.cn_no
+                    ? { DocumentNo: creditNote.cn_no }
+                    : undefined,
+                }
+              : undefined
           }
         />
       )}
@@ -198,17 +188,16 @@ export function CnHeader({
   // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
   // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
   // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
-  const subtitle =
-    createdByName ? (
-      <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-        {createdByName && (
-          <span className="flex items-center gap-1">
-            <User className="size-3 shrink-0" aria-hidden="true" />
-            {createdByName}
-          </span>
-        )}
-      </span>
-    ) : undefined;
+  const subtitle = createdByName ? (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      {createdByName && (
+        <span className="flex items-center gap-1">
+          <User className="size-3 shrink-0" aria-hidden="true" />
+          {createdByName}
+        </span>
+      )}
+    </span>
+  ) : undefined;
 
   return (
     <DocFormHeader

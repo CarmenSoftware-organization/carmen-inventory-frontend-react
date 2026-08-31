@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { extendTailwindMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { extendTailwindMerge } from "tailwind-merge";
 
 /**
  * tailwind-merge รู้จักแค่ scale มาตรฐานของ Tailwind กับ arbitrary value —
@@ -27,7 +27,7 @@ const twMerge = extendTailwindMerge({
       ],
     },
   },
-})
+});
 
 /**
  * รวม className แบบ conditional และ merge Tailwind classes ที่ซ้อนทับ
@@ -42,7 +42,7 @@ const twMerge = extendTailwindMerge({
  * ```
  */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -56,9 +56,9 @@ export function cn(...inputs: ClassValue[]) {
  */
 function hasControlChars(value: string): boolean {
   return [...value].some((ch) => {
-    const code = ch.charCodeAt(0)
-    return code <= 31 || code === 127
-  })
+    const code = ch.charCodeAt(0);
+    return code <= 31 || code === 127;
+  });
 }
 
 /**
@@ -77,17 +77,47 @@ function hasControlChars(value: string): boolean {
  * ```
  */
 export function sanitizeUrl(url: string): string | undefined {
-  const candidate = url.trim()
-  if (!candidate || hasControlChars(candidate)) return undefined
+  const candidate = url.trim();
+  if (!candidate || hasControlChars(candidate)) return undefined;
   try {
-    const parsed = new URL(candidate)
+    const parsed = new URL(candidate);
     if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-      return parsed.toString()
+      return parsed.toString();
     }
   } catch {
     // invalid URL — fall through to undefined
   }
-  return undefined
+  return undefined;
+}
+
+/**
+ * URL ที่ปลอดภัยพอจะใส่ใน `<img src>` — คืน `null` ถ้าไม่เข้าเกณฑ์
+ *
+ * `<img>` รับได้มากกว่า href ปกติเพราะปลายทางคือรูป ไม่ใช่การพาผู้ใช้ไปไหน:
+ * - `blob:` — object URL ที่หน้านี้สร้างเองจากไฟล์ที่ผู้ใช้เพิ่งเลือก (พรีวิวก่อนอัปโหลด)
+ *   blob URL อ้างถึงของในเอกสารนี้เท่านั้น ปลอมมาจากข้างนอกไม่ได้
+ * - `data:image/…` — placeholder/รูป base64 ที่ backend ส่งมา ชนิดอื่นไม่รับ
+ *   (`data:text/html` เป็นทางคลาสสิกของ XSS)
+ * - http(s) และ path ภายในแอป — ผ่าน `safeNavigationHref` ตามปกติ
+ *
+ * ด่านนี้อยู่ที่ตัว `<img>` เอง ไม่ใช่ที่ผู้เรียก เพราะผู้เรียกเพิ่มได้เรื่อย ๆ
+ * และคนเพิ่มคนที่สี่จะไม่รู้ว่าต้อง sanitize มาก่อน
+ *
+ * @param input - URL ดิบ
+ * @returns URL ที่ใช้ได้ หรือ null
+ * @example
+ * ```ts
+ * safeImageSrc("blob:http://localhost/9f2…"); // ใช้ได้
+ * safeImageSrc("data:text/html,<script>");    // null
+ * ```
+ */
+export function safeImageSrc(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
+  if (candidate.startsWith("blob:")) return candidate;
+  if (/^data:image\/[a-z0-9.+-]+[,;]/i.test(candidate)) return candidate;
+  return safeNavigationHref(candidate);
 }
 
 /**
@@ -101,22 +131,24 @@ export function sanitizeUrl(url: string): string | undefined {
  * Trims input and rejects control characters first. Rejects javascript:, data:,
  * vbscript:, file:, and protocol-relative URLs.
  */
-export function safeNavigationHref(input: string | null | undefined): string | null {
-  if (!input) return null
-  const candidate = input.trim()
-  if (!candidate || hasControlChars(candidate)) return null
+export function safeNavigationHref(
+  input: string | null | undefined,
+): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
 
-  const absolute = sanitizeUrl(candidate)
-  if (absolute) return absolute
+  const absolute = sanitizeUrl(candidate);
+  if (absolute) return absolute;
 
   if (
     candidate.startsWith("/") &&
     !candidate.startsWith("//") &&
     !candidate.includes("\\")
   ) {
-    return candidate
+    return candidate;
   }
-  return null
+  return null;
 }
 
 /**
@@ -139,14 +171,16 @@ export function safeNavigationHref(input: string | null | undefined): string | n
  * safeInternalHref("//evil.com");          // null
  * ```
  */
-export function safeInternalHref(input: string | null | undefined): string | null {
-  if (!input) return null
-  const candidate = input.trim()
-  if (!candidate || hasControlChars(candidate)) return null
-  if (!candidate.startsWith("/") || candidate.startsWith("//")) return null
-  if (candidate.includes("\\")) return null
-  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(candidate)) return null
-  return candidate
+export function safeInternalHref(
+  input: string | null | undefined,
+): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
+  if (!candidate.startsWith("/") || candidate.startsWith("//")) return null;
+  if (candidate.includes("\\")) return null;
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(candidate)) return null;
+  return candidate;
 }
 
 /**
@@ -164,6 +198,6 @@ export function safeInternalHref(input: string | null | undefined): string | nul
  * ```
  */
 export function sanitizeText(input: string | null | undefined): string {
-  if (!input) return ""
-  return input.replaceAll(/[<>]/g, "").trim()
+  if (!input) return "";
+  return input.replaceAll(/[<>]/g, "").trim();
 }

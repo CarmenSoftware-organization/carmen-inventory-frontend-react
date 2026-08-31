@@ -1,13 +1,13 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLocation } from "@/hooks/use-location";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
-import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupLocationProps {
@@ -55,7 +55,7 @@ export function LookupLocation({
   excludeIds,
   defaultLabel,
   size = "sm",
-  popoverWidth,
+  popoverWidth = "w-[26.25rem]",
   modal,
   locationTypes,
   error,
@@ -69,20 +69,25 @@ export function LookupLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const { items: locations, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Location>({
-      useListHook: useLocation,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (l: Location) => {
-        if (!l.is_active) return false;
-        if (excludedSet && excludedSet.has(l.id)) return false;
-        if (locationTypes && !locationTypes.includes(l.location_type))
-          return false;
-        return true;
-      },
-    });
+  const {
+    items: locations,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Location>({
+    useListHook: useLocation,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (l: Location) => {
+      if (!l.is_active) return false;
+      if (excludedSet && excludedSet.has(l.id)) return false;
+      if (locationTypes && !locationTypes.includes(l.location_type))
+        return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
@@ -109,17 +114,13 @@ export function LookupLocation({
             {l.code}
           </Badge>
           <span className="flex-1 truncate text-left">{l.name}</span>
-          <LocationTypeBadge
-            type={l.location_type}
-            size="xs"
-            className="shrink-0"
-          />
+          <LocationTypeLabel type={l.location_type} className="shrink-0" />
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}
       searchPlaceholder={tl("search", { entity: tfl("location") })}
       disabled={disabled}
-      className={className}
+      className={cn("w-full", className)}
       popoverAlign="start"
       emptyIcon={Warehouse}
       emptyTitle={tl("noDefined", { entity: tfl("location") })}

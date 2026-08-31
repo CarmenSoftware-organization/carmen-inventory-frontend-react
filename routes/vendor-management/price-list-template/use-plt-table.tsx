@@ -66,7 +66,6 @@ export function usePriceListTemplateTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("currency")} />
       ),
-      enableSorting: false,
       meta: {
         headerTitle: tfl("currency"),
         skeleton: columnSkeletons.textShort,
@@ -81,7 +80,6 @@ export function usePriceListTemplateTable({
         const val = row.getValue<number | null>("validity_period");
         return val === null ? "—" : t("validityDays", { count: val });
       },
-      enableSorting: false,
       meta: {
         headerTitle: tfl("validityPeriod"),
         skeleton: columnSkeletons.textShort,
@@ -104,16 +102,12 @@ export function usePriceListTemplateTable({
           inactive: ts("inactive"),
         };
         return (
-          <StatusDotBadge
-            size="lg"
-            tone={PL_STATUS_TONE[status] ?? "neutral"}
-          >
+          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
             {labelMap[status] ?? status}
           </StatusDotBadge>
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
@@ -138,7 +132,9 @@ export function usePriceListTemplateTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

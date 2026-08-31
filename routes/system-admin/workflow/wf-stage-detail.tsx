@@ -1,25 +1,8 @@
-
-import { useState } from "react";
-import {
-  useWatch,
-  type UseFormReturn,
-  type UseFieldArrayReturn,
-} from "react-hook-form";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { CheckCircle2, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import type { User, Stage } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 import { WfStageGeneral } from "./wf-stage-general";
@@ -28,7 +11,6 @@ import { WfStageUsers } from "./wf-stage-users";
 
 interface WfStageDetailProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
-  readonly fieldArray: UseFieldArrayReturn<WorkflowCreateModel, "data.stages">;
   readonly index: number;
   readonly users: User[];
   readonly isDisabled: boolean;
@@ -38,17 +20,14 @@ interface WfStageDetailProps {
 
 export function WfStageDetail({
   form,
-  fieldArray,
   index,
   users,
   isDisabled,
   isFirst,
   isLast,
 }: WfStageDetailProps) {
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const isMiddle = !isFirst && !isLast;
   const t = useTranslations("systemAdmin.workflow");
-  const tc = useTranslations("common");
 
   const watchedStage = useWatch({
     control: form.control,
@@ -59,17 +38,12 @@ export function WfStageDetail({
   const assignedUsers = watchedStage?.assigned_users ?? [];
   const assignedUserIds = new Set(assignedUsers.map((u) => u.user_id));
 
-  const handleDeleteStage = () => {
-    fieldArray.remove(index);
-    setShowDeleteAlert(false);
-  };
-
   if (isLast) {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center">
         <CheckCircle2 className="text-success-foreground mb-2 size-8" />
-        <p className="text-xs font-semibold">{t("completedStage")}</p>
-        <p className="text-muted-foreground mt-0.5 text-xs">
+        <p className="text-sm font-semibold">{t("completedStage")}</p>
+        <p className="text-muted-foreground mt-0.5 text-sm">
           {t("completedStageDesc")}
         </p>
       </div>
@@ -77,31 +51,16 @@ export function WfStageDetail({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-end">
-        {isMiddle && !isDisabled && (
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteAlert(true)}
-            className="text-xs"
-          >
-            <Trash2 className="size-3" />
-            {tc("delete")}
-          </Button>
-        )}
-      </div>
-
+    <div className="space-y-6">
       <Tabs defaultValue="general">
         <TabsList variant="line">
-          <TabsTrigger value="general" className="text-xs">
+          <TabsTrigger value="general" className="text-sm">
             {t("general")}
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="text-xs">
+          <TabsTrigger value="notifications" className="text-sm">
             {t("notifications")}
           </TabsTrigger>
-          <TabsTrigger value="users" className="text-xs">
+          <TabsTrigger value="users" className="text-sm">
             {t("assignedUsers")}
             {!isHod && assignedUsers.length > 0 && (
               <Badge
@@ -115,7 +74,7 @@ export function WfStageDetail({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="space-y-2 pt-2">
+        <TabsContent value="general" className="space-y-6 pt-4">
           <WfStageGeneral
             form={form}
             index={index}
@@ -124,7 +83,7 @@ export function WfStageDetail({
           />
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-2 pt-2">
+        <TabsContent value="notifications" className="space-y-6 pt-4">
           <WfStageNotifications
             form={form}
             index={index}
@@ -135,7 +94,7 @@ export function WfStageDetail({
           />
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-2 pt-2">
+        <TabsContent value="users" className="space-y-6 pt-4">
           <WfStageUsers
             form={form}
             index={index}
@@ -147,30 +106,6 @@ export function WfStageDetail({
           />
         </TabsContent>
       </Tabs>
-
-      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm">
-              {t("deleteStage")}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
-              {t("deleteStageConfirm", { name: watchedStage?.name ?? "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-7 text-xs">
-              {tc("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteStage}
-              className="h-7 text-xs"
-            >
-              {tc("delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

@@ -9,6 +9,10 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import {
+  removeFromDocSequence,
+  useDocSequence,
+} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
@@ -19,7 +23,7 @@ import {
   useDeletePurchaseRequest,
   useUpdatePr,
   useSplitPurchaseRequest,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import type {
   PurchaseRequest,
   CreatePurchaseRequestDto,
@@ -169,9 +173,18 @@ export function usePrFormActions({
     onCancel: navGuard.cancel,
   };
 
+  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อ
+  // ใบถัดไปเลยแทนกลับ list ให้คนอนุมัติไล่เคลียร์ my-pending ได้รวดเดียว
+  // (ใบสุดท้าย/เข้าตรงจาก deep link → กลับ list ตามเดิม) — ที่ /new sequence
+  // เป็น null เสมอ (path ไม่ลงท้าย id) create-then-submit จึงกลับ list ปกติ
+  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-request");
+    // ใบนี้ action จบแล้วหลุดจาก my-pending — ตัดออกจากคิวก่อนเดินต่อ ให้เลข
+    // n/N ของใบถัดไปตรงกับจำนวนที่เหลือใน list จริง (nextPath คำนวณไว้ก่อนตัด
+    // จึงยังชี้ใบถัดไปถูกตัว)
+    removeFromDocSequence(location.pathname);
+    navigate(seq?.nextPath ?? "/procurement/purchase-request");
   };
 
   const toSubmitStageDetails = (
@@ -290,18 +303,11 @@ export function usePrFormActions({
     });
   };
 
-  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — back คือ browser back
-  // ไปยัง history entry ของ list (params ถูกเก็บใน URL อยู่แล้ว). ถ้าเข้า detail
-  // ตรง ๆ (deep-link, location.key === "default" คือ entry แรก ไม่มี history ในแอป)
-  // fallback ไป list path เปล่า
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
-      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
-      navGuard.back();
-    } else {
-      navigate("/procurement/purchase-request");
-    }
+    navigate("/procurement/purchase-request");
   };
 
   const handleBack = () => {

@@ -59,7 +59,11 @@ export function useCuisineTable({
     {
       accessorKey: "region",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("region")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("region")}
+          className="justify-center"
+        />
       ),
       cell: ({ row }) => {
         const region = row.getValue("region") as string;
@@ -88,7 +92,9 @@ export function useCuisineTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

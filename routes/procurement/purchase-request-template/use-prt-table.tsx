@@ -58,7 +58,9 @@ export function usePrtTable({
     },
     {
       accessorKey: "description",
-      header: tfl("description"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("description")} />
+      ),
       meta: {
         headerTitle: tfl("description"),
         skeleton: columnSkeletons.text,

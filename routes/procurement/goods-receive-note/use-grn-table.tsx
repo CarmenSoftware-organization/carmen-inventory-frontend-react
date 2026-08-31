@@ -2,7 +2,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import type { ParamsDto } from "@/types/params";
@@ -10,11 +9,8 @@ import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import {
-  GRN_STATUS_CONFIG,
-  GRN_TYPE_CONFIG,
-  GRN_DOC_TYPE_KEY,
-} from "@/constant/goods-receive-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { auditColumns } from "@/components/ui/data-grid/columns";
 
@@ -96,12 +92,16 @@ export function useGrnTable({
         const status = row.getValue<string>("doc_status") || "draft";
         const config = GRN_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status.toUpperCase()}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status.toUpperCase()}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
-      size: 120,
+      size: 160,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
@@ -118,13 +118,13 @@ export function useGrnTable({
       ),
       cell: ({ row }) => {
         const docType = row.original.doc_type;
-        const configKey = GRN_DOC_TYPE_KEY[docType] ?? docType;
-        const config = GRN_TYPE_CONFIG[configKey];
-        const label = getGrnDocTypeLabel(tfl, docType);
         return (
-          <Badge size="sm" className={config?.className}>
-            {label}
-          </Badge>
+          <StatusIconLabel
+            status={docType}
+            label={getGrnDocTypeLabel(tfl, docType)}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center"
+          />
         );
       },
       size: 160,
@@ -191,7 +191,9 @@ export function useGrnTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.grn_no },
   });
 }

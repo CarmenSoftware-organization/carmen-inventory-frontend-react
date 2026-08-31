@@ -1,4 +1,7 @@
-import { createStatusConfig, createStatusFilterOptions } from "@/constant/status-config";
+import {
+  createStatusConfig,
+  createStatusFilterOptions,
+} from "@/constant/status-config";
 
 export const PERIOD_STATUS_CONFIG = createStatusConfig([
   "open",

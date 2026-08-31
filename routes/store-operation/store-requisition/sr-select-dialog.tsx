@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { CheckSquare, ListChecks } from "lucide-react";
 import {
@@ -35,7 +34,9 @@ export function SrSelectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">        <div className="relative space-y-5 p-6">
+      <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">
+        {" "}
+        <div className="relative space-y-5 p-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
               <div className="bg-invert/10 text-invert flex size-9 shrink-0 items-center justify-center rounded-lg">
@@ -58,7 +59,7 @@ export function SrSelectDialog({
               onClick={onSelectAll}
               className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
             >
-              <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-lg">
                 <CheckSquare className="size-4" />
               </div>
               <div className="space-y-1">
@@ -78,7 +79,7 @@ export function SrSelectDialog({
               disabled={pendingCount === 0}
               className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              <div className="flex size-9 items-center justify-center rounded-lg bg-warning/10 text-warning-foreground">
+              <div className="bg-warning/10 text-warning-foreground flex size-9 items-center justify-center rounded-lg">
                 <ListChecks className="size-4" />
               </div>
               <div className="space-y-1">

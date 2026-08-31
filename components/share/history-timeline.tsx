@@ -201,7 +201,9 @@ export function HistoryTimelineItem({
 
   // เมื่อจัดกลุ่มตามวัน วันที่ย้ายไปอยู่หัวข้อคั่นแล้ว รางเหลือแต่เวลา — ใช้
   // "HH:mm" ตรง ๆ ไม่ต้องแยกส่วนเวลาออกจาก dateFormat ซึ่งทำไม่ได้เสมอไป
-  const dateLine = groupByDay ? formatDate(at, "HH:mm") : formatDate(at, dateFormat);
+  const dateLine = groupByDay
+    ? formatDate(at, "HH:mm")
+    : formatDate(at, dateFormat);
   const timeLine = groupByDay || hasTime ? "" : formatDate(at, "HH:mm");
   // dateLine ว่างแปลว่า `at` parse เป็นวันที่ไม่ได้ (ดู formatDate) — attribute
   // `dateTime` ต้องไม่ใส่ค่าที่ไม่ valid ไปด้วย ปล่อยเป็น undefined แทน
@@ -230,7 +232,7 @@ export function HistoryTimelineItem({
     <li className="group/hist col-span-2 grid grid-cols-subgrid">
       <time
         dateTime={dateTimeAttr}
-        className="text-micro text-muted-foreground pt-0.5 text-right leading-tight tabular-nums whitespace-nowrap"
+        className="text-micro text-muted-foreground pt-0.5 text-right leading-tight whitespace-nowrap tabular-nums"
       >
         <span className="block">{dateLine}</span>
         {timeLine && <span className="block">{timeLine}</span>}
@@ -267,7 +269,7 @@ export function HistoryTimelineItem({
             กำหนดไว้ ยิ่งข้อความนี้เป็น text-micro-legal (10px) ยิ่งต้องผ่านเกณฑ์
             ลำดับสายตายังคงอยู่เพราะมันเล็กกว่าบรรทัดอื่นและอยู่ท้ายสุดของแถว */}
         {elapsed && (
-          <p className="text-muted-foreground mt-2 text-micro-legal">
+          <p className="text-muted-foreground text-micro-legal mt-2">
             {elapsed}
           </p>
         )}

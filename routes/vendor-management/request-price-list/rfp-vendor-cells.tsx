@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Check,
-  CheckCircle2,
-  Copy,
-  ExternalLink,
-  Mail,
-  Trash2,
-} from "lucide-react";
+import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -28,13 +21,11 @@ export function VendorNameCell({
   if (!name) return EMPTY;
   return (
     <div className="flex min-w-0 flex-col">
-      <span className="text-foreground truncate text-xs font-semibold">
-        {name}
-      </span>
+      <p className="text-foreground truncate text-xs font-semibold">{name}</p>
       {code && (
-        <span className="text-muted-foreground truncate text-micro-legal tracking-wide uppercase">
+        <p className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
           {code}
-        </span>
+        </p>
       )}
     </div>
   );
@@ -81,7 +72,6 @@ export function EmailValue({ value }: { readonly value?: string | null }) {
       aria-label={`Send email to ${value}`}
       className="text-primary/90 hover:text-primary group flex min-w-0 items-center gap-1.5 text-xs underline-offset-2 transition-colors hover:underline"
     >
-      <Mail className="size-3.5 shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
       <span className="min-w-0 truncate">{value}</span>
     </a>
   );
@@ -97,7 +87,7 @@ export function SubmissionStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-eyebrow font-semibold tracking-widest uppercase",
+        "text-micro-eyebrow inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-widest uppercase",
         hasSubmitted
           ? "bg-success/15 text-success-foreground"
           : "bg-muted text-muted-foreground",
@@ -133,7 +123,7 @@ export function PricelistCell({
           "noopener,noreferrer",
         )
       }
-      className="truncate text-micro"
+      className="text-micro truncate"
     >
       {pricelist.no}
     </CellAction>

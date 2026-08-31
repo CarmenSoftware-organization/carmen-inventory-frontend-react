@@ -1,4 +1,3 @@
-
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -19,7 +18,7 @@ import {
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
 import { toast } from "sonner";
-import { useCreateWorkflow } from "@/hooks/use-workflow";
+import { useCreateWorkflow } from "./use-workflow-mutations";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { workflowTypeField } from "@/constant/workflow";
 import {
@@ -75,7 +74,7 @@ export default function WorkflowNewForm() {
                 size="sm"
                 onClick={() => navigate("/system-admin/workflow")}
                 disabled={isPending}
-                className="text-xs"
+                className="text-sm"
               >
                 {tc("cancel")}
               </Button>
@@ -84,7 +83,7 @@ export default function WorkflowNewForm() {
                 size="sm"
                 form="new-workflow-form"
                 disabled={isPending}
-                className="text-xs"
+                className="text-sm"
               >
                 {isPending ? tf("creating") : t("createWorkflow")}
               </Button>
@@ -100,9 +99,15 @@ export default function WorkflowNewForm() {
         )}
       >
         {/* General */}
-        <SettingSection first title={t("general")} description={t("generalDesc")}>
+        <SettingSection
+          first
+          title={t("general")}
+          description={t("generalDesc")}
+        >
           <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="wf-name" required>{t("workflowName")}</FieldLabel>
+            <FieldLabel htmlFor="wf-name" required>
+              {t("workflowName")}
+            </FieldLabel>
             <Input
               id="wf-name"
               placeholder={t("workflowNamePlaceholder")}
@@ -115,7 +120,9 @@ export default function WorkflowNewForm() {
           </Field>
 
           <Field data-invalid={!!form.formState.errors.workflow_type}>
-            <FieldLabel htmlFor="wf-type" required>{t("workflowType")}</FieldLabel>
+            <FieldLabel htmlFor="wf-type" required>
+              {t("workflowType")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="workflow_type"
@@ -125,7 +132,7 @@ export default function WorkflowNewForm() {
                   onValueChange={field.onChange}
                   disabled={isPending}
                 >
-                  <SelectTrigger id="wf-type" size="sm" className="text-xs">
+                  <SelectTrigger id="wf-type" className="h-9">
                     <SelectValue placeholder={t("selectType")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -133,7 +140,7 @@ export default function WorkflowNewForm() {
                       <SelectItem
                         key={opt.value}
                         value={opt.value}
-                        className="text-xs"
+                        className="text-sm"
                       >
                         {opt.label}
                       </SelectItem>
@@ -154,7 +161,7 @@ export default function WorkflowNewForm() {
             <Textarea
               id="wf-description"
               placeholder={t("optionalDescription")}
-              className="min-h-15 text-xs"
+              className="min-h-15 text-sm"
               disabled={isPending}
               maxLength={256}
               {...form.register("description")}
@@ -164,7 +171,7 @@ export default function WorkflowNewForm() {
 
         {/* Status */}
         <SettingSection title={t("status")} description={t("statusDesc")}>
-          <div className="sm:col-span-2 space-y-3">
+          <div className="space-y-3 sm:col-span-2">
             <Controller
               control={form.control}
               name="is_active"
@@ -183,7 +190,7 @@ export default function WorkflowNewForm() {
             <div className="bg-muted/40 rounded-md border px-2.5 py-2">
               <div className="flex items-start gap-2">
                 <Info className="text-info-ink mt-0.5 size-3.5 shrink-0" />
-                <div className="space-y-0.5 text-xs">
+                <div className="space-y-0.5 text-sm">
                   <p className="text-foreground font-semibold">
                     {t("defaultConfig")}
                   </p>

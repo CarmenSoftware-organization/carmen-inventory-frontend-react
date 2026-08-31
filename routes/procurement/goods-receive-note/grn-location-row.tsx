@@ -28,7 +28,7 @@ import {
   DiscountOverrideInput,
   OverrideToggle,
   TaxOverrideInput,
-} from "@/components/procurement/discount-tax-override";
+} from "../shared/discount-tax-override";
 import { useProductUnits, useUnitDecimals } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";

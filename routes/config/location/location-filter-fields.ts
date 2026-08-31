@@ -21,9 +21,18 @@ export const LOCATION_FILTER_FIELDS: FilterFieldDef[] = [
     control: "multi-select",
     labelKey: "field.locationType",
     options: [
-      { labelKey: "config.location.typeInventory", value: "location_type|string:inventory" },
-      { labelKey: "config.location.typeDirect", value: "location_type|string:direct" },
-      { labelKey: "config.location.typeConsignment", value: "location_type|string:consignment" },
+      {
+        labelKey: "config.location.typeInventory",
+        value: "location_type|string:inventory",
+      },
+      {
+        labelKey: "config.location.typeDirect",
+        value: "location_type|string:direct",
+      },
+      {
+        labelKey: "config.location.typeConsignment",
+        value: "location_type|string:consignment",
+      },
     ],
   },
   {
@@ -31,8 +40,14 @@ export const LOCATION_FILTER_FIELDS: FilterFieldDef[] = [
     control: "multi-select",
     labelKey: "field.physicalCount",
     options: [
-      { labelKey: "config.location.pcYes", value: "physical_count_type|string:yes" },
-      { labelKey: "config.location.pcNo", value: "physical_count_type|string:no" },
+      {
+        labelKey: "config.location.pcYes",
+        value: "physical_count_type|string:yes",
+      },
+      {
+        labelKey: "config.location.pcNo",
+        value: "physical_count_type|string:no",
+      },
     ],
   },
 ];

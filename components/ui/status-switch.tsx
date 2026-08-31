@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +37,9 @@ function StatusSwitch({
     <div className="space-y-0.5 rounded-md border p-2">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold">{resolvedLabel}</p>
+          <p className="text-sm font-semibold">{resolvedLabel}</p>
           {resolvedDescription && (
-            <p className="text-muted-foreground text-micro">
+            <p className="text-muted-foreground text-xs">
               {resolvedDescription}
             </p>
           )}
@@ -56,7 +55,7 @@ function StatusSwitch({
       {!hideBadge && (
         <Badge
           variant={checked ? "success" : "destructive"}
-          className="px-2 py-0 text-micro-legal"
+          className="px-2 py-0.5 text-xs"
         >
           {checked ? resolvedActiveText : resolvedInactiveText}
         </Badge>

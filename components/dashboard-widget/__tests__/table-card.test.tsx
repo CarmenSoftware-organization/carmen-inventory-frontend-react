@@ -38,11 +38,19 @@ describe("TableCard", () => {
         { key: "amount", label: "Amount", type: "number" },
       ],
       rows: [
-        { pr_number: "PR-2503001", item_name: "Singha Beer 320ml", amount: 1250 },
+        {
+          pr_number: "PR-2503001",
+          item_name: "Singha Beer 320ml",
+          amount: 1250,
+        },
       ],
     };
     const { container } = render(
-      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+      <TableCard
+        widget={makeWidget(data)}
+        moduleName="procurement"
+        subTileFor={noop}
+      />,
     );
     expect(container.textContent).toContain("PR Number");
     expect(container.textContent).toContain("Item Name");
@@ -60,7 +68,11 @@ describe("TableCard", () => {
       rows: [{ action_icon: "undo-2", item_name: "Dishwashing Liquid" }],
     };
     const { container } = render(
-      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+      <TableCard
+        widget={makeWidget(data)}
+        moduleName="procurement"
+        subTileFor={noop}
+      />,
     );
     // lucide renders an <svg class="lucide lucide-undo-2 ...">
     expect(container.querySelector("svg.lucide-undo-2")).not.toBeNull();
@@ -76,7 +88,11 @@ describe("TableCard", () => {
       rows: [{ action_icon: "circle-x", item_name: "MOOZE VODKA 700ml." }],
     };
     const { container } = render(
-      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+      <TableCard
+        widget={makeWidget(data)}
+        moduleName="procurement"
+        subTileFor={noop}
+      />,
     );
     expect(container.querySelector("svg.lucide-circle-x")).not.toBeNull();
     expect(container.textContent).toContain("MOOZE VODKA 700ml.");
@@ -88,7 +104,11 @@ describe("TableCard", () => {
       rows: [{ action_icon: "not-a-real-icon" }],
     };
     const { container } = render(
-      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+      <TableCard
+        widget={makeWidget(data)}
+        moduleName="procurement"
+        subTileFor={noop}
+      />,
     );
     expect(container.querySelector("svg.lucide")).toBeNull();
   });

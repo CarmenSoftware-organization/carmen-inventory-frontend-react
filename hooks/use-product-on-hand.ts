@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -37,7 +37,12 @@ export function useProductOnHand(
   const buCode = useBuCode();
 
   return useQuery<ProductOnHandResponse>({
-    queryKey: [QUERY_KEYS.PRODUCT_ON_HAND, buCode, productId, locationId ?? null],
+    queryKey: [
+      QUERY_KEYS.PRODUCT_ON_HAND,
+      buCode,
+      productId,
+      locationId ?? null,
+    ],
     queryFn: async () => {
       const url = buildUrl(
         API_ENDPOINTS.PRODUCT_ON_HAND(buCode!, productId!),

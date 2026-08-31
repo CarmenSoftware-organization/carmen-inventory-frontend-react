@@ -2,7 +2,7 @@ import { createConfigCrud } from "@/hooks/use-config-crud";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useXlsxExport, type XlsxColumn } from "@/hooks/use-xlsx-export";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_NORMAL } from "@/lib/cache-config";
@@ -96,7 +96,10 @@ export function useExportPriceListTemplate() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();
 
-  const exportPriceListTemplate = async ({ params, columns }: ExportPriceListTemplateArgs) => {
+  const exportPriceListTemplate = async ({
+    params,
+    columns,
+  }: ExportPriceListTemplateArgs) => {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<PriceListTemplate>({
       fetch: async () => {

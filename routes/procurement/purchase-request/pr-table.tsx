@@ -7,7 +7,17 @@ import type {
 } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router";
+import {
+  MoreHorizontal,
+  CheckCircle2,
+  XCircle,
+  Copy,
+  Trash2,
+} from "lucide-react";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -15,8 +25,8 @@ import {
   columnSkeletons,
   customActionColumn,
   indexColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -29,6 +39,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -74,6 +85,18 @@ export function usePurchaseRequestTable({
     useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
+  const t = useTranslations("procurement.purchaseRequest");
+  const navigate = useNavigate();
+  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่ม Add: ต้องมี workflow ที่เริ่มได้
+  // (PR ไม่มี permission .create ใน catalog) กดไม่ผ่านเด้ง dialog บอกเหตุผล
+  const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+  const handleDuplicate = (item: PurchaseRequest) => {
+    if (!canCreatePr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate(`/procurement/purchase-request/new?duplicate_id=${item.id}`);
+  };
 
   const dataColumns: ColumnDef<PurchaseRequest>[] = [
     {
@@ -86,9 +109,10 @@ export function usePurchaseRequestTable({
           {row.original.pr_no}
         </CellAction>
       ),
-      size: 140,
+      size: 130,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
+    sendbackColumn<PurchaseRequest>(tc("sendBack")),
     {
       accessorKey: "pr_date",
       header: ({ column }) => (
@@ -99,7 +123,7 @@ export function usePurchaseRequestTable({
         />
       ),
       cell: ({ row }) => formatDate(row.original.pr_date, dateFormat),
-      size: 120,
+      size: 95,
       meta: {
         headerTitle: tfl("date"),
         skeleton: columnSkeletons.text,
@@ -108,36 +132,58 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "workflow_name",
-      header: tfl("type"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("type")}
+          className="justify-center"
+        />
+      ),
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.text,
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 120,
+      size: 100,
     },
     {
       accessorKey: "workflow_current_stage",
-      header: tfl("stage"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("stage")}
+          className="justify-center"
+        />
+      ),
       meta: {
         headerTitle: tfl("stage"),
         cellClassName: "text-center",
         headerClassName: "text-center",
         skeleton: columnSkeletons.text,
       },
-      size: 140,
+      size: 100,
     },
     {
       accessorKey: "pr_status",
-      header: tfl("status"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }): React.ReactNode => {
         const status = row.original.pr_status;
         const config = PR_STATUS_CONFIG[status] ?? PR_STATUS_CONFIG.draft;
         return (
-          <Badge className={config.className} size="sm">
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config.label}
+            // คอลัมน์นี้จัดกลาง — ตัว label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {
@@ -146,17 +192,21 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
-      size: 140,
+      size: 120,
     },
     {
       accessorKey: "requestor_name",
-      header: tfl("requester"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("requester")} />
+      ),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
       size: 180,
     },
     {
       accessorKey: "department_name",
-      header: tfl("department"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("department")} />
+      ),
       size: 220,
       meta: { headerTitle: tfl("department"), skeleton: columnSkeletons.text },
     },
@@ -189,7 +239,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 150,
+      size: 120,
     },
     ...auditColumns<PurchaseRequest>(tfl, dateTimeFormat),
   ];
@@ -234,19 +284,24 @@ export function usePurchaseRequestTable({
               </DropdownMenuItem>
             )}
 
+            {(onApprove || onReject) && isPendingApproval && (
+              <DropdownMenuSeparator />
+            )}
+
+            {/* Duplicate ได้ทุกสถานะ — สั่งของประจำสัปดาห์คือก๊อปใบเดิมแล้วแก้จำนวน */}
+            <DropdownMenuItem onClick={() => handleDuplicate(item)}>
+              <Copy aria-hidden="true" />
+              {tc("duplicate")}
+            </DropdownMenuItem>
+
             {isDraft && (
-              <>
-                {(onApprove || onReject) && isPendingApproval && (
-                  <DropdownMenuSeparator />
-                )}
-                <DropdownMenuItem
-                  onClick={() => onDelete(item)}
-                  variant={"destructive"}
-                >
-                  <Trash2 className="text-destructive" aria-hidden="true" />
-                  {tc("delete")}
-                </DropdownMenuItem>
-              </>
+              <DropdownMenuItem
+                onClick={() => onDelete(item)}
+                variant={"destructive"}
+              >
+                <Trash2 className="text-destructive" aria-hidden="true" />
+                {tc("delete")}
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -261,7 +316,7 @@ export function usePurchaseRequestTable({
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 50,
+    size: 60,
     meta: {
       headerClassName: "text-center print:hidden",
       cellClassName: "text-center print:hidden",
@@ -285,7 +340,7 @@ export function usePurchaseRequestTable({
     cell: ({ row }) => (
       <>
         {row.getIsSelected() && (
-          <div className="bg-primary absolute start-0 top-0 bottom-0 w-0.5 rounded-full" />
+          <div className="bg-primary absolute inset-s-0 top-0 bottom-0 w-0.5 rounded-full" />
         )}
         <Checkbox
           checked={row.getIsSelected()}

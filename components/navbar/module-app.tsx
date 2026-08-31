@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { Lock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 
@@ -63,6 +64,7 @@ export default function ModuleApp() {
               path={mod.path}
               label={t(mod.name)}
               denied={mod.denied}
+              locked={mod.locked}
               permission={mod.permission}
               onNavigate={() => setOpen(false)}
             />
@@ -70,7 +72,7 @@ export default function ModuleApp() {
         </div>
 
         {/* Shortcut hint — static display */}
-        <div className="border-border/60 text-muted-foreground flex items-center justify-center gap-1.5 border-t py-2 text-micro">
+        <div className="border-border/60 text-muted-foreground text-micro flex items-center justify-center gap-1.5 border-t py-2">
           <span>{tn("shortcutOpen")}</span>
           <span className="flex items-center gap-1">
             <HintKey>{modKey}</HintKey>
@@ -85,7 +87,7 @@ export default function ModuleApp() {
 /** kbd chip for the shortcut hint */
 function HintKey({ children }: { readonly children: React.ReactNode }) {
   return (
-    <kbd className="bg-muted inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 text-micro-legal font-semibold">
+    <kbd className="bg-muted text-micro-legal inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 font-semibold">
       {children}
     </kbd>
   );
@@ -96,6 +98,8 @@ interface LauncherTileProps {
   readonly path: string;
   readonly label: string;
   readonly denied: boolean;
+  /** BU ปัจจุบันไม่ได้ซื้อ feature นี้ — คนละเรื่องกับ denied, ชนะ denied เสมอ */
+  readonly locked: boolean;
   readonly permission?: import("@/constant/permissions").Permission;
   readonly onNavigate: () => void;
 }
@@ -105,6 +109,7 @@ const LauncherTile = ({
   path,
   label,
   denied,
+  locked,
   permission,
   onNavigate,
 }: LauncherTileProps) => {
@@ -112,13 +117,21 @@ const LauncherTile = ({
     "group/tile flex min-h-22.5 flex-col items-center justify-start gap-2 rounded-xl px-1 pt-3 pb-2",
     "hover:bg-muted/60 focus-visible:bg-muted/60 transition-colors",
     "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
-    denied && "opacity-50",
+    (denied || locked) && "opacity-50",
   );
 
   const content = (
     <>
-      <span className="transition-transform group-hover/tile:scale-105">
+      <span className="relative transition-transform group-hover/tile:scale-105">
         <AppTile name={name} size={44} />
+        {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ — locked ชนะ
+            denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) */}
+        {locked && (
+          <Lock
+            className="bg-background text-muted-foreground absolute -right-1 -bottom-1 size-3.5 rounded-full p-0.5 opacity-90"
+            aria-hidden="true"
+          />
+        )}
       </span>
       <span className="text-foreground/80 max-w-full text-center text-xs leading-tight font-semibold wrap-break-word">
         {label}
@@ -126,12 +139,19 @@ const LauncherTile = ({
     </>
   );
 
-  // Denied → button (no anchor → NextTopLoader's anchor click listener doesn't trigger)
-  if (denied) {
+  // locked หรือ denied → button (no anchor → NextTopLoader's anchor click
+  // listener doesn't trigger) ต่างกันแค่ reason ที่ dispatch
+  if (denied || locked) {
     return (
       <button
         type="button"
-        onClick={() => dispatchPermissionDenied(permission)}
+        onClick={() =>
+          dispatchPermissionDenied(
+            permission,
+            undefined,
+            locked ? "license" : "permission",
+          )
+        }
         aria-disabled
         className={tileClass}
       >

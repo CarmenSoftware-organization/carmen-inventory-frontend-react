@@ -22,7 +22,9 @@ const css = readFileSync(join(ROOT, "styles/globals.css"), "utf-8");
 
 /** the body of the `@media (prefers-reduced-motion: reduce)` block */
 function reducedMotionBlock(): string {
-  const start = css.search(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/);
+  const start = css.search(
+    /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/,
+  );
   if (start === -1) return "";
   let depth = 0;
   let i = css.indexOf("{", start);
@@ -38,9 +40,10 @@ describe("reduced motion is honoured", () => {
   const block = reducedMotionBlock();
 
   it("has a prefers-reduced-motion block at all", () => {
-    expect(block, "no @media (prefers-reduced-motion: reduce) in globals.css").not.toBe(
-      "",
-    );
+    expect(
+      block,
+      "no @media (prefers-reduced-motion: reduce) in globals.css",
+    ).not.toBe("");
   });
 
   it("neutralises animation and transition globally", () => {

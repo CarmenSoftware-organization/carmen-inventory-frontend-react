@@ -1,6 +1,3 @@
-import type { VariantProps } from "class-variance-authority";
-import type { badgeVariants } from "@/components/ui/badge";
-import { SR_TYPE, type StoreRequisitionType } from "@/types/store-requisition";
 import {
   createStatusConfig,
   createStatusFilterOptions,
@@ -9,13 +6,6 @@ import {
 } from "./status-config";
 
 export const SR_LIST_PATH = "/store-operation/store-requisition";
-
-type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
-
-export const SR_TYPE_VARIANT: Record<StoreRequisitionType, BadgeVariant> = {
-  [SR_TYPE.TRANSFER]: "info-light",
-  [SR_TYPE.ISSUE]: "warning-light",
-};
 
 /** Badge className + label for SR document-level status */
 export const SR_STATUS_CONFIG = createStatusConfig([

@@ -32,11 +32,12 @@ import {
   useBatchRejectPurchaseRequest,
   useBatchDeletePurchaseRequest,
   useExportPurchaseRequest,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -50,20 +51,23 @@ import { FieldLabel } from "@/components/ui/field";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { PrFilterStatus } from "./pr-filter-status";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { PURCHASE_REQUEST_STATUS_OPTIONS } from "@/constant/purchase-request";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
@@ -147,7 +151,7 @@ export default function PurchaseRequestComponent() {
   const { data: stages } = usePurchaseRequestWorkflowStages();
 
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
-  // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
+  // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
   // เหมือนที่เคยอยู่ใน PrFilterSheet เดิม) ไม่มี value จริงจึงไม่ถูกนับใน
   // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" (ของ tab บน URL จริง)
   const prFilterFields = useMemo<FilterFieldDef[]>(
@@ -155,7 +159,7 @@ export default function PurchaseRequestComponent() {
       {
         key: "view_mode_toggle",
         control: "custom",
-        // labelKey ว่างเจตนา — ListFilterSheet จะไม่ render <FieldLabel> ลอย ๆ ให้
+        // labelKey ว่างเจตนา — ListFilter จะไม่ render <FieldLabel> ลอย ๆ ให้
         // (control นี้ sm:hidden อยู่แล้ว มี label "View" ของตัวเองอยู่ข้างในสำหรับ
         // มือถือเท่านั้น ไม่งั้น desktop จะเห็น label ค้างแต่ไม่มี control ข้างใต้)
         labelKey: "",
@@ -178,32 +182,76 @@ export default function PurchaseRequestComponent() {
         ),
       },
       {
+        // ค่า option เป็น clause เต็มต่อตัว (pr_status|string:draft) — เลือกหลายตัว
+        // MultiSelectFilter join เป็น clause ซ้ำ prefix ซึ่ง gateway parse รวมเป็น
+        // IN query ให้เอง (parseFilterString รองรับทั้งสอง format โดยตั้งใจ)
         key: "filter",
         control: "custom",
         labelKey: "common.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
-          <PrFilterStatus value={value} onChange={onChange} className="w-full" />
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={PURCHASE_REQUEST_STATUS_OPTIONS}
+            className="w-full"
+          />
         ),
       },
       {
         key: "workflow_current_stage",
         control: "stage",
         labelKey: "procurement.purchaseRequest.stage",
+        section: "listView.sectionDocument",
         stages: stages ?? [],
       },
       {
         key: "workflow",
         control: "workflow",
         labelKey: "field.workflow",
+        section: "listView.sectionDocument",
         workflowType: WORKFLOW_TYPE.PR,
       },
-      { key: "department", control: "department", labelKey: "field.department" },
-      { key: "user_id", control: "requester", labelKey: "common.requester" },
+      {
+        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
+        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
+        key: "sendback",
+        control: "status",
+        labelKey: "common.sendBack",
+        section: "listView.sectionDocument",
+        options: [
+          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
+        ],
+      },
+      {
+        // ช่วงจำนวนเงินรวม — UI ฝั่ง frontend ก่อน: toClause คืนค่าว่างไว้ไม่ให้
+        // clause หลุดไป backend (QueryParams ยังไม่รู้จัก num_range เดี๋ยว 500)
+        // ค่า "จริง" ใน URL/saved views ปกติ — backend รองรับเมื่อไรค่อยถอด toClause
+        key: "amount",
+        control: "amount-range",
+        labelKey: "field.totalAmount",
+        fieldKey: "base_total_amount",
+        section: "listView.sectionDocument",
+        toClause: () => "",
+      },
+      {
+        key: "department",
+        control: "department",
+        labelKey: "field.department",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "user_id",
+        control: "requester",
+        labelKey: "common.requester",
+        section: "listView.sectionPeople",
+      },
       {
         key: "pr_date",
         control: "date-range",
         labelKey: "field.prDate",
         fieldKey: "pr_date",
+        section: "listView.sectionDate",
       },
     ],
     [stages, viewMode, t, tc],
@@ -311,6 +359,19 @@ export default function PurchaseRequestComponent() {
   });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav) — my-pending ยิงชุด
+  // เต็ม (perpage: -1) แยกอีกหนึ่ง query เพื่อให้ ↑↓ เดินได้ทุกใบที่รอเราอยู่ ไม่ใช่แค่
+  // หน้าที่เปิดค้างไว้ (คนอนุมัติไล่เคลียร์ได้จบชุดโดยไม่ต้องเด้งกลับ list)
+  // all-document ไม่ทำแบบนี้ — ใบทั้งระบบมีหลักพัน ดึงมาทั้งกองเพื่อเอาแค่ id ไม่คุ้ม
+  // ระหว่างชุดเต็มยังโหลดไม่เสร็จใช้แถวหน้าปัจจุบันไปก่อน ปุ่มจึงไม่หายวับ
+  const docSequenceQuery = useMyPendingPurchaseRequest(
+    { ...queryParams, page: undefined, perpage: -1 },
+    { enabled: viewMode === "my-pending" },
+  );
+  const docSequenceItems =
+    viewMode === "my-pending" ? (docSequenceQuery.data?.data ?? items) : items;
+  useRecordDocSequence(docSequenceItems.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -387,8 +448,7 @@ export default function PurchaseRequestComponent() {
     setBatchRejectOpen(true);
   };
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -418,12 +478,12 @@ export default function PurchaseRequestComponent() {
               className="hidden items-center gap-2 sm:flex"
             />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={prFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -433,6 +493,7 @@ export default function PurchaseRequestComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             <DataGridColumnVisibility
               table={table}
               trigger={
@@ -512,7 +573,14 @@ export default function PurchaseRequestComponent() {
             table={table}
             recordCount={totalRecords}
             isLoading={isLoading}
-            tableLayout={{ checkbox: true, headerSticky: true }}
+            tableLayout={{
+              checkbox: true,
+              headerSticky: true,
+              // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
+              // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
+              // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
+              columnsResizable: true,
+            }}
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer

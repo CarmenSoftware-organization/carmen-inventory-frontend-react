@@ -1,6 +1,6 @@
 # Architecture
 
-Carmen inventory ERP frontend — a **Vite + React 19 + React Router 7** single-page
+CARMEN BLUE frontend — a **Vite + React 19 + React Router 7** single-page
 app, ported from the Next.js app at `../carmen-inventory-frontend/`. It ships as a
 static bundle (S3/CloudFront, GCS/Cloud CDN, or a Docker nginx image); the browser
 talks to the backend gateway directly. There is **no application server** of our own.
@@ -50,7 +50,7 @@ mode the image proxies `/api/*` itself, so no backend CORS is required. See
    environment by swapping `config.json`.
 2. **`refreshTokens()`** — attempts to restore the session from the refresh token in
    `localStorage`. Failure just means "not logged in"; `RequireAuth` redirects to
-   `/login`. Doing this *before* first render avoids a login-page flash on reload while
+   `/login`. Doing this _before_ first render avoids a login-page flash on reload while
    already authenticated.
 3. **render** — mounts `<RouterProvider router={router} />`.
 
@@ -67,7 +67,7 @@ The token design has a single, deliberate split (`lib/auth/`):
 - **Refresh token — in `localStorage`** (`refresh-token-storage.ts`). This file is the
   single swap point if the app ever moves to a cookie-based refresh model.
 - **`auth-api.ts`** — `login()`, `refreshTokens()`, `logout()`. `logout()` clears both
-  stores locally *and* posts the refresh token to the backend for server-side
+  stores locally _and_ posts the refresh token to the backend for server-side
   revocation (whenever either token is present).
 - **`RequireAuth`** redirects to `/login` whenever the token store empties. The
   `useLogout` hook routes through `auth-api.logout()` so a logout cannot leave a
@@ -77,18 +77,18 @@ The token design has a single, deliberate split (`lib/auth/`):
 
 There is no server to proxy `/api/*`, so `lib/http-client.ts` does it in the browser:
 
-| Request path | Rewritten to |
-|---|---|
-| `/api/proxy/<rest>` | `${BACKEND_URL}/<rest>` |
+| Request path           | Rewritten to                                      |
+| ---------------------- | ------------------------------------------------- |
+| `/api/proxy/<rest>`    | `${BACKEND_URL}/<rest>`                           |
 | `/api/external/<rest>` | `${BACKEND_URL}/<rest>` (public, unauthenticated) |
-| `/api/<rest>` | `${BACKEND_URL}/api/<rest>` (e.g. `/api/auth/*`) |
+| `/api/<rest>`          | `${BACKEND_URL}/api/<rest>` (e.g. `/api/auth/*`)  |
 
 `httpClient` attaches `Authorization: Bearer <access token>` and `x-app-id` itself, so
 `constant/api-endpoints.ts` and every data hook are byte-identical to the source app.
 
 Error handling in `handleClientErrors`:
 
-- **401** → try `refreshTokens()` once; on success the *retried* request is re-run
+- **401** → try `refreshTokens()` once; on success the _retried_ request is re-run
   through the handler (a second 401 clears the session, 403/429 are normalized) rather
   than returned raw. A `"permission"` message is treated as 403.
 - **403** → dispatch a `permission-denied` event + throw `ApiError(FORBIDDEN)`.
@@ -106,7 +106,7 @@ fetched as a blob) rather than using an `/api/proxy/...` path.
 `routes/router.tsx` is a React Router 7 data router (`createBrowserRouter`, 125 lazy
 routes). Shape:
 
-```
+```text
 / (redirect → /dashboard)
 ├── /login                         (public)
 ├── /pl/:url_token                 (public price-list)
@@ -134,11 +134,11 @@ Conventions:
 
 The migration kept the source code's import surface and shims it:
 
-| Source import | Shimmed to |
-|---|---|
-| `next/navigation` | `@/lib/compat/navigation` (`useRouter`, `usePathname`, `useParams`…) |
-| `next/link` | `@/lib/compat/link` (default export, `href` prop → react-router `to`) |
-| `next-intl` | `use-intl` |
+| Source import     | Shimmed to                                                            |
+| ----------------- | --------------------------------------------------------------------- |
+| `next/navigation` | `@/lib/compat/navigation` (`useRouter`, `usePathname`, `useParams`…)  |
+| `next/link`       | `@/lib/compat/link` (default export, `href` prop → react-router `to`) |
+| `next-intl`       | `use-intl`                                                            |
 
 ESLint blocks direct `next*` imports. New code should import `react-router` directly.
 

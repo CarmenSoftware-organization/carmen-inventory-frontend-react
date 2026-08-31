@@ -4,15 +4,16 @@ import {
   getCoreRowModel,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Users, Search } from "lucide-react";
+import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DataGrid,
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { HighlightText } from "@/components/ui/highlight-text";
+import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import { Input } from "@/components/ui/input";
 import { useTranslations } from "use-intl";
 
 interface UserTableRow {
@@ -27,38 +28,6 @@ interface UserTableProps {
   readonly users: UserTableRow[];
   readonly className?: string;
 }
-
-const HighlightText = ({
-  text,
-  query,
-}: {
-  readonly text: string;
-  readonly query: string;
-}) => {
-  "use no memo";
-  if (!text) return null;
-  if (!query.trim()) return <>{text}</>;
-
-  const escaped = query.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <mark
-            key={`${i}-${part}`}
-            className="rounded-sm bg-warning/30 text-foreground font-bold"
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      )}
-    </>
-  );
-};
 
 export function UserTable({ users, className }: UserTableProps) {
   "use no memo";
@@ -130,19 +99,12 @@ export function UserTable({ users, className }: UserTableProps) {
 
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="relative w-96">
-        <Search
-          aria-hidden="true"
-          className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2"
-          size={12}
-        />
-        <Input
-          placeholder={t("search")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-6 pl-8 text-micro-legal"
-        />
-      </div>
+      <SearchInput
+        defaultValue={search}
+        containerClassName="w-96"
+        onInputChange={setSearch}
+        onSearch={setSearch}
+      />
       <DataGrid
         table={table}
         recordCount={filteredUsers.length}

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +14,11 @@ import {
   SettingSection,
   SettingSectionSkeleton,
 } from "@/components/ui/setting-section";
-import { useAppConfigByKey, useUpsertAppConfig, useTestEmail } from "@/hooks/use-app-config";
+import {
+  useAppConfigByKey,
+  useUpsertAppConfig,
+  useTestEmail,
+} from "@/hooks/use-app-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
 const schema = z.object({
@@ -62,7 +65,10 @@ function toFormValues(value: Record<string, unknown> | undefined): FormValues {
 
 function toApiValue(values: FormValues): Record<string, unknown> {
   const parseEmails = (s: string) =>
-    s.split(/[,;\s]+/).map((e) => e.trim()).filter(Boolean);
+    s
+      .split(/[,;\s]+/)
+      .map((e) => e.trim())
+      .filter(Boolean);
   return {
     smtp: {
       host: values.smtp_host,
@@ -175,7 +181,10 @@ export default function ConfigEmailComponent() {
         >
           <Field>
             <FieldLabel>{t("host")}</FieldLabel>
-            <Input {...form.register("smtp_host")} placeholder="smtp.gmail.com" />
+            <Input
+              {...form.register("smtp_host")}
+              placeholder="smtp.gmail.com"
+            />
             <FieldError>{form.formState.errors.smtp_host?.message}</FieldError>
           </Field>
           <Field>
@@ -244,7 +253,10 @@ export default function ConfigEmailComponent() {
           </Field>
           <Field>
             <FieldLabel>{t("subjectPrefix")}</FieldLabel>
-            <Input {...form.register("subject_prefix")} placeholder="[Carmen]" />
+            <Input
+              {...form.register("subject_prefix")}
+              placeholder="[Carmen]"
+            />
           </Field>
         </SettingSection>
       </form>

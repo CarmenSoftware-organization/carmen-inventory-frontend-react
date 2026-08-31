@@ -1,10 +1,10 @@
 import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { History, Pencil, Save, Trash2, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   IA_STATUS_CONFIG,
   IA_TYPE_ICON,
@@ -71,11 +71,18 @@ export function IaFormHero({
     />
   );
 
-  const badges = statusConfig ? (
-    <Badge className={statusConfig.className} size="sm">
-      {statusConfig.label}
-    </Badge>
-  ) : undefined;
+  // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ เหลือสีไว้ที่
+  // ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ (ทรงเดียวกับ PR/PO/GRN/CN/SR)
+  const badges =
+    statusConfig && inventoryAdjustment ? (
+      <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+        <StatusIconLabel
+          status={inventoryAdjustment.doc_status}
+          label={statusConfig.label}
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
+      </div>
+    ) : undefined;
 
   const actions = (
     <>

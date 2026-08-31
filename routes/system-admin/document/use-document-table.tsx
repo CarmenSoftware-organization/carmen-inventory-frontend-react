@@ -23,6 +23,7 @@ import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
+import { formatFileSize } from "@/lib/format-file-size";
 
 interface UseDocumentTableOptions {
   documents: DocumentFile[];
@@ -31,19 +32,6 @@ interface UseDocumentTableOptions {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
   onDelete: (doc: DocumentFile) => void;
 }
-
-/**
- * แปลงจำนวน bytes เป็นข้อความขนาดไฟล์ (B, KB, MB)
- * @param bytes - ขนาดไฟล์เป็น bytes
- * @returns ข้อความแสดงขนาดไฟล์ในหน่วยที่เหมาะสม
- * @example
- * formatFileSize(1048576); // "1.0 MB"
- */
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 /**
  * คืนค่าข้อมูลประเภทไฟล์ (icon, label key, className) ตาม content type
@@ -64,9 +52,17 @@ const getFileTypeInfo = (contentType: string) => {
       className: "text-green-600",
     };
   if (contentType.includes("pdf"))
-    return { icon: FileText, labelKey: "pdf" as const, className: "text-red-500" };
+    return {
+      icon: FileText,
+      labelKey: "pdf" as const,
+      className: "text-red-500",
+    };
   if (contentType.includes("image"))
-    return { icon: FileImage, labelKey: "image" as const, className: "text-blue-500" };
+    return {
+      icon: FileImage,
+      labelKey: "image" as const,
+      className: "text-blue-500",
+    };
   if (
     contentType.includes("zip") ||
     contentType.includes("rar") ||
@@ -78,7 +74,11 @@ const getFileTypeInfo = (contentType: string) => {
       className: "text-amber-500",
     };
   if (contentType.includes("text/plain"))
-    return { icon: FileText, labelKey: "txt" as const, className: "text-gray-500" };
+    return {
+      icon: FileText,
+      labelKey: "txt" as const,
+      className: "text-gray-500",
+    };
   if (contentType.includes("word") || contentType.includes("document"))
     return {
       icon: FileText,
@@ -90,8 +90,16 @@ const getFileTypeInfo = (contentType: string) => {
     contentType.includes("xml") ||
     contentType.includes("html")
   )
-    return { icon: FileCode, labelKey: "code" as const, className: "text-purple-500" };
-  return { icon: File, labelKey: "file" as const, className: "text-muted-foreground" };
+    return {
+      icon: FileCode,
+      labelKey: "code" as const,
+      className: "text-purple-500",
+    };
+  return {
+    icon: File,
+    labelKey: "file" as const,
+    className: "text-muted-foreground",
+  };
 };
 
 /**
@@ -124,7 +132,7 @@ export function useDocumentTable({
       ),
       cell: ({ row }) => (
         <span
-          className="font-semibold text-xs block truncate max-w-100"
+          className="block max-w-100 truncate text-xs font-semibold"
           title={row.getValue("originalName")}
         >
           {row.getValue("originalName")}
@@ -139,7 +147,11 @@ export function useDocumentTable({
       ),
       cell: ({ row }) => {
         const contentType: string = row.getValue("contentType");
-        const { icon: Icon, labelKey, className } = getFileTypeInfo(contentType);
+        const {
+          icon: Icon,
+          labelKey,
+          className,
+        } = getFileTypeInfo(contentType);
         return (
           <div className="flex items-center gap-1.5">
             <Icon className={`h-3.5 w-3.5 ${className}`} />

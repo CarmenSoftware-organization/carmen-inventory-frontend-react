@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,8 +20,8 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { useReportTemplates } from "@/hooks/use-report";
-import { useCreateReportSchedule } from "@/hooks/use-report-schedule";
+import { useReportTemplates } from "../shared/use-report";
+import { useCreateReportSchedule } from "./use-report-schedule";
 import { useErrorToast } from "@/hooks/use-error-toast";
 import {
   EMPTY_FORM,

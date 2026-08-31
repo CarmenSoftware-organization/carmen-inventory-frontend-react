@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { useEquipment, useDeleteEquipment } from "@/hooks/use-equipment";
+import { useEquipment, useDeleteEquipment } from "./use-equipment";
 import { useEquipmentCategory } from "@/hooks/use-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -42,12 +42,13 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentTable } from "./use-eq-table";
 import EqCard from "./eq-card";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -103,6 +104,7 @@ export default function EquipmentComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -116,6 +118,7 @@ export default function EquipmentComponent() {
       },
       {
         key: "category",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "field.category",
         render: (value, onChange) => (
@@ -235,7 +238,7 @@ export default function EquipmentComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={equipmentFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -245,6 +248,7 @@ export default function EquipmentComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

@@ -45,7 +45,7 @@ export default function PrSelectTemplate({ template, onSelect }: Props) {
               {template.name}
             </h3>
             {template.workflow_name && (
-              <p className="text-muted-foreground mt-0.5 truncate text-micro">
+              <p className="text-muted-foreground text-micro mt-0.5 truncate">
                 {template.workflow_name}
               </p>
             )}
@@ -64,7 +64,7 @@ export default function PrSelectTemplate({ template, onSelect }: Props) {
             {previewItems.map((item) => (
               <div
                 key={item.id}
-                className="flex min-w-0 items-center gap-1.5 text-micro"
+                className="text-micro flex min-w-0 items-center gap-1.5"
               >
                 <Package
                   aria-hidden="true"
@@ -73,7 +73,7 @@ export default function PrSelectTemplate({ template, onSelect }: Props) {
                 <Badge
                   variant="outline"
                   size="xs"
-                  className="shrink-0 text-micro-legal"
+                  className="text-micro-legal shrink-0"
                 >
                   {item.product_code}
                 </Badge>
@@ -86,7 +86,7 @@ export default function PrSelectTemplate({ template, onSelect }: Props) {
               </div>
             ))}
             {remaining > 0 && (
-              <p className="text-muted-foreground/70 pl-4.5 text-micro-legal">
+              <p className="text-muted-foreground/70 text-micro-legal pl-4.5">
                 {t("nMore", { count: remaining })}
               </p>
             )}

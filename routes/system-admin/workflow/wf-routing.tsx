@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Controller,
@@ -6,7 +5,7 @@ import {
   type UseFormReturn,
   type UseFieldArrayReturn,
 } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Search, Waypoints } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useDepartment } from "@/hooks/use-department";
+import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 import { cn } from "@/lib/utils";
 import {
@@ -40,6 +40,7 @@ interface WfRoutingProps {
     "data.routing_rules"
   >;
   readonly stages: { id: string; name: string }[];
+  readonly allProducts: Product[];
   readonly isDisabled: boolean;
 }
 
@@ -47,10 +48,12 @@ export function WfRouting({
   form,
   fieldArray,
   stages,
+  allProducts,
   isDisabled,
 }: WfRoutingProps) {
   const { fields, append, remove } = fieldArray;
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: deptData } = useDepartment();
   const departments = deptData?.data ?? [];
   const t = useTranslations("systemAdmin.workflow");
@@ -108,76 +111,126 @@ export function WfRouting({
     );
   };
 
+  const filteredFields = fields
+    .map((f, i) => ({ ...f, originalIndex: i }))
+    .filter((f) => {
+      if (!searchQuery) return true;
+      const ruleName = watchedRules?.[f.originalIndex]?.name ?? f.name;
+      return ruleName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
   return (
-    <div className="flex gap-3 pt-3">
+    <div className="flex flex-col gap-6 pt-4 lg:flex-row">
       {/* Left: Rule list */}
-      <div className="w-48 shrink-0 space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold">{t("rules")}</span>
+      <div className="w-full shrink-0 space-y-4 lg:w-72 xl:w-80">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-foreground/80 text-sm font-semibold">
+            {t("rules")}
+          </span>
           {!isDisabled && (
             <Button
               type="button"
               variant="outline"
-              size="xs"
+              size="sm"
               onClick={handleAddRule}
-              className="h-6 px-1.5 text-xs"
+              className="hover:bg-muted/50 h-9 px-4 text-sm font-medium shadow-sm transition-all"
             >
-              <Plus className="size-2.5" />
+              <Plus className="mr-1.5 size-3.5" />
               {tc("add")}
             </Button>
           )}
         </div>
 
-        {fields.length === 0 ? (
-          <p className="text-muted-foreground py-3 text-center text-sm">
-            {t("noRoutingRules")}
-          </p>
-        ) : (
-          <div className="space-y-0.5">
-            {fields.map((field, idx) => (
-              <div
-                key={field.id}
-                className={cn(
-                  "flex items-center rounded border text-xs",
-                  safeIndex === idx && "border-primary bg-primary/5",
-                )}
+        <div className="relative px-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+          <Input
+            placeholder={tc("search") || "Search..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 pl-9"
+          />
+        </div>
+
+        {filteredFields.length === 0 ? (
+          <div className="animate-in fade-in zoom-in-95 flex flex-col items-center justify-center py-10 text-center duration-200">
+            <Waypoints className="text-muted-foreground/30 mb-3 size-10" />
+            <p className="text-foreground text-sm font-medium">
+              {tc("noData") || "No routing rules found"}
+            </p>
+            {!isDisabled && !searchQuery && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddRule}
+                className="mt-4"
               >
-                <button
-                  type="button"
-                  className="flex-1 truncate px-1.5 py-1 text-left"
-                  onClick={() => setSelectedIndex(idx)}
+                <Plus className="mr-1.5 size-3.5" />
+                {tc("add")}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {filteredFields.map((field) => {
+              const idx = field.originalIndex;
+              return (
+                <div
+                  key={field.id}
+                  className={cn(
+                    "group animate-in fade-in slide-in-from-left-2 flex items-center justify-between gap-2 rounded-xl border p-1 pl-4 transition-all duration-200 duration-300",
+                    safeIndex === idx
+                      ? "border-primary/30 bg-primary/5 ring-primary/20 shadow-sm ring-1"
+                      : "border-border hover:border-border/80 hover:bg-muted/40",
+                  )}
                 >
-                  {watchedRules?.[idx]?.name || `Rule ${idx + 1}`}
-                </button>
-                {!isDisabled && (
                   <button
                     type="button"
-                    className="text-muted-foreground hover:text-destructive px-1"
-                    onClick={() => handleRemoveRule(idx)}
+                    className={cn(
+                      "flex-1 truncate text-left text-sm transition-colors",
+                      safeIndex === idx
+                        ? "text-primary font-semibold"
+                        : "text-foreground font-medium",
+                    )}
+                    onClick={() => setSelectedIndex(idx)}
                   >
-                    <Trash2 className="size-2.5" />
+                    {watchedRules?.[idx]?.name || `Rule ${idx + 1}`}
                   </button>
-                )}
-              </div>
-            ))}
+                  {!isDisabled && (
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex shrink-0 cursor-pointer items-center justify-center rounded p-1.5 transition-all duration-200",
+                        safeIndex === idx
+                          ? "text-destructive hover:bg-destructive/10"
+                          : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                      )}
+                      onClick={() => handleRemoveRule(idx)}
+                      aria-label={tc("delete")}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Right: Rule detail */}
-      <div className="flex-1 rounded border p-3">
+      <div className="bg-card flex-1 rounded-xl border p-4 shadow-sm md:p-6">
         {fields.length === 0 ? (
-          <p className="text-muted-foreground py-6 text-center text-xs">
+          <p className="text-muted-foreground py-10 text-center text-sm">
             {t("selectOrAddRule")}
           </p>
         ) : (
-          <div className="space-y-3">
-            <FieldGroup className="gap-2">
-              <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-8">
+            <FieldGroup className="gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <Field>
                   <FieldLabel>{t("ruleName")}</FieldLabel>
                   <Input
-                    className="h-8 text-xs"
+                    className="h-9"
                     disabled={isDisabled}
                     {...form.register(`data.routing_rules.${safeIndex}.name`)}
                   />
@@ -194,16 +247,12 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger size="sm" className="text-xs">
+                        <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {stageNames.map((name) => (
-                            <SelectItem
-                              key={name}
-                              value={name}
-                              className="text-xs"
-                            >
+                            <SelectItem key={name} value={name}>
                               {name}
                             </SelectItem>
                           ))}
@@ -217,7 +266,7 @@ export function WfRouting({
               <Field>
                 <FieldLabel>{tfl("description")}</FieldLabel>
                 <Textarea
-                  className="min-h-12 text-xs"
+                  className="min-h-[80px]"
                   disabled={isDisabled}
                   placeholder={tfl("optional")}
                   maxLength={256}
@@ -229,15 +278,17 @@ export function WfRouting({
             </FieldGroup>
 
             {/* Condition section */}
-            <div className="space-y-2">
-              <span className="text-xs font-semibold">{t("condition")}</span>
+            <div className="space-y-4">
+              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+                {t("condition")}
+              </span>
 
-              <FieldGroup className="gap-2">
+              <FieldGroup className="gap-6 pt-4">
                 <div
                   className={cn(
-                    "grid gap-2",
+                    "grid gap-6",
                     watchedField === "total_amount"
-                      ? "grid-cols-2"
+                      ? "grid-cols-1 md:grid-cols-2"
                       : "grid-cols-1",
                   )}
                 >
@@ -248,7 +299,7 @@ export function WfRouting({
                       onValueChange={handleFieldChange}
                       disabled={isDisabled}
                     >
-                      <SelectTrigger className="h-7 text-xs">
+                      <SelectTrigger className="h-9">
                         <SelectValue placeholder={t("selectField")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -273,16 +324,12 @@ export function WfRouting({
                             onValueChange={field.onChange}
                             disabled={isDisabled}
                           >
-                            <SelectTrigger size="sm" className="text-xs">
+                            <SelectTrigger className="h-9">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {operatorValues.map((value) => (
-                                <SelectItem
-                                  key={value}
-                                  value={value}
-                                  className="text-xs"
-                                >
+                                <SelectItem key={value} value={value}>
                                   {t(operatorKeys[value])}
                                 </SelectItem>
                               ))}
@@ -300,7 +347,7 @@ export function WfRouting({
                       <FieldLabel>{t("value")}</FieldLabel>
                       <Input
                         type="number"
-                        className="h-7 text-xs"
+                        className="h-9"
                         disabled={isDisabled}
                         value={watchedConditionValue?.[0] ?? ""}
                         onChange={(e) =>
@@ -315,12 +362,12 @@ export function WfRouting({
 
                 {watchedField === "total_amount" &&
                   watchedOperator === "between" && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <Field>
                         <FieldLabel>{t("minValue")}</FieldLabel>
                         <Input
                           type="number"
-                          className="h-7 text-xs"
+                          className="h-9"
                           disabled={isDisabled}
                           {...form.register(
                             `data.routing_rules.${safeIndex}.condition.min_value`,
@@ -331,7 +378,7 @@ export function WfRouting({
                         <FieldLabel>{t("maxValue")}</FieldLabel>
                         <Input
                           type="number"
-                          className="h-7 text-xs"
+                          className="h-9"
                           disabled={isDisabled}
                           {...form.register(
                             `data.routing_rules.${safeIndex}.condition.max_value`,
@@ -358,6 +405,7 @@ export function WfRouting({
                 {watchedField === "category" && (
                   <CategoryCheckboxList
                     form={form}
+                    allProducts={allProducts}
                     ruleIndex={safeIndex}
                     isDisabled={isDisabled}
                   />
@@ -366,10 +414,12 @@ export function WfRouting({
             </div>
 
             {/* Action section */}
-            <div className="space-y-2">
-              <span className="text-xs font-semibold">{t("actionLabel")}</span>
+            <div className="space-y-4">
+              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+                {t("actionLabel")}
+              </span>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
                 <Field>
                   <FieldLabel>{tfl("type")}</FieldLabel>
                   <Controller
@@ -381,7 +431,7 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger className="h-7 text-xs">
+                        <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -407,7 +457,7 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger className="h-7 text-xs">
+                        <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -429,4 +479,3 @@ export function WfRouting({
     </div>
   );
 }
-

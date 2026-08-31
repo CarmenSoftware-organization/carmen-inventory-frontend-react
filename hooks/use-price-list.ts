@@ -3,7 +3,7 @@ import { createConfigCrud } from "@/hooks/use-config-crud";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useXlsxExport, type XlsxColumn } from "@/hooks/use-xlsx-export";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { ApiError } from "@/lib/api-error";
 import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
@@ -187,6 +187,64 @@ export function usePriceListActiveVendors(date: string | undefined) {
       return json.data ?? [];
     },
     enabled: !!buCode && !!date,
+    ...CACHE_DYNAMIC,
+  });
+}
+
+export interface PriceCompareOption {
+  vendor_id: string;
+  vendor_name: string;
+  pricelist_detail_id: string;
+  pricelist_no: string;
+  price: number;
+}
+
+/**
+ * ราคาที่ผู้ขายทุกเจ้าเสนอไว้สำหรับสินค้า+หน่วย+วันที่+สกุลเงินนั้น
+ *
+ * endpoint เดียวกับ dialog เทียบราคาและ auto-allocate แต่ห่อเป็น hook เพื่อให้
+ * **ยิงแบบมีเงื่อนไขและ cache ได้** — ผู้ใช้หลักคือป้ายเตือนราคาแพงในแถว ซึ่งยิง
+ * เฉพาะแถวที่ถูกตั้งธงไว้แล้วเท่านั้น (ปกติ 1-2 แถวต่อใบ) ไม่ใช่ทุกแถว
+ *
+ * @param params - product/unit/date/currency ของแถวนั้น ครบทุกตัวถึงจะยิง
+ * @param enabled - ตัวคุมว่าถึงเวลายิงหรือยัง
+ */
+export function usePriceCompare(
+  params: {
+    productId?: string;
+    unitId?: string;
+    atDate?: string;
+    currencyId?: string;
+  },
+  enabled = true,
+) {
+  const buCode = useBuCode();
+  const { productId, unitId, atDate, currencyId } = params;
+  const ready =
+    !!buCode && !!productId && !!unitId && !!atDate && !!currencyId && enabled;
+
+  return useQuery<PriceCompareOption[], ApiError>({
+    queryKey: [
+      QUERY_KEYS.PRICE_LIST_COMPARE,
+      buCode,
+      productId,
+      unitId,
+      atDate,
+      currencyId,
+    ],
+    queryFn: async () => {
+      const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(buCode!), {
+        product_id: productId,
+        unit_id: unitId,
+        at_date: atDate,
+        currency_id: currencyId,
+      });
+      const res = await httpClient.get(url);
+      if (!res.ok) throw await ApiError.from(res, "Failed to compare prices");
+      const json = await res.json();
+      return json.data?.lists ?? [];
+    },
+    enabled: ready,
     ...CACHE_DYNAMIC,
   });
 }

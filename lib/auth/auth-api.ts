@@ -17,7 +17,10 @@ const authHeaders = (): Record<string, string> => ({
   "x-app-id": getRuntimeConfig().X_APP_ID,
 });
 
-export async function login(email: string, password: string): Promise<LoginResult> {
+export async function login(
+  email: string,
+  password: string,
+): Promise<LoginResult> {
   const { BACKEND_URL } = getRuntimeConfig();
   let res: Response;
   try {
@@ -28,7 +31,12 @@ export async function login(email: string, password: string): Promise<LoginResul
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
 
   const json = await res.json().catch(() => ({}));
@@ -57,7 +65,11 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   const { access_token, refresh_token, platform_role } = json?.data ?? {};
   if (!access_token || !refresh_token) {
-    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid login response from backend", 502);
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      "Invalid login response from backend",
+      502,
+    );
   }
 
   tokenStore.set(access_token);
@@ -87,7 +99,11 @@ export interface RegisterPayload {
  * @param fallback - ข้อความเมื่อ backend ไม่ส่ง message มา
  * @param parsed - body ที่ parse ไว้แล้ว (ส่งมาเมื่อผู้เรียกอ่าน body ไปก่อนแล้ว body อ่านซ้ำไม่ได้)
  */
-async function toAuthApiError(res: Response, fallback: string, parsed?: unknown): Promise<ApiError> {
+async function toAuthApiError(
+  res: Response,
+  fallback: string,
+  parsed?: unknown,
+): Promise<ApiError> {
   const json = (parsed ?? (await res.json().catch(() => ({})))) as {
     message?: string | string[];
     retry_after?: number;
@@ -102,10 +118,14 @@ async function toAuthApiError(res: Response, fallback: string, parsed?: unknown)
   // `register` เป็นได้ทั้ง AUTH_EMAIL_ALREADY_EXISTS (เข้าสู่ระบบได้) และ AUTH_USERNAME_ALREADY_EXISTS
   // (เข้าสู่ระบบไม่ได้ บัญชีที่ชนเป็นของคนอื่น) การทิ้งฟิลด์นี้ทำให้หน้าจอแยกสองกรณีไม่ได้เลยและต้อง
   // เดาว่าเป็นกรณีที่พบบ่อยกว่า ซึ่งคือคำแนะนำที่ผิดสำหรับอีกกรณีหนึ่งเสมอ
-  const serverCode: string | undefined = typeof json?.code === "string" ? json.code : undefined;
+  const serverCode: string | undefined =
+    typeof json?.code === "string" ? json.code : undefined;
   const details =
     retryAfter !== undefined || serverCode !== undefined
-      ? { ...(retryAfter !== undefined ? { retryAfter } : {}), ...(serverCode ? { serverCode } : {}) }
+      ? {
+          ...(retryAfter !== undefined ? { retryAfter } : {}),
+          ...(serverCode ? { serverCode } : {}),
+        }
       : undefined;
   // 410 (ลิงก์ใช้ไม่ได้) กับ 409 (มีบัญชีแล้ว) ใช้ code เดียวกัน หน้าจอแยกสองกรณีนี้ด้วย
   // `error.status` ไม่ใช่ด้วย code
@@ -143,7 +163,12 @@ export async function signupRequest(email: string): Promise<void> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok) return;
   throw await toAuthApiError(res, "Could not send the verification link");
@@ -153,7 +178,9 @@ export async function signupRequest(email: string): Promise<void> {
  * ตรวจลิงก์ก่อนแสดงฟอร์มสมัคร — POST /api/auth/signup-token/verify (public)
  * 410 แปลว่าลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว โดยแยกสามกรณีนี้ไม่ได้ตั้งใจ
  */
-export async function verifySignupToken(token: string): Promise<{ email: string }> {
+export async function verifySignupToken(
+  token: string,
+): Promise<{ email: string }> {
   const { BACKEND_URL } = getRuntimeConfig();
   let res: Response;
   try {
@@ -164,12 +191,23 @@ export async function verifySignupToken(token: string): Promise<{ email: string 
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw await toAuthApiError(res, "This link is no longer valid", json);
+  if (!res.ok)
+    throw await toAuthApiError(res, "This link is no longer valid", json);
   const email: string | undefined = json?.data?.email;
-  if (!email) throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid response from backend", 502);
+  if (!email)
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      "Invalid response from backend",
+      502,
+    );
   return { email };
 }
 
@@ -188,10 +226,84 @@ export async function register(payload: RegisterPayload): Promise<void> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok) return;
   throw await toAuthApiError(res, "Register failed");
+}
+
+/**
+ * ขอลิงก์ตั้งรหัสผ่านใหม่ — POST /api/auth/forgot-password (public)
+ *
+ * **กลืน 404 ให้เท่ากับสำเร็จตั้งแต่ชั้นนี้** — backend ตอบ 404 "User not found" เมื่ออีเมลนั้น
+ * ไม่มีบัญชี ซึ่งเปลี่ยนฟอร์มนี้ให้กลายเป็นเครื่องมือค้นว่าอีเมลไหนมีบัญชีในระบบ การกลืนไว้ที่นี่
+ * แทนที่จะให้หน้าจอตัดสินใจเอง แปลว่าหน้าจอไหนก็เผลอแสดงให้ต่างกันไม่ได้ เทียบกับเส้นทางสมัคร
+ * ที่ backend ตอบ 200 เสมออยู่แล้ว ตรงนี้เป็นการชดเชยฝั่ง client ให้ได้พฤติกรรมเดียวกัน
+ *
+ * หมายเหตุ: endpoint นี้ไม่มี rate limit ฝั่ง backend (ต่างจาก `signup-request`) คูลดาวน์ปุ่ม
+ * "ส่งอีกครั้ง" บนหน้าจอจึงเป็นแค่ UX ไม่ใช่การป้องกันการยิงซ้ำ
+ */
+export async function forgotPassword(email: string): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
+  }
+  if (res.ok || res.status === 404) return;
+  throw await toAuthApiError(res, "Could not send the reset link");
+}
+
+/**
+ * ตั้งรหัสผ่านใหม่ด้วย token จากลิงก์ในอีเมล — POST /api/auth/reset-password-with-token (public)
+ *
+ * `token` คือรหัสสั้นใน query ของลิงก์ ไม่ใช่ JWT — ตัว JWT ถูกเก็บคู่กันไว้ฝั่ง backend และถูก
+ * ตรวจอีกชั้นที่นั่น ค่านี้จึงส่งต่อไปตรง ๆ ได้โดยไม่ต้องแกะอะไร
+ *
+ * 400 ครอบสามกรณีรวมกัน: token ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว — backend ตอบเหมือนกันหมด
+ * โดยตั้งใจ และหน้าจอต้องไม่พยายามเดาว่าเป็นกรณีไหน
+ *
+ * backend ไม่คืน access token กลับมา ผู้ใช้จึงต้องไปเข้าสู่ระบบเองหลังตั้งรหัสสำเร็จ
+ */
+export async function resetPasswordWithToken(
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/reset-password-with-token`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ token, new_password: newPassword }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
+  }
+  if (res.ok) return;
+  throw await toAuthApiError(res, "Could not reset the password");
 }
 
 // Mutex — concurrent 401s แชร์ refresh request เดียวกัน (พฤติกรรมเดิมจาก http-client)

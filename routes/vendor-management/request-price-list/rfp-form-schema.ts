@@ -30,17 +30,21 @@ export function createRfpSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
       name: z.string().min(1, tv("required", { field: tf("name") })),
-      pricelist_template_id: z.string().min(1, tv("required", { field: tf("template") })),
+      pricelist_template_id: z
+        .string()
+        .min(1, tv("required", { field: tf("template") })),
       start_date: z.string().min(1, tv("required", { field: tf("startDate") })),
       end_date: z.string().min(1, tv("required", { field: tf("endDate") })),
       custom_message: z.string().optional(),
       dimension: z.any(),
       info: z.string().optional(),
       email_template_id: z.string().optional(),
-      vendors: z.object({
-        add: z.array(createVendorItemSchema(tv, tf)).default([]),
-        remove: z.array(z.string()).default([]),
-      }).default({ add: [], remove: [] }),
+      vendors: z
+        .object({
+          add: z.array(createVendorItemSchema(tv, tf)).default([]),
+          remove: z.array(z.string()).default([]),
+        })
+        .default({ add: [], remove: [] }),
     })
     .refine(
       (data) => {
@@ -79,7 +83,8 @@ export function getDefaultValues(rfp?: RequestPriceList): RfpFormValues {
     end_date: rfp.end_date ?? "",
     custom_message: rfp.custom_message ?? "",
     dimension: rfp.dimension ?? "",
-    info: typeof rfp.info === "string" ? rfp.info : JSON.stringify(rfp.info ?? {}),
+    info:
+      typeof rfp.info === "string" ? rfp.info : JSON.stringify(rfp.info ?? {}),
     email_template_id: rfp.email_template_id ?? "",
     vendors: { add: [], remove: [] },
   };

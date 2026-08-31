@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 
@@ -28,10 +28,10 @@ export default function PrtCard({ item, onEdit, onDelete }: PrtCardProps) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.workflow_name && (
         <ListCardRow label={tfl("workflow")}>{item.workflow_name}</ListCardRow>
       )}

@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import {
   Columns3,
@@ -20,6 +19,7 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import {
   useUserActivity,
   useExportUserActivity,
-} from "@/hooks/use-user-activity";
+} from "./use-user-activity";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
@@ -50,7 +50,7 @@ import { UserActivityDetailSheet } from "./user-activity-detail-sheet";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -101,6 +101,7 @@ export default function UserActivityComponent() {
     () => [
       {
         key: "action",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.userActivity.action",
         render: (value, onChange) => (
@@ -115,6 +116,7 @@ export default function UserActivityComponent() {
       },
       {
         key: "actor_id",
+        section: "listView.sectionPeople",
         control: "custom",
         labelKey: "systemAdmin.userActivity.user",
         render: (value, onChange) => (
@@ -180,7 +182,8 @@ export default function UserActivityComponent() {
             value: (r) =>
               [r.actor_firstname, r.actor_middlename, r.actor_lastname]
                 .filter(Boolean)
-                .join(" ") || (r.actor_username ?? ""),
+                .join(" ") ||
+              (r.actor_username ?? ""),
             width: 24,
           },
           {
@@ -212,197 +215,204 @@ export default function UserActivityComponent() {
     tableConfig,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-      {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <ModuleTileIcon />
-            <h1 className="text-lg font-semibold">{t("title")}</h1>
-            {totalRecords > 0 && (
-              <Badge variant="secondary" size="sm" className="tabular-nums text-xs">
-                {totalRecords.toLocaleString()}
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground text-sm">{t("desc")}</p>
-        </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleExport}
-            disabled={isExporting}
-            className="hidden sm:inline-flex"
-          >
-            {isExporting ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Download aria-hidden="true" />
-            )}
-            {isExporting ? tc("exporting") : tc("export")}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => globalThis.print()}
-            className="hidden sm:inline-flex"
-          >
-            <Printer aria-hidden="true" />
-            {tc("print")}
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="ml-auto h-11 w-11 shrink-0 sm:hidden"
-                aria-label={tc("aria.moreActions")}
-              >
-                <MoreHorizontal aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                {isExporting ? (
-                  <Loader2 className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <Download aria-hidden="true" />
-                )}
-                {isExporting ? tc("exporting") : tc("export")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => globalThis.print()}>
-                <Printer aria-hidden="true" />
-                {tc("print")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-          <div className="flex-1 sm:flex-initial">
-            <SearchInput defaultValue={search} onSearch={setSearch} />
-          </div>
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilterSheet
-            fields={userActivityFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </div>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          {displayMode === "list" && (
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label={tc("aria.toggleColumns")}
+        {/* Header */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <ModuleTileIcon />
+              <h1 className="text-lg font-semibold">{t("title")}</h1>
+              {totalRecords > 0 && (
+                <Badge
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs tabular-nums"
                 >
-                  <Columns3 className="size-4" />
+                  {totalRecords.toLocaleString()}
+                </Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm">{t("desc")}</p>
+          </div>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+              className="hidden sm:inline-flex"
+            >
+              {isExporting ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Download aria-hidden="true" />
+              )}
+              {isExporting ? tc("exporting") : tc("export")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => globalThis.print()}
+              className="hidden sm:inline-flex"
+            >
+              <Printer aria-hidden="true" />
+              {tc("print")}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="ml-auto h-11 w-11 shrink-0 sm:hidden"
+                  aria-label={tc("aria.moreActions")}
+                >
+                  <MoreHorizontal aria-hidden="true" />
                 </Button>
-              }
-            />
-          )}
-          <div className="flex items-center rounded-md border">
-            <Button
-              size="icon-sm"
-              variant={displayMode === "list" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("list")}
-              aria-label={tc("aria.listView")}
-            >
-              <LayoutList className="size-4" />
-            </Button>
-            <Button
-              size="icon-sm"
-              variant={displayMode === "grid" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("grid")}
-              aria-label={tc("aria.gridView")}
-            >
-              <LayoutGrid className="size-4" />
-            </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+                  {isExporting ? (
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download aria-hidden="true" />
+                  )}
+                  {isExporting ? tc("exporting") : tc("export")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => globalThis.print()}>
+                  <Printer aria-hidden="true" />
+                  {tc("print")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      </div>
 
-      {/* Active filter badges */}
-      <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+            <div className="flex-1 sm:flex-initial">
+              <SearchInput defaultValue={search} onSearch={setSearch} />
+            </div>
+            <span className="bg-border hidden h-4 w-px sm:block" />
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilter
+              fields={userActivityFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
+            {displayMode === "list" && (
+              <DataGridColumnVisibility
+                table={table}
+                trigger={
+                  <Button
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={tc("aria.toggleColumns")}
+                  >
+                    <Columns3 className="size-4" />
+                  </Button>
+                }
+              />
+            )}
+            <div className="flex items-center rounded-md border">
+              <Button
+                size="icon-sm"
+                variant={displayMode === "list" ? "secondary" : "ghost"}
+                onClick={() => setDisplayMode("list")}
+                aria-label={tc("aria.listView")}
+              >
+                <LayoutList className="size-4" />
+              </Button>
+              <Button
+                size="icon-sm"
+                variant={displayMode === "grid" ? "secondary" : "ghost"}
+                onClick={() => setDisplayMode("grid")}
+                aria-label={tc("aria.gridView")}
+              >
+                <LayoutGrid className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Active filter badges */}
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
-      {/* Content */}
-      {!isMobile && displayMode === "list" && (
-        <DataGrid
-          table={table}
-          recordCount={totalRecords}
-          isLoading={isLoading}
-          tableLayout={{ headerSticky: true }}
-          emptyMessage={<EmptyComponent />}
-          onRowClick={setSelectedLog}
-        >
-          <DataGridContainer
-            className={cn(
-              "flex flex-col",
-              lf.activeFilters.length > 0
-                ? "max-h-[calc(100vh-13rem-3rem)]"
-                : "max-h-[calc(100vh-10rem-3rem)]",
-            )}
+        {/* Content */}
+        {!isMobile && displayMode === "list" && (
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+            emptyMessage={<EmptyComponent />}
+            onRowClick={setSelectedLog}
           >
-            <DataGridScrollArea>
-              <DataGridTable />
-            </DataGridScrollArea>
-            <DataGridPagination />
-          </DataGridContainer>
-        </DataGrid>
-      )}
+            <DataGridContainer
+              className={cn(
+                "flex flex-col",
+                lf.activeFilters.length > 0
+                  ? "max-h-[calc(100vh-13rem-3rem)]"
+                  : "max-h-[calc(100vh-10rem-3rem)]",
+              )}
+            >
+              <DataGridScrollArea>
+                <DataGridTable />
+              </DataGridScrollArea>
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
+        )}
 
-      {useInfiniteScroll &&
-        (grid.isLoading ? (
-          <ActivityCardSkeletonGrid />
-        ) : grid.error ? (
-          <ErrorState
-            message={grid.error.message}
-            onRetry={() => grid.refetch?.()}
-          />
-        ) : logs.length === 0 ? (
-          <EmptyComponent />
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {logs.map((log, i) => (
-                <UserActivityCard
-                  key={log.id}
-                  log={log}
-                  index={i}
-                  onClick={() => setSelectedLog(log)}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
+        {useInfiniteScroll &&
+          (grid.isLoading ? (
+            <ActivityCardSkeletonGrid />
+          ) : grid.error ? (
+            <ErrorState
+              message={grid.error.message}
+              onRetry={() => grid.refetch?.()}
+            />
+          ) : logs.length === 0 ? (
+            <EmptyComponent />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {logs.map((log, i) => (
+                  <UserActivityCard
+                    key={log.id}
+                    log={log}
+                    index={i}
+                    onClick={() => setSelectedLog(log)}
+                  />
+                ))}
               </div>
-            )}
-          </>
-        ))}
+              {grid.hasMore && (
+                <div
+                  ref={grid.sentinelRef}
+                  className="flex justify-center py-4"
+                >
+                  {grid.isLoadingMore && (
+                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                  )}
+                </div>
+              )}
+            </>
+          ))}
       </div>
 
       {/* Detail Sheet */}

@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";
 import type { AdjustmentType } from "@/types/adjustment-type";
@@ -26,10 +26,10 @@ export default function AdjustmentTypeCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
       <ListCardRow label={tfl("type")}>
         {item.type === ADJUSTMENT_TYPE.STOCK_IN

@@ -42,12 +42,13 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentCategoryTable } from "./use-equipment-category-table";
 import EquipmentCategoryCard from "./equipment-category-card";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -101,6 +102,7 @@ export default function EquipmentCategoryComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -228,7 +230,7 @@ export default function EquipmentCategoryComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={equipmentCategoryFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -238,6 +240,7 @@ export default function EquipmentCategoryComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

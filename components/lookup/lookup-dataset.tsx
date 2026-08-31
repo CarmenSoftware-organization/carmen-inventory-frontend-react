@@ -66,13 +66,15 @@ export function LookupDataset({
   const [hasOpened, setHasOpened] = useState(false);
   const { data, isLoading } = useDashboardDatasets(hasOpened);
 
-  const datasets = [...(extraItems ?? []), ...(data?.items ?? [])].filter((d) => {
-    if (excludeIds?.has(d.id)) return false;
-    if (category && d.category !== category) return false;
-    if (shape && d.shape !== shape) return false;
-    if (shapes && !shapes.includes(d.shape)) return false;
-    return true;
-  });
+  const datasets = [...(extraItems ?? []), ...(data?.items ?? [])].filter(
+    (d) => {
+      if (excludeIds?.has(d.id)) return false;
+      if (category && d.category !== category) return false;
+      if (shape && d.shape !== shape) return false;
+      if (shapes && !shapes.includes(d.shape)) return false;
+      return true;
+    },
+  );
 
   return (
     <LookupCombobox<DashboardDataset>

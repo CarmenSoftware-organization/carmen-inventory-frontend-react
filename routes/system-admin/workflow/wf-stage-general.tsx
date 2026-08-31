@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -62,12 +61,12 @@ export function WfStageGeneral({
   } as const;
 
   return (
-    <FieldGroup className="gap-2">
-      <div className="grid grid-cols-2 gap-2">
+    <FieldGroup className="gap-6 pt-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Field>
           <FieldLabel>{t("stageName")}</FieldLabel>
           <Input
-            className="h-8"
+            className="h-9"
             disabled={isDisabled}
             {...form.register(`data.stages.${index}.name`)}
           />
@@ -84,12 +83,12 @@ export function WfStageGeneral({
                 onValueChange={field.onChange}
                 disabled={isDisabled}
               >
-                <SelectTrigger size="sm" className="text-xs">
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {roleValues.map((value) => (
-                    <SelectItem key={value} value={value} className="text-xs">
+                    <SelectItem key={value} value={value}>
                       {t(roleLabelKeys[value])}
                     </SelectItem>
                   ))}
@@ -103,7 +102,7 @@ export function WfStageGeneral({
       <Field>
         <FieldLabel>{tfl("description")}</FieldLabel>
         <Textarea
-          className="min-h-12 text-xs"
+          className="min-h-[80px]"
           disabled={isDisabled}
           placeholder={tfl("optional")}
           maxLength={256}
@@ -129,7 +128,10 @@ export function WfStageGeneral({
                     value="only_creator"
                     id={`${prefix}-creator-only`}
                   />
-                  <label htmlFor={`${prefix}-creator-only`} className="text-xs">
+                  <label
+                    htmlFor={`${prefix}-creator-only`}
+                    className="text-sm font-medium"
+                  >
                     {t("onlyCreator")}
                   </label>
                 </div>
@@ -138,7 +140,10 @@ export function WfStageGeneral({
                     value="all_department"
                     id={`${prefix}-all-dept`}
                   />
-                  <label htmlFor={`${prefix}-all-dept`} className="text-xs">
+                  <label
+                    htmlFor={`${prefix}-all-dept`}
+                    className="text-sm font-medium"
+                  >
                     {t("allDepartment")}
                   </label>
                 </div>
@@ -148,12 +153,12 @@ export function WfStageGeneral({
         </Field>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Field>
           <FieldLabel>{t("sla")}</FieldLabel>
           <Input
             type="number"
-            className="h-8"
+            className="h-9"
             disabled={isDisabled}
             {...form.register(`data.stages.${index}.sla`)}
           />
@@ -169,12 +174,12 @@ export function WfStageGeneral({
                 onValueChange={field.onChange}
                 disabled={isDisabled}
               >
-                <SelectTrigger size="sm" className="text-xs">
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {slaUnitValues.map((value) => (
-                    <SelectItem key={value} value={value} className="text-xs">
+                    <SelectItem key={value} value={value}>
                       {t(slaUnitLabelKeys[value])}
                     </SelectItem>
                   ))}
@@ -185,7 +190,7 @@ export function WfStageGeneral({
         </Field>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[2fr_1fr_1fr] sm:gap-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[2fr_1fr_1fr]">
         <div>
           <FieldLabel className="mb-1.5">{t("availableActions")}</FieldLabel>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -219,10 +224,7 @@ export function WfStageGeneral({
                     )}
                   />
                   <FieldLabel>
-                    <Badge
-                      variant="success"
-                      className="px-1 py-0 text-micro-legal"
-                    >
+                    <Badge variant="success" size="sm" className="font-medium">
                       {t("actionApprove")}
                     </Badge>
                   </FieldLabel>
@@ -242,7 +244,8 @@ export function WfStageGeneral({
                   <FieldLabel>
                     <Badge
                       variant="destructive"
-                      className="px-1 py-0 text-micro-legal"
+                      size="sm"
+                      className="font-medium"
                     >
                       {t("actionReject")}
                     </Badge>
@@ -261,10 +264,7 @@ export function WfStageGeneral({
                     )}
                   />
                   <FieldLabel>
-                    <Badge
-                      variant="warning"
-                      className="px-1 py-0 text-micro-legal"
-                    >
+                    <Badge variant="warning" size="sm" className="font-medium">
                       {t("actionSendBack")}
                     </Badge>
                   </FieldLabel>
@@ -327,7 +327,7 @@ export function WfStageGeneral({
             />
           </Field>
           {signatureDisabled && (
-            <p className="text-muted-foreground mt-1 text-micro-legal">
+            <p className="text-muted-foreground mt-1 text-xs">
               {t("signatureLimitReached")}
             </p>
           )}

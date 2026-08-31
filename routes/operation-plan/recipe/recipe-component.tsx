@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { useRecipe, useDeleteRecipe } from "@/hooks/use-recipe";
+import { useRecipe, useDeleteRecipe } from "./use-recipe";
 import { useCuisine } from "@/hooks/use-cuisine";
 import { useRecipeCategory } from "@/hooks/use-recipe-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -45,11 +45,12 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { useRecipeTable } from "./use-recipe-table";
 import RecipeCard from "./recipe-card";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -135,9 +136,24 @@ export default function RecipeComponent() {
         ),
       },
       {
+        key: "difficulty",
+        control: "custom",
+        labelKey: "field.difficulty",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("difficulty")}
+            options={difficultyFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
         key: "cuisine",
         control: "custom",
         labelKey: "field.cuisine",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -152,26 +168,13 @@ export default function RecipeComponent() {
         key: "category",
         control: "custom",
         labelKey: "field.category",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
             onChange={onChange}
             placeholder={tfl("category")}
             options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
-      },
-      {
-        key: "difficulty",
-        control: "custom",
-        labelKey: "field.difficulty",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("difficulty")}
-            options={difficultyFilterOptions}
             className="w-full"
           />
         ),
@@ -289,7 +292,7 @@ export default function RecipeComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={recipeFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -299,6 +302,7 @@ export default function RecipeComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

@@ -12,27 +12,45 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DeniedReasonIcon } from "@/components/permission-denied-icon";
 import type { Permission } from "@/constant/permissions";
 
 export const PERMISSION_DENIED_EVENT = "permission-denied";
 
+/**
+ * ทำไมถึงเข้าไม่ได้ — สี่เหตุผลนี้ผู้ใช้แก้คนละวิธี จึงต้องบอกให้ตรง
+ * - "permission": ไม่มีสิทธิ์ RBAC — ติดต่อผู้ดูแลขอสิทธิ์
+ * - "license": feature ไม่อยู่ในสัญญาของ BU — ไม่ใช่เรื่องสิทธิ์ แก้ด้วยการซื้อ/เปิดสัญญา
+ * - "expired": สัญญาหมดอายุ/ถูกระงับ — อ่านได้ เขียนไม่ได้ (บล็อกเฉพาะปุ่มเขียน)
+ * - "seat": cluster มีผู้ใช้เกินจำนวนที่นั่งที่ซื้อไว้ (SEAT_LIMIT_EXCEEDED, Task 5.3) —
+ *   อ่านได้ เขียนไม่ได้เหมือน "expired" แต่ทางแก้มีสองทาง (ปิดผู้ใช้ที่ไม่ใช้งาน หรือซื้อ
+ *   ที่นั่งเพิ่ม) ต่างจาก "license"/"expired" ที่มีทางแก้เดียว — คำอธิบายจึงบอกทั้งสองทาง
+ */
+export type DeniedReason = "permission" | "license" | "expired" | "seat";
+
 interface PermissionDeniedDetail {
   permission?: Permission;
   message?: string;
+  reason?: DeniedReason;
 }
 
 /**
  * Dispatch event ให้ `PermissionDeniedDialog` แสดง — ใช้กับ click handler
- * ของ menu/link ที่ไม่มีสิทธิ์ หรือ guard ใน useCan
+ * ของ menu/link ที่ไม่มีสิทธิ์ หรือ guard ใน useCan/useLicense
+ *
+ * @param permission - permission ที่ขาด (ถ้าเกี่ยวกับสิทธิ์)
+ * @param message - ข้อความแทน default
+ * @param reason - สาเหตุที่เข้าไม่ได้ — default `"permission"` (พฤติกรรมเดิมเมื่อไม่ส่งมา)
  */
 export function dispatchPermissionDenied(
   permission?: Permission,
   message?: string,
+  reason: DeniedReason = "permission",
 ) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(PERMISSION_DENIED_EVENT, {
-      detail: { permission, message },
+      detail: { permission, message, reason },
     }),
   );
 }
@@ -66,6 +84,25 @@ export function PermissionDeniedDialog() {
     };
   }, []);
 
+  const reason = detail?.reason ?? "permission";
+  const title =
+    reason === "license"
+      ? t("licenseTitle")
+      : reason === "expired"
+        ? t("expiredTitle")
+        : reason === "seat"
+          ? t("seatTitle")
+          : t("title");
+  const description =
+    detail?.message ??
+    (reason === "license"
+      ? t("licenseDescription")
+      : reason === "expired"
+        ? t("expiredDescription")
+        : reason === "seat"
+          ? t("seatDescription")
+          : t("description"));
+
   return (
     <AlertDialog
       open={!!detail}
@@ -74,18 +111,26 @@ export function PermissionDeniedDialog() {
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
           <AlertDialogMedia>
-            <ShieldOff className="text-destructive" aria-hidden />
+            {reason === "permission" ? (
+              <ShieldOff className="text-destructive" aria-hidden />
+            ) : (
+              <DeniedReasonIcon reason={reason} />
+            )}
           </AlertDialogMedia>
 
-          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
 
-          <AlertDialogDescription>
-            {detail?.message ?? t("description")}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
 
-          <p className="text-muted-foreground/80 text-xs leading-relaxed">
-            {t("contactAdmin")}
-          </p>
+          {/* "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์" เป็นทางแก้ของ reason "permission" เท่านั้น —
+              "license" บอกให้ติดต่อฝ่ายขาย "expired" บอกให้ต่ออายุสัญญา และ "seat" บอกทั้ง
+              สองทาง (ปิดผู้ใช้ที่ไม่ใช้งาน/ซื้อที่นั่งเพิ่ม) อยู่ในคำอธิบายด้านบนแล้วทุกกรณี
+              การแปะบรรทัดนี้ทุก reason จึงขัดกันเอง */}
+          {reason === "permission" && (
+            <p className="text-muted-foreground/80 text-xs leading-relaxed">
+              {t("contactAdmin")}
+            </p>
+          )}
         </AlertDialogHeader>
 
         {/* footer ของ size=sm เป็น grid-cols-2 — ปุ่มเดียวต้องบังคับให้อยู่กลาง */}

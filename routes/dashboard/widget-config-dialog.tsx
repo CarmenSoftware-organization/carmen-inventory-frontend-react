@@ -93,7 +93,9 @@ export function WidgetConfigDialog({
             </h3>
             {isError ? (
               <p role="alert" className="text-destructive text-sm">
-                {t("previewError", { message: error?.message ?? "Unknown error" })}
+                {t("previewError", {
+                  message: error?.message ?? "Unknown error",
+                })}
               </p>
             ) : isLoading || !preview ? (
               <WidgetSkeleton />

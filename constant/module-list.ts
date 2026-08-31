@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS, type Permission } from "@/constant/permissions";
 import {
+  Link2,
+  BookText,
   LayoutDashboard,
   Settings2,
   Coins,
@@ -20,6 +22,7 @@ import {
   MapPin,
   Warehouse,
   Receipt,
+  Rows3,
   Briefcase,
   Scale,
   SlidersHorizontal,
@@ -51,7 +54,6 @@ import {
   MessageSquareText,
   Activity,
   UserRoundSearch,
-  Mail,
   BellRing,
   Database,
   Award,
@@ -72,6 +74,27 @@ export interface ModuleDto {
    * Admin bypasses regardless
    */
   permission?: Permission;
+  /**
+   * License feature key ของ leaf นี้ — ระบุตรง ๆ เมื่อ key ที่คำนวณจาก `permission`
+   * ไม่ตรงกับ catalog ของ backend
+   *
+   * **ทำไมต้องมีฟิลด์นี้:** namespace ของ *permission* (RBAC) กับของ *license feature*
+   * **ไม่ใช่ตัวเดียวกัน** เช่น หน้า Unit ใช้ permission `product_management.unit.view`
+   * แต่ backend คิดค่า license เป็น `configuration.unit`; หน้า Report ใช้
+   * `report_analytics.view` แต่ feature จริงคือ `report.list` การปล่อยให้คำนวณเอง
+   * จะได้ key ที่ไม่มีอยู่ใน catalog → หน้านั้นถูกล็อกถาวรตอนเปิด
+   * `LICENSE_ENFORCEMENT` และ license **ไม่มี admin bypass** จึงไม่มีใครเข้าไปแก้ได้
+   *
+   * ค่าที่ใส่ต้องมาจาก `LICENSE_ROUTE_FEATURES` ของ backend (map จาก URL path จริง
+   * ของ endpoint ที่หน้านั้นเรียก) ไม่ใช่การเดาจากชื่อเมนู
+   *
+   * ลำดับการหาค่า: `licenseFeature` → `featureKeyOf(permission)` → ไม่มีเลย = ไม่ล็อก
+   * (`licenseFeatureOf()` ใน `hooks/use-license.ts`)
+   *
+   * เพิ่ม leaf ใหม่แล้วเทสต์ `constant/module-list.license-feature.test.ts` แดง
+   * แปลว่า key ที่ได้ไม่มีใน catalog — แก้ที่นี่ ห้ามแก้ fixture
+   */
+  licenseFeature?: string;
 }
 
 export function getModule(path: string): ModuleDto {
@@ -106,6 +129,7 @@ export const moduleList: ModuleDto[] = [
   {
     name: "dashboard",
     path: "/dashboard",
+    licenseFeature: "dashboard.widget", // app:dashboard-widgets (/api/me/dashboard-widgets)
     icon: LayoutDashboard,
   },
   {
@@ -121,6 +145,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "purchaseRequest",
         path: "/procurement/purchase-request",
+        licenseFeature: "procurement.purchase_request", // app:purchase-requests
         icon: FileText,
       },
       {
@@ -132,6 +157,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "purchaseOrder",
         path: "/procurement/purchase-order",
+        licenseFeature: "procurement.purchase_order", // app:purchase-orders
         icon: ClipboardList,
         separatorBefore: false,
       },
@@ -190,12 +216,14 @@ export const moduleList: ModuleDto[] = [
       {
         name: "priceListTemplate",
         path: "/vendor-management/price-list-template",
+        licenseFeature: "vendor_management.price_list_template", // app:pricelist-templates
         icon: FileSpreadsheet,
         permission: PERMISSIONS.vendor_management.view,
       },
       {
         name: "requestPriceList",
         path: "/vendor-management/request-price-list",
+        licenseFeature: "vendor_management.request_price_list", // app:request-for-pricings
         icon: FileSpreadsheet,
         permission: PERMISSIONS.vendor_management.view,
       },
@@ -209,17 +237,20 @@ export const moduleList: ModuleDto[] = [
       {
         name: "storeRequisition",
         path: "/store-operation/store-requisition",
+        licenseFeature: "store_operations.store_requisition", // app:store-requisitions
         icon: ListChecks,
       },
       {
         name: "stockReplenishment",
         path: "/store-operation/stock-replenishment",
+        licenseFeature: "store_operations.stock_replenishment", // app:stock-replenishment
         icon: PackagePlus,
         permission: PERMISSIONS.inventory_management.stock_in.view,
       },
       {
         name: "wastageReporting",
         path: "/store-operation/wastage-reporting",
+        licenseFeature: "store_operations.wastage_reporting", // app:wastage-reporting
         icon: AlertTriangle,
         permission: PERMISSIONS.inventory_management.stock_out.view,
       },
@@ -233,12 +264,14 @@ export const moduleList: ModuleDto[] = [
       {
         name: "inventoryAdjustment",
         path: "/inventory-management/inventory-adjustment",
+        licenseFeature: "inventory_management.inventory_adjustment", // app:inventory-adjustments
         icon: ArrowUpDown,
         permission: PERMISSIONS.inventory_management.view,
       },
       {
         name: "transaction",
         path: "/inventory-management/transaction",
+        licenseFeature: "inventory_management.transaction", // app:inventory-transactions
         icon: Receipt,
         permission: PERMISSIONS.inventory_management.view,
       },
@@ -271,30 +304,35 @@ export const moduleList: ModuleDto[] = [
       {
         name: "operationRecipe",
         path: "/operation-plan/recipe",
+        licenseFeature: "operation_plan.recipe", // config:recipes
         icon: BookOpen,
         permission: PERMISSIONS.operation_plan.view,
       },
       {
         name: "operationCategory",
         path: "/operation-plan/category",
+        licenseFeature: "operation_plan.category", // config:recipe-categories
         icon: Layers,
         permission: PERMISSIONS.operation_plan.view,
       },
       {
         name: "operationCuisine",
         path: "/operation-plan/cuisine",
+        licenseFeature: "operation_plan.cuisine", // config:recipe-cuisines
         icon: UtensilsCrossed,
         permission: PERMISSIONS.operation_plan.view,
       },
       {
         name: "operationEquipment",
         path: "/operation-plan/equipment",
+        licenseFeature: "operation_plan.equipment", // config:recipe-equipment
         icon: Wrench,
         permission: PERMISSIONS.operation_plan.view,
       },
       {
         name: "operationEquipmentCategory",
         path: "/operation-plan/equipment-category",
+        licenseFeature: "operation_plan.equipment_category", // config:recipe-equipment-categories
         icon: FolderTree,
         permission: PERMISSIONS.operation_plan.view,
       },
@@ -308,18 +346,21 @@ export const moduleList: ModuleDto[] = [
       {
         name: "reportList",
         path: "/report/list",
+        licenseFeature: "report.list", // app:reports
         icon: Files,
         permission: PERMISSIONS.report_analytics.view,
       },
       {
         name: "reportSchedule",
         path: "/report/schedules",
+        licenseFeature: "report.list", // app:reports (/api/{bu}/reports/schedules -> segment 'reports')
         icon: Calendar,
         permission: PERMISSIONS.report_analytics.view,
       },
       {
         name: "reportHistory",
         path: "/report/history",
+        licenseFeature: "report.list", // app:reports (/api/{bu}/reports/history -> segment 'reports')
         icon: Clock,
         permission: PERMISSIONS.report_analytics.view,
       },
@@ -399,6 +440,21 @@ export const moduleList: ModuleDto[] = [
     icon: Settings2,
     subModules: [
       {
+        // ยังไม่ผูก permission/licenseFeature โดยตั้งใจ — โมดูลนี้เพิ่งวางโครง
+        // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
+        // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
+        // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
+        name: "accountCode",
+        path: "/config/account-code",
+        icon: BookText,
+      },
+      {
+        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ accountCode
+        name: "accountMapping",
+        path: "/config/account-mapping",
+        icon: Link2,
+      },
+      {
         name: "storeLocation",
         path: "/config/location",
         icon: Building,
@@ -419,8 +475,16 @@ export const moduleList: ModuleDto[] = [
       {
         name: "unit",
         path: "/config/unit",
+        licenseFeature: "configuration.unit", // config:units
         icon: Scale,
         permission: PERMISSIONS.product_management.unit.view,
+      },
+      {
+        name: "shelf",
+        path: "/config/shelf",
+        licenseFeature: "configuration",
+        icon: Rows3,
+        permission: PERMISSIONS.configuration.shelf.view,
       },
       {
         name: "adjustmentType",
@@ -437,6 +501,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "creditNoteReason",
         path: "/config/credit-note-reason",
+        licenseFeature: "configuration.credit_note_reason", // app:credit-note-reasons
         icon: MessageSquareText,
         permission: PERMISSIONS.configuration.view,
       },
@@ -462,18 +527,21 @@ export const moduleList: ModuleDto[] = [
       {
         name: "creditTerm",
         path: "/config/credit-term",
+        licenseFeature: "configuration.credit_term", // config:credit-terms
         icon: Clock,
         permission: PERMISSIONS.configuration.view,
       },
       {
         name: "extraCost",
         path: "/config/extra-cost",
+        licenseFeature: "configuration.extra_cost_type", // config:extra-cost-types
         icon: Coins,
         permission: PERMISSIONS.configuration.extra_cost.view,
       },
       {
         name: "certification",
         path: "/config/certification",
+        licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
         icon: Award,
         separatorBefore: true,
         permission: PERMISSIONS.configuration.view,
@@ -481,6 +549,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "eco",
         path: "/config/eco",
+        licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
         icon: Leaf,
         permission: PERMISSIONS.configuration.view,
       },
@@ -494,18 +563,26 @@ export const moduleList: ModuleDto[] = [
       {
         name: "companyProfile",
         path: "/system-admin/company-profile",
+        // `/api/business-units` ไม่แมตช์ LICENSE_ROUTE_FEATURES เลย (backend fail-open)
+        // จึงไม่มี resource key ที่ "ถูก" ให้ใช้ — ใช้ module key ของกลุ่มที่หน้านี้อยู่
+        // ซึ่งล็อกเฉพาะ BU ที่ไม่ได้ซื้อ System Admin ทั้งโมดูล (over-lock น้อยที่สุด)
+        licenseFeature: "system_admin",
         icon: Briefcase,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "defaultSetting",
         path: "/system-admin/default-setting",
+        // เหมือน companyProfile — ยิง `/api/business-units` + `/api-system/...`
+        // ซึ่งอยู่นอกขอบเขต license ทั้งคู่
+        licenseFeature: "system_admin",
         icon: SlidersHorizontal,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "period",
         path: "/system-admin/period",
+        licenseFeature: "system_admin.period", // app:periods
         icon: Calendar,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
@@ -513,18 +590,21 @@ export const moduleList: ModuleDto[] = [
       {
         name: "workflow",
         path: "/system-admin/workflow",
+        licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "interface",
         path: "/system-admin/interface",
+        licenseFeature: "configuration.app_config", // config:app-config
         icon: Cable,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "role",
         path: "/system-admin/role",
+        licenseFeature: "system_admin.role", // config:application-roles
         icon: ShieldCheck,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
@@ -532,12 +612,14 @@ export const moduleList: ModuleDto[] = [
       {
         name: "user",
         path: "/system-admin/user",
+        licenseFeature: "system_admin.user", // app:users
         icon: UserCheck,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "runningCode",
         path: "/system-admin/running-code",
+        licenseFeature: "system_admin.running_code", // config:running-codes
         icon: Hash,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
@@ -545,12 +627,14 @@ export const moduleList: ModuleDto[] = [
       {
         name: "document",
         path: "/system-admin/document",
+        licenseFeature: "system_admin.document", // app:documents
         icon: FileCheck,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "userActivity",
         path: "/system-admin/user-activity",
+        licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: UserRoundSearch,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
@@ -558,25 +642,22 @@ export const moduleList: ModuleDto[] = [
       {
         name: "activityLog",
         path: "/system-admin/activity-log",
+        licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: Activity,
-        permission: PERMISSIONS.system_configuration.view,
-      },
-      {
-        name: "configEmail",
-        path: "/system-admin/config-email",
-        icon: Mail,
-        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "notificationTemplate",
         path: "/system-admin/notification-template",
+        licenseFeature: "configuration.notification_template", // config:notification-templates
         icon: BellRing,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "dashboardDataset",
         path: "/system-admin/dashboard-dataset",
+        licenseFeature: "dashboard.dataset", // app:dashboard-lab / app:datasets
         icon: Database,
         permission: PERMISSIONS.system_configuration.view,
       },

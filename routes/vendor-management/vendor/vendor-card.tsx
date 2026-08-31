@@ -1,10 +1,10 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { Vendor } from "@/types/vendor";
 
@@ -36,10 +36,10 @@ export default function VendorCard({
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardActiveRow active={item.is_active} />
       <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>
       {item.business_type?.length > 0 && (
         <ListCardRow label={tfl("businessType")}>

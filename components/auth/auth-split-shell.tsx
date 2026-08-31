@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
 import { Hotel, ShieldCheck, Sparkles, Zap } from "lucide-react";
-import brandingUrl from "@/components/icons/carmen-branding.svg";
+import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
+import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
 
 /**
  * โครงหน้า auth แบบแบ่งครึ่ง — ซ้ายเป็นการ์ดฟอร์ม ขวาเป็น hero (ซ่อนบนจอเล็ก)
@@ -130,7 +131,7 @@ export function AuthSplitShell({
       </div>
 
       {/* Footer */}
-      <p className="text-muted-foreground/40 pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center text-micro-legal">
+      <p className="text-muted-foreground/40 text-micro-legal pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center">
         {t("platformFooter")}
       </p>
     </div>
@@ -141,11 +142,18 @@ export function AuthSplitShell({
 
 function BrandMark({ size = "sm" }: { readonly size?: "sm" | "lg" }) {
   return (
-    <img
-      src={brandingUrl}
-      alt="Carmen"
-      className={size === "lg" ? "h-18 w-auto" : "h-7 w-auto"}
-    />
+    <>
+      <img
+        src={brandingLightUrl}
+        alt="Carmen"
+        className={`${size === "lg" ? "h-18 w-auto" : "h-7 w-auto"} dark:hidden`}
+      />
+      <img
+        src={brandingDarkUrl}
+        alt="Carmen"
+        className={`${size === "lg" ? "h-18 w-auto" : "h-7 w-auto"} hidden dark:block`}
+      />
+    </>
   );
 }
 
@@ -168,7 +176,7 @@ function BentoCard({
       <div className="text-foreground text-xs font-semibold tracking-tight">
         {title}
       </div>
-      <p className="text-muted-foreground mt-0.5 text-micro leading-snug">
+      <p className="text-muted-foreground text-micro mt-0.5 leading-snug">
         {desc}
       </p>
     </div>

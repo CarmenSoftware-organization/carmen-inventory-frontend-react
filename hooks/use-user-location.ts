@@ -3,7 +3,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { CACHE_STATIC } from "@/lib/cache-config";
 import type { Location } from "@/types/location";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";

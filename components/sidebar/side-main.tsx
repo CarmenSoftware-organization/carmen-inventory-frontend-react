@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
+import { Lock } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -125,16 +126,32 @@ export function SideMain() {
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >
-                      {sub.denied ? (
+                      {sub.locked || sub.denied ? (
                         <button
                           type="button"
                           onClick={() =>
-                            dispatchPermissionDenied(sub.permission)
+                            dispatchPermissionDenied(
+                              sub.permission,
+                              undefined,
+                              sub.locked ? "license" : "permission",
+                            )
                           }
                           title={t(sub.name)}
                           className="opacity-50"
                         >
-                          {content}
+                          {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ —
+                              locked ชนะ denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) */}
+                          {sub.locked ? (
+                            <span className="flex items-center gap-2">
+                              {content}
+                              <Lock
+                                className="size-3 shrink-0 opacity-70"
+                                aria-hidden
+                              />
+                            </span>
+                          ) : (
+                            content
+                          )}
                         </button>
                       ) : (
                         <Link to={sub.path}>{content}</Link>

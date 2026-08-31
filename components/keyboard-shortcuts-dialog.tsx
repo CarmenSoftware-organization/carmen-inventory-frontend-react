@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -18,6 +17,7 @@ interface Shortcut {
 // "/" are handled by the keydown listener below; "Esc" closes the dialog via
 // Radix.
 const SHORTCUTS: Shortcut[] = [
+  { keys: ["⌘K / Ctrl+K"], description: "Open command palette" },
   { keys: ["?"], description: "Show this dialog" },
   { keys: ["/"], description: "Focus search input on current page" },
   { keys: ["Esc"], description: "Close dialog / clear focus" },
@@ -25,7 +25,7 @@ const SHORTCUTS: Shortcut[] = [
 
 function Key({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="bg-muted inline-flex h-5 min-w-5 items-center justify-center rounded border px-1.5 text-micro font-semibold">
+    <kbd className="bg-muted text-micro inline-flex h-5 min-w-5 items-center justify-center rounded border px-1.5 font-semibold">
       {children}
     </kbd>
   );

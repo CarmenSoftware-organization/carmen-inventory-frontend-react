@@ -1,4 +1,3 @@
-
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ImageIcon, Upload, X } from "lucide-react";
@@ -64,7 +63,9 @@ export function EqImageField({
       return;
     }
     if (selected.size > IMAGE_MAX_BYTES) {
-      toast.warning(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
+      toast.warning(
+        t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }),
+      );
       return;
     }
     onChange({ file: selected, removed: false });
@@ -84,19 +85,19 @@ export function EqImageField({
 
   return (
     <div className="space-y-2">
-      <span className="block text-micro-legal font-bold uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="text-micro-legal text-muted-foreground block font-bold tracking-[0.14em] uppercase">
         {t("image")}
       </span>
 
       {displayUrl ? (
-        <div className="relative flex h-44 items-center justify-center overflow-hidden rounded-md border bg-muted md:h-56">
+        <div className="bg-muted relative flex h-44 items-center justify-center overflow-hidden rounded-md border md:h-56">
           <img
             src={displayUrl}
             alt={t("entity")}
             className="size-full object-contain"
           />
           {!disabled && (
-            <div className="absolute bottom-2 right-2 flex gap-1.5">
+            <div className="absolute right-2 bottom-2 flex gap-1.5">
               <Button
                 type="button"
                 size="xs"
@@ -136,22 +137,22 @@ export function EqImageField({
           onDrop={handleDrop}
           disabled={disabled}
           className={cn(
-            "flex h-44 w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-muted/40 px-4 text-center transition-colors md:h-56",
-            !disabled && "cursor-pointer hover:bg-muted/60",
+            "bg-muted/40 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 text-center transition-colors md:h-56",
+            !disabled && "hover:bg-muted/60 cursor-pointer",
             disabled && "cursor-not-allowed opacity-60",
             isDragging && "border-primary bg-primary/10",
           )}
         >
-          <div className="flex size-12 items-center justify-center rounded-md border bg-card">
+          <div className="bg-card flex size-12 items-center justify-center rounded-md border">
             {isDragging ? (
-              <Upload className="size-5 text-primary" aria-hidden="true" />
+              <Upload className="text-primary size-5" aria-hidden="true" />
             ) : (
-              <ImageIcon className="size-5 text-primary" aria-hidden="true" />
+              <ImageIcon className="text-primary size-5" aria-hidden="true" />
             )}
           </div>
           <div className="space-y-0.5">
             <div className="text-sm font-semibold">{t("dropPhoto")}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               {t("imageUploadHint", { size: formatBytes(IMAGE_MAX_BYTES) })}
             </div>
           </div>

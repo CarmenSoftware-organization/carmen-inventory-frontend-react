@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -13,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePurchaseRequestTemplates } from "@/hooks/use-purchase-request";
+import { usePurchaseRequestTemplates } from "./use-purchase-request";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import PrSelectTemplate from "./pr-select-template";
@@ -150,54 +149,54 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
               </div>
             </DialogHeader>
 
-              {!isLoading && templates && templates.length > 0 && (
-                <SearchInput
-                  defaultValue={searchTerm}
-                  onSearch={setSearchTerm}
-                  onInputChange={setSearchTerm}
-                  containerClassName="w-full"
-                  inputClassName="h-9 text-sm"
-                />
-              )}
+            {!isLoading && templates && templates.length > 0 && (
+              <SearchInput
+                defaultValue={searchTerm}
+                onSearch={setSearchTerm}
+                onInputChange={setSearchTerm}
+                containerClassName="w-full"
+                inputClassName="h-9 text-sm"
+              />
+            )}
 
-              <ScrollArea className="-mx-1 max-h-112 flex-1 overflow-hidden px-1">
-                <div className="space-y-2">
-                  {isLoading && (
-                    <div className="flex items-center justify-center py-10">
-                      <Loader2 className="text-muted-foreground size-6 animate-spin" />
-                    </div>
-                  )}
-                  {!isLoading &&
-                    filteredTemplates.length > 0 &&
-                    filteredTemplates.map((template) => (
-                      <PrSelectTemplate
-                        key={template.id}
-                        template={template}
-                        onSelect={handleSelectTemplate}
-                      />
-                    ))}
-                  {!isLoading &&
-                    templates &&
-                    templates.length > 0 &&
-                    filteredTemplates.length === 0 && (
-                      <div className="py-8">
-                        <EmptyComponent
-                          title={t("noTemplateResults")}
-                          description={t("tryDifferentSearch")}
-                        />
-                      </div>
-                    )}
-                  {!isLoading && (!templates || templates.length === 0) && (
+            <ScrollArea className="-mx-1 max-h-112 flex-1 overflow-hidden px-1">
+              <div className="space-y-2">
+                {isLoading && (
+                  <div className="flex items-center justify-center py-10">
+                    <Loader2 className="text-muted-foreground size-6 animate-spin" />
+                  </div>
+                )}
+                {!isLoading &&
+                  filteredTemplates.length > 0 &&
+                  filteredTemplates.map((template) => (
+                    <PrSelectTemplate
+                      key={template.id}
+                      template={template}
+                      onSelect={handleSelectTemplate}
+                    />
+                  ))}
+                {!isLoading &&
+                  templates &&
+                  templates.length > 0 &&
+                  filteredTemplates.length === 0 && (
                     <div className="py-8">
                       <EmptyComponent
-                        title={t("noTemplates")}
-                        description={t("noTemplatesDesc")}
+                        title={t("noTemplateResults")}
+                        description={t("tryDifferentSearch")}
                       />
                     </div>
                   )}
-                </div>
-              </ScrollArea>
-            </div>
+                {!isLoading && (!templates || templates.length === 0) && (
+                  <div className="py-8">
+                    <EmptyComponent
+                      title={t("noTemplates")}
+                      description={t("noTemplatesDesc")}
+                    />
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         )}
       </DialogContent>
     </Dialog>

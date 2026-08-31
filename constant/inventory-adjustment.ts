@@ -33,4 +33,3 @@ export const IA_TYPE_ICON: Record<"stock-in" | "stock-out", LucideIcon> = {
   "stock-in": PackagePlus,
   "stock-out": PackageMinus,
 };
-

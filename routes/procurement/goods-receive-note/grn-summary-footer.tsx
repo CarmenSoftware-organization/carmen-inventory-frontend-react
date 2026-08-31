@@ -1,7 +1,8 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { formatCurrency } from "@/lib/currency-utils";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
+import { sumGrnItems } from "./grn-summary";
 import { useCurrency } from "@/hooks/use-currency";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnFooterAction } from "./grn-footer-action";
@@ -46,24 +47,7 @@ export function GrnSummaryFooter({
   const currencyCode =
     currencies.find((c) => c.id === currencyId)?.code || currencyName;
 
-  // grand summary — รวมยอดจากทุก item (net/discount/tax/total ที่คำนวณไว้แล้ว)
-  let totalDiscount = 0;
-  let totalNet = 0;
-  let totalTax = 0;
-  let grandTotal = 0;
-  for (const it of items) {
-    totalDiscount += Number(it?.discount_amount) || 0;
-    totalNet += Number(it?.net_amount) || 0;
-    totalTax += Number(it?.tax_amount) || 0;
-    grandTotal += Number(it?.total_price) || 0;
-  }
-  const summary = {
-    subtotal: round2(totalNet + totalDiscount),
-    totalDiscount: round2(totalDiscount),
-    totalNet: round2(totalNet),
-    totalTax: round2(totalTax),
-    grandTotal: round2(grandTotal),
-  };
+  const summary = sumGrnItems(items);
 
   if (items.length === 0) return null;
 
@@ -84,9 +68,7 @@ export function GrnSummaryFooter({
               ? `-${formatCurrency(summary.totalDiscount)}`
               : formatCurrency(0),
           valueClassName:
-            summary.totalDiscount > 0
-              ? "text-destructive"
-              : undefined,
+            summary.totalDiscount > 0 ? "text-destructive" : undefined,
         },
         {
           key: "net",

@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { createCommentCrud } from "@/hooks/use-comment-crud";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation, removeFromListById } from "@/hooks/use-api-mutation";
 import { useXlsxExport, type XlsxColumn } from "@/hooks/use-xlsx-export";
 import { httpClient } from "@/lib/http-client";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type {
@@ -14,10 +15,6 @@ import type {
   GrnLocationItem,
 } from "@/types/goods-receive-note";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import type {
-  CommentAttachment,
-  CommentItem,
-} from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
 
 /**
@@ -141,10 +138,7 @@ export function useGoodsReceiveNoteByVendorForCn(
  * @example
  * const { data } = useGrnProducts(grnId, { search });
  */
-export function useGrnProducts(
-  grnId: string | undefined,
-  params?: ParamsDto,
-) {
+export function useGrnProducts(grnId: string | undefined, params?: ParamsDto) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<GrnProductItem>>({
@@ -201,10 +195,7 @@ export function useGrnProductLocations(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw await ApiError.from(
-          res,
-          "Failed to fetch GRN product locations",
-        );
+        throw await ApiError.from(res, "Failed to fetch GRN product locations");
       return res.json();
     },
     enabled: !!buCode && !!grnId && !!productId,
@@ -222,10 +213,7 @@ export function useGrnProductLocations(
  * @example
  * const { data } = useGrnLocations(grnId, { search });
  */
-export function useGrnLocations(
-  grnId: string | undefined,
-  params?: ParamsDto,
-) {
+export function useGrnLocations(grnId: string | undefined, params?: ParamsDto) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<GrnLocationItem>>({
@@ -282,10 +270,7 @@ export function useGrnLocationProducts(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw await ApiError.from(
-          res,
-          "Failed to fetch GRN location products",
-        );
+        throw await ApiError.from(res, "Failed to fetch GRN location products");
       return res.json();
     },
     enabled: !!buCode && !!grnId && !!locationId,
@@ -348,7 +333,10 @@ export function useCreateGoodsReceiveNote() {
 export function useUpdateGoodsReceiveNote() {
   return useApiMutation<CreateGrnDto & { id: string }>({
     mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.patch(`${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`, data),
+      httpClient.patch(
+        `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`,
+        data,
+      ),
     invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTES],
     errorMessage: "Failed to update goods receive note",
   });
@@ -437,99 +425,22 @@ export function useVoidGoodsReceiveNote() {
 
 // --- Comments ---
 
-/**
- * ดึงรายการ comment ของ GRN จาก
- * `/api/{buCode}/good-received-note-comment/{grnId}`
- */
-export function useGoodsReceiveNoteComments(grnId: string | undefined) {
-  const buCode = useBuCode();
+/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
+export const grnCommentCrud = createCommentCrud({
+  queryKey: QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS,
+  commentEndpoint: API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT,
+  idFieldName: "good_received_note_id",
+  label: "goods receive note",
+});
 
-  return useQuery<CommentItem[]>({
-    queryKey: [QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS, buCode, grnId],
-    queryFn: async () => {
-      if (!buCode || !grnId)
-        throw new ApiError(
-          ERROR_CODES.VALIDATION_ERROR,
-          "Missing buCode or goods receive note id",
-        );
-      const res = await httpClient.get(
-        API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(buCode, grnId),
-      );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch comments");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    enabled: !!buCode && !!grnId,
-  });
-}
-
-/**
- * แก้ไข comment ของ GRN ผ่าน
- * `PATCH /api/{buCode}/good-received-note-comment/{commentId}`
- */
-export function useUpdateGrnComment() {
-  return useApiMutation<{
-    id: string;
-    message: string;
-    attachments: CommentAttachment[];
-  }>({
-    mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.patch(
-        `${API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(buCode)}/${id}`,
-        data,
-      ),
-    invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS],
-    errorMessage: "Failed to update comment",
-  });
-}
-
-/**
- * ลบ comment ของ GRN ผ่าน
- * `DELETE /api/{buCode}/good-received-note-comment/{commentId}`
- */
-export function useDeleteGrnComment() {
-  return useApiMutation<string>({
-    mutationFn: (id, buCode) =>
-      httpClient.delete(
-        `${API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(buCode)}/${id}`,
-      ),
-    invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS],
-    errorMessage: "Failed to delete comment",
-  });
-}
-
-/**
- * สร้าง comment ของ GRN ผ่าน multipart/form-data
- * ส่ง message + type + files ในคำขอเดียวไปยัง
- * `/api/{buCode}/good-received-note-comment/{grnId}`
- */
-export function useCreateGrnComment() {
-  return useApiMutation<{
-    good_received_note_id: string;
-    message: string;
-    type: string;
-    files: File[];
-  }>({
-    mutationFn: (data, buCode) => {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("type", data.type);
-      for (const file of data.files) {
-        formData.append("files", file);
-      }
-      return httpClient.post(
-        API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(
-          buCode,
-          data.good_received_note_id,
-        ),
-        formData,
-      );
-    },
-    invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS],
-    errorMessage: "Failed to add comment",
-  });
-}
+/** ดึงรายการ comment ของ GRN จาก `/api/{buCode}/good-received-note-comment/{grnId}` */
+export const useGoodsReceiveNoteComments = grnCommentCrud.useComments;
+/** สร้าง comment ของ GRN ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
+export const useCreateGrnComment = grnCommentCrud.useCreate;
+/** แก้ไข comment ของ GRN ตาม comment id */
+export const useUpdateGrnComment = grnCommentCrud.useUpdate;
+/** ลบ comment ของ GRN ตาม comment id */
+export const useDeleteGrnComment = grnCommentCrud.useDelete;
 
 // --- Export ---
 

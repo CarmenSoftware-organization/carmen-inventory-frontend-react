@@ -38,6 +38,9 @@ export const PERMISSIONS = {
     exchange_rate: crud("configuration.exchange_rate"),
     extra_cost: crud("configuration.extra_cost"),
     location: crud("configuration.location"),
+    // shelf: backend ยังไม่มี permission key นี้ — หน้าสร้างรอไว้ non-admin
+    // จะยังไม่เห็นเมนูจนกว่า backend จะ seed permission ตามชื่อนี้
+    shelf: crud("configuration.shelf"),
     tax_profile: crud("configuration.tax_profile"),
   },
   product_management: {

@@ -73,7 +73,9 @@ describe("useInterfaceConfig", () => {
       wrapper,
     });
 
-    await waitFor(() => expect(result.current.value).toEqual({ enabled: true }));
+    await waitFor(() =>
+      expect(result.current.value).toEqual({ enabled: true }),
+    );
     expect(result.current.isNew).toBe(false);
     expect(result.current.isError).toBe(false);
   });
@@ -96,16 +98,21 @@ describe("useInterfaceConfig", () => {
   it("saves through to the config key and reports the pending state", async () => {
     vi.mocked(httpClient.get).mockResolvedValue({
       ok: true,
-      json: async () => ({ data: { id: "1", key: "interface_pos", value: {} } }),
+      json: async () => ({
+        data: { id: "1", key: "interface_pos", value: {} },
+      }),
     } as Response);
     vi.mocked(httpClient.put).mockResolvedValue({
       ok: true,
       json: async () => ({ data: {} }),
     } as Response);
 
-    const { result, rerender } = renderHook(() => useInterfaceConfig("interface_pos"), {
-      wrapper,
-    });
+    const { result, rerender } = renderHook(
+      () => useInterfaceConfig("interface_pos"),
+      {
+        wrapper,
+      },
+    );
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const onSuccess = vi.fn();
@@ -141,7 +148,9 @@ describe("useInterfaceConfig", () => {
     const { result } = renderHook(() => useInterfaceConfig("interface_pos"), {
       wrapper,
     });
-    await waitFor(() => expect(result.current.value).toEqual({ enabled: true }));
+    await waitFor(() =>
+      expect(result.current.value).toEqual({ enabled: true }),
+    );
     expect(httpClient.get).toHaveBeenCalledTimes(1);
 
     act(() => result.current.refetch());
@@ -166,7 +175,9 @@ describe("useInterfaceConfig", () => {
   it("fetches the config key it was given", async () => {
     vi.mocked(httpClient.get).mockResolvedValue({
       ok: true,
-      json: async () => ({ data: { id: "1", key: "interface_pms", value: {} } }),
+      json: async () => ({
+        data: { id: "1", key: "interface_pms", value: {} },
+      }),
     } as Response);
 
     const { result } = renderHook(() => useInterfaceConfig("interface_pms"), {

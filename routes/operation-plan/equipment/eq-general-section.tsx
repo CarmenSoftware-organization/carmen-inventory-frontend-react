@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Textarea } from "@/components/ui/textarea";
@@ -127,7 +126,6 @@ export function EqGeneralSection({
               {...form.register("serial_no")}
             />
           </Field>
-
         </div>
 
         <Field className="mt-4">

@@ -4,6 +4,106 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.2.0] - 2026-08-23
+
+_No notable changes._
+
+## [2.1.0] - 2026-08-23
+
+### Added
+- report browser errors and traces to SigNoz through the gateway — Thammanoon Semapru `c0aa2072`
+- **license:** แถบเตือนโควตาที่นั่ง + ข้อความ SEAT_LIMIT_EXCEEDED — Thammanoon Semapru `0e40d32b`
+- **procurement:** เพิ่มคอลัมน์ Send Back ในหน้า My Approval — Thammanoon Semapru `be1c8db1`
+- **procurement:** เปิดให้เรียงคอลัมน์ Send Back ได้ — Thammanoon Semapru `839d0001`
+- **procurement:** เพิ่มคอลัมน์ Send Back ในหน้า list ของ PR / PO / SR — Thammanoon Semapru `4828d783`
+- **license:** แยก 403 ของ license ออกจาก 403 ของสิทธิ์ — Thammanoon Semapru `c364ad56`
+- **license:** ปิดปุ่มเขียนใน FormToolbar + row actions เมื่อสัญญาหมดอายุ — Thammanoon Semapru `43bd5d85`
+- **license:** banner สัญญาหมดอายุ + guard() บล็อกการเขียนเมื่อ canWrite เป็น false — Thammanoon Semapru `8bfb513e`
+- **license:** sidebar แสดงโมดูลที่ยังไม่ได้ซื้อแบบล็อก — Thammanoon Semapru `62c68a88`
+- **license:** แยกสาเหตุที่เข้าไม่ได้เป็น permission/license/expired — Thammanoon Semapru `88ba82fb`
+- **license:** type ของ license block + hook useLicense พร้อมสวิตช์ shadow mode — Thammanoon Semapru `ef5f6562`
+- **auth:** เพิ่มเส้นทางลืมรหัสผ่านและตั้งรหัสผ่านใหม่ — Thammanoon Semapru `b20bebce`
+- **document:** แสดงแถบสรุปขนาดไฟล์แนบของ BU เหนือตาราง (#106) — Thammanoon Semapru `42e22859`
+- **document:** เพิ่ม Sheet แจกแจงพื้นที่จัดเก็บตามโมดูล (#106) — Thammanoon Semapru `4abd5457`
+- **document:** เพิ่มแผนที่ reference_type → ชื่อโมดูล และ i18n ของสรุป (#106) — Thammanoon Semapru `6eccd8e6`
+- **document:** เพิ่ม hook useDocumentSummary (#106) — Thammanoon Semapru `27079756`
+- **accounting:** enhance approval workflow handling in accounting detail (#105) — llHorizonll `0d1a2929`
+- **accounting:** add accounting document routes and dashboard (#105) — llHorizonll `4a72884d`
+- **config:** หน้า Shelf อัปเดตตาม contract จริงจากทีม backend — Thitiphong Srisavat `3503514a`
+- **config:** หน้า Shelf (ชั้นวาง) — สร้างรอ backend — Thitiphong Srisavat `83e2b5a7`
+- **procurement:** เลือกสินค้าใน PR/PR template กรองตาม workflow ด้วย — Thitiphong Srisavat `dc89e569`
+- **workflow:** checkbox เลือก/เอาออกทั้งหมดใน tab Products — Thitiphong Srisavat `c0da91f3`
+- add submit button to header, enhance signature upload UI, and include aria-invalid states in profile settings form — Thammanoon Semapru `d9840d81`
+- add broadcast and personal notification labels and introduce entry animations to notification items — Thammanoon Semapru `5f07323c`
+- implement and integrate GlobalNotificationBanner to display unread notification alerts — Thammanoon Semapru `107d21a2`
+- redesign notification UI with dynamic icons, improved layout, and bulk selection functionality — Thammanoon Semapru `34a18a99`
+- implement theme-aware branding logos for light and dark mode — Thammanoon Semapru `a0f2834e`
+
+### Fixed
+- **deploy:** เขียน WS_URL กับ LICENSE_ENFORCEMENT ลง config.json ของ GCS ด้วย (#113) — Thammanoon Semapru `143419b2`
+- **company-profile:** ถอดช่อง Max license users ที่กำลังจะว่างถาวร — Thammanoon Semapru `60d95cd9`
+- **license:** หน้าแรกหลังล็อกอินไป leaf ที่เปิดได้จริง + กล่องปฏิเสธไม่เป็นทางตัน — Thammanoon Semapru `eb07e66e`
+- **license:** ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อเหตุผลไม่ใช่เรื่องสิทธิ์ — Thammanoon Semapru `e13e03e0`
+- **license:** ปิดปุ่มเขียนใน ConfigListTemplate + แก้ CLAUDE.md ให้ตรงความจริง — Thammanoon Semapru `720814e2`
+- **license:** แก้ feature key ของทุกหน้าให้ตรง catalog ของ backend + กันไม่ให้พังเงียบอีก — Thammanoon Semapru `930c0a2e`
+- **license:** module-landing + navbar app launcher ปฏิบัติกับ locked เหมือน sidebar — Thammanoon Semapru `d0d4a0df`
+- **license:** เพิ่มการ์ดสัญญาณสีแดงให้ permission-denied-icon.tsx — Thammanoon Semapru `590ab8b1`
+- **workflow:** เก็บ data.products เป็น id ล้วนตามสัญญา backend — Thammanoon Semapru `ff2b55db`
+- **document:** แก้ findings จาก final code review ของแถบสรุปขนาดไฟล์แนบ (#106) — Thammanoon Semapru `cad9c0f6`
+- **accounting:** ใช้ token text-micro-legal แทนขนาดตัวอักษรดิบ 10px (#105) — Thammanoon Semapru `cc4e4eb5`
+- **telemetry:** send logged-out errors through the anonymous channel — Thammanoon Semapru `9f530119`
+- **ui:** เก็บตกงานกวาดสี — ห้ามใช้ token ฝั่ง fill เป็นสีตัวอักษร — Thitiphong Srisavat `e19bfed8`
+- **procurement:** new PR จาก template — โชว์ workflow และให้ back ถาม discard — Thitiphong Srisavat `8b61ad14`
+- **procurement:** เปิด blank PR ไม่ต้องยิง purchase-request-templates — Thitiphong Srisavat `69508e0e`
+- **procurement:** กรอง workflow ใน PR template ตอนสร้างใหม่ให้เหลือเฉพาะตัวที่เริ่มได้ — Thitiphong Srisavat `a3edf346`
+- **pr:** ปลด lock ฟอร์มใบที่ถูก send back กลับมาหาคนขอ — Thitiphong Srisavat `364e1b08`
+- **type-ladder:** เก็บขนาดตัวอักษรดิบที่หลุดเข้ามาใน 3 dialog + ปิดช่องของ guard — Thammanoon Semapru `ca35a93b`
+- **comment-sheet:** รับ data URI เฉพาะรูปภาพ และเขียนเส้นทาง URL ให้ตรงความจริง — Thammanoon Semapru `c715fe0f`
+- include file extensions in FormData uploads and add optional presignedUrl to Document type — Thammanoon Semapru `acfced6a`
+- update toaster component to properly handle dynamic toast notifications — Thammanoon Semapru `3aa0c0b6`
+- restrict selection mode to unread notifications and improve checkbox layout alignment — Thammanoon Semapru `e00a5161`
+- hide business unit badge in notification items for broadcast messages — Thammanoon Semapru `65d1a746`
+
+### Changed
+- **procurement:** ย้ายคอลัมน์ Send Back ไปต่อจากเลขที่เอกสาร — Thammanoon Semapru `4aca1d32`
+- **document:** ย้าย formatFileSize เป็นของกลางและรองรับถึง TB (#106) — Thammanoon Semapru `589bef18`
+- **accounting:** replace WorkflowStep with WorkflowTrack in accounting detail (#105) — llHorizonll `f7272e88`
+- **ui:** กวาดสี hardcode ที่เหลือไปใช้ token จาก globals.css — Thitiphong Srisavat `409d8986`
+- **navbar:** notification เปลี่ยนไปใช้สี token จาก globals.css — Thitiphong Srisavat `3902f0b7`
+- **layout:** ถอด GlobalNotificationBanner ออกจาก root layout — Thitiphong Srisavat `00b95d1e`
+- **product:** จัดชื่อไฟล์ tab เป็น pd-tab-* ให้เรียงกันเอง — Thitiphong Srisavat `43910333`
+- **product:** เก็บงาน UI แท็บ locations + eco labels — Thitiphong Srisavat `75ff3209`
+- **workflow:** เก็บ products ใน payload เป็น id ล้วน เลิก snapshot ทั้งตัว — Thitiphong Srisavat `2c895183`
+- consolidate external price list components and route structure for improved maintainability — Thammanoon Semapru `ed3bf518`
+- remove email configuration module and update system-admin landing page UI styles — Thammanoon Semapru `ca4d6784`
+- redesign user profile settings layout and document form development best practices — Thammanoon Semapru `b3f4d9bd`
+- update user profile interface with improved visual hierarchy and modernized styling components — Thammanoon Semapru `4658bab6`
+- redesign WhatsNewDialog with a modernized timeline-based layout and improved UI components — Thammanoon Semapru `8eb11777`
+- redesign change password dialog layout with updated styling and custom footer implementation — Thammanoon Semapru `daa3a46a`
+- streamline notification component styles and unify layout across dialogs and popovers — Thammanoon Semapru `b135f813`
+- redesign notification list UI and detail dialog with improved visuals and glassmorphism styling — Thammanoon Semapru `34697aec`
+- reformat notification-item-content components for improved readability and consistency — Thammanoon Semapru `543328a5`
+- rename project from Carmen Inventory to CARMEN BLUE across documentation and UI strings — Thammanoon Semapru `dcd753f1`
+
+## [2.0.1] - 2026-08-11
+
+### Added
+- **notification:** แท็บทั้งหมด/ยังไม่อ่าน และปุ่มโหลดเพิ่มบนหน้ารายการ — Thammanoon Semapru `7b43c83`
+- **notification:** map deep-link ไอคอนและป้ายตาม doc_type ครบ 7 ชนิด — Thammanoon Semapru `f8844e0`
+- **notification:** ชนิดข้อมูลตามสัญญาใหม่ doc_type/event/source พร้อม endpoint unread และคำแปล — Thammanoon Semapru `ac44c55`
+
+### Fixed
+- **notification:** แก้ toast ซ้ำในสอง mutation + หน้า /notifications ไม่ mark read เอง — Thammanoon Semapru `ed635ea`
+- **notification:** ถอด refetchType ที่ไม่มีผลจริง และเลิกอ่าน summary ที่หายไปว่าศูนย์ — Thammanoon Semapru `1a86b6b`
+- **notification:** เก็บสี่ข้อจากรีวิว — ขอบเขต invalidate สถานะโหลด และคอมเมนต์ที่ไม่ตรงโค้ด — Thammanoon Semapru `6e3c8e3`
+- **notification:** ไม่ขึ้นตราคอมเมนต์เมื่อยังไม่มีป้ายกำกับ กัน control ที่ screen reader อ่านไม่ได้ — Thammanoon Semapru `9966a0e`
+- **notification:** ปรับฟิลด์ที่รับ null ได้ให้ตรงสัญญาและแก้คอมเมนต์ created_at ที่ขัดกับชนิด — Thammanoon Semapru `cf5bce3`
+- **investor:** แปลงผัง mermaid เป็น SVG ตอน build ผังจึงขึ้นตอนเปิดไฟล์ในเครื่อง (#103) — Thammanoon Semapru `cc37aa7`
+- **register:** แยก 409 สองความหมาย + ใช้ retry_after จริง + ข้อความ network error ที่แปลแล้ว — Thammanoon Semapru `1fb466e`
+
+### Changed
+- **notification:** ย้ายชั้นข้อมูลไป TanStack Query ให้ REST เป็นแหล่งความจริงเดียว — Thammanoon Semapru `acfcc4b`
+
 ## [2.0.0] - 2026-08-09
 
 ### Added

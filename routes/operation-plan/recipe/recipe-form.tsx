@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -11,7 +11,7 @@ import {
   useCreateRecipe,
   useUpdateRecipe,
   useDeleteRecipe,
-} from "@/hooks/use-recipe";
+} from "./use-recipe";
 import type { Recipe } from "@/types/recipe";
 import type { FormMode } from "@/types/form";
 import {
@@ -48,7 +48,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(recipe ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -80,8 +79,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
 
   const onSubmit = (values: RecipeFormValues) => {
     const payload = buildRecipePayload(values);
-    const { files, manifest, count, isDirty: galleryDirty } =
-      gallery.buildPayload();
+    const {
+      files,
+      manifest,
+      count,
+      isDirty: galleryDirty,
+    } = gallery.buildPayload();
 
     if (isEdit && recipe) {
       // Send the full gallery manifest only when it changed (full-sync);
@@ -103,7 +106,10 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       );
     } else {
       createRecipe.mutate(
-        { ...payload, ...(count > 0 ? { images: files, gallery: manifest } : {}) },
+        {
+          ...payload,
+          ...(count > 0 ? { images: files, gallery: manifest } : {}),
+        },
         {
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -114,12 +120,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     }
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/operation-plan/recipe");
-    }
+    navigate("/operation-plan/recipe");
   };
 
   const handleBack = () => {
@@ -171,7 +176,9 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           profile (title/desc ซ้าย · เนื้อหาขวา) stack ต่อกันด้วยเส้นคั่น */}
       <form
         id="recipe-form"
-        onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
       >
         <RecipeHeroFields
           form={form}

@@ -1,4 +1,5 @@
-
+import { useContext } from "react";
+import { Check } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
   Select,
@@ -7,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
+import { cn } from "@/lib/utils";
 
 interface StatusOption {
   value: string;
@@ -47,11 +50,42 @@ export function StatusFilter({
 }: Props) {
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
+  const inline = useContext(FilterInlineContext);
 
   const statusOptions = options ?? [
     { label: ts("active"), value: "is_active|bool:true" },
     { label: ts("inactive"), value: "is_active|bool:false" },
   ];
+
+  // ใน submenu ของ ListFilterMenu — โชว์ตัวเลือกเป็นแถวกดได้เลย ไม่ต้องเปิด
+  // Select ซ้อนอีกชั้น (single-select จึงใช้เครื่องหมายถูก ไม่ใช่ checkbox)
+  if (inline) {
+    const rows = [
+      { label: defaultLabel ?? ts("all"), value: "" },
+      ...statusOptions,
+    ];
+    return (
+      <div>
+        {rows.map((opt) => (
+          <button
+            key={opt.value || "_all"}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs"
+          >
+            <Check
+              aria-hidden="true"
+              className={cn(
+                "size-3.5 shrink-0",
+                (value || "") !== opt.value && "invisible",
+              )}
+            />
+            <span className="truncate">{opt.label}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <Select

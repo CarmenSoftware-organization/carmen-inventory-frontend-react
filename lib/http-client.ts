@@ -1,7 +1,8 @@
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "@/lib/api-error";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -140,7 +141,10 @@ const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
     ...init,
     // signal สดต่อ attempt — retry หลัง refresh ได้ timeout window ใหม่ของตัวเอง
     signal: init.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
-    headers: { ...buildAuthHeaders(), ...(init.headers as Record<string, string>) },
+    headers: {
+      ...buildAuthHeaders(),
+      ...(init.headers as Record<string, string>),
+    },
   };
   try {
     return await fetch(target, finalInit);
@@ -193,6 +197,22 @@ const readErrorMessage = async (
   try {
     const body = await response.clone().json();
     return body?.message;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * อ่าน body ดิบทั้งก้อนของ error response (ใช้ clone() กันชนกับ caller ที่จะอ่านซ้ำ)
+ *
+ * ใช้เฉพาะจุดที่ต้องมองเข้าไปใน `error.code` (แยก license 403 จาก permission 403) —
+ * `readErrorMessage` ด้านบนพอสำหรับจุดอื่นที่ต้องการแค่ข้อความ
+ *
+ * @returns body ที่ parse แล้ว หรือ undefined เมื่อไม่ใช่ JSON/parse ไม่ได้
+ */
+const readErrorBody = async (response: Response): Promise<unknown> => {
+  try {
+    return await response.clone().json();
   } catch {
     return undefined;
   }
@@ -253,13 +273,35 @@ const handleClientErrors = async (
   }
 
   if (response.status === 403) {
-    const message = await readErrorMessage(response);
-    dispatchAuthError(message);
-    throw new ApiError(
-      ERROR_CODES.FORBIDDEN,
-      message || "Access denied",
-      403,
-    );
+    // 403 มีสี่ความหมายที่ผู้ใช้แก้คนละวิธี — license (ไม่อยู่ในสัญญา), license หมดอายุ,
+    // และ (Task 5.3) cluster เกินโควตาที่นั่งที่ซื้อไว้ (SEAT_LIMIT_EXCEEDED) ต้องเด้ง dialog
+    // คนละความหมายจาก 403 ของสิทธิ์ (RBAC) เดิม ไม่งั้นลูกค้าที่สัญญาหมดอายุ/เกินโควตาจะเห็นว่า
+    // "ไม่มีสิทธิ์" แล้วไปโทษแอดมินของตัวเองผิดที่ แยกด้วย `error.code` เท่านั้น (ดู
+    // phase-c-backend-contract.md ข้อ 5) — `licenseErrorCodeFrom` คืน undefined ให้ทั้ง
+    // permission 403 ปกติและ body รูปแปลกทุกแบบ (null, ไม่มี error, error เป็น string)
+    // จึงไม่ throw และตกไปเส้นทางเดิม
+    const body = await readErrorBody(response);
+    const message =
+      typeof (body as { message?: unknown } | undefined)?.message === "string"
+        ? (body as { message: string }).message
+        : undefined;
+    const licenseCode = licenseErrorCodeFrom(body);
+
+    if (licenseCode) {
+      dispatchPermissionDenied(
+        undefined,
+        undefined,
+        licenseCode === "LICENSE_EXPIRED"
+          ? "expired"
+          : licenseCode === "SEAT_LIMIT_EXCEEDED"
+            ? "seat"
+            : "license",
+      );
+    } else {
+      dispatchAuthError(message);
+    }
+
+    throw new ApiError(ERROR_CODES.FORBIDDEN, message || "Access denied", 403);
   }
 
   if (response.status === 429) {

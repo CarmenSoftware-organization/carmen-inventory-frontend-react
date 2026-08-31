@@ -19,8 +19,10 @@ import {
   useExportGoodsReceiveNote,
 } from "@/hooks/use-goods-receive-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
+import { useVendor } from "@/hooks/use-vendor";
+import { GRN_STATUS_OPTIONS } from "@/constant/goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -30,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { setSessionItem } from "@/lib/safe-storage";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import EmptyComponent from "@/components/empty-component";
@@ -40,7 +43,7 @@ import { mapPoDetailToItems } from "./grn-item-table";
 import type { PoForGrn } from "@/types/purchase-order";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -69,35 +72,134 @@ export default function GrnComponent() {
     defaultSort: "grn_date:desc",
   });
 
-  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
-  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
-  const grnStatusOptions = useMemo(
+  const { data: vendorData } = useVendor({ perpage: -1 });
+  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
+  // reference เปลี่ยนทุก render จน grnFilterFields memo ข้างล่างไม่เคย hit
+  const vendorOptions = useMemo(
     () =>
-      Object.entries(GRN_STATUS_CONFIG).map(([key, cfg]) => ({
-        label: cfg.label,
-        value: `grn_status|string:${key}`,
-      })),
-    [],
+      (vendorData?.data ?? [])
+        .filter((v) => v.is_active)
+        .map((v) => ({
+          label: v.name,
+          value: `vendor_id|string:${v.id}`,
+        })),
+    [vendorData],
   );
+
+  // ตัวเลือกเลข invoice จากใบ GRN ที่มีจริง (distinct, ตัดค่าว่าง) — ดึงทั้งก้อน
+  // ครั้งเดียวแชร์ cache กับ list หลัก เลือกหลายใบได้เป็น IN query ฝั่ง backend เดิม
+  const { data: allGrnData } = useGoodsReceiveNote({ perpage: -1 });
+  const invoiceOptions = useMemo(() => {
+    const seen = new Set<string>();
+    for (const g of allGrnData?.data ?? []) {
+      const no = g.invoice_no?.trim();
+      if (no) seen.add(no);
+    }
+    return [...seen]
+      .sort()
+      .map((no) => ({ label: no, value: `invoice_no|string:${no}` }));
+  }, [allGrnData]);
 
   const grnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
-      { key: "filter", control: "status", labelKey: "common.status" },
       {
         key: "grn_status",
         control: "custom",
-        labelKey: "procurement.goodsReceiveNote.status",
+        labelKey: "common.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
             onChange={onChange}
-            options={grnStatusOptions}
+            options={GRN_STATUS_OPTIONS}
             className="w-full"
           />
         ),
       },
+      {
+        key: "doc_type",
+        control: "multi-select",
+        labelKey: "field.type",
+        section: "listView.sectionDocument",
+        options: [
+          {
+            labelKey: "field.purchaseOrder",
+            value: "doc_type|string:purchase_order",
+          },
+          { labelKey: "field.manual", value: "doc_type|string:manual" },
+        ],
+      },
+      {
+        key: "invoice_no",
+        control: "custom",
+        labelKey: "field.invoiceNo",
+        section: "listView.sectionDocument",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={invoiceOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+      {
+        // ช่วงจำนวนเงินรวม — UI ฝั่ง frontend ก่อน เหมือน PR/PO: toClause คืนค่าว่าง
+        // ไว้ไม่ให้ clause หลุดไป backend (QueryParams ยังไม่รู้จัก num_range)
+        key: "amount",
+        control: "amount-range",
+        labelKey: "field.totalAmount",
+        fieldKey: "total_amount",
+        section: "listView.sectionDocument",
+        toClause: () => "",
+      },
+      {
+        key: "vendor",
+        control: "custom",
+        labelKey: "field.vendor",
+        section: "listView.sectionPeople",
+        // chip โชว์ชื่อ vendor จริงแทนจำนวน — mapping อยู่ในมือหน้านี้อยู่แล้ว
+        valueText: (raw) => {
+          const ids = raw
+            .split(",")
+            .map((p) => p.slice(p.lastIndexOf(":") + 1))
+            .filter(Boolean);
+          const names = ids
+            .map(
+              (id) => (vendorData?.data ?? []).find((v) => v.id === id)?.name,
+            )
+            .filter((n): n is string => !!n);
+          if (names.length === 0) return `${ids.length}`;
+          return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
+        },
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={vendorOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+      {
+        // ผู้รับ = คนคีย์ใบรับของ (คอลัมน์ Received By ใน list) — กรองที่ created_by_id
+        key: "received_by",
+        control: "requester",
+        labelKey: "field.receivedBy",
+        fieldKey: "created_by_id",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "grn_date",
+        control: "date-range",
+        labelKey: "field.grnDate",
+        fieldKey: "grn_date",
+        section: "listView.sectionDate",
+      },
     ],
-    [grnStatusOptions],
+    [vendorOptions, vendorData, invoiceOptions],
   );
 
   const lf = useListFilters({
@@ -119,6 +221,10 @@ export default function GrnComponent() {
   });
 
   const goodsReceiveNotes = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(goodsReceiveNotes.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -246,7 +352,7 @@ export default function GrnComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={grnFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -256,6 +362,7 @@ export default function GrnComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             <DataGridColumnVisibility
               table={table}
               trigger={

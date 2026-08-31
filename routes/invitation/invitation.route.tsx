@@ -150,7 +150,8 @@ export function Component() {
   // ล็อกอินอยู่แล้ว — ไม่ต้องเดาฝั่ง client ว่าเป็นบัญชีที่ถูกคนหรือไม่ backend เทียบอีเมลเองและตอบ 403
   if (isAuthed) {
     const failed = accept.error ?? decline.error;
-    const wrongAccount = failed instanceof ApiError && failed.statusCode === 403;
+    const wrongAccount =
+      failed instanceof ApiError && failed.statusCode === 403;
     const errorMessage = failed
       ? wrongAccount
         ? t("invitation.wrongAccount")
@@ -178,7 +179,9 @@ export function Component() {
             disabled={accept.isPending || decline.isPending}
             onClick={() => accept.mutate()}
           >
-            {accept.isPending ? t("invitation.accepting") : t("invitation.accept")}
+            {accept.isPending
+              ? t("invitation.accepting")
+              : t("invitation.accept")}
           </Button>
           <Button
             variant="outline"
@@ -259,7 +262,7 @@ export function Component() {
       {isConflict ? (
         // ไม่มีปุ่มใด ๆ โดยเจตนา ทุกทางที่กดได้จากตรงนี้พาไปตัน — เข้าสู่ระบบก็ไม่ได้เพราะบัญชีที่ชน
         // เป็นของคนอื่น สมัครก็ได้ 409 การให้ปุ่มที่กดแล้วล้มเหลวแย่กว่าการบอกตรง ๆ ว่าต้องรอผู้ดูแล
-        <p className="mt-4 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-4 text-sm">
           {t("invitation.addressConflict")}
         </p>
       ) : (

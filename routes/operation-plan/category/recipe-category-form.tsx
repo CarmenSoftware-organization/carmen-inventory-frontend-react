@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -39,14 +38,15 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
-  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(category ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
   const { data: allCategoryData } = useRecipeCategory({ perpage: -1 });
-  const categoryMap = new Map((allCategoryData?.data ?? []).map((c) => [c.id, c]));
+  const categoryMap = new Map(
+    (allCategoryData?.data ?? []).map((c) => [c.id, c]),
+  );
 
   const createCategory = useCreateRecipeCategory();
   const updateCategory = useUpdateRecipeCategory();
@@ -100,12 +100,11 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
     }
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/operation-plan/category");
-    }
+    navigate("/operation-plan/category");
   };
 
   const handleBack = () => {

@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FieldPlainText } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
-import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { InventoryTooltip } from "@/components/share/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -41,6 +41,7 @@ const ProductCell = memo(function ProductCell({
   disabled,
   fromLocationId,
   toLocationId,
+  workflowId,
 }: {
   control: Control<SrFormValues>;
   form: UseFormReturn<SrFormValues>;
@@ -48,6 +49,7 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   fromLocationId: string;
   toLocationId: string;
+  workflowId: string;
 }) {
   "use no memo";
   const buCode = useBuCode();
@@ -127,6 +129,7 @@ const ProductCell = memo(function ProductCell({
               }}
               fromLocationId={fromLocationId}
               toLocationId={toLocationId}
+              workflowId={workflowId}
               disabled={disabled}
               // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
               // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
@@ -135,7 +138,6 @@ const ProductCell = memo(function ProductCell({
               // เลือกสินค้าเสร็จ → เด้งไปช่องจำนวนที่ขอของแถวเดียวกันต่อเลย
               // (SR ไม่มีสถานที่รายแถว มาจากหัวเอกสาร จำนวนจึงเป็นช่องถัดไปจริง ๆ)
               nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
-              className="w-full"
             />
           )}
         />
@@ -289,6 +291,7 @@ interface UseSrItemTableOptions {
   onDelete: (index: number) => void;
   fromLocationId: string;
   toLocationId: string;
+  workflowId: string;
   role?: string;
 }
 
@@ -299,6 +302,7 @@ export function useSrItemTable({
   onDelete,
   fromLocationId,
   toLocationId,
+  workflowId,
   role,
 }: UseSrItemTableOptions) {
   "use no memo";
@@ -366,6 +370,7 @@ export function useSrItemTable({
                 disabled={disabled || lockNonApproved}
                 fromLocationId={fromLocationId}
                 toLocationId={toLocationId}
+                workflowId={workflowId}
               />
             </div>
           );
@@ -615,6 +620,7 @@ export function useSrItemTable({
     onDelete,
     fromLocationId,
     toLocationId,
+    workflowId,
     role,
     t,
     tfl,

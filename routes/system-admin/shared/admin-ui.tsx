@@ -64,53 +64,8 @@ export function EmptyState({ icon: Icon, title, desc }: EmptyStateProps) {
       </div>
       <p className="text-foreground text-xs font-semibold">{title}</p>
       {desc && (
-        <p className="text-muted-foreground max-w-[16rem] text-micro">
-          {desc}
-        </p>
+        <p className="text-muted-foreground text-micro max-w-[16rem]">{desc}</p>
       )}
     </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* FilterChip — pill toggle with count + optional accent dot           */
-/* ------------------------------------------------------------------ */
-
-interface FilterChipProps {
-  readonly label: string;
-  readonly count: number;
-  readonly active: boolean;
-  readonly onClick: () => void;
-  readonly accentClass?: string;
-}
-
-export function FilterChip({
-  label,
-  count,
-  active,
-  onClick,
-  accentClass,
-}: FilterChipProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold transition-colors",
-        active
-          ? "border-primary/40 bg-primary/5 text-foreground"
-          : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-      )}
-    >
-      {accentClass && (
-        <span
-          className={cn("size-1.5 rounded-full", accentClass)}
-          aria-hidden="true"
-        />
-      )}
-      <span>{label}</span>
-      <span className="text-muted-foreground/80 tabular-nums">{count}</span>
-    </button>
   );
 }

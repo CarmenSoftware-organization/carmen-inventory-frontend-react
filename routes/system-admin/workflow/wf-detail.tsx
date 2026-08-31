@@ -11,7 +11,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useUpdateWorkflow } from "@/hooks/use-workflow";
+import { useUpdateWorkflow } from "./use-workflow-mutations";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -77,7 +77,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   const watchedProducts = useWatch({
     control: form.control,
     name: "data.products",
-  }) as { id: string }[] | undefined;
+  }) as string[] | undefined;
 
   const routingFieldArray = useFieldArray({
     control: form.control,
@@ -85,6 +85,17 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   });
 
   const hasStages = !!watchedStages && watchedStages.length > 0;
+
+  let hasStageErrors = !!form.formState.errors.data?.stages;
+  let validationResult = null;
+  if (hasStages) {
+    validationResult = validateWorkflow(watchedStages!);
+    if (validationResult.errorCount > 0) hasStageErrors = true;
+  }
+
+  const hasGeneralErrors =
+    !!form.formState.errors.name || !!form.formState.errors.workflow_type;
+  const hasRoutingErrors = !!form.formState.errors.data?.routing_rules;
 
   const onSubmit = (values: WorkflowCreateModel) => {
     updateWorkflow.mutate(
@@ -117,20 +128,15 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
         formId="wf-detail-form"
       />
 
-      {watchedStages &&
-        watchedStages.length > 0 &&
-        (() => {
-          const result = validateWorkflow(watchedStages);
-          return (
-            <WfValidationPanel
-              issues={result.issues}
-              errorCount={result.errorCount}
-              warningCount={result.warningCount}
-              isReady={result.isReady}
-              onSelectStage={handleSelectStage}
-            />
-          );
-        })()}
+      {hasStages && validationResult && (
+        <WfValidationPanel
+          issues={validationResult.issues}
+          errorCount={validationResult.errorCount}
+          warningCount={validationResult.warningCount}
+          isReady={validationResult.isReady}
+          onSelectStage={handleSelectStage}
+        />
+      )}
 
       <div
         className={cn(
@@ -164,92 +170,129 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
           onSubmit={form.handleSubmit(onSubmit, () =>
             scrollToFirstInvalidField(),
           )}
+          className="bg-card text-card-foreground flex min-h-[600px] flex-col overflow-hidden rounded-xl border shadow-sm"
         >
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList variant="line">
-              <TabsTrigger value="general" className="text-xs">
-                {t("general")}
-              </TabsTrigger>
-              <TabsTrigger value="stages" className="text-xs">
-                {t("stages")}
-                {watchedStages && watchedStages.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {watchedStages.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="routing" className="text-xs">
-                {t("routing")}
-                {routingFieldArray.fields.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {routingFieldArray.fields.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="products" className="text-xs">
-                {t("products")}
-                {watchedProducts && watchedProducts.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {watchedProducts.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="text-xs">
-                {t("insights")}
-              </TabsTrigger>
-            </TabsList>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="flex flex-1 flex-col"
+          >
+            <div className="bg-muted/20 border-b px-4 pt-2 md:px-6">
+              <TabsList
+                variant="line"
+                className="h-auto gap-4 bg-transparent p-0"
+              >
+                <TabsTrigger
+                  value="general"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
+                  {t("general")}
+                  {hasGeneralErrors && (
+                    <div className="bg-destructive absolute top-2 right-2 size-2 rounded-full" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="stages"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
+                  {t("stages")}
+                  {watchedStages && watchedStages.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {watchedStages.length}
+                    </Badge>
+                  )}
+                  {hasStageErrors && (
+                    <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="routing"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
+                  {t("routing")}
+                  {routingFieldArray.fields.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {routingFieldArray.fields.length}
+                    </Badge>
+                  )}
+                  {hasRoutingErrors && (
+                    <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="products"
+                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
+                  {t("products")}
+                  {watchedProducts && watchedProducts.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {watchedProducts.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="insights"
+                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
+                  {t("insights")}
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="general">
-              <WfGeneral form={form} isDisabled={isDisabled} />
-            </TabsContent>
+            <div className="flex-1 p-4 md:p-6">
+              <TabsContent value="general" className="mt-0 outline-none">
+                <WfGeneral form={form} isDisabled={isDisabled} />
+              </TabsContent>
 
-            <TabsContent value="stages">
-              <WfStages
-                form={form}
-                fieldArray={stagesFieldArray}
-                users={users}
-                isDisabled={isDisabled}
-                selectedIndex={selectedStageIndex}
-                onSelectIndex={setSelectedStageIndex}
-              />
-            </TabsContent>
+              <TabsContent value="stages" className="mt-0 outline-none">
+                <WfStages
+                  form={form}
+                  fieldArray={stagesFieldArray}
+                  users={users}
+                  isDisabled={isDisabled}
+                  selectedIndex={selectedStageIndex}
+                  onSelectIndex={setSelectedStageIndex}
+                />
+              </TabsContent>
 
-            <TabsContent value="routing">
-              <WfRouting
-                form={form}
-                fieldArray={routingFieldArray}
-                stages={stagesFieldArray.fields}
-                isDisabled={isDisabled}
-              />
-            </TabsContent>
+              <TabsContent value="routing" className="mt-0 outline-none">
+                <WfRouting
+                  form={form}
+                  fieldArray={routingFieldArray}
+                  stages={stagesFieldArray.fields}
+                  allProducts={products}
+                  isDisabled={isDisabled}
+                />
+              </TabsContent>
 
-            <TabsContent value="products">
-              <WfProducts
-                form={form}
-                allProducts={products}
-                isDisabled={isDisabled}
-              />
-            </TabsContent>
+              <TabsContent value="products" className="mt-0 outline-none">
+                <WfProducts
+                  form={form}
+                  allProducts={products}
+                  isDisabled={isDisabled}
+                />
+              </TabsContent>
 
-            <TabsContent value="insights">
-              <WfInsights
-                stages={watchedStages ?? []}
-                productCount={watchedProducts?.length ?? 0}
-                routingCount={routingFieldArray.fields.length}
-              />
-            </TabsContent>
+              <TabsContent value="insights" className="mt-0 outline-none">
+                <WfInsights
+                  stages={watchedStages ?? []}
+                  productCount={watchedProducts?.length ?? 0}
+                  routingCount={routingFieldArray.fields.length}
+                />
+              </TabsContent>
+            </div>
           </Tabs>
         </form>
       </div>

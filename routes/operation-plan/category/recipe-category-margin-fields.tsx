@@ -1,7 +1,11 @@
-
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldLabel, FieldDescription, FieldInput } from "@/components/ui/field";
+import {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldInput,
+} from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeCategoryFormValues } from "./recipe-category-form-schema";
 
@@ -26,7 +30,9 @@ export function RecipeCategoryMarginFields({
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="rc-margin-min">{t("minProfitMargin")}</FieldLabel>
+          <FieldLabel htmlFor="rc-margin-min">
+            {t("minProfitMargin")}
+          </FieldLabel>
           <div className="relative">
             <FieldInput
               id="rc-margin-min"
@@ -41,7 +47,7 @@ export function RecipeCategoryMarginFields({
               errorIconAlign="left"
               {...form.register("margin_minimum")}
             />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+            <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
               %
             </span>
           </div>
@@ -66,7 +72,7 @@ export function RecipeCategoryMarginFields({
               errorIconAlign="left"
               {...form.register("margin_target")}
             />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+            <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
               %
             </span>
           </div>

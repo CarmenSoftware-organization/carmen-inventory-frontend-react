@@ -1,8 +1,11 @@
-
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
+import {
+  removeFromDocSequence,
+  useDocSequence,
+} from "@/hooks/use-doc-sequence";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -14,7 +17,7 @@ import {
   useRejectPurchaseOrder,
   useReviewPurchaseOrder,
   useClosePurchaseOrder,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -108,7 +111,9 @@ export function usePoFormHandlers({
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
   const navGuard = useNavigationGuard(
-    (mode === "add" || mode === "edit") && form.formState.isDirty && !isSubmitting,
+    (mode === "add" || mode === "edit") &&
+      form.formState.isDirty &&
+      !isSubmitting,
   );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
@@ -212,14 +217,11 @@ export function usePoFormHandlers({
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
-      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
-      navGuard.back();
-    } else {
-      navigate("/procurement/purchase-order");
-    }
+    navigate("/procurement/purchase-order");
   };
 
   const handleBack = () => {
@@ -263,9 +265,13 @@ export function usePoFormHandlers({
    * ที่เพิ่งติ๊กแถว (ติ๊กแล้ว setValue ทำให้ dirty) ถ้าไม่ปิด guard ก่อน การ
    * navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่บันทึกไปแล้ว
    */
+  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
+  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิว (แบบเดียวกับ onSuccessList ของ PR)
+  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-order");
+    removeFromDocSequence(location.pathname);
+    navigate(seq?.nextPath ?? "/procurement/purchase-order");
   };
 
   const runSubmitPo = async () => {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -10,7 +10,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/hooks/use-product";
-import { useUploadProductImages } from "@/hooks/use-product-image";
+import { useUploadProductImages } from "./use-product-image";
 import {
   type ProductDetail,
   type ProductFormValues,
@@ -27,11 +27,11 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import FormToolbar from "./pd-form-toolbar";
-import GeneralTab from "./pd-general-tab";
-import LocationsTab from "./pd-location-tab";
-import UnitConversionTab from "./pd-unit-conversion-tab";
+import PdTabGeneral from "./pd-tab-general";
+import PdTabLocations from "./pd-tab-locations";
+import PdTabUnitConversion from "./pd-tab-unit-conversion";
 import TabArrayCount, { TabEcoLabelCount } from "./pd-tab-count";
-import { ProductEcoLabelSection } from "./pd-eco-label-section";
+import { PdTabEco } from "./pd-tab-eco";
 
 const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
   if (!product) {
@@ -97,6 +97,7 @@ const mapUnitToPayload = (unit: ProductUnitConversion) => ({
 
 const mapLocationToPayload = (l: ProductFormValues["locations"][number]) => ({
   location_id: l.location_id,
+  shelf_id: l.shelf_id ?? null,
   min_qty: l.min_qty ?? null,
   max_qty: l.max_qty ?? null,
   re_order_qty: l.re_order_qty ?? null,
@@ -197,7 +198,6 @@ export function ProductForm({ product }: ProductFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const rawReturnUrl = searchParams.get("returnUrl");
   const returnUrl =
@@ -350,12 +350,11 @@ export function ProductForm({ product }: ProductFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate(returnUrl);
-    }
+    navigate(returnUrl);
   };
 
   const handleBack = () => {
@@ -367,14 +366,7 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   return (
-    // px-4 ให้ header+form มี gutter ซ้าย · max-w-4xl คุมทั้งฟอร์มให้เท่า
-    // company profile (ทุก tab รวมตาราง units/locations)
-    //
-    // w-full ขาดไม่ได้: พ่อเป็น flex column และ mx-auto ทำให้ margin แกนขวางเป็น
-    // auto ซึ่งยกเลิก align-self: stretch ของ flex item — กล่องจะถูกวัดตามเนื้อหา
-    // แทน แท็บที่เนื้อหาน้อย (eco label ที่ยังไม่มีข้อมูล) เลยหดแล้วเลื่อนตำแหน่ง
-    // ทั้งบล็อกรวมหัวเรื่องกับแถบแท็บ
-    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
+    <div className="mx-auto w-full space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
@@ -421,7 +413,7 @@ export function ProductForm({ product }: ProductFormProps) {
             )}
           </TabsList>
           <TabsContent value="general">
-            <GeneralTab
+            <PdTabGeneral
               form={form}
               isDisabled={isDisabled}
               product={product}
@@ -431,13 +423,13 @@ export function ProductForm({ product }: ProductFormProps) {
           </TabsContent>
           <TabsContent value="units">
             <div className="space-y-6">
-              <UnitConversionTab
+              <PdTabUnitConversion
                 form={form}
                 name="order_units"
                 label={t("orderUnit")}
                 isDisabled={isDisabled}
               />
-              <UnitConversionTab
+              <PdTabUnitConversion
                 form={form}
                 name="ingredient_units"
                 label={t("ingredientUnit")}
@@ -446,11 +438,11 @@ export function ProductForm({ product }: ProductFormProps) {
             </div>
           </TabsContent>
           <TabsContent value="locations">
-            <LocationsTab form={form} isDisabled={isDisabled} />
+            <PdTabLocations form={form} isDisabled={isDisabled} />
           </TabsContent>
           {product?.id && (
             <TabsContent value="eco-labels">
-              <ProductEcoLabelSection productId={product.id} />
+              <PdTabEco productId={product.id} readOnly={isDisabled} />
             </TabsContent>
           )}
         </Tabs>

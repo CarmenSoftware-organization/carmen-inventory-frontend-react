@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { usePurchaseRequestById } from "@/hooks/use-purchase-request";
+import { usePurchaseRequestById } from "./use-purchase-request";
 import { PurchaseRequestForm } from "./pr-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
@@ -24,5 +24,5 @@ export function EditPurchaseRequestContent({ id }: { id: string }) {
       />
     );
 
-  return <PurchaseRequestForm purchaseRequest={purchaseRequest} />;
+  return <PurchaseRequestForm key={purchaseRequest.id} purchaseRequest={purchaseRequest} />;
 }

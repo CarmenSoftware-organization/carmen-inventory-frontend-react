@@ -20,7 +20,9 @@ export function encodeFilterParam(
 }
 
 /** ตัด key ที่ค่าว่างออก — ค่าว่าง ≡ ไม่มี key (กัน dirty ปลอม) */
-function normalize(record: Record<string, string | undefined>): Record<string, string> {
+function normalize(
+  record: Record<string, string | undefined>,
+): Record<string, string> {
   return Object.fromEntries(
     Object.entries(record).filter(([, v]) => !!v && v.trim() !== ""),
   ) as Record<string, string>;

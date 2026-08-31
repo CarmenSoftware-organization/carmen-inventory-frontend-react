@@ -8,17 +8,21 @@ import type {
   PhysicalCountPeriod,
   CreatePhysicalCountPeriodDto,
 } from "@/types/physical-count-period";
-import type { CurrentPeriodResponse, CurrentPeriodData } from "@/types/physical-count";
+import type {
+  CurrentPeriodResponse,
+  CurrentPeriodData,
+} from "@/types/physical-count";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
-const crud = createConfigCrud<PhysicalCountPeriod, CreatePhysicalCountPeriodDto>(
-  {
-    queryKey: QUERY_KEYS.PHYSICAL_COUNT_PERIODS,
-    endpoint: API_ENDPOINTS.PHYSICAL_COUNT_PERIODS,
-    label: "physical count period",
-    updateMethod: "PATCH",
-  },
-);
+const crud = createConfigCrud<
+  PhysicalCountPeriod,
+  CreatePhysicalCountPeriodDto
+>({
+  queryKey: QUERY_KEYS.PHYSICAL_COUNT_PERIODS,
+  endpoint: API_ENDPOINTS.PHYSICAL_COUNT_PERIODS,
+  label: "physical count period",
+  updateMethod: "PATCH",
+});
 
 /**
  * Hook ดึงรายการงวดตรวจนับสต็อก (physical count period) แบบแบ่งหน้า
@@ -97,7 +101,11 @@ export function usePhysicalCountPeriodCurrent(includeNotCount = false) {
   const buCode = useBuCode();
 
   return useQuery<CurrentPeriodData>({
-    queryKey: [QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT, buCode, includeNotCount],
+    queryKey: [
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+      buCode,
+      includeNotCount,
+    ],
     queryFn: async () => {
       const url = `${API_ENDPOINTS.PHYSICAL_COUNT_PERIOD_CURRENT(buCode!)}?include_not_count=${includeNotCount}`;
       const res = await httpClient.get(url);
@@ -123,11 +131,20 @@ export function usePhysicalCountPeriodCurrent(includeNotCount = false) {
  * const { data } = usePhysicalCountPeriodDetail(periodId, false);
  * ```
  */
-export function usePhysicalCountPeriodDetail(periodId: string | undefined, includeNotCount = false) {
+export function usePhysicalCountPeriodDetail(
+  periodId: string | undefined,
+  includeNotCount = false,
+) {
   const buCode = useBuCode();
 
   return useQuery<CurrentPeriodData>({
-    queryKey: [QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT, buCode, "detail", periodId, includeNotCount],
+    queryKey: [
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+      buCode,
+      "detail",
+      periodId,
+      includeNotCount,
+    ],
     queryFn: async () => {
       const url = `${API_ENDPOINTS.PHYSICAL_COUNT_PERIOD_DETAIL(buCode!, periodId!)}?include_not_count=${includeNotCount}`;
       const res = await httpClient.get(url);

@@ -25,11 +25,7 @@ export function CarmenLogo({
   );
 
   if (variant === "lockup") {
-    return (
-      <span>
-        {mark} Carmen
-      </span>
-    );
+    return <span>{mark} Carmen</span>;
   }
 
   return mark;

@@ -1,11 +1,8 @@
 import type { Audit } from "./audit";
+import type { LastAction } from "./last-action";
 
 export type StoreRequisitionStatus =
-  | "draft"
-  | "in_progress"
-  | "completed"
-  | "cancelled"
-  | "voided";
+  "draft" | "in_progress" | "completed" | "cancelled" | "voided";
 
 export interface WorkflowHistoryEntry {
   user: { id: string; name: string };
@@ -65,6 +62,11 @@ export interface StoreRequisition {
   workflow_previous_stage?: string;
   workflow_next_stage?: string;
   workflow_history: WorkflowHistoryEntry[];
+  /**
+   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
+   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
+   */
+  last_action?: LastAction | null;
   requestor_id: string;
   requestor_name: string;
   department_id: string;
@@ -112,5 +114,61 @@ export interface CreateStoreRequisitionDto {
       update?: (SrDetailPayload & { id: string })[];
       remove?: { id: string }[];
     };
+  };
+}
+
+/**
+ * หนึ่งแถวการเคลื่อนไหวสต๊อกของใบเบิก — backend แตกขาเข้า/ขาออกมาให้แล้ว
+ * แถวหนึ่ง = คลังหนึ่ง ไม่ใช่รายการหนึ่ง (ฝั่ง client จึงไม่ต้องแตกเองอีก)
+ */
+export interface SrStockMovementItem {
+  id: string;
+  /** null = ยังไม่ได้ post เป็น inventory transaction จริง (ดู `is_posted` ของก้อนใหญ่) */
+  inventory_transaction_id: string | null;
+  store_requisition_detail_id: string;
+  sequence_no: number;
+  location_id: string;
+  location_code: string;
+  location_name: string;
+  product_id: string;
+  product_code: string;
+  product_name: string;
+  product_local_name?: string | null;
+  lot_no?: string | null;
+  inventory_unit_id: string;
+  inventory_unit_name: string;
+  qty_in: number;
+  qty_out: number;
+  cost_per_unit: number;
+  total_cost: number;
+  requested_qty: number;
+  approved_qty: number;
+  issued_qty: number;
+}
+
+export interface SrStockMovement {
+  store_requisition_id: string;
+  sr_no: string;
+  sr_date: string;
+  sr_type: string;
+  doc_status: string;
+  from_location_id: string;
+  from_location_code: string;
+  from_location_name: string;
+  to_location_id: string;
+  to_location_code: string;
+  to_location_name: string;
+  /**
+   * `false` = ตัวเลขในตารางเป็นการ**คาดการณ์**จากตัวใบ ยังไม่ได้ตัดสต๊อกจริง
+   * (`source` จะเป็น `store_requisition_detail` ไม่ใช่ inventory transaction)
+   */
+  is_posted: boolean;
+  source: string;
+  items: SrStockMovementItem[];
+  summary: {
+    total_qty_in: number;
+    total_qty_out: number;
+    total_cost_in: number;
+    total_cost_out: number;
   };
 }

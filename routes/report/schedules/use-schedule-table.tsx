@@ -1,4 +1,3 @@
-
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import type { ColumnDef } from "@tanstack/react-table";

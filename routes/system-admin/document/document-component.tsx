@@ -1,5 +1,4 @@
-
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -14,13 +13,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useDocument,
+  useDocumentSummary,
   useUploadDocument,
   useDeleteDocument,
-} from "@/hooks/use-document";
+} from "./use-document";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import DocumentCard from "./document-card";
+import DocumentSummaryBar from "./document-summary-bar";
+import DocumentSummarySheet from "./document-summary-sheet";
 import type { DocumentFile } from "@/types/document";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -36,7 +38,7 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -79,6 +81,19 @@ export default function DocumentComponent() {
   const uploadDocument = useUploadDocument();
   const isMobile = useIsMobile();
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+  const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+  const { data: summary, isLoading: isSummaryLoading } = useDocumentSummary();
+  const hasSummary = !!summary && summary.total_count > 0;
+  // ช่องแถบสรุปถือว่า "มีของ" ตั้งแต่ตอนโหลด (มี skeleton แสดงอยู่) ไม่ใช่แค่ตอนมีข้อมูลจริง
+  // ใช้ค่านี้กับ max-h ของตารางเท่านั้น ส่วน Sheet ยังต้องใช้ hasSummary เพราะต้องการข้อมูลจริง
+  const summarySlotVisible = hasSummary || isSummaryLoading;
+
+  // สลับ BU แล้ว summary หายไปกลางอากาศ (query key เปลี่ยน) ทำให้ Sheet unmount โดยไม่เคยเรียก
+  // onOpenChange(false) — ถ้าไม่รีเซ็ตตรงนี้ summarySheetOpen จะค้างเป็น true แล้วพอสลับไป BU
+  // ที่มีไฟล์ Sheet จะเด้งเปิดเองโดยไม่มีใครกด
+  useEffect(() => {
+    if (!hasSummary) setSummarySheetOpen(false);
+  }, [hasSummary]);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const useInfiniteScroll = !!isMobile;
   const { data, isLoading, error, refetch } = useDocument(params, {
@@ -105,6 +120,7 @@ export default function DocumentComponent() {
     () => [
       {
         key: "type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.type",
         render: (value, onChange) => (
@@ -171,8 +187,7 @@ export default function DocumentComponent() {
     e.target.value = "";
   };
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -213,6 +228,12 @@ export default function DocumentComponent() {
           </div>
         </div>
 
+        <DocumentSummaryBar
+          summary={summary}
+          isLoading={isSummaryLoading}
+          onViewAll={() => setSummarySheetOpen(true)}
+        />
+
         <div className="flex w-full items-center gap-2">
           <div className="flex-1">
             <SearchInput defaultValue={search} onSearch={setSearch} />
@@ -222,7 +243,7 @@ export default function DocumentComponent() {
             view={lf.view}
             snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
           />
-          <ListFilterSheet
+          <ListFilter
             fields={documentFilterFields}
             values={lf.values}
             setValue={lf.setValue}
@@ -277,9 +298,17 @@ export default function DocumentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+                // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ (ทั้ง skeleton ตอนโหลดและแถบจริง) — สี่เคส
+                // ตามว่าช่องแถบสรุปมีของ (summarySlotVisible: กำลังโหลดหรือมีข้อมูลแล้ว) และมี
+                // active filter หรือไม่ ใช้ summarySlotVisible ไม่ใช่ hasSummary เพราะถ้ารอข้อมูล
+                // จริงก่อนค่อยเผื่อพื้นที่ ตารางจะกระตุกตอน skeleton สลับเป็นแถบจริง
+                summarySlotVisible
+                  ? lf.activeFilters.length > 0
+                    ? "max-h-[calc(100vh-17rem-3rem)]"
+                    : "max-h-[calc(100vh-14rem-3rem)]"
+                  : lf.activeFilters.length > 0
+                    ? "max-h-[calc(100vh-13rem-3rem)]"
+                    : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
               <DataGridScrollArea>
@@ -311,6 +340,14 @@ export default function DocumentComponent() {
           });
         }}
       />
+
+      {hasSummary && (
+        <DocumentSummarySheet
+          open={summarySheetOpen}
+          onOpenChange={setSummarySheetOpen}
+          summary={summary}
+        />
+      )}
 
       <SaveViewDialog
         open={saveViewDialogOpen}

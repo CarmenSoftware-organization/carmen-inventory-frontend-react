@@ -22,7 +22,7 @@ import {
   useDeleteRunningCode,
   useInitRunningCode,
   useExportRunningCode,
-} from "@/hooks/use-running-code";
+} from "./use-running-code";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";

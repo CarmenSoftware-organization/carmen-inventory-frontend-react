@@ -11,10 +11,7 @@ import {
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
-import {
-  PrDescriptionField,
-  PrWorkflowField,
-} from "./pr-general-fields";
+import { PrDescriptionField, PrWorkflowField } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
 import { PrFooterAction } from "./workflow/pr-footer-action";
@@ -24,20 +21,24 @@ import {
   createPrSchema,
   type PrFormValues,
   getDefaultValues,
+  getDuplicateValues,
 } from "./pr-form-schema";
 import { useProfile } from "@/hooks/use-profile";
-import { usePrPreviousStages } from "@/hooks/use-purchase-request";
+import { usePrPreviousStages } from "./use-purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { PrHeader } from "./pr-header";
 
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
   readonly template?: PurchaseRequestTemplate;
+  /** ใบเดิมที่ผู้ใช้กด Duplicate — ทำหน้าที่เหมือน template (prefill แล้วนับ dirty) */
+  readonly duplicateFrom?: PurchaseRequest;
 }
 
 export function PurchaseRequestForm({
   purchaseRequest,
   template,
+  duplicateFrom,
 }: PurchaseRequestFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -61,14 +62,22 @@ export function PurchaseRequestForm({
         !!purchaseRequest?.workflow_current_stage,
     );
 
-  const defaultValues = getDefaultValues(purchaseRequest, template);
+  // ค่าแรกเข้าของฟอร์ม (มี template/duplicateFrom = เติมของมาให้แล้ว) ส่วน
+  // baseline ที่ใช้เทียบ dirty ตอนมาจาก prefill ต้องเป็นฟอร์มเปล่า — ของที่
+  // ถูกเติมคือของที่ยังไม่ save ถ้าปล่อยเป็น baseline ฟอร์มจะไม่ dirty
+  // เลย กด back ออกเงียบ ๆ โดย discard ไม่ถามทั้งที่มีของค้างเต็มฟอร์ม
+  const initialValues = duplicateFrom
+    ? getDuplicateValues(duplicateFrom)
+    : getDefaultValues(purchaseRequest, template);
+  const isPrefilled = !!template || !!duplicateFrom;
+  const defaultValues = isPrefilled ? getDefaultValues() : initialValues;
   const role = purchaseRequest?.role ?? STAGE_ROLE.CREATE;
 
   const form = useForm<PrFormValues>({
     resolver: zodResolver(
       createPrSchema(tv, tfl, role),
     ) as Resolver<PrFormValues>,
-    defaultValues,
+    defaultValues: initialValues,
     // Purchase stage บังคับ vendor/price/tax ผ่าน schema — ถ้า validate แบบ
     // onChange จะขึ้น error แดงทันทีที่แตะฟอร์ม ทำให้ตอน "send back" เหมือนถูก
     // บังคับกรอกทั้งที่ไม่ต้อง จึง validate เฉพาะตอนกด action (onSubmit) สำหรับ
@@ -76,6 +85,16 @@ export function PurchaseRequestForm({
     mode: role === STAGE_ROLE.PURCHASE ? "onSubmit" : "onChange",
     reValidateMode: "onChange",
   });
+
+  // จาก template/duplicate: สลับ baseline เป็นฟอร์มเปล่าโดยคงค่าที่เติมไว้ →
+  // ฟอร์มนับเป็น dirty ตั้งแต่เกิด navGuard/discard เลยทำงานเหมือนผู้ใช้กรอกเองทุกช่อง
+  // (ต้องมาก่อน effect auto-populate ข้างล่าง — ตัวนั้น reset ด้วย keepDirtyValues
+  // ซึ่งจะคงค่าที่เติมไว้ก็ต่อเมื่อ field พวกนั้นถูกนับ dirty แล้วเท่านั้น)
+  useEffect(() => {
+    if (!isPrefilled) return;
+    form.reset(defaultValues, { keepValues: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ครั้งเดียวตอน mount
+  }, []);
 
   // validate เฉพาะตอนกด "Purchase Approve" เท่านั้น (action-aware) — send back
   // จะไม่เรียกตัวนี้จึงไม่บังคับกรอก vendor/price/tax. ใช้ handleSubmit เพื่อให้
@@ -113,10 +132,10 @@ export function PurchaseRequestForm({
     !purchaseRequest?.pr_status ||
     purchaseRequest.pr_status === PR_STATUS.DRAFT;
 
-  // lock หลัง submit (status ≠ draft) เฉพาะ role ผู้สร้าง (CREATE) — role ใน
-  // workflow (purchase/approve) ยังต้องเลือก/แก้ item ได้ จึงไม่โดน lock ตรงนี้
-  const isDisabled =
-    isView || actions.isPending || (!isDraft && role === STAGE_ROLE.CREATE);
+  // ไม่ lock ตาม status — backend ให้ role เป็น view_only อยู่แล้วถ้าผู้ใช้ไม่ใช่
+  // actor ของ stage ปัจจุบัน ส่วน non-draft ที่ role = create คือใบถูก send back
+  // กลับมาหาคนขอ ซึ่งต้องแก้ได้ (แถวที่ตัดสินแล้วยังล็อกราย row ผ่าน isRowLocked)
+  const isDisabled = isView || actions.isPending;
 
   const hasHistory = !!purchaseRequest?.workflow_history?.length;
 
@@ -168,6 +187,16 @@ export function PurchaseRequestForm({
       if (!values.department_id) patch.department_id = defaultDefaultId;
     }
     if (Object.keys(patch).length === 0) return;
+    // จาก template/duplicate ฟอร์มต้อง dirty อยู่แล้ว (baseline เปล่า) — setValue
+    // ตรง ๆ พอ ห้ามเดินทาง reset ข้างล่าง: keepDirtyValues เก็บเฉพาะ field ที่อยู่ใน
+    // dirtyFields ซึ่ง items ที่ prefill มายังไม่อยู่ → โดน wipe ทั้งตาราง
+    if (isPrefilled) {
+      if (patch.pr_date) form.setValue("pr_date", patch.pr_date);
+      if (patch.requestor_id) form.setValue("requestor_id", patch.requestor_id);
+      if (patch.department_id)
+        form.setValue("department_id", patch.department_id);
+      return;
+    }
     // ใช้ค่า auto ที่ตั้งไว้แล้วเป็น baseline ต่อ (patch.X ?? values.X) — กันเคส
     // profile โหลดทีหลัง (2 เฟส) แล้ว reset รอบสองไป wipe pr_date ที่ตั้งไว้รอบแรก
     form.reset(
@@ -203,7 +232,7 @@ export function PurchaseRequestForm({
         departmentName={departmentName ?? ""}
         prDateDisplay={prDateDisplay}
         description={descriptionReadOnly ? watchedDescription : undefined}
-        workflowName={purchaseRequest?.workflow_name}
+        workflowName={purchaseRequest?.workflow_name ?? template?.workflow_name}
         workflowField={
           workflowEditable ? (
             <PrWorkflowField
@@ -244,15 +273,11 @@ export function PurchaseRequestForm({
       <form
         id="purchase-request-form"
         onSubmit={(e) => {
-          // เติมค่าที่ระบบรู้เองก่อน แล้วค่อยตรวจ — เหลือให้คนกรอกเฉพาะที่เดาแทนไม่ได้
           actions.fillKnownItemDefaults();
           form.handleSubmit(actions.onSubmit, actions.revealInvalid)(e);
         }}
         className="space-y-4 px-4"
       >
-        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (แถบบนหัว) ออกจากตารางรายการ
-            เหมือน PO/GRN — สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ
-            ก้อนล่างกวาดตาทีละแถว */}
         <hr className="border-border" />
 
         <PrItemFields

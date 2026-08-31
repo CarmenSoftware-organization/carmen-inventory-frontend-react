@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -22,14 +21,15 @@ import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import type { Report, ReportTemplate } from "@/types/report";
-import { useReportTemplates, useRunReportMutation } from "@/hooks/use-report";
+import { useReportTemplates, useRunReportMutation } from "../shared/use-report";
 import { useReportTable } from "./use-report-table";
+import { safeNavigationHref } from "@/lib/utils";
 import { ReportParamDialog } from "./report-param-dialog";
 import ReportCard from "./report-card";
 import { ReportGroupFilter } from "./report-group-filter";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -90,6 +90,7 @@ export default function ReportComponent() {
     () => [
       {
         key: "groups",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "report.allTypes",
         render: (value, onChange) => (
@@ -139,10 +140,15 @@ export default function ReportComponent() {
     const toastId = toast.loading(t("generating", { name: report.ReportName }));
 
     try {
-      const { url } = await runReport.mutateAsync({
+      const { url: rawUrl } = await runReport.mutateAsync({
         template_id: report._templateId ?? "",
         filters,
       });
+      // URL ที่ backend คืนมาไปจบที่ `location.href` ตรง ๆ — `javascript:` ที่หลุดมา
+      // ทางไหนก็ตามคือ XSS ทันที ค่าที่ไม่ผ่านตกลง catch ด้านล่างเหมือน error อื่น
+      const url = safeNavigationHref(rawUrl);
+      if (!url)
+        throw new Error(`Report viewer returned an unsafe URL: ${rawUrl}`);
       if (viewerWindow && !viewerWindow.closed) {
         viewerWindow.location.href = url;
       } else {
@@ -182,10 +188,7 @@ export default function ReportComponent() {
       <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
           {/* Header */}
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
 
           {/* Toolbar */}
           <div className="flex w-full items-center gap-2">
@@ -197,7 +200,7 @@ export default function ReportComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={reportFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -225,7 +228,10 @@ export default function ReportComponent() {
             </div>
           </div>
 
-          <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+          <ActiveFilterBar
+            filters={lf.activeFilters}
+            onClearAll={lf.clearAll}
+          />
         </div>
 
         {/* Content */}

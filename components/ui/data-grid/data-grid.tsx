@@ -56,6 +56,15 @@ export interface DataGridProps<TData extends object> {
     columnsDraggable?: boolean;
     rowsDraggable?: boolean;
     checkbox?: boolean;
+    /**
+     * บังคับให้ทุกแถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ เนื้อหาที่ยาวกว่านั้นตัดด้วย
+     * ellipsis (default `true`) — ตารางอ่านอย่างเดียวจะได้จังหวะแถวสม่ำเสมอ
+     * ไม่กระโดดตามความยาวชื่อสินค้า
+     *
+     * **ปิดในตารางที่เซลล์มี input/select/ปุ่ม** — ตัว clamp ใช้
+     * `display: -webkit-box` ซึ่งทำ layout ของ control ข้างในเพี้ยน
+     */
+    rowClamp?: boolean;
   };
   tableClassNames?: {
     base?: string;
@@ -182,6 +191,7 @@ function DataGrid<TData extends object>({
       columnsDraggable: false,
       rowsDraggable: false,
       checkbox: false,
+      rowClamp: true,
     },
     tableClassNames: {
       base: "",

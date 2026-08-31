@@ -755,15 +755,15 @@ export default function AccountingDetail() {
                       aria-label={t("approvalWorkflow")}
                       className="gap-0.5 px-1.5"
                     >
-                      <span className="bg-success flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-black">
+                      <span className="bg-success text-micro-legal flex size-5 items-center justify-center rounded-full font-semibold text-black">
                         ✓
                       </span>
                       <span className="bg-success/60 h-px w-2" />
-                      <span className="bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
+                      <span className="bg-primary text-primary-foreground text-micro-legal flex size-5 items-center justify-center rounded-full font-semibold">
                         2
                       </span>
                       <span className="bg-border h-px w-2" />
-                      <span className="bg-muted text-muted-foreground flex size-5 items-center justify-center rounded-full border text-[10px] font-semibold">
+                      <span className="bg-muted text-muted-foreground text-micro-legal flex size-5 items-center justify-center rounded-full border font-semibold">
                         3
                       </span>
                       <span className="sr-only">{t("approvalController")}</span>
@@ -1171,7 +1171,7 @@ export default function AccountingDetail() {
                           </td>
                           <td className="px-3 py-0.5" />
                           <td className="px-3 py-0.5 text-right tabular-nums">
-                            <span className="text-muted-foreground block text-[10px]">
+                            <span className="text-muted-foreground text-micro-legal block">
                               {t("baseDebit")}
                             </span>
                             <span className="text-primary font-semibold">
@@ -1181,7 +1181,7 @@ export default function AccountingDetail() {
                             </span>
                           </td>
                           <td className="px-3 py-0.5 text-right tabular-nums">
-                            <span className="text-muted-foreground block text-[10px]">
+                            <span className="text-muted-foreground text-micro-legal block">
                               {t("baseCredit")}
                             </span>
                             <span className="text-success-foreground font-semibold">
@@ -1221,7 +1221,7 @@ export default function AccountingDetail() {
                     key={metric.label}
                     className="grid justify-items-end gap-0.5 px-3"
                   >
-                    <span className="text-muted-foreground text-[10px] font-medium">
+                    <span className="text-muted-foreground text-micro-legal font-medium">
                       {metric.label}
                     </span>
                     <span

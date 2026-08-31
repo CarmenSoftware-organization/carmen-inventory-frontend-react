@@ -1,5 +1,8 @@
-import { StatusBadge } from "@/components/ui/status-badge";
-import { ListCard, ListCardAuditRows } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardActiveRow,
+  ListCardAuditRows,
+} from "@/components/share/list-card";
 import type { BusinessType } from "@/types/business-type";
 
 interface Props {
@@ -16,10 +19,10 @@ export default function BusinessTypeCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );

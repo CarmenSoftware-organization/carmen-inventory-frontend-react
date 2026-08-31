@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ApiError, ERROR_CODES } from "./api-error";
+import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "./api-error";
 
 describe("ERROR_CODES", () => {
   it("contains all expected error codes", () => {
@@ -27,13 +27,9 @@ describe("ApiError", () => {
   });
 
   it("stores code, message, statusCode, retryable, details", () => {
-    const err = new ApiError(
-      ERROR_CODES.RATE_LIMITED,
-      "slow down",
-      429,
-      true,
-      { retryAfter: 60 },
-    );
+    const err = new ApiError(ERROR_CODES.RATE_LIMITED, "slow down", 429, true, {
+      retryAfter: 60,
+    });
     expect(err.code).toBe("RATE_LIMITED");
     expect(err.message).toBe("slow down");
     expect(err.statusCode).toBe(429);
@@ -112,6 +108,106 @@ describe("ApiError.from", () => {
   it("survives a body that is not JSON", async () => {
     const err = await ApiError.from(fakeResponse(503), "fb");
     expect(err.message).toBe("fb");
+  });
+
+  // backend ส่งรายละเอียดที่ client เรนเดอร์ต่อได้มาในฟิลด์ `data` ของ error body
+  // (ฝั่ง backend เรียกว่า `details`) เช่นรายการเอกสารที่บล็อกการเปิดรอบตรวจนับ
+  it("carries the structured `data` payload through to details", async () => {
+    const blockers = {
+      counts: { grn: 1, stock_in: 0, stock_out: 0, sr: 2 },
+      total: 3,
+      documents: { grn: [{ id: "g1", no: "GRN-1" }], stock_in: [], stock_out: [], sr: [] },
+    };
+
+    const err = await ApiError.from(
+      fakeResponse(422, { message: "still open", data: blockers }),
+      "fb",
+    );
+
+    expect(err.details).toEqual(blockers);
+    expect(err.message).toBe("still open");
+  });
+
+  it("leaves details undefined when the body has no data field", async () => {
+    const err = await ApiError.from(
+      fakeResponse(400, { message: "bad" }),
+      "fb",
+    );
+    expect(err.details).toBeUndefined();
+  });
+
+  it("leaves details undefined when the body is not JSON", async () => {
+    const err = await ApiError.from(fakeResponse(500), "fb");
+    expect(err.details).toBeUndefined();
+  });
+
+  // error body ของ StdResponse ตั้ง data เป็น null เมื่อไม่มีรายละเอียด — อย่าให้ null
+  // กลายเป็น details ที่ผู้เรียกต้องมาเช็คเองอีกชั้น
+  it("normalises a null data field to undefined", async () => {
+    const err = await ApiError.from(
+      fakeResponse(404, { message: "nope", data: null }),
+      "fb",
+    );
+    expect(err.details).toBeUndefined();
+  });
+});
+
+// C5: แยก 403 ของ license ออกจาก 403 ของสิทธิ์ — key เดียวที่แยกได้เด็ดขาดคือ
+// body.error.code (phase-c-backend-contract.md ข้อ 5c) ต้องไม่คีย์กับ message/status
+describe("licenseErrorCodeFrom", () => {
+  it("returns LICENSE_REQUIRED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({
+        error: { code: "LICENSE_REQUIRED", id: 2110001 },
+        feature: "procurement.purchase_request",
+        bu_codes: ["BU01"],
+      }),
+    ).toBe("LICENSE_REQUIRED");
+  });
+
+  it("returns LICENSE_EXPIRED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({ error: { code: "LICENSE_EXPIRED", id: 2110002 } }),
+    ).toBe("LICENSE_EXPIRED");
+  });
+
+  // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่งของ cluster (evaluateSeat ฝั่ง backend, Task 5.1/5.2)
+  it("returns SEAT_LIMIT_EXCEEDED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({
+        error: { code: "SEAT_LIMIT_EXCEEDED" },
+        bu_codes: ["BU01"],
+      }),
+    ).toBe("SEAT_LIMIT_EXCEEDED");
+  });
+
+  // permission 403 จริง — error เหลือแค่ {message:"Forbidden"} ไม่มี code เลย
+  it("returns undefined for a real permission-403 body", () => {
+    expect(
+      licenseErrorCodeFrom({
+        message:
+          "Permission denied: You do not have the required permissions for BU(s): BU01",
+        error: { message: "Forbidden" },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("returns undefined for an unrelated error.code (e.g. SEAT_LIMIT_REACHED)", () => {
+    expect(
+      licenseErrorCodeFrom({ error: { code: "SEAT_LIMIT_REACHED" } }),
+    ).toBeUndefined();
+  });
+
+  it.each([
+    ["null body", null],
+    ["undefined body", undefined],
+    ["a bare string body", "Forbidden"],
+    ["body with no error key", { message: "Forbidden" }],
+    ["error as a string, not an object", { error: "Forbidden" }],
+    ["error.code as a non-string", { error: { code: 123 } }],
+  ])("does not throw and returns undefined for %s", (_label, body) => {
+    expect(() => licenseErrorCodeFrom(body)).not.toThrow();
+    expect(licenseErrorCodeFrom(body)).toBeUndefined();
   });
 });
 

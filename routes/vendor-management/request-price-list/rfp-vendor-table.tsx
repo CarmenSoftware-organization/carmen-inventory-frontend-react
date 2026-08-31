@@ -174,6 +174,7 @@ export default function RfpVendorTable({
   return (
     <SettingSection
       wide
+      frameless
       title={t("vendors.title")}
       description={t("vendors.noVendorsDesc")}
       count={displayVendors.length}

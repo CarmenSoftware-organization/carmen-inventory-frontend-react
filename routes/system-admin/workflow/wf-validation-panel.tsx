@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   AlertCircle,
@@ -71,10 +70,10 @@ export default function WfValidationPanel({
     return (
       <div
         role="status"
-        className="border-success/40 bg-success/10 flex items-center gap-2 rounded border px-3 py-2"
+        className="border-success/40 bg-success/10 flex items-center gap-4 rounded-xl border p-4 shadow-sm"
       >
-        <CheckCircle2 className="text-success-foreground size-4 shrink-0" />
-        <p className="text-success-foreground text-xs font-semibold">
+        <CheckCircle2 className="text-success-foreground size-5 shrink-0" />
+        <p className="text-success-foreground text-sm font-semibold">
           {t("validationReady")}
         </p>
       </div>
@@ -91,21 +90,21 @@ export default function WfValidationPanel({
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className={cn("rounded border", headerContainer)}>
+      <div className={cn("rounded-xl border shadow-sm", headerContainer)}>
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-auto w-full items-center justify-between gap-2 px-3 py-2 hover:bg-transparent"
+            className="flex h-auto w-full items-center justify-between gap-4 p-4 hover:bg-transparent"
             aria-expanded={open}
           >
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 items-center gap-3">
               <HeaderIcon
-                className={cn("size-4 shrink-0", headerIconClass)}
+                className={cn("size-5 shrink-0", headerIconClass)}
                 aria-hidden="true"
               />
               <p
                 className={cn(
-                  "text-xs font-semibold",
+                  "text-sm font-semibold",
                   isReady ? "text-warning-foreground" : "text-destructive",
                 )}
               >
@@ -130,7 +129,7 @@ export default function WfValidationPanel({
             </div>
             <ChevronDown
               className={cn(
-                "text-muted-foreground size-3.5 shrink-0 transition-transform",
+                "text-muted-foreground size-4 shrink-0 transition-transform",
                 open && "rotate-180",
               )}
               aria-hidden="true"
@@ -139,20 +138,20 @@ export default function WfValidationPanel({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <ul className="space-y-1 border-t border-current/10 px-3 py-2">
+          <ul className="space-y-3 border-t border-current/10 p-4">
             {issues.map((issue, i) => {
               const config = SEVERITY_CONFIG[issue.severity];
               const Icon = config.icon;
               const clickable =
                 typeof issue.stageIndex === "number" && onSelectStage;
               const content = (
-                <div className="flex w-full items-start gap-2">
+                <div className="flex w-full items-start gap-3">
                   <Icon
-                    className={cn("mt-0.5 size-3 shrink-0", config.iconClass)}
+                    className={cn("mt-0.5 size-4 shrink-0", config.iconClass)}
                     aria-hidden="true"
                   />
                   <div className="min-w-0 flex-1 text-left">
-                    <p className="text-xs leading-snug">
+                    <p className="text-sm leading-snug">
                       {t(
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         issue.translationKey as any,
@@ -160,7 +159,7 @@ export default function WfValidationPanel({
                       )}
                     </p>
                     {issue.stageName && (
-                      <p className="text-muted-foreground mt-0.5 text-micro">
+                      <p className="text-muted-foreground mt-1 text-sm">
                         {t("stageName")}: {issue.stageName}
                       </p>
                     )}
@@ -174,12 +173,12 @@ export default function WfValidationPanel({
                     <button
                       type="button"
                       onClick={() => onSelectStage(issue.stageIndex!)}
-                      className="hover:bg-foreground/5 focus-visible:ring-ring w-full rounded px-1.5 py-1 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      className="hover:bg-foreground/5 focus-visible:ring-ring w-full rounded-xl px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {content}
                     </button>
                   ) : (
-                    <div className="px-1.5 py-1">{content}</div>
+                    <div className="px-3 py-2">{content}</div>
                   )}
                 </li>
               );

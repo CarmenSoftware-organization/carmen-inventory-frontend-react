@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Download, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   useRecipeEquipmentCategory,
   useDeleteRecipeEquipmentCategory,
-} from "@/hooks/use-recipe-equipment-category";
+} from "./use-recipe-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { RecipeEquipmentCategory } from "@/types/recipe-equipment-category";
 import SearchInput from "@/components/search-input";
@@ -26,7 +25,7 @@ import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useRecipeEquipmentCategoryTable } from "./use-recipe-equipment-category-table";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -61,7 +60,8 @@ export default function RecipeEquipmentCategoryComponent() {
   // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
   // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ
   const recipeEquipmentCategoryFilterFields = useMemo<FilterFieldDef[]>(
-    () => [{ key: "filter", control: "status", labelKey: "common.status" }],
+    () => [{ key: "filter",
+        section: "listView.sectionDocument", control: "status", labelKey: "common.status" }],
     [],
   );
 
@@ -90,8 +90,7 @@ export default function RecipeEquipmentCategoryComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <DisplayTemplate
@@ -104,7 +103,7 @@ export default function RecipeEquipmentCategoryComponent() {
             view={lf.view}
             snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
           />
-          <ListFilterSheet
+          <ListFilter
             fields={recipeEquipmentCategoryFilterFields}
             values={lf.values}
             setValue={lf.setValue}

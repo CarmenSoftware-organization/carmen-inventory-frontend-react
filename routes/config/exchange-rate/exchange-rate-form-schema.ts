@@ -13,11 +13,15 @@ import type { ExchangeRateItem } from "@/types/exchange-rate";
  */
 export function createExchangeRateSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
-    exchange_rate: z.number().min(0, tv("minZero", { field: tf("exchangeRate") })),
+    exchange_rate: z
+      .number()
+      .min(0, tv("minZero", { field: tf("exchangeRate") })),
   });
 }
 
-export type ExchangeRateFormValues = z.infer<ReturnType<typeof createExchangeRateSchema>>;
+export type ExchangeRateFormValues = z.infer<
+  ReturnType<typeof createExchangeRateSchema>
+>;
 
 export const EMPTY_FORM: ExchangeRateFormValues = {
   exchange_rate: 0,
@@ -31,7 +35,9 @@ export const EMPTY_FORM: ExchangeRateFormValues = {
  * // route: /config/exchange-rate (dialog)
  * const defaults = getDefaultValues(item);
  */
-export function getDefaultValues(item?: ExchangeRateItem): ExchangeRateFormValues {
+export function getDefaultValues(
+  item?: ExchangeRateItem,
+): ExchangeRateFormValues {
   if (!item) return { ...EMPTY_FORM };
   return {
     exchange_rate: item.exchange_rate,
@@ -47,15 +53,22 @@ export function getDefaultValues(item?: ExchangeRateItem): ExchangeRateFormValue
  * // route: /config/exchange-rate (manual create dialog)
  * const schema = createManualExchangeRateSchema(tv, tfl);
  */
-export function createManualExchangeRateSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createManualExchangeRateSchema(
+  tv: TranslationFn,
+  tf: TranslationFn,
+) {
   return z.object({
     currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
     at_date: z.string().min(1, tv("required", { field: tf("date") })),
-    exchange_rate: z.coerce.number().min(0, tv("minZero", { field: tf("exchangeRate") })),
+    exchange_rate: z.coerce
+      .number()
+      .min(0, tv("minZero", { field: tf("exchangeRate") })),
   });
 }
 
-export type ManualExchangeRateFormValues = z.infer<ReturnType<typeof createManualExchangeRateSchema>>;
+export type ManualExchangeRateFormValues = z.infer<
+  ReturnType<typeof createManualExchangeRateSchema>
+>;
 
 export const EMPTY_MANUAL_FORM: ManualExchangeRateFormValues = {
   currency_id: "",

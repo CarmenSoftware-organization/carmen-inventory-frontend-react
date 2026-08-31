@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
-import { useInventoryAdjustmentById } from "@/hooks/use-inventory-adjustment";
+import { useInventoryAdjustmentById } from "./use-inventory-adjustment";
 import { InventoryAdjustmentForm } from "./ia-form";
 import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";

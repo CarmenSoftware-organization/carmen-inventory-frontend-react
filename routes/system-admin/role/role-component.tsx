@@ -12,7 +12,7 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRole, useDeleteRole } from "@/hooks/use-role";
+import { useRole, useDeleteRole } from "../shared/use-role";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
 import { useDataGridState } from "@/hooks/use-data-grid-state";

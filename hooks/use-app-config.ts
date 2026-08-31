@@ -17,7 +17,9 @@ export async function fetchAppConfigByKey(
   buCode: string,
   key: string,
 ): Promise<AppConfig> {
-  const res = await httpClient.get(API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode, key));
+  const res = await httpClient.get(
+    API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode, key),
+  );
   if (!res.ok) throw await ApiError.from(res, "Failed to fetch app config");
   const json = await res.json();
   return json.data;
@@ -47,7 +49,8 @@ export function useAppConfigs() {
     queryKey: [QUERY_KEYS.APP_CONFIGS, buCode],
     queryFn: async () => {
       const res = await httpClient.get(API_ENDPOINTS.APP_CONFIGS(buCode!));
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch app configs");
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch app configs");
       const json = await res.json();
       // list endpoint wraps rows as `data: { items, count }` (unlike the single-key
       // GET, whose `data` IS the row) — the array lives at `data.items`

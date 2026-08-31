@@ -1,9 +1,10 @@
 import { Building2, CalendarDays, User } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { WorkflowStepButton } from "@/components/share/workflow-step-button";
 import { PR_STATUS, type PurchaseRequest } from "@/types/purchase-request";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -56,18 +57,26 @@ export function PrHeader({
   // edition ย้ายมาอยู่แถวเดียวกับเลขที่ใบ เพื่อคืนบรรทัด subtitle ให้แถบขั้นตอน
   // (เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่ด้วยกันหมดในบรรทัดเดียว)
   const badges = (
-    <>
-      {statusCfg && (
-        <Badge className={statusCfg.className} size="sm">
-          {statusCfg.label ?? purchaseRequest?.pr_status}
-        </Badge>
+    // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+    // เอกสาร ส่วนสถานะกับรุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน ก่อนหน้านี้
+    // นั่งติดกันด้วย gap เท่ากันหมดจนอ่านเป็นพวงเดียว
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {statusCfg && purchaseRequest && (
+        <StatusIconLabel
+          status={purchaseRequest.pr_status}
+          label={statusCfg.label ?? purchaseRequest.pr_status}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ (18-20px) สถานะเป็นข้อมูล
+          // ประกอบ ป้ายจึงเป็นสีจางเท่ารุ่นเอกสารที่อยู่ข้างกัน เหลือสีไว้ที่ไอคอน
+          // จุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {purchaseRequest?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {purchaseRequest.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   // draft/add ยังไม่เข้า workflow — ซ่อน workflow cell/step
@@ -158,25 +167,11 @@ export function PrHeader({
       />
     ) : undefined;
 
-  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
-  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
-  // tooltip ทำหน้าที่แทน (ของเดิมยังเขียนว่า "Tap" ซึ่งเป็นคำของมือถือ ทั้งที่
-  // แอปนี้เป็นเครื่องมือบนโต๊ะทำงาน)
-  const workflowStep =
-    workflowStepEl && hasHistory && onShowHistory ? (
-      <button
-        type="button"
-        onClick={onShowHistory}
-        title={t("tabWorkflowHistory")}
-        aria-label={t("tabWorkflowHistory")}
-        // w-fit: พื้นหลังตอน hover ต้องกอดเฉพาะแถบ ไม่ใช่ลากยาวเต็มบรรทัด
-        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {workflowStepEl}
-      </button>
-    ) : (
-      workflowStepEl
-    );
+  const workflowStep = workflowStepEl ? (
+    <WorkflowStepButton onShowHistory={hasHistory ? onShowHistory : undefined}>
+      {workflowStepEl}
+    </WorkflowStepButton>
+  ) : undefined;
 
   return (
     <DocFormHeader

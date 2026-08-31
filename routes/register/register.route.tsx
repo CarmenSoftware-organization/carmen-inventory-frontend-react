@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { RedirectIfAuthed } from "@/components/auth/redirect-if-authed";
-import CheckInbox from "./check-inbox";
+import CheckInbox from "@/components/auth/check-inbox";
+import { signupRequest } from "@/lib/auth/auth-api";
 import SignupEmailForm from "./signup-email-form";
 
 /**
@@ -17,7 +18,11 @@ export function Component() {
   return (
     <RedirectIfAuthed>
       {sentTo ? (
-        <CheckInbox email={sentTo} />
+        <CheckInbox
+          email={sentTo}
+          namespace="auth.signup"
+          onResend={signupRequest}
+        />
       ) : (
         <SignupEmailForm onSent={setSentTo} />
       )}

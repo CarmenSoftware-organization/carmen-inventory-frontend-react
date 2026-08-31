@@ -34,7 +34,9 @@ function tsxFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
     const rel = `${dir}/${e.name}`;
     if (e.isDirectory()) return tsxFiles(rel);
-    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx") ? [rel] : [];
+    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx")
+      ? [rel]
+      : [];
   });
 }
 
@@ -53,17 +55,8 @@ const offenders = (): string[] =>
     .map(({ file }) => file);
 
 describe("the 9px micro tier stays at weight 600", () => {
-  /**
-   * home-component.tsx is the un-ported source-app landing — nothing imports it
-   * and CLAUDE.md says so explicitly, so it was left alone rather than swept.
-   * Listing it here rather than filtering it out means this test starts failing
-   * the moment it is deleted (good — delete this line too) or wired up (also
-   * good — it would need the sweep first).
-   */
-  const KNOWN_DEAD = ["components/home-component.tsx"];
-
   it("has no font-bold on a 9px eyebrow in live code", () => {
-    expect(offenders()).toEqual(KNOWN_DEAD);
+    expect(offenders()).toEqual([]);
   });
 
   it("still finds the pattern it claims to guard, in both spellings", () => {
@@ -107,6 +100,14 @@ describe("the 9px micro tier stays at weight 600", () => {
  *
  * Nothing stops the 614th. This is the ratchet: a size with a token can never
  * come back, and any other arbitrary size must be justified here by name.
+ *
+ * Every tokenised size is listed in BOTH spellings it can be written in. Missing
+ * one is a hole, not a tidier table: `text-[14px]` sailed past this guard into
+ * the notification dialog because only `0.875rem` was registered, and landed in
+ * ALLOWED_OFF_LADDER — the list for sizes that have *no* token — as if it were a
+ * deliberate exception. A size that is off the ladder and a size that is on it
+ * but spelled by hand need different answers, and this map is what tells them
+ * apart.
  */
 const TOKENISED: Record<string, string> = {
   "0.5rem": "text-micro-floor",
@@ -117,7 +118,9 @@ const TOKENISED: Record<string, string> = {
   "0.6875rem": "text-micro",
   "0.7rem": "text-micro",
   "0.75rem": "text-xs",
+  "12px": "text-xs",
   "0.875rem": "text-sm",
+  "14px": "text-sm",
 };
 
 /**
@@ -126,9 +129,6 @@ const TOKENISED: Record<string, string> = {
  * cleaned up and the entry goes stale. Either way somebody has to look.
  */
 const ALLOWED_OFF_LADDER: Record<string, number> = {
-  // Un-ported source-app landing; nothing imports it (see KNOWN_DEAD above and
-  // CLAUDE.md). Sweeping dead code would only add diff noise.
-  "components/home-component.tsx": 8,
   // Badge `default` (13px) and `xl` (15px) size variants — part of the component's
   // public API, chosen deliberately, and they straddle the 12/14 ladder steps.
   "components/ui/badge.tsx": 2,
@@ -221,7 +221,8 @@ const ALLOWED_SUB_10PX: Record<string, number> = {
   // Miniature mock interfaces: a fake terminal with macOS traffic-light dots, a
   // fake SQL editor, fake table rows. Scaling this type up breaks the illustration
   // — the point is that it reads as a tiny screenshot.
-  "routes/system-admin/landing-visuals.tsx": 20,
+  // Was 20 until ca4d678 deleted the email-config module's illustration (−3).
+  "routes/system-admin/landing-visuals.tsx": 17,
 
   // ── Digits ──
   // Uniform height, no ascenders/descenders, no diacritics; legible at 9px in a way
@@ -230,17 +231,18 @@ const ALLOWED_SUB_10PX: Record<string, number> = {
   "components/ui/input.tsx": 1, // character counter
   "components/ui/textarea.tsx": 1, // character counter
   "components/ui/transfer.tsx": 1, // selected count chip
-  "components/ui/tree-product-lookup.tsx": 1, // leaf count chip
+  "components/share/tree-product-lookup.tsx": 1, // leaf count chip
   "routes/inventory-management/shared/entry-notes-dialog.tsx": 1, // file size
   "routes/inventory-management/shared/filter-pill.tsx": 1, // filter count chip
   "routes/inventory-management/shared/inv-shared.tsx": 2, // "01" index bubbles
   "routes/inventory-management/spot-check/sc-product-panel.tsx": 1, // String(length)
   "routes/operation-plan/recipe/recipe-name-field.tsx": 1, // character counter
   "routes/report/report-landing.tsx": 1, // "07:30" schedule time
-  "routes/vendor-management/price-list/pl-name-field.tsx": 1, // character counter
 
-  // ── Caps by nature ──
-  "routes/system-admin/workflow/wf-stage-users.tsx": 1, // avatar initials
+  // The "caps by nature" section is gone on purpose: its only entry was the
+  // wf-stage-users avatar initials, which cc009d2 moved to `text-sm` on a size-8
+  // avatar. Deleting the line rather than zeroing it is what this list is for —
+  // a stale entry and a real exemption should not look the same.
 };
 
 describe("sub-10px type stays off running text", () => {

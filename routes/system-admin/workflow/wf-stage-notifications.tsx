@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,7 +8,7 @@ import type { WorkflowCreateModel } from "./wf-form-schema";
 
 type WfAction = "submit" | "approve" | "reject" | "sendback";
 type WfRecipient = "requestor" | "current_approve" | "next_step";
-type WfChannel = "app" | "email";
+type WfChannel = "app";
 
 interface WfStageNotificationsProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
@@ -75,9 +74,11 @@ export function WfStageNotifications({
       )}
 
       {isMiddle && (
-        <div className="space-y-1.5 rounded border p-2">
-          <span className="text-xs font-semibold">{t("slaWarning")}</span>
-          <div className="space-y-1">
+        <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
+          <span className="text-foreground/80 text-sm font-semibold">
+            {t("slaWarning")}
+          </span>
+          <div className="space-y-3">
             <Field orientation="horizontal">
               <Controller
                 control={form.control}
@@ -116,7 +117,7 @@ export function WfStageNotifications({
             !watchedStage?.available_actions.reject.is_active &&
             !watchedStage?.available_actions.sendback.is_active)) &&
         !isMiddle && (
-          <p className="text-muted-foreground py-3 text-xs">
+          <p className="text-muted-foreground py-3 text-sm">
             {t("noActiveActions")}
           </p>
         )}
@@ -144,9 +145,11 @@ function NotificationSection({
   const t = useTranslations("systemAdmin.workflow");
 
   return (
-    <div className="space-y-2 rounded border p-2">
-      <span className="text-xs font-semibold">{t(actionKey)}</span>
-      <div className="space-y-2">
+    <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
+      <span className="text-foreground/80 text-sm font-semibold">
+        {t(actionKey)}
+      </span>
+      <div className="space-y-4">
         <RecipientRow
           form={form}
           index={index}
@@ -203,7 +206,7 @@ function RecipientRow({
   });
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-3">
       <Field orientation="horizontal">
         <Controller
           control={form.control}
@@ -219,21 +222,13 @@ function RecipientRow({
         <FieldLabel>{label}</FieldLabel>
       </Field>
       {isActive && (
-        <div className="space-y-1.5 pl-5">
+        <div className="space-y-3 pl-7">
           <ChannelRow
             form={form}
             index={index}
             action={action}
             recipient={recipient}
             channel="app"
-            isDisabled={isDisabled}
-          />
-          <ChannelRow
-            form={form}
-            index={index}
-            action={action}
-            recipient={recipient}
-            channel="email"
             isDisabled={isDisabled}
           />
         </div>
@@ -260,14 +255,14 @@ function ChannelRow({
   isDisabled,
 }: ChannelRowProps) {
   const t = useTranslations("systemAdmin.workflow");
-  const channelLabel = channel === "app" ? t("channelApp") : t("channelEmail");
+  const channelLabel = t("channelApp");
   const channelActive = useWatch({
     control: form.control,
     name: `data.stages.${index}.available_actions.${action}.recipients.${recipient}.notification_channel.${channel}.is_active`,
   });
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4">
       <Controller
         control={form.control}
         name={`data.stages.${index}.available_actions.${action}.recipients.${recipient}.notification_channel.${channel}.is_active`}
@@ -279,7 +274,7 @@ function ChannelRow({
           />
         )}
       />
-      <span className="text-muted-foreground w-12 shrink-0 text-micro font-semibold">
+      <span className="text-muted-foreground w-12 shrink-0 text-sm font-semibold">
         {channelLabel}
       </span>
       <Controller

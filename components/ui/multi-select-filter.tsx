@@ -1,8 +1,7 @@
-
 import type React from "react";
+import { useContext } from "react";
 import { ChevronsUpDown, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -17,13 +16,55 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "use-intl";
+import { lookupIcon } from "@/components/ui/status-icon-label";
 
 interface FilterOption {
   value: string;
   label: string;
   group?: string;
+  /** สีจุดสถานะหน้า label (ค่า CSS เช่น `var(--status-draft)`) — ไม่ใส่ = ไม่มีจุด */
+  dotColor?: string;
+  /** ค่า status ดิบ — มีแล้วจะวาดไอคอนสถานะแทนจุด ให้ตรงกับที่เห็นในตาราง */
+  statusKey?: string;
+}
+
+/**
+ * คีย์สถานะ/ชนิดใบที่ซ่อนอยู่ในค่าของตัวเลือก — รูปแบบคือ `field|type:value`
+ * ทั้งระบบ ตัวเลือกที่ประกาศ options เองแบบดิบ ๆ (ไม่ได้ผ่าน
+ * `createStatusFilterOptions`) จึงยังได้ไอคอนโดยไม่ต้องไล่เติม statusKey ทีละที่
+ */
+function keyFromValue(value: string): string | undefined {
+  const colon = value.lastIndexOf(":");
+  return colon === -1 ? undefined : value.slice(colon + 1);
+}
+
+/** จุด/ไอคอนนำหน้า label ของตัวเลือกสถานะ — ตัวเดียวใช้ทั้งสองสาขาที่ render option */
+function OptionMarker({ option }: { readonly option: FilterOption }) {
+  // ไม่รู้จักคีย์ = ไม่ใช่ field สถานะ/ชนิดใบ (ผู้ขาย แผนก ฯลฯ) ต้องไม่มีไอคอนโผล่
+  const found = lookupIcon(
+    option.statusKey ?? keyFromValue(option.value) ?? "",
+  );
+  if (found) {
+    const { icon: Icon, color } = found;
+    return (
+      <Icon
+        className="size-3.5 shrink-0"
+        style={{ color }}
+        aria-hidden="true"
+      />
+    );
+  }
+  if (!option.dotColor) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className="size-2 shrink-0 rounded-full"
+      style={{ backgroundColor: option.dotColor }}
+    />
+  );
 }
 
 interface MultiSelectFilterProps {
@@ -36,27 +77,6 @@ interface MultiSelectFilterProps {
   readonly searchPlaceholder?: string;
 }
 
-/**
- * Multi-select filter button สำหรับ list page toolbar
- *
- * value เก็บเป็น comma-separated string เพื่อให้ sync กับ URL query
- * ได้ตรง ๆ รองรับ grouped options (ผ่าน field group ใน FilterOption),
- * search input (เมื่อ searchable=true), auto-clear เมื่อเลือกครบทุก option
- * และปุ่ม X clear ในตัว trigger แสดง Badge จำนวนที่เลือก
- *
- * @param props - value (csv), onChange, options, placeholder, searchable ฯลฯ
- * @returns JSX element ของปุ่ม filter พร้อม popover
- * @example
- * ```tsx
- * <MultiSelectFilter
- *   value={statusFilter}
- *   onChange={setStatusFilter}
- *   options={PR_STATUS_OPTIONS}
- *   placeholder="Status"
- *   searchable
- * />
- * ```
- */
 export function MultiSelectFilter({
   value,
   onChange,
@@ -67,6 +87,7 @@ export function MultiSelectFilter({
   searchPlaceholder = "Search...",
 }: MultiSelectFilterProps) {
   const tc = useTranslations("common");
+  const inline = useContext(FilterInlineContext);
   const selected = value ? value.split(",") : [];
 
   const toggle = (optValue: string) => {
@@ -81,106 +102,123 @@ export function MultiSelectFilter({
     onChange("");
   };
 
+  // ปุ่มพูดค่าที่เลือก ไม่ใช่ชื่อ field — "Draft +2" อ่านออกทันทีว่ากรองอะไรอยู่
+  // (ชื่อ field มี FieldLabel ของชีทบอกอยู่แล้ว)
+  const selectedLabels = selected
+    .map((v) => options.find((o) => o.value === v)?.label)
+    .filter(Boolean) as string[];
+  const valueText =
+    selectedLabels.length > 0
+      ? selectedLabels[0] +
+        (selectedLabels.length > 1 ? ` +${selectedLabels.length - 1}` : "")
+      : "";
+
+  const list = (
+    <Command>
+      {searchable && (
+        <CommandInput placeholder={searchPlaceholder} className="h-8 text-xs" />
+      )}
+      <CommandList>
+        <CommandEmpty>{tc("noOptions")}</CommandEmpty>
+        <CommandGroup>
+          <CommandItem onSelect={() => onChange("")} className="text-xs">
+            <Checkbox checked={selected.length === 0} tabIndex={-1} />
+            {tc("all")}
+          </CommandItem>
+        </CommandGroup>
+        {(() => {
+          const grouped = new Map<string, FilterOption[]>();
+          for (const opt of options) {
+            const key = opt.group ?? "";
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key)!.push(opt);
+          }
+          const hasGroups = Array.from(grouped.keys()).some((k) => k !== "");
+          if (!hasGroups) {
+            return (
+              <CommandGroup>
+                {options.map((opt) => {
+                  const isSelected = selected.includes(opt.value);
+                  return (
+                    <CommandItem
+                      key={opt.value}
+                      onSelect={() => toggle(opt.value)}
+                      className="text-xs"
+                    >
+                      <Checkbox checked={isSelected} tabIndex={-1} />
+                      <OptionMarker option={opt} />
+                      {opt.label}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            );
+          }
+          return Array.from(grouped.entries()).map(([groupName, opts]) => (
+            <CommandGroup
+              key={groupName || "_ungrouped"}
+              heading={groupName || undefined}
+            >
+              {opts.map((opt) => {
+                const isSelected = selected.includes(opt.value);
+                return (
+                  <CommandItem
+                    key={opt.value}
+                    value={`${opt.value} ${opt.label}`}
+                    onSelect={() => toggle(opt.value)}
+                    className="text-xs"
+                  >
+                    <Checkbox checked={isSelected} tabIndex={-1} />
+                    <OptionMarker option={opt} />
+                    {opt.label}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          ));
+        })()}
+      </CommandList>
+    </Command>
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์รายการตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  if (inline) {
+    return list;
+  }
+
   return (
-    <Popover>
+    // modal — ใช้ใน ListFilter (Dialog modal) เป็นหลัก ถ้าไม่ประกาศ scroll
+    // ในรายการจะโดน scroll lock ของ Sheet กิน (เหมือน FilterStage/Requester ฯลฯ)
+    <Popover modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className={cn("justify-between gap-1 text-xs font-normal", className)}
         >
-          <span className="truncate text-xs">
-            {selected.length > 0 ? (
-              <>
-                {placeholder}
-                <Badge variant="secondary" size="xs" className="ml-1 tabular-nums">
-                  {selected.length}
-                </Badge>
-              </>
-            ) : (
-              placeholder
+          <span
+            className={cn(
+              "truncate text-xs",
+              !valueText && "text-muted-foreground",
             )}
+          >
+            {valueText || placeholder}
           </span>
           <span className="flex items-center gap-0.5">
             {selected.length > 0 && (
-              <span
-                onClick={clear}
-                aria-hidden="true"
-              >
-                <X className="size-3 text-muted-foreground hover:text-foreground" />
+              <span onClick={clear} aria-hidden="true">
+                <X className="text-muted-foreground hover:text-foreground size-3" />
               </span>
             )}
-            <ChevronsUpDown className="size-3 text-muted-foreground" />
+            <ChevronsUpDown className="text-muted-foreground size-3" />
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn("p-0", searchable ? "w-56" : "w-48")} align="start">
-        <Command>
-          {searchable && (
-            <CommandInput placeholder={searchPlaceholder} className="h-8 text-xs" />
-          )}
-          <CommandList>
-            <CommandEmpty>{tc("noOptions")}</CommandEmpty>
-            <CommandGroup>
-              <CommandItem
-                onSelect={() => onChange("")}
-                className="text-xs"
-              >
-                <Checkbox checked={selected.length === 0} tabIndex={-1} />
-                {tc("all")}
-              </CommandItem>
-            </CommandGroup>
-            {(() => {
-              const grouped = new Map<string, FilterOption[]>();
-              for (const opt of options) {
-                const key = opt.group ?? "";
-                if (!grouped.has(key)) grouped.set(key, []);
-                grouped.get(key)!.push(opt);
-              }
-              const hasGroups = Array.from(grouped.keys()).some((k) => k !== "");
-              if (!hasGroups) {
-                return (
-                  <CommandGroup>
-                    {options.map((opt) => {
-                      const isSelected = selected.includes(opt.value);
-                      return (
-                        <CommandItem
-                          key={opt.value}
-                          onSelect={() => toggle(opt.value)}
-                          className="text-xs"
-                        >
-                          <Checkbox checked={isSelected} tabIndex={-1} />
-                          {opt.label}
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                );
-              }
-              return Array.from(grouped.entries()).map(([groupName, opts]) => (
-                <CommandGroup
-                  key={groupName || "_ungrouped"}
-                  heading={groupName || undefined}
-                >
-                  {opts.map((opt) => {
-                    const isSelected = selected.includes(opt.value);
-                    return (
-                      <CommandItem
-                        key={opt.value}
-                        value={`${opt.value} ${opt.label}`}
-                        onSelect={() => toggle(opt.value)}
-                        className="text-xs"
-                      >
-                        <Checkbox checked={isSelected} tabIndex={-1} />
-                        {opt.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              ));
-            })()}
-          </CommandList>
-        </Command>
+      <PopoverContent
+        className={cn("p-0", searchable ? "w-56" : "w-48")}
+        align="start"
+      >
+        {list}
       </PopoverContent>
     </Popover>
   );

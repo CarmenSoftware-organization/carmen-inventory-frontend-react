@@ -10,7 +10,7 @@ const en: LegalDocument = {
   eyebrow: "Legal",
   title: "Terms of Service",
   effective: `Effective ${EFFECTIVE}`,
-  intro: `These terms govern your use of Carmen Inventory, the hospitality supply-chain platform operated by ${LEGAL_ENTITY.company}. Your employer — the hotel or hotel group that holds the subscription — decides what you can see and do inside it.`,
+  intro: `These terms govern your use of CARMEN BLUE, the hospitality supply-chain platform operated by ${LEGAL_ENTITY.company}. Your employer — the hotel or hotel group that holds the subscription — decides what you can see and do inside it.`,
   tocLabel: "On this page",
   crossLink: "Read the Privacy Policy",
   sections: [
@@ -18,7 +18,7 @@ const en: LegalDocument = {
       id: "acceptance",
       heading: "1. Accepting these terms",
       paragraphs: [
-        "By signing in to Carmen Inventory you accept these terms. If you are using an account created for you by your employer, you accept them on your own behalf and confirm you are authorised to use that account.",
+        "By signing in to CARMEN BLUE you accept these terms. If you are using an account created for you by your employer, you accept them on your own behalf and confirm you are authorised to use that account.",
         "If you do not accept these terms, do not sign in. Ask your manager to remove your access instead.",
       ],
     },
@@ -26,7 +26,7 @@ const en: LegalDocument = {
       id: "service",
       heading: "2. What the service is",
       paragraphs: [
-        "Carmen Inventory handles the back-of-house supply chain for hotels: purchase requests, purchase orders, goods receipt, store requisitions, stock counts, vendor price lists and the reporting around them.",
+        "CARMEN BLUE handles the back-of-house supply chain for hotels: purchase requests, purchase orders, goods receipt, store requisitions, stock counts, vendor price lists and the reporting around them.",
         "It is a business tool sold to organisations, not a consumer product. Accounts are issued through a hotel or hotel group, and every record you create belongs to that organisation rather than to you personally.",
       ],
     },
@@ -126,7 +126,7 @@ const th: LegalDocument = {
   eyebrow: "ข้อกำหนด",
   title: "ข้อตกลงการใช้บริการ",
   effective: `มีผลตั้งแต่ ${EFFECTIVE}`,
-  intro: `ข้อตกลงนี้ใช้กับการใช้งาน Carmen Inventory ระบบจัดการซัพพลายเชนสำหรับโรงแรม ให้บริการโดย ${LEGAL_ENTITY.company} โดยโรงแรมหรือกลุ่มโรงแรมที่เป็นผู้ซื้อบริการ เป็นผู้กำหนดว่าคุณเห็นอะไรและทำอะไรได้บ้างในระบบ`,
+  intro: `ข้อตกลงนี้ใช้กับการใช้งาน CARMEN BLUE ระบบจัดการซัพพลายเชนสำหรับโรงแรม ให้บริการโดย ${LEGAL_ENTITY.company} โดยโรงแรมหรือกลุ่มโรงแรมที่เป็นผู้ซื้อบริการ เป็นผู้กำหนดว่าคุณเห็นอะไรและทำอะไรได้บ้างในระบบ`,
   tocLabel: "หัวข้อในหน้านี้",
   crossLink: "อ่านนโยบายความเป็นส่วนตัว",
   sections: [
@@ -134,7 +134,7 @@ const th: LegalDocument = {
       id: "acceptance",
       heading: "1. การยอมรับข้อตกลง",
       paragraphs: [
-        "การเข้าสู่ระบบ Carmen Inventory ถือว่าคุณยอมรับข้อตกลงนี้ หากใช้บัญชีที่ที่ทำงานสร้างให้ ถือว่าคุณยอมรับในนามตัวเองและยืนยันว่าได้รับอนุญาตให้ใช้บัญชีนั้นจริง",
+        "การเข้าสู่ระบบ CARMEN BLUE ถือว่าคุณยอมรับข้อตกลงนี้ หากใช้บัญชีที่ที่ทำงานสร้างให้ ถือว่าคุณยอมรับในนามตัวเองและยืนยันว่าได้รับอนุญาตให้ใช้บัญชีนั้นจริง",
         "ถ้าไม่ยอมรับข้อตกลงนี้ กรุณาอย่าเข้าสู่ระบบ และแจ้งหัวหน้างานให้ยกเลิกสิทธิ์ของคุณแทน",
       ],
     },
@@ -142,7 +142,7 @@ const th: LegalDocument = {
       id: "service",
       heading: "2. บริการนี้คืออะไร",
       paragraphs: [
-        "Carmen Inventory ดูแลงานหลังบ้านของโรงแรม ตั้งแต่ใบขอซื้อ ใบสั่งซื้อ การรับสินค้า ใบเบิกของ การนับสต็อก ราคาจากผู้ขาย ไปจนถึงรายงานที่เกี่ยวข้อง",
+        "CARMEN BLUE ดูแลงานหลังบ้านของโรงแรม ตั้งแต่ใบขอซื้อ ใบสั่งซื้อ การรับสินค้า ใบเบิกของ การนับสต็อก ราคาจากผู้ขาย ไปจนถึงรายงานที่เกี่ยวข้อง",
         "เป็นเครื่องมือสำหรับองค์กร ไม่ใช่บริการสำหรับผู้บริโภคทั่วไป บัญชีทุกบัญชีออกผ่านโรงแรมหรือกลุ่มโรงแรม และข้อมูลทุกรายการที่คุณสร้างเป็นขององค์กรนั้น ไม่ใช่ของคุณเป็นการส่วนตัว",
       ],
     },
@@ -162,9 +162,7 @@ const th: LegalDocument = {
     {
       id: "acceptable-use",
       heading: "4. การใช้งานที่ยอมรับได้",
-      paragraphs: [
-        "ใช้ระบบเพื่องานขององค์กรคุณตามปกติเท่านั้น",
-      ],
+      paragraphs: ["ใช้ระบบเพื่องานขององค์กรคุณตามปกติเท่านั้น"],
       bullets: [
         "อย่าพยายามเข้าถึงข้อมูลของโรงแรมที่คุณไม่ได้รับสิทธิ์",
         "อย่าทดสอบเจาะระบบ สแกน หรือหาทางข้ามการยืนยันตัวตน ข้อจำกัดจำนวนคำขอ หรือการควบคุมสิทธิ์",

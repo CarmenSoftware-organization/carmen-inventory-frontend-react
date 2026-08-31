@@ -13,7 +13,7 @@ import {
   auditColumns,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
 interface UseCnTableOptions {
@@ -47,7 +47,7 @@ export function useCnTable({
           {row.original.cn_no}
         </CellAction>
       ),
-      size: 100,
+      size: 140,
       meta: { headerTitle: tfl("cnNo"), skeleton: columnSkeletons.text },
     },
     {
@@ -71,9 +71,12 @@ export function useCnTable({
         const type = row.original.credit_note_type;
         const config = CN_TYPE_CONFIG[type];
         return (
-          <Badge className={config?.className} size="sm">
-            {config?.label ?? type}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={config?.label ?? type}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center"
+          />
         );
       },
       meta: {
@@ -119,14 +122,24 @@ export function useCnTable({
     },
     {
       accessorKey: "doc_status",
-      header: tfl("status"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
         const status = row.original.doc_status;
         const config = CN_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {

@@ -21,7 +21,9 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     product_local_name: z.string(),
     unit_name: z.string(),
     description: z.string(),
-    requested_qty: z.coerce.number().min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
+    requested_qty: z.coerce
+      .number()
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     approved_qty: z.coerce.number(),
     issued_qty: z.coerce.number(),
     current_stage_status: z.string(),
@@ -61,13 +63,21 @@ export function createSrSchema(tv: TranslationFn, tf: TranslationFn) {
     .object({
       doc_version: z.coerce.number().optional(),
       sr_date: z.string().min(1, tv("required", { field: tf("srDate") })),
-      expected_date: z.string().min(1, tv("required", { field: tf("expectedDate") })),
+      expected_date: z
+        .string()
+        .min(1, tv("required", { field: tf("expectedDate") })),
       description: z.string(),
       workflow_id: z.string().min(1, tv("required", { field: tf("workflow") })),
       requestor_id: z.string(),
-      department_id: z.string().min(1, tv("required", { field: tf("department") })),
-      from_location_id: z.string().min(1, tv("required", { field: tf("fromLocation") })),
-      to_location_id: z.string().min(1, tv("required", { field: tf("toLocation") })),
+      department_id: z
+        .string()
+        .min(1, tv("required", { field: tf("department") })),
+      from_location_id: z
+        .string()
+        .min(1, tv("required", { field: tf("fromLocation") })),
+      to_location_id: z
+        .string()
+        .min(1, tv("required", { field: tf("toLocation") })),
       items: z
         .array(createSrDetailSchema(tv, tf))
         .min(1, tv("atLeastOneItem", { item: tf("items") })),

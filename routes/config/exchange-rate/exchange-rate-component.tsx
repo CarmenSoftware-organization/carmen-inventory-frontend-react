@@ -22,6 +22,7 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   AlertDialog,
@@ -40,7 +41,7 @@ import {
   useExchangeRateMutation,
   useExternalExchangeRates,
   useExchangeRateDelete,
-} from "@/hooks/use-exchange-rate";
+} from "../shared/use-exchange-rate";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -247,6 +248,7 @@ export default function ExchangeRateComponent() {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

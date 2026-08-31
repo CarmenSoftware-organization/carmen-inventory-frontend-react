@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { useDeleteWorkflow } from "@/hooks/use-workflow";
+import { useDeleteWorkflow } from "./use-workflow-mutations";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
 import { openActivity } from "@/components/share/activity-sheet-host";
@@ -48,12 +48,12 @@ export function WfHeader({
       <Badge
         variant={workflow.is_active ? "success" : "secondary"}
         size="sm"
-        className="text-xs"
+        className="text-sm"
       >
         {workflow.is_active ? ts("active") : ts("inactive")}
       </Badge>
       <Separator orientation="vertical" className="mx-0.5 h-3.5" />
-      <span className="text-muted-foreground text-xs">
+      <span className="text-muted-foreground text-sm">
         {typeLabels[workflow.workflow_type] ?? workflow.workflow_type}
       </span>
     </>
@@ -71,7 +71,7 @@ export function WfHeader({
       variant="outline"
       size="sm"
       onClick={() => openActivity(workflow.id, workflow.name)}
-      className="text-xs"
+      className="text-sm"
     >
       <History className="size-3" />
       {tActivity("title")}
@@ -83,11 +83,11 @@ export function WfHeader({
       {activityButton}
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={onCancel}
         disabled={isPending}
-        className="text-xs"
+        className="text-sm"
       >
         {tc("cancel")}
       </Button>
@@ -96,7 +96,7 @@ export function WfHeader({
         size="sm"
         form={formId}
         disabled={isPending}
-        className="text-xs"
+        className="text-sm"
       >
         {isPending ? tf("saving") : t("saveChanges")}
       </Button>
@@ -104,7 +104,7 @@ export function WfHeader({
   ) : (
     <>
       {activityButton}
-      <Button size="sm" onClick={onEdit} className="text-xs">
+      <Button size="sm" onClick={onEdit} className="text-sm">
         <Pencil className="size-3" />
         {tc("edit")}
       </Button>
@@ -113,7 +113,7 @@ export function WfHeader({
         size="sm"
         onClick={() => setShowDelete(true)}
         disabled={deleteWorkflow.isPending}
-        className="text-xs"
+        className="text-sm"
       >
         <Trash2 className="size-3" />
         {tc("delete")}

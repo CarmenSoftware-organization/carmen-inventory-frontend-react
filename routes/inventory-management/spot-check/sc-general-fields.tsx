@@ -89,7 +89,7 @@ export function ScGeneralFields({
                     value={field.value}
                     onValueChange={field.onChange}
                     disabled={disabled}
-                    className="w-full text-xs"
+                    className="text-xs"
                   />
                 )}
               />

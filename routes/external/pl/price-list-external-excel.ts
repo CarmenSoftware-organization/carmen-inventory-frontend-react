@@ -83,7 +83,8 @@ export async function downloadExternalPricelistXlsx(
     // ไม่พึ่ง sheet ซ่อน — ใช้ได้ถ้าไม่มีชื่อที่มี comma และรวมกันไม่เกิน 255 ตัว
     // (limit สูตร Excel) · เกินนั้นค่อย fallback ไป range บน sheet ซ่อน
     const inline = `"${names.join(",")}"`;
-    const canInline = !names.some((n) => n.includes(",")) && inline.length <= 255;
+    const canInline =
+      !names.some((n) => n.includes(",")) && inline.length <= 255;
 
     let formula: string;
     if (canInline) {
@@ -138,7 +139,10 @@ export type ExcelImportResult =
       readonly skipped: number;
     };
 
-const norm = (v: unknown) => String(v ?? "").trim().toLowerCase();
+const norm = (v: unknown) =>
+  String(v ?? "")
+    .trim()
+    .toLowerCase();
 
 /**
  * เอาค่าจากแถว excel (อ่านด้วย readXlsxFirstSheet) กลับเข้ารายการ detail
@@ -166,9 +170,7 @@ export function applyExcelRows(
   details.forEach((d, i) => {
     if (d.product_code) indexByCode.set(norm(d.product_code), i);
   });
-  const profileByName = new Map(
-    taxProfiles.map((t) => [norm(t.name), t]),
-  );
+  const profileByName = new Map(taxProfiles.map((t) => [norm(t.name), t]));
 
   const updated = details.map((d) => ({ ...d }));
   let applied = 0;

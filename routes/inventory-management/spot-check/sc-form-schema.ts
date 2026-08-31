@@ -69,7 +69,9 @@ export function createSpotCheckSchema(tv: TranslationFn, tf: TranslationFn) {
     );
 }
 
-export type SpotCheckFormValues = z.infer<ReturnType<typeof createSpotCheckSchema>>;
+export type SpotCheckFormValues = z.infer<
+  ReturnType<typeof createSpotCheckSchema>
+>;
 
 // --- Defaults ---
 

@@ -6,7 +6,7 @@ import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog"
 import {
   useCreateCnReasonConfig,
   useUpdateCnReasonConfig,
-} from "@/hooks/use-cn-reason-config";
+} from "./use-cn-reason-config";
 import type { CnReason } from "@/types/cn-reason";
 import {
   createCnReasonSchema,

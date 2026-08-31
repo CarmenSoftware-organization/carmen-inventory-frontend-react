@@ -91,7 +91,11 @@ export default function PmsInterfaceForm() {
       errorMessage={t("loadError")}
       saveLabel={t("save")}
     >
-      <SettingSection first title={tp("connection")} description={tp("connectionDesc")}>
+      <SettingSection
+        first
+        title={tp("connection")}
+        description={tp("connectionDesc")}
+      >
         <ToggleField
           label={t("enabled")}
           checked={form.watch("enabled")}

@@ -150,9 +150,7 @@ describe("getDefaultValues — effective date", () => {
   it("เก็บ ISO ดิบจาก effectivePeriod ไม่ round-trip ผ่าน UTC date (กัน off-by-one)", () => {
     // backend ส่ง full ISO — timezone +7 ทำให้ toISOString().split() หล่นไป 1 วัน
     const dv = getDefaultValues(
-      basePriceList(
-        "2026-07-19T17:00:00.000Z - 2026-07-24T17:00:00.000Z",
-      ),
+      basePriceList("2026-07-19T17:00:00.000Z - 2026-07-24T17:00:00.000Z"),
     );
     expect(dv.effective_from_date).toBe("2026-07-19T17:00:00.000Z");
     expect(dv.effective_to_date).toBe("2026-07-24T17:00:00.000Z");

@@ -1,7 +1,14 @@
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useLocation } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocSequenceNav } from "@/components/share/doc-sequence-nav";
+import { useProfile } from "@/hooks/use-profile";
+import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
+
+/** segment ท้าย path เป็น id ของเอกสารจริงไหม — /new (สร้างใหม่) ไม่ใช่ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -49,6 +56,20 @@ export function DocFormHeader({
   leading,
   flush = false,
 }: DocFormHeaderProps) {
+  const { pathname } = useLocation();
+  const { buCode } = useProfile();
+
+  // บันทึกลง "เพิ่งเปิด" ของ ⌘K palette — DocFormHeader คือหัวของหน้า detail
+  // ทุกโมดูล จุดเดียวครอบหมด บันทึกเฉพาะ path ที่ลงท้ายด้วย id จริง (หน้า /new
+  // ไม่ใช่เอกสาร) — title ระหว่างโหลดเป็นชื่อ entity ชั่วคราว เดี๋ยว effect รอบ
+  // ถัดไปเขียนทับด้วยเลขที่จริงเองเพราะ key คือ path เดิม
+  useEffect(() => {
+    if (!buCode || titleMuted) return;
+    const last = pathname.split("/").pop() ?? "";
+    if (!UUID_RE.test(last)) return;
+    recordRecentDocument({ path: pathname, label: title, bu: buCode });
+  }, [pathname, title, titleMuted, buCode]);
+
   return (
     <div>
       {/* ── Content column ── px-4 (เว้น flush) ให้ title/ribbon align กับ form
@@ -62,7 +83,7 @@ export function DocFormHeader({
             size="icon-sm"
             onClick={onBack}
             aria-label={backLabel}
-            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.5rem)] -translate-y-1/2 hover:bg-transparent dark:hover:bg-transparent"
+            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2 hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>
@@ -89,12 +110,13 @@ export function DocFormHeader({
             </h1>
             {badges}
           </div>
-          {actions && (
-            // shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {actions}
-            </div>
-          )}
+          {/* shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
+              DocSequenceNav render ตัวเองเฉพาะเมื่อ detail นี้อยู่ในลำดับของ
+              list ที่เพิ่งเปิดมา (ดู use-doc-sequence) หน้าอื่นได้ null เงียบ ๆ */}
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <DocSequenceNav />
+            {actions}
+          </div>
         </div>
         {subtitle && (
           <div className="text-muted-foreground mt-0.5 text-xs">{subtitle}</div>

@@ -24,7 +24,11 @@ function makeLog(overrides: Partial<ActivityLog> = {}): ActivityLog {
     old_data: null,
     new_data: null,
     audit: {
-      created: { at: "2026-05-27T12:46:56.727Z", id: "a-1", name: "Admin Zebra" },
+      created: {
+        at: "2026-05-27T12:46:56.727Z",
+        id: "a-1",
+        name: "Admin Zebra",
+      },
       updated: { at: "2026-05-27T12:46:56.727Z" },
     },
     ...overrides,
@@ -38,7 +42,9 @@ describe("getLogCreatedAt", () => {
   });
 
   it("returns empty string when audit is missing", () => {
-    const log = makeLog({ audit: undefined as unknown as ActivityLog["audit"] });
+    const log = makeLog({
+      audit: undefined as unknown as ActivityLog["audit"],
+    });
     expect(getLogCreatedAt(log)).toBe("");
   });
 });

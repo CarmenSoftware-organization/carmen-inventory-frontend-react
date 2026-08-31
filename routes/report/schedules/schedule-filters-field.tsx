@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -8,7 +7,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useReportLookups } from "@/hooks/use-report-schedule";
+import { useReportLookups } from "./use-report-schedule";
 import type { ReportScheduleDialogField } from "@/types/report-schedule";
 import type { ScheduleFormValues } from "./schedule-form-schema";
 
@@ -64,7 +63,10 @@ export function ScheduleFiltersField({
 interface ScheduleFilterRowProps {
   readonly form: UseFormReturn<ScheduleFormValues>;
   readonly field: ReportScheduleDialogField;
-  readonly lookups: Record<string, ReadonlyArray<{ label: string; value: string }>>;
+  readonly lookups: Record<
+    string,
+    ReadonlyArray<{ label: string; value: string }>
+  >;
   readonly disabled: boolean;
 }
 

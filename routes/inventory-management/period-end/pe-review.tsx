@@ -1,4 +1,3 @@
-
 import {
   CalendarRange,
   CheckCircle2,
@@ -7,6 +6,8 @@ import {
   Lock,
   MapPin,
   PackageCheck,
+  PackageMinus,
+  PackagePlus,
   Receipt,
   RefreshCw,
   ShoppingCart,
@@ -31,13 +32,14 @@ import {
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PERIOD_STATUS_CONFIG } from "@/constant/period";
-import { useClosePeriodEnd, usePeriodEndReview } from "@/hooks/use-period-end";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { useClosePeriodEnd, usePeriodEndReview } from "./use-period-end";
 import type { ReviewTransactionKey } from "@/types/period-end";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { PhysicalCountLocation } from "@/types/physical-count";
 import { PeDocumentsDialog } from "./pe-documents-dialog";
 import { PcLocationCard } from "../shared/pc-location-card";
+import { useOpenPhysicalCount } from "../shared/use-open-physical-count";
 
 interface ModuleConfig {
   readonly icon: LucideIcon;
@@ -50,6 +52,8 @@ const MODULE_CONFIG: Record<ReviewTransactionKey, ModuleConfig> = {
   grn: { icon: PackageCheck, color: "var(--sub-grn)" },
   cn: { icon: Receipt, color: "var(--sub-cn)" },
   sr: { icon: ClipboardList, color: "var(--sub-store-requisition)" },
+  si: { icon: PackagePlus, color: "var(--status-stock-in)" },
+  so: { icon: PackageMinus, color: "var(--status-stock-out)" },
 };
 
 const TRANSACTION_KEYS = Object.keys(MODULE_CONFIG) as ReviewTransactionKey[];
@@ -61,6 +65,8 @@ export default function PeReview() {
   const tc = useTranslations("common");
   const { data, isLoading, isFetching, refetch } = usePeriodEndReview();
   const closeMutation = useClosePeriodEnd();
+  const { open: openPhysicalCount, pendingLocationId } =
+    useOpenPhysicalCount();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [docsKey, setDocsKey] = useState<ReviewTransactionKey | null>(null);
 
@@ -81,10 +87,12 @@ export default function PeReview() {
   const locationsPercent =
     locations.length === 0 ? 0 : (locationsDone / locations.length) * 100;
 
-  const canClose =
-    !!data &&
-    transactionEntries.every((e) => e.isDone) &&
-    locations.every((p) => p.physical_count_status === "completed");
+  /* กติกาการปิดงวดมาจาก backend ไม่คำนวณซ้ำที่นี่ — เดิมหน้านี้คิดเองว่า "ทุกโมดูล
+     is_complete และทุกคลังนับครบ" แต่ backend คืน is_complete เป็น false เมื่อโมดูลนั้น
+     ไม่มีเอกสารเลย (count > 0 && ...) งวดที่ไม่มีใบลดหนี้จึงกดปิดไม่ได้ตลอดกาล */
+  const canClose = data?.can_close ?? false;
+
+  const isCounting = data?.physical_count_period?.status === "counting";
 
   const handleClose = () => {
     closeMutation.mutate(undefined, {
@@ -96,15 +104,12 @@ export default function PeReview() {
     });
   };
 
-  /* Navigate to entry page when an in-progress count is clicked.
-     not_started rows (no physical_count_id) and completed rows render their
-     own indicators in PcLocationCard. */
+  /* เปิดใบนับของคลังนั้น — สร้างใบใหม่ให้ถ้ายังไม่มี เดิม branch นี้ `if (physical_count_id)`
+     เฉย ๆ ไม่มี else ปุ่ม Start บนแถวที่ยังไม่มีใบจึงกดแล้วเงียบสนิท */
   const handleLocationAction = (item: PhysicalCountLocation) => {
-    if (item.physical_count_id) {
-      navigate(
-        `/inventory-management/physical-count/${item.physical_count_id}/entry`,
-      );
-    }
+    const periodId = data?.physical_count_period?.id;
+    if (!periodId) return;
+    openPhysicalCount(item, periodId);
   };
 
   return (
@@ -181,12 +186,10 @@ export default function PeReview() {
                 {formatLocalizedDate(data.end_date, locale)}
               </CardTitle>
               <CardAction>
-                <Badge
-                  className={PERIOD_STATUS_CONFIG[data.status]?.className}
-                  size="sm"
-                >
-                  {t(`status.${data.status}`)}
-                </Badge>
+                <StatusIconLabel
+                  status={data.status}
+                  label={t(`status.${data.status}`)}
+                />
               </CardAction>
             </CardHeader>
             <CardContent>
@@ -245,7 +248,7 @@ export default function PeReview() {
                         setDocsKey(key);
                       }
                     }}
-                    className="animate-fade-in-up group focus-visible:ring-ring cursor-pointer transition hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="animate-fade-in-up group focus-visible:ring-ring hover:border-primary/40 cursor-pointer transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
                     <CardContent className="space-y-3">
@@ -342,6 +345,9 @@ export default function PeReview() {
                         item={item}
                         index={index}
                         onAction={handleLocationAction}
+                        disabled={!isCounting}
+                        disabledReason={t("notCountingYet")}
+                        pending={pendingLocationId === item.id}
                       />
                     </div>
                   ))}
@@ -398,7 +404,7 @@ function SummaryStat({ label, value, hint, tone }: SummaryStatProps) {
         {value}
       </p>
       <span
-        className={`inline-flex items-center rounded-full px-2 py-0.5 text-micro font-semibold ${toneClass}`}
+        className={`text-micro inline-flex items-center rounded-full px-2 py-0.5 font-semibold ${toneClass}`}
       >
         {hint}
       </span>

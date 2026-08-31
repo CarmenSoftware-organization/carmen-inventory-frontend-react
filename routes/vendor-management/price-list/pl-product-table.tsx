@@ -10,7 +10,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { DuplicateProductDialog } from "@/components/ui/duplicate-product-dialog";
+import { DuplicateProductDialog } from "@/components/share/duplicate-product-dialog";
 import { useDuplicateProductConfirm } from "@/hooks/use-duplicate-product-confirm";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";

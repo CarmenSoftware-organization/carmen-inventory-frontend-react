@@ -9,6 +9,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuditCell } from "@/components/share/audit-cell";
+import { SendBackStatus } from "@/components/share/sendback-status";
+import { isSentBack } from "@/constant/last-action";
+import type { RowWithLastAction } from "@/constant/last-action";
 import type { Permission } from "@/constant/permissions";
 import type { ParamsDto } from "@/types/params";
 import type { AuditEntry } from "@/types/audit";
@@ -21,20 +24,6 @@ export const columnSkeletons = {
   badge: <Skeleton className="mx-auto h-3 w-12 rounded-full" />,
 };
 
-/**
- * สร้าง ColumnDef สำหรับ checkbox เลือกแถว
- *
- * Render `DataGridTableRowSelectAll` ใน header และ `DataGridTableRowSelect`
- * ในแต่ละแถว ปิด sorting/hiding/resizing และจัดให้ column กว้าง 50px
- * align center พร้อม skeleton
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @returns ColumnDef ของ column "select"
- * @example
- * ```ts
- * const columns = [selectColumn<Currency>(), ...customColumns];
- * ```
- */
 export function selectColumn<T>(): ColumnDef<T> {
   return {
     id: "select",
@@ -43,7 +32,7 @@ export function selectColumn<T>(): ColumnDef<T> {
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 50,
+    size: 55,
     meta: {
       headerClassName: "text-center print:hidden",
       cellClassName: "text-center print:hidden",
@@ -52,20 +41,6 @@ export function selectColumn<T>(): ColumnDef<T> {
   };
 }
 
-/**
- * สร้าง ColumnDef ของคอลัมน์เลขลำดับ (#)
- *
- * คำนวณเลขลำดับจาก `row.index + 1 + (page - 1) * perpage` เพื่อให้แสดงเลข
- * ต่อเนื่องระหว่างหน้า ปิด sorting/hiding และจัดความกว้าง 50px align center
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @param params - ParamsDto ที่มี `page` และ `perpage` ของหน้าปัจจุบัน
- * @returns ColumnDef ของ index column
- * @example
- * ```ts
- * indexColumn<Currency>(params);
- * ```
- */
 export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
   return {
     id: "index",
@@ -76,7 +51,7 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
       ((Number(params.page) || 1) - 1) * (Number(params.perpage) || 10),
     enableSorting: false,
     enableHiding: false,
-    size: 50,
+    size: 40,
     meta: {
       headerClassName: "text-center",
       cellClassName: "text-center",
@@ -97,20 +72,6 @@ function StatusColumnHeader<T>({ column }: { column: Column<T, unknown> }) {
   );
 }
 
-/**
- * สร้าง ColumnDef ของ status badge
- *
- * อ่านค่า `is_active` แล้ว render `Badge` สี success/secondary (ตรงกับ card)
- * พร้อม label "ใช้งาน"/"ไม่ใช้งาน" จาก i18n header รองรับ sort + แปล
- * จัดความกว้าง 100px align center
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @returns ColumnDef ของ status column
- * @example
- * ```ts
- * const columns = [...customColumns, statusColumn<Currency>()];
- * ```
- */
 export function statusColumn<T>(): ColumnDef<T> {
   return {
     accessorKey: "is_active",
@@ -127,26 +88,6 @@ export function statusColumn<T>(): ColumnDef<T> {
   };
 }
 
-/**
- * สร้าง ColumnDef ของ action column (ลบรายการ)
- *
- * Render `DataGridRowActions` ที่มีปุ่มลบเรียก `onDelete(row.original)` ไว้
- * ท้ายตาราง ปิด sorting และจัดความกว้าง 60px align right
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @param onDelete - callback เมื่อกดลบ row
- * @returns ColumnDef ของ action column
- * @example
- * ```ts
- * actionColumn<Currency>((item) => setDeleteTarget(item));
- * ```
- */
-/**
- * วิธีดึง id และป้ายชื่อของแถวไปเปิด activity sheet
- *
- * เป็น callback ไม่ใช่ชื่อฟิลด์ตายตัว เพราะแต่ละตารางเก็บป้ายชื่อคนละที่ —
- * เอกสารใช้เลขที่ (`po_no`) ข้อมูลหลักใช้ `code` หรือ `name`
- */
 export interface ActionColumnActivity<T> {
   /** entity id ของแถว — คืน undefined เพื่อซ่อนเมนูเฉพาะแถวนั้น */
   id: (row: T) => string | undefined;
@@ -159,6 +100,9 @@ export function actionColumn<T>(
   options?: {
     deleteDenied?: boolean;
     deletePermission?: Permission;
+    /** สัญญาหมดอายุ/ถูกระงับ (`!canWrite`) — ปิดปุ่ม delete จริงพร้อม title อธิบาย */
+    writeDisabled?: boolean;
+    writeDisabledTitle?: string;
     activity?: ActionColumnActivity<T>;
   },
 ): ColumnDef<T> {
@@ -172,6 +116,8 @@ export function actionColumn<T>(
           onDelete={() => onDelete(row.original)}
           deleteDenied={options?.deleteDenied}
           deletePermission={options?.deletePermission}
+          writeDisabled={options?.writeDisabled}
+          writeDisabledTitle={options?.writeDisabledTitle}
           activity={
             activityId
               ? {
@@ -202,22 +148,6 @@ interface RowWithAudit {
 /** `useTranslations("field")` ของหน้าที่เรียก — ใช้แค่คีย์ created/updated */
 type FieldTranslator = (key: "created" | "updated") => string;
 
-/**
- * สร้าง ColumnDef คู่ created/updated ของตาราง list (วันเวลา + ชื่อผู้ทำ)
- *
- * `id` ตั้งเป็นชื่อคอลัมน์ฝั่ง backend (`created_at`/`updated_at`) เพื่อให้กด sort
- * แล้วส่ง `sort=created_at:asc|desc` ได้ตรง cell ใช้ `AuditCell` ตัวเดียวกับการ์ด
- *
- * @typeParam T - ประเภทข้อมูลแถว (ต้องมี `audit`)
- * @param tfl - translator ของ namespace `field`
- * @param dateTimeFormat - รูปแบบวันเวลาของ BU (จาก `useProfile()`)
- * @param options.size - ความกว้างคอลัมน์ (default 160)
- * @returns ColumnDef สองตัว เรียง created แล้วตามด้วย updated
- * @example
- * ```ts
- * const columns = [...customColumns, ...auditColumns<Currency>(tfl, dateTimeFormat)];
- * ```
- */
 export function auditColumns<T extends RowWithAudit>(
   tfl: FieldTranslator,
   dateTimeFormat: string,
@@ -242,17 +172,40 @@ export function auditColumns<T extends RowWithAudit>(
   }));
 }
 
-/**
- * Custom action column factory — same defaults as `actionColumn` but lets you
- * provide a custom cell renderer (e.g. dropdown with Approve/Reject/Delete).
- * Auto-includes `print:hidden` so the column is omitted when printing.
- * @typeParam T - row data type
- * @param cell - cell renderer (TanStack Table CellContext)
- * @example
- * ```ts
- * customActionColumn<PurchaseRequest>(({ row }) => <PrActionDropdown item={row.original} />)
- * ```
- */
+export function sendbackColumn<T extends RowWithLastAction>(
+  title: string,
+  options?: { size?: number },
+): ColumnDef<T> {
+  return {
+    id: "last_action",
+    // accessorFn คืนข้อความ ไม่ใช่ boolean — column visibility menu กับการคัดลอก
+    // ค่าจากตารางจะได้อ่านรู้เรื่อง ไม่ใช่ "true"/"false"
+    accessorFn: (row: T) => (isSentBack(row.last_action) ? title : ""),
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        column={column}
+        title={title}
+        className="justify-center"
+      />
+    ),
+    cell: ({ row }) => (
+      <SendBackStatus
+        lastAction={row.original.last_action}
+        // คอลัมน์นี้จัดกลาง — ป้ายเป็น inline-flex ซึ่ง `text-center` ของเซลล์
+        // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid (ท่าเดียวกับคอลัมน์สถานะ)
+        className="flex w-full justify-center"
+      />
+    ),
+    size: options?.size ?? 110,
+    meta: {
+      headerTitle: title,
+      skeleton: columnSkeletons.badge,
+      cellClassName: "text-center",
+      headerClassName: "text-center",
+    },
+  };
+}
+
 export function customActionColumn<T>(
   cell: NonNullable<ColumnDef<T>["cell"]>,
 ): ColumnDef<T> {

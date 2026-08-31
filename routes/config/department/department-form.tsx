@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -15,7 +15,7 @@ import {
   FieldLabel,
   FieldPlainText,
 } from "@/components/ui/field";
-import { FormToolbar } from "@/components/ui/form-toolbar";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +30,7 @@ import { useAllUsers } from "@/hooks/use-all-users";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { Department } from "@/types/department";
 import type { FormMode } from "@/types/form";
-import { transferHandler } from "@/utils/transfer-handler";
+import { transferHandler } from "@/lib/transfer-handler";
 import {
   createDepartmentSchema,
   type DepartmentFormValues,
@@ -50,7 +50,6 @@ interface DepartmentFormProps {
 
 export function DepartmentForm({ department }: DepartmentFormProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(department ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -215,12 +214,11 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/config/department");
-    }
+    navigate("/config/department");
   };
 
   const handleBack = () => {
@@ -261,9 +259,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           statusBadge={codeBadge}
           editTitle={department?.name}
           permissionPrefix="configuration.department"
-          activity={
-            department && { id: department.id, label: department.name }
-          }
+          activity={department && { id: department.id, label: department.name }}
         />
       </Reveal>
 
@@ -377,6 +373,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         <Reveal delay={160}>
           <SettingSection
             wide
+            frameless
             title={t("members")}
             description={t("membersDesc")}
             count={
@@ -406,6 +403,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         <Reveal delay={220}>
           <SettingSection
             wide
+            frameless
             title={t("hod")}
             description={t("hodDesc")}
             count={

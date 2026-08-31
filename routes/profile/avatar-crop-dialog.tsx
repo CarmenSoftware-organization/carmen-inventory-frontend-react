@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { Loader2, ZoomIn, ZoomOut } from "lucide-react";
@@ -92,7 +91,7 @@ export function AvatarCropDialog({
         </DialogHeader>
 
         {/* Crop viewport — square 1:1 */}
-        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
+        <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-lg">
           {src && (
             <Cropper
               image={src}
@@ -132,7 +131,7 @@ export function AvatarCropDialog({
             disabled={busy}
             onChange={(e) => setZoom(Number(e.target.value))}
             aria-label={t("zoom")}
-            className="bg-muted h-1.5 flex-1 cursor-pointer appearance-none rounded-full accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-muted accent-primary h-1.5 flex-1 cursor-pointer appearance-none rounded-full disabled:cursor-not-allowed disabled:opacity-50"
           />
           <Button
             type="button"
@@ -144,7 +143,7 @@ export function AvatarCropDialog({
           >
             <ZoomIn aria-hidden="true" />
           </Button>
-          <span className="text-muted-foreground w-10 text-right text-micro tabular-nums">
+          <span className="text-muted-foreground text-micro w-10 text-right tabular-nums">
             {zoom.toFixed(1)}×
           </span>
         </div>
@@ -212,7 +211,9 @@ async function renderCroppedBlob(src: string, area: Area): Promise<Blob> {
     area.width,
     area.height,
   );
-  const mimeType = src.startsWith("data:image/jpeg") ? "image/jpeg" : "image/png";
+  const mimeType = src.startsWith("data:image/jpeg")
+    ? "image/jpeg"
+    : "image/png";
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {

@@ -1,5 +1,21 @@
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { safeNavigationHref } from "@/lib/utils";
+
+/**
+ * เปิด viewer URL ที่ได้จาก response ของ backend
+ *
+ * กรอง `javascript:` / `data:` ทิ้งด้วย `safeNavigationHref` ก่อนเสมอ ไม่ใช่เพราะไม่เชื่อ
+ * backend แต่เพราะ URL ก้อนนี้ประกอบมาจากค่าที่ผู้ใช้กรอก (ชื่อไฟล์ · template) และมันไป
+ * จบที่ `window.open`/`location.href` ตรง ๆ — ถ้าหลุดมาได้แม้ครั้งเดียวคือ XSS ที่ผู้ใช้
+ * เป็นคนกดเอง ราคาของการกรองคือโค้ดสามบรรทัด
+ */
+function openViewerUrl(url: string, target: "_blank" | "self" | null): void {
+  const safe = safeNavigationHref(url);
+  if (!safe) throw new Error(`Viewer returned an unsafe URL: ${url}`);
+  if (target === "_blank") window.open(safe, "_blank", "noopener,noreferrer");
+  else if (target === "self") window.location.href = safe;
+}
 
 /**
  * Safely read an error response body and format it as a ": <detail>" suffix
@@ -71,7 +87,9 @@ export interface PrintDocumentOptions {
  * (SI and SO were in that state until the backend grew
  * `stock-{ins,outs}/:id/print-viewer` plus their SI/SO form templates.)
  */
-const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: string, id: string) => string>> = {
+const DEDICATED_PRINT_ENDPOINTS: Partial<
+  Record<PrintDocumentType, (buCode: string, id: string) => string>
+> = {
   PR: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/purchase-requests/${encodeURIComponent(id)}/print-viewer`,
   PO: (bu, id) =>
@@ -143,14 +161,16 @@ export async function printDocument(
         `Print failed for ${documentType} (${res.status})${await errorSuffix(res)}`,
       );
     }
-    const json: { data?: { viewer_url?: string }; viewer_url?: string } = await res.json();
+    const json: { data?: { viewer_url?: string }; viewer_url?: string } =
+      await res.json();
     const viewerUrl = json.data?.viewer_url ?? json.viewer_url;
     if (!viewerUrl) {
-      throw new Error(`Print endpoint returned no viewer_url for ${documentType}`);
+      throw new Error(
+        `Print endpoint returned no viewer_url for ${documentType}`,
+      );
     }
     const target = options.target === undefined ? "_blank" : options.target;
-    if (target === "_blank") window.open(viewerUrl, "_blank", "noopener,noreferrer");
-    else if (target === "self") window.location.href = viewerUrl;
+    openViewerUrl(viewerUrl, target);
     return { url: viewerUrl, templateId: "", templateName: null };
   }
 
@@ -178,11 +198,7 @@ export async function printDocument(
 
   // 3. Open or hand back.
   const target = options.target === undefined ? "_blank" : options.target;
-  if (target === "_blank") {
-    window.open(url, "_blank", "noopener,noreferrer");
-  } else if (target === "self") {
-    window.location.href = url;
-  }
+  openViewerUrl(url, target);
 
   return {
     url,

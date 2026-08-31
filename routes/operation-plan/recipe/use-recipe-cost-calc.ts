@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { round2 } from "@/lib/currency-utils";
@@ -51,11 +50,8 @@ export function useRecipeCostCalc(
   const costPerPortion = yld > 0 ? round2(totalCost / yld) : 0;
   const grossMargin = sell > 0 ? round2(sell - costPerPortion) : null;
   const grossMarginPct =
-    sell > 0 && grossMargin != null
-      ? round2((grossMargin / sell) * 100)
-      : null;
-  const actualFoodCostPct =
-    sell > 0 ? round2((ing / sell) * 100) : null;
+    sell > 0 && grossMargin != null ? round2((grossMargin / sell) * 100) : null;
+  const actualFoodCostPct = sell > 0 ? round2((ing / sell) * 100) : null;
   const laborCostPct = sell > 0 ? round2((lab / sell) * 100) : null;
   const overheadPct = sell > 0 ? round2((ovh / sell) * 100) : null;
   const suggestedPrice =

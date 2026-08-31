@@ -8,7 +8,7 @@ import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
 import { useCreateCurrency, useUpdateCurrency } from "@/hooks/use-currency";
-import { useExternalExchangeRates } from "@/hooks/use-exchange-rate";
+import { useExternalExchangeRates } from "../shared/use-exchange-rate";
 import { useProfile } from "@/hooks/use-profile";
 import { currenciesIso } from "@/constant/currencies-iso";
 import {

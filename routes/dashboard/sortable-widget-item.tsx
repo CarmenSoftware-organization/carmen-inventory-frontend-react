@@ -1,4 +1,3 @@
-
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CircleAlert, GripVertical, Settings2, Trash2 } from "lucide-react";
@@ -23,7 +22,11 @@ import type {
   DatasetShape,
   MyDashboardWidget,
 } from "@/types/dashboard-widget";
-import { inferModuleName, inferSubTile, SUPPORTED_SHAPES } from "./widget-shape";
+import {
+  inferModuleName,
+  inferSubTile,
+  SUPPORTED_SHAPES,
+} from "./widget-shape";
 
 interface SortableWidgetItemProps {
   readonly widget: MyDashboardWidget;
@@ -124,15 +127,17 @@ export function SortableWidgetItem({
           detail.meta.shape as (typeof SUPPORTED_SHAPES)[number],
         ) ? (
         <WidgetRenderer
-          widget={buildFullWidget(widget, detail.meta, detail.data, displayTitle)}
+          widget={buildFullWidget(
+            widget,
+            detail.meta,
+            detail.data,
+            displayTitle,
+          )}
           moduleName={moduleName}
           subTileFor={inferSubTile}
         />
       ) : (
-        <UnsupportedCard
-          title={displayTitle}
-          shape={detail.meta.shape}
-        />
+        <UnsupportedCard title={displayTitle} shape={detail.meta.shape} />
       )}
     </li>
   );
@@ -209,10 +214,8 @@ function UnsupportedCard({
           <CircleAlert className="size-4" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="truncate text-sm font-semibold leading-snug">
-            {title}
-          </p>
-          <p className="text-muted-foreground text-micro font-semibold uppercase tracking-wide">
+          <p className="truncate text-sm leading-snug font-semibold">{title}</p>
+          <p className="text-muted-foreground text-micro font-semibold tracking-wide uppercase">
             {t("unsupportedTitle")}
           </p>
           <p className="text-muted-foreground text-micro leading-snug">

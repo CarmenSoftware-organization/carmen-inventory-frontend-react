@@ -25,13 +25,7 @@ function makeStageWithoutSignatureKey(name: string) {
 }
 
 /** render WfStageGeneral ของ stage หนึ่งตัว โดยมี stages ทั้งชุดอยู่ใน form state */
-function Harness({
-  stages,
-  index,
-}: {
-  stages: Stage[];
-  index: number;
-}) {
+function Harness({ stages, index }: { stages: Stage[]; index: number }) {
   const form = useForm<WorkflowCreateModel>({
     defaultValues: {
       name: "wf",
@@ -42,7 +36,12 @@ function Harness({
     } as WorkflowCreateModel,
   });
   return (
-    <WfStageGeneral form={form} index={index} isFirst={false} isDisabled={false} />
+    <WfStageGeneral
+      form={form}
+      index={index}
+      isFirst={false}
+      isDisabled={false}
+    />
   );
 }
 

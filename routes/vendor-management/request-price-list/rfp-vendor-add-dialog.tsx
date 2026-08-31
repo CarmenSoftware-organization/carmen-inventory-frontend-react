@@ -28,6 +28,7 @@ import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import { useVendor } from "@/hooks/use-vendor";
 import type { Vendor } from "@/types/vendor";
+import { VendorNameCell } from "./rfp-vendor-cells";
 
 interface Props {
   readonly open: boolean;
@@ -108,24 +109,18 @@ export function RfpVendorAddDialog({
       selectColumn<Vendor>(),
       indexColumn<Vendor>({ page, perpage }),
       {
-        accessorKey: "code",
-        header: () => tfl("code"),
-        size: 60,
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">{row.original.code}</span>
-        ),
-        meta: { headerTitle: tfl("code") },
-      },
-      {
         accessorKey: "name",
-        header: () => tfl("name"),
+        header: () => tfl("vendor"),
+        // รหัสซ้อนใต้ชื่อในเซลล์เดียว ไม่แยกคอลัมน์ — ทรงเดียวกับตารางผู้ขายใน
+        // คำขอ (`VendorNameCell`) ที่อยู่หลัง dialog นี้ คนเลือกจาก dialog แล้ว
+        // เห็นแถวหน้าตาเดิมโผล่ในตาราง ไม่ต้องแปลว่ามันคือรายการเดียวกัน
         cell: ({ row }) => (
-          <span className="truncate font-medium">{row.original.name}</span>
+          <VendorNameCell name={row.original.name} code={row.original.code} />
         ),
         // w-full ให้คอลัมน์ชื่อดูดที่ว่างที่เหลือไปหมด — table-auto เฉลี่ยที่ว่าง
         // ให้ทุกคอลัมน์เท่า ๆ กัน ช่องติ๊กเลยกว้าง 76px ทั้งที่ข้างในมีแค่กล่อง 16px
         meta: {
-          headerTitle: tfl("name"),
+          headerTitle: tfl("vendor"),
           headerClassName: "w-full",
           cellClassName: "w-full",
         },
@@ -234,7 +229,7 @@ export function RfpVendorAddDialog({
           <div className="flex gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => closeAndReset(false)}
             >

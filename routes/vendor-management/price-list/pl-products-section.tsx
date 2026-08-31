@@ -1,4 +1,3 @@
-
 import { Plus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -48,6 +47,7 @@ export function PLProductsSection({
   return (
     <SettingSection
       wide
+      frameless
       title={headerLabels.title}
       description={headerLabels.noItemsDesc}
       count={detailFields.length}

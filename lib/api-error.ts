@@ -115,7 +115,7 @@ export class ApiError extends Error {
     sanitize?: (message: string | undefined, fallback: string) => string,
   ): Promise<ApiError> {
     const code = statusToCode(res.status);
-    const raw = await readServerMessage(res);
+    const { message: raw, data } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
     const cleaned = sanitize ? sanitize(raw, fallbackMessage) : raw;
@@ -125,10 +125,56 @@ export class ApiError extends Error {
       serverMessage || fallbackMessage,
       res.status,
       res.status >= 500,
-      undefined,
+      data,
       serverMessage,
     );
   }
+}
+
+/**
+ * error code สามตัวที่ `LicenseInterceptor` ฝั่ง backend โยนมาเมื่อ feature ไม่อยู่ในสัญญา/
+ * สัญญาหมดอายุ/cluster เกินโควตาที่นั่ง (`SEAT_LIMIT_EXCEEDED` — Task 5.1/5.2, evaluateSeat)
+ */
+export const LICENSE_ERROR_CODES = {
+  LICENSE_REQUIRED: "LICENSE_REQUIRED",
+  LICENSE_EXPIRED: "LICENSE_EXPIRED",
+  SEAT_LIMIT_EXCEEDED: "SEAT_LIMIT_EXCEEDED",
+} as const;
+
+export type LicenseErrorCode =
+  (typeof LICENSE_ERROR_CODES)[keyof typeof LICENSE_ERROR_CODES];
+
+/**
+ * แยก 403 ของ license ออกจาก 403 ของสิทธิ์ (permission) — คีย์เดียวที่แยกได้เด็ดขาดคือ
+ * `body.error.code` ("LICENSE_REQUIRED" | "LICENSE_EXPIRED" | "SEAT_LIMIT_EXCEEDED") ตาม
+ * สัญญาจริงจาก `LicenseInterceptor` (backend) — **ห้ามคีย์กับ `message` หรือ `status`** เพราะ 403
+ * ของ permission ก็เป็น 403 เหมือนกันและ `message` ขึ้นกับภาษา
+ *
+ * permission 403 ของ backend ส่ง `error` เป็น `{message:"Forbidden"}` เสมอ (ไม่มี `code`)
+ * — คืน `undefined` สำหรับกรณีนั้นและกรณี body รูปแปลกทุกแบบ (null, ไม่มี `error`,
+ * `error` เป็น string) เพื่อให้ caller ปล่อยไปเส้นทาง permission เดิม ไม่ throw
+ *
+ * @param body - error body ที่ parse จาก response แล้ว (JSON.parse ผลลัพธ์, ชนิดอะไรก็ได้)
+ * @returns license error code เมื่อแมตช์ ไม่งั้น undefined
+ * @example
+ * ```ts
+ * licenseErrorCodeFrom({ error: { code: "LICENSE_REQUIRED" } }); // "LICENSE_REQUIRED"
+ * licenseErrorCodeFrom({ error: { message: "Forbidden" } });     // undefined
+ * licenseErrorCodeFrom(null);                                    // undefined
+ * ```
+ */
+export function licenseErrorCodeFrom(
+  body: unknown,
+): LicenseErrorCode | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const error = (body as { error?: unknown }).error;
+  if (typeof error !== "object" || error === null) return undefined;
+  const code = (error as { code?: unknown }).code;
+  return code === LICENSE_ERROR_CODES.LICENSE_REQUIRED ||
+    code === LICENSE_ERROR_CODES.LICENSE_EXPIRED ||
+    code === LICENSE_ERROR_CODES.SEAT_LIMIT_EXCEEDED
+    ? code
+    : undefined;
 }
 
 /**
@@ -150,17 +196,29 @@ export function isTransportError(error: unknown): boolean {
 }
 
 /**
- * อ่าน `message` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
- * คืน undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
+ * อ่าน `message` และ `data` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
+ *
+ * `data` คือช่องที่ backend ใช้ส่งรายละเอียดที่ client เอาไปเรนเดอร์ต่อได้ (ฝั่ง backend
+ * เรียกมันว่า `details` แล้ว `StdResponse.error` วางลงฟิลด์ `data` ของ error body)
+ * เช่นรายการเอกสารที่บล็อกการเปิดรอบตรวจนับ — เดิมอ่านแค่ `message` รายละเอียดจึงหล่นหาย
+ * ทั้งที่ backend ส่งมาครบ
+ *
+ * คืน message เป็น undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */
-const readServerMessage = async (res: Response): Promise<string | undefined> => {
+const readErrorBody = async (
+  res: Response,
+): Promise<{ message: string | undefined; data: unknown }> => {
   try {
     const body = await res.clone().json();
-    return typeof body?.message === "string" && body.message.trim()
-      ? body.message
-      : undefined;
+    return {
+      message:
+        typeof body?.message === "string" && body.message.trim()
+          ? body.message
+          : undefined,
+      data: body?.data ?? undefined,
+    };
   } catch {
-    return undefined;
+    return { message: undefined, data: undefined };
   }
 };
 

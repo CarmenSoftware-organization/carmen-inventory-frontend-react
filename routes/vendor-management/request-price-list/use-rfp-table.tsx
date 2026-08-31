@@ -71,18 +71,25 @@ export function useRequestPriceListTable({
       meta: { headerTitle: tfl("template"), skeleton: columnSkeletons.text },
     },
     {
-      id: "period",
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียงช่วงเวลา = เรียงวันเริ่ม)
+      id: "start_date",
       accessorFn: (row) => formatPeriod(row.start_date, row.end_date),
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("effectivePeriod")} />
       ),
-      enableSorting: false,
-      meta: { headerTitle: tfl("effectivePeriod"), skeleton: columnSkeletons.text },
+      meta: {
+        headerTitle: tfl("effectivePeriod"),
+        skeleton: columnSkeletons.text,
+      },
     },
     {
       accessorKey: "vendor_count",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("vendorCount")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("vendorCount")}
+          className="justify-center"
+        />
       ),
       enableSorting: false,
       meta: {
@@ -104,7 +111,9 @@ export function useRequestPriceListTable({
     onDelete,
     hideStatus: true,
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

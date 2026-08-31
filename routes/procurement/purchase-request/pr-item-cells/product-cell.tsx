@@ -4,7 +4,7 @@ import {
   type UseFormReturn,
   type Control,
 } from "react-hook-form";
-import { memo } from "react";
+import { memo, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +12,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
+import { OnHandDialog } from "@/components/share/on-hand-dialog";
+import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import type { PrFormValues } from "../pr-form-schema";
 import { InventoryTooltipCell, useIsRowLocked } from "./helpers";
 
@@ -21,22 +23,17 @@ export const ProductCell = memo(function ProductCell({
   index,
   isDisabled,
   buCode,
-  inventoryActions,
 }: {
   control: Control<PrFormValues>;
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
   buCode?: string;
-  /** กด "คงเหลือ"/"กำลังสั่ง" ใน tooltip สต็อก — ไม่ส่งมาก็เป็นข้อความเฉยๆ */
-  inventoryActions?: {
-    onOnHand?: () => void;
-    onOnOrder?: () => void;
-  };
 }) {
   "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const workflowId = useWatch({ control, name: "workflow_id" }) ?? "";
   const productCode =
     useWatch({ control, name: `items.${index}.product_code` }) ?? "";
   const productName =
@@ -45,7 +42,39 @@ export const ProductCell = memo(function ProductCell({
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const unitName =
     useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const isRowLocked = useIsRowLocked(control, index);
+  const [onHandOpen, setOnHandOpen] = useState(false);
+  const [onOrderOpen, setOnOrderOpen] = useState(false);
+
+  // กด "คงเหลือ"/"กำลังสั่ง" ใน tooltip สต็อก แล้วเปิด dialog รายละเอียดต่อ —
+  // ทรงเดียวกับ SR (sr-item-table.tsx) และแถบ inventory ใต้แถว (pr-inventory-row)
+  const inventoryTooltip = (
+    <>
+      <InventoryTooltipCell
+        control={control}
+        index={index}
+        buCode={buCode}
+        onOnHandClick={productId ? () => setOnHandOpen(true) : undefined}
+        onOnOrderClick={productId ? () => setOnOrderOpen(true) : undefined}
+      />
+      {productId && (
+        <>
+          <OnHandDialog
+            open={onHandOpen}
+            onOpenChange={setOnHandOpen}
+            productId={productId}
+          />
+          <OnOrderDialog
+            open={onOrderOpen}
+            onOpenChange={setOnOrderOpen}
+            productId={productId}
+          />
+        </>
+      )}
+    </>
+  );
   if (isDisabled || isRowLocked) {
     return (
       <div className="flex flex-col gap-0.5">
@@ -57,16 +86,10 @@ export const ProductCell = memo(function ProductCell({
           >
             {productName || <span className="text-muted-foreground">—</span>}
           </p>
-          <InventoryTooltipCell
-            control={control}
-            index={index}
-            buCode={buCode}
-            onOnHandClick={inventoryActions?.onOnHand}
-            onOnOrderClick={inventoryActions?.onOnOrder}
-          />
+          {inventoryTooltip}
         </div>
         <p
-          className="text-muted-foreground truncate text-micro-legal"
+          className="text-muted-foreground text-micro-legal truncate"
           title={productLocalName || undefined}
         >
           {productLocalName || <span className="text-muted-foreground">—</span>}
@@ -87,6 +110,7 @@ export const ProductCell = memo(function ProductCell({
                 <div className="min-w-0 flex-1">
                   <LookupProductInLocation
                     locationId={locationId}
+                    workflowId={workflowId}
                     value={field.value ?? ""}
                     disableTooltip
                     error={
@@ -131,7 +155,7 @@ export const ProductCell = memo(function ProductCell({
                     </p>
                   </div>
                   {(productLocalName || unitName) && (
-                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-micro">
+                    <div className="text-foreground/60 text-micro mt-2 flex items-center gap-2 border-t pt-2">
                       {productLocalName && <span>{productLocalName}</span>}
                       {productLocalName && unitName && (
                         <span aria-hidden="true">·</span>
@@ -147,13 +171,7 @@ export const ProductCell = memo(function ProductCell({
           </TooltipProvider>
         )}
       />
-      <InventoryTooltipCell
-        control={control}
-        index={index}
-        buCode={buCode}
-        onOnHandClick={inventoryActions?.onOnHand}
-        onOnOrderClick={inventoryActions?.onOnOrder}
-      />
+      {inventoryTooltip}
     </div>
   );
 });

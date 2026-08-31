@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useRecipeById } from "@/hooks/use-recipe";
+import { useRecipeById } from "./use-recipe";
 import { RecipeForm } from "./recipe-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

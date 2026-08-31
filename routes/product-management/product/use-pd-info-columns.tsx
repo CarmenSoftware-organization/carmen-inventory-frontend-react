@@ -31,7 +31,7 @@ interface UsePdInfoColumnsOptions {
  * Hook สร้าง column definitions ของตาราง "Additional info / Attributes"
  * ใน General tab ของ Product detail
  *
- * แยกออกจาก `pd-general-tab.tsx` ตาม pattern `use-{module}-table.tsx`
+ * แยกออกจาก `pd-tab-general.tsx` ตาม pattern `use-{module}-table.tsx`
  * ของโปรเจกต์ caller ป้อนผลลัพธ์เข้า `useReactTable({ data, columns })` ต่อ
  *
  * @param options.form - RHF instance ของ product form (ใช้ control + register + formState)

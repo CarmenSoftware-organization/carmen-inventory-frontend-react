@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Pencil, Save, Trash2, X } from "lucide-react";
@@ -69,7 +68,7 @@ export function RecipeToolbar({
     <>
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase",
+          "text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase",
           code
             ? "bg-foreground text-background"
             : "text-muted-foreground border border-dashed",
@@ -115,10 +114,7 @@ export function RecipeToolbar({
             {RECIPE_STATUS_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {ts(
-                  opt.value.toLowerCase() as
-                    | "draft"
-                    | "published"
-                    | "archived",
+                  opt.value.toLowerCase() as "draft" | "published" | "archived",
                 )}
               </SelectItem>
             ))}

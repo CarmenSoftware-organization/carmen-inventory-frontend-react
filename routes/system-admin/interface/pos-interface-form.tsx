@@ -97,7 +97,11 @@ export default function PosInterfaceForm() {
       errorMessage={t("loadError")}
       saveLabel={t("save")}
     >
-      <SettingSection first title={tp("connection")} description={tp("connectionDesc")}>
+      <SettingSection
+        first
+        title={tp("connection")}
+        description={tp("connectionDesc")}
+      >
         <ToggleField
           label={t("enabled")}
           checked={form.watch("enabled")}
@@ -125,7 +129,9 @@ export default function PosInterfaceForm() {
           value={form.watch("sync_frequency")}
           options={FREQUENCIES}
           optionLabel={(f) => t(`frequencyOption.${f}`)}
-          onChange={(v) => form.setValue("sync_frequency", v, { shouldDirty: true })}
+          onChange={(v) =>
+            form.setValue("sync_frequency", v, { shouldDirty: true })
+          }
         />
         <TextField
           label={tp("defaultLocationCode")}

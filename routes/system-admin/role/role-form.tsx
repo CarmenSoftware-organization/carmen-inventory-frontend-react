@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { KeySquare, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -12,13 +11,18 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
-import { useCreateRole, useUpdateRole, useDeleteRole } from "@/hooks/use-role";
+import {
+  useCreateRole,
+  useUpdateRole,
+  useDeleteRole,
+} from "../shared/use-role";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
 import type { FormMode } from "@/types/form";
 import { SectionCard } from "../shared/admin-ui";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
+import { useRolePrint } from "./use-role-print";
 import {
   roleSchema,
   getDefaultValues,
@@ -31,7 +35,6 @@ interface RoleFormProps {
 
 export function RoleForm({ role }: RoleFormProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const t = useTranslations("systemAdmin.role");
   const tt = useTranslations("toast");
   const [mode, setMode] = useState<FormMode>(role ? "view" : "add");
@@ -47,7 +50,9 @@ export function RoleForm({ role }: RoleFormProps) {
   const isPending = createRole.isPending || updateRole.isPending;
   const isDisabled = isView || isPending;
 
-  const originalPermissionIds = new Set(role?.permissions.map((p) => p.permission_id) ?? []);
+  const originalPermissionIds = new Set(
+    role?.permissions.map((p) => p.permission_id) ?? [],
+  );
 
   const defaultValues = getDefaultValues(role);
 
@@ -60,6 +65,7 @@ export function RoleForm({ role }: RoleFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  const { printRole } = useRolePrint();
 
   /* Live watches — subscribe only to specific fields */
   const watchedName = useWatch({
@@ -124,12 +130,11 @@ export function RoleForm({ role }: RoleFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/system-admin/role");
-    }
+    navigate("/system-admin/role");
   };
 
   const handleBack = () => {
@@ -143,14 +148,15 @@ export function RoleForm({ role }: RoleFormProps) {
   const heroName = watchedName ?? "";
 
   return (
-    <div className="space-y-4">
+    // ความกว้างเท่า location form (mx-auto max-w-4xl) — layout แถว label+checkbox
+    // ของ permission picker wrap ตัวเองได้ ไม่ต้องการเต็มจอแบบ matrix เดิม
+    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
       <AnimationStyles />
 
       {/* ── Hero ──────────────────────────────────── */}
       <Reveal>
         <RoleHero
           name={heroName}
-          isNew={isAdd}
           isView={isView}
           canDelete={isView && !!role}
           isDeleting={deleteRole.isPending}
@@ -159,6 +165,7 @@ export function RoleForm({ role }: RoleFormProps) {
           onDelete={() => setShowDelete(true)}
           onEdit={() => setMode("edit")}
           onCancel={handleCancel}
+          onPrint={() => printRole(heroName, watchedPermissions ?? [])}
         />
       </Reveal>
 
@@ -205,7 +212,6 @@ export function RoleForm({ role }: RoleFormProps) {
                   value={field.value}
                   onChange={field.onChange}
                   disabled={isDisabled}
-                  originalIds={originalPermissionIds}
                 />
               )}
             />

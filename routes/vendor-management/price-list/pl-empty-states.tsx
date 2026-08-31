@@ -1,4 +1,3 @@
-
 import { Plus, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -26,9 +25,7 @@ export function EmptyProducts({
         <Tag className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-micro">
-        {description}
-      </p>
+      <p className="text-muted-foreground text-micro mt-0.5">{description}</p>
       {!disabled && onAdd && (
         <Button type="button" size="xs" onClick={onAdd} className="mt-2">
           <Plus />

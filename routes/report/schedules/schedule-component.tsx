@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
@@ -20,7 +19,7 @@ import { useErrorToast } from "@/hooks/use-error-toast";
 import {
   useDeleteReportSchedule,
   useReportSchedules,
-} from "@/hooks/use-report-schedule";
+} from "./use-report-schedule";
 import type { ReportSchedule } from "@/types/report-schedule";
 import { CreateScheduleDialog } from "./create-schedule-dialog";
 import { useScheduleTableColumns } from "./use-schedule-table";

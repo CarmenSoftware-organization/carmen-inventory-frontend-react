@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { useLocationPairProducts } from "@/hooks/use-location-pair-products";
 import { useTranslations } from "use-intl";
-import { toast } from "sonner";
 import { BoxIcon, Check, Eye, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { WarningDialog } from "@/components/ui/warning-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
@@ -26,6 +26,8 @@ interface SrItemFieldsProps {
   readonly disableAdd?: boolean;
   readonly fromLocationId: string;
   readonly toLocationId: string;
+  /** workflow ของใบ — ร่วมเป็นเกณฑ์กรองสินค้ากับคู่คลัง */
+  readonly workflowId: string;
   readonly role?: string;
 }
 
@@ -35,12 +37,17 @@ export function SrItemFields({
   disableAdd,
   fromLocationId,
   toLocationId,
+  workflowId,
   role,
 }: SrItemFieldsProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  // เหตุที่เพิ่มรายการไม่ได้ — null = เพิ่มได้ปกติ
+  const [addBlocked, setAddBlocked] = useState<"criteria" | "noProduct" | null>(
+    null,
+  );
   const [bulkAction, setBulkAction] = useState<"approve" | "reject" | null>(
     null,
   );
@@ -55,41 +62,53 @@ export function SrItemFields({
   // ตัวที่ยิงจริงคือ lookup ในแต่ละแถว ซึ่งกว่าจะ mount ก็ตอนกดเพิ่มรายการแล้ว
   // observer ตัวนี้อยู่ตลอดอายุแท็บรายการ ของที่โหลดมาเลยไม่ถูกทิ้งทั้งที่ gcTime
   // เป็น 0 · params ต้องตรงกับที่ useLookupPagination ยิงหน้าแรกเป๊ะ ไม่งั้นคนละ key
-  useLocationPairProducts(
-    fromLocationId || undefined,
-    toLocationId || undefined,
-    {
-      search: undefined,
-      perpage: 30,
-      page: 1,
-    },
-  );
+  const { data: scopeProducts, isSuccess: scopeLoaded } =
+    useLocationPairProducts(
+      fromLocationId || undefined,
+      toLocationId || undefined,
+      workflowId || undefined,
+      {
+        search: undefined,
+        perpage: 30,
+        page: 1,
+      },
+    );
 
-  // เปลี่ยนคลังแล้วสินค้าที่เลือกไว้อาจไม่มีในคู่ใหม่ — ล้างของที่เลือกไว้ทุกแถว
-  // เช็คว่า "คู่เดิมครบทั้งสองข้าง" ก่อนล้าง ไม่งั้นตอนเปิดใบเก่าที่ค่าทยอยมาจาก
+  // โหลดมาแล้วได้ [] = คู่คลังนี้ไม่มีของที่เวิร์กโฟลว์นี้ให้เบิกเลย เพิ่มแถวไปก็
+  // เลือกอะไรไม่ได้ (ยังไม่โหลดเสร็จ ไม่ถือว่าว่าง ไม่งั้นเตือนดักหน้าตอนกำลังโหลด)
+  const hasNoProduct = scopeLoaded && (scopeProducts?.data?.length ?? 0) === 0;
+
+  // เปลี่ยนคลังหรือ workflow แล้วสินค้าที่เลือกไว้อาจไม่อยู่ในเกณฑ์ใหม่ (สินค้าที่
+  // เลือกได้ = มีทั้งสองคลัง + อยู่ในชุดที่ workflow เลือกไว้) — ล้างของที่เลือกทุกแถว
+  // เช็คว่า "เกณฑ์เดิมครบทั้งสามค่า" ก่อนล้าง ไม่งั้นตอนเปิดใบเก่าที่ค่าทยอยมาจาก
   // ว่าง → มีจริง จะไปล้างสินค้าที่เพิ่งโหลดมาทิ้ง
   const prevPair = useRef<string | null>(null);
   useEffect(() => {
-    const pair = `${fromLocationId}|${toLocationId}`;
+    const pair = `${fromLocationId}|${toLocationId}|${workflowId}`;
     const prev = prevPair.current;
     prevPair.current = pair;
     if (prev === null || prev === pair) return;
-    const [prevFrom, prevTo] = prev.split("|");
-    if (!prevFrom || !prevTo) return;
+    const [prevFrom, prevTo, prevWorkflow] = prev.split("|");
+    if (!prevFrom || !prevTo || !prevWorkflow) return;
     itemFields.forEach((_, index) => {
       form.setValue(`items.${index}.product_id`, "");
       form.setValue(`items.${index}.product_name`, "");
       form.setValue(`items.${index}.product_local_name`, "");
       form.setValue(`items.${index}.unit_name`, "");
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ล้างเมื่อคู่คลังเปลี่ยนเท่านั้น
-  }, [fromLocationId, toLocationId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ล้างเมื่อเกณฑ์กรองเปลี่ยนเท่านั้น
+  }, [fromLocationId, toLocationId, workflowId]);
 
-  // ต้องมีคลังครบทั้งคู่ก่อน เพราะช่องเลือกสินค้าดึงเฉพาะของที่มีอยู่ทั้งสองคลัง —
-  // เพิ่มแถวเปล่าไปก่อนได้แต่จะกดเลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
+  // ต้องมีคลังครบทั้งคู่ + workflow ก่อน เพราะช่องเลือกสินค้าดึงเฉพาะของที่มีอยู่
+  // ทั้งสองคลังและอยู่ในชุดที่ workflow เลือกไว้ — เพิ่มแถวเปล่าไปก่อนได้แต่จะกด
+  // เลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
   const handleAddItem = () => {
-    if (!fromLocationId || !toLocationId) {
-      toast.warning(t("selectLocationsFirst"));
+    if (!workflowId || !fromLocationId || !toLocationId) {
+      setAddBlocked("criteria");
+      return;
+    }
+    if (hasNoProduct) {
+      setAddBlocked("noProduct");
       return;
     }
     prependItem({ ...SR_ITEM });
@@ -119,6 +138,7 @@ export function SrItemFields({
     onDelete: setDeleteIndex,
     fromLocationId,
     toLocationId,
+    workflowId,
     role,
   });
 
@@ -205,7 +225,7 @@ export function SrItemFields({
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        tableLayout={{ checkbox: !disabled }}
+        tableLayout={{ rowClamp: false, checkbox: !disabled }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}
@@ -231,6 +251,22 @@ export function SrItemFields({
           removeItem(deleteIndex);
           setDeleteIndex(null);
         }}
+      />
+
+      <WarningDialog
+        open={addBlocked !== null}
+        title={
+          addBlocked === "noProduct"
+            ? t("noProductTitle")
+            : t("addItemBlockedTitle")
+        }
+        description={
+          addBlocked === "noProduct"
+            ? t("noProductDesc")
+            : t("addItemBlockedDesc")
+        }
+        confirmLabel={tc("close")}
+        onConfirm={() => setAddBlocked(null)}
       />
 
       <SrSelectDialog

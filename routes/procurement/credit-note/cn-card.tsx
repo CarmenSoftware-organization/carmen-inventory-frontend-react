@@ -1,14 +1,15 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { CreditNote } from "@/types/credit-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
 interface CnCardProps {
@@ -40,21 +41,24 @@ export default function CnCard({ item, onEdit, onDelete }: CnCardProps) {
   return (
     <ListCard
       title={item.cn_no}
-      badge={
-        <Badge size="xs" className={statusConfig?.className}>
-          {statusConfig?.label ?? item.doc_status}
-        </Badge>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow
+        status={item.doc_status}
+        label={statusConfig?.label ?? item.doc_status}
+      />
       <ListCardRow label={tfl("docDate")}>
         <span className="tabular-nums">
           {formatDate(item.cn_date, dateFormat)}
         </span>
       </ListCardRow>
       <ListCardRow label={tfl("type")}>
-        {typeConfig?.label ?? item.credit_note_type}
+        <StatusIconLabel
+          status={item.credit_note_type}
+          label={typeConfig?.label ?? item.credit_note_type}
+          className="text-muted-foreground"
+        />
       </ListCardRow>
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>

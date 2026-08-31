@@ -6,13 +6,16 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { useTransaction } from "@/hooks/use-transaction";
+import { useTransaction } from "./use-transaction";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { DateRangePicker, type DateRange } from "@/components/ui/date-range-picker";
+import {
+  DateRangePicker,
+  type DateRange,
+} from "@/components/ui/date-range-picker";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
@@ -25,7 +28,7 @@ import type { TransactionSummary as TransactionSummaryType } from "@/types/trans
 import { DateRangeFilter, type DateRangeValue } from "./date-range-filter";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -132,10 +135,10 @@ export default function TransactionComponent() {
   //
   // two-key hidden holder (แก้จาก Task 20 review finding): created_at_to ใช้
   // `hidden: true` + `labelKey: ""` จริง ๆ ตอนนี้แล้ว — ก่อนหน้านี้เคยให้ labelKey
-  // เดียวกับ created_at_from เป็นทางเลี่ยง เพราะ ListFilterSheet/activeFilters เดิม
+  // เดียวกับ created_at_from เป็นทางเลี่ยง เพราะ ListFilter/activeFilters เดิม
   // ไม่รู้จัก "field ที่ไม่ต้อง render/ไม่ต้องมี chip" มาก่อน ทำให้ label ซ้ำโผล่ในชีท
   // (2 แถว "Select date range") และ chip ซ้ำใน ActiveFilterBar หลังเลือกช่วงวันที่
-  // ตอนนี้ framework รองรับ `hidden` แล้ว (ListFilterSheet ข้าม field นี้ทั้งหมด,
+  // ตอนนี้ framework รองรับ `hidden` แล้ว (ListFilter ข้าม field นี้ทั้งหมด,
   // useListFilters.activeFilters ก็กรองออกด้วย) จึง labelKey ว่างได้จริงโดยไม่มี
   // ผลข้างเคียง (t("") ไม่ถูกเรียกเพราะ hidden field ไม่เข้าทั้งสองที่นั้นเลย) —
   // created_at_from ยังประกาศ `linkedKeys: ["created_at_to"]` เพิ่ม เพื่อให้ปุ่ม X
@@ -147,6 +150,7 @@ export default function TransactionComponent() {
         key: "dateRange",
         control: "custom",
         labelKey: "inventoryManagement.transaction.dateRange",
+        section: "listView.sectionDate",
         toClause: () => "",
         render: (value, onChange) => (
           <DateRangeFilter
@@ -159,14 +163,23 @@ export default function TransactionComponent() {
         key: "created_at_from",
         control: "custom",
         labelKey: "inventoryManagement.transaction.selectDateRange",
+        section: "listView.sectionDate",
         toClause: () => "",
         linkedKeys: ["created_at_to"],
-        render: (value, onChange) => (
+        // peer มาจาก draft ของ ListFilter — อ่าน/เขียน created_at_to ผ่านมัน
+        // เพื่อให้ทั้งคู่ apply พร้อมกันตอน Done (fallback URL ตรงเมื่อไม่มี peer)
+        render: (value, onChange, peer) => (
           <DateRangePicker
-            value={{ from: value, to: createdAtToRaw }}
+            value={{
+              from: value,
+              to: peer ? peer.get("created_at_to") : createdAtToRaw,
+            }}
             onValueChange={(range) => {
               onChange(range.from ?? "");
-              setValueRef.current("created_at_to", range.to ?? "");
+              (peer?.set ?? setValueRef.current)(
+                "created_at_to",
+                range.to ?? "",
+              );
             }}
             placeholder={t("selectDateRange")}
             className="w-full"
@@ -185,6 +198,7 @@ export default function TransactionComponent() {
         key: "location_id",
         control: "custom",
         labelKey: "field.location",
+        section: "listView.sectionLocation",
         toClause: (v) => `location_id:${v}`,
         render: (value, onChange) => (
           <LookupLocation
@@ -197,7 +211,6 @@ export default function TransactionComponent() {
             onItemChange={(loc) => setLocationLabel(loc.name)}
             placeholder={t("allLocations")}
             size="sm"
-            className="w-full"
           />
         ),
       },
@@ -205,6 +218,7 @@ export default function TransactionComponent() {
         key: "category_id",
         control: "custom",
         labelKey: "field.category",
+        section: "listView.sectionCategory",
         toClause: (v) => `category_id:${v}`,
         render: (value, onChange) => (
           <LookupCategory
@@ -224,9 +238,12 @@ export default function TransactionComponent() {
         key: "inventory_doc_type",
         control: "custom",
         labelKey: "inventoryManagement.transaction.referenceType",
+        section: "listView.sectionDocument",
         toClause: (v) => `inventory_doc_type|in:${v}`,
         render: (value, onChange) => {
-          const refTypes = new Set(value ? value.split(",").filter(Boolean) : []);
+          const refTypes = new Set(
+            value ? value.split(",").filter(Boolean) : [],
+          );
           const toggle = (v: string) => {
             const next = new Set(refTypes);
             if (next.has(v)) next.delete(v);
@@ -243,7 +260,7 @@ export default function TransactionComponent() {
                     type="button"
                     onClick={() => toggle(opt.value)}
                     className={cn(
-                      "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
+                      "border-border/40 bg-card hover:bg-card text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold tracking-wide transition-all",
                       active && "border-primary bg-primary/10 text-primary",
                     )}
                   >
@@ -303,8 +320,7 @@ export default function TransactionComponent() {
     tableConfig,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="relative isolate -mx-3 -my-3">
@@ -330,7 +346,7 @@ export default function TransactionComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={transactionFilterFields}
               values={lf.values}
               setValue={lf.setValue}

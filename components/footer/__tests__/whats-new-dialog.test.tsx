@@ -13,10 +13,22 @@ vi.mock("@/lib/changelog", () => ({
         commit: "abc1234",
         changes: {
           added: [
-            { scope: "news", summary: "add news image upload", hash: "deadbeef", author: "Jane Dev", pr: 111 },
+            {
+              scope: "news",
+              summary: "add news image upload",
+              hash: "deadbeef",
+              author: "Jane Dev",
+              pr: 111,
+            },
           ],
           fixed: [
-            { scope: null, summary: "fix timestamp", hash: "cafe0001", author: "John Dev", pr: 99 },
+            {
+              scope: null,
+              summary: "fix timestamp",
+              hash: "cafe0001",
+              author: "John Dev",
+              pr: 99,
+            },
           ],
           changed: [],
         },

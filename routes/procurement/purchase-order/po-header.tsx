@@ -1,25 +1,15 @@
 import { useTranslations } from "use-intl";
-import {
-  Building2,
-  History,
-  Lock,
-  Pencil,
-  Save,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
-import { PrintDocumentButton } from "@/components/print-document-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
-import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
+import { WorkflowStepButton } from "@/components/share/workflow-step-button";
+import { usePurchaseOrderComments } from "../shared/use-purchase-order";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -63,7 +53,6 @@ export function PoHeader({
   onShowHistory,
 }: PoHeaderProps) {
   const t = useTranslations("procurement.purchaseOrder");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
@@ -79,26 +68,34 @@ export function PoHeader({
     ? PO_TYPE_CONFIG[purchaseOrder.po_type]
     : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ประเภท/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {poStatusConfig && (
-        <Badge className={poStatusConfig.className} size="sm">
-          {poStatusConfig.label}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {poStatusConfig && purchaseOrder && (
+        <StatusIconLabel
+          status={purchaseOrder.po_status}
+          label={poStatusConfig.label}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
-      {poTypeConfig && (
-        <Badge className={poTypeConfig.className} size="sm">
-          {poTypeConfig.label}
-        </Badge>
+      {poTypeConfig && purchaseOrder && (
+        <StatusIconLabel
+          status={purchaseOrder.po_type}
+          label={poTypeConfig.label}
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {/* รุ่นเอกสารย้ายมาอยู่แถวเดียวกับเลขที่ใบ เพื่อคืนบรรทัด subtitle
           ให้แถบขั้นตอน — เลขที่ใบ · สถานะ · รุ่น คือตัวตนของเอกสารชุดเดียวกัน */}
       {purchaseOrder?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {purchaseOrder.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (
@@ -160,27 +157,22 @@ export function PoHeader({
               {tc("delete")}
             </Button>
           )}
-          <CommentButton count={comments?.length} onClick={onShowComment} />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => openActivity(purchaseOrder.id, purchaseOrder.po_no)}
-          >
-            <History aria-hidden="true" />
-            {tActivity("title")}
-          </Button>
-          {isView && (
-            <PrintDocumentButton
-              documentType="PO"
-              documentId={purchaseOrder.id}
-              filters={
-                purchaseOrder.po_no
-                  ? { DocumentNo: purchaseOrder.po_no }
-                  : undefined
-              }
-            />
-          )}
+          <DocActionsMenu
+            onComment={onShowComment}
+            commentCount={comments?.length}
+            activity={{ id: purchaseOrder.id, label: purchaseOrder.po_no }}
+            print={
+              isView
+                ? {
+                    documentType: "PO",
+                    documentId: purchaseOrder.id,
+                    filters: purchaseOrder.po_no
+                      ? { DocumentNo: purchaseOrder.po_no }
+                      : undefined,
+                  }
+                : undefined
+            }
+          />
         </>
       )}
       {isAdd && (
@@ -240,23 +232,11 @@ export function PoHeader({
     />
   ) : undefined;
 
-  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
-  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
-  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
-  const workflowStep =
-    workflowStepEl && hasHistory && onShowHistory ? (
-      <button
-        type="button"
-        onClick={onShowHistory}
-        title={t("tabWorkflowHistory")}
-        aria-label={t("tabWorkflowHistory")}
-        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {workflowStepEl}
-      </button>
-    ) : (
-      workflowStepEl
-    );
+  const workflowStep = workflowStepEl ? (
+    <WorkflowStepButton onShowHistory={hasHistory ? onShowHistory : undefined}>
+      {workflowStepEl}
+    </WorkflowStepButton>
+  ) : undefined;
 
   return (
     <DocFormHeader

@@ -20,8 +20,10 @@ import {
   useMyPendingStoreRequisition,
   useDeleteStoreRequisition,
   useExportStoreRequisition,
-} from "@/hooks/use-store-requisition";
+  useStoreRequisitionWorkflowStages,
+} from "./use-store-requisition";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import type { StoreRequisition } from "@/types/store-requisition";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -34,20 +36,23 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { FieldLabel } from "@/components/ui/field";
-import { SrFilterStatus } from "./sr-filter-status";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
+import { SR_TYPE } from "@/types/store-requisition";
 import { SrFilterFromLocation } from "./sr-filter-from-location";
 import { SrFilterToLocation } from "./sr-filter-to-location";
-import { SrFilterType } from "./sr-filter-type";
 import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 /**
@@ -117,6 +122,7 @@ export default function StoreRequisitionComponent() {
   const deleteStoreRequisition = useDeleteStoreRequisition();
   const { exportStoreRequisition, isExporting } = useExportStoreRequisition();
   const { params, search, setSearch, tableConfig } = useDataGridState();
+  const { data: stages } = useStoreRequisitionWorkflowStages();
 
   // ของเดิม 4 popover (status/sr_type/from_location/to_location) แต่ละตัวมี
   // value/onChange เป็น URL filter string ของตัวเองอยู่แล้ว (คนละ URL param) —
@@ -124,7 +130,7 @@ export default function StoreRequisitionComponent() {
   const srFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
-        // field แรกเป็น custom control ล้วน ๆ — ยืม slot ใน ListFilterSheet เพื่อวาง
+        // field แรกเป็น custom control ล้วน ๆ — ยืม slot ใน ListFilter เพื่อวาง
         // toggle my-pending/all-document สำหรับมือถือเท่านั้น (ของเดิมอยู่ใน sheet
         // มือถือคู่กับปุ่ม inline บน desktop) ไม่มี value จริงจึงไม่ถูกนับใน
         // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" ของ tab บน URL จริง
@@ -148,29 +154,69 @@ export default function StoreRequisitionComponent() {
         ),
       },
       {
+        // ประเภทมีสองค่าคงที่ label เป็น i18n key — ใช้ control กลางตรง ๆ ได้เลย
         key: "sr_type",
-        control: "custom",
+        control: "multi-select",
         labelKey: "common.type",
-        render: (value, onChange) => (
-          <SrFilterType value={value} onChange={onChange} className="w-full" />
-        ),
+        section: "listView.sectionDocument",
+        options: [
+          {
+            labelKey: "common.transfer",
+            value: `sr_type|string:${SR_TYPE.TRANSFER}`,
+          },
+          {
+            labelKey: "common.issue",
+            value: `sr_type|string:${SR_TYPE.ISSUE}`,
+          },
+        ],
       },
       {
+        // ค่า option เป็น clause เต็มต่อตัว (doc_status|string:draft) — เลือกหลายตัว
+        // MultiSelectFilter join เป็น clause ซ้ำ prefix ซึ่ง gateway parse รวมเป็น
+        // IN query ให้เอง (แบบเดียวกับ status ของ PR)
         key: "filter",
         control: "custom",
         labelKey: "common.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
-          <SrFilterStatus
+          <MultiSelectFilter
             value={value}
             onChange={onChange}
+            options={STORE_REQUISITION_STATUS_OPTIONS}
             className="w-full"
           />
         ),
       },
       {
+        key: "workflow_current_stage",
+        control: "stage",
+        labelKey: "field.stage",
+        section: "listView.sectionDocument",
+        stages: stages ?? [],
+      },
+      {
+        key: "workflow",
+        control: "workflow",
+        labelKey: "field.workflow",
+        section: "listView.sectionDocument",
+        workflowType: WORKFLOW_TYPE.SR,
+      },
+      {
+        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
+        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
+        key: "sendback",
+        control: "status",
+        labelKey: "common.sendBack",
+        section: "listView.sectionDocument",
+        options: [
+          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
+        ],
+      },
+      {
         key: "from_location",
         control: "custom",
         labelKey: "field.fromLocation",
+        section: "listView.sectionLocation",
         render: (value, onChange) => (
           <SrFilterFromLocation
             value={value}
@@ -183,6 +229,7 @@ export default function StoreRequisitionComponent() {
         key: "to_location",
         control: "custom",
         labelKey: "field.toLocation",
+        section: "listView.sectionLocation",
         render: (value, onChange) => (
           <SrFilterToLocation
             value={value}
@@ -191,8 +238,27 @@ export default function StoreRequisitionComponent() {
           />
         ),
       },
+      {
+        key: "user_id",
+        control: "requester",
+        labelKey: "common.requester",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "department",
+        control: "department",
+        labelKey: "field.department",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "sr_date",
+        control: "date-range",
+        labelKey: "field.date",
+        fieldKey: "sr_date",
+        section: "listView.sectionDate",
+      },
     ],
-    [viewMode, t, tc],
+    [viewMode, stages, t, tc],
   );
 
   const lf = useListFilters({
@@ -233,6 +299,19 @@ export default function StoreRequisitionComponent() {
   });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav) — my-pending ยิงชุด
+  // เต็ม (perpage: -1) แยกอีกหนึ่ง query เพื่อให้ ↑↓ เดินได้ทุกใบที่รอเราอยู่ ไม่ใช่แค่
+  // หน้าที่เปิดค้างไว้ (คนอนุมัติไล่เคลียร์ได้จบชุดโดยไม่ต้องเด้งกลับ list)
+  // all-document ไม่ทำแบบนี้ — ใบทั้งระบบมีหลักพัน ดึงมาทั้งกองเพื่อเอาแค่ id ไม่คุ้ม
+  // ระหว่างชุดเต็มยังโหลดไม่เสร็จใช้แถวหน้าปัจจุบันไปก่อน ปุ่มจึงไม่หายวับ
+  const docSequenceQuery = useMyPendingStoreRequisition(
+    { ...queryParams, page: undefined, perpage: -1 },
+    { enabled: viewMode === "my-pending" },
+  );
+  const docSequenceItems =
+    viewMode === "my-pending" ? (docSequenceQuery.data?.data ?? items) : items;
+  useRecordDocSequence(docSequenceItems.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -345,7 +424,7 @@ export default function StoreRequisitionComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={srFilterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -359,6 +438,7 @@ export default function StoreRequisitionComponent() {
           <div className="ml-auto hidden shrink-0 items-center gap-2 sm:flex">
             {displayMode === "list" && (
               <div className="hidden sm:block">
+                <DataGridSortMenu table={table} />
                 <DataGridColumnVisibility
                   table={table}
                   trigger={

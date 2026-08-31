@@ -1,0 +1,9 @@
+// Project settings สำหรับ Zed — บังคับ prettier เป็น formatter ตอน save
+// (default "auto" ของ Zed เลือก formatter ไม่ตรง ทำให้ format on save เงียบ)
+{
+  "format_on_save": "on",
+  "formatter": "prettier",
+  "code_actions_on_format": {
+    "source.fixAll.eslint": true
+  }
+}

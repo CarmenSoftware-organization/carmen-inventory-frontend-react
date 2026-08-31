@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { Audit } from "./audit";
 import { lastActionSchema } from "./last-action";
+import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
 export type PurchaseRequestStatus =
@@ -32,9 +33,7 @@ export enum PR_ITEM_STAGE_STATUS {
 }
 
 export interface PurchaseRequestDetail
-  extends TaxFields,
-    DiscountFields,
-    ItemMoneyFields {
+  extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   purchase_request_id: string;
   sequence_no: number;
@@ -95,8 +94,7 @@ export interface PrItemHistoryEntry {
 }
 
 export interface PurchaseRequestTemplateDetail
-  extends TaxFields,
-    DiscountFields {
+  extends TaxFields, DiscountFields {
   id: string;
   purchase_request_template_id: string;
   location_id: string;
@@ -180,6 +178,11 @@ export interface PurchaseRequest {
   workflow_next_stage: string;
   workflow_previous_stage: string;
   workflow_history: WorkflowHistoryEntry[];
+  /**
+   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
+   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
+   */
+  last_action?: LastAction | null;
   requestor_id: string;
   requestor_name: string;
   department_id: string;
@@ -221,7 +224,9 @@ export const purchaseRequestSchema = z.looseObject({
   // ไปไม่ถึง — แถวเลยมี created_at ดิบค้างและ **ไม่มี `audit`** (ดู CLAUDE.md
   // "Known open items") พอ backend ใส่ paths ให้ถูก created_at จะหายไปเป็น audit
   // การประกาศไว้ตอนนี้จึงเท่ากับผูกโค้ดกับสภาพชั่วคราวที่กำลังจะถูกแก้
-  purchase_request_detail: z.array(purchaseRequestDetailSummarySchema).optional(),
+  purchase_request_detail: z
+    .array(purchaseRequestDetailSummarySchema)
+    .optional(),
 });
 
 export enum PR_ITEM_PRICELIST_COMPARE_TYPE {

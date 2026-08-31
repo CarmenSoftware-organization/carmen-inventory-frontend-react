@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Check, Sparkles } from "lucide-react";
@@ -74,7 +73,7 @@ export function RecipeComplianceFields({
           <div>
             <CardSubLabel className="flex items-center gap-1.5">
               {t("allergens")}
-              <span className="ml-1 font-semibold normal-case tracking-normal text-muted-foreground">
+              <span className="text-muted-foreground ml-1 font-semibold tracking-normal normal-case">
                 · {t("allergensFlagged", { count: flaggedCount })}
               </span>
             </CardSubLabel>
@@ -110,9 +109,7 @@ export function RecipeComplianceFields({
                           isDisabled && "cursor-not-allowed opacity-60",
                         )}
                       >
-                        {on && (
-                          <Check className="size-3" aria-hidden="true" />
-                        )}
+                        {on && <Check className="size-3" aria-hidden="true" />}
                         {allergen.label}
                       </button>
                     );
@@ -122,7 +119,7 @@ export function RecipeComplianceFields({
               {customList.map((custom) => (
                 <span
                   key={custom}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-warning bg-warning/10 px-3 py-1 text-xs font-semibold text-warning-foreground"
+                  className="border-warning bg-warning/10 text-warning-foreground inline-flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1 text-xs font-semibold"
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   {custom}

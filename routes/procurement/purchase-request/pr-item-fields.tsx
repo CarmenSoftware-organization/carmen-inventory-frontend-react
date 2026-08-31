@@ -141,10 +141,6 @@ export function PrItemFields({
     }, 0);
   };
 
-  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — ขึ้น toast อย่างเดียว
-  // ผู้ใช้ยังไม่เห็นอยู่ดีว่าต้องกรอกอะไรบ้าง เพราะยังไม่มีแถวให้ดู เติมแถวเปล่า
-  // ให้เลยแล้วช่องที่ต้องกรอกจะขึ้นกรอบแดงเอง (แถวที่มี error ถูกกางให้อยู่แล้ว
-  // ผ่าน submitCount ใน pr-item-table)
   const submitCount = form.formState.submitCount;
   useEffect(() => {
     if (!submitCount) return;
@@ -173,9 +169,7 @@ export function PrItemFields({
   });
 
   const selectedRows = table.getSelectedRowModel().rows;
-  // ต้องอยู่โหมดแก้ไขก่อน — ติ๊กแถวได้เฉพาะโหมดแก้ไขก็จริง แต่ selection ค้างข้าม
-  // โหมดได้ (ติ๊กแล้วกดยกเลิก) ปุ่มตัดสินจะยังโผล่ให้กดในโหมดอ่าน · เกณฑ์เดียวกับ
-  // ปุ่มล้างสถานะรายแถวและกับ SR
+
   const canBulkAction =
     !isDisabled &&
     (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
@@ -195,13 +189,6 @@ export function PrItemFields({
     return selectedRows.map((row) => row.index);
   };
 
-  /**
-   * Validate รายการที่เลือกก่อนทำ bulk action (approve/review/reject)
-   * ถ้ามี item ที่ zod error → expand แถวนั้น + scroll ไป field แรกที่ผิด + เตือน
-   * แล้วคืน `true` เพื่อให้ caller block action
-   * (zod superRefine บังคับ vendor/price/tax เฉพาะตอน role = purchase อยู่แล้ว
-   *  จึงไม่ block ผิดจังหวะที่ stage อื่น)
-   */
   const guardSelectedItemErrors = async (): Promise<boolean> => {
     await form.trigger("items");
     const errored = getSelectedIndices().filter((index) => {
@@ -373,7 +360,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="success"
-                size="xs"
+                size="sm"
                 onClick={handleBulkApprove}
               >
                 <Check />
@@ -382,7 +369,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="warning"
-                size="xs"
+                size="sm"
                 onClick={handleBulkReview}
               >
                 <Eye />
@@ -391,7 +378,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="destructive"
-                size="xs"
+                size="sm"
                 onClick={handleBulkReject}
               >
                 <X />
@@ -401,7 +388,7 @@ export function PrItemFields({
                 <Button
                   type="button"
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={handleBulkSplit}
                 >
                   <Scissors />
@@ -419,7 +406,10 @@ export function PrItemFields({
                   return {
                     productName: item.product_name,
                     productLocalName: item.product_local_name,
-                    locationName: item.location_name,
+                    qty: item.requested_qty,
+                    unitName: item.requested_unit_name,
+                    price: item.pricelist_price,
+                    currencyCode: item.currency_code ?? undefined,
                   };
                 })}
               />
@@ -427,8 +417,8 @@ export function PrItemFields({
             {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
               <Button
                 type="button"
-                variant="ghost"
-                size="xs"
+                variant="outline"
+                size="sm"
                 onClick={() =>
                   table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
                 }
@@ -477,6 +467,7 @@ export function PrItemFields({
           table={table}
           recordCount={itemFields.length}
           tableLayout={{
+            rowClamp: false,
             checkbox: !!prStatus && prStatus !== "draft",
             columnsResizable: true,
           }}
@@ -488,9 +479,6 @@ export function PrItemFields({
             />
           }
         >
-          {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
-            — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
-            แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
           <DataGridContainer scroll>
             <DataGridTable />
           </DataGridContainer>
@@ -517,15 +505,11 @@ export function PrItemFields({
               if (!open) setBulkAction(null);
             }}
             onConfirm={handleBulkActionConfirm}
-            items={selectedRows.map(
-              (row): ActionDialogItem => ({
-                index: row.index,
-                productName: form.getValues(`items.${row.index}.product_name`),
-                locationName: form.getValues(
-                  `items.${row.index}.location_name`,
-                ),
-              }),
-            )}
+            items={selectedRows.map((row): ActionDialogItem => ({
+              index: row.index,
+              productName: form.getValues(`items.${row.index}.product_name`),
+              locationName: form.getValues(`items.${row.index}.location_name`),
+            }))}
             {...bulkActionDialogConfig[bulkAction]}
             {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
               ? { stages: previousStages, stagesLoading }

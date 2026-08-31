@@ -1,4 +1,4 @@
-import { comboColWidth } from "../combo-col-width";
+import { comboColWidth } from "../shared/combo-col-width";
 
 /**
  * คอลัมน์จำนวน (order / received / foc)

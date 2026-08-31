@@ -1,4 +1,3 @@
-
 import { Sparkle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -30,7 +29,9 @@ export function PrAskAiMenu({ items, disabled }: PrAskAiMenuProps) {
     if (!provider.supportsPrefill && navigator.clipboard) {
       navigator.clipboard
         .writeText(query)
-        .then(() => toast.success(t("askAiCopied", { provider: provider.label })))
+        .then(() =>
+          toast.success(t("askAiCopied", { provider: provider.label })),
+        )
         .catch(() => toast.error(t("askAiCopyFailed")));
     }
     window.open(provider.buildUrl(query), "_blank", "noopener,noreferrer");
@@ -39,7 +40,7 @@ export function PrAskAiMenu({ items, disabled }: PrAskAiMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" size="xs" disabled={disabled}>
+        <Button type="button" variant="outline" size="sm" disabled={disabled}>
           <Sparkle />
           {t("askAi")}
         </Button>

@@ -54,7 +54,9 @@ describe("useNavigationGuard — programmatic back", () => {
     await user.click(screen.getByRole("button", { name: "toolbar back" }));
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "open detail" })).toBeInTheDocument(),
+      expect(
+        screen.getByRole("button", { name: "open detail" }),
+      ).toBeInTheDocument(),
     );
     expect(screen.queryByText("guard dialog")).not.toBeInTheDocument();
   });

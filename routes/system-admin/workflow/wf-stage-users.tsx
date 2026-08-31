@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -10,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Field, FieldLabel } from "@/components/ui/field";
 import type { User } from "@/types/workflows";
+import { cn } from "@/lib/utils";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 
 interface WfStageUsersProps {
@@ -35,15 +35,29 @@ export function WfStageUsers({
   const t = useTranslations("systemAdmin.workflow");
 
   const filteredUsers = (() => {
-    if (!userSearch) return users;
-    const q = userSearch.toLowerCase();
-    return users.filter(
-      (u) =>
-        u.firstname.toLowerCase().includes(q) ||
-        u.lastname.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        (u.middlename && u.middlename.toLowerCase().includes(q)),
-    );
+    let result = users;
+    if (userSearch) {
+      const q = userSearch.toLowerCase();
+      result = users.filter(
+        (u) =>
+          u.firstname.toLowerCase().includes(q) ||
+          u.lastname.toLowerCase().includes(q) ||
+          u.email.toLowerCase().includes(q) ||
+          (u.middlename && u.middlename.toLowerCase().includes(q)),
+      );
+    }
+
+    // Sort assigned users to the top, then alphabetically by firstname
+    return [...result].sort((a, b) => {
+      const aAssigned = assignedUserIds.has(a.user_id) ? 1 : 0;
+      const bAssigned = assignedUserIds.has(b.user_id) ? 1 : 0;
+
+      if (aAssigned !== bAssigned) {
+        return bAssigned - aAssigned;
+      }
+
+      return a.firstname.localeCompare(b.firstname);
+    });
   })();
 
   const toggleUser = (user: User) => {
@@ -105,41 +119,43 @@ export function WfStageUsers({
       )}
 
       {isHod ? (
-        <div className="border-warning/40 bg-warning/10 flex items-center gap-1.5 rounded border px-2 py-1.5">
-          <Lock className="text-warning-foreground size-3" />
-          <p className="text-warning-foreground text-xs">{t("hodEnabled")}</p>
+        <div className="border-warning/30 bg-warning/10 flex items-center gap-3 rounded-lg border p-4">
+          <Lock className="text-warning-foreground size-4" />
+          <p className="text-warning-foreground text-sm font-medium">
+            {t("hodEnabled")}
+          </p>
         </div>
       ) : (
-        <>
-          <div className="flex items-center gap-1.5">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute top-1/2 left-2 size-3 -translate-y-1/2" />
+              <Search className="text-muted-foreground/70 absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
               <Input
                 placeholder={t("searchUsers")}
-                className="h-7 pl-7 text-xs"
+                className="bg-muted/30 hover:bg-muted/50 focus:bg-background h-9 w-full rounded-lg pl-9 transition-colors"
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
               />
             </div>
             {!isDisabled && (
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1.5">
                 <Button
                   type="button"
-                  variant="outline"
-                  size="xs"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => assignAll(userSearch ? filteredUsers : users)}
-                  className="h-6 px-1.5 text-xs"
+                  className="hover:bg-secondary/80 h-9 px-4 text-sm font-medium shadow-sm transition-all"
                 >
                   {userSearch ? t("assignFiltered") : t("assignAll")}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={() =>
                     unassignAll(userSearch ? filteredUsers : users)
                   }
-                  className="h-6 px-1.5 text-xs"
+                  className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 h-9 px-4 text-sm font-medium shadow-sm transition-all"
                 >
                   {userSearch ? t("unassignFiltered") : t("unassignAll")}
                 </Button>
@@ -147,30 +163,50 @@ export function WfStageUsers({
             )}
           </div>
 
-          <div className="max-h-56 space-y-0.5 overflow-y-auto">
+          <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
             {filteredUsers.length === 0 ? (
-              <p className="text-muted-foreground py-3 text-center text-xs">
-                {t("noUsersFound")}
-              </p>
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-8 text-center">
+                <Search className="text-muted-foreground/40 mb-2 size-6" />
+                <p className="text-muted-foreground text-sm">
+                  {t("noUsersFound")}
+                </p>
+              </div>
             ) : (
               filteredUsers.map((user) => {
                 const isAssigned = assignedUserIds.has(user.user_id);
                 return (
                   <div
                     key={user.user_id}
-                    className="flex items-center justify-between rounded border px-1.5 py-1"
+                    className={cn(
+                      "group flex items-center justify-between rounded-xl border p-4 transition-all duration-200",
+                      isAssigned
+                        ? "border-primary/20 bg-primary/5 ring-primary/10 shadow-sm ring-1"
+                        : "hover:border-border hover:bg-muted/40 border-transparent",
+                    )}
                   >
-                    <div className="flex items-center gap-1.5">
-                      <Avatar className="size-5">
-                        <AvatarFallback className="text-micro-eyebrow">
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        className={cn(
+                          "size-8 shadow-sm transition-transform duration-200",
+                          isAssigned
+                            ? "ring-primary ring-offset-background ring-2 ring-offset-1"
+                            : "group-hover:scale-105",
+                        )}
+                      >
+                        <AvatarFallback className="bg-muted text-foreground text-sm font-medium">
                           {user.initials}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="text-xs leading-tight font-semibold">
+                      <div className="flex flex-col">
+                        <p
+                          className={cn(
+                            "text-sm leading-tight font-semibold transition-colors",
+                            isAssigned ? "text-primary" : "text-foreground",
+                          )}
+                        >
                           {user.firstname} {user.lastname}
                         </p>
-                        <p className="text-muted-foreground text-micro-legal leading-tight">
+                        <p className="text-muted-foreground/80 mt-0.5 text-sm leading-tight">
                           {user.email}
                         </p>
                       </div>
@@ -178,10 +214,15 @@ export function WfStageUsers({
                     {!isDisabled && (
                       <Button
                         type="button"
-                        variant={isAssigned ? "destructive" : "outline"}
-                        size="xs"
+                        variant={isAssigned ? "outline" : "secondary"}
+                        size="sm"
                         onClick={() => toggleUser(user)}
-                        className="h-6 px-1.5 text-xs"
+                        className={cn(
+                          "h-9 px-4 text-sm font-medium shadow-sm transition-all",
+                          isAssigned
+                            ? "border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            : "hover:bg-primary hover:text-primary-foreground",
+                        )}
                       >
                         {isAssigned ? t("unassign") : t("assign")}
                       </Button>
@@ -189,7 +230,7 @@ export function WfStageUsers({
                     {isDisabled && isAssigned && (
                       <Badge
                         variant="secondary"
-                        className="px-1 py-0 text-micro-legal"
+                        className="bg-primary/10 text-primary hover:bg-primary/20"
                       >
                         {t("assigned")}
                       </Badge>
@@ -199,7 +240,7 @@ export function WfStageUsers({
               })
             )}
           </div>
-        </>
+        </div>
       )}
     </>
   );

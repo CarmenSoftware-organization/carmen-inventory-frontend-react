@@ -1,5 +1,10 @@
 import { useTranslations } from "use-intl";
-import { Field, FieldInput, FieldLabel, FieldSelect } from "@/components/ui/field";
+import {
+  Field,
+  FieldInput,
+  FieldLabel,
+  FieldSelect,
+} from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import type { DatasetParam, WidgetParams } from "@/types/dashboard-widget";
 import { PARAM_EMPTY, shouldShowAllOption } from "./widget-shape";
@@ -61,7 +66,9 @@ export function WidgetParamFields({
                 <SelectContent>
                   {/* param ไม่บังคับ + ไม่มี default = เลือก "ทั้งหมด" ได้ (ส่ง "") */}
                   {shouldShowAllOption(p) && (
-                    <SelectItem value={PARAM_EMPTY}>{t("paramsAll")}</SelectItem>
+                    <SelectItem value={PARAM_EMPTY}>
+                      {t("paramsAll")}
+                    </SelectItem>
                   )}
                   {p.options.map((opt) => (
                     <SelectItem key={opt} value={opt}>

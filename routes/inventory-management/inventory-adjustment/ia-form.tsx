@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useFormatter, useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -10,7 +10,7 @@ import {
   useDeleteInventoryAdjustment,
   useCommitInventoryAdjustment,
   useVoidInventoryAdjustment,
-} from "@/hooks/use-inventory-adjustment";
+} from "./use-inventory-adjustment";
 import { useAdjustmentType } from "@/hooks/use-adjustment-type";
 import { useProfile } from "@/hooks/use-profile";
 import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";
@@ -54,7 +54,6 @@ export function InventoryAdjustmentForm({
   inventoryAdjustment,
 }: InventoryAdjustmentFormProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(
     inventoryAdjustment ? "view" : "add",
   );
@@ -298,12 +297,11 @@ export function InventoryAdjustmentForm({
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
-    }
+    navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
   };
 
   const handleBack = () => {

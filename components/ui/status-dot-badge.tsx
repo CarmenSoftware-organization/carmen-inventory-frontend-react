@@ -18,11 +18,25 @@ const TONE_DOT: Record<DotTone, string> = {
   neutral: "bg-muted-foreground/50",
 };
 
+/**
+ * ขนาดจุด — 8px ทุกขนาดชิป ยกเว้น `xs` ที่ชิปบีบเกินกว่าจะรับได้
+ *
+ * เดิมเป็น 6px ทุกที่ซึ่งเล็กเกินไปสำหรับของที่แบกสัญญาณสีไว้คนเดียว (label เป็น
+ * สีกลางเสมอ) แต่**จุดไม่ต้องโตตามตัวอักษร** — ขนาดตัวอักษรเป็นเรื่องของการอ่าน
+ * ส่วนจุดเป็นเรื่องของการกวาดตาหาสี ซึ่งมีสตอปที่พอดีอยู่สตอปเดียว โตกว่านี้
+ * มันจะอ่านเป็น "จุดที่มีคำต่อท้าย" แทนที่จะเป็นป้ายที่มีจุดนำ
+ */
+const DOT_SIZE = {
+  xs: "size-1.5",
+  sm: "size-2",
+  lg: "size-2",
+} as const;
+
 interface StatusDotBadgeProps {
   /** ความหมายของสถานะ → สีของ dot */
   readonly tone: DotTone;
   /** ขนาด badge — `"sm"` list/grid, `"xs"` หัวฟอร์มกระชับ, `"lg"` table cell */
-  readonly size?: "xs" | "sm" | "lg";
+  readonly size?: keyof typeof DOT_SIZE;
   readonly className?: string;
   readonly children: ReactNode;
 }
@@ -47,10 +61,18 @@ export function StatusDotBadge({
     <Badge
       variant="secondary"
       size={size}
-      className={cn("font-normal", className)}
+      // ธงให้ globals.css ยกเว้นชิปนี้จากกฎย่อ badge ในตาราง (ดูคอมเมนต์ที่กฎนั้น)
+      data-status-chip=""
+      // ยกเลิก tracking-tight ที่มาจาก base ของ Badge — ในแถวตารางที่คอลัมน์ข้าง ๆ
+      // เป็น tracking-wide ตัวอักษรที่ถูกบีบจะอ่านว่าเล็กกว่าเพื่อน ทั้งที่ px เท่ากัน
+      className={cn("font-normal tracking-normal", className)}
     >
       <span
-        className={cn("size-1.5 shrink-0 rounded-full", TONE_DOT[tone])}
+        className={cn(
+          "shrink-0 rounded-full",
+          DOT_SIZE[size],
+          TONE_DOT[tone],
+        )}
         aria-hidden="true"
       />
       {children}

@@ -21,7 +21,12 @@ interface SrRequestDetailsProps {
   readonly readOnly: boolean;
   /** submit pending → input ยังอยู่แต่กดไม่ได้ */
   readonly disabled: boolean;
-  readonly onFromLocInfoChange: (info: LocationInfo) => void;
+  /**
+   * แจ้งคลังต้นทางที่เลือกกลับให้ผู้เรียก — optional เพราะตอนนี้ไม่มีใครต้องการ
+   * (แท็บ stock movement ดึงชื่อคลังมาจาก API เองแล้ว) คงไว้เพราะฝั่งปลายทางยังใช้
+   * และวันไหนมีคนต้องใช้จะได้ไม่ต้องรื้อ dropdown ใหม่
+   */
+  readonly onFromLocInfoChange?: (info: LocationInfo) => void;
   readonly onToLocInfoChange: (info: LocationInfo) => void;
   readonly role?: string;
   /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
@@ -115,7 +120,7 @@ export function SrRequestDetails({
                 }
               }}
               onItemChange={(item) =>
-                onFromLocInfoChange({
+                onFromLocInfoChange?.({
                   name: item?.name ?? "",
                   code: item?.code ?? "",
                   location_type: item?.location_type,

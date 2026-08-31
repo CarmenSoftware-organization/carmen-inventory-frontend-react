@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +27,7 @@ import { useCertification } from "@/hooks/use-certification";
 import {
   useCreateVendorCertificate,
   useUpdateVendorCertificate,
-} from "@/hooks/use-vendor-certificate";
+} from "./use-vendor-certificate";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { VendorCertificate } from "@/types/vendor-certificate";
 
@@ -143,7 +142,14 @@ export function VendorCertificateDialog({
     };
 
     if (isEdit) {
-      updateCert.mutate({ id: certificate.id, doc_version: certificate.doc_version, ...payload }, handlers);
+      updateCert.mutate(
+        {
+          id: certificate.id,
+          doc_version: certificate.doc_version,
+          ...payload,
+        },
+        handlers,
+      );
     } else {
       createCert.mutate({ vendor_id: vendorId, ...payload }, handlers);
     }

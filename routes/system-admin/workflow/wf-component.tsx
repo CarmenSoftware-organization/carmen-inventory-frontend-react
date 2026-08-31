@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus, Loader2 } from "lucide-react";
@@ -13,7 +12,8 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useWorkflow, useDeleteWorkflow } from "@/hooks/use-workflow";
+import { useWorkflow } from "@/hooks/use-workflow";
+import { useDeleteWorkflow } from "./use-workflow-mutations";
 import type { WorkflowDto } from "@/types/workflows";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -34,7 +34,7 @@ import { useWfRowMutations } from "./use-wf-row-mutations";
 import { STATUS_OPTIONS, WF_TYPE_OPTIONS } from "./wf-filter-options";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -68,6 +68,7 @@ export default function WorkflowComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -81,6 +82,7 @@ export default function WorkflowComponent() {
       },
       {
         key: "workflow_type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.workflow.workflowType",
         render: (value, onChange) => (
@@ -137,8 +139,7 @@ export default function WorkflowComponent() {
     pendingId,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -180,7 +181,7 @@ export default function WorkflowComponent() {
             view={lf.view}
             snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
           />
-          <ListFilterSheet
+          <ListFilter
             fields={workflowFilterFields}
             values={lf.values}
             setValue={lf.setValue}
@@ -202,9 +203,10 @@ export default function WorkflowComponent() {
             onRetry={() => grid.refetch?.()}
           />
         )}
-        {isMobile && !grid.isLoading && !grid.error && workflows.length === 0 && (
-          <EmptyComponent />
-        )}
+        {isMobile &&
+          !grid.isLoading &&
+          !grid.error &&
+          workflows.length === 0 && <EmptyComponent />}
         {isMobile && !grid.isLoading && !grid.error && workflows.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-3">

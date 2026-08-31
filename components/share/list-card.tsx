@@ -11,9 +11,13 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { isSentBack } from "@/constant/last-action";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { AuditEntry } from "@/types/audit";
+import type { LastAction } from "@/types/last-action";
 
 /**
  * Skeleton ที่ mirror โครง `ListCard` — ใช้ตอนโหลดให้ความสูงใกล้ของจริง
@@ -135,6 +139,96 @@ export function ListCardAuditRows({
         </ListCardRow>
       )}
     </>
+  );
+}
+
+/**
+ * แถว **สถานะ** หัวเนื้อการ์ด
+ *
+ * เดิมสถานะอยู่ในช่อง `badge` มุมขวาบนของหัวการ์ด ซึ่งทำให้มันเป็นข้อมูลชิ้นเดียว
+ * ในการ์ดที่ไม่มี label กำกับ คนต้องเดาเอาเองว่าคำที่เห็นคือสถานะ — พอย้ายลงมา
+ * เป็นแถวเหมือนข้อมูลอื่น มันอ่านคู่กับ label ได้ตรง ๆ และการ์ดทุกใบมีโครงเดียวกัน
+ *
+ * @param status - ค่า status ดิบ (ไม่มี = ไม่ render เช่น PO ที่ยังไม่มีสถานะ)
+ * @param label - ป้ายสถานะที่แสดง (มาจาก config ของโมดูลเอง)
+ */
+export function ListCardStatusRow({
+  status,
+  label,
+}: {
+  readonly status?: string | null;
+  readonly label?: string | null;
+}) {
+  const tfl = useTranslations("field");
+
+  if (!status || !label) return null;
+
+  return (
+    <ListCardRow label={tfl("status")}>
+      <StatusIconLabel
+        status={status}
+        label={label}
+        // ป้ายของบางโมดูลมาจาก i18n ตรง ๆ ไม่ได้ผ่าน createStatusConfig ที่
+        // uppercase ให้ — บังคับที่นี่ทีเดียวจะได้ไม่ต้องจำเป็นราย ๆ ไป
+        className="uppercase"
+      />
+    </ListCardRow>
+  );
+}
+
+/**
+ * แถว **สถานะ** ของข้อมูลตั้งต้น (เปิด/ปิดใช้งาน)
+ *
+ * ย้ายลงมาจากช่อง `badge` หัวการ์ดด้วยเหตุผลเดียวกับสถานะเอกสาร — ของที่ลอยอยู่
+ * มุมขวาบนโดยไม่มี label กำกับ คนต้องเดาเองว่ามันคืออะไร
+ *
+ * ยังเป็นชิปจุดสี (`StatusBadge`) ไม่ใช่ไอคอน+ข้อความแบบเอกสาร โดยตั้งใจ:
+ * เปิด/ปิดใช้งานมีแค่สองค่าที่ตรงข้ามกัน ไม่ใช่ความคืบหน้าที่ไล่เป็นลำดับ จึงไม่มี
+ * รูปทรงให้แยกด้วยไอคอน — ต่างจากสถานะเอกสารที่มีเจ็ดแปดค่าและคนแยกด้วยรูปไอคอน
+ *
+ * @param active - `item.is_active` ของรายการนั้น
+ */
+export function ListCardActiveRow({ active }: { readonly active: boolean }) {
+  const tfl = useTranslations("field");
+
+  return (
+    <ListCardRow label={tfl("status")}>
+      <StatusBadge active={active} />
+    </ListCardRow>
+  );
+}
+
+/**
+ * แถว **ส่งกลับ** — เอกสารใบนี้ถูกตีกลับให้กลับไปแก้อยู่หรือไม่
+ *
+ * **แถวนี้โผล่เสมอเมื่อ render** ไม่ถูกตีกลับก็ขึ้นขีด ไม่ใช่หายไปทั้งแถว —
+ * การ์ดในกริดเดียวกันจึงมีจำนวนแถวเท่ากันทุกใบ ตาไล่ลงตรง ๆ ได้โดยไม่ต้องนับใหม่
+ * ทุกใบ (แถวที่หายไปบ้างโผล่บ้างทำให้ข้อมูลบรรทัดเดียวกันของสองใบอยู่คนละระดับ)
+ *
+ * ให้ render เฉพาะโมดูลที่**มีเส้นทางตีกลับจริง** คือ PR / PO / SR เท่านั้น —
+ * GRN/CN/IA ไม่มี `buildReviewWorkflow` ฝั่ง backend จึงไม่มีแถวนี้เลย ไม่ใช่มีแล้ว
+ * ขึ้นขีดตลอดกาล (ดู `constant/last-action.ts`)
+ *
+ * @param lastAction - `item.last_action` จาก list/detail endpoint
+ */
+export function ListCardSendBackRow({
+  lastAction,
+}: {
+  readonly lastAction?: LastAction | null;
+}) {
+  const tc = useTranslations("common");
+
+  return (
+    <ListCardRow label={tc("sendBack")}>
+      {isSentBack(lastAction) ? (
+        <StatusIconLabel
+          status="send_back"
+          label={tc("sendBack").toUpperCase()}
+        />
+      ) : (
+        "—"
+      )}
+    </ListCardRow>
   );
 }
 

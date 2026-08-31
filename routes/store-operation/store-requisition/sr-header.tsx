@@ -1,19 +1,22 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Building2,
   CalendarDays,
-  History,
   Pencil,
   Save,
   Trash2,
   User,
   X,
 } from "lucide-react";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
-import { useStoreRequisitionComments } from "@/hooks/use-store-requisition";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
+import { useStoreRequisitionComments } from "./use-store-requisition";
 import {
   Sheet,
   SheetContent,
@@ -21,24 +24,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { WorkflowStepButton } from "@/components/share/workflow-step-button";
 import { cn } from "@/lib/utils";
 import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
 import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
-import {
-  SR_STATUS_CONFIG,
-  SR_TYPE_VARIANT,
-} from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { getModeLabels, type FormMode } from "@/types/form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type {
   StoreRequisition,
   StoreRequisitionType,
 } from "@/types/store-requisition";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface SrHeaderProps {
   readonly storeRequisition?: StoreRequisition;
@@ -86,7 +85,6 @@ export function SrHeader({
   onComment,
 }: SrHeaderProps) {
   const t = useTranslations("storeOperation.storeRequisition");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -108,21 +106,39 @@ export function SrHeader({
     role === STAGE_ROLE.APPROVE ||
     role === STAGE_ROLE.ISSUE;
 
+  const navigate = useNavigate();
+  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่มสร้าง: ต้องมี workflow ที่เริ่มได้
+  // (แนวเดียวกับ PR) กดไม่ผ่านเด้ง dialog บอกเหตุผล ไม่ซ่อนปุ่มเงียบ ๆ
+  const { canCreate: canCreateSr } = useCreatableWorkflows(WORKFLOW_TYPE.SR);
+  const handleDuplicate = () => {
+    if (!canCreateSr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate(
+      `/store-operation/store-requisition/new?duplicate_id=${storeRequisition?.id}`,
+    );
+  };
+
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ชนิดใบ/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
       {docStatus && (
-        <Badge className={SR_STATUS_CONFIG[docStatus]?.className}>
-          {ts(docStatus).toUpperCase()}
-        </Badge>
+        <StatusIconLabel
+          status={docStatus}
+          label={ts(docStatus)}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+        />
       )}
       {srType && (
-        <Badge
-          variant={SR_TYPE_VARIANT[srType]}
-          size="sm"
-          className="uppercase"
-        >
-          {srType}
-        </Badge>
+        <StatusIconLabel
+          status={srType}
+          label={srType}
+          className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+        />
       )}
       {isAdd && (
         <Badge variant="secondary" size="sm">
@@ -132,11 +148,11 @@ export function SrHeader({
       {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
           เพื่อคืนบรรทัด subtitle ให้แถบขั้นตอน */}
       {storeRequisition?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {storeRequisition.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (
@@ -184,29 +200,22 @@ export function SrHeader({
           )}
         </>
       )}
-      {storeRequisition && onComment && (
-        <CommentButton count={comments?.length} onClick={onComment} />
-      )}
+      {/* Duplicate/Print เฉพาะ view (ตอน edit ค่าบนจออาจยังไม่ save) */}
       {storeRequisition && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openActivity(storeRequisition.id, storeRequisition.sr_no)
-          }
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && storeRequisition?.id && (
-        <PrintDocumentButton
-          documentType="SR"
-          documentId={storeRequisition.id}
-          filters={
-            storeRequisition.sr_no
-              ? { DocumentNo: storeRequisition.sr_no }
+        <DocActionsMenu
+          onDuplicate={isView ? handleDuplicate : undefined}
+          onComment={onComment}
+          commentCount={comments?.length}
+          activity={{ id: storeRequisition.id, label: storeRequisition.sr_no }}
+          print={
+            isView && storeRequisition.id
+              ? {
+                  documentType: "SR",
+                  documentId: storeRequisition.id,
+                  filters: storeRequisition.sr_no
+                    ? { DocumentNo: storeRequisition.sr_no }
+                    : undefined,
+                }
               : undefined
           }
         />
@@ -297,23 +306,13 @@ export function SrHeader({
       />
     ) : undefined;
 
-  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
-  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
-  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
-  const workflowStep =
-    workflowStepEl && hasHistory ? (
-      <button
-        type="button"
-        onClick={() => setShowHistory(true)}
-        title={t("tabWorkflowHistory")}
-        aria-label={t("tabWorkflowHistory")}
-        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {workflowStepEl}
-      </button>
-    ) : (
-      workflowStepEl
-    );
+  const workflowStep = workflowStepEl ? (
+    <WorkflowStepButton
+      onShowHistory={hasHistory ? () => setShowHistory(true) : undefined}
+    >
+      {workflowStepEl}
+    </WorkflowStepButton>
+  ) : undefined;
 
   return (
     <>

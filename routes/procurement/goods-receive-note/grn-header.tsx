@@ -2,7 +2,6 @@ import { useTranslations } from "use-intl";
 import {
   Building2,
   FileText,
-  History,
   Pencil,
   Save,
   Trash2,
@@ -10,10 +9,8 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CommentButton } from "@/components/comment-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
-import { Badge } from "@/components/ui/badge";
-import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -21,10 +18,10 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -68,7 +65,6 @@ export function GrnHeader({
   onSave,
 }: GrnHeaderProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
@@ -95,27 +91,35 @@ export function GrnHeader({
     ? GRN_FORM_STATUS_CONFIG[goodsReceiveNote.doc_status]
     : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ชนิดใบ/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {statusCfg && (
-        <Badge className={statusCfg.className} size="sm">
-          {statusCfg.label ?? goodsReceiveNote?.doc_status}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {statusCfg && goodsReceiveNote && (
+        <StatusIconLabel
+          status={goodsReceiveNote.doc_status}
+          label={statusCfg.label ?? goodsReceiveNote.doc_status}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {goodsReceiveNote && (
-        <Badge variant="info-light" size="sm">
-          {getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
-        </Badge>
+        <StatusIconLabel
+          status={goodsReceiveNote.doc_type}
+          label={getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {/* เลขที่ใบ · สถานะ · ชนิดใบ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
           (ทรงเดียวกับใบลดหนี้) — ไม่ใช่ Badge เพราะรุ่นเป็นตัวเลขอ้างอิง ไม่ใช่
           สถานะที่ต้องสะดุดตา */}
       {goodsReceiveNote?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {goodsReceiveNote.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (
@@ -197,30 +201,24 @@ export function GrnHeader({
         </>
       )}
 
-      {/* Always (มี record) — comment + print */}
+      {/* Always (มี record) — comment / activity / print ยุบอยู่ในเมนู ⋯ */}
       {goodsReceiveNote && (
-        <CommentButton count={comments?.length} onClick={onShowComment} />
-      )}
-      {goodsReceiveNote && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openActivity(goodsReceiveNote.id, goodsReceiveNote.grn_no)
-          }
-        >
-          <History />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && goodsReceiveNote?.id && (
-        <PrintDocumentButton
-          documentType="GRN"
-          documentId={goodsReceiveNote.id}
-          filters={
-            goodsReceiveNote.grn_no
-              ? { DocumentNo: goodsReceiveNote.grn_no }
+        <DocActionsMenu
+          onComment={onShowComment}
+          commentCount={comments?.length}
+          activity={{
+            id: goodsReceiveNote.id,
+            label: goodsReceiveNote.grn_no,
+          }}
+          print={
+            isView && goodsReceiveNote.id
+              ? {
+                  documentType: "GRN",
+                  documentId: goodsReceiveNote.id,
+                  filters: goodsReceiveNote.grn_no
+                    ? { DocumentNo: goodsReceiveNote.grn_no }
+                    : undefined,
+                }
               : undefined
           }
         />

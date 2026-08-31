@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -14,7 +13,9 @@ import CertificationCard from "./certification-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const CertificationDialog = lazy(() =>
-  import("./certification-dialog").then((mod) => ({ default: mod.CertificationDialog })),
+  import("./certification-dialog").then((mod) => ({
+    default: mod.CertificationDialog,
+  })),
 );
 
 export default function CertificationComponent() {

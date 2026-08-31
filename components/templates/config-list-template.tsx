@@ -8,6 +8,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -31,7 +32,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { cn } from "@/lib/utils";
@@ -101,7 +102,9 @@ function renderGridContent<TEntity extends { id: string }>({
 interface DeleteFlowArgs<TEntity extends { id: string }> {
   readonly deleteTarget: TEntity | null;
   readonly setDeleteTarget: (entity: TEntity | null) => void;
-  readonly deleteMutation: ReturnType<ConfigListTemplateProps<TEntity>["useDelete"]>;
+  readonly deleteMutation: ReturnType<
+    ConfigListTemplateProps<TEntity>["useDelete"]
+  >;
   readonly renderDeleteDialog?: ConfigListTemplateProps<TEntity>["renderDeleteDialog"];
   readonly entityNameField: keyof TEntity & string;
   readonly t: ReturnType<typeof useTranslations>;
@@ -280,7 +283,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     }
   };
 
-  const { can, isAdmin } = useCan();
+  const { can, isAdmin, canWrite } = useCan();
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const createPermission = prefix
@@ -291,6 +294,23 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     ? buildPermissionKey(prefix, "update")
     : undefined;
   const updateDenied = !!updatePermission && !isAdmin && !can(updatePermission);
+  // สัญญาหมดอายุ/ถูกระงับ → เขียนไม่ได้ทั้งหน้า ไม่ว่าจะมีสิทธิ์ RBAC หรือไม่
+  // (license ไม่มี admin bypass) ปุ่มลบของแถวถูกปิดไปแล้วใน useConfigTable —
+  // ถ้าไม่รวมตรงนี้ด้วย ปุ่ม Add กับ dialog แก้ไขจะยังใช้ได้แล้วไปเด้ง 403 ตอน save
+  // ซึ่งขัดกับปุ่มลบบนแถวเดียวกันในจอเดียวกัน
+  const addBlocked = createDenied || !canWrite;
+  const handleAddClick = () => {
+    if (!canWrite) {
+      // license มาก่อน permission เสมอ — แก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
+      dispatchPermissionDenied(createPermission, undefined, "expired");
+      return;
+    }
+    if (createDenied) {
+      dispatchPermissionDenied(createPermission);
+      return;
+    }
+    handleAdd();
+  };
 
   const table = useTable({
     data: entities,
@@ -307,8 +327,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     disabled: !isMobile,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div
@@ -339,12 +358,8 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
-            onAdd={
-              createDenied
-                ? () => dispatchPermissionDenied(createPermission)
-                : handleAdd
-            }
-            addDisabled={createDenied}
+            onAdd={handleAddClick}
+            addDisabled={addBlocked}
             addLabel={t("add")}
             onExport={handleExport}
             isExporting={isExporting}
@@ -362,12 +377,12 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={filterFields}
               values={lf.values}
               setValue={lf.setValue}
@@ -377,6 +392,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}
@@ -458,7 +474,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         open: dialogOpen,
         onOpenChange: setDialogOpen,
         entity: editEntity,
-        readOnly: !!editEntity && updateDenied,
+        readOnly: !!editEntity && (updateDenied || !canWrite),
       })}
 
       {renderDeleteFlow({

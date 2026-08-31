@@ -99,7 +99,8 @@ describe("SI config registry", () => {
     expect(avg?.labelKey).toBe("config.siCostFromOptions.average");
     // non-conditional options have no gate
     expect(
-      item?.options?.find((o) => o.value === "last_cost")?.visibleWhenCalcMethod,
+      item?.options?.find((o) => o.value === "last_cost")
+        ?.visibleWhenCalcMethod,
     ).toBeUndefined();
   });
 });
@@ -194,9 +195,7 @@ describe("Print Form config registry", () => {
   });
 
   it("points each item at its report_group and its own label key", () => {
-    expect(
-      section?.items.map((i) => [i.optionsGroup, i.labelKey]),
-    ).toEqual([
+    expect(section?.items.map((i) => [i.optionsGroup, i.labelKey])).toEqual([
       ["PR", "config.printFormPr"],
       ["PO", "config.printFormPo"],
       ["GRN", "config.printFormGrn"],

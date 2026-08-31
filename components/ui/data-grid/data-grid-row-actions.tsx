@@ -1,4 +1,3 @@
-
 import { History, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,15 @@ interface DataGridRowActionsProps {
   /** Permission codes สำหรับใช้ใน dispatch event เมื่อ denied */
   readonly editPermission?: Permission;
   readonly deletePermission?: Permission;
+  /**
+   * สัญญาหมดอายุ/ถูกระงับ (`!canWrite` จาก `useCan()`) — ต่างจาก `editDenied`/
+   * `deleteDenied` (permission) ตรงที่ปิดจริง (Radix `disabled`, ไม่คลิกได้เลย
+   * ไม่เด้ง dialog) พร้อม `title` อธิบาย เพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
+   * มาก่อน `editDenied`/`deleteDenied` เสมอเมื่อเป็น true พร้อมกัน
+   */
+  readonly writeDisabled?: boolean;
+  /** Tooltip เมื่อ `writeDisabled` — ข้อความจาก `messages/*.json` namespace `license` */
+  readonly writeDisabledTitle?: string;
   /**
    * เปิดเมนู Activity ของแถวนี้ — ไม่ส่ง = ไม่มีเมนู
    *
@@ -61,17 +69,23 @@ export function DataGridRowActions({
   deleteDenied,
   editPermission,
   deletePermission,
+  writeDisabled,
+  writeDisabledTitle,
   activity,
 }: DataGridRowActionsProps) {
   const tc = useTranslations("common");
   const tActivity = useTranslations("activity");
 
-  const handleEdit = editDenied
-    ? () => dispatchPermissionDenied(editPermission)
-    : onEdit;
-  const handleDelete = deleteDenied
-    ? () => dispatchPermissionDenied(deletePermission)
-    : onDelete;
+  const handleEdit = writeDisabled
+    ? undefined
+    : editDenied
+      ? () => dispatchPermissionDenied(editPermission)
+      : onEdit;
+  const handleDelete = writeDisabled
+    ? undefined
+    : deleteDenied
+      ? () => dispatchPermissionDenied(deletePermission)
+      : onDelete;
 
   return (
     <div className="flex justify-end">
@@ -84,9 +98,14 @@ export function DataGridRowActions({
         <DropdownMenuContent align="end">
           {onEdit && (
             <DropdownMenuItem
-              className={cn("cursor-pointer", editDenied && "opacity-50")}
+              className={cn(
+                "cursor-pointer",
+                (writeDisabled || editDenied) && "opacity-50",
+              )}
               onClick={handleEdit}
-              aria-disabled={editDenied || undefined}
+              disabled={writeDisabled}
+              title={writeDisabled ? writeDisabledTitle : undefined}
+              aria-disabled={!writeDisabled && editDenied ? true : undefined}
             >
               <Pencil className="size-3" />
               {tc("edit")}
@@ -109,8 +128,10 @@ export function DataGridRowActions({
             <DropdownMenuItem
               onClick={handleDelete}
               variant={"destructive"}
-              aria-disabled={deleteDenied || undefined}
-              className={cn(deleteDenied && "opacity-50")}
+              disabled={writeDisabled}
+              title={writeDisabled ? writeDisabledTitle : undefined}
+              aria-disabled={!writeDisabled && deleteDenied ? true : undefined}
+              className={cn((writeDisabled || deleteDenied) && "opacity-50")}
             >
               <Trash2 className="text-destructive" />
               {tc("delete")}

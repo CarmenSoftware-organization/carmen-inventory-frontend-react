@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm, type Resolver } from "react-hook-form";
@@ -10,6 +9,7 @@ import {
   Loader2,
   Mail,
   Trash2,
+  IdCard,
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -47,7 +47,7 @@ import {
   createProfileSchema,
   type ProfileFormValues,
 } from "./profile-form-schema";
-import ChangePasswordDialog from "./change-password-dialog";
+import ChangePasswordDialog from "@/components/share/change-password-dialog";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 import { SignatureDialog } from "./signature-dialog";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -208,7 +208,7 @@ export default function UserProfileSetting() {
     .join("");
 
   return (
-    <div className="w-full space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto w-full max-w-5xl space-y-10 pb-[max(2rem,env(safe-area-inset-bottom))] duration-500">
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-2 py-1 sm:static sm:py-0">
         <Button
@@ -216,263 +216,313 @@ export default function UserProfileSetting() {
           size="icon-sm"
           onClick={handleBack}
           aria-label={tc("goBack")}
-          className="h-11 w-11 sm:h-8 sm:w-8 hover:bg-transparent dark:hover:bg-transparent"
+          className="h-11 w-11 hover:bg-transparent sm:h-8 sm:w-8 dark:hover:bg-transparent"
         >
           <ArrowLeft />
         </Button>
         <h1 className="text-lg font-semibold">{t("title")}</h1>
-      </div>
-
-      {/* Account Info — read-only hero */}
-      <div className="relative overflow-hidden rounded-xl border bg-primary/5">
-        <div className="relative flex flex-col gap-3 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={isUploadingAvatar}
-                aria-label={t("uploadAvatar")}
-                aria-busy={isUploadingAvatar}
-                className="group ring-primary/20 ring-offset-background hover:ring-primary/40 focus-visible:ring-primary relative block size-12 cursor-pointer rounded-full ring-2 ring-offset-2 transition focus-visible:outline-none disabled:cursor-wait disabled:opacity-70"
-              >
-                <Avatar
-                  key={avatarPreview ?? profile.avatar_url ?? "fallback"}
-                  className="size-12"
-                >
-                  {(avatarPreview ?? profile.avatar_url) && (
-                    <AvatarImage
-                      src={avatarPreview ?? profile.avatar_url ?? undefined}
-                      alt={initials || "?"}
-                      className="object-cover"
-                    />
-                  )}
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {profile.alias_name || initials || "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="bg-foreground/55 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100">
-                  <Camera className="size-4 text-white" aria-hidden="true" />
-                </span>
-              </button>
-              {(avatarPreview || profile.avatar_url) && !isUploadingAvatar && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon-xs"
-                  disabled={isDeletingAvatar}
-                  onClick={handleRemoveAvatar}
-                  aria-label={t("removeAvatar")}
-                  className="absolute -top-1 -right-1 size-5 rounded-full shadow"
-                >
-                  {isDeletingAvatar ? (
-                    <Loader2 aria-hidden="true" className="animate-spin" />
-                  ) : (
-                    <Trash2 aria-hidden="true" />
-                  )}
-                </Button>
-              )}
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept={IMAGE_ACCEPT_ATTR}
-                disabled={isUploadingAvatar}
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold">
-                  {t("accountInfo")}
-                </span>
-                <Badge variant="primary-light" size="xs" className="text-xs">
-                  {profile.platform_role}
-                </Badge>
-              </div>
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <Mail className="size-3 shrink-0" aria-hidden="true" />
-                <span className="truncate">{profile.email || "-"}</span>
-              </div>
-            </div>
-          </div>
+        <div className="ml-auto">
           <Button
-            variant="outline"
+            type="submit"
+            form="profile-form"
             size="sm"
-            onClick={() => setPasswordOpen(true)}
-            className="h-11 w-full sm:h-9 sm:w-auto"
+            disabled={updateProfile.isPending}
+            className="h-9 shadow-sm"
           >
-            <KeyRound className="size-3.5" aria-hidden="true" />
-            {t("changePassword")}
+            {updateProfile.isPending ? t("saving") : tc("save")}
           </Button>
         </div>
       </div>
 
-      {/* Personal Info Form */}
-      <section className="bg-card rounded-xl border">
-        <header className="border-b px-2 py-2">
-          <h2 className="text-sm font-semibold">{t("personalInfo")}</h2>
-        </header>
-        <form
-          id="profile-form"
-          onSubmit={form.handleSubmit(onSubmit, () =>
-            scrollToFirstInvalidField(),
-          )}
-          className="space-y-3 px-2 py-3"
-        >
-          <FieldGroup className="gap-3">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Field data-invalid={!!form.formState.errors.firstname}>
-                <FieldLabel htmlFor="firstname" required>
-                  {t("firstName")}
-                </FieldLabel>
-                <Input
-                  id="firstname"
-                  placeholder={t("enterFirstName")}
-                  className="h-8"
-                  maxLength={100}
-                  disabled={updateProfile.isPending}
-                  {...form.register("firstname")}
+      {/* Account Info — read-only hero */}
+      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[220px_1fr] lg:gap-8">
+        <div className="pt-2">
+          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+            {t("accountInfo")}
+          </h2>
+        </div>
+        <div className="bg-card relative overflow-hidden rounded-xl border shadow-sm">
+          <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4 sm:gap-5">
+              <div className="group/avatar relative">
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  aria-label={t("uploadAvatar")}
+                  aria-busy={isUploadingAvatar}
+                  className="group ring-primary/30 ring-offset-background hover:ring-primary/60 focus-visible:ring-primary relative block size-16 cursor-pointer rounded-full shadow-xl ring-4 ring-offset-2 transition-all focus-visible:outline-none disabled:cursor-wait disabled:opacity-70 sm:size-20"
+                >
+                  <Avatar
+                    key={avatarPreview ?? profile.avatar_url ?? "fallback"}
+                    className="size-16 sm:size-20"
+                  >
+                    {(avatarPreview ?? profile.avatar_url) && (
+                      <AvatarImage
+                        src={avatarPreview ?? profile.avatar_url ?? undefined}
+                        alt={initials || "?"}
+                        className="object-cover"
+                      />
+                    )}
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      {profile.alias_name || initials || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="bg-foreground/55 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera
+                      className="text-background size-4"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </button>
+                {(avatarPreview || profile.avatar_url) &&
+                  !isUploadingAvatar && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon-xs"
+                      disabled={isDeletingAvatar}
+                      onClick={handleRemoveAvatar}
+                      aria-label={t("removeAvatar")}
+                      className="absolute -top-1 -right-1 size-5 rounded-full shadow"
+                    >
+                      {isDeletingAvatar ? (
+                        <Loader2 aria-hidden="true" className="animate-spin" />
+                      ) : (
+                        <Trash2 aria-hidden="true" />
+                      )}
+                    </Button>
+                  )}
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept={IMAGE_ACCEPT_ATTR}
+                  disabled={isUploadingAvatar}
+                  className="hidden"
+                  onChange={handleAvatarChange}
                 />
-                <FieldError>
-                  {form.formState.errors.firstname?.message}
-                </FieldError>
-              </Field>
-
-              <Field data-invalid={!!form.formState.errors.middlename}>
-                <FieldLabel htmlFor="middlename">{t("middleName")}</FieldLabel>
-                <Input
-                  id="middlename"
-                  placeholder={t("enterMiddleName")}
-                  className="h-8"
-                  maxLength={100}
-                  disabled={updateProfile.isPending}
-                  {...form.register("middlename")}
-                />
-                <FieldError>
-                  {form.formState.errors.middlename?.message}
-                </FieldError>
-              </Field>
-
-              <Field data-invalid={!!form.formState.errors.lastname}>
-                <FieldLabel htmlFor="lastname" required>
-                  {t("lastName")}
-                </FieldLabel>
-                <Input
-                  id="lastname"
-                  placeholder={t("enterLastName")}
-                  className="h-8"
-                  maxLength={100}
-                  disabled={updateProfile.isPending}
-                  {...form.register("lastname")}
-                />
-                <FieldError>
-                  {form.formState.errors.lastname?.message}
-                </FieldError>
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field
-                data-invalid={!!form.formState.errors.telephone}
-                className="w-full"
-              >
-                <FieldLabel htmlFor="telephone">{t("telephone")}</FieldLabel>
-                <Input
-                  id="telephone"
-                  placeholder={t("enterTelephone")}
-                  className="h-8"
-                  maxLength={20}
-                  disabled={updateProfile.isPending}
-                  {...form.register("telephone")}
-                />
-                <FieldError>
-                  {form.formState.errors.telephone?.message}
-                </FieldError>
-              </Field>
-
-              <Field
-                data-invalid={!!form.formState.errors.alias_name}
-                className="w-full lg:w-20"
-              >
-                <FieldLabel htmlFor="alias_name">{t("alias")}</FieldLabel>
-                <Input
-                  id="alias_name"
-                  placeholder={t("aliasPlaceholder")}
-                  className="h-8"
-                  maxLength={2}
-                  disabled={updateProfile.isPending}
-                  {...form.register("alias_name")}
-                />
-                <FieldError>
-                  {form.formState.errors.alias_name?.message}
-                </FieldError>
-              </Field>
-            </div>
-          </FieldGroup>
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={updateProfile.isPending}
-              className="h-11 w-full sm:h-9 sm:w-auto"
-            >
-              {updateProfile.isPending ? t("saving") : tc("save")}
-            </Button>
-          </div>
-        </form>
-      </section>
-
-      {/* Signature */}
-      <section className="bg-card rounded-xl border">
-        <header className="flex items-center justify-between border-b px-2 py-2">
-          <h2 className="text-sm font-semibold">{t("signature")}</h2>
-          <div className="flex gap-2">
-            {profile.signature_url && !isUploadingSignature && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                disabled={isDeletingSignature}
-                onClick={() => setRemoveSignatureOpen(true)}
-              >
-                {isDeletingSignature ? (
-                  <Loader2
-                    className="size-3.5 animate-spin"
+              </div>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-lg font-bold tracking-tight">
+                    {t("accountInfo")}
+                  </span>
+                  <Badge
+                    variant="primary-light"
+                    size="sm"
+                    className="shadow-primary/10 border-primary/20 text-xs shadow-sm"
+                  >
+                    {profile.platform_role}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                  <Mail
+                    className="text-primary/60 size-3.5 shrink-0"
                     aria-hidden="true"
                   />
-                ) : (
-                  <Trash2 className="size-3.5" aria-hidden="true" />
-                )}
-                {t("removeSignature")}
-              </Button>
-            )}
+                  <span className="truncate font-medium">
+                    {profile.email || "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
             <Button
-              type="button"
               variant="outline"
               size="sm"
-              disabled={isUploadingSignature}
-              onClick={() => setSignatureDialogOpen(true)}
+              onClick={() => setPasswordOpen(true)}
+              className="group h-10 w-full shadow-sm sm:h-9 sm:w-auto"
             >
-              {profile.signature_url ? t("editSignature") : t("addSignature")}
+              <KeyRound
+                className="size-3.5 transition-transform group-hover:rotate-12"
+                aria-hidden="true"
+              />
+              {t("changePassword")}
             </Button>
           </div>
-        </header>
-        <div className="flex min-h-24 items-center justify-center p-3">
-          {profile.signature_url ? (
-            <img
-              key={profile.signature_url}
-              src={profile.signature_url}
-              alt={t("signature")}
-              className="max-h-32 max-w-full object-contain"
-            />
-          ) : (
-            <p className="text-muted-foreground text-xs">
-              {t("signatureUploadHint")}
-            </p>
-          )}
         </div>
-      </section>
+      </div>
+
+      {/* Personal Info Form */}
+      <div className="grid grid-cols-1 items-start gap-6 border-t pt-8 md:grid-cols-[220px_1fr] lg:gap-8">
+        <div className="pt-2">
+          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+            {t("personalInfo")}
+          </h2>
+        </div>
+        <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
+          <form
+            id="profile-form"
+            onSubmit={form.handleSubmit(onSubmit, () =>
+              scrollToFirstInvalidField(),
+            )}
+          >
+            <div className="space-y-6 p-5 sm:p-6">
+              <FieldGroup className="gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field data-invalid={!!form.formState.errors.firstname}>
+                    <FieldLabel htmlFor="firstname" required>
+                      {t("firstName")}
+                    </FieldLabel>
+                    <Input
+                      id="firstname"
+                      placeholder={t("enterFirstName")}
+                      className="h-9 transition-colors"
+                      maxLength={100}
+                      disabled={updateProfile.isPending}
+                      aria-invalid={!!form.formState.errors.firstname}
+                      {...form.register("firstname")}
+                    />
+                    <FieldError>
+                      {form.formState.errors.firstname?.message}
+                    </FieldError>
+                  </Field>
+
+                  <Field data-invalid={!!form.formState.errors.middlename}>
+                    <FieldLabel htmlFor="middlename">
+                      {t("middleName")}
+                    </FieldLabel>
+                    <Input
+                      id="middlename"
+                      placeholder={t("enterMiddleName")}
+                      className="h-9 transition-colors"
+                      maxLength={100}
+                      disabled={updateProfile.isPending}
+                      aria-invalid={!!form.formState.errors.middlename}
+                      {...form.register("middlename")}
+                    />
+                    <FieldError>
+                      {form.formState.errors.middlename?.message}
+                    </FieldError>
+                  </Field>
+
+                  <Field data-invalid={!!form.formState.errors.lastname}>
+                    <FieldLabel htmlFor="lastname" required>
+                      {t("lastName")}
+                    </FieldLabel>
+                    <Input
+                      id="lastname"
+                      placeholder={t("enterLastName")}
+                      className="h-9 transition-colors"
+                      maxLength={100}
+                      disabled={updateProfile.isPending}
+                      aria-invalid={!!form.formState.errors.lastname}
+                      {...form.register("lastname")}
+                    />
+                    <FieldError>
+                      {form.formState.errors.lastname?.message}
+                    </FieldError>
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    data-invalid={!!form.formState.errors.telephone}
+                    className="w-full"
+                  >
+                    <FieldLabel htmlFor="telephone">
+                      {t("telephone")}
+                    </FieldLabel>
+                    <Input
+                      id="telephone"
+                      placeholder={t("enterTelephone")}
+                      className="h-9 transition-colors"
+                      maxLength={20}
+                      disabled={updateProfile.isPending}
+                      aria-invalid={!!form.formState.errors.telephone}
+                      {...form.register("telephone")}
+                    />
+                    <FieldError>
+                      {form.formState.errors.telephone?.message}
+                    </FieldError>
+                  </Field>
+
+                  <Field
+                    data-invalid={!!form.formState.errors.alias_name}
+                    className="w-full lg:w-20"
+                  >
+                    <FieldLabel htmlFor="alias_name">{t("alias")}</FieldLabel>
+                    <Input
+                      id="alias_name"
+                      placeholder={t("aliasPlaceholder")}
+                      className="h-9 uppercase transition-colors"
+                      maxLength={2}
+                      disabled={updateProfile.isPending}
+                      aria-invalid={!!form.formState.errors.alias_name}
+                      {...form.register("alias_name")}
+                    />
+                    <FieldError>
+                      {form.formState.errors.alias_name?.message}
+                    </FieldError>
+                  </Field>
+                </div>
+              </FieldGroup>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      {/* Signature */}
+      <div className="grid grid-cols-1 items-start gap-6 border-t pt-8 md:grid-cols-[220px_1fr] lg:gap-8">
+        <div className="pt-2">
+          <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+            {t("signature")}
+          </h2>
+        </div>
+        <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
+          <div className="bg-muted/10 flex items-center justify-end border-b px-4 py-3">
+            <div className="flex gap-2">
+              {profile.signature_url && !isUploadingSignature && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={isDeletingSignature}
+                  onClick={() => setRemoveSignatureOpen(true)}
+                >
+                  {isDeletingSignature ? (
+                    <Loader2
+                      className="size-3.5 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Trash2 className="size-3.5" aria-hidden="true" />
+                  )}
+                  {t("removeSignature")}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isUploadingSignature}
+                onClick={() => setSignatureDialogOpen(true)}
+                className="shadow-sm"
+              >
+                {profile.signature_url ? t("editSignature") : t("addSignature")}
+              </Button>
+            </div>
+          </div>
+          <div className="flex min-h-32 items-center justify-center p-6">
+            {profile.signature_url ? (
+              <img
+                key={profile.signature_url}
+                src={profile.signature_url}
+                alt={t("signature")}
+                className="max-h-36 max-w-full object-contain drop-shadow-md transition-transform hover:scale-105"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
+                <div className="bg-muted/30 border-border/30 flex size-12 items-center justify-center rounded-full border shadow-sm">
+                  <IdCard className="text-muted-foreground size-5" />
+                </div>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t("signatureUploadHint")}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
 
       <ChangePasswordDialog
         open={passwordOpen}

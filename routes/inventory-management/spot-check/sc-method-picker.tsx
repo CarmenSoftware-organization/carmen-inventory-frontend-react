@@ -1,4 +1,3 @@
-
 import { Check, Gem, Hash, Shuffle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
@@ -99,7 +98,7 @@ function MethodCard({
         >
           {title}
         </div>
-        <p className="text-muted-foreground mt-0.5 text-micro-legal leading-snug">
+        <p className="text-muted-foreground text-micro-legal mt-0.5 leading-snug">
           {desc}
         </p>
       </div>

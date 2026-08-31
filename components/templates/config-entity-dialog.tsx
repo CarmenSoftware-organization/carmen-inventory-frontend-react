@@ -12,13 +12,7 @@ import { type LucideIcon } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
@@ -146,7 +140,9 @@ export function ConfigEntityDialog<
 
   const form = useForm<TFormValues>({
     // schema input type เป็น generic — cast ให้ผ่าน overload ของ zodResolver
-    resolver: zodResolver(buildSchema(tv, tfl) as never) as Resolver<TFormValues>,
+    resolver: zodResolver(
+      buildSchema(tv, tfl) as never,
+    ) as Resolver<TFormValues>,
     defaultValues: toFormValues(null) as DefaultValues<TFormValues>,
   });
 
@@ -190,54 +186,69 @@ export function ConfigEntityDialog<
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className={cn("gap-0 p-0 sm:max-w-md", contentClassName)}>
-        <form
-          onSubmit={
-            stopPropagationOnSubmit
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  form.handleSubmit(onSubmit)(e);
-                }
-              : form.handleSubmit(onSubmit)
-          }
-        >
-          <DialogHeader className="gap-0 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Icon className="size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-base">
-                  {isEdit
-                    ? tf("editTitle", { entity: t("entity") })
-                    : tf("addTitle", { entity: t("entity") })}
-                </DialogTitle>
+      <DialogContent
+        className={cn(
+          "overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-[425px]",
+          contentClassName,
+        )}
+        showCloseButton={false}
+      >
+        <div className="border-border/60 bg-popover/80 relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-3xl">
+          <form
+            onSubmit={
+              stopPropagationOnSubmit
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.handleSubmit(onSubmit)(e);
+                  }
+                : form.handleSubmit(onSubmit)
+            }
+            className="relative flex flex-col"
+          >
+            <div className="border-border/40 bg-background/40 border-b px-6 py-6">
+              <div className="flex items-center gap-4">
+                <div className="text-primary bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="flex flex-col">
+                  <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
+                    {isEdit
+                      ? tf("editTitle", { entity: t("entity") })
+                      : tf("addTitle", { entity: t("entity") })}
+                  </DialogTitle>
+                </div>
               </div>
             </div>
-          </DialogHeader>
-          <div className="space-y-3 border-t px-5 py-4">
-            <FieldGroup className="gap-3">
-              {children({ form, disabled: isPending || !!readOnly })}
-            </FieldGroup>
-          </div>
-          <DialogFooter className="bg-muted/20 border-t px-5 py-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-            >
-              {readOnly ? tc("close") : tc("cancel")}
-            </Button>
-            {!readOnly && (
-              <Button type="submit" size="sm" disabled={isPending}>
-                {submitLabel}
+
+            <div className="px-6 py-6">
+              <FieldGroup className="gap-5">
+                {children({ form, disabled: isPending || !!readOnly })}
+              </FieldGroup>
+            </div>
+
+            <div className="border-border/40 bg-background/40 flex justify-end gap-3 border-t px-6 py-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isPending}
+                className="rounded-xl"
+              >
+                {readOnly ? tc("close") : tc("cancel")}
               </Button>
-            )}
-          </DialogFooter>
-        </form>
+              {!readOnly && (
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl font-bold shadow-lg backdrop-blur-md transition-all"
+                >
+                  {submitLabel}
+                </Button>
+              )}
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

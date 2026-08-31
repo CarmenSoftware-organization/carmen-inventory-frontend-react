@@ -1,6 +1,5 @@
-
 import { useTranslations } from "use-intl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Command, CommandInput } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { useDepartment } from "@/hooks/use-department";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,9 @@ export function FilterDepartment({
 }: FilterDepartmentProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { data } = useDepartment({ perpage: -1 }, { enabled: open });
+  const inline = useContext(FilterInlineContext);
+  // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
+  const { data } = useDepartment({ perpage: -1 }, { enabled: open || inline });
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
@@ -81,6 +83,62 @@ export function FilterDepartment({
 
   const selectedCount = selectedIds.size;
 
+  // ปุ่มพูดค่าที่เลือก — "ชื่อแผนกแรก +N" อ่านออกทันทีว่ากรองอะไรอยู่
+  // (รายชื่อแผนก fetch ตอนเปิด popover เท่านั้น — ยังไม่มีข้อมูล เช่นเปิดจาก
+  // deep link/saved view โดยไม่เคยเปิด popover ให้ถอยไปแบบ "แผนก (N)")
+  const firstName = departments.find((d) => selectedIds.has(d.id))?.name;
+  const valueText =
+    selectedCount > 0
+      ? `${firstName ?? `${tfl("department")} (${selectedCount})`}${
+          firstName && selectedCount > 1 ? ` +${selectedCount - 1}` : ""
+        }`
+      : tfl("department");
+
+  const list = (
+    <Command shouldFilter={false}>
+      <CommandInput
+        placeholder={tfl("department")}
+        className="placeholder:text-xs"
+        value={search}
+        onValueChange={setSearch}
+      />
+      <div className="max-h-60 overflow-y-auto p-1">
+        <label
+          className={cn(
+            "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+            "hover:bg-accent hover:text-accent-foreground",
+          )}
+        >
+          <Checkbox
+            checked={selectedCount === 0}
+            onCheckedChange={() => onChange("")}
+          />
+          <span className="truncate">{tc("all")}</span>
+        </label>
+        {filteredDepartments.map((dept) => (
+          <label
+            key={dept.id}
+            className={cn(
+              "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+              "hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Checkbox
+              checked={selectedIds.has(dept.id)}
+              onCheckedChange={() => handleToggle(dept.id)}
+            />
+            <span className="truncate">{dept.name}</span>
+          </label>
+        ))}
+      </div>
+    </Command>
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์รายการตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  if (inline) {
+    return list;
+  }
+
   return (
     <Popover
       open={open}
@@ -102,51 +160,13 @@ export function FilterDepartment({
               !selectedCount && "text-muted-foreground text-xs",
             )}
           >
-            {selectedCount > 0
-              ? `${tfl("department")} (${selectedCount})`
-              : tfl("department")}
+            {valueText}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={tfl("department")}
-            className="placeholder:text-xs"
-            value={search}
-            onValueChange={setSearch}
-          />
-          <div className="max-h-60 overflow-y-auto p-1">
-            <label
-              className={cn(
-                "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                "hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              <Checkbox
-                checked={selectedCount === 0}
-                onCheckedChange={() => onChange("")}
-              />
-              <span className="truncate">{tc("all")}</span>
-            </label>
-            {filteredDepartments.map((dept) => (
-              <label
-                key={dept.id}
-                className={cn(
-                  "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                  "hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <Checkbox
-                  checked={selectedIds.has(dept.id)}
-                  onCheckedChange={() => handleToggle(dept.id)}
-                />
-                <span className="truncate">{dept.name}</span>
-              </label>
-            ))}
-          </div>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );

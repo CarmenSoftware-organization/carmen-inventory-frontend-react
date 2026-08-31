@@ -103,7 +103,7 @@ export default defineConfig(() => ({
           }
           // แยก vendor หนักที่หลาย route ใช้ร่วมกัน ออกจาก shared (router) chunk
           // — ทั้งหมดเสถียร เปลี่ยนไม่บ่อย จึง cache ได้ยาว lib ที่ใช้ route เดียว
-          // (xlsx/recharts/@xyflow/monaco) ไม่ต้องแยก เพราะ lazy route แยก chunk ให้แล้ว
+          // (xlsx/recharts/@xyflow) ไม่ต้องแยก เพราะ lazy route แยก chunk ให้แล้ว
           if (id.includes("/lucide-react/")) {
             return "icons";
           }

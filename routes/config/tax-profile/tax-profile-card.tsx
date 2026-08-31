@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { TaxProfile } from "@/types/tax-profile";
 
@@ -20,10 +20,10 @@ export default function TaxProfileCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.tax_rate != null && (
         <ListCardRow label={tfl("taxRate")}>
           <span className="tabular-nums">{item.tax_rate}</span>

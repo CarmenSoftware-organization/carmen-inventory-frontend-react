@@ -1,13 +1,15 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
+  ListCardSendBackRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import { PO_TYPE, type PurchaseOrder } from "@/types/purchase-order";
 
@@ -44,23 +46,24 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
   return (
     <ListCard
       title={item.po_no}
-      badge={
-        statusConfig ? (
-          <Badge size="xs" className={statusConfig.className}>
-            {statusConfig.label}
-          </Badge>
-        ) : undefined
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.po_status} label={statusConfig?.label} />
+      <ListCardSendBackRow lastAction={item.last_action} />
       <ListCardRow label={tfl("orderDate")}>
         <span className="tabular-nums">
           {formatDate(item.order_date, dateFormat)}
         </span>
       </ListCardRow>
       {typeConfig?.label && (
-        <ListCardRow label={tfl("poType")}>{typeConfig.label}</ListCardRow>
+        <ListCardRow label={tfl("poType")}>
+          <StatusIconLabel
+            status={item.po_type ?? PO_TYPE.MANUAL}
+            label={typeConfig.label}
+            className="text-muted-foreground"
+          />
+        </ListCardRow>
       )}
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>

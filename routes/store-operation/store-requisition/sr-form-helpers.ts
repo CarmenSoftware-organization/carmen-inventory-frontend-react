@@ -59,6 +59,48 @@ export function buildSrDefaultValues(
 }
 
 /**
+ * ค่าเริ่มต้นของฟอร์มตอน duplicate ใบเดิม — semantics เดียวกับ Duplicate ของ PR:
+ * ตั้งต้นจากฟอร์มเปล่า (วันที่วันนี้/พรุ่งนี้ requestor เป็นคนกดก๊อป) แล้ว copy
+ * "ของที่เบิก" จากใบเดิม (notes/workflow/แผนก/คลังต้นทาง-ปลายทาง + รายการสินค้า
+ * กับจำนวนที่ขอ) ทิ้งของที่ผูกกับรอบเดิมทั้งหมด: item id/doc_version, จำนวนที่
+ * อนุมัติ/จ่ายจริง, สถานะ stage — ใบใหม่ต้องเริ่มรอบ workflow ของตัวเอง
+ */
+export function buildSrDuplicateValues(
+  storeRequisition: StoreRequisition,
+  defaultRequestorId: string,
+  defaultDepartmentId: string,
+): SrFormValues {
+  const blank = buildSrDefaultValues(
+    undefined,
+    defaultRequestorId,
+    defaultDepartmentId,
+  );
+  return {
+    ...blank,
+    description: storeRequisition.description ?? "",
+    workflow_id: storeRequisition.workflow_id ?? "",
+    department_id: storeRequisition.department_id ?? defaultDepartmentId,
+    from_location_id: storeRequisition.from_location_id ?? "",
+    to_location_id: storeRequisition.to_location_id ?? "",
+    items:
+      storeRequisition.store_requisition_detail?.map((d) => ({
+        product_id: d.product_id,
+        product_name: d.product_name,
+        product_local_name: d.product_local_name ?? "",
+        unit_name: d.inventory_unit_name ?? "",
+        description: d.description ?? "",
+        requested_qty: d.requested_qty,
+        approved_qty: 0,
+        issued_qty: 0,
+        current_stage_status: "pending",
+        stage_status: "",
+        _initial_stage_status: "pending",
+        stage_message: "",
+      })) ?? [],
+  };
+}
+
+/**
  * ยอดเงินของรายการ SR
  *
  * backend ยังไม่ส่งราคาต่อหน่วยมากับ store_requisition_detail เลยคง 0 ไว้ก่อน
@@ -70,15 +112,17 @@ export function srItemAmount(_item: SrFormValues["items"][number]): number {
 }
 
 /**
- * ราคาต่อหน่วยของรายการ SR — 0 ด้วยเหตุผลเดียวกับ `srItemAmount`
+ * ใบนี้ดูการเคลื่อนไหวสต๊อกได้หรือยัง — **เฉพาะใบที่ปิดจบแล้วเท่านั้น**
  *
- * แยกออกมาเพราะตารางสต๊อกต้องโชว์ราคาต่อหน่วยกับยอดรวมคนละคอลัมน์ วันไหนราคา
- * มาจริงก็แก้ที่นี่ที่เดียวแล้วทั้งสองคอลัมน์ตรงกันเอง
+ * ก่อนถึง completed ของยังไม่ขยับจริง ตัวเลขที่ backend ตอบมาเป็นการคาดการณ์จาก
+ * ตัวใบ (`source: store_requisition_detail`) การโชว์ตารางไว้จึงมีแต่ทำให้คนเข้าใจ
+ * ว่าตัดสต๊อกไปแล้ว — ทั้งตารางและยอดสรุปใน footer ใช้เกณฑ์เดียวกันจากที่นี่
+ * และใช้กัน request ด้วย (ยังไม่ถึงเวลาก็ไม่ต้องยิง)
+ *
+ * ใบใหม่ที่ยังไม่บันทึกไม่มีสถานะ จึงตกเกณฑ์นี้ไปเองโดยไม่ต้องเช็กแยก
  */
-export function srItemUnitPrice(
-  _item: SrFormValues["items"][number],
-): number {
-  return 0;
+export function srStockVisible(docStatus?: string): boolean {
+  return docStatus === "completed";
 }
 
 /** ยอดรวมทั้งใบ = ผลรวม srItemAmount ของทุกแถว */

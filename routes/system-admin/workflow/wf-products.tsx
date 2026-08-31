@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronRight, Search } from "lucide-react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
@@ -103,6 +102,7 @@ interface WfProductsProps {
 export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
   const [search, setSearch] = useState("");
   const t = useTranslations("systemAdmin.workflow");
+  const tfl = useTranslations("field");
   const uncategorizedLabel = t("uncategorized");
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
@@ -139,7 +139,7 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     control: form.control,
     name: "data.products",
   });
-  const selectedIds = new Set((selectedProducts ?? []).map((p) => p.id));
+  const selectedIds = new Set(selectedProducts ?? []);
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -156,10 +156,10 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     if (selectedIds.has(product.id)) {
       form.setValue(
         "data.products",
-        current.filter((p) => p.id !== product.id),
+        current.filter((id) => id !== product.id),
       );
     } else {
-      form.setValue("data.products", [...current, product]);
+      form.setValue("data.products", [...current, product.id]);
     }
   };
 
@@ -173,14 +173,10 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
       const removeSet = new Set(leafIds);
       form.setValue(
         "data.products",
-        current.filter((p) => !removeSet.has(p.id)),
+        current.filter((id) => !removeSet.has(id)),
       );
     } else {
-      const allProductsMap = new Map(allProducts.map((p) => [p.id, p]));
-      const toAdd = leafIds
-        .filter((id) => !selectedIds.has(id))
-        .map((id) => allProductsMap.get(id))
-        .filter(Boolean) as Product[];
+      const toAdd = leafIds.filter((id) => !selectedIds.has(id));
       form.setValue("data.products", [...current, ...toAdd]);
     }
   };
@@ -193,26 +189,75 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     return "indeterminate";
   };
 
+  // select all ทำงานกับที่มองเห็น — ค้นอยู่ก็เลือก/เอาออกเฉพาะที่กรองเจอ
+  // (เกณฑ์เดียวกับ checkbox ของ node กลุ่ม ที่กวาดเฉพาะ leaf ใต้กิ่งตัวเอง)
+  const visibleProductIds = (() => {
+    const ids: string[] = [];
+    const walk = (nodes: TreeNode[]) => {
+      for (const n of nodes) {
+        if (n.type === "product") ids.push(n.id);
+        else walk(n.children);
+      }
+    };
+    walk(filteredTree);
+    return ids;
+  })();
+
+  const selectedVisibleCount = visibleProductIds.filter((id) =>
+    selectedIds.has(id),
+  ).length;
+  const allVisibleSelected =
+    visibleProductIds.length > 0 &&
+    selectedVisibleCount === visibleProductIds.length;
+  const selectAllState: boolean | "indeterminate" = allVisibleSelected
+    ? true
+    : selectedVisibleCount > 0
+      ? "indeterminate"
+      : false;
+
+  const toggleSelectAll = () => {
+    if (isDisabled) return;
+    const current = form.getValues("data.products") ?? [];
+    if (allVisibleSelected) {
+      const removeSet = new Set(visibleProductIds);
+      form.setValue(
+        "data.products",
+        current.filter((id) => !removeSet.has(id)),
+      );
+    } else {
+      const toAdd = visibleProductIds.filter((id) => !selectedIds.has(id));
+      form.setValue("data.products", [...current, ...toAdd]);
+    }
+  };
+
   return (
-    <div className="space-y-2 pt-3">
-      <div className="flex items-center gap-2">
+    <div className="space-y-4 pt-4">
+      <div className="flex items-center gap-4">
         <div className="relative max-w-sm flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-2 size-3 -translate-y-1/2" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
             placeholder={t("searchProducts")}
-            className="h-8 pl-7 text-xs placeholder:text-xs"
+            className="h-9 pl-9 text-sm placeholder:text-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <span className="text-muted-foreground text-micro-legal">
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <Checkbox
+            checked={selectAllState}
+            onCheckedChange={toggleSelectAll}
+            disabled={isDisabled || visibleProductIds.length === 0}
+          />
+          <span className="text-sm select-none">{tfl("selectAll")}</span>
+        </label>
+        <span className="text-muted-foreground text-sm font-medium">
           {t("nSelected", { count: selectedProducts?.length ?? 0 })}
         </span>
       </div>
 
-      <div className="max-h-105 overflow-y-auto rounded border p-1.5">
+      <div className="bg-card max-h-105 overflow-y-auto rounded-xl border p-3 shadow-sm">
         {filteredTree.length === 0 ? (
-          <p className="text-muted-foreground py-6 text-center text-xs">
+          <p className="text-muted-foreground py-10 text-center text-sm">
             {search ? t("noProductsMatch") : t("noProductsAvailable")}
           </p>
         ) : (
@@ -281,7 +326,7 @@ const TreeNodeRow = ({
           onCheckedChange={() => node.product && onToggleProduct(node.product)}
           disabled={isDisabled}
         />
-        <span className="text-xs">{node.name}</span>
+        <span className="text-sm">{node.name}</span>
       </div>
     );
   }
@@ -301,7 +346,7 @@ const TreeNodeRow = ({
         >
           <ChevronRight
             className={cn(
-              "text-muted-foreground size-3 transition-transform",
+              "text-muted-foreground size-4 transition-transform",
               isExpanded && "rotate-90",
             )}
           />
@@ -316,8 +361,8 @@ const TreeNodeRow = ({
           className="flex flex-1 cursor-pointer items-center gap-1.5 text-left"
           onClick={() => onToggleExpand(node.id)}
         >
-          <span className="text-xs font-semibold">{node.name}</span>
-          <span className="text-muted-foreground text-micro">
+          <span className="text-sm font-semibold">{node.name}</span>
+          <span className="text-muted-foreground text-sm">
             ({leafIdsMap.get(node.id)?.length ?? 0})
           </span>
         </button>

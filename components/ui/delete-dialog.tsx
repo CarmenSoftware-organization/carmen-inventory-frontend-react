@@ -1,4 +1,3 @@
-
 import { Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {

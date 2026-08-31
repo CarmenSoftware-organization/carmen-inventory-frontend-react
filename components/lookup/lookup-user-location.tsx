@@ -6,7 +6,7 @@ import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
-import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LookupCombobox } from "./lookup-combobox";
@@ -164,11 +164,7 @@ function LookupUserLocationInner({
             {l.code}
           </Badge>
           <span className="flex-1 truncate text-left">{l.name}</span>
-          <LocationTypeBadge
-            type={l.location_type}
-            size="xs"
-            className="shrink-0"
-          />
+          <LocationTypeLabel type={l.location_type} className="shrink-0" />
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}

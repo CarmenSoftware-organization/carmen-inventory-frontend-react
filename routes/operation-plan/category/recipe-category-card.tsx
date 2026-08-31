@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { RecipeCategory } from "@/types/recipe-category";
 
@@ -35,10 +35,10 @@ export default function RecipeCategoryCard({
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
       {parentName && (
         <ListCardRow label={tfl("parentCategory")}>{parentName}</ListCardRow>

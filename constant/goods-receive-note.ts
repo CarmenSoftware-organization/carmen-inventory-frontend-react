@@ -1,4 +1,4 @@
-import { createStatusConfig } from "./status-config";
+import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
 /** GRN document status (table/card view) */
 export const GRN_STATUS_CONFIG = createStatusConfig([
@@ -7,6 +7,12 @@ export const GRN_STATUS_CONFIG = createStatusConfig([
   "committed",
   "voided",
 ] as const);
+
+/** ตัวเลือก filter สถานะ GRN ใน list sheet — คอลัมน์จริงใน DB คือ doc_status */
+export const GRN_STATUS_OPTIONS = createStatusFilterOptions(
+  "doc_status",
+  GRN_STATUS_CONFIG,
+);
 
 /** GRN form status (save/committed flow) */
 export const GRN_FORM_STATUS_CONFIG = createStatusConfig([

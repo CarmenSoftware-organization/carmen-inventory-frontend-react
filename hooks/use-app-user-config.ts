@@ -23,7 +23,8 @@ export async function fetchAppUserConfigByKey(
   const res = await httpClient.get(
     API_ENDPOINTS.APP_USER_CONFIG_BY_KEY(buCode, key),
   );
-  if (!res.ok) throw await ApiError.from(res, "Failed to fetch app user config");
+  if (!res.ok)
+    throw await ApiError.from(res, "Failed to fetch app user config");
   const json = await res.json();
   return json.data;
 }
@@ -41,7 +42,9 @@ export function useAppUserConfigByKey(key: string | undefined) {
 export function useUpsertAppUserConfig() {
   return useApiMutation<{ key: string; value: Record<string, unknown> }>({
     mutationFn: ({ key, value }, buCode) =>
-      httpClient.put(API_ENDPOINTS.APP_USER_CONFIG_BY_KEY(buCode, key), { value }),
+      httpClient.put(API_ENDPOINTS.APP_USER_CONFIG_BY_KEY(buCode, key), {
+        value,
+      }),
     invalidateKeys: [QUERY_KEYS.APP_USER_CONFIGS],
     errorMessage: "Failed to save app user config",
   });

@@ -108,7 +108,9 @@ export function useExchangeRateTable({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / Number(params.perpage ?? 10)),
   });

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -7,7 +6,7 @@ import {
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
-} from "@/hooks/use-price-list-external";
+} from "./use-price-list-external";
 import { toast } from "sonner";
 import type { PricelistExternalDto } from "@/types/price-list-external";
 import { ErrorState } from "@/components/ui/error-state";
@@ -107,7 +106,9 @@ export default function PriceListExternalComponent({
     } catch (err) {
       // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor
       // ภายนอกเห็น แทนข้อความ generic — invalidate/refetch จัดการ reset เอง
-      toast.error(err instanceof HttpError ? err.message : "Failed to save changes");
+      toast.error(
+        err instanceof HttpError ? err.message : "Failed to save changes",
+      );
     }
   };
 
@@ -203,69 +204,81 @@ export default function PriceListExternalComponent({
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <PriceListExternalHeader data={data} />
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          {isViewMode
-            ? "Items requested for pricing."
-            : "Enter your price and tax for each item, then submit."}
-        </p>
-        <div className="flex items-center gap-2 shrink-0">
-          {/* ดาวน์โหลดค่าปัจจุบันไปกรอก/ดูใน excel — ใช้ได้ทุกสถานะ */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadExcel}
-            className="gap-1.5"
-          >
-            <Download className="h-4 w-4" />
-            Excel
-          </Button>
-          {/* submit แล้ว vendor แก้ไม่ได้อีก → ซ่อน upload + สลับ edit mode */}
-          {data.status !== "submitted" && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImportOpen(true)}
-                disabled={updateMutation.isPending}
-                className="gap-1.5"
-              >
-                <Upload className="h-4 w-4" />
-                Import
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsViewMode(!isViewMode)}
-                className="gap-1.5"
-              >
-                {isViewMode ? (
+    <div className="mx-auto max-w-6xl px-4 md:px-8">
+      <div className="border-border bg-card overflow-hidden rounded-xl border shadow-sm">
+        <div className="space-y-8 p-6 md:p-8">
+          <PriceListExternalHeader data={data} />
+
+          <div className="border-border space-y-6 border-t pt-6">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-muted-foreground text-sm">
+                {isViewMode
+                  ? "Items requested for pricing."
+                  : "Enter your price and tax for each item, then submit."}
+              </p>
+              <div className="flex shrink-0 items-center gap-2">
+                {/* ดาวน์โหลดค่าปัจจุบันไปกรอก/ดูใน excel — ใช้ได้ทุกสถานะ */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadExcel}
+                  className="gap-1.5"
+                >
+                  <Download className="h-4 w-4" />
+                  Excel
+                </Button>
+                {/* submit แล้ว vendor แก้ไม่ได้อีก → ซ่อน upload + สลับ edit mode */}
+                {data.status !== "submitted" && (
                   <>
-                    <Pencil className="h-4 w-4" />
-                    Edit Mode
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" />
-                    View Mode
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setImportOpen(true)}
+                      disabled={updateMutation.isPending}
+                      className="gap-1.5"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Import
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsViewMode(!isViewMode)}
+                      className="gap-1.5"
+                    >
+                      {/* ป้ายบอก "กดแล้วจะได้ทำอะไร" ไม่ใช่ชื่อโหมด — คนอ่านคือ
+                          แอดมินฝ่ายขายของ vendor ที่เพิ่งได้ลิงก์มา ไม่เคยเห็นระบบนี้
+                          "Edit/View Mode" เป็นภาษาซอฟต์แวร์ ส่วนสิ่งที่เขามาทำจริง
+                          คือใส่ราคา */}
+                      {isViewMode ? (
+                        <>
+                          <Pencil className="h-4 w-4" />
+                          Enter Prices
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          Preview
+                        </>
+                      )}
+                    </Button>
                   </>
                 )}
-              </Button>
-            </>
-          )}
+              </div>
+            </div>
+            <PriceListExternalProductTable
+              form={form}
+              isViewMode={isViewMode}
+              onSave={handleSave}
+              onSubmit={() => setConfirmSubmitOpen(true)}
+              isSaving={updateMutation.isPending}
+              isSubmitting={submitMutation.isPending}
+              taxProfiles={taxProfiles ?? []}
+            />
+          </div>
         </div>
       </div>
-      <PriceListExternalProductTable
-        form={form}
-        isViewMode={isViewMode}
-        onSave={handleSave}
-        onSubmit={() => setConfirmSubmitOpen(true)}
-        isSaving={updateMutation.isPending}
-        isSubmitting={submitMutation.isPending}
-        taxProfiles={taxProfiles ?? []}
-      />
+
       <PriceListExternalImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}

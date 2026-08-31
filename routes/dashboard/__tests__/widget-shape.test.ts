@@ -40,9 +40,29 @@ describe("inferWidgetTypeFromShape", () => {
 
 describe("defaultParamsFor", () => {
   const params: readonly DatasetParam[] = [
-    { name: "granularity", label: "Granularity", type: "text", required: false, default: "day", options: ["day", "week", "month"] },
-    { name: "days", label: "Look-back (days)", type: "int", required: false, default: 30 },
-    { name: "status", label: "PR status", type: "text", required: false, default: "", options: ["draft"] },
+    {
+      name: "granularity",
+      label: "Granularity",
+      type: "text",
+      required: false,
+      default: "day",
+      options: ["day", "week", "month"],
+    },
+    {
+      name: "days",
+      label: "Look-back (days)",
+      type: "int",
+      required: false,
+      default: 30,
+    },
+    {
+      name: "status",
+      label: "PR status",
+      type: "text",
+      required: false,
+      default: "",
+      options: ["draft"],
+    },
   ];
 
   it("seeds every param from its default", () => {
@@ -97,7 +117,9 @@ describe("shouldShowAllOption", () => {
   });
 
   it("shows All for a non-required param with empty-string default (status)", () => {
-    expect(shouldShowAllOption(P({ default: "", options: ["draft"] }))).toBe(true);
+    expect(shouldShowAllOption(P({ default: "", options: ["draft"] }))).toBe(
+      true,
+    );
   });
 
   it("shows All for a non-required param with no default", () => {
@@ -106,13 +128,15 @@ describe("shouldShowAllOption", () => {
 
   it("hides All for a param with a meaningful default (time_range token)", () => {
     expect(
-      shouldShowAllOption(P({ default: "@1month", options: ["@today", "@1month"] })),
+      shouldShowAllOption(
+        P({ default: "@1month", options: ["@today", "@1month"] }),
+      ),
     ).toBe(false);
   });
 
   it("hides All for a required param", () => {
-    expect(shouldShowAllOption(P({ required: true, default: "", options: ["a"] }))).toBe(
-      false,
-    );
+    expect(
+      shouldShowAllOption(P({ required: true, default: "", options: ["a"] })),
+    ).toBe(false);
   });
 });

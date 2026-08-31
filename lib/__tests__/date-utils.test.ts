@@ -56,7 +56,20 @@ describe("formatDate", () => {
   });
 
   it("handles all 12 months correctly (MMM)", () => {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     for (let i = 0; i < 12; i++) {
       const iso = `2026-${String(i + 1).padStart(2, "0")}-15T00:00:00Z`;
       expect(formatDate(iso, "MMM")).toBe(months[i]);

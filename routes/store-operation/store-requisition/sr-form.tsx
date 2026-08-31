@@ -18,7 +18,11 @@ import {
   computeSrAction,
   type SrFormValues,
 } from "./sr-form-schema";
-import { buildSrDefaultValues, srGrandTotal } from "./sr-form-helpers";
+import {
+  buildSrDefaultValues,
+  buildSrDuplicateValues,
+  srGrandTotal,
+} from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
 import { SrItemFields } from "./sr-item-fields";
 import { SrHeader } from "./sr-header";
@@ -29,6 +33,8 @@ import { SrStockTable } from "./sr-stock-table";
 
 interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
+  /** ใบเดิมที่ผู้ใช้กด Duplicate — prefill แล้วนับ dirty (แบบเดียวกับ PR) */
+  readonly duplicateFrom?: StoreRequisition;
 }
 
 interface LocationInfo {
@@ -39,6 +45,7 @@ interface LocationInfo {
 
 export function StoreRequisitionForm({
   storeRequisition,
+  duplicateFrom,
 }: StoreRequisitionFormProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -60,17 +67,37 @@ export function StoreRequisitionForm({
   const departmentCode = storeRequisition?.department_code ?? "";
   const defaultDepartmentId = defaultBu?.department?.id ?? "";
 
-  const defaultValues = buildSrDefaultValues(
-    storeRequisition,
-    defaultRequestorId,
-    defaultDepartmentId,
-  );
+  // ค่าแรกเข้า (duplicate = เติมของจากใบเดิมมาแล้ว) ส่วน baseline เทียบ dirty
+  // ตอน duplicate ต้องเป็นฟอร์มเปล่า — เหตุผลเดียวกับ template ของ PR: ของที่
+  // เติมคือของที่ยังไม่ save ฟอร์มต้องนับ dirty ตั้งแต่เกิดให้ navGuard ถามก่อนทิ้ง
+  const initialValues = duplicateFrom
+    ? buildSrDuplicateValues(
+        duplicateFrom,
+        defaultRequestorId,
+        defaultDepartmentId,
+      )
+    : buildSrDefaultValues(
+        storeRequisition,
+        defaultRequestorId,
+        defaultDepartmentId,
+      );
+  const defaultValues = duplicateFrom
+    ? buildSrDefaultValues(undefined, defaultRequestorId, defaultDepartmentId)
+    : initialValues;
 
   const srSchema = createSrSchema(tv, tfl);
   const form = useForm<SrFormValues>({
     resolver: zodResolver(srSchema) as Resolver<SrFormValues>,
-    defaultValues,
+    defaultValues: initialValues,
   });
+
+  // จาก duplicate: สลับ baseline เป็นฟอร์มเปล่าโดยคงค่าที่เติมไว้ → dirty ตั้งแต่เกิด
+  // (ต้องมาก่อน effect auto-populate ข้างล่าง — ดู pr-form.tsx เหตุผลเดียวกัน)
+  useEffect(() => {
+    if (!duplicateFrom) return;
+    form.reset(defaultValues, { keepValues: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ครั้งเดียวตอน mount
+  }, []);
 
   const actions = useSrFormActions({
     form,
@@ -101,16 +128,13 @@ export function StoreRequisitionForm({
     name: "to_location_id",
   });
   const srDate = useWatch({ control: form.control, name: "sr_date" });
+  const workflowId = useWatch({ control: form.control, name: "workflow_id" });
   const items = useWatch({ control: form.control, name: "items" }) ?? [];
   const departmentId = useWatch({
     control: form.control,
     name: "department_id",
   });
 
-  const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
-    name: storeRequisition?.from_location_name ?? "",
-    code: storeRequisition?.from_location_code ?? "",
-  });
   const [toLocInfo, setToLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.to_location_name ?? "",
     code: storeRequisition?.to_location_code ?? "",
@@ -127,14 +151,24 @@ export function StoreRequisitionForm({
     if (!values.requestor_id) patch.requestor_id = defaultRequestorId;
     if (!values.department_id) patch.department_id = defaultDepartmentId;
     if (Object.keys(patch).length > 0) {
-      form.reset(
-        {
-          ...defaultValues,
-          requestor_id: patch.requestor_id ?? values.requestor_id,
-          department_id: patch.department_id ?? values.department_id,
-        },
-        { keepDirtyValues: true },
-      );
+      // จาก duplicate ฟอร์ม dirty อยู่แล้ว (baseline เปล่า) — setValue ตรง ๆ พอ
+      // ห้ามเดินทาง reset: keepDirtyValues เก็บเฉพาะ field ใน dirtyFields ซึ่ง
+      // items ที่ prefill มายังไม่อยู่ → โดน wipe ทั้งตาราง (trap เดียวกับ PR)
+      if (duplicateFrom) {
+        if (patch.requestor_id)
+          form.setValue("requestor_id", patch.requestor_id);
+        if (patch.department_id)
+          form.setValue("department_id", patch.department_id);
+      } else {
+        form.reset(
+          {
+            ...defaultValues,
+            requestor_id: patch.requestor_id ?? values.requestor_id,
+            department_id: patch.department_id ?? values.department_id,
+          },
+          { keepDirtyValues: true },
+        );
+      }
     }
     if (isAdd && !hasDepartment) {
       toast.warning(t("noDepartment"));
@@ -171,9 +205,10 @@ export function StoreRequisitionForm({
   const itemFieldsProps = {
     form,
     disabled: isDisabled,
-    disableAdd: !fromLocationId || !toLocationId,
+    disableAdd: !fromLocationId || !toLocationId || !workflowId,
     fromLocationId: fromLocationId ?? "",
     toLocationId: toLocationId ?? "",
+    workflowId: workflowId ?? "",
     role: storeRequisition ? storeRequisition.role : STAGE_ROLE.CREATE,
   };
 
@@ -208,7 +243,6 @@ export function StoreRequisitionForm({
           form={form}
           readOnly={isView}
           disabled={actions.isPending}
-          onFromLocInfoChange={setFromLocInfo}
           onToLocInfoChange={setToLocInfo}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
           isDraft={
@@ -243,9 +277,6 @@ export function StoreRequisitionForm({
 
           <TabsContent value="stock">
             <SrStockTable
-              items={items}
-              fromLocationName={fromLocInfo.name}
-              toLocationName={toLocInfo.name}
               srId={storeRequisition?.id}
               srNo={storeRequisition?.sr_no}
               docStatus={storeRequisition?.doc_status}
@@ -261,6 +292,9 @@ export function StoreRequisitionForm({
         action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
         grandTotal={srGrandTotal(items)}
         hasItems={items.length > 0}
+        activeTab={tab === "stock" ? "stock" : "items"}
+        srId={storeRequisition?.id}
+        docStatus={storeRequisition?.doc_status}
         onSubmit={actions.openSubmitDialog}
         onApprove={() => actions.setActionDialog("approve")}
         onIssue={() => actions.setActionDialog("issue")}

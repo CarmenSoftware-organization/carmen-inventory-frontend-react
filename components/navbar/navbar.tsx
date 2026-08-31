@@ -1,4 +1,13 @@
+import { MoreVertical } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useProfile } from "@/hooks/use-profile";
 import { UserProfile } from "./user-profile";
 import PathBreadcrumb from "./path-breadcrumb";
@@ -26,9 +35,43 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-1">
           {!isError && (
             <>
-              <div className="flex items-center gap-1">
+              <div className="hidden items-center gap-1 sm:flex">
                 <BuSwitcher />
                 <ModuleApp />
+              </div>
+
+              <div className="flex items-center sm:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-foreground h-8 w-8"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="top" className="rounded-b-2xl p-4 pt-12">
+                    <SheetHeader>
+                      <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                    </SheetHeader>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-muted-foreground text-sm font-medium">
+                          Business Unit
+                        </span>
+                        <BuSwitcher />
+                      </div>
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-muted-foreground text-sm font-medium">
+                          Applications
+                        </span>
+                        <ModuleApp />
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
 
               <Notification />

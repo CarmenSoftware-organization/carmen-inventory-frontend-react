@@ -69,7 +69,7 @@ export function RecipeCostHero({
             />
           </div>
           {suggested != null && suggested > 0 && (
-            <div className="bg-muted text-muted-foreground mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-micro font-semibold">
+            <div className="bg-muted text-muted-foreground text-micro mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-semibold">
               <Sparkles className="size-2.5" aria-hidden="true" />
               {t("suggestedAtTarget", {
                 price: `฿${suggested.toFixed(2)}`,

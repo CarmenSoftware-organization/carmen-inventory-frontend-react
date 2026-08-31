@@ -89,7 +89,7 @@ function JsonBlock({ data }: { data: Record<string, unknown> | null }) {
   if (!data || Object.keys(data).length === 0)
     return <span className="text-muted-foreground">—</span>;
   return (
-    <pre className="bg-muted/50 max-h-60 overflow-x-auto rounded-md border p-2 text-micro-legal leading-relaxed">
+    <pre className="bg-muted/50 text-micro-legal max-h-60 overflow-x-auto rounded-md border p-2 leading-relaxed">
       {JSON.stringify(data, null, 2)}
     </pre>
   );
@@ -176,7 +176,9 @@ export function ActivityLogDetailSheet({
 
                   <InfoRow icon={User} label={t("user")}>
                     <div>
-                      {actorName && <p className="font-semibold">{actorName}</p>}
+                      {actorName && (
+                        <p className="font-semibold">{actorName}</p>
+                      )}
                       {log.actor_username && (
                         <p className="text-muted-foreground">
                           {log.actor_username}

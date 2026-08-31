@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
-import { useInterfaceEntitlement } from "@/hooks/use-interface-entitlement";
+import { useInterfaceEntitlement } from "./use-interface-entitlement";
 import { findCategory, findBrand } from "./interface-registry";
 
 /**

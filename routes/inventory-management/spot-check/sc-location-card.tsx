@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useProfile } from "@/hooks/use-profile";
-import { useResetSpotCheck } from "@/hooks/use-spot-check";
+import { useResetSpotCheck } from "./use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
 import { LocationAvatar, LocationCardShell } from "../shared/inv-shared";
 import { ResumeInfoPanel } from "./sc-resume-info-panel";
@@ -91,7 +91,7 @@ export function ScLocationCard({
               </Link>
               <Link
                 to={`/config/location/${item.location_id}`}
-                className="text-muted-foreground hover:text-foreground shrink-0 text-micro-legal tracking-wide uppercase transition-colors"
+                className="text-muted-foreground hover:text-foreground text-micro-legal shrink-0 tracking-wide uppercase transition-colors"
               >
                 {item.code}
               </Link>
@@ -113,7 +113,7 @@ export function ScLocationCard({
                 </span>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
+            <div className="text-muted-foreground text-micro flex items-center gap-1.5">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>

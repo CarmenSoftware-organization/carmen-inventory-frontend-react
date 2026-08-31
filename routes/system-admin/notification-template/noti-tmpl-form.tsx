@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ChevronLeft, History, Pencil, Save, Trash2, X } from "lucide-react";
@@ -61,7 +61,6 @@ export function NotificationTemplateForm({
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
@@ -115,12 +114,11 @@ export function NotificationTemplateForm({
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate(LIST_PATH);
-    }
+    navigate(LIST_PATH);
   };
 
   const handleBack = () => {
@@ -158,7 +156,7 @@ export function NotificationTemplateForm({
 
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
             size="sm"

@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { usePhysicalCountById } from "@/hooks/use-physical-count";
+import { usePhysicalCountById } from "../shared/use-physical-count";
 import { PcForm } from "./pc-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

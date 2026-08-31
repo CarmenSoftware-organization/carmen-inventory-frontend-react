@@ -16,20 +16,34 @@ const fields: FilterFieldDef[] = [
 ];
 
 function view(overrides: Partial<SavedView>): SavedView {
-  return { id: "v1", name: "test", filters: {}, created_at: "2026-07-29T00:00:00Z", ...overrides };
+  return {
+    id: "v1",
+    name: "test",
+    filters: {},
+    created_at: "2026-07-29T00:00:00Z",
+    ...overrides,
+  };
 }
 
 describe("encodeFilterParam", () => {
   it("ส่งผ่าน clause เต็มตรงๆ และข้าม field ว่าง", () => {
     expect(
-      encodeFilterParam(fields, { filter: "is_active|bool:true", cn_status: "", pr_date: "" }),
+      encodeFilterParam(fields, {
+        filter: "is_active|bool:true",
+        cn_status: "",
+        pr_date: "",
+      }),
     ).toBe("is_active|bool:true");
   });
 
   it("ห่อค่า CSV ด้วย toClause", () => {
-    expect(encodeFilterParam(fields, { filter: "", cn_status: "draft,posted", pr_date: "" })).toBe(
-      "doc_status|enum:draft,posted",
-    );
+    expect(
+      encodeFilterParam(fields, {
+        filter: "",
+        cn_status: "draft,posted",
+        pr_date: "",
+      }),
+    ).toBe("doc_status|enum:draft,posted");
   });
 
   it("join หลาย field ด้วย ; และ comma ใน date_range รอด", () => {
@@ -50,15 +64,19 @@ describe("encodeFilterParam", () => {
 describe("viewMatchesCurrent", () => {
   it("ค่าว่างเทียบเท่าไม่มี key (ไม่ dirty ปลอม)", () => {
     const v = view({ filters: { filter: "is_active|bool:true" } });
-    expect(viewMatchesCurrent(v, { filter: "is_active|bool:true", pr_date: "" }, "")).toBe(true);
+    expect(
+      viewMatchesCurrent(v, { filter: "is_active|bool:true", pr_date: "" }, ""),
+    ).toBe(true);
   });
 
   it("ค่าต่าง → dirty", () => {
     const v = view({ filters: { filter: "is_active|bool:true" } });
-    expect(viewMatchesCurrent(v, { filter: "is_active|bool:false" }, "")).toBe(false);
+    expect(viewMatchesCurrent(v, { filter: "is_active|bool:false" }, "")).toBe(
+      false,
+    );
   });
 
-  it("sort ต่าง → dirty / sort undefined เทียบเท่า \"\"", () => {
+  it('sort ต่าง → dirty / sort undefined เทียบเท่า ""', () => {
     const v = view({ filters: {}, sort: "pr_no:desc" });
     expect(viewMatchesCurrent(v, {}, "pr_no:desc")).toBe(true);
     expect(viewMatchesCurrent(v, {}, "")).toBe(false);

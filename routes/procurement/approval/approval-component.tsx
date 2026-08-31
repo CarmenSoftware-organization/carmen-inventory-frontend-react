@@ -8,10 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  useApprovalPending,
-  useApprovalPendingSummary,
-} from "@/hooks/use-approval";
+import { useApprovalPending, useApprovalPendingSummary } from "./use-approval";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import SearchInput from "@/components/search-input";
@@ -23,19 +20,12 @@ import { cn } from "@/lib/utils";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-// หน้านี้ไม่มี filter field จริงให้ลง sheet — ตัวกรอง doc_type ขับเคลื่อนด้วยการ์ด
-// สรุปด้านบน ผ่าน useDataGridState's setFilter ที่เขียน URL param "filter" ตรง ๆ
-// (ไม่ใช่ clause แบบ key|type:value เหมือนหน้าอื่น จึงไม่พอร์ตเข้า lf.filterParam)
-// ประกาศเป็น hidden field คีย์ "filter" (ชื่อ param เดียวกับที่ useDataGridState ใช้)
-// เพื่อให้ saved view จับ/คืนค่า/ล้าง param นี้ได้ด้วย โดยไม่โผล่เป็น control ใน sheet
 const APPROVAL_FILTER_FIELDS: FilterFieldDef[] = [
-  // ตัวกรอง doc_type ของหน้านี้ขับด้วยการคลิก summary card (ไม่มี control ใน sheet)
-  // ประกาศเป็น hidden field เพื่อให้ saved view จับ/คืนค่า/ล้าง param นี้ได้
   {
     key: "filter",
     labelKey: "",
@@ -88,19 +78,12 @@ export default function ApprovalComponent() {
 
   const activeType = filter?.match(/doc_type:(\w+)/)?.[1] ?? "total";
 
-  /**
-   * จัดการคลิกการ์ดสรุปเพื่อกรองตามประเภทเอกสาร
-   * @param key - คีย์ประเภทเอกสารที่ต้องการกรอง
-   */
   const handleCardClick = (key: keyof ApprovalPendingSummary) => {
     setFilter(key === "total" ? "" : `doc_type:${key}`);
   };
 
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
 
-  // fields ว่าง (ดู APPROVAL_FILTER_FIELDS) — ให้แค่ ViewSelector/ListFilterSheet/
-  // saved-views ครบตาม sweep เดียวกับหน้าอื่น doc_type ยังกรองผ่านการ์ดสรุปด้านบน
-  // เหมือนเดิมทั้งหมด ไม่ผ่าน lf.filterParam
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.APPROVAL,
     fields: APPROVAL_FILTER_FIELDS,
@@ -111,9 +94,7 @@ export default function ApprovalComponent() {
     useApprovalPendingSummary();
 
   const items = data?.data ?? [];
-  // ใช้ total ที่แท้จริงจาก summary endpoint (มี total/pr/po/sr) ตาม activeType แทน
-  // items.length (ความยาวของหน้าปัจจุบัน) — ไม่งั้น pageCount = 1 เสมอ approver เลื่อน
-  // หน้าไม่ได้ ส่วนกรณี search เป็น client-side filter จึงไม่รู้ total จริง ใช้ length
+
   const totalRecords = search
     ? items.length
     : (summary?.[activeType as keyof ApprovalPendingSummary] ?? items.length);
@@ -137,7 +118,7 @@ export default function ApprovalComponent() {
             view={lf.view}
             snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
           />
-          <ListFilterSheet
+          <ListFilter
             fields={APPROVAL_FILTER_FIELDS}
             values={lf.values}
             setValue={lf.setValue}

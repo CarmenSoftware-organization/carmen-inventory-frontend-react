@@ -52,6 +52,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api-system/business-units/${id}/avatar`,
   BUSINESS_UNIT_LOGO: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/logo`,
+  /** ผังบัญชีของ BU — ชื่อ resource ฝั่ง backend คือ chart-of-accounts */
+  CHART_OF_ACCOUNTS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/chart-of-accounts`,
   CN_REASONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>
@@ -88,6 +91,8 @@ export const API_ENDPOINTS = {
   DEPARTMENT_USER_BY_USER: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/department-users/user/${userId}`,
   DOCUMENTS: (buCode: string) => `/api/proxy/api/${buCode}/documents`,
+  DOCUMENTS_SUMMARY: (buCode: string) =>
+    `/api/proxy/api/${buCode}/documents/summary`,
   EQUIPMENT_CATEGORIES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/recipe-equipment-categories`,
   EXCHANGE_RATES: (buCode: string) =>
@@ -131,12 +136,18 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/products/movement/locations`,
   LOCATIONS_WITH_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/locations-with-movement`,
-  LOCATION_PAIR_PRODUCTS: (
+  /**
+   * สินค้าที่มีทั้งคลังต้นทางและปลายทาง **และอยู่ในรายการที่ workflow เลือกไว้**
+   * (`tb_workflow.data.products`) — แทน `location-products/products/:from/:to` เดิม
+   * ที่กรองด้วยคลังอย่างเดียว ไม่มี workflow เป็นเงื่อนไข
+   */
+  LOCATION_WORKFLOW_PRODUCTS: (
     buCode: string,
-    locationId1: string,
-    locationId2: string,
+    fromLocationId: string,
+    toLocationId: string,
+    workflowId: string,
   ) =>
-    `/api/proxy/api/config/${buCode}/location-products/products/${locationId1}/${locationId2}`,
+    `/api/proxy/api/config/${buCode}/products-location-workflow/${fromLocationId}/${toLocationId}/${workflowId}`,
   LOGIN: "/api/auth/login",
   LOGOUT: "/api/auth/logout",
   MY_DASHBOARD_WIDGETS: (buCode: string) =>
@@ -154,6 +165,7 @@ export const API_ENDPOINTS = {
     "/api/proxy/api/my-pending/store-requisitions/pending",
   NOTIFICATIONS: "/api/proxy/api/notifications",
   NOTIFICATIONS_MARK_ALL_READ: "/api/proxy/api/notifications/mark-all-read",
+  NOTIFICATIONS_UNREAD: "/api/proxy/api/notifications/unread",
   NOTIFICATION_BY_ID: (id: string) =>
     `/api/proxy/api/notifications/${toSafePathSegment(id)}`,
   NOTIFICATION_MARK_READ: (id: string) =>
@@ -166,6 +178,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/period-ends/current`,
   PERIOD_END_REVIEW: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/review`,
+  PERIOD_END_START_COUNTING: (buCode: string) =>
+    `/api/proxy/api/${buCode}/period-ends/start-counting`,
   PERIOD_NEXT: (buCode: string) => `/api/proxy/api/${buCode}/periods/next`,
   PERMISSIONS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/permissions`,
@@ -216,6 +230,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/products/${productId}/images/order`,
   PRODUCTS_BY_LOCATION: (buCode: string, locationId: string) =>
     `/api/proxy/api/${buCode}/products/locations/${locationId}`,
+  PRODUCTS_BY_LOCATION_WORKFLOW: (
+    buCode: string,
+    locationId: string,
+    workflowId: string,
+  ) =>
+    `/api/proxy/api/config/${buCode}/products-location-workflow/${locationId}/${workflowId}`,
   PRODUCTS_WITH_MOVEMENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/products/with-movement`,
   PRODUCTS_WITH_MOVEMENT_AT_LOCATION: (buCode: string, locationId: string) =>
@@ -282,6 +302,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-requests`,
   PURCHASE_REQUESTS: "/api/proxy/api/purchase-requests",
@@ -332,6 +354,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/running-codes`,
   RUNNING_CODES_INIT: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/running-codes/init`,
+  /** backend ยังไม่มี endpoint นี้ — หน้า /config/shelf สร้างรอ contract นี้ไว้ */
+  SHELVES: (buCode: string) => `/api/proxy/api/config/${buCode}/shelves`,
   SPOT_CHECK: (buCode: string) => `/api/proxy/api/${buCode}/spot-checks`,
   // Spot check comment (header level) — id = spot_check_id (GET/POST list) หรือ comment id (PATCH/DELETE)
   SPOT_CHECK_COMMENT: (buCode: string, id: string) =>
@@ -367,10 +391,18 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/spot-checks/${id}/submit`,
   STOCK_IN: (buCode: string) => `/api/proxy/api/${buCode}/stock-ins`,
   STOCK_OUT: (buCode: string) => `/api/proxy/api/${buCode}/stock-outs`,
+  STOCK_REPLENISHMENT: (buCode: string) =>
+    `/api/proxy/api/${buCode}/stock-replenishments`,
+  WASTAGE_REPORTING: (buCode: string) =>
+    `/api/proxy/api/${buCode}/wastage-reporting`,
   STORE_REQUISITION: (buCode: string) =>
     `/api/proxy/api/${buCode}/store-requisitions`,
   STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
     `/api/proxy/api/${buCode}/store-requisitions/${srId}/previous-stages`,
+  STORE_REQUISITION_STOCK_MOVEMENTS: (buCode: string, srId: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/${srId}/stock-movements`,
+  STORE_REQUISITION_WORKFLOW_STAGES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/workflow-stages`,
   STORE_REQUISITIONS: "/api/proxy/api/store-requisitions",
   STORE_REQUISITION_COMMENT: (buCode: string, srId?: string) =>
     srId

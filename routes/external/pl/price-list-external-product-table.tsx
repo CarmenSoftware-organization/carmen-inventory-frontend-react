@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import {
   Controller,
@@ -210,8 +209,7 @@ export default function PriceListExternalProductTable({
   const addTierToItem = (itemIndex: number, rowId: string) => {
     const current =
       (form.getValues(`tb_pricelist_detail.${itemIndex}.moq_tiers`) as
-        | MoqTierDto[]
-        | undefined) ?? [];
+        MoqTierDto[] | undefined) ?? [];
     form.setValue(
       `tb_pricelist_detail.${itemIndex}.moq_tiers`,
       [
@@ -321,7 +319,11 @@ export default function PriceListExternalProductTable({
         accessorKey: "moq_qty",
         id: "moq_qty",
         header: ({ column }) => (
-          <DataGridColumnHeader title="MOQ" visibility={false} column={column} />
+          <DataGridColumnHeader
+            title="MOQ"
+            visibility={false}
+            column={column}
+          />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
@@ -475,9 +477,7 @@ export default function PriceListExternalProductTable({
       {
         id: "actions",
         header: () => (
-          <span className="text-muted-foreground text-micro">
-            Tiers
-          </span>
+          <span className="text-muted-foreground text-micro">Tiers</span>
         ),
         cell: ({ row }) => {
           const itemIndex = fields.findIndex((f) => f.id === row.original.id);
@@ -520,7 +520,6 @@ export default function PriceListExternalProductTable({
     [fields, form, taxProfiles],
   );
 
-
   // Table for edit mode
   const editTable = useReactTable({
     data: fields,
@@ -554,6 +553,7 @@ export default function PriceListExternalProductTable({
       table={editTable}
       recordCount={fields?.length || 0}
       tableLayout={{
+        rowClamp: false,
         columnsPinnable: false,
         columnsResizable: false,
         columnsMovable: false,
@@ -566,9 +566,9 @@ export default function PriceListExternalProductTable({
             <DataGridTable />
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
-        <DataGridPagination />
+          <DataGridPagination />
         </DataGridContainer>
-        <div className="flex items-center gap-2 justify-end">
+        <div className="flex items-center justify-end gap-2">
           {hasPendingChanges && (
             <Badge variant="warning" className="text-xs">
               Unsaved changes

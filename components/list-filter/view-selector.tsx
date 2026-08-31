@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import {
+  Bookmark,
+  BookmarkX,
+  Building2,
   Check,
   ChevronDown,
   Copy,
@@ -11,6 +14,7 @@ import {
   RotateCcw,
   Save,
   Trash2,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,6 +180,7 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
         ) : (
           <span className="size-3.5 shrink-0" />
         )}
+        <Bookmark className="size-3.5 shrink-0" />
         <span className="truncate">{v.name}</span>
       </DropdownMenuItem>
     );
@@ -226,9 +231,16 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="max-w-64 justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            className="max-w-64 justify-between"
+          >
+            <Bookmark aria-hidden="true" className="size-3.5 shrink-0" />
+            {/* ชื่อ field จาง ค่าเข้ม — ภาษาเดียวกับ chip ใน ActiveFilterBar */}
             <span className="truncate">
-              {tv("view")}: {label}
+              <span className="text-muted-foreground">{tv("view")}: </span>
+              {label}
             </span>
             <ChevronDown className="size-3.5 shrink-0 opacity-60" />
           </Button>
@@ -266,6 +278,7 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
             ) : (
               <span className="size-3.5 shrink-0" />
             )}
+            <BookmarkX className="size-3.5 shrink-0" />
             {tv("noView")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -293,13 +306,19 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
               )}
               {userViews.length > 0 && (
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>{tv("myViews")}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <UserRound className="size-3.5 shrink-0" />
+                    {tv("myViews")}
+                  </DropdownMenuLabel>
                   {userViews.map((v) => renderRow(v, "user", true))}
                 </DropdownMenuGroup>
               )}
               {buViews.length > 0 && (
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>{tv("buViews")}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <Building2 className="size-3.5 shrink-0" />
+                    {tv("buViews")}
+                  </DropdownMenuLabel>
                   {buViews.map((v) => renderRow(v, "bu", canManageBu))}
                 </DropdownMenuGroup>
               )}
@@ -373,7 +392,9 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
 
       <DeleteDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && !deletePending && setDeleteTarget(null)}
+        onOpenChange={(open) =>
+          !open && !deletePending && setDeleteTarget(null)
+        }
         title={tv("deleteConfirm", { name: deleteTarget?.name ?? "" })}
         isPending={deletePending}
         onConfirm={() => {

@@ -12,7 +12,7 @@ export function LandingModuleCard({
 }) {
   const Icon = mod.icon;
   return (
-    <article className="bg-card border-border flex flex-col overflow-hidden rounded-md border">
+    <article className="bg-card border-border flex flex-col overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md">
       {/* chrome ของการ์ดเป็นกลาง — การ์ดแยกกันด้วยไอคอน ชื่อ และตัวภาพ ไม่ใช่สี
           (accent เหลือแค่ในภาพจำลอง ดู ACCENT ใน landing-visuals) */}
       <div className="bg-muted/40 border-border-subtle relative h-28 overflow-hidden border-b">
@@ -32,7 +32,7 @@ export function LandingModuleCard({
         <div className="text-foreground/75 text-xs leading-snug font-semibold">
           {t(`modules.${mod.key}.one`)}
         </div>
-        <p className="text-muted-foreground mt-0.5 text-micro leading-relaxed">
+        <p className="text-muted-foreground text-micro mt-0.5 leading-relaxed">
           {t(`modules.${mod.key}.long`)}
         </p>
       </div>
@@ -42,13 +42,13 @@ export function LandingModuleCard({
           <div className="text-foreground text-micro font-bold">
             {t(`modules.${mod.key}.stat`)}
           </div>
-          <div className="text-muted-foreground mt-0.5 text-micro-legal">
+          <div className="text-muted-foreground text-micro-legal mt-0.5">
             {t(`modules.${mod.key}.meta`)}
           </div>
         </div>
         <Link
           to={mod.href}
-          className="text-foreground border-foreground hover:bg-foreground hover:text-background inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-1 text-micro-legal font-semibold transition-colors"
+          className="text-foreground border-foreground hover:bg-foreground hover:text-background text-micro-legal inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1.5 font-semibold transition-colors"
         >
           {t("cta.open")}
           <ArrowRight aria-hidden className="size-2.5" />

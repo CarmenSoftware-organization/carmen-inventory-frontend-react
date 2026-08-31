@@ -14,8 +14,8 @@ export function LandingChapter({
     chapter.modules.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2";
   return (
     <section
-      className={`border-border-subtle border-t px-4 py-6 md:px-8 md:py-7 lg:px-10 lg:py-8 ${
-        alt ? "bg-muted/40" : "bg-card"
+      className={`border-border-subtle border-t px-4 py-10 md:px-8 md:py-12 lg:px-10 lg:py-16 ${
+        alt ? "bg-muted/20" : "bg-card"
       }`}
     >
       <div className="grid gap-4 md:grid-cols-[10rem_1fr] md:gap-8 lg:grid-cols-[12rem_1fr]">
@@ -26,7 +26,7 @@ export function LandingChapter({
           <div className="text-foreground/25 text-3xl leading-[0.85] font-semibold tracking-tight md:text-4xl lg:text-5xl">
             {chapter.num}
           </div>
-          <div className="border-border text-muted-foreground mt-2 inline-block border-t-[1.5px] pt-1.5 text-micro-eyebrow font-semibold tracking-[0.14em] uppercase">
+          <div className="border-border text-muted-foreground text-micro-eyebrow mt-2 inline-block border-t-[1.5px] pt-1.5 font-semibold tracking-[0.14em] uppercase">
             {t(`chapters.${chapter.key}.kicker`)}
           </div>
         </div>
@@ -40,7 +40,9 @@ export function LandingChapter({
         </div>
       </div>
 
-      <div className={`mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 ${cols}`}>
+      <div
+        className={`mt-8 grid grid-cols-1 gap-5 sm:gap-6 md:mt-10 md:grid-cols-2 ${cols}`}
+      >
         {chapter.modules.map((m) => (
           <LandingModuleCard key={m.key} mod={m} t={t} />
         ))}

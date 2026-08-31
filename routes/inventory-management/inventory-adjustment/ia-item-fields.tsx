@@ -74,6 +74,7 @@ export function AdjItemFields({
     <>
       <SettingSection
         wide
+        frameless
         title={tfl("items")}
         description={t("noItemsDesc")}
         count={itemFields.length}
@@ -93,6 +94,7 @@ export function AdjItemFields({
           )}
 
           <DataGrid
+            tableLayout={{ rowClamp: false }}
             table={table}
             recordCount={itemFields.length}
             emptyMessage={

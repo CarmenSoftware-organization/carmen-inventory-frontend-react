@@ -2,6 +2,8 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { httpClient } from "@/lib/http-client";
+import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import type { CacheProfile } from "@/lib/cache-config";
 import type {
   CommentAttachment,
   CommentItem,
@@ -9,11 +11,13 @@ import type {
 
 interface CommentCrudOptions {
   queryKey: string;
-  entityEndpoint: (buCode: string) => string;
+  /** `(bu, id?) => …/{entity}-comments/{id}` — ไม่ส่ง id = path สำหรับอ้าง comment id */
   commentEndpoint: (buCode: string, entityId?: string) => string;
-  attachmentEndpoint: (buCode: string, entityId: string) => string;
+  /** ชื่อฟิลด์ id ของ entity ใน payload ตอนสร้าง เช่น `purchase_request_id` */
   idFieldName: string;
   label: string;
+  /** cache profile ของ useComments — ไม่ระบุ = ค่า default ของ react-query */
+  cacheProfile?: CacheProfile;
 }
 
 /**
@@ -24,22 +28,19 @@ interface CommentCrudOptions {
  * @returns object ของ hook สำหรับใช้ใน component comment sheet
  * @example
  * const prCommentCrud = createCommentCrud({
- *   queryKey: QUERY_KEYS.PR_COMMENTS,
- *   entityEndpoint: (bu) => API_ENDPOINTS.PURCHASE_REQUESTS(bu),
- *   commentEndpoint: (bu) => `${API_ENDPOINTS.PURCHASE_REQUESTS(bu)}/comment`,
- *   attachmentEndpoint: (bu, id) => `${API_ENDPOINTS.PURCHASE_REQUESTS(bu)}/${id}/attachment`,
- *   idFieldName: "pr_id",
+ *   queryKey: QUERY_KEYS.PURCHASE_REQUEST_COMMENTS,
+ *   commentEndpoint: API_ENDPOINTS.PURCHASE_REQUEST_COMMENT,
+ *   idFieldName: "purchase_request_id",
  *   label: "purchase request",
  * });
  * const { data: comments } = prCommentCrud.useComments(prId);
  */
 export function createCommentCrud({
   queryKey,
-  entityEndpoint,
   commentEndpoint,
-  attachmentEndpoint,
   idFieldName,
   label,
+  cacheProfile,
 }: CommentCrudOptions) {
   /**
    * Hook ดึงรายการ comment ของ entity ตาม id
@@ -55,14 +56,16 @@ export function createCommentCrud({
       queryKey: [queryKey, buCode, entityId],
       queryFn: async () => {
         if (!buCode || !entityId)
-          throw new Error(`Missing buCode or ${label} id`);
-        const res = await httpClient.get(
-          `${entityEndpoint(buCode)}/${entityId}/comment`,
-        );
-        if (!res.ok) throw new Error("Failed to fetch comments");
+          throw new ApiError(
+            ERROR_CODES.VALIDATION_ERROR,
+            `Missing buCode or ${label} id`,
+          );
+        const res = await httpClient.get(commentEndpoint(buCode, entityId));
+        if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
         const json = await res.json();
         return json.data ?? [];
       },
+      ...cacheProfile,
       enabled: !!buCode && !!entityId,
     });
   }
@@ -76,11 +79,16 @@ export function createCommentCrud({
       [key: string]: unknown;
       message: string;
       type: string;
-      attachments: CommentAttachment[];
+      files: File[];
     }>({
       mutationFn: (data, buCode) => {
+        // multipart คำขอเดียว — ข้อความกับไฟล์ไปพร้อมกัน ไม่มีขั้นอัปโหลดแยก
+        const formData = new FormData();
+        formData.append("message", data.message);
+        formData.append("type", data.type);
+        for (const file of data.files) formData.append("files", file);
         const entityId = data[idFieldName] as string | undefined;
-        return httpClient.post(commentEndpoint(buCode, entityId), data);
+        return httpClient.post(commentEndpoint(buCode, entityId), formData);
       },
       invalidateKeys: [queryKey],
       errorMessage: "Failed to add comment",
@@ -127,37 +135,11 @@ export function createCommentCrud({
     });
   }
 
-  /**
-   * อัปโหลดไฟล์แนบของ comment ผ่าน multipart/form-data
-   * @param buCode - รหัส business unit
-   * @param entityId - id ของ entity เจ้าของ comment
-   * @param file - ไฟล์ที่ต้องการอัปโหลด
-   * @returns ข้อมูล CommentAttachment ที่อัปโหลดแล้ว
-   */
-  async function uploadAttachment(
-    buCode: string,
-    entityId: string,
-    file: File,
-  ): Promise<CommentAttachment> {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await httpClient.post(
-      attachmentEndpoint(buCode, entityId),
-      formData,
-    );
-
-    if (!res.ok) throw new Error("Failed to upload attachment");
-    const json = await res.json();
-    return json.data;
-  }
-
   return {
     useComments,
     useCreate,
     useUpdate,
     useDelete,
-    uploadAttachment,
     /** The entity ID field name for create payloads */
     idFieldName,
   };

@@ -87,18 +87,21 @@ export function usePriceListTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
       size: 240,
     },
     {
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียงช่วงเวลา = เรียงวันเริ่ม)
+      id: "effective_from_date",
       accessorKey: "effectivePeriod",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("effectivePeriod")} />
       ),
-      enableSorting: false,
-      cell: ({ row }) => formatPeriod(row.getValue("effectivePeriod")),
-      meta: { headerTitle: tfl("effectivePeriod"), skeleton: columnSkeletons.text },
+      cell: ({ row }) => formatPeriod(row.getValue("effective_from_date")),
+      meta: {
+        headerTitle: tfl("effectivePeriod"),
+        skeleton: columnSkeletons.text,
+      },
       size: 220,
     },
     {
@@ -113,16 +116,12 @@ export function usePriceListTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
         return (
-          <StatusDotBadge
-            size="lg"
-            tone={PL_STATUS_TONE[status] ?? "neutral"}
-          >
+          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
             {ts(status as "draft" | "submitted" | "active" | "inactive")}
           </StatusDotBadge>
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
@@ -146,7 +145,9 @@ export function usePriceListTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

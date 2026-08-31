@@ -46,13 +46,12 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
   const setField = (i: number, field: keyof MoqTierDto, value: number) =>
     setTiers(tiers.map((t, j) => (j === i ? { ...t, [field]: value } : t)));
 
-  const removeTier = (i: number) =>
-    setTiers(tiers.filter((_, j) => j !== i));
+  const removeTier = (i: number) => setTiers(tiers.filter((_, j) => j !== i));
 
   return (
     <div className="bg-muted/30 flex justify-end px-6 py-4">
       <div className="w-full max-w-2xl space-y-1.5">
-        <div className="text-muted-foreground grid grid-cols-[1fr_1fr_1fr_2rem] gap-3 px-0.5 text-micro-legal font-semibold tracking-wider uppercase">
+        <div className="text-muted-foreground text-micro-legal grid grid-cols-[1fr_1fr_1fr_2rem] gap-3 px-0.5 font-semibold tracking-wider uppercase">
           <span className="text-right">MOQ</span>
           <span className="text-right">Price</span>
           <span className="text-right">Lead Time</span>

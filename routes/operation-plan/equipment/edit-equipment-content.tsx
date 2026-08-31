@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useEquipmentById } from "@/hooks/use-equipment";
+import { useEquipmentById } from "./use-equipment";
 import { EquipmentForm } from "./eq-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

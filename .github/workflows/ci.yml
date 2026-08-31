@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# GITHUB_TOKEN ใช้แค่ checkout — ปิดสิทธิ์ที่เหลือทั้งหมด ไม่งั้น token ได้สิทธิ์
+# ตาม default ของ repo ซึ่งอาจกว้างถึงเขียนโค้ด/ปล่อย package (CodeQL #3)
+permissions:
+  contents: read
+
 # ยกเลิก run เก่าของ branch/PR เดียวกันเมื่อมี push ใหม่ — ประหยัด runner
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}

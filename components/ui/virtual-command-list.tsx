@@ -1,4 +1,3 @@
-
 import { useCallback, useRef, type ReactNode } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -76,7 +75,7 @@ export function VirtualCommandList<T>({
     <div
       ref={parentRef}
       data-slot="command-list"
-      className="overflow-x-hidden overflow-y-auto scroll-py-1 p-1"
+      className="scroll-py-1 overflow-x-hidden overflow-y-auto p-1"
       style={{ maxHeight }}
       onScroll={handleScroll}
     >
@@ -87,7 +86,7 @@ export function VirtualCommandList<T>({
         {virtualizer.getVirtualItems().map((virtualRow) => (
           <div
             key={virtualRow.key}
-            className="absolute left-0 top-0 w-full"
+            className="absolute top-0 left-0 w-full"
             style={{ transform: `translateY(${virtualRow.start}px)` }}
           >
             {children(items[virtualRow.index], virtualRow.index)}
@@ -95,7 +94,9 @@ export function VirtualCommandList<T>({
         ))}
       </div>
       {isLoadingMore && (
-        <div className="flex justify-center py-2 text-xs text-muted-foreground">Loading more...</div>
+        <div className="text-muted-foreground flex justify-center py-2 text-xs">
+          Loading more...
+        </div>
       )}
     </div>
   );

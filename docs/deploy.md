@@ -153,9 +153,38 @@ non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
 - Both deploy scripts delete the dev `config.json` from `dist/` before syncing and
   exclude `config.json` from the sync, so the environment's config on the bucket
   is never overwritten.
-- **If a `script-src` CSP is ever introduced** (none exists today, on any target):
-  the inline font-scale script in `index.html` needs its hash allow-listed (or
-  `'unsafe-inline'`), otherwise it gets blocked and the page flashes from `normal`
-  to the user's saved size on every load — `main.tsx` also calls `applyScale` as a
-  fallback, but only after the JS bundle loads, so the flash still happens before
-  React mounts.
+
+---
+
+## Security headers
+
+ทุกปลายทางส่ง header ชุดเดียวกัน: CSP · `X-Content-Type-Options` ·
+`X-Frame-Options` · `Referrer-Policy` · `Permissions-Policy` ·
+`Strict-Transport-Security` — ตั้งคนละที่เพราะแต่ละปลายทางคุม response header คนละชั้น
+
+| ปลายทาง | ตั้งที่ไหน | ต้องทำอะไรเอง |
+|---|---|---|
+| Docker/nginx | `docker/30-render-security-headers.sh` render ตอน container start | ไม่ต้อง — อยู่ใน image แล้ว |
+| Vercel | `vercel.json` | ไม่ต้อง |
+| GCS + Cloud CDN | `scripts/setup-gcs-cdn.sh` ตั้งที่ backend bucket | รันสคริปต์ setup (รันซ้ำได้ — refresh header ให้ distribution เก่าด้วย) |
+| S3 + CloudFront | response-headers-policy | รัน `scripts/cloudfront-security-headers.sh <distribution-id> public/config.<env>.json` **ครั้งเดียวต่อ distribution** |
+
+### กับดักที่ต้องรู้ก่อนแก้
+
+- **`script-src` ผูกกับ hash ของ inline script ใน `index.html`** (ตัวที่เติม font-scale
+  ก่อน paint แรก) แก้สคริปต์นั้นแม้แต่ตัวอักษรเดียวโดยไม่คำนวณ hash ใหม่ =
+  **สคริปต์ถูกบล็อกเงียบ ๆ ใน production ทุกปลายทาง** หน้าเว็บยังขึ้นปกติ แค่ขนาด
+  ตัวอักษรกระพริบจาก normal ไปขนาดที่ผู้ใช้เลือกทุกครั้งที่โหลด — dev server ไม่มี CSP
+  จึงไม่มีทางเจอตอนพัฒนา `lib/__tests__/security-headers.test.ts` คำนวณ hash จาก
+  `index.html` จริงแล้วเทียบกับทั้ง 4 ไฟล์ให้ ถ้าแดงคือให้เอาค่าใน error ไปแทนของเดิม
+- **`connect-src` ต่างกันตามปลายทาง** — Docker เป็น same-origin (nginx proxy `/api` เอง)
+  จึงมีแค่ `'self'` + `WS_URL`; CDN ยิงข้าม origin จึงต้องระบุ backend origin ด้วย
+  ย้าย backend เมื่อไหร่ต้องรันสคริปต์ setup/cloudfront ใหม่ ไม่งั้น request ถูกบล็อกทั้งแอป
+- **Vercel ใช้ `connect-src 'self' https: wss:`** ซึ่งหลวมกว่าปลายทางอื่นโดยตั้งใจ —
+  `vercel.json` เป็น JSON นิ่ง ๆ ไม่รู้ backend origin ตอน deploy ส่วนที่กัน XSS จริง
+  (`script-src`) ยังแน่นเท่ากัน
+- **HSTS ไม่ใส่ `includeSubDomains`** — โดเมนลูกที่ยังเป็น http จะเข้าไม่ได้ทันที
+  เปิดเพิ่มเมื่อยืนยันแล้วว่าทุก subdomain เป็น https
+- `style-src` มี `'unsafe-inline'` เพราะ React ใส่ `style` attribute เองและ
+  `components/ui/chart.tsx` inject `<style>` — `script-src` **ห้ามมี** เด็ดขาด
+  (มี test กันไว้)

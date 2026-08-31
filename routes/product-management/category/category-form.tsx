@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +6,12 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusSwitch } from "@/components/ui/status-switch";
-import { Field, FieldError, FieldInput, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldInput,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -51,7 +55,11 @@ export function CategoryForm({
   );
 
   const parentDisplay =
-    type === "category" ? "" : parentNode ? `${parentNode.code} - ${parentNode.name}` : "";
+    type === "category"
+      ? ""
+      : parentNode
+        ? `${parentNode.code} - ${parentNode.name}`
+        : "";
 
   const defaultValues = ((): CategoryFormValues => {
     const base: CategoryFormValues = {

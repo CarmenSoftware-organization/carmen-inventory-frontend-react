@@ -103,7 +103,9 @@ function tsxFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
     const rel = `${dir}/${e.name}`;
     if (e.isDirectory()) return tsxFiles(rel);
-    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx") ? [rel] : [];
+    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx")
+      ? [rel]
+      : [];
   });
 }
 
@@ -133,18 +135,18 @@ const STATUS_FILL_AS_TEXT =
 
 describe("the fill/text split holds", () => {
   it("no component uses a fill status token as a text colour", () => {
-    const offenders = ["components", "routes"]
-      .flatMap(tsxFiles)
-      .filter((f) => {
-        const src = readFileSync(join(ROOT, f), "utf-8");
-        return SEMANTIC_FILL_AS_TEXT.test(src) || STATUS_FILL_AS_TEXT.test(src);
-      });
+    const offenders = ["components", "routes"].flatMap(tsxFiles).filter((f) => {
+      const src = readFileSync(join(ROOT, f), "utf-8");
+      return SEMANTIC_FILL_AS_TEXT.test(src) || STATUS_FILL_AS_TEXT.test(src);
+    });
     expect(offenders).toEqual([]);
   });
 
   it("still recognises the pattern it guards", () => {
     expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-warning"`)).toBe(true);
-    expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-success/80"`)).toBe(true);
+    expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-success/80"`)).toBe(
+      true,
+    );
     // must NOT fire on the two legitimate spellings
     expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-warning-ink"`)).toBe(
       false,

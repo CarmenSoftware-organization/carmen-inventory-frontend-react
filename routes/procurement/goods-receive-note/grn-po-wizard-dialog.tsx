@@ -25,7 +25,7 @@ import { GRN_PO_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import {
   usePurchaseOrderGrnVendors,
   usePurchaseOrderForGrnByVendor,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
@@ -226,12 +226,7 @@ function VendorStep({
       </div>
 
       <div className="flex shrink-0 items-center border-t px-6 py-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          className="text-muted-foreground"
-        >
+        <Button variant="outline" size="sm" onClick={onCancel}>
           {tc("cancel")}
         </Button>
       </div>
@@ -442,7 +437,7 @@ function PoStep({
                       checked={detailChecked}
                       onCheckedChange={() => toggleDetail(d.id)}
                     />
-                    <span className="text-muted-foreground shrink-0 text-micro tabular-nums">
+                    <span className="text-muted-foreground text-micro shrink-0 tabular-nums">
                       {d.product_code}
                     </span>
                     <span className="text-foreground min-w-0 flex-1 truncate text-xs">
@@ -451,7 +446,7 @@ function PoStep({
                     <span className="w-14 shrink-0 text-right text-xs tabular-nums">
                       {d.order_qty}
                     </span>
-                    <span className="text-muted-foreground w-10 shrink-0 text-center text-micro">
+                    <span className="text-muted-foreground text-micro w-10 shrink-0 text-center">
                       {d.order_unit_name}
                     </span>
                     <span className="w-20 shrink-0 text-right text-xs tabular-nums">

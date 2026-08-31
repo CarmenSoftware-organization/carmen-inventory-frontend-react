@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useStoreRequisitionById } from "@/hooks/use-store-requisition";
+import { useStoreRequisitionById } from "./use-store-requisition";
 import { StoreRequisitionForm } from "./sr-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

@@ -1,6 +1,5 @@
-
 import { useTranslations } from "use-intl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Command, CommandInput } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { useWorkflowTypeQuery } from "@/hooks/use-workflow";
 import { type WORKFLOW_TYPE } from "@/types/workflows";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,7 @@ export function FilterWorkflow({
   const [search, setSearch] = useState("");
   const { data: workflows } = useWorkflowTypeQuery(workflowType);
   const tfl = useTranslations("field");
+  const inline = useContext(FilterInlineContext);
 
   const filteredWorkflows = (() => {
     const list = workflows ?? [];
@@ -86,6 +87,50 @@ export function FilterWorkflow({
 
   const selectedCount = selectedIds.size;
 
+  // ปุ่มพูดค่าที่เลือก — "ชื่อ workflow แรก +N" อ่านออกทันทีว่ากรองอะไรอยู่
+  const firstName = (workflows ?? []).find((w) =>
+    selectedIds.has(w.id),
+  )?.name;
+  const valueText =
+    selectedCount > 0
+      ? `${firstName ?? `${tfl("workflow")} (${selectedCount})`}${
+          firstName && selectedCount > 1 ? ` +${selectedCount - 1}` : ""
+        }`
+      : tfl("workflow");
+
+  const list = (
+    <Command shouldFilter={false}>
+      <CommandInput
+        placeholder={tfl("workflow")}
+        className="placeholder:text-xs"
+        value={search}
+        onValueChange={setSearch}
+      />
+      <div className="max-h-60 overflow-y-auto p-1">
+        {filteredWorkflows.map((wf) => (
+          <label
+            key={wf.id}
+            className={cn(
+              "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+              "hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Checkbox
+              checked={selectedIds.has(wf.id)}
+              onCheckedChange={() => handleToggle(wf.id)}
+            />
+            <span className="truncate">{wf.name}</span>
+          </label>
+        ))}
+      </div>
+    </Command>
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์รายการตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  if (inline) {
+    return list;
+  }
+
   return (
     <Popover
       open={open}
@@ -107,39 +152,13 @@ export function FilterWorkflow({
               !selectedCount && "text-muted-foreground text-xs",
             )}
           >
-            {selectedCount > 0
-              ? `${tfl("workflow")} (${selectedCount})`
-              : tfl("workflow")}
+            {valueText}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={tfl("workflow")}
-            className="placeholder:text-xs"
-            value={search}
-            onValueChange={setSearch}
-          />
-          <div className="max-h-60 overflow-y-auto p-1">
-            {filteredWorkflows.map((wf) => (
-              <label
-                key={wf.id}
-                className={cn(
-                  "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                  "hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <Checkbox
-                  checked={selectedIds.has(wf.id)}
-                  onCheckedChange={() => handleToggle(wf.id)}
-                />
-                <span className="truncate">{wf.name}</span>
-              </label>
-            ))}
-          </div>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );

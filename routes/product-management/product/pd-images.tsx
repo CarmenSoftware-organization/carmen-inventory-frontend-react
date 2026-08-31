@@ -11,7 +11,7 @@ import { fileRejectMessage } from "@/lib/image-upload";
 import {
   useDeleteProductImage,
   useProductImages,
-} from "@/hooks/use-product-image";
+} from "./use-product-image";
 import type { ProductImage } from "@/types/product-image";
 import { type MockImage, validateImageFiles } from "./pd-image-utils";
 import { ImageLightbox } from "./pd-image-lightbox";

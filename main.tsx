@@ -40,10 +40,23 @@ window.addEventListener("vite:preloadError", () => {
 async function boot() {
   try {
     const { loadRuntimeConfig } = await import("@/lib/runtime-config");
-    await loadRuntimeConfig();
+    const runtimeConfig = await loadRuntimeConfig();
 
     const { refreshTokens } = await import("@/lib/auth/auth-api");
     await refreshTokens(); // ล้มเหลว = ไม่ logged-in → RequireAuth พาไป /login เอง
+
+    // Telemetry — import แบบ dynamic โดยตั้งใจ: environment ที่ไม่เปิดจะไม่โหลด
+    // OTel SDK (~60-80 KB) ลงเครื่องผู้ใช้เลย ต้องอยู่หลัง refreshTokens เพราะ
+    // exporter ต้องมี token ไปด้วย
+    if (runtimeConfig.OTEL_ENABLED) {
+      try {
+        const { initTelemetry } = await import("@/lib/telemetry");
+        initTelemetry({ serviceName: "carmen-spa", version: __APP_VERSION__ });
+      } catch (e) {
+        // telemetry ล้มต้องไม่กัน app ขึ้น — เครื่องมือสังเกตการณ์ห้ามเป็นเหตุให้ระบบล่ม
+        console.warn("[telemetry] init failed", e);
+      }
+    }
 
     const { router } = await import("./routes/router");
     createRoot(document.getElementById("root")!).render(
@@ -59,6 +72,18 @@ async function boot() {
     }
   } catch (error) {
     console.error("[boot] failed", error);
+    // boot ล้ม = ผู้ใช้เข้าระบบไม่ได้เลย ซึ่งเป็นบั๊กกลุ่มที่กระทบหนักที่สุดและ
+    // มองไม่เห็นจากฝั่งเรา ส่งผ่านช่อง anonymous เพราะตอนนี้ยังไม่มี token
+    void import("@/lib/telemetry")
+      .then((m) =>
+        m.reportPreLoginError(
+          error instanceof Error ? error.message : String(error),
+          error instanceof Error ? error.stack : undefined,
+        ),
+      )
+      .catch(() => {
+        /* ส่งไม่ได้ก็ต้องไม่สร้าง error ใหม่ทับ */
+      });
     document.getElementById("root")!.innerHTML =
       '<div style="font-family: system-ui; padding: 2rem; color: #b91c1c">Failed to load application configuration. Please try again or contact support.</div>';
   }

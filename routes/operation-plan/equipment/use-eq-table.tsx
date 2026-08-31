@@ -67,7 +67,7 @@ export function useEquipmentTable({
       ),
       cell: ({ row }) => {
         const categoryId = row.getValue("category_id") as string | null;
-        return categoryId ? categories.get(categoryId) ?? "—" : "—";
+        return categoryId ? (categories.get(categoryId) ?? "—") : "—";
       },
       size: 160,
       meta: { headerTitle: tfl("category") },
@@ -117,6 +117,8 @@ export function useEquipmentTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
   });
 }

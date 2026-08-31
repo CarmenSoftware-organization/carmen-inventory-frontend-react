@@ -19,7 +19,7 @@ import {
   useReviewPhysicalCount,
   useSavePhysicalCount,
   useRefreshPhysicalCount,
-} from "@/hooks/use-physical-count";
+} from "../shared/use-physical-count";
 import { cn } from "@/lib/utils";
 import SearchInput from "@/components/search-input";
 import { CalculatorDialog } from "../shared/calculator-dialog";

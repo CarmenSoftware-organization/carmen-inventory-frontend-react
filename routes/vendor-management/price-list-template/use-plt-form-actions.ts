@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -16,10 +15,7 @@ import type {
   PriceListTemplate,
 } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
-import {
-  groupDetailsToProducts,
-  type PltFormValues,
-} from "./plt-form-schema";
+import { groupDetailsToProducts, type PltFormValues } from "./plt-form-schema";
 
 interface UsePltFormActionsParams {
   form: UseFormReturn<PltFormValues>;
@@ -105,7 +101,11 @@ export function usePltFormActions({
 
     if (isEdit && priceListTemplate) {
       updateTemplate.mutate(
-        { id: priceListTemplate.id, doc_version: priceListTemplate.doc_version, ...payload },
+        {
+          id: priceListTemplate.id,
+          doc_version: priceListTemplate.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -138,13 +138,16 @@ export function usePltFormActions({
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  const goBack = () => navigate("/vendor-management/price-list-template");
+
   const handleBack = () => {
     if (isEdit || isAdd) {
-      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
-      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
-      discard.confirm(() => navGuard.back());
+      discard.confirm(goBack);
     } else {
-      navigate(-1);
+      goBack();
     }
   };
 

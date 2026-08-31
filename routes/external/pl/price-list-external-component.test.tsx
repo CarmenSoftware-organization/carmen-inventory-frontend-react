@@ -9,15 +9,15 @@ import {
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
-} from "@/hooks/use-price-list-external";
+} from "./use-price-list-external";
 import type { PricelistExternalDto } from "@/types/price-list-external";
 import { toast } from "sonner";
 
 // คง HttpError ตัวจริงไว้ (instanceof ต้องตรง class เดียวกับที่ component import)
 // แต่ stub hook ทั้งสามให้คุม return value ได้
-vi.mock("@/hooks/use-price-list-external", async (importActual) => {
+vi.mock("./use-price-list-external", async (importActual) => {
   const actual =
-    await importActual<typeof import("@/hooks/use-price-list-external")>();
+    await importActual<typeof import("./use-price-list-external")>();
   return {
     ...actual,
     usePriceListExternal: vi.fn(),
@@ -149,7 +149,9 @@ describe("PriceListExternalComponent — submit error surfacing", () => {
     // กด Submit ที่ตาราง → เปิด confirm dialog → กดยืนยันใน dialog
     await userEvent.click(screen.getByRole("button", { name: "Submit" }));
     const dialog = await screen.findByRole("alertdialog");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Submit" }));
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Submit" }),
+    );
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("This link has expired"),

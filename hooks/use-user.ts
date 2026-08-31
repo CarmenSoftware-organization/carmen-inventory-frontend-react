@@ -5,12 +5,15 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { httpClient } from "@/lib/http-client";
+import { buildUrl } from "@/lib/build-query-string";
 import { ApiError } from "@/lib/api-error";
 import type { User } from "@/types/workflows";
 import type {
   UserDetail,
   UpdateUserRolesDto,
   UserDepartmentResponse,
+  UserApplicationRole,
+  UserRoleSummaryRole,
 } from "@/types/user";
 import type { INVENTORY_TYPE } from "@/constant/location";
 
@@ -184,9 +187,7 @@ export function useUserDepartments(userId: string | undefined) {
       );
       if (!res.ok) throw new Error("Failed to fetch user departments");
       const json = await res.json();
-      return (
-        json.data ?? { department: null, hod_departments: [] }
-      );
+      return json.data ?? { department: null, hod_departments: [] };
     },
     enabled: !!buCode && !!userId,
   });
@@ -196,25 +197,67 @@ export function useUpdateUserLocations() {
   const buCode = useBuCode();
   const queryClient = useQueryClient();
 
-  return useMutation<
-    void,
-    ApiError,
-    { userId: string; locationIds: string[] }
-  >({
-    mutationFn: async ({ userId, locationIds }) => {
-      if (!buCode) throw new Error("Missing buCode");
-      const res = await httpClient.put(
-        API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId),
-        { location_ids: locationIds },
-      );
-      if (!res.ok) {
-        throw await ApiError.from(res, "Failed to update user locations");
-      }
+  return useMutation<void, ApiError, { userId: string; locationIds: string[] }>(
+    {
+      mutationFn: async ({ userId, locationIds }) => {
+        if (!buCode) throw new Error("Missing buCode");
+        const res = await httpClient.put(
+          API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId),
+          { location_ids: locationIds },
+        );
+        if (!res.ok) {
+          throw await ApiError.from(res, "Failed to update user locations");
+        }
+      },
+      onSuccess: (_data, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ["user-locations", buCode, variables.userId],
+        });
+      },
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["user-locations", buCode, variables.userId],
-      });
-    },
-  });
+  );
+}
+
+// --- User × Role matrix (รายงาน print/CSV) ---
+
+export interface UserRoleMatrix {
+  users: UserApplicationRole[];
+  roles: UserRoleSummaryRole[];
+}
+
+/**
+ * Hook คืนฟังก์ชันดึงตาราง user × role ทั้ง BU จาก
+ * `GET /api/config/{bu}/user-application-roles` — ยิงรอบแรกอ่าน `paginate.total`
+ * ถ้าหน้าแรกยังไม่ครบค่อยยิงซ้ำด้วย `perpage = total` ให้ได้ครบทุกคน
+ * data คือ user พร้อม role_ids และ summary.roles คือ role catalog ไว้ทำหัวคอลัมน์
+ * @returns async fetcher คืน { users, roles }
+ * @example
+ * const fetchMatrix = useUserRoleMatrixFetch();
+ * const { users, roles } = await fetchMatrix();
+ */
+export function useUserRoleMatrixFetch() {
+  const buCode = useBuCode();
+
+  return async (): Promise<UserRoleMatrix> => {
+    if (!buCode) throw new Error("Missing buCode");
+    const endpoint = API_ENDPOINTS.USER_APPLICATION_ROLES(buCode);
+
+    const first = await httpClient.get(endpoint);
+    if (!first.ok) {
+      throw await ApiError.from(first, "Failed to fetch user roles");
+    }
+    const firstJson = await first.json();
+    const users: UserApplicationRole[] = firstJson.data ?? [];
+    const total: number = firstJson.paginate?.total ?? users.length;
+    if (users.length >= total) {
+      return { users, roles: firstJson.summary?.roles ?? [] };
+    }
+
+    const res = await httpClient.get(buildUrl(endpoint, { perpage: total }));
+    if (!res.ok) {
+      throw await ApiError.from(res, "Failed to fetch user roles");
+    }
+    const json = await res.json();
+    return { users: json.data ?? [], roles: json.summary?.roles ?? [] };
+  };
 }

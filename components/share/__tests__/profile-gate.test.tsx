@@ -72,12 +72,18 @@ describe("ProfileGate", () => {
       </ProfileGate>,
     );
 
-    expect(screen.getByRole("button", { name: "noBuRetry" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "noBuRetry" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "signOut" })).toBeInTheDocument();
   });
 
   it("still shows the loader while the profile is in flight", () => {
-    profile.mockReturnValue({ ...baseProfile, isPending: true, data: undefined });
+    profile.mockReturnValue({
+      ...baseProfile,
+      isPending: true,
+      data: undefined,
+    });
 
     render(
       <ProfileGate>

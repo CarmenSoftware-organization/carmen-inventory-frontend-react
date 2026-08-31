@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 import en from "@/messages/en.json";
@@ -58,21 +59,43 @@ vi.mock("@/lib/http-client", () => ({
   },
 }));
 
+// markRead/markAllRead errors go through useErrorToast → sonner. Mock it so
+// the mutation-failure tests don't rely on a real toast store implementation
+// (same pattern as use-export-error-toast.test.tsx).
+vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
+
 import { httpClient } from "@/lib/http-client";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
-import { useNotification } from "../use-notification";
+import {
+  useNotificationRealtime,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+  notificationKeys,
+} from "../use-notification";
+import type { NotificationListResponse } from "@/types/notification";
 
 // hook แจ้ง error ผ่าน useErrorToast ซึ่งอ่านข้อความจาก i18n — ต้องมี provider
-const wrapper = ({ children }: { children: ReactNode }) =>
-  createElement(IntlProvider, {
-    locale: "en",
-    messages: en,
-    timeZone: "Asia/Bangkok",
-    children,
-  });
+// mark-read/mark-all-read ยังใช้ useQueryClient() ด้วย — ต้องมี QueryClientProvider
+let queryClient: QueryClient;
 
-const renderNotification = (userId: string | undefined) =>
-  renderHook(() => useNotification(userId), { wrapper });
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(
+    QueryClientProvider,
+    { client: queryClient },
+    createElement(IntlProvider, {
+      locale: "en",
+      messages: en,
+      timeZone: "Asia/Bangkok",
+      children,
+    }),
+  );
+
+const renderRealtime = (userId: string | undefined) =>
+  renderHook(() => useNotificationRealtime(userId), { wrapper });
+
+// popover ใช้ perpage เริ่มต้น 10 (POPOVER_SIZE ภายใน hook) — ใช้ค่าเดียวกัน
+// เพื่อให้คีย์แคชที่ทดสอบตรงกับที่ useUnreadNotifications() จะสร้างจริง
+const UNREAD_QUERY_KEY = notificationKeys.unreadPopover(10);
 
 /**
  * ดึง MockWebSocket instance ล่าสุดที่ถูกสร้างขึ้นในเทสต์
@@ -83,11 +106,17 @@ function getLatestWs(): MockWebSocket {
   return MockWebSocket.instances[MockWebSocket.instances.length - 1];
 }
 
-describe("useNotification", () => {
+describe("useNotificationRealtime", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     MockWebSocket.instances = [];
     vi.useFakeTimers();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
     // WS_URL มาจาก runtime config แล้ว (เดิมคือ NEXT_PUBLIC_WS_URL env)
     setRuntimeConfigForTests({
       BACKEND_URL: "",
@@ -101,7 +130,7 @@ describe("useNotification", () => {
   });
 
   it("does not connect when userId is undefined", () => {
-    renderNotification(undefined);
+    renderRealtime(undefined);
 
     expect(MockWebSocket.instances).toHaveLength(0);
   });
@@ -109,7 +138,7 @@ describe("useNotification", () => {
   it("connects to WebSocket and registers user on open", async () => {
     vi.useRealTimers();
 
-    const { result } = renderNotification("user-1");
+    const { result } = renderRealtime("user-1");
 
     const ws = getLatestWs();
     expect(ws.url).toBe("ws://localhost:3001");
@@ -127,39 +156,10 @@ describe("useNotification", () => {
     );
   });
 
-  it("receives notifications from WebSocket messages", async () => {
-    vi.useRealTimers();
+  it("invalidates the notifications query when a notification message arrives", () => {
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    const notification = {
-      id: "n1",
-      title: "Test",
-      message: "Hello",
-      type: "info",
-      created_at: "2026-03-01T00:00:00Z",
-    };
-
-    act(() => {
-      ws.simulateMessage({ type: "notification", data: notification });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(1);
-    });
-
-    expect(result.current.notifications[0]).toEqual(notification);
-  });
-
-  it("prepends new notifications (newest first)", async () => {
-    vi.useRealTimers();
-
-    const { result } = renderNotification("user-1");
+    renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -169,29 +169,56 @@ describe("useNotification", () => {
     act(() => {
       ws.simulateMessage({
         type: "notification",
-        data: { id: "n1", title: "First" },
+        data: { id: "n1", title: "Test" },
       });
+    });
+
+    // สัญญาณถูกหน่วงไว้ก่อน — ยังไม่ยิงจนกว่าจะครบ debounce
+    expect(invalidateSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    // hook ไม่ถือรายการเองอีกแล้ว (payload บน WS ไม่ครบฟิลด์) — สัญญาที่เหลือคือ
+    // invalidate คีย์ "notifications" ทั้งกลุ่มให้ REST ดึงสดแทน
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: notificationKeys.all,
+    });
+  });
+
+  // ตอน register ฝั่ง micro-notification replay ของที่ยังไม่อ่านกลับมาทีละใบ — ถ้า
+  // invalidate ทุก frame จะได้ refetch /unread เท่าจำนวนใบค้างต่อการ refresh หนึ่งครั้ง
+  it("collapses a burst of notification messages into one invalidate", () => {
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    renderRealtime("user-1");
+
+    const ws = getLatestWs();
+    act(() => {
+      ws.simulateOpen();
     });
 
     act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n2", title: "Second" },
-      });
+      for (let i = 0; i < 10; i += 1) {
+        ws.simulateMessage({
+          type: "notification",
+          data: { id: `n${i}`, title: "Backlog" },
+        });
+      }
     });
 
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(2);
+    act(() => {
+      vi.advanceTimersByTime(300);
     });
 
-    expect(result.current.notifications[0].id).toBe("n2");
-    expect(result.current.notifications[1].id).toBe("n1");
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("ignores malformed WebSocket messages", async () => {
-    vi.useRealTimers();
+  it("ignores malformed WebSocket messages", () => {
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    const { result } = renderNotification("user-1");
+    renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -200,17 +227,16 @@ describe("useNotification", () => {
 
     act(() => {
       ws.onmessage?.({ data: "not-json{{{" });
+      vi.advanceTimersByTime(300);
     });
 
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(0);
-    });
+    expect(invalidateSpy).not.toHaveBeenCalled();
   });
 
-  it("ignores non-notification message types", async () => {
-    vi.useRealTimers();
+  it("ignores non-notification message types", () => {
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    const { result } = renderNotification("user-1");
+    renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -219,219 +245,16 @@ describe("useNotification", () => {
 
     act(() => {
       ws.simulateMessage({ type: "ping", data: {} });
+      vi.advanceTimersByTime(300);
     });
 
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(0);
-    });
-  });
-
-  it("markAsRead calls PUT /read with category and removes the notification", async () => {
-    vi.useRealTimers();
-    vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
-
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n1", title: "A", category: "user-to-user" },
-      });
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n2", title: "B" },
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(2);
-    });
-
-    await act(async () => {
-      await result.current.markAsRead("n1");
-    });
-
-    expect(httpClient.put).toHaveBeenCalledWith(
-      "/api/proxy/api/notifications/n1/read",
-      { category: "user-to-user" },
-    );
-    expect(result.current.notifications).toHaveLength(1);
-    expect(result.current.notifications[0].id).toBe("n2");
-  });
-
-  it("markAsRead rolls back and keeps the notification when the request fails", async () => {
-    vi.useRealTimers();
-    vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
-
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n1", title: "A", category: "bu-to-user" },
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(1);
-    });
-
-    await act(async () => {
-      await result.current.markAsRead("n1");
-    });
-
-    expect(httpClient.put).toHaveBeenCalledTimes(1);
-    expect(result.current.notifications).toHaveLength(1);
-  });
-
-  it("markAllAsRead calls the mark-all-read endpoint and clears notifications", async () => {
-    vi.useRealTimers();
-    vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
-
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n1", title: "A" },
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(1);
-    });
-
-    await act(async () => {
-      await result.current.markAllAsRead();
-    });
-
-    expect(httpClient.put).toHaveBeenCalledWith(
-      "/api/proxy/api/notifications/mark-all-read",
-    );
-    expect(result.current.notifications).toHaveLength(0);
-  });
-
-  it("markAllAsRead sends a single bulk request regardless of notification count", async () => {
-    vi.useRealTimers();
-    vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
-
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n1", title: "A" },
-      });
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n2", title: "B" },
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(2);
-    });
-
-    await act(async () => {
-      await result.current.markAllAsRead();
-    });
-
-    expect(httpClient.put).toHaveBeenCalledTimes(1);
-    expect(result.current.notifications).toHaveLength(0);
-  });
-
-  it("markAllAsRead rolls back and keeps notifications when the request fails", async () => {
-    vi.useRealTimers();
-    vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
-
-    const { result } = renderNotification("user-1");
-
-    const ws = getLatestWs();
-    act(() => {
-      ws.simulateOpen();
-    });
-
-    act(() => {
-      ws.simulateMessage({
-        type: "notification",
-        data: { id: "n1", title: "A" },
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(1);
-    });
-
-    await act(async () => {
-      await result.current.markAllAsRead();
-    });
-
-    expect(httpClient.put).toHaveBeenCalledTimes(1);
-    expect(result.current.notifications).toHaveLength(1);
-  });
-
-  it("markAllAsRead does nothing when userId is undefined", async () => {
-    vi.useRealTimers();
-
-    const { result } = renderNotification(undefined);
-
-    await act(async () => {
-      await result.current.markAllAsRead();
-    });
-
-    expect(httpClient.put).not.toHaveBeenCalled();
-  });
-
-  it("receives notifications from custom notification-sent event", async () => {
-    vi.useRealTimers();
-
-    const { result } = renderNotification(undefined);
-
-    const notification = {
-      id: "n1",
-      title: "Custom",
-      message: "Via event",
-      type: "success",
-      created_at: "2026-03-01T00:00:00Z",
-    };
-
-    act(() => {
-      window.dispatchEvent(
-        new CustomEvent("notification-sent", { detail: notification }),
-      );
-    });
-
-    await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(1);
-    });
-
-    expect(result.current.notifications[0]).toEqual(notification);
+    expect(invalidateSpy).not.toHaveBeenCalled();
   });
 
   it("sets isConnected to false on WebSocket close", async () => {
     vi.useRealTimers();
 
-    const { result } = renderNotification("user-1");
+    const { result } = renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -452,7 +275,7 @@ describe("useNotification", () => {
   });
 
   it("attempts to reconnect with exponential backoff on close", () => {
-    renderNotification("user-1");
+    renderRealtime("user-1");
 
     expect(MockWebSocket.instances).toHaveLength(1);
 
@@ -494,7 +317,7 @@ describe("useNotification", () => {
   });
 
   it("caps reconnect delay at 30 seconds", () => {
-    renderNotification("user-1");
+    renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -537,7 +360,7 @@ describe("useNotification", () => {
   it("cleans up WebSocket on unmount", async () => {
     vi.useRealTimers();
 
-    const { unmount } = renderNotification("user-1");
+    const { unmount } = renderRealtime("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -550,7 +373,7 @@ describe("useNotification", () => {
   });
 
   it("resets reconnect counter on successful connection", () => {
-    renderNotification("user-1");
+    renderRealtime("user-1");
 
     const ws1 = getLatestWs();
 
@@ -580,5 +403,160 @@ describe("useNotification", () => {
     });
 
     expect(MockWebSocket.instances).toHaveLength(3);
+  });
+});
+
+describe("useMarkNotificationRead", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+  });
+
+  it("markAsRead calls PUT /read with source and removes the notification", async () => {
+    vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
+
+    queryClient.setQueryData<NotificationListResponse>(UNREAD_QUERY_KEY, {
+      data: [
+        { id: "n1", title: "A", source: "broadcast" },
+        { id: "n2", title: "B", source: "personal" },
+      ],
+      paginate: { total: 2, page: 1, perpage: 10, pages: 1 },
+    });
+
+    const { result } = renderHook(() => useMarkNotificationRead(), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate({ id: "n1", source: "broadcast" });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(httpClient.put).toHaveBeenCalledWith(
+      "/api/proxy/api/notifications/n1/read",
+      { source: "broadcast" },
+    );
+
+    const cached =
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY);
+    expect(cached?.data.map((n) => n.id)).toEqual(["n2"]);
+    expect(cached?.paginate.total).toBe(1);
+  });
+
+  it("markAsRead rolls back and keeps the notification when the request fails", async () => {
+    vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
+    // errorToast ล็อก console.error ใน DEV — คาดหมายในเคสนี้ ไม่ใช่บั๊ก แต่ทำให้
+    // เอาต์พุตเทสต์ไม่สะอาด กันไว้เฉพาะเคสที่ตั้งใจให้ล้มเหลว
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const original: NotificationListResponse = {
+      data: [{ id: "n1", title: "A", source: "personal" }],
+      paginate: { total: 1, page: 1, perpage: 10, pages: 1 },
+    };
+    queryClient.setQueryData<NotificationListResponse>(
+      UNREAD_QUERY_KEY,
+      original,
+    );
+
+    const { result } = renderHook(() => useMarkNotificationRead(), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate({ id: "n1", source: "personal" });
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(httpClient.put).toHaveBeenCalledTimes(1);
+    expect(
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY),
+    ).toEqual(original);
+
+    consoleErrorSpy.mockRestore();
+  });
+});
+
+describe("useMarkAllNotificationsRead", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+  });
+
+  it("markAllAsRead calls the mark-all-read endpoint and clears the unread cache", async () => {
+    vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
+
+    queryClient.setQueryData<NotificationListResponse>(UNREAD_QUERY_KEY, {
+      data: [
+        { id: "n1", title: "A", source: "personal" },
+        { id: "n2", title: "B", source: "broadcast" },
+      ],
+      paginate: { total: 2, page: 1, perpage: 10, pages: 1 },
+    });
+
+    const { result } = renderHook(() => useMarkAllNotificationsRead(), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(httpClient.put).toHaveBeenCalledWith(
+      "/api/proxy/api/notifications/mark-all-read",
+    );
+
+    const cached =
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY);
+    expect(cached?.data).toHaveLength(0);
+    expect(cached?.paginate.total).toBe(0);
+  });
+
+  it("markAllAsRead rolls back and keeps notifications when the request fails", async () => {
+    vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const original: NotificationListResponse = {
+      data: [{ id: "n1", title: "A", source: "personal" }],
+      paginate: { total: 1, page: 1, perpage: 10, pages: 1 },
+    };
+    queryClient.setQueryData<NotificationListResponse>(
+      UNREAD_QUERY_KEY,
+      original,
+    );
+
+    const { result } = renderHook(() => useMarkAllNotificationsRead(), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(httpClient.put).toHaveBeenCalledTimes(1);
+    expect(
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY),
+    ).toEqual(original);
+
+    consoleErrorSpy.mockRestore();
   });
 });

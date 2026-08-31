@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -32,7 +31,7 @@ import {
 } from "@/components/ui/stepper";
 import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { useCreatePurchaseOrder } from "@/hooks/use-purchase-order";
+import { useCreatePurchaseOrder } from "../../shared/use-purchase-order";
 import { PO_TYPE } from "@/types/purchase-order";
 import { createPoSchema } from "../po-form-schema";
 import { buildPoPayload } from "../build-po-payload";
@@ -377,11 +376,10 @@ export function FromPriceListContent() {
 
       <footer className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky bottom-0 -mx-3 -mb-3 flex items-center justify-between border-t px-3 py-3 backdrop-blur">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={handleCancel}
           disabled={createPo.isPending}
-          className="text-muted-foreground"
         >
           {tc("cancel")}
         </Button>

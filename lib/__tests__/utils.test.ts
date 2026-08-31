@@ -5,6 +5,7 @@ import {
   sanitizeUrl,
   safeNavigationHref,
   safeInternalHref,
+  safeImageSrc,
 } from "../utils";
 
 describe("cn", () => {
@@ -93,7 +94,9 @@ describe("safeNavigationHref", () => {
   });
 
   it("accepts canonicalized http/https URLs", () => {
-    expect(safeNavigationHref("https://carmen.app")).toBe("https://carmen.app/");
+    expect(safeNavigationHref("https://carmen.app")).toBe(
+      "https://carmen.app/",
+    );
   });
 
   it("rejects protocol-relative and backslash-mangled paths", () => {
@@ -112,7 +115,9 @@ describe("safeInternalHref", () => {
     expect(safeInternalHref("/procurement/purchase-request/123")).toBe(
       "/procurement/purchase-request/123",
     );
-    expect(safeInternalHref("  /some/page?tab=1#x  ")).toBe("/some/page?tab=1#x");
+    expect(safeInternalHref("  /some/page?tab=1#x  ")).toBe(
+      "/some/page?tab=1#x",
+    );
   });
 
   it("returns null for empty/nullish input", () => {
@@ -136,5 +141,42 @@ describe("safeInternalHref", () => {
 
   it("rejects paths containing control characters", () => {
     expect(safeInternalHref("/ok" + String.fromCharCode(31))).toBeNull();
+  });
+});
+
+describe("safeImageSrc", () => {
+  it("รับ blob URL ที่หน้านี้สร้างเองจากไฟล์ที่ผู้ใช้เลือก", () => {
+    const url = "blob:http://localhost:5173/9f2a7c1e-0000-4aaa-8bbb-ccccdddd";
+    expect(safeImageSrc(url)).toBe(url);
+  });
+
+  it("รับ data URI เฉพาะที่เป็นรูป", () => {
+    expect(safeImageSrc("data:image/png;base64,iVBORw0KGgo=")).toBe(
+      "data:image/png;base64,iVBORw0KGgo=",
+    );
+    expect(safeImageSrc("data:image/svg+xml,<svg/>")).toBe(
+      "data:image/svg+xml,<svg/>",
+    );
+  });
+
+  it("ปฏิเสธ data URI ชนิดอื่นและ scheme ที่รันโค้ดได้", () => {
+    expect(safeImageSrc("data:text/html,<script>alert(1)</script>")).toBeNull();
+    expect(safeImageSrc("data:image")).toBeNull();
+    expect(safeImageSrc("javascript:alert(1)")).toBeNull();
+    // ช่องว่าง/ตัวอักษรควบคุมนำหน้าเป็นวิธีคลาสสิกในการหลบตัวตรวจ
+    expect(safeImageSrc("  javascript:alert(1)")).toBeNull();
+    expect(safeImageSrc("java\nscript:alert(1)")).toBeNull();
+  });
+
+  it("ส่วนที่เหลือใช้เกณฑ์เดียวกับ href ปกติ", () => {
+    expect(safeImageSrc("https://cdn.example/a.png")).toBe(
+      "https://cdn.example/a.png",
+    );
+    expect(safeImageSrc("/api/proxy/api/BU/documents/1/download")).toBe(
+      "/api/proxy/api/BU/documents/1/download",
+    );
+    expect(safeImageSrc("//evil.example/a.png")).toBeNull();
+    expect(safeImageSrc("")).toBeNull();
+    expect(safeImageSrc(null)).toBeNull();
   });
 });

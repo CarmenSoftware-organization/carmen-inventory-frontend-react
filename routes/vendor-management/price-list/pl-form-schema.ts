@@ -18,7 +18,9 @@ function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     moq_qty: z.coerce.number().min(0),
     price: z.coerce.number().min(0),
     price_without_tax: z.coerce.number().min(0),
-    tax_profile_id: z.string().min(1, tv("required", { field: tf("taxProfile") })),
+    tax_profile_id: z
+      .string()
+      .min(1, tv("required", { field: tf("taxProfile") })),
     tax_rate: z.coerce.number().min(0),
     tax_amt: z.coerce.number().min(0),
     lead_time_days: z.coerce.number().min(0),
@@ -40,8 +42,12 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
       status: z.enum(["draft", "submitted", "active", "inactive"]),
       vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
       currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
-      effective_from_date: z.string().min(1, tv("required", { field: tf("startDate") })),
-      effective_to_date: z.string().min(1, tv("required", { field: tf("endDate") })),
+      effective_from_date: z
+        .string()
+        .min(1, tv("required", { field: tf("startDate") })),
+      effective_to_date: z
+        .string()
+        .min(1, tv("required", { field: tf("endDate") })),
       note: z.string(),
       pricelist_detail: z.array(createPriceListDetailSchema(tv, tf)),
     })
@@ -91,7 +97,9 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
     });
 }
 
-export type PriceListFormValues = z.infer<ReturnType<typeof createPriceListSchema>>;
+export type PriceListFormValues = z.infer<
+  ReturnType<typeof createPriceListSchema>
+>;
 
 export type PriceListDetailField = FieldArrayWithId<
   PriceListFormValues,

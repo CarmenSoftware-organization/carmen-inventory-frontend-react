@@ -52,12 +52,77 @@ jobs:
       # deploy-gcs.sh deliberately excludes config.json from its sync (per-environment,
       # never overwritten by a build sync) — upload it as its own step instead, sourced from
       # repo variables. Set these under Settings > Secrets and variables > Actions > Variables.
+      #
+      # ทุกคีย์ที่ runtime อ่านต้องอยู่ที่นี่ครบ — ไฟล์นี้ทับ config.json ในถังทั้งไฟล์ คีย์ที่ไม่ได้เขียน
+      # จะหายไปเงียบ ๆ และ getRuntimeConfig อ่านคีย์ที่หายเป็น "ไม่ได้ตั้ง" ไม่ใช่ error:
+      # WS_URL หาย = ปิด real-time notification, LICENSE_ENFORCEMENT หาย = shadow mode
+      # (`LICENSE_ENFORCEMENT ?? false` ใน lib/runtime-config.ts) ทั้งสองกรณีไม่มีอะไรฟ้องเลย
+      #
+      # Every key the runtime reads must be written here: this file replaces config.json in the
+      # bucket wholesale, and a key left out simply disappears — getRuntimeConfig treats a missing
+      # key as "unset", not as an error. A missing WS_URL silently disables real-time
+      # notifications; a missing LICENSE_ENFORCEMENT silently drops the app back to shadow mode.
       - name: Write and upload config.json
+        env:
+          BACKEND_URL: ${{ vars.BACKEND_URL }}
+          X_APP_ID: ${{ vars.X_APP_ID }}
+          WS_URL: ${{ vars.WS_URL }}
+          LICENSE_ENFORCEMENT: ${{ vars.LICENSE_ENFORCEMENT }}
+          OTEL_ENABLED: ${{ vars.OTEL_ENABLED }}
         run: |
-          cat > /tmp/config.json <<EOF
-          {
-            "BACKEND_URL": "${{ vars.BACKEND_URL }}",
-            "X_APP_ID": "${{ vars.X_APP_ID }}"
-          }
-          EOF
+          set -euo pipefail
+
+          # ค่า default เป็น false โดยตั้งใจ — ตัวแปรที่ยังไม่ได้ตั้งต้องได้พฤติกรรมที่ปลอดภัยที่สุด
+          # (ไม่บล็อกใคร) ไม่ใช่บังคับใช้โดยไม่มีใครสั่ง
+          # Defaults to false on purpose: an unset variable must land on the safe behaviour
+          # (block nobody), never on enforcing without anyone asking for it.
+          LICENSE_ENFORCEMENT="${LICENSE_ENFORCEMENT:-false}"
+          case "$LICENSE_ENFORCEMENT" in
+            true|false) ;;
+            *)
+              echo "::error::vars.LICENSE_ENFORCEMENT ต้องเป็น true หรือ false เท่านั้น (ได้: '$LICENSE_ENFORCEMENT')"
+              exit 1
+              ;;
+          esac
+
+          # default false เช่นกัน และเขียนลงไฟล์เสมอแม้เป็น false โดยตั้งใจ
+          #
+          # ถังนี้คือ GCP POC (api-carmen-web.pncsb-app.com) ซึ่งเป็นคนละ backend กับ dev
+          # ที่ SigNoz อยู่ — gateway ของมันไม่มี endpoint /telemetry/v1 ด้วยซ้ำ เปิดแล้ว
+          # เบราว์เซอร์จะยิงหาที่ที่ไม่มีอะไรรับ
+          #
+          # เขียน false ลงไปแทนที่จะปล่อยให้คีย์หายไป เพราะ "ปิดเพราะตั้งใจ" กับ
+          # "ปิดเพราะลืมเขียน" ให้ผลเหมือนกันทุกประการ แยกไม่ออกเวลามาอ่านทีหลัง
+          OTEL_ENABLED="${OTEL_ENABLED:-false}"
+          case "$OTEL_ENABLED" in
+            true|false) ;;
+            *)
+              echo "::error::vars.OTEL_ENABLED ต้องเป็น true หรือ false เท่านั้น (ได้: '$OTEL_ENABLED')"
+              exit 1
+              ;;
+          esac
+
+          # jq ประกอบ JSON ให้ — heredoc ธรรมดาพังทันทีถ้าค่ามีอักขระที่ต้อง escape และ
+          # ค่าที่ว่างจะกลายเป็น JSON ที่ parse ไม่ได้ ซึ่ง SPA จะขึ้น
+          # "Failed to load application configuration" ทั้งแอปโดยไม่มี log อะไรบอกสาเหตุ
+          # jq builds the JSON: a plain heredoc breaks on any character needing an escape, and an
+          # empty value yields unparseable JSON — which shows up as a blank app with
+          # "Failed to load application configuration" and nothing explaining why.
+          #
+          # WS_URL ใส่เฉพาะเมื่อมีค่า เพราะ runtime ถือว่า "ไม่มีคีย์" = ปิด real-time ตั้งใจ
+          # ส่วนสตริงว่างจะถูกมองเป็นค่าที่ตั้งไว้แล้วแต่ใช้ไม่ได้
+          # WS_URL is written only when non-empty: the runtime reads an absent key as "real-time
+          # deliberately off", whereas an empty string reads as a configured-but-broken endpoint.
+          jq -n \
+            --arg backend_url "$BACKEND_URL" \
+            --arg x_app_id "$X_APP_ID" \
+            --arg ws_url "$WS_URL" \
+            --argjson license_enforcement "$LICENSE_ENFORCEMENT" \
+            --argjson otel_enabled "$OTEL_ENABLED" \
+            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: $otel_enabled}
+             + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)' > /tmp/config.json
+
+          echo "config.json ที่จะอัปโหลด (ไม่มีความลับในไฟล์นี้):"
+          cat /tmp/config.json
+
           gcloud storage cp /tmp/config.json "gs://${GCS_BUCKET}/config.json" --cache-control="no-cache"

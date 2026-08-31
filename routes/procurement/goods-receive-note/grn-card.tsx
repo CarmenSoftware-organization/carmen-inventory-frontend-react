@@ -1,14 +1,15 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 
@@ -42,20 +43,25 @@ export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
   return (
     <ListCard
       title={item.grn_no}
-      badge={
-        <Badge size="xs" className={statusConfig?.className}>
-          {statusConfig?.label ?? status}
-        </Badge>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow
+        status={status}
+        label={statusConfig?.label ?? status}
+      />
       <ListCardRow label={tfl("grnDate")}>
         <span className="tabular-nums">
           {item.grn_date ? formatDate(item.grn_date, dateFormat) : "—"}
         </span>
       </ListCardRow>
-      <ListCardRow label={tfl("type")}>{docTypeLabel}</ListCardRow>
+      <ListCardRow label={tfl("type")}>
+        <StatusIconLabel
+          status={item.doc_type}
+          label={docTypeLabel}
+          className="text-muted-foreground"
+        />
+      </ListCardRow>
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>
       )}

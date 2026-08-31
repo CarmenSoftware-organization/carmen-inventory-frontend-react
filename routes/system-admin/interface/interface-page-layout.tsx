@@ -62,7 +62,12 @@ export function InterfacePageLayout({
         </div>
         {!isError && !isLoading && (
           <div className="flex shrink-0 items-center gap-2">
-            <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
+            <Button
+              type="button"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving}
+            >
               {isSaving ? (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
               ) : (
@@ -78,7 +83,10 @@ export function InterfacePageLayout({
 
       {!isError && isLoading && (
         <div>
-          <SettingSectionSkeleton first fields={["half", "half", "half", "half"]} />
+          <SettingSectionSkeleton
+            first
+            fields={["half", "half", "half", "half"]}
+          />
           <SettingSectionSkeleton fields={["half", "half", "full"]} />
         </div>
       )}

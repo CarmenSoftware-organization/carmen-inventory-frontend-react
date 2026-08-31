@@ -1,12 +1,12 @@
 import { ArrowUpRight, FileText, Rows3 } from "lucide-react";
 import { useTranslations } from "use-intl";
 
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
-  JOB_STATUS_CONFIG,
   REPORT_FORMAT_LABELS,
   normalizeJobStatus,
 } from "@/constant/report-history";
-import { cn } from "@/lib/utils";
+import { cn, safeNavigationHref } from "@/lib/utils";
 import type {
   ReportFormatRaw,
   ReportHistory,
@@ -39,18 +39,20 @@ export default function HistoryCard({ item }: HistoryCardProps) {
   const t = useTranslations("reportHistory");
 
   const statusKey = normalizeJobStatus(item.status);
-  const statusConfig = statusKey ? JOB_STATUS_CONFIG[statusKey] : null;
   const accent = statusKey
     ? STATUS_COLOR[statusKey]
     : "var(--muted-foreground)";
   const formatLabel =
     REPORT_FORMAT_LABELS[item.format as ReportFormatRaw] ?? item.format;
   const name = item.file_name ?? item.report_type;
-  const hasUrl = !!item.file_url;
+  // presigned URL จาก backend — กรอง `javascript:`/`data:` ทิ้งก่อนเสมอ การ์ดที่ URL
+  // ไม่ผ่านจะกดไม่ได้เหมือนตอนที่ยังไม่มีไฟล์ (ไม่ใช่กดแล้วเงียบ)
+  const fileHref = safeNavigationHref(item.file_url);
+  const hasUrl = !!fileHref;
 
   const open = () => {
-    if (item.file_url) {
-      globalThis.window.open(item.file_url, "_blank", "noopener,noreferrer");
+    if (fileHref) {
+      globalThis.window.open(fileHref, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -73,7 +75,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
         "group border-border/60 bg-card relative flex flex-col overflow-hidden rounded-2xl border transition-colors",
         "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
         hasUrl &&
-          "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40",
+          "hover:border-primary/40 cursor-pointer hover:-translate-y-0.5",
       )}
     >
       {/* Status accent bar — widens on hover */}
@@ -111,7 +113,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
               />
             )}
           </div>
-          <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-micro">
+          <div className="text-muted-foreground text-micro mt-1 flex items-center gap-1.5">
             <span className="font-semibold tracking-wide uppercase">
               {item.report_type}
             </span>
@@ -125,7 +127,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
 
       {/* Footer — rows + status pill */}
       <div className="border-border/40 relative mt-auto flex items-center justify-between gap-2 border-t px-4 py-2">
-        <div className="text-muted-foreground inline-flex items-center gap-1.5 text-micro">
+        <div className="text-muted-foreground text-micro inline-flex items-center gap-1.5">
           {item.row_count != null ? (
             <>
               <Rows3 className="size-3" aria-hidden />
@@ -139,19 +141,12 @@ export default function HistoryCard({ item }: HistoryCardProps) {
           )}
         </div>
 
-        {statusConfig && (
-          <div
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-micro-legal font-semibold",
-              statusConfig.className,
-            )}
-          >
-            <span
-              aria-hidden
-              className="size-1 rounded-full bg-current opacity-80"
-            />
-            {t(statusKey!)}
-          </div>
+        {statusKey && (
+          <StatusIconLabel
+            status={statusKey}
+            label={t(statusKey)}
+            className="text-micro-legal [&>svg]:size-3"
+          />
         )}
       </div>
     </div>

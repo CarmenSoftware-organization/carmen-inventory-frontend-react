@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -16,14 +16,14 @@ import {
   FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
-import { FormToolbar } from "@/components/ui/form-toolbar";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { ProductTable } from "@/components/ui/product-table";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { TransferItem } from "@/components/ui/transfer";
-import { TreeProductLookup } from "@/components/ui/tree-product-lookup";
+import { TreeProductLookup } from "@/components/share/tree-product-lookup";
 import { UserTable } from "@/components/ui/user-table";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
 import {
@@ -34,6 +34,7 @@ import {
 import { useAllUsers } from "@/hooks/use-all-users";
 import { useAllProducts } from "@/hooks/use-all-products";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import {
   INVENTORY_TYPE_LABEL_KEY,
   INVENTORY_TYPE_OPTIONS,
@@ -42,7 +43,7 @@ import {
 } from "@/constant/location";
 import type { Location } from "@/types/location";
 import type { FormMode } from "@/types/form";
-import { transferHandler } from "@/utils/transfer-handler";
+import { transferHandler } from "@/lib/transfer-handler";
 import {
   createLocationSchema,
   getDefaultValues,
@@ -63,7 +64,6 @@ interface LocationFormProps {
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const routerLocation = useLocation();
   const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -242,12 +242,11 @@ export function LocationForm({ location }: LocationFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (routerLocation.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/config/location");
-    }
+    navigate("/config/location");
   };
 
   const handleBack = () => {
@@ -349,9 +348,13 @@ export function LocationForm({ location }: LocationFormProps) {
                 <FieldLabel required>{tfl("locationType")}</FieldLabel>
                 {isView ? (
                   <FieldPlainText>
-                    {location?.location_type
-                      ? t(INVENTORY_TYPE_LABEL_KEY[location.location_type])
-                      : ""}
+                    {location?.location_type ? (
+                      // ไอคอนชุดเดียวกับที่ list แสดง — สลับ list ↔ ฟอร์มแล้วเห็น
+                      // ประเภทคลังหน้าตาเดิม
+                      <LocationTypeLabel type={location.location_type} />
+                    ) : (
+                      ""
+                    )}
                   </FieldPlainText>
                 ) : (
                   <Controller
@@ -489,6 +492,7 @@ export function LocationForm({ location }: LocationFormProps) {
         <Reveal delay={160}>
           <SettingSection
             wide
+            frameless
             title={t("locationUsers")}
             description={t("usersDesc")}
             count={isView ? enrichedUsers.length : userTargetKeys.length}
@@ -514,6 +518,7 @@ export function LocationForm({ location }: LocationFormProps) {
         <Reveal delay={220}>
           <SettingSection
             wide
+            frameless
             title={t("products")}
             description={t("productsDesc")}
             count={isView ? enrichedProducts.length : selectedProductIds.size}

@@ -30,9 +30,8 @@ export function Toaster(props: ToasterProps) {
     <SonnerToaster
       theme={resolvedTheme === "dark" ? "dark" : "light"}
       closeButton
-      position="bottom-left"
-      // bottom ต้องพ้นแถบสถานะด้านล่าง (StatusBar สูงราว 24px) ไม่งั้น toast
-      // สองบรรทัดจะโผล่ทับหรือถูกขอบจอตัด — เดิมไม่ได้ตั้ง เลยใช้ 24px ของ sonner
+      position="bottom-right"
+      // bottom ต้องพ้นแถบสถานะด้านล่าง (StatusBar สูงราว 24px)
       mobileOffset={{
         top: "1rem",
         left: "1rem",

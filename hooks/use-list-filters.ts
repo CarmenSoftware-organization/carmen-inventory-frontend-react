@@ -8,15 +8,80 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
+import { useDepartment } from "@/hooks/use-department";
+import { useUser } from "@/hooks/use-user";
 import { useListViews, type UseListViewsResult } from "@/hooks/use-list-views";
 import {
   encodeFilterParam,
   viewMatchesCurrent,
 } from "@/lib/list-filter-encode";
 import type { ActiveFilter } from "@/components/ui/active-filter-bar";
-import type { FilterFieldDef } from "@/types/list-filter";
+import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
 import type { SavedView, ViewScope } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+
+/** ค่าดิบราย id จาก clause — ตัด "col|type:" ทิ้ง (รองรับทั้ง merge และ clause ซ้ำ prefix) */
+function clauseTokens(value: string): string[] {
+  return value
+    .split(",")
+    .map((part) =>
+      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
+    )
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+/** ชื่อตัวแรก +N — คืน undefined เมื่อไม่มีชื่อให้โชว์ (ให้ fallback ทำงานต่อ) */
+function firstPlusRest(names: readonly string[]): string | undefined {
+  if (names.length === 0) return undefined;
+  return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
+}
+
+/**
+ * ข้อความค่าบน chip ของ ActiveFilterBar — derive จาก field def + ค่า URL:
+ * `valueText` ของ field ชนะเสมอ → options ที่ประกาศไว้ map เป็น label →
+ * date_range เป็น "จาก – ถึง" → slug อ่านออกโชว์ตรง (ตัวแรก +N) →
+ * id (uuid) โชว์จำนวนรายการแทน (ไม่มีชื่อให้โชว์ในชั้นนี้)
+ *
+ * export ให้ ListFilterMenu (desktop) ใช้โชว์ค่าย่อท้ายแถว field ด้วย —
+ * ข้อความชุดเดียวกับ chip เสมอ จะได้ไม่ต้อง derive สองสูตร
+ */
+export function chipValueText(
+  f: FilterFieldDef,
+  value: string,
+  t: (key: string) => string,
+): string | undefined {
+  if (f.valueText) return f.valueText(value);
+
+  const options = "options" in f ? f.options : undefined;
+  if (options?.length) {
+    const selected = new Set(value.split(","));
+    const labels = options
+      .filter((o) => selected.has(o.value))
+      .map((o) => t(o.labelKey));
+    if (labels.length > 0) {
+      return labels[0] + (labels.length > 1 ? ` +${labels.length - 1}` : "");
+    }
+  }
+
+  const dateRange = /\|date_?range:([^,]+),(.+)$/.exec(value);
+  if (dateRange) return `${dateRange[1]} – ${dateRange[2]}`;
+
+  // ช่วงตัวเลข — ฝั่งเดียวโชว์เป็น ≥/≤ ให้อ่านออกว่าเปิดปลาย
+  const numRange = /\|num_range:([^,]*),(.*)$/.exec(value);
+  if (numRange) {
+    const [, min, max] = numRange;
+    if (min && max) return `${min} – ${max}`;
+    return min ? `≥ ${min}` : `≤ ${max}`;
+  }
+
+  const tokens = clauseTokens(value);
+  if (tokens.length === 0) return undefined;
+  if (tokens.some((v) => UUID_RE.test(v))) return `${tokens.length}`;
+  return firstPlusRest(tokens.map((v) => v.replace(/_/g, " ")));
+}
 
 export interface UseListFiltersOptions {
   pageKey: ListPageKey;
@@ -162,6 +227,26 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
+  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — fetch เฉพาะเมื่อหน้ามี field ชนิดนั้น
+  // (ค่าใน clause เป็น id ล้วน ชื่ออยู่ในทะเบียนกลาง ไม่ใช่ในตัว control)
+  const hasDepartmentField = fields.some((f) => f.control === "department");
+  const hasRequesterField = fields.some((f) => f.control === "requester");
+  const { data: departmentData } = useDepartment(
+    { perpage: -1 },
+    { enabled: hasDepartmentField },
+  );
+  const { data: userData } = useUser(
+    { perpage: -1 },
+    { enabled: hasRequesterField },
+  );
+
+  // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
+  // ListFilter ส่งให้ control ใน sheet/เมนู เพื่อให้ field คู่ (linked keys) ทำงานครบ
+  const peer: FilterPeerAccess = useMemo(
+    () => ({ get: (key) => values[key] ?? "", set: setValue }),
+    [values, setValue],
+  );
+
   const activeFilters: ActiveFilter[] = useMemo(
     () =>
       fields
@@ -171,6 +256,46 @@ export function useListFilters(
         .map((f) => ({
           key: f.key,
           label: t(f.labelKey),
+          // chip แก้ค่าได้เอง — เว้น field ที่ไม่มีชื่อ (custom เฉพาะมือถือ) ให้เป็น
+          // chip อ่านอย่างเดียวตามเดิม
+          ...(f.labelKey
+            ? {
+                field: f,
+                rawValue: values[f.key],
+                onChange: (v: string) => setValue(f.key, v),
+                peer,
+              }
+            : {}),
+          // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
+          value: (() => {
+            const raw = values[f.key];
+            // แผนก/ผู้ขอ: id → ชื่อจริงจากทะเบียน (ระหว่างโหลดตก fallback เป็นจำนวน)
+            let named: string | undefined;
+            if (f.control === "department") {
+              const list = departmentData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => list.find((d) => d.id === id)?.name)
+                  .filter((n): n is string => !!n),
+              );
+            } else if (f.control === "requester") {
+              const list = userData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => {
+                    const u = list.find((usr) => usr.user_id === id);
+                    return u
+                      ? [u.firstname, u.middlename, u.lastname]
+                          .filter(Boolean)
+                          .join(" ")
+                      : undefined;
+                  })
+                  .filter((n): n is string => !!n),
+              );
+            }
+            const text = named ?? chipValueText(f, raw, t);
+            return text === t(f.labelKey) ? undefined : text;
+          })(),
           onRemove: () => {
             // field ที่มี linkedKeys (เช่น created_at_from คู่กับ created_at_to
             // ที่ถูกซ่อนไว้) ต้องล้างทั้งคู่พร้อมกันใน setURLParams ครั้งเดียว ไม่งั้น
@@ -186,7 +311,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue],
+    [fields, values, t, setValue, peer, departmentData, userData],
   );
 
   const current: SavedView | null = sv

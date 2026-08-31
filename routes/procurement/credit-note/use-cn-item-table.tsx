@@ -26,12 +26,12 @@ import {
   DiscountOverrideInput,
   OverrideToggle,
   TaxOverrideInput,
-} from "@/components/procurement/discount-tax-override";
+} from "../shared/discount-tax-override";
 import { cn } from "@/lib/utils";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useUnitDecimals } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
-import { COMBO_COL } from "../combo-col-width";
+import { COMBO_COL } from "../shared/combo-col-width";
 import type { CnFormValues } from "./cn-form-schema";
 import {
   computeCnItemAmounts,

@@ -1,11 +1,12 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
+  ListCardSendBackRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -63,11 +64,6 @@ export default function PrCard({
   return (
     <ListCard
       title={item.pr_no}
-      badge={
-        <Badge size="xs" className={config.className}>
-          {config.label}
-        </Badge>
-      }
       onOpen={() => onEdit(item)}
       onDelete={canDelete ? () => onDelete?.(item) : undefined}
       actions={
@@ -105,6 +101,8 @@ export default function PrCard({
         ) : undefined
       }
     >
+      <ListCardStatusRow status={item.pr_status} label={config.label} />
+      <ListCardSendBackRow lastAction={item.last_action} />
       <ListCardRow label={tfl("date")}>
         <span className="tabular-nums">
           {formatDate(item.pr_date, dateFormat)}

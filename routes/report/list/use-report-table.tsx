@@ -47,7 +47,7 @@ export function useReportTable({
         header: "#",
         size: 50,
         cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">{row.index + 1}</span>
+          <span className="text-muted-foreground text-xs">{row.index + 1}</span>
         ),
         meta: { skeleton: columnSkeletons.number },
       },
@@ -59,7 +59,7 @@ export function useReportTable({
         cell: ({ row }) => (
           <button
             type="button"
-            className="text-left text-xs font-semibold text-primary hover:underline focus-visible:outline-none"
+            className="text-primary text-left text-xs font-semibold hover:underline focus-visible:outline-none"
             onClick={(e) => {
               (e.currentTarget as HTMLButtonElement).blur();
               onSelect?.(row.original);

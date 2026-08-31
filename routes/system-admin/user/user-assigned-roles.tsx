@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Check, Shield } from "lucide-react";
@@ -48,7 +47,7 @@ function RoleToggleCard({
           {role.name}
         </p>
         {role.description && (
-          <p className="text-muted-foreground line-clamp-1 text-micro">
+          <p className="text-muted-foreground text-micro line-clamp-1">
             {role.description}
           </p>
         )}
@@ -118,7 +117,7 @@ export function RolesSection({
             scrollToFirstInvalidField(),
           )}
         >
-          <div className="divide-border/60 overflow-hidden rounded-lg border divide-y">
+          <div className="divide-border/60 divide-y overflow-hidden rounded-lg border">
             {roles.map((role: Role) => (
               <Controller
                 key={role.id}

@@ -8,9 +8,9 @@ import {
   columnSkeletons,
   indexColumn,
   selectColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type {
@@ -20,10 +20,7 @@ import type {
 } from "@/types/store-requisition";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import {
-  SR_STATUS_CONFIG,
-  SR_TYPE_VARIANT,
-} from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 
 interface UseStoreRequisitionTableOptions {
   items: StoreRequisition[];
@@ -45,6 +42,7 @@ export function useStoreRequisitionTable({
   "use no memo";
   const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const ts = useTranslations("status");
 
   const dataColumns: ColumnDef<StoreRequisition>[] = [
@@ -59,8 +57,9 @@ export function useStoreRequisitionTable({
         </CellAction>
       ),
       meta: { headerTitle: tfl("srNo"), skeleton: columnSkeletons.text },
-      size: 120,
+      size: 80,
     },
+    sendbackColumn<StoreRequisition>(tc("sendBack")),
     {
       accessorKey: "sr_type",
       header: ({ column }) => (
@@ -74,22 +73,21 @@ export function useStoreRequisitionTable({
         const type = row.getValue("sr_type") as StoreRequisitionType;
         if (!type) return null;
         return (
-          <Badge
-            variant={SR_TYPE_VARIANT[type]}
-            size="xs"
-            className="uppercase"
-          >
-            {type}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={type}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center uppercase"
+          />
         );
       },
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
-        headerClassName: "text-center"
+        headerClassName: "text-center",
       },
-      size: 100,
+      size: 80,
     },
     {
       accessorKey: "sr_date",
@@ -98,18 +96,18 @@ export function useStoreRequisitionTable({
       ),
       cell: ({ row }) => formatDate(row.getValue("sr_date"), dateFormat),
       meta: { headerTitle: tfl("date"), skeleton: columnSkeletons.text },
-      size: 120,
+      size: 75,
     },
     {
-      id: "location",
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียง From → To = เรียงต้นทาง)
+      id: "from_location_name",
       accessorFn: (row) =>
         `${row.from_location_name} → ${row.to_location_name}`,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("fromTo")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("fromTo"), skeleton: columnSkeletons.text },
-      size: 220,
+      size: 120,
     },
     {
       accessorKey: "requestor_name",
@@ -117,12 +115,14 @@ export function useStoreRequisitionTable({
         <DataGridColumnHeader column={column} title={tfl("requester")} />
       ),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
+      size: 100,
     },
     {
       accessorKey: "department_name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
+      size: 100,
       meta: { headerTitle: tfl("department"), skeleton: columnSkeletons.text },
     },
     {
@@ -137,21 +137,24 @@ export function useStoreRequisitionTable({
       cell: ({ row }) => {
         const status = row.getValue("doc_status") as StoreRequisitionStatus;
         return (
-          // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
-          // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
-          <Badge
-            className={`uppercase ${SR_STATUS_CONFIG[status]?.className ?? ""}`}
-            size="sm"
-          >
-            {ts(status)}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={ts(status)}
+            // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
+            // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
+            // (ต่างจากโมดูลอื่นที่ label uppercase มาจาก createStatusConfig แล้ว)
+            //
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
       meta: {
         headerTitle: tfl("status"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
-        headerClassName: "text-center"
+        headerClassName: "text-center",
       },
       size: 80,
     },
@@ -164,6 +167,7 @@ export function useStoreRequisitionTable({
           className="justify-center"
         />
       ),
+      size: 80,
       meta: {
         headerTitle: tfl("workflowStage"),
         skeleton: columnSkeletons.text,
@@ -179,6 +183,7 @@ export function useStoreRequisitionTable({
           className="justify-center"
         />
       ),
+      size: 80,
       meta: {
         headerTitle: tfl("currentStage"),
         skeleton: columnSkeletons.text,
@@ -201,7 +206,9 @@ export function useStoreRequisitionTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

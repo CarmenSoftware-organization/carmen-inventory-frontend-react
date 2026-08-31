@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import {
   DataGrid,
   DataGridContainer,
@@ -27,21 +28,6 @@ interface StockReplLocationProps {
   ) => void;
 }
 
-/**
- * แสดง location 1 แห่งในหน้า Stock Replenishment แบบ collapsible
- * มีตารางรายการสินค้าที่ต้องเติมพร้อม checkbox เลือก และ badge สรุปสถานะ
- *
- * @param props - location, selectedIds, open state, onOpenChange และ onSelectionChange
- * @param props.location - ข้อมูล Location พร้อม products_location
- * @param props.selectedIds - Set ของ product id ที่เลือก
- * @param props.open - สถานะ collapsible
- * @param props.onOpenChange - callback เปลี่ยน open
- * @param props.onSelectionChange - callback เมื่อเปลี่ยน selection
- * @returns คอมโพเนนต์ location collapsible พร้อมตาราง
- * @example
- * <StockReplLocation location={loc} selectedIds={ids} open={true}
- *   onOpenChange={setOpen} onSelectionChange={handleChange} />
- */
 export function StockReplLocation({
   location,
   selectedIds,
@@ -55,10 +41,11 @@ export function StockReplLocation({
   const ts = useTranslations("status");
   const tl = useTranslations("lookup");
 
+  // สีอยู่ที่ dot ตัวเดียว chip เป็นกลาง ตาม pattern StatusDotBadge ของแอป
   const STATUS_CONFIG = {
-    critical: { variant: "destructive" as const, label: ts("critical") },
-    warning: { variant: "warning" as const, label: ts("warning") },
-    low: { variant: "secondary" as const, label: ts("low") },
+    critical: { tone: "destructive" as const, label: ts("critical") },
+    warning: { tone: "warning" as const, label: ts("warning") },
+    low: { tone: "neutral" as const, label: ts("low") },
   };
 
   const products = location.products_location;
@@ -92,14 +79,9 @@ export function StockReplLocation({
   const columns: ColumnDef<ProductLocation>[] = [
     {
       id: "select",
-      header: () => (
-        <Checkbox
-          checked={allSelected}
-          {...(someSelected ? { "data-state": "indeterminate" } : {})}
-          onCheckedChange={(checked) => handleSelectAll(checked === true)}
-          aria-label={t("selectAllIn", { location: location.location_name })}
-        />
-      ),
+      // select-all ย้ายไปเป็น checkbox ที่หัวแถว location แล้ว — ไม่ใส่ซ้ำใน
+      // หัวตาราง (สอง control ป้ายเดียวกันชี้งานเดียวกัน)
+      header: () => "",
       cell: ({ row }) => (
         <Checkbox
           checked={selectedIds.has(row.original.id)}
@@ -126,8 +108,25 @@ export function StockReplLocation({
     {
       accessorKey: "name",
       header: tfl("product"),
-      cell: ({ row }) => row.getValue("name") || "...",
+      // ชื่อหลักบน local name เป็นบรรทัดรองข้างล่าง — ยาวเกินคอลัมน์ให้ตัดด้วย
+      // ellipsis (table เป็น table-fixed ความกว้างตาม size ข้างล่าง)
+      cell: ({ row }) => (
+        <div className="min-w-0">
+          <p className="truncate" title={row.getValue("name")}>
+            {row.getValue("name") || "..."}
+          </p>
+          {row.original.local_name && (
+            <p
+              className="text-muted-foreground text-micro truncate"
+              title={row.original.local_name}
+            >
+              {row.original.local_name}
+            </p>
+          )}
+        </div>
+      ),
       enableSorting: false,
+      size: 180,
     },
     {
       id: "category",
@@ -160,31 +159,51 @@ export function StockReplLocation({
       enableSorting: false,
     },
     {
-      accessorKey: "current",
-      header: tfl("current"),
+      accessorKey: "on_hand_qty",
+      header: tfl("onHandQty"),
       cell: ({ row }) => (
-        <span className="tabular-nums">{row.getValue("current")}</span>
+        <span className="tabular-nums">{row.getValue("on_hand_qty")}</span>
       ),
       enableSorting: false,
       size: 80,
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
-      accessorKey: "par_level",
-      header: tfl("parLevel"),
+      accessorKey: "min_qty",
+      header: tfl("minQty"),
       cell: ({ row }) => (
-        <span className="tabular-nums">{row.getValue("par_level")}</span>
+        <span className="tabular-nums">{row.getValue("min_qty")}</span>
       ),
       enableSorting: false,
       size: 80,
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
-      accessorKey: "need",
-      header: tfl("need"),
+      accessorKey: "max_qty",
+      header: tfl("maxQty"),
       cell: ({ row }) => (
-        <span className="tabular-nums font-semibold">
-          {row.getValue("need")}
+        <span className="tabular-nums">{row.getValue("max_qty")}</span>
+      ),
+      enableSorting: false,
+      size: 80,
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      accessorKey: "par_qty",
+      header: tfl("parQty"),
+      cell: ({ row }) => (
+        <span className="tabular-nums">{row.getValue("par_qty")}</span>
+      ),
+      enableSorting: false,
+      size: 80,
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      accessorKey: "reorder_qty",
+      header: tfl("reorderQty"),
+      cell: ({ row }) => (
+        <span className="font-semibold tabular-nums">
+          {row.getValue("reorder_qty")}
         </span>
       ),
       enableSorting: false,
@@ -197,9 +216,9 @@ export function StockReplLocation({
       cell: ({ row }) => {
         const config = STATUS_CONFIG[row.original.status];
         return (
-          <Badge variant={config.variant} size="xs">
+          <StatusDotBadge tone={config.tone} size="xs">
             {config.label}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       enableSorting: false,
@@ -217,36 +236,51 @@ export function StockReplLocation({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
-      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/70 transition-colors">
-        <ChevronRight
-          className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
+      <div className="bg-muted/40 hover:bg-muted/70 flex w-full items-center gap-2 rounded-md border px-3 py-2 transition-colors">
+        <Checkbox
+          checked={someSelected ? "indeterminate" : allSelected}
+          onCheckedChange={(checked) => handleSelectAll(checked === true)}
+          aria-label={t("selectAllIn", { location: location.location_name })}
         />
-        <span className="flex-1">{location.location_name}</span>
-        <Badge variant="secondary" size="sm">
-          {t("nItems", { count: products.length })}
-        </Badge>
-        {criticalCount > 0 && (
-          <Badge variant="destructive" size="sm">
-            {t("nCritical", { count: criticalCount })}
-          </Badge>
-        )}
-        {warningCount > 0 && (
-          <Badge variant="warning" size="sm">
-            {t("nWarning", { count: warningCount })}
-          </Badge>
-        )}
-        {lowCount > 0 && (
+        <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-left text-sm font-semibold">
+          <ChevronRight
+            className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
+          />
+          <span className="flex-1">
+            <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+              {location.location_code}
+            </span>
+            {location.location_name}
+          </span>
           <Badge variant="secondary" size="sm">
-            {t("nLow", { count: lowCount })}
+            {t("nItems", { count: products.length })}
           </Badge>
-        )}
-      </CollapsibleTrigger>
+          {criticalCount > 0 && (
+            <StatusDotBadge tone="destructive" size="sm">
+              {t("nCritical", { count: criticalCount })}
+            </StatusDotBadge>
+          )}
+          {warningCount > 0 && (
+            <StatusDotBadge tone="warning" size="sm">
+              {t("nWarning", { count: warningCount })}
+            </StatusDotBadge>
+          )}
+          {lowCount > 0 && (
+            <StatusDotBadge tone="neutral" size="sm">
+              {t("nLow", { count: lowCount })}
+            </StatusDotBadge>
+          )}
+        </CollapsibleTrigger>
+      </div>
 
       <CollapsibleContent>
         <div className="mt-1">
+          {/* checkbox: true จำเป็น — DataGridTable กรองคอลัมน์ id "select" ทิ้ง
+              เมื่อ flag นี้ปิด (default) ทำให้ checkbox รายแถวหายทั้งคอลัมน์ */}
           <DataGrid
             table={table}
             recordCount={products.length}
+            tableLayout={{ checkbox: true }}
           >
             <DataGridContainer>
               <DataGridTable />

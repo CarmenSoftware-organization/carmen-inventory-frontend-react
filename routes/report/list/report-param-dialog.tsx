@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -19,10 +18,8 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
-import { useReportListLookups } from "@/hooks/use-report";
-import type {
-  ReportPeriodMap,
-} from "@/types/report";
+import { useReportListLookups } from "../shared/use-report";
+import type { ReportPeriodMap } from "@/types/report";
 import type { Report } from "@/types/report";
 import {
   parseReportDialog,
@@ -173,11 +170,7 @@ function LookupControl({ node, id }: LookupControlProps) {
 
   if (options.length > 0) {
     return (
-      <FieldSelect
-        name={id}
-        defaultValue={options[0].value}
-        className="h-8"
-      >
+      <FieldSelect name={id} defaultValue={options[0].value} className="h-8">
         <SelectContent className="max-h-[min(60vh,400px)]" position="popper">
           {options.map((o) => (
             <SelectItem key={o.value} value={o.value}>
@@ -190,11 +183,7 @@ function LookupControl({ node, id }: LookupControlProps) {
   }
 
   return (
-    <FieldSelect
-      name={id}
-      placeholder={`(${node.dataSource})`}
-      className="h-8"
-    >
+    <FieldSelect name={id} placeholder={`(${node.dataSource})`} className="h-8">
       <SelectContent className="max-h-[min(60vh,400px)]" position="popper" />
     </FieldSelect>
   );
@@ -250,9 +239,7 @@ function DateControl({ node, periods }: DateControlProps) {
   // ที่ใช้ @current_period/@previous_period ได้ initial = "" เมื่อ periods โหลดเสร็จ
   // initial เปลี่ยน → remount ด้วยค่าใหม่ (เกิดครั้งเดียวก่อนผู้ใช้แก้ เพราะ periods
   // นิ่งหลังโหลด) ไม่งั้น useState(initial) จะค้างค่าว่างตลอด
-  return (
-    <DateControlInner key={initial} name={node.name} initial={initial} />
-  );
+  return <DateControlInner key={initial} name={node.name} initial={initial} />;
 }
 
 function DateControlInner({
@@ -381,7 +368,9 @@ export function ReportParamDialog({
 
   const dialogXml = report?.Dialog;
   const fields: FormField[] =
-    !dialogXml || dialogXml.trim().length === 0 ? [] : parseReportDialog(dialogXml);
+    !dialogXml || dialogXml.trim().length === 0
+      ? []
+      : parseReportDialog(dialogXml);
 
   const sources = collectDataSources(fields);
   const includePeriods = needsPeriods(fields);
@@ -408,8 +397,12 @@ export function ReportParamDialog({
       const includeAll = ds !== "period";
       return {
         ...ctrl,
-        items: includeAll ? ["ALL", ...items.map((i) => i.name)] : items.map((i) => i.name),
-        values: includeAll ? ["ALL", ...items.map((i) => i.code)] : items.map((i) => i.code),
+        items: includeAll
+          ? ["ALL", ...items.map((i) => i.name)]
+          : items.map((i) => i.name),
+        values: includeAll
+          ? ["ALL", ...items.map((i) => i.code)]
+          : items.map((i) => i.code),
       };
     };
     if (field.kind === "range") {
@@ -445,10 +438,7 @@ export function ReportParamDialog({
           <DialogTitle className="text-sm">{report.ReportName}</DialogTitle>
         </DialogHeader>
 
-        <form
-          ref={formRef}
-          className="min-h-0 flex-1 overflow-y-auto pr-1"
-        >
+        <form ref={formRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
           {enrichedFields.length === 0 ? (
             <p className="text-muted-foreground text-xs">
               {t("noFiltersConfigured")}

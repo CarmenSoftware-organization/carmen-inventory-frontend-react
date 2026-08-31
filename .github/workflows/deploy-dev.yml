@@ -1,0 +1,162 @@
+name: Deploy carmen-inventory (Dev)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# deploy ตัวนี้คุยกับเครื่องปลายทางผ่าน ssh key ใน secrets ล้วน ๆ GITHUB_TOKEN
+# ใช้แค่ checkout — ปิดที่เหลือ (CodeQL #6)
+permissions:
+  contents: read
+
+# deploy สลับทั้งไดเรกทอรี ปล่อยให้สอง run ทับกันแปลว่า swap ของคนละ build
+# อาจสลับกัน — ต่อคิวแทน ไม่ยกเลิกตัวที่กำลังรัน
+concurrency:
+  group: deploy-dev-carmen-inventory
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: development
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # build ใช้ config.sample.json เป็น placeholder เท่านั้น — ไฟล์จริงถูกเขียนทับ
+      # ในขั้นถัดไป เพราะ public/config.*.json ทุกไฟล์ถูก gitignore CI จึงไม่มี
+      # config.dev.json ให้ `bun run build:dev` ใช้
+      - name: Build
+        env:
+          BUILD_CONFIG_FILE: config.sample.json
+        run: bun run build
+
+      # ── config.json ของ dev ──
+      #
+      # vars.BACKEND_URL / vars.X_APP_ID ที่มีอยู่เป็นของ **GCP POC**
+      # (api-carmen-web.pncsb-app.com) ห้ามเอามาใช้ที่นี่ — จึงมีชุด DEV_* แยก
+      #
+      # ทุกคีย์ที่ runtime อ่านต้องเขียนครบ: ไฟล์นี้ทับทั้งไฟล์ และ getRuntimeConfig
+      # อ่านคีย์ที่หายเป็น "ไม่ได้ตั้ง" ไม่ใช่ error — WS_URL หาย = ปิด real-time,
+      # OTEL_ENABLED หาย = ปิด telemetry ทั้งคู่เงียบสนิทไม่มีอะไรฟ้อง
+      - name: Write config.json
+        env:
+          BACKEND_URL: ${{ vars.DEV_BACKEND_URL }}
+          X_APP_ID: ${{ vars.DEV_X_APP_ID }}
+          WS_URL: ${{ vars.DEV_WS_URL }}
+          LICENSE_ENFORCEMENT: ${{ vars.DEV_LICENSE_ENFORCEMENT }}
+        run: |
+          set -euo pipefail
+          for v in BACKEND_URL X_APP_ID; do
+            if [ -z "${!v}" ]; then
+              echo "::error::vars.DEV_$v ยังไม่ได้ตั้ง — SPA จะขึ้น 'Failed to load application configuration'"
+              exit 1
+            fi
+          done
+          LICENSE_ENFORCEMENT="${LICENSE_ENFORCEMENT:-false}"
+          case "$LICENSE_ENFORCEMENT" in true|false) ;; *)
+            echo "::error::DEV_LICENSE_ENFORCEMENT ต้องเป็น true/false (ได้: '$LICENSE_ENFORCEMENT')"; exit 1 ;;
+          esac
+
+          # jq ประกอบ JSON ให้ — heredoc พังทันทีถ้าค่ามีอักขระที่ต้อง escape
+          jq -n \
+            --arg backend_url "$BACKEND_URL" \
+            --arg x_app_id "$X_APP_ID" \
+            --arg ws_url "$WS_URL" \
+            --argjson license_enforcement "$LICENSE_ENFORCEMENT" \
+            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id,
+              LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: true}
+             + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)' > dist/config.json
+
+          echo "config.json ที่จะ deploy (ไม่มีความลับในไฟล์นี้):"
+          cat dist/config.json
+
+          # กันพลาดเงียบ: ถ้า chunk หาย แปลว่า dynamic import ถูกตัดทิ้ง
+          ls dist/assets/telemetry-*.js >/dev/null || {
+            echo "::error::ไม่พบ telemetry chunk ใน bundle"; exit 1; }
+
+          tar czf /tmp/carmen-spa-build.tgz -C dist .
+
+      - name: Upload bundle
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          source: /tmp/carmen-spa-build.tgz
+          target: /tmp
+          strip_components: 1
+
+      - name: Swap into place and verify
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          command_timeout: 10m
+          script: |
+            set -e
+            ROOT=/var/www/carmen-inventory
+
+            # แตกข้าง ๆ แล้วค่อยสลับ — แตกทับของเดิมจะมีช่วงที่ index.html ใหม่
+            # ชี้ไป chunk ที่ยังเขียนไม่เสร็จ
+            rm -rf "$ROOT.new"; mkdir -p "$ROOT.new"
+            tar xzf /tmp/carmen-spa-build.tgz -C "$ROOT.new"
+            rm -f /tmp/carmen-spa-build.tgz
+
+            test -f "$ROOT.new/index.html"
+            test -f "$ROOT.new/config.json"
+
+            rm -rf "$ROOT.old"
+            [ -d "$ROOT" ] && mv "$ROOT" "$ROOT.old"
+            mv "$ROOT.new" "$ROOT"
+
+            BASE=http://localhost:9901
+
+            # ดึงเนื้อจริงและ "ตาม redirect" — nginx ที่บังคับ https จะตอบ 301
+            # ซึ่งไม่ได้แปลว่าเสิร์ฟไม่ได้ ของเดิมเช็คแค่เลข 200 เลย fail ทั้งที่
+            # ไฟล์ขึ้นเรียบร้อย (31 ส.ค. 69)
+            get() {
+              if command -v curl >/dev/null 2>&1; then
+                curl -fsSL -m 15 --insecure "$1" 2>/dev/null
+              else
+                wget -qO- --no-check-certificate "$1" 2>/dev/null
+              fi
+            }
+
+            echo "— response header ของ / (ไว้ไล่เวลา redirect ไปผิดที่) —"
+            if command -v curl >/dev/null 2>&1; then
+              curl -sS -o /dev/null -D - -m 15 "$BASE/" | head -20 || true
+            else
+              wget -qS --spider -O /dev/null "$BASE/" 2>&1 | head -20 || true
+            fi
+
+            index=$(get "$BASE/" || true)
+            route=$(get "$BASE/procurement/purchase-request" || true)
+            cfg=$(get "$BASE/config.json" || true)
+            echo "config.json ที่เสิร์ฟจริง: $(printf '%s' "$cfg" | head -c 200)"
+
+            # เช็คว่าไบต์ที่เสิร์ฟคือ build ก้อนนี้จริง ไม่ใช่แค่ตอบ 200 —
+            # index ต้องชี้ chunk ใน /assets/, เส้นทางในแอปต้อง fallback มาที่
+            # index เดียวกัน และ config.json ต้องเป็นของที่เพิ่งประกอบไป
+            ok=1
+            printf '%s' "$index" | grep -q '/assets/' || { echo "::error::/ ไม่ใช่ index ของ build นี้"; ok=0; }
+            printf '%s' "$route" | grep -q '/assets/' || { echo "::error::เส้นทางในแอปไม่ fallback มาที่ index"; ok=0; }
+            printf '%s' "$cfg" | grep -q 'BACKEND_URL' || { echo "::error::config.json ที่เสิร์ฟไม่มี BACKEND_URL"; ok=0; }
+
+            if [ "$ok" != "1" ]; then
+              echo "::error::เสิร์ฟไม่ผ่าน — ย้อนกลับของเดิม"
+              rm -rf "$ROOT"; mv "$ROOT.old" "$ROOT"; exit 1
+            fi
+            rm -rf "$ROOT.old"
+            echo "DONE OK"
