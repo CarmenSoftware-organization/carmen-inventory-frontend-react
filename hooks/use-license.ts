@@ -160,7 +160,8 @@ export function resolveLicense(
       );
     },
     // ไม่แตะ `bypass` โดยตั้งใจ — ดูเหตุผลเต็มที่ doc ของ isHidden ใน LicenseInfo
-    isHidden: (featureKey: string) => (license?.hidden_features ?? []).includes(featureKey),
+    isHidden: (featureKey: string) =>
+      (license?.hidden_features ?? []).includes(featureKey),
     seat,
     // ล้อ evaluateSeat ฝั่ง backend เป๊ะ ๆ: used > cap เท่านั้น — ไม่ผ่าน `bypass`/`enforced`
     // โดยตั้งใจ (ดู doc ของ overQuota ใน LicenseInfo ด้านบน)
