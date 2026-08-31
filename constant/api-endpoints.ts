@@ -34,8 +34,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/activity-logs/${id}/detail`,
   ADJUSTMENT_TYPES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/adjustment-types`,
-  ACCOUNT_CODES: (buCode: string) =>
-    `/api/proxy/api/config/${buCode}/account-codes`,
   /** UI telemetry batch ingest (click + page view) — ดู lib/analytics.ts */
   ANALYTICS_EVENTS: "/api/proxy/api/analytics-events",
   APPLICATION_ROLES: (buCode: string) =>
@@ -54,6 +52,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api-system/business-units/${id}/avatar`,
   BUSINESS_UNIT_LOGO: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/logo`,
+  /** ผังบัญชีของ BU — ชื่อ resource ฝั่ง backend คือ chart-of-accounts */
+  CHART_OF_ACCOUNTS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/chart-of-accounts`,
   CN_REASONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>

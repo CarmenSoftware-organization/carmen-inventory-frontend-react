@@ -15,6 +15,7 @@ interface Props {
 
 /** การ์ดรหัสบัญชี สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function AcCard({ item, onEdit, onDelete }: Props) {
+  const t = useTranslations("config.accountCode");
   const tfl = useTranslations("field");
 
   return (
@@ -24,10 +25,13 @@ export default function AcCard({ item, onEdit, onDelete }: Props) {
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
       <ListCardActiveRow active={item.is_active} />
-      <ListCardRow label={tfl("name")}>{item.name}</ListCardRow>
-      {item.description && (
-        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
-      )}
+      <ListCardRow label={t("accountName")}>{item.description_1}</ListCardRow>
+      <ListCardRow label={tfl("nature")}>
+        {t(`nature.${item.nature}`)}
+      </ListCardRow>
+      <ListCardRow label={tfl("type")}>
+        {t(`accountType.${item.type}`)}
+      </ListCardRow>
       <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );

@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type { AccountCode, CreateAccountCodeDto } from "@/types/account-code";
 
 /**
- * ผังบัญชีของ BU — `GET/POST/PATCH/DELETE /api/config/{bu}/account-codes`
+ * ผังบัญชีของ BU — `GET/POST/PATCH/DELETE /api/config/{bu}/chart-of-accounts`
  *
  * คนละของกับ account-code **mapping** ฝั่ง micro-business ซึ่งเป็น sub-resource
  * ของสินค้า/หมวดสินค้า (เขียนผ่าน `accountCodes: {add/update/remove}` ของ endpoint
@@ -12,7 +12,7 @@ import type { AccountCode, CreateAccountCodeDto } from "@/types/account-code";
  */
 const crud = createConfigCrud<AccountCode, CreateAccountCodeDto>({
   queryKey: QUERY_KEYS.ACCOUNT_CODES,
-  endpoint: API_ENDPOINTS.ACCOUNT_CODES,
+  endpoint: API_ENDPOINTS.CHART_OF_ACCOUNTS,
   label: "account code",
   updateMethod: "PATCH",
 });

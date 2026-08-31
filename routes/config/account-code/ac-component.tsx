@@ -17,6 +17,7 @@ import AcCard from "./ac-card";
  * <AcComponent />
  */
 export default function AcComponent() {
+  const t = useTranslations("config.accountCode");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -34,11 +35,16 @@ export default function AcComponent() {
       // ฝั่งหลังบ้านไปก่อน ยืนยันแล้วค่อยใส่ `defaultSort="code:asc"`
       exportColumns={[
         { header: tfl("code"), value: (r) => r.code, width: 18 },
-        { header: tfl("name"), value: (r) => r.name, width: 36 },
+        { header: t("accountName"), value: (r) => r.description_1, width: 40 },
         {
-          header: tfl("description"),
-          value: (r) => r.description ?? "",
-          width: 40,
+          header: tfl("nature"),
+          value: (r) => t(`nature.${r.nature}`),
+          width: 12,
+        },
+        {
+          header: tfl("type"),
+          value: (r) => t(`accountType.${r.type}`),
+          width: 22,
         },
         {
           header: tfl("status"),

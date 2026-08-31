@@ -23,7 +23,7 @@ interface UseAcTableOptions {
 }
 
 /**
- * ตารางรหัสบัญชี — รหัส · ชื่อ · คำอธิบาย · สถานะ
+ * ตารางรหัสบัญชี — รหัส · ชื่อบัญชี · ด้านบัญชี · ประเภท · สถานะ
  *
  * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
  * @returns TanStack table instance
@@ -39,6 +39,7 @@ export function useAcTable({
   onEdit,
   onDelete,
 }: UseAcTableOptions) {
+  const t = useTranslations("config.accountCode");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 
@@ -57,18 +58,29 @@ export function useAcTable({
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
-      accessorKey: "name",
+      accessorKey: "description_1",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("name")} />
+        <DataGridColumnHeader column={column} title={t("accountName")} />
       ),
-      meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
+      meta: { headerTitle: t("accountName"), skeleton: columnSkeletons.text },
     },
     {
-      accessorKey: "description",
+      accessorKey: "nature",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("description")} />
+        <DataGridColumnHeader column={column} title={tfl("nature")} />
       ),
-      meta: { headerTitle: tfl("description"), skeleton: columnSkeletons.text },
+      cell: ({ row }) => t(`nature.${row.original.nature}`),
+      size: 110,
+      meta: { headerTitle: tfl("nature"), skeleton: columnSkeletons.textShort },
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("type")} />
+      ),
+      cell: ({ row }) => t(`accountType.${row.original.type}`),
+      size: 180,
+      meta: { headerTitle: tfl("type"), skeleton: columnSkeletons.text },
     },
     statusColumn<AccountCode>(),
     ...auditColumns<AccountCode>(tfl, dateTimeFormat),
