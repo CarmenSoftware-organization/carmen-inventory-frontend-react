@@ -32,6 +32,45 @@ import type { CommentItem } from "@/components/ui/comment-sheet";
  * @example
  * const { data } = usePurchaseRequest({ page: 1, perpage: 20 });
  */
+/**
+ * response ที่ backend ส่งมาไม่ตรง schema ที่ FE ถืออยู่ — เป็นสัญญาณว่า contract
+ * เพี้ยน ไม่ใช่ error ของผู้ใช้ list จึงยังแสดงต่อด้วยข้อมูลดิบตามเดิม
+ *
+ * dev เห็นใน console · prod ส่งขึ้น SigNoz ให้คนที่แก้ได้เห็น (ตะโกนใส่ console
+ * ของผู้ใช้ไม่มีใครอ่าน) · import telemetry แบบ dynamic เพื่อไม่ให้ลาก OTEL SDK
+ * เข้า bundle หลัก แบบเดียวกับ root-error-boundary
+ *
+ * ส่งเฉพาะ path/code/message — ไม่เอา field อื่นของ zod issue ติดไปด้วย
+ * เผื่อเวอร์ชันหน้ามันแนบค่าจริงมาแล้วข้อมูลลูกค้าหลุดขึ้น observability
+ */
+function reportSchemaMismatch(
+  source: string,
+  issues: readonly { path: PropertyKey[]; code: string; message: string }[],
+) {
+  if (import.meta.env.DEV) {
+    console.warn(`[${source}] API schema mismatch:`, issues);
+    return;
+  }
+  void import("@/lib/telemetry")
+    .then((m) =>
+      m.reportError("PR API schema mismatch", {
+        source,
+        extra: {
+          // จำกัด 5 ข้อ — schema เปลี่ยนยกชุดจะได้ไม่ยิงเป็นร้อยทุก request
+          issues: issues.slice(0, 5).map((i) => ({
+            path: i.path.join("."),
+            code: i.code,
+            message: i.message,
+          })),
+          total: issues.length,
+        },
+      }),
+    )
+    .catch(() => {
+      /* เงียบ — รายงานไม่ได้ต้องไม่ทำให้หน้า list พัง */
+    });
+}
+
 export function usePurchaseRequest(
   params?: ParamsDto,
   options?: { enabled?: boolean },
@@ -54,7 +93,7 @@ export function usePurchaseRequest(
 
       const parsed = paginatedResponse(purchaseRequestSchema).safeParse(entry);
       if (!parsed.success) {
-        console.warn("[PR] API schema mismatch:", parsed.error.issues);
+        reportSchemaMismatch("use-purchase-request", parsed.error.issues);
       }
 
       return {
@@ -106,7 +145,10 @@ export function useMyPendingPurchaseRequest(
 
       const parsed = paginatedResponse(purchaseRequestSchema).safeParse(entry);
       if (!parsed.success) {
-        console.warn("[PR pending] API schema mismatch:", parsed.error.issues);
+        reportSchemaMismatch(
+          "use-purchase-request:pending",
+          parsed.error.issues,
+        );
       }
 
       return {

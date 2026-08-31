@@ -339,11 +339,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
 
       <form
         id={FORM_ID}
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          console.warn("[vendor-form] validation failed:", errors);
-          console.warn("[vendor-form] values:", form.getValues());
-          scrollToFirstInvalidField();
-        })}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
       >
         <VendorGeneral form={form} isDisabled={isDisabled} />
         <VendorAddress
