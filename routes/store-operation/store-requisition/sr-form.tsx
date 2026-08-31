@@ -128,6 +128,7 @@ export function StoreRequisitionForm({
     name: "to_location_id",
   });
   const srDate = useWatch({ control: form.control, name: "sr_date" });
+  const workflowId = useWatch({ control: form.control, name: "workflow_id" });
   const items = useWatch({ control: form.control, name: "items" }) ?? [];
   const departmentId = useWatch({
     control: form.control,
@@ -204,9 +205,10 @@ export function StoreRequisitionForm({
   const itemFieldsProps = {
     form,
     disabled: isDisabled,
-    disableAdd: !fromLocationId || !toLocationId,
+    disableAdd: !fromLocationId || !toLocationId || !workflowId,
     fromLocationId: fromLocationId ?? "",
     toLocationId: toLocationId ?? "",
+    workflowId: workflowId ?? "",
     role: storeRequisition ? storeRequisition.role : STAGE_ROLE.CREATE,
   };
 

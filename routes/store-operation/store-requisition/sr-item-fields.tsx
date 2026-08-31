@@ -26,6 +26,8 @@ interface SrItemFieldsProps {
   readonly disableAdd?: boolean;
   readonly fromLocationId: string;
   readonly toLocationId: string;
+  /** workflow ของใบ — ร่วมเป็นเกณฑ์กรองสินค้ากับคู่คลัง */
+  readonly workflowId: string;
   readonly role?: string;
 }
 
@@ -35,6 +37,7 @@ export function SrItemFields({
   disableAdd,
   fromLocationId,
   toLocationId,
+  workflowId,
   role,
 }: SrItemFieldsProps) {
   "use no memo";
@@ -58,6 +61,7 @@ export function SrItemFields({
   useLocationPairProducts(
     fromLocationId || undefined,
     toLocationId || undefined,
+    workflowId || undefined,
     {
       search: undefined,
       perpage: 30,
@@ -65,31 +69,37 @@ export function SrItemFields({
     },
   );
 
-  // เปลี่ยนคลังแล้วสินค้าที่เลือกไว้อาจไม่มีในคู่ใหม่ — ล้างของที่เลือกไว้ทุกแถว
-  // เช็คว่า "คู่เดิมครบทั้งสองข้าง" ก่อนล้าง ไม่งั้นตอนเปิดใบเก่าที่ค่าทยอยมาจาก
+  // เปลี่ยนคลังหรือ workflow แล้วสินค้าที่เลือกไว้อาจไม่อยู่ในเกณฑ์ใหม่ (สินค้าที่
+  // เลือกได้ = มีทั้งสองคลัง + อยู่ในชุดที่ workflow เลือกไว้) — ล้างของที่เลือกทุกแถว
+  // เช็คว่า "เกณฑ์เดิมครบทั้งสามค่า" ก่อนล้าง ไม่งั้นตอนเปิดใบเก่าที่ค่าทยอยมาจาก
   // ว่าง → มีจริง จะไปล้างสินค้าที่เพิ่งโหลดมาทิ้ง
   const prevPair = useRef<string | null>(null);
   useEffect(() => {
-    const pair = `${fromLocationId}|${toLocationId}`;
+    const pair = `${fromLocationId}|${toLocationId}|${workflowId}`;
     const prev = prevPair.current;
     prevPair.current = pair;
     if (prev === null || prev === pair) return;
-    const [prevFrom, prevTo] = prev.split("|");
-    if (!prevFrom || !prevTo) return;
+    const [prevFrom, prevTo, prevWorkflow] = prev.split("|");
+    if (!prevFrom || !prevTo || !prevWorkflow) return;
     itemFields.forEach((_, index) => {
       form.setValue(`items.${index}.product_id`, "");
       form.setValue(`items.${index}.product_name`, "");
       form.setValue(`items.${index}.product_local_name`, "");
       form.setValue(`items.${index}.unit_name`, "");
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ล้างเมื่อคู่คลังเปลี่ยนเท่านั้น
-  }, [fromLocationId, toLocationId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ล้างเมื่อเกณฑ์กรองเปลี่ยนเท่านั้น
+  }, [fromLocationId, toLocationId, workflowId]);
 
-  // ต้องมีคลังครบทั้งคู่ก่อน เพราะช่องเลือกสินค้าดึงเฉพาะของที่มีอยู่ทั้งสองคลัง —
-  // เพิ่มแถวเปล่าไปก่อนได้แต่จะกดเลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
+  // ต้องมีคลังครบทั้งคู่ + workflow ก่อน เพราะช่องเลือกสินค้าดึงเฉพาะของที่มีอยู่
+  // ทั้งสองคลังและอยู่ในชุดที่ workflow เลือกไว้ — เพิ่มแถวเปล่าไปก่อนได้แต่จะกด
+  // เลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
   const handleAddItem = () => {
     if (!fromLocationId || !toLocationId) {
       toast.warning(t("selectLocationsFirst"));
+      return;
+    }
+    if (!workflowId) {
+      toast.warning(t("selectWorkflowFirst"));
       return;
     }
     prependItem({ ...SR_ITEM });
@@ -119,6 +129,7 @@ export function SrItemFields({
     onDelete: setDeleteIndex,
     fromLocationId,
     toLocationId,
+    workflowId,
     role,
   });
 

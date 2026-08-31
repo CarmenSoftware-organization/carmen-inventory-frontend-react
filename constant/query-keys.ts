@@ -69,7 +69,7 @@ export const QUERY_KEYS = {
   PRICE_LIST_TEMPLATES: "price-list-templates",
   PRODUCTS: "products",
   PRODUCTS_BY_LOCATION: "products-by-location",
-  LOCATION_PAIR_PRODUCTS: "location-pair-products",
+  LOCATION_WORKFLOW_PRODUCTS: "location-workflow-products",
   PRODUCT_INVENTORY: "product-inventory",
   PRODUCT_ON_ORDER: "product-on-order",
   PRODUCT_COST_BY_LOCATION_QTY: "product-cost-by-location-qty",

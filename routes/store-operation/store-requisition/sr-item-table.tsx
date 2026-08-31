@@ -41,6 +41,7 @@ const ProductCell = memo(function ProductCell({
   disabled,
   fromLocationId,
   toLocationId,
+  workflowId,
 }: {
   control: Control<SrFormValues>;
   form: UseFormReturn<SrFormValues>;
@@ -48,6 +49,7 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   fromLocationId: string;
   toLocationId: string;
+  workflowId: string;
 }) {
   "use no memo";
   const buCode = useBuCode();
@@ -127,6 +129,7 @@ const ProductCell = memo(function ProductCell({
               }}
               fromLocationId={fromLocationId}
               toLocationId={toLocationId}
+              workflowId={workflowId}
               disabled={disabled}
               // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
               // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
@@ -288,6 +291,7 @@ interface UseSrItemTableOptions {
   onDelete: (index: number) => void;
   fromLocationId: string;
   toLocationId: string;
+  workflowId: string;
   role?: string;
 }
 
@@ -298,6 +302,7 @@ export function useSrItemTable({
   onDelete,
   fromLocationId,
   toLocationId,
+  workflowId,
   role,
 }: UseSrItemTableOptions) {
   "use no memo";
@@ -365,6 +370,7 @@ export function useSrItemTable({
                 disabled={disabled || lockNonApproved}
                 fromLocationId={fromLocationId}
                 toLocationId={toLocationId}
+                workflowId={workflowId}
               />
             </div>
           );
@@ -614,6 +620,7 @@ export function useSrItemTable({
     onDelete,
     fromLocationId,
     toLocationId,
+    workflowId,
     role,
     t,
     tfl,

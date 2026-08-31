@@ -11,6 +11,8 @@ import { LookupCombobox } from "./lookup-combobox";
 interface LookupLocationPairProductProps {
   readonly fromLocationId: string;
   readonly toLocationId: string;
+  /** workflow ของใบ — เป็นเกณฑ์กรองสินค้าร่วมกับคู่คลัง ไม่ใช่ของประดับ */
+  readonly workflowId: string;
   readonly value: string;
   readonly onValueChange: (
     value: string,
@@ -33,9 +35,10 @@ interface LookupLocationPairProductProps {
 /**
  * Lookup Popover สำหรับเลือกสินค้าที่มีอยู่ใน location ทั้งต้นทางและปลายทาง (Store Requisition)
  *
- * ใช้ `useLocationPairProducts(fromLocationId, toLocationId)` เพื่อดึงเฉพาะสินค้าที่มีใน
- * ทั้งสอง location พร้อม server-side search และ infinite scroll (perpage 30) disabled
- * เมื่อไม่มี from/to location ครบ รองรับ `excludeIds` กัน duplicate ใน item list
+ * ใช้ `useLocationPairProducts(fromLocationId, toLocationId, workflowId)` เพื่อดึงเฉพาะ
+ * สินค้าที่มีในทั้งสอง location และอยู่ในชุดสินค้าที่ workflow นั้นเลือกไว้ พร้อม
+ * server-side search และ infinite scroll (perpage 30) disabled เมื่อคลังต้นทาง/ปลายทาง
+ * หรือ workflow ยังไม่ครบ รองรับ `excludeIds` กัน duplicate ใน item list
  *
  * @param value - product_id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object LocationPairProduct
@@ -46,6 +49,7 @@ interface LookupLocationPairProductProps {
  *   <LookupLocationPairProduct
  *     fromLocationId={fromId}
  *     toLocationId={toId}
+ *     workflowId={workflowId}
  *     value={field.value}
  *     onValueChange={field.onChange}
  *   />
@@ -55,6 +59,7 @@ interface LookupLocationPairProductProps {
 export function LookupLocationPairProduct({
   fromLocationId,
   toLocationId,
+  workflowId,
   value,
   onValueChange,
   disabled,
@@ -82,6 +87,7 @@ export function LookupLocationPairProduct({
     useLocationPairProducts(
       fromLocationId || undefined,
       toLocationId || undefined,
+      workflowId || undefined,
       params,
     );
 
@@ -99,7 +105,7 @@ export function LookupLocationPairProduct({
       if (excludedSet && excludedSet.has(p.product_id)) return false;
       return true;
     },
-    resetDeps: [fromLocationId, toLocationId],
+    resetDeps: [fromLocationId, toLocationId, workflowId],
   });
 
   return (
@@ -125,7 +131,7 @@ export function LookupLocationPairProduct({
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("product") })}
       searchPlaceholder={tl("search", { entity: tfl("product") })}
-      disabled={disabled || !fromLocationId || !toLocationId}
+      disabled={disabled || !fromLocationId || !toLocationId || !workflowId}
       className={cn("w-full", className)}
       popoverWidth={popoverWidth}
       popoverAlign="start"

@@ -3258,6 +3258,7 @@
       "breadcrumbList": "Store requisitions",
       "breadcrumbNew": "New",
       "selectLocationsFirst": "Choose both the source and destination store before adding items.",
+      "selectWorkflowFirst": "Choose an approval route first — it decides which products can be requested.",
       "submitted": "Store requisition submitted",
       "approved": "Store requisition approved",
       "issued": "Items issued — stock moved out",

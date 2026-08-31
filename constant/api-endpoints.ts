@@ -135,12 +135,18 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/products/movement/locations`,
   LOCATIONS_WITH_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/locations-with-movement`,
-  LOCATION_PAIR_PRODUCTS: (
+  /**
+   * สินค้าที่มีทั้งคลังต้นทางและปลายทาง **และอยู่ในรายการที่ workflow เลือกไว้**
+   * (`tb_workflow.data.products`) — แทน `location-products/products/:from/:to` เดิม
+   * ที่กรองด้วยคลังอย่างเดียว ไม่มี workflow เป็นเงื่อนไข
+   */
+  LOCATION_WORKFLOW_PRODUCTS: (
     buCode: string,
-    locationId1: string,
-    locationId2: string,
+    fromLocationId: string,
+    toLocationId: string,
+    workflowId: string,
   ) =>
-    `/api/proxy/api/config/${buCode}/location-products/products/${locationId1}/${locationId2}`,
+    `/api/proxy/api/config/${buCode}/products-location-workflow/${fromLocationId}/${toLocationId}/${workflowId}`,
   LOGIN: "/api/auth/login",
   LOGOUT: "/api/auth/logout",
   MY_DASHBOARD_WIDGETS: (buCode: string) =>
