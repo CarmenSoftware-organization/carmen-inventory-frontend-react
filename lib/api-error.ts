@@ -45,6 +45,14 @@ export class ApiError extends Error {
   public readonly serverMessage?: string;
 
   /**
+   * รหัสจาก error catalog ของ backend (`body.error.code`) เมื่อมี
+   *
+   * ต่างจาก `code` ที่เป็นการจัดหมวดจาก HTTP status ฝั่ง client — ตัวนี้คือเหตุผลที่แท้จริง
+   * ที่ backend ปฏิเสธ ใช้ map เป็นข้อความเจาะจงได้โดยไม่ต้องเอา message ดิบมาโชว์
+   */
+  public readonly appCode?: string;
+
+  /**
    * สร้าง instance ของ ApiError พร้อมกำหนด code, message และข้อมูลประกอบ
    *
    * ใช้สำหรับ throw error ที่มีการจำแนกประเภทชัดเจน
@@ -69,10 +77,12 @@ export class ApiError extends Error {
     public readonly retryable: boolean = false,
     public readonly details?: unknown,
     serverMessage?: string,
+    appCode?: string,
   ) {
     super(message);
     this.name = "ApiError";
     this.serverMessage = serverMessage;
+    this.appCode = appCode;
   }
 
   /**
@@ -115,7 +125,7 @@ export class ApiError extends Error {
     sanitize?: (message: string | undefined, fallback: string) => string,
   ): Promise<ApiError> {
     const code = statusToCode(res.status);
-    const { message: raw, data } = await readErrorBody(res);
+    const { message: raw, data, appCode } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
     const cleaned = sanitize ? sanitize(raw, fallbackMessage) : raw;
@@ -127,6 +137,7 @@ export class ApiError extends Error {
       res.status >= 500,
       data,
       serverMessage,
+      appCode,
     );
   }
 }
@@ -207,7 +218,7 @@ export function isTransportError(error: unknown): boolean {
  */
 const readErrorBody = async (
   res: Response,
-): Promise<{ message: string | undefined; data: unknown }> => {
+): Promise<{ message: string | undefined; data: unknown; appCode?: string }> => {
   try {
     const body = await res.clone().json();
     return {
@@ -216,6 +227,11 @@ const readErrorBody = async (
           ? body.message
           : undefined,
       data: body?.data ?? undefined,
+      // `error.code` คือรหัสจาก error catalog ของ backend (เช่น
+      // WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS) เป็นสิ่งเดียวที่บอกได้ว่า 400 นี้คือเรื่องอะไร
+      // — status กับ message บอกไม่ได้ ตัวหลังยังเปลี่ยนตามภาษาด้วย
+      appCode:
+        typeof body?.error?.code === "string" ? body.error.code : undefined,
     };
   } catch {
     return { message: undefined, data: undefined };

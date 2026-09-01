@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useDeleteWorkflow } from "./use-workflow-mutations";
+import { useWorkflowEditAvailability } from "./use-workflow-availability";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
 import { openActivity } from "@/components/share/activity-sheet-host";
@@ -38,9 +39,38 @@ export function WfHeader({
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const ts = useTranslations("status");
+  const tw = useTranslations("systemAdmin.workflow.documents");
   const tt = useTranslations("toast");
 
   const typeLabels = getWorkflowTypeLabels(t);
+  const { data: availability } = useWorkflowEditAvailability(workflow.id);
+
+  // จำนวนเอกสารแยกตามสถานะ — in_progress คือตัวที่ทำให้แก้ workflow ไม่ได้ จึงเน้นให้เห็นต่างจาก
+  // อีกสองถัง ผู้ใช้จะได้รู้ตั้งแต่ก่อนกด Edit ว่าติดอะไรและติดอยู่เท่าไร
+  const docCounts = availability?.documents;
+  const docBadges = docCounts ? (
+    <>
+      <Separator orientation="vertical" className="mx-0.5 h-3.5" />
+      <span className="text-muted-foreground flex items-center gap-1.5 text-sm">
+        <span>
+          {tw("draft")}: {docCounts.draft}
+        </span>
+        <span
+          className={
+            docCounts.in_progress > 0 ? "text-amber-600 dark:text-amber-500" : ""
+          }
+          title={
+            docCounts.in_progress > 0 ? tw("inProgressBlocksEdit") : undefined
+          }
+        >
+          {tw("inProgress")}: {docCounts.in_progress}
+        </span>
+        <span>
+          {tw("done")}: {docCounts.done}
+        </span>
+      </span>
+    </>
+  ) : null;
 
   // status + type-label (คั่นด้วย separator) แสดงข้าง title
   const badges = !isEditing ? (
@@ -56,6 +86,7 @@ export function WfHeader({
       <span className="text-muted-foreground text-sm">
         {typeLabels[workflow.workflow_type] ?? workflow.workflow_type}
       </span>
+      {docBadges}
     </>
   ) : undefined;
 

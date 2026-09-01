@@ -782,7 +782,8 @@
     "backToList": "Back to list",
     "goToDashboard": "Go to dashboard",
     "noBusinessUnit": "No business unit selected — pick one from the top bar first.",
-    "buSwitchFailed": "Could not switch business unit. Please try again."
+    "buSwitchFailed": "Could not switch business unit. Please try again.",
+    "workflowInProgress": "Can’t edit this workflow while documents are still in progress. Finish or void them first."
   },
   "validation": {
     "required": "{field} is required",
@@ -1890,7 +1891,13 @@
       "generalDesc": "Name, type and description for this workflow.",
       "status": "Status",
       "statusDesc": "Set whether this workflow is active on creation.",
-      "notFound": "Approval flow not found"
+      "notFound": "Approval flow not found",
+      "documents": {
+        "draft": "Draft",
+        "inProgress": "In progress",
+        "done": "Done",
+        "inProgressBlocksEdit": "Documents still in progress — this workflow can't be edited or deleted until they finish"
+      }
     },
     "runningCode": {
       "entity": "Running Code",
