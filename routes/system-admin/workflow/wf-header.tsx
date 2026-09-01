@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { WarningDialog } from "@/components/ui/warning-dialog";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useDeleteWorkflow } from "./use-workflow-mutations";
+import { useWorkflowEditAvailability } from "./use-workflow-availability";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
 import { openActivity } from "@/components/share/activity-sheet-host";
@@ -33,14 +35,44 @@ export function WfHeader({
   const navigate = useNavigate();
   const deleteWorkflow = useDeleteWorkflow();
   const [showDelete, setShowDelete] = useState(false);
+  const [showBlocked, setShowBlocked] = useState(false);
   const t = useTranslations("systemAdmin.workflow");
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const ts = useTranslations("status");
+  const tw = useTranslations("systemAdmin.workflow.documents");
   const tt = useTranslations("toast");
 
   const typeLabels = getWorkflowTypeLabels(t);
+  const { data: availability } = useWorkflowEditAvailability(workflow.id);
+
+  // จำนวนเอกสารแยกตามสถานะ — in_progress คือตัวที่ทำให้แก้ workflow ไม่ได้ จึงเน้นให้เห็นต่างจาก
+  // อีกสองถัง ผู้ใช้จะได้รู้ตั้งแต่ก่อนกด Edit ว่าติดอะไรและติดอยู่เท่าไร
+  const docCounts = availability?.documents;
+  const docBadges = docCounts ? (
+    <>
+      <Separator orientation="vertical" className="mx-0.5 h-3.5" />
+      <span className="text-muted-foreground flex items-center gap-1.5 text-sm">
+        <span>
+          {tw("draft")}: {docCounts.draft}
+        </span>
+        <span
+          className={
+            docCounts.in_progress > 0 ? "text-amber-600 dark:text-amber-500" : ""
+          }
+          title={
+            docCounts.in_progress > 0 ? tw("inProgressBlocksEdit") : undefined
+          }
+        >
+          {tw("inProgress")}: {docCounts.in_progress}
+        </span>
+        <span>
+          {tw("done")}: {docCounts.done}
+        </span>
+      </span>
+    </>
+  ) : null;
 
   // status + type-label (คั่นด้วย separator) แสดงข้าง title
   const badges = !isEditing ? (
@@ -56,6 +88,7 @@ export function WfHeader({
       <span className="text-muted-foreground text-sm">
         {typeLabels[workflow.workflow_type] ?? workflow.workflow_type}
       </span>
+      {docBadges}
     </>
   ) : undefined;
 
@@ -77,6 +110,19 @@ export function WfHeader({
       {tActivity("title")}
     </Button>
   );
+
+  // กันไม่ให้เข้าโหมดแก้ตั้งแต่แรกเมื่อยังมีเอกสารดำเนินการอยู่ — backend ปฏิเสธการบันทึกอยู่แล้ว
+  // การปล่อยให้เข้าไปกรอกจนเสร็จแล้วค่อยเด้งตอนกดเซฟ คือให้ผู้ใช้เสียเวลาไปกับงานที่บันทึกไม่ได้
+  // ถ้ายังไม่รู้คำตอบ (query ยังโหลด หรือโหลดไม่สำเร็จ) ให้ผ่านไปก่อน แล้วไปตกที่การ์ดฝั่ง backend
+  // แทนที่จะล็อกปุ่มเพราะอ่านสถานะไม่ได้
+  const blockedFromEdit = availability?.can_edit === false;
+  const handleEdit = () => {
+    if (blockedFromEdit) {
+      setShowBlocked(true);
+      return;
+    }
+    onEdit();
+  };
 
   const actions = isEditing ? (
     <>
@@ -104,7 +150,7 @@ export function WfHeader({
   ) : (
     <>
       {activityButton}
-      <Button size="sm" onClick={onEdit} className="text-sm">
+      <Button size="sm" onClick={handleEdit} className="text-sm">
         <Pencil className="size-3" />
         {tc("edit")}
       </Button>
@@ -131,6 +177,16 @@ export function WfHeader({
         badges={badges}
         actions={actions}
         flush
+      />
+
+      <WarningDialog
+        open={showBlocked}
+        title={tw("blockedTitle")}
+        description={tw("blockedDescription", {
+          count: docCounts?.in_progress ?? 0,
+        })}
+        confirmLabel={tc("close")}
+        onConfirm={() => setShowBlocked(false)}
       />
 
       <DeleteDialog

@@ -16,6 +16,19 @@ const CODE_TO_KEY: Record<ErrorCode, string> = {
   [ERROR_CODES.NOT_FOUND]: "notFound",
 };
 
+/**
+ * `error.code` จาก backend ที่ผู้ใช้แก้เองได้ → คีย์ i18n เฉพาะเรื่อง
+ *
+ * ข้อความกลางถูกใช้กับ 400/422 ทุกตัวเพราะ backend เคยส่ง stack trace ของ Prisma กลับมา — แต่การ
+ * เหวี่ยงแหแบบนั้นกลืนเหตุผลที่ผู้ใช้แก้ได้เองไปด้วย เช่น workflow ที่แก้ไม่ได้เพราะยังมีเอกสารค้าง
+ * ผู้ใช้เห็นแค่ "กรอกไม่ถูกต้อง" แล้วไล่ตรวจฟอร์มที่ไม่มีอะไรผิดเลย
+ *
+ * ใส่เฉพาะรหัสที่ผู้ใช้ทำอะไรกับมันได้ รหัสที่เป็นความผิดพลาดภายในให้ตกไปที่ข้อความกลางตามเดิม
+ */
+const APP_CODE_TO_KEY: Record<string, string> = {
+  WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS: "workflowInProgress",
+};
+
 /** ข้อความกลางเมื่อไม่รู้ว่าเกิดอะไร — บอกว่าให้ทำอะไรต่อ ดีกว่าบอกว่าอะไรพัง */
 function fallbackKey(code: ErrorCode, statusCode?: number): string {
   // 400 ทั่วไปไม่ได้แปลว่า "กรอกไม่ครบ" เสมอไป กรอกครบแต่ค่าผิดก็ 400 —
@@ -58,7 +71,10 @@ export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
       // ต่อไปถ้าจะแปลบางเคสให้เจาะจงขึ้น (เช่น unique constraint ของ
       // product+location = "ใบนี้มีสินค้าตัวนี้ในคลังนี้อยู่แล้ว") ให้ map เป็นคีย์
       // i18n ที่นี่ ไม่ใช่ปล่อยข้อความดิบผ่านไป
-      return t(fallbackKey(err.code, err.statusCode));
+      // รหัสจาก catalog มาก่อน: มันบอกเหตุผลจริงที่ backend ปฏิเสธ ส่วนข้อความกลางเป็นทางลงเมื่อ
+      // ไม่รู้ว่าเป็นเรื่องอะไร ไม่ใช่ค่าเริ่มต้นที่ควรกลบเหตุผลที่รู้อยู่แล้ว
+      const mapped = err.appCode ? APP_CODE_TO_KEY[err.appCode] : undefined;
+      return t(mapped ?? fallbackKey(err.code, err.statusCode));
     }
     const key = CODE_TO_KEY[err.code];
     return key ? t(key) : t("unexpected");
