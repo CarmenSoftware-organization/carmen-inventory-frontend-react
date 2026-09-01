@@ -711,6 +711,10 @@ export const router = createBrowserRouter([
                 lazy: () => import("./accounting/journal-staging/journal-staging.route"),
               },
               {
+                path: "settings",
+                lazy: () => import("./accounting/accounting-settings.route"),
+              },
+              {
                 path: "template-voucher",
                 lazy: () => import("./accounting/accounting-document.route"),
               },

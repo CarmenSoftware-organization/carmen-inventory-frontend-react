@@ -1,81 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
-import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import { buildUrl } from "@/lib/build-query-string";
-import { httpClient } from "@/lib/http-client";
-import { ApiError } from "@/lib/api-error";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import type { JournalVoucher, JournalVoucherAction, JournalVoucherInput } from "@/types/journal-voucher";
 
 const key = "journal-vouchers";
+const line = (id: string, code: string, name: string, debit: string, credit: string) => ({ id, sequence_no: Number(id), account_id: id, account_code: code, account_name: name, department_id: null, department_code: null, department_name: null, comment: null, currency_id: "THB", currency_code: "THB", exchange_rate: "1", rate_date: null, rate_type: null, rate_source: "mock", debit, credit, base_debit: debit, base_credit: credit, dimension: [] });
+let mockJournalVouchers: JournalVoucher[] = [
+  { id: "mock-jv-001", doc_version: 1, display_no: "JV-2026-0001", jv_no: "JV-2026-0001", draft_reference: "DRAFT-0001", jv_status: "posted", jv_date: "2026-08-31", journal_date: "2026-08-31", journal_type: "GJ", jv_type: "GJ", prefix: "JV", description: "Month-end utilities accrual", note: null, functional_currency_id: "THB", base_currency_id: "THB", source_type: "inventory", source_id: "mock-event-1", source_no: "INV-2026-0098", schedule_post: false, scheduled_post_at: null, auto_reverse: false, reverse_date: null, total_debit: "12500.00", total_credit: "12500.00", workflow_enabled_snapshot: false, lines: [line("1", "6100", "Utilities expense", "12500.00", "0"), line("2", "2100", "Accrued expenses", "0", "12500.00")] },
+  { id: "mock-jv-002", doc_version: 1, display_no: "JV-2026-0002", jv_no: null, draft_reference: "DRAFT-0002", jv_status: "draft", jv_date: "2026-09-01", journal_date: "2026-09-01", journal_type: "GJ", jv_type: "GJ", prefix: "JV", description: "Office supplies purchase", note: "Mock draft", functional_currency_id: "THB", base_currency_id: "THB", source_type: "manual", source_id: null, source_no: null, schedule_post: true, scheduled_post_at: "2026-09-02T09:00:00Z", auto_reverse: false, reverse_date: null, total_debit: "3200.00", total_credit: "3200.00", workflow_enabled_snapshot: false, lines: [line("1", "6200", "Office supplies", "3200.00", "0"), line("2", "1100", "Cash", "0", "3200.00")] },
+];
+const response = (data: unknown) => Promise.resolve(new Response(JSON.stringify(data), { status: 200, headers: { "Content-Type": "application/json" } }));
+const draft = (): JournalVoucher => ({ ...mockJournalVouchers[1], id: "mock-jv-new", display_no: "JV-2026-MOCK", jv_no: null, jv_status: "draft" });
 
-async function readJson<T>(response: Response, message: string): Promise<T> {
-  if (!response.ok) throw await ApiError.from(response, message);
-  return response.json() as Promise<T>;
-}
+export function useJournalVouchers(params?: ParamsDto) { return useQuery<PaginatedResponse<JournalVoucher>>({ queryKey: [key, "mock", params], queryFn: async () => { const search = String(params?.search ?? "").toLowerCase(); const filter = String(params?.filter ?? ""); const status = filter.startsWith("status:") ? filter.slice(7) : ""; const data = mockJournalVouchers.filter((item) => (!status || item.jv_status === status) && (!search || `${item.display_no} ${item.description} ${item.source_type}`.toLowerCase().includes(search))); return { data, paginate: { page: 1, perpage: data.length, total: data.length, pages: 1 } } as PaginatedResponse<JournalVoucher>; } }); }
+export const MOCK_SETTINGS_KEY = "carmen-accounting-mock-settings";
+export function useJournalVoucherSettings() { return useQuery({ queryKey: [key, "mock", "settings"], queryFn: async () => { const mode = window.localStorage.getItem(MOCK_SETTINGS_KEY); return { workflow_enabled: false, journal_staging_mode: mode === "standard" ? "standard" as const : "strict" as const }; } }); }
+export function useJournalVoucher(id?: string) { return useQuery<JournalVoucher>({ queryKey: [key, "mock", id], queryFn: async () => mockJournalVouchers.find((item) => item.id === id) ?? draft(), enabled: !!id && id !== "new" }); }
+export function useCreateJournalVoucher() { return useApiMutation<JournalVoucherInput, { data: JournalVoucher }>({ mutationFn: (data) => { const item = { ...draft(), ...data, id: `mock-jv-${Date.now()}`, display_no: `JV-2026-${String(mockJournalVouchers.length + 1).padStart(4, "0")}` } as JournalVoucher; mockJournalVouchers = [item, ...mockJournalVouchers]; return response({ data: item }); }, invalidateKeys: [key] }); }
+export function useUpdateJournalVoucher() { return useApiMutation<JournalVoucherInput & { id: string; doc_version: number }, { data: JournalVoucher }>({ mutationFn: ({ id, ...data }) => { const current = mockJournalVouchers.find((item) => item.id === id) ?? draft(); const item = { ...current, ...data, doc_version: current.doc_version + 1 } as JournalVoucher; mockJournalVouchers = mockJournalVouchers.map((row) => row.id === id ? item : row); return response({ data: item }); }, invalidateKeys: [key] }); }
+export function useJournalVoucherAction(action: "submit" | "approve" | "reject" | "return-to-draft" | "retry-post" | "reschedule" | "reverse" | "void") { return useApiMutation<JournalVoucherAction & { id: string }, { data: JournalVoucher }>({ mutationFn: ({ id }) => { const current = mockJournalVouchers.find((item) => item.id === id) ?? draft(); const next = action === "submit" ? "submitted" : action === "reverse" ? "reversed" : action === "void" ? "voided" : current.jv_status; const item = { ...current, jv_status: next } as JournalVoucher; mockJournalVouchers = mockJournalVouchers.map((row) => row.id === id ? item : row); return response({ data: item }); }, invalidateKeys: [key] }); }
+export function useCopyJournalVoucher() { return useApiMutation<string, { data: JournalVoucher }>({ mutationFn: (id) => { const source = mockJournalVouchers.find((item) => item.id === id) ?? draft(); const item = { ...source, id: `mock-jv-${Date.now()}`, display_no: `JV-2026-${String(mockJournalVouchers.length + 1).padStart(4, "0")}`, jv_no: null, jv_status: "draft" } as JournalVoucher; mockJournalVouchers = [item, ...mockJournalVouchers]; return response({ data: item }); }, invalidateKeys: [key] }); }
 
-export function useJournalVouchers(params?: ParamsDto) {
-  const buCode = useBuCode();
-  return useQuery<PaginatedResponse<JournalVoucher>>({
-    queryKey: [key, buCode, params],
-    queryFn: async () => readJson(await httpClient.get(buildUrl(API_ENDPOINTS.JOURNAL_VOUCHERS(buCode!), params)), "Failed to load Journal Vouchers"),
-    enabled: !!buCode,
-  });
-}
 
-export function useJournalVoucherSettings() {
-  const buCode = useBuCode();
-  return useQuery<{ workflow_enabled: boolean; journal_staging_mode: "standard" | "strict" }>({
-    queryKey: [key, buCode, "settings"],
-    queryFn: async () => {
-      const json = await readJson<{ data: { workflow_enabled: boolean; journal_staging_mode: "standard" | "strict" } }>(await httpClient.get(API_ENDPOINTS.JOURNAL_VOUCHER_SETTINGS(buCode!)), "Failed to load Journal Voucher settings");
-      return json.data;
-    },
-    enabled: !!buCode,
-  });
-}
 
-export function useJournalVoucher(id?: string) {
-  const buCode = useBuCode();
-  return useQuery<JournalVoucher>({
-    queryKey: [key, buCode, id],
-    queryFn: async () => {
-      const json = await readJson<{ data: JournalVoucher }>(await httpClient.get(`${API_ENDPOINTS.JOURNAL_VOUCHERS(buCode!)}/${id}`), "Failed to load Journal Voucher");
-      return json.data;
-    },
-    enabled: !!buCode && !!id && id !== "new",
-  });
-}
-
-export function useCreateJournalVoucher() {
-  return useApiMutation<JournalVoucherInput, { data: JournalVoucher }>({
-    mutationFn: (data, buCode) => httpClient.post(API_ENDPOINTS.JOURNAL_VOUCHERS(buCode), data),
-    invalidateKeys: [key],
-    errorMessage: "Failed to create Journal Voucher",
-  });
-}
-
-export function useUpdateJournalVoucher() {
-  return useApiMutation<JournalVoucherInput & { id: string; doc_version: number }, { data: JournalVoucher }>({
-    mutationFn: ({ id, ...data }, buCode) => httpClient.put(`${API_ENDPOINTS.JOURNAL_VOUCHERS(buCode)}/${id}`, data),
-    invalidateKeys: [key],
-    errorMessage: "Failed to update Journal Voucher",
-  });
-}
-
-export function useJournalVoucherAction(action: "submit" | "approve" | "reject" | "return-to-draft" | "retry-post" | "reschedule" | "reverse" | "void") {
-  return useApiMutation<JournalVoucherAction & { id: string }, { data: JournalVoucher }>({
-    mutationFn: ({ id, ...data }, buCode) => httpClient.post(`${API_ENDPOINTS.JOURNAL_VOUCHERS(buCode)}/${id}/${action}`, data),
-    invalidateKeys: [key],
-    errorMessage: `Failed to ${action} Journal Voucher`,
-  });
-}
-
-export function useCopyJournalVoucher() {
-  return useApiMutation<string, { data: JournalVoucher }>({
-    mutationFn: (id, buCode) => httpClient.post(`${API_ENDPOINTS.JOURNAL_VOUCHERS(buCode)}/${id}/copy`),
-    invalidateKeys: [key],
-    errorMessage: "Failed to copy Journal Voucher",
-  });
-}
