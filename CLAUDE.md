@@ -112,6 +112,15 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
 กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`
 (โหลดเองเมื่อทำงานใต้ `routes/`)
 
+## UI consistency for new pages
+
+ก่อนสร้างหรือแก้หน้า React ขนาดใหญ่ ให้ใช้ skill `carmen-ui-consistency`
+(`.agents/skills/carmen-ui-consistency/SKILL.md`) และเริ่มจากหน้าอ้างอิงที่ใกล้ที่สุด
+เสมอ ต้อง reuse shared components ของระบบ เช่น `DocumentListHeader`, `DataGrid`,
+`SearchInput`, `StatusFilter`, `SettingSection` และ `Field` ก่อนสร้าง component หรือ
+markup แบบเฉพาะกิจ รายละเอียดเป็น checklist อยู่ใน skill และกฎระดับ repo อยู่ใน
+`AGENTS.md`.
+
 ## Known open items
 
 - `/api/time` was a Next route — `use-server-time` is stubbed to client time.
