@@ -101,6 +101,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/extra-cost-types`,
   GOODS_RECEIVE_NOTE: (buCode: string) =>
     `/api/proxy/api/${buCode}/good-received-notes`,
+  JOURNAL_VOUCHERS: (buCode: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers`,
+  JOURNAL_VOUCHER_SETTINGS: (buCode: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers/settings`,
+  JOURNAL_STAGING_BATCHES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-staging/batches`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>

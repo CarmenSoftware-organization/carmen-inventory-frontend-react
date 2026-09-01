@@ -221,6 +221,8 @@ Auto-Reverse ใช้ Workflow toggle ของ reversal journal type:
 
 ชื่อ endpoint เป็นข้อเสนอ ต้อง align กับ backend conventions ก่อน implementation
 
+Phase 1 gateway ใช้ prefix `/api/:bu_code/accounting` และมี Journal Staging endpoints ดังนี้:
+
 ```text
 GET    /api/:bu/gl/journal-vouchers
 POST   /api/:bu/gl/journal-vouchers
@@ -238,6 +240,16 @@ GET    /api/:bu/gl/journal-vouchers/:id/activity
 GET    /api/:bu/gl/accounts/lookup
 POST   /api/:bu/gl/exchange-rates/resolve
 POST   /api/:bu/gl/budget/check
+```
+
+```text
+POST /api/:bu_code/accounting/journal-staging/batches                 # 202 Accepted
+GET  /api/:bu_code/accounting/journal-staging/batches
+GET  /api/:bu_code/accounting/journal-staging/batches/:id
+POST /api/:bu_code/accounting/journal-staging/batches/:id/process
+POST /api/:bu_code/accounting/journal-staging/batches/:id/generate
+PUT  /api/:bu_code/accounting/journal-staging/records/:id
+GET  /api/:bu_code/accounting/journal-vouchers/settings
 ```
 
 Action endpoints ต้องรับ `doc_version` และ idempotency key ตามความเหมาะสม
