@@ -1896,7 +1896,9 @@
         "draft": "Draft",
         "inProgress": "In progress",
         "done": "Done",
-        "inProgressBlocksEdit": "Documents still in progress — this workflow can't be edited or deleted until they finish"
+        "inProgressBlocksEdit": "Documents still in progress — this workflow can't be edited or deleted until they finish",
+        "blockedTitle": "Can’t edit this workflow yet",
+        "blockedDescription": "{count} document(s) are still in progress on this workflow. Editing would change the stages they are moving through, so finish or void them first."
       }
     },
     "runningCode": {

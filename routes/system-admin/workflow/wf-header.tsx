@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { WarningDialog } from "@/components/ui/warning-dialog";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useDeleteWorkflow } from "./use-workflow-mutations";
 import { useWorkflowEditAvailability } from "./use-workflow-availability";
@@ -34,6 +35,7 @@ export function WfHeader({
   const navigate = useNavigate();
   const deleteWorkflow = useDeleteWorkflow();
   const [showDelete, setShowDelete] = useState(false);
+  const [showBlocked, setShowBlocked] = useState(false);
   const t = useTranslations("systemAdmin.workflow");
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
@@ -109,6 +111,19 @@ export function WfHeader({
     </Button>
   );
 
+  // กันไม่ให้เข้าโหมดแก้ตั้งแต่แรกเมื่อยังมีเอกสารดำเนินการอยู่ — backend ปฏิเสธการบันทึกอยู่แล้ว
+  // การปล่อยให้เข้าไปกรอกจนเสร็จแล้วค่อยเด้งตอนกดเซฟ คือให้ผู้ใช้เสียเวลาไปกับงานที่บันทึกไม่ได้
+  // ถ้ายังไม่รู้คำตอบ (query ยังโหลด หรือโหลดไม่สำเร็จ) ให้ผ่านไปก่อน แล้วไปตกที่การ์ดฝั่ง backend
+  // แทนที่จะล็อกปุ่มเพราะอ่านสถานะไม่ได้
+  const blockedFromEdit = availability?.can_edit === false;
+  const handleEdit = () => {
+    if (blockedFromEdit) {
+      setShowBlocked(true);
+      return;
+    }
+    onEdit();
+  };
+
   const actions = isEditing ? (
     <>
       {activityButton}
@@ -135,7 +150,7 @@ export function WfHeader({
   ) : (
     <>
       {activityButton}
-      <Button size="sm" onClick={onEdit} className="text-sm">
+      <Button size="sm" onClick={handleEdit} className="text-sm">
         <Pencil className="size-3" />
         {tc("edit")}
       </Button>
@@ -162,6 +177,16 @@ export function WfHeader({
         badges={badges}
         actions={actions}
         flush
+      />
+
+      <WarningDialog
+        open={showBlocked}
+        title={tw("blockedTitle")}
+        description={tw("blockedDescription", {
+          count: docCounts?.in_progress ?? 0,
+        })}
+        confirmLabel={tc("close")}
+        onConfirm={() => setShowBlocked(false)}
       />
 
       <DeleteDialog
