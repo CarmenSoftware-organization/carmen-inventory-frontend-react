@@ -19,7 +19,7 @@ export default function DisplayTemplate({
     <div className="space-y-3">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold">{title}</h1>
+          <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
         </div>
         {description && (
           <p className="text-muted-foreground text-sm">{description}</p>

@@ -3,10 +3,10 @@ import { useTranslations } from "use-intl";
 import { Loader2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import EmptyComponent from "@/components/empty-component";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 export default function DashboardDatasetComponent() {
   const t = useTranslations("systemAdmin.dashboardDataset");
@@ -38,20 +38,11 @@ export default function DashboardDatasetComponent() {
 
   return (
     <div className="space-y-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="flex items-center gap-2">
-        <ModuleTileIcon />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold">{t("title")}</h1>
-            {total > 0 && (
-              <Badge variant="secondary" size="sm">
-                {total}
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground text-sm">{t("desc")}</p>
-        </div>
-      </div>
+      <DocumentListHeader
+        title={t("title")}
+        description={t("desc")}
+        count={total}
+      />
 
       <div className="relative max-w-sm">
         <Search

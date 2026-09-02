@@ -119,13 +119,13 @@ export default function AmComponent() {
     >
       <Tabs value={tab} onValueChange={(v) => setTab(v as "AP" | "GL")}>
         <TabsList variant="line">
-          <TabsTrigger value="AP" className="text-xs">
+          <TabsTrigger value="AP">
             {t("tabAp")}
             <span className="text-muted-foreground ms-1.5 tabular-nums">
               {apRows.length}
             </span>
           </TabsTrigger>
-          <TabsTrigger value="GL" className="text-xs">
+          <TabsTrigger value="GL">
             {t("tabGl")}
             <span className="text-muted-foreground ms-1.5 tabular-nums">
               {glRows.length}

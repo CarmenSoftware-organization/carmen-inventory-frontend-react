@@ -54,6 +54,11 @@ interface SubTileProps {
   readonly size?: number;
 }
 
+/** มี SubTile ของชื่อนี้จริงไหม — ให้ caller เลือกไม่ render แทนได้ tile เปล่า */
+export function hasSubTile(name: string): boolean {
+  return Boolean(SubTiles[name]);
+}
+
 /** Render illustrated submodule tile — palette มาจาก parent module (fallback = config) */
 export function SubTile({ name, parentName, size = 44 }: SubTileProps) {
   const palette = getPalette(parentName) ?? getPalette("config");

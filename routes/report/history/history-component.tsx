@@ -8,9 +8,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -22,6 +20,7 @@ import { useHistoryTable } from "./use-history-table";
 import { useReportHistory } from "./use-report-history";
 import type { ReportHistory } from "@/types/report-history";
 import HistoryCard from "./history-card";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 export default function HistoryComponent() {
   const t = useTranslations("reportHistory");
@@ -61,18 +60,11 @@ export default function HistoryComponent() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <ModuleTileIcon />
-          <h1 className="text-lg font-semibold">{t("title")}</h1>
-          {totalRecords > 0 && (
-            <Badge variant="secondary" size="sm" className="tabular-nums">
-              {totalRecords.toLocaleString()}
-            </Badge>
-          )}
-        </div>
-        <p className="text-muted-foreground text-sm">{t("desc")}</p>
-      </div>
+      <DocumentListHeader
+        title={t("title")}
+        description={t("desc")}
+        count={totalRecords}
+      />
 
       {/* Toolbar — search + display toggle */}
       <div className="flex flex-wrap items-center justify-between gap-2">

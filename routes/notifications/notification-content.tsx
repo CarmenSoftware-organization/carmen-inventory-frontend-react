@@ -106,17 +106,11 @@ export default function NotificationsContent() {
               }
             }}
           >
-            <TabsList className="bg-muted/50 rounded-xl p-1">
-              <TabsTrigger
-                value="all"
-                className="rounded-lg data-[state=active]:shadow-sm"
-              >
+            <TabsList>
+              <TabsTrigger value="all">
                 {tRoot("notifications.tabAll")}
               </TabsTrigger>
-              <TabsTrigger
-                value="unread"
-                className="rounded-lg data-[state=active]:shadow-sm"
-              >
+              <TabsTrigger value="unread">
                 {tRoot("notifications.tabUnread")}
                 {unreadCount !== undefined && unreadCount > 0 && (
                   <span className="bg-primary/15 text-primary text-micro-legal ms-2 rounded-full px-2 py-0.5 font-bold tabular-nums">

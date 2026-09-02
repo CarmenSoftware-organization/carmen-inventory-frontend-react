@@ -3,7 +3,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Pencil, Save, X } from "lucide-react";
+import { Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -30,6 +30,7 @@ import { UserAvatar } from "./user-assigned-ui";
 import { RolesSection } from "./user-assigned-roles";
 import { DepartmentsSection } from "./user-assigned-departments";
 import { LocationsSection } from "./user-assigned-locations";
+import { BackButton } from "@/components/share/back-button";
 
 interface UserAssignedFormProps {
   readonly user: UserDetail;
@@ -186,14 +187,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       {/* ── Header: identity + actions (company-profile layout) ── */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Go back"
-            onClick={handleBack}
-          >
-            <ArrowLeft />
-          </Button>
+          <BackButton onClick={handleBack} />
           <UserAvatar first={user.firstname} last={user.lastname} />
           <div className="min-w-0">
             <div className="flex items-center gap-2">

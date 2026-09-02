@@ -53,7 +53,7 @@ export default function ConfigDashboard() {
       <header className="flex items-center gap-3">
         <AppTile name={MODULE_NAME} size={40} />
         <div className="min-w-0">
-          <h1 className="text-lg leading-tight font-semibold">{t("title")}</h1>
+          <h1 className="text-lg leading-tight font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground text-sm leading-snug">
             {t("description")}
           </p>

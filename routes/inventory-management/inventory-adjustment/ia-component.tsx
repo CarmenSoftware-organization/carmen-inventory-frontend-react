@@ -268,7 +268,11 @@ export default function InventoryAdjustmentComponent() {
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader title={t("title")} description={t("desc")} />
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"

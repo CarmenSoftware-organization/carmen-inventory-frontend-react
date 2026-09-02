@@ -8,10 +8,8 @@ import {
   DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import EmptyComponent from "@/components/empty-component";
 import { toast } from "sonner";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -23,6 +21,7 @@ import {
 import type { ReportSchedule } from "@/types/report-schedule";
 import { CreateScheduleDialog } from "./create-schedule-dialog";
 import { useScheduleTableColumns } from "./use-schedule-table";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 export default function ScheduleComponent() {
   const t = useTranslations("reportSchedule");
@@ -62,18 +61,11 @@ export default function ScheduleComponent() {
     <>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {schedules.length > 0 && (
-                <Badge variant="secondary" size="sm" className="tabular-nums">
-                  {schedules.length.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm">{t("desc")}</p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={schedules.length}
+          />
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="mr-1 size-4" aria-hidden="true" />
             {t("createSchedule")}

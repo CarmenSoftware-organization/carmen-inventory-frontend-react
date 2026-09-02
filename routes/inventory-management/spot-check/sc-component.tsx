@@ -202,6 +202,7 @@ export default function ScComponent() {
                 <DocumentListHeader
                   title={t("title")}
                   description={t("desc")}
+                  count={locations.length}
                 />
               </div>
               <ViewToggle view={view} setView={setView} t={t} />

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,7 +38,6 @@ import { PERIOD_STATUS_OPTIONS, PERIOD_STATUS_CONFIG } from "@/constant/period";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -55,6 +53,7 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 /**
  * Component หลักของหน้ารายการงวดบัญชี (Period) รองรับ desktop/mobile, filter, และการสร้างงวดถัดไป
@@ -174,22 +173,11 @@ export default function PeriodComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm">{t("desc")}</p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
