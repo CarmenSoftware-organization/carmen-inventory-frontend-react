@@ -387,12 +387,12 @@ export function ProductForm({ product }: ProductFormProps) {
       >
         <Tabs defaultValue="general">
           <TabsList variant="line">
-            <TabsTrigger value="general" className="text-xs">
+            <TabsTrigger value="general">
               {t("tabGeneral")}
               <TabArrayCount form={form} name="info" />
               {hasGeneralError && <TabErrorDot />}
             </TabsTrigger>
-            <TabsTrigger value="units" className="text-xs">
+            <TabsTrigger value="units">
               {t("tabUnits")}
               <TabArrayCount
                 form={form}
@@ -400,13 +400,13 @@ export function ProductForm({ product }: ProductFormProps) {
               />
               {hasUnitsError && <TabErrorDot />}
             </TabsTrigger>
-            <TabsTrigger value="locations" className="text-xs">
+            <TabsTrigger value="locations">
               {t("tabLocations")}
               <TabArrayCount form={form} name="locations" />
               {hasLocationsError && <TabErrorDot />}
             </TabsTrigger>
             {product?.id && (
-              <TabsTrigger value="eco-labels" className="text-xs">
+              <TabsTrigger value="eco-labels">
                 {t("tabEcoLabels")}
                 <TabEcoLabelCount productId={product.id} />
               </TabsTrigger>

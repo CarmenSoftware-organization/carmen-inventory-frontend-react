@@ -54,13 +54,13 @@ export function WfStageDetail({
     <div className="space-y-6">
       <Tabs defaultValue="general">
         <TabsList variant="line">
-          <TabsTrigger value="general" className="text-sm">
+          <TabsTrigger value="general">
             {t("general")}
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="text-sm">
+          <TabsTrigger value="notifications">
             {t("notifications")}
           </TabsTrigger>
-          <TabsTrigger value="users" className="text-sm">
+          <TabsTrigger value="users">
             {t("assignedUsers")}
             {!isHod && assignedUsers.length > 0 && (
               <Badge

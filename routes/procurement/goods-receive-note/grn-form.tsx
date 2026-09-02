@@ -221,10 +221,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
 
         <Tabs defaultValue="general">
           <TabsList variant="line">
-            <TabsTrigger value="general" className="text-xs">
+            <TabsTrigger value="general">
               {t("tabItems")}
             </TabsTrigger>
-            <TabsTrigger value="extra-cost" className="text-xs">
+            <TabsTrigger value="extra-cost">
               {t("tabExtraCost")}
               {extraCostCount > 0 && (
                 <Badge

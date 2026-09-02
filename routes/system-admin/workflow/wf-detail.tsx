@@ -184,7 +184,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
               >
                 <TabsTrigger
                   value="general"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                  className="relative py-2.5"
                 >
                   {t("general")}
                   {hasGeneralErrors && (
@@ -193,7 +193,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                 </TabsTrigger>
                 <TabsTrigger
                   value="stages"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                  className="relative py-2.5"
                 >
                   {t("stages")}
                   {watchedStages && watchedStages.length > 0 && (
@@ -211,7 +211,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                 </TabsTrigger>
                 <TabsTrigger
                   value="routing"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                  className="relative py-2.5"
                 >
                   {t("routing")}
                   {routingFieldArray.fields.length > 0 && (
@@ -229,7 +229,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                 </TabsTrigger>
                 <TabsTrigger
                   value="products"
-                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                  className="py-2.5"
                 >
                   {t("products")}
                   {watchedProducts && watchedProducts.length > 0 && (
@@ -244,7 +244,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                 </TabsTrigger>
                 <TabsTrigger
                   value="insights"
-                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                  className="py-2.5"
                 >
                   {t("insights")}
                 </TabsTrigger>
