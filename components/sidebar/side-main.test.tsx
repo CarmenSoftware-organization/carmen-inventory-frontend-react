@@ -72,9 +72,9 @@ function sub(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function renderSideMain() {
+function renderSideMain(pathname = "/procurement") {
   return render(
-    <MemoryRouter initialEntries={["/procurement"]}>
+    <MemoryRouter initialEntries={[pathname]}>
       <SidebarProvider>
         <SideMain />
       </SidebarProvider>
@@ -156,5 +156,57 @@ describe("SideMain — locked wins over denied when both are true", () => {
       undefined,
       "license",
     );
+  });
+});
+
+/**
+ * เมนูย่อยอีกชั้น (workflow แยกตามชนิดใบ) — ลูกมี path ของตัวเองที่ซ้อนอยู่ใต้
+ * path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออกจะสว่างสองอัน
+ */
+describe("SideMain — เมนูย่อยอีกชั้น", () => {
+  const parent = () =>
+    sub({
+      name: "workflow",
+      path: "/procurement/sub-a",
+      subModules: [
+        { name: "childA", path: "/procurement/sub-a/child-a", icon: DummyIcon },
+        { name: "childB", path: "/procurement/sub-a/child-b", icon: DummyIcon },
+      ],
+    });
+
+  const activeNames = () =>
+    Array.from(document.querySelectorAll('[data-active="true"]')).map((el) =>
+      el.textContent?.trim(),
+    );
+
+  it("ลูกทุกตัวถูก render เป็นลิงก์ของตัวเอง", () => {
+    visibleSubs.mockReturnValue([parent()]);
+    renderSideMain("/procurement/sub-a");
+    expect(screen.getByRole("link", { name: /childA/i })).toHaveAttribute(
+      "href",
+      "/procurement/sub-a/child-a",
+    );
+    expect(screen.getByRole("link", { name: /childB/i })).toHaveAttribute(
+      "href",
+      "/procurement/sub-a/child-b",
+    );
+  });
+
+  it("อยู่หน้าของลูก = ลูกตัวนั้นสว่างตัวเดียว ตัวแม่ไม่สว่าง", () => {
+    visibleSubs.mockReturnValue([parent()]);
+    renderSideMain("/procurement/sub-a/child-a");
+    expect(activeNames()).toEqual(["childA"]);
+  });
+
+  it("อยู่หน้าของแม่ = แม่สว่าง ลูกไม่สว่างสักตัว", () => {
+    visibleSubs.mockReturnValue([parent()]);
+    renderSideMain("/procurement/sub-a");
+    expect(activeNames()).toEqual(["workflow"]);
+  });
+
+  it("หน้าลูกที่ลึกลงไปอีก (เช่น /child-a/123) ยังนับเป็นลูกตัวนั้น", () => {
+    visibleSubs.mockReturnValue([parent()]);
+    renderSideMain("/procurement/sub-a/child-a/123");
+    expect(activeNames()).toEqual(["childA"]);
   });
 });

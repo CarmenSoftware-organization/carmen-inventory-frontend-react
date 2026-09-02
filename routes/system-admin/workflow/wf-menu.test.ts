@@ -30,10 +30,9 @@ describe("เมนูย่อยของ workflow", () => {
     expect(slugs).toEqual([...WORKFLOW_DOC_TYPES]);
   });
 
-  it("เมนูย่อยเป็น route ของตัวเอง ไม่ใช่หน้าเดิมที่ติด query", () => {
+  it("เมนูย่อยเป็น route ของตัวเอง ซ้อนอยู่ใต้ path ของตัวแม่", () => {
     for (const s of workflow?.subModules ?? []) {
       expect(s.path.startsWith("/system-admin/workflow/")).toBe(true);
-      expect(s.search).toBeUndefined();
     }
   });
 

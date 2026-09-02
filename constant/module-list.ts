@@ -63,13 +63,6 @@ import {
 export interface ModuleDto {
   name: string;
   path: string;
-  /**
-   * query string ที่ต่อท้าย `path` ตอนสร้างลิงก์ (ขึ้นต้นด้วย `?`)
-   *
-   * ใช้กับเมนูย่อยที่ชี้หน้าเดียวกันแต่กรองไว้ล่วงหน้า เช่น workflow แยกตามชนิดใบ
-   * — `path` ต้องสะอาดเสมอเพราะเป็นตัวเทียบ active/breadcrumb/license
-   */
-  search?: string;
   icon: LucideIcon;
   subModules?: ModuleDto[];
   /** When true, render a visual separator before this module */

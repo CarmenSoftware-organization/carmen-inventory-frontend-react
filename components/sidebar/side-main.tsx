@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 const ACCENT = "var(--primary)";
 
 export function SideMain() {
-  const { pathname, search } = useLocation();
+  const pathname = useLocation().pathname;
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));
@@ -79,10 +79,11 @@ export function SideMain() {
             {visibleSubs.map((sub) => {
               const onPath =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
-              // เมนูย่อยที่ path เดียวกันแยกกันด้วย query — ไม่งั้นสว่างพร้อมกันหมด
-              // ตัวแม่สว่างเมื่ออยู่หน้านั้นแบบไม่ได้กรองด้วยลูกตัวไหน
+              // อยู่หน้าของลูกตัวไหนอยู่ไหม — ลูกมี path ของตัวเองซึ่งซ้อนอยู่ใต้
+              // path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออก
+              // จะสว่างพร้อมกันสองอัน
               const activeChild = sub.subModules?.find(
-                (c) => c.search && onPath && search === c.search,
+                (c) => pathname === c.path || pathname.startsWith(c.path + "/"),
               );
               const isActive = onPath && !activeChild;
               // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
@@ -168,10 +169,12 @@ export function SideMain() {
                   {/* เมนูย่อยอีกชั้น — เยื้องเข้าไปและซ่อนตอนย่อ sidebar เป็นไอคอน
                       (ไอคอนเรียงกันสามตัวที่ชี้หน้าเดียวกันแยกไม่ออกอยู่ดี) */}
                   {sub.subModules?.map((child) => {
-                    const childActive = onPath && search === child.search;
+                    const childActive =
+                      pathname === child.path ||
+                      pathname.startsWith(child.path + "/");
                     return (
                       <SidebarMenuItem
-                        key={`${child.path}${child.search ?? ""}`}
+                        key={child.path}
                         className="group-data-[collapsible=icon]:hidden"
                       >
                         <SidebarMenuButton
@@ -180,7 +183,7 @@ export function SideMain() {
                           isActive={childActive}
                           className="ms-4 w-auto rounded-md"
                         >
-                          <Link to={`${child.path}${child.search ?? ""}`}>
+                          <Link to={child.path}>
                             <child.icon
                               aria-hidden="true"
                               className={cn(

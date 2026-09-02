@@ -146,13 +146,11 @@ export function CommandPalette() {
               const Icon = leaf.icon;
               return (
                 <CommandItem
-                  key={`${leaf.path}${leaf.search ?? ""}`}
+                  key={leaf.path}
                   // ชื่อ leaf อย่างเดียวซ้ำกันข้ามกลุ่มได้ (เช่น category) —
                   // ผูก path เข้าไปให้ value ไม่ชนกัน และให้ค้นด้วย path ได้เลย
                   value={`${t(mod.name)} ${t(leaf.name)} ${leaf.path}`}
-                  // เมนูย่อยที่ path ซ้ำกันแยกกันด้วย query — ไม่พาไปด้วยก็ได้หน้า
-                  // เดียวกันแบบไม่กรอง ซึ่งไม่ตรงกับชื่อรายการที่กดเลือก
-                  onSelect={() => go(`${leaf.path}${leaf.search ?? ""}`)}
+                  onSelect={() => go(leaf.path)}
                 >
                   <Icon aria-hidden="true" className="text-muted-foreground" />
                   {t(leaf.name)}
