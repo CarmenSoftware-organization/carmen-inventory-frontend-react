@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import {
-  ArrowLeft,
   Ban,
   Boxes,
   ChevronDown,
@@ -65,6 +64,7 @@ import {
   accountingDetailInitialMode,
   documentsFor,
 } from "./accounting-documents";
+import { BackButton } from "@/components/share/back-button";
 
 const DEPARTMENTS = [
   { id: "100", label: "100 - Admin" },
@@ -376,15 +376,10 @@ export default function AccountingDetail() {
     <div className="flex w-full min-w-0 flex-col gap-4">
       <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
         <div className="flex flex-wrap items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
+          <BackButton
             onClick={() => navigate(config.path)}
-          >
-            <ArrowLeft className="size-4" />
-            {t("back")}
-          </Button>
+            label={t("back")}
+          />
           <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
           <Button
             type="button"

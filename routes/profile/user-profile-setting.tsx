@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ArrowLeft,
   Camera,
   KeyRound,
   Loader2,
@@ -56,6 +55,7 @@ import {
   IMAGE_ACCEPT_ATTR,
   IMAGE_MIME_TYPES,
 } from "@/lib/image-upload";
+import { BackButton } from "@/components/share/back-button";
 
 export default function UserProfileSetting() {
   const navigate = useNavigate();
@@ -211,15 +211,9 @@ export default function UserProfileSetting() {
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto w-full max-w-5xl space-y-10 pb-[max(2rem,env(safe-area-inset-bottom))] duration-500">
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-2 py-1 sm:static sm:py-0">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleBack}
-          aria-label={tc("goBack")}
-          className="h-11 w-11 hover:bg-transparent sm:h-8 sm:w-8 dark:hover:bg-transparent"
-        >
-          <ArrowLeft />
-        </Button>
+        {/* touch target 44px บนมือถือ — header นี้ sticky อยู่บนสุดของหน้าโปรไฟล์
+            ซึ่งเป็นหน้าที่เปิดจากมือถือบ่อย จงใจใหญ่กว่า icon-sm ปกติ */}
+        <BackButton onClick={handleBack} className="h-11 w-11 sm:h-8 sm:w-8" />
         <h1 className="text-lg font-semibold">{t("title")}</h1>
         <div className="ml-auto">
           <Button

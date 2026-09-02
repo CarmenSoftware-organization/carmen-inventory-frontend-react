@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_DOT_CHIP } from "@/constant/status-config";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { BackButton } from "@/components/share/back-button";
 
 interface PcEntryHeaderProps {
   readonly locationName: string;
@@ -28,22 +28,17 @@ export function PcEntryHeader({
   lastSaved,
 }: PcEntryHeaderProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const tc = useTranslations("common");
   const navigate = useNavigate();
 
   return (
     <div className="border-border/60 bg-card mb-3 rounded-xl border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
+          {/* mt-0.5 ให้ปุ่มตรงกับบรรทัดแรกของ title ที่มีบรรทัดย่อยใต้ลงมา */}
+          <BackButton
             onClick={() => navigate("/inventory-management/physical-count")}
-            aria-label={tc("goBack")}
-            className="mt-0.5 rounded-full hover:bg-transparent dark:hover:bg-transparent"
-          >
-            <ArrowLeft />
-          </Button>
+            className="mt-0.5"
+          />
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="text-foreground mt-1 text-base leading-tight font-semibold tracking-tight">
