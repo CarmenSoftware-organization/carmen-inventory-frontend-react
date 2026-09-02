@@ -12,7 +12,11 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useWorkflow } from "@/hooks/use-workflow";
+import {
+  WORKFLOW_LIST_HOOKS,
+  useWorkflow,
+  type WorkflowDocType,
+} from "@/hooks/use-workflow";
 import { useDeleteWorkflow } from "./use-workflow-mutations";
 import type { WorkflowDto } from "@/types/workflows";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -39,7 +43,17 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-export default function WorkflowComponent() {
+interface WorkflowComponentProps {
+  /**
+   * จำกัดรายการไว้ที่ชนิดเอกสารเดียว — ยิง `GET /config/{bu}/workflows/{slug}`
+   * แทน endpoint รวม และซ่อนตัวกรองชนิดใบ (หน้านี้เป็นของชนิดนั้นอยู่แล้ว)
+   */
+  readonly docType?: WorkflowDocType;
+}
+
+export default function WorkflowComponent({
+  docType,
+}: WorkflowComponentProps = {}) {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<WorkflowDto | null>(null);
   const deleteWorkflow = useDeleteWorkflow();
@@ -80,23 +94,27 @@ export default function WorkflowComponent() {
           />
         ),
       },
-      {
-        key: "workflow_type",
-        section: "listView.sectionDocument",
-        control: "custom",
-        labelKey: "systemAdmin.workflow.workflowType",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={t("workflowType")}
-            options={WF_TYPE_OPTIONS}
-            className="w-full"
-          />
-        ),
-      },
+      ...(docType
+        ? []
+        : ([
+            {
+              key: "workflow_type",
+              section: "listView.sectionDocument",
+              control: "custom",
+              labelKey: "systemAdmin.workflow.workflowType",
+              render: (value, onChange) => (
+                <MultiSelectFilter
+                  value={value}
+                  onChange={onChange}
+                  placeholder={t("workflowType")}
+                  options={WF_TYPE_OPTIONS}
+                  className="w-full"
+                />
+              ),
+            },
+          ] satisfies FilterFieldDef[])),
     ],
-    [statusOptions, t],
+    [statusOptions, t, docType],
   );
 
   const lf = useListFilters({
@@ -107,12 +125,15 @@ export default function WorkflowComponent() {
   const combinedParams = { ...params, filter: lf.filterParam };
 
   const useInfiniteScroll = !!isMobile;
-  const { data, isLoading, error, refetch } = useWorkflow(combinedParams, {
+  // หน้าที่จำกัดชนิดใบยิง endpoint ของชนิดนั้นตรง ๆ ไม่ใช่ดึงทั้งหมดมากรองทีหลัง
+  // (docType มาจาก route จึงคงที่ตลอดอายุหน้า ลำดับ hook ไม่สลับ)
+  const useListHook = docType ? WORKFLOW_LIST_HOOKS[docType] : useWorkflow;
+  const { data, isLoading, error, refetch } = useListHook(combinedParams, {
     enabled: !useInfiniteScroll,
   });
 
   const grid = useGridPagination<WorkflowDto>({
-    useListHook: useWorkflow,
+    useListHook,
     params: combinedParams,
     enabled: useInfiniteScroll,
   });

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { moduleList } from "@/constant/module-list";
-import { WF_TYPE_OPTIONS } from "@/routes/system-admin/workflow/wf-filter-options";
+import { WORKFLOW_DOC_TYPES, WORKFLOW_LIST_HOOKS } from "@/hooks/use-workflow";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import th from "@/messages/th.json";
 import en from "@/messages/en.json";
 
@@ -21,18 +22,18 @@ describe("เมนูย่อยของ workflow", () => {
     ]);
   });
 
-  it("ค่าที่ลิงก์พาไปตรงกับตัวกรองบนหน้า workflow เป๊ะ", () => {
-    // ต่างกันเมื่อไร = กดเมนูแล้วได้หน้าที่กรองด้วยค่าที่ตัวกรองไม่รู้จัก
-    const linked = (workflow?.subModules ?? []).map((s) =>
-      decodeURIComponent((s.search ?? "").replace("?workflow_type=", "")),
+  it("path ของเมนูย่อยลงท้ายด้วย slug ที่ endpoint รู้จัก", () => {
+    // slug เพี้ยนเมื่อไร = ยิง GET /config/{bu}/workflows/<ผิด> แล้วได้ 404
+    const slugs = (workflow?.subModules ?? []).map((s) =>
+      s.path.replace("/system-admin/workflow/", ""),
     );
-    expect(linked).toEqual(WF_TYPE_OPTIONS.map((o) => o.value));
+    expect(slugs).toEqual([...WORKFLOW_DOC_TYPES]);
   });
 
-  it("เมนูย่อยใช้ path เดียวกับตัวแม่ — แยกกันด้วย query อย่างเดียว", () => {
+  it("เมนูย่อยเป็น route ของตัวเอง ไม่ใช่หน้าเดิมที่ติด query", () => {
     for (const s of workflow?.subModules ?? []) {
-      expect(s.path).toBe("/system-admin/workflow");
-      expect(s.search?.startsWith("?workflow_type=")).toBe(true);
+      expect(s.path.startsWith("/system-admin/workflow/")).toBe(true);
+      expect(s.search).toBeUndefined();
     }
   });
 
@@ -53,6 +54,27 @@ describe("เมนูย่อยของ workflow", () => {
         (en.modules as Record<string, string>)[s.name],
         s.name,
       ).toBeTruthy();
+    }
+  });
+});
+
+describe("endpoint ของแต่ละชนิด", () => {
+  it("path ที่ยิงจริงตรงกับที่ backend เปิดไว้", () => {
+    // ผูกกับสตริงเต็ม ๆ ไม่ใช่แค่ slug — ย้ายโฟลเดอร์ config/ ไปที่อื่นแล้ว
+    // เทสต์ต้องแดง ไม่ใช่ปล่อยให้ไปเจอ 404 ตอนกดเมนู
+    expect(API_ENDPOINTS.WORKFLOWS_BY_DOC_TYPE("BU1", "purchase-request")).toBe(
+      "/api/proxy/api/config/BU1/workflows/purchase-request",
+    );
+    for (const slug of WORKFLOW_DOC_TYPES) {
+      expect(API_ENDPOINTS.WORKFLOWS_BY_DOC_TYPE("BU1", slug)).toBe(
+        `/api/proxy/api/config/BU1/workflows/${slug}`,
+      );
+    }
+  });
+
+  it("ทุกชนิดมี list hook ของตัวเอง", () => {
+    for (const slug of WORKFLOW_DOC_TYPES) {
+      expect(WORKFLOW_LIST_HOOKS[slug], slug).toBeTypeOf("function");
     }
   });
 });

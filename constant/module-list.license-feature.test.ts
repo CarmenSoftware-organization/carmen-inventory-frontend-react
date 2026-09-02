@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { moduleList, type ModuleDto } from "./module-list";
+import { findRouteLeaf, moduleList, type ModuleDto } from "./module-list";
 import { licenseFeatureOf } from "@/hooks/use-license";
 import {
   LICENSE_FEATURE_KEYS,
@@ -130,8 +130,11 @@ describe("moduleList → license feature key", () => {
   });
 
   it("จับ regression ของ key ที่เคยพังจริงทั้ง 4 กลุ่ม", () => {
+    // ใช้ findRouteLeaf ตัวเดียวกับที่ RouteGuard ใช้จริง ไม่ใช่ตัวเก็บ leaf ของ
+    // เทสต์เอง — โหนดที่เป็นทั้งหน้าและมีเมนูย่อย (เช่น workflow) ไม่ใช่ leaf
+    // ในสายตาตัวเก็บ แต่ RouteGuard ยังต้องหา feature ของมันเจอ
     const featureOf = (path: string) => {
-      const leaf = leaves().find((l) => l.path === path);
+      const leaf = findRouteLeaf(path);
       if (!leaf) throw new Error(`leaf not found: ${path}`);
       return licenseFeatureOf(leaf);
     };

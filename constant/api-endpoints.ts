@@ -430,6 +430,14 @@ export const API_ENDPOINTS = {
   VENDOR_CERTIFICATES_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/config/${buCode}/vendor-certificates/vendor/${vendorId}`,
   WORKFLOWS: (buCode: string) => `/api/proxy/api/config/${buCode}/workflows`,
+  /**
+   * รายการ workflow ของชนิดเอกสารเดียว — `slug` เป็น kebab-case ของชนิดใบ
+   * (`purchase-request` · `purchase-order` · `store-requisition`)
+   *
+   * คนละตัวกับ `WORKFLOW_BY_TYPE` ที่อยู่นอก `config/` และใช้กับ lookup ในฟอร์ม
+   */
+  WORKFLOWS_BY_DOC_TYPE: (buCode: string, slug: string) =>
+    `/api/proxy/api/config/${buCode}/workflows/${slug}`,
   WORKFLOW_BY_TYPE: (buCode: string, type: string) =>
     `/api/proxy/api/${buCode}/workflows/type/${type}`,
 } as const;

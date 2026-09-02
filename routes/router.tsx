@@ -624,6 +624,23 @@ export const router = createBrowserRouter([
                 path: "workflow",
                 lazy: () => import("./system-admin/workflow/workflow.route"),
               },
+              // สามเส้นนี้ต้องมาก่อน `workflow/:id` — react-router จัดลำดับ static
+              // เหนือ dynamic ให้อยู่แล้ว แต่เขียนติดกันไว้จะได้เห็นความสัมพันธ์
+              {
+                path: "workflow/purchase-request",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
+              },
+              {
+                path: "workflow/purchase-order",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
+              },
+              {
+                path: "workflow/store-requisition",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
+              },
               {
                 path: "workflow/new",
                 lazy: () =>

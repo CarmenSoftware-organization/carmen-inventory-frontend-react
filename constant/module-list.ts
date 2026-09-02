@@ -600,30 +600,26 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
         permission: PERMISSIONS.system_configuration.view,
-        // เมนูย่อยชี้หน้าเดิมแต่ติดตัวกรองชนิดใบมาให้ — ค่าใน `search` คือ clause
-        // เต็มแบบเดียวกับที่ตัวกรองบนหน้าเขียนลง URL (ดู WF_TYPE_OPTIONS) กด
-        // เข้ามาแล้วจึงเห็น chip ตัวกรองและกดถอดออกได้เหมือนกรองเอง
+        // เมนูย่อยเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
+        // (`GET /config/{bu}/workflows/{slug}`) ไม่ใช่กรองจากชุดเดียวกัน
         subModules: [
           {
             name: "workflowPurchaseRequest",
-            path: "/system-admin/workflow",
-            search: `?workflow_type=${encodeURIComponent("workflow_type|string:purchase_request_workflow")}`,
+            path: "/system-admin/workflow/purchase-request",
             licenseFeature: "system_admin.workflow",
             icon: ShoppingCart,
             permission: PERMISSIONS.system_configuration.view,
           },
           {
             name: "workflowPurchaseOrder",
-            path: "/system-admin/workflow",
-            search: `?workflow_type=${encodeURIComponent("workflow_type|string:purchase_order_workflow")}`,
+            path: "/system-admin/workflow/purchase-order",
             licenseFeature: "system_admin.workflow",
             icon: Receipt,
             permission: PERMISSIONS.system_configuration.view,
           },
           {
             name: "workflowStoreRequisition",
-            path: "/system-admin/workflow",
-            search: `?workflow_type=${encodeURIComponent("workflow_type|string:store_requisition_workflow")}`,
+            path: "/system-admin/workflow/store-requisition",
             licenseFeature: "system_admin.workflow",
             icon: Store,
             permission: PERMISSIONS.system_configuration.view,
