@@ -253,7 +253,11 @@ export default function PcComponent() {
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
           <Reveal>
-            <DocumentListHeader title={t("title")} description={t("desc")} />
+            <DocumentListHeader
+              title={t("title")}
+              description={t("desc")}
+              count={locations.length}
+            />
           </Reveal>
 
           <Reveal delay={60}>
