@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Codemod: แปลง Next imports → Vite/React Router equivalents
-# ใช้กับไดเรกทอรีที่ copy มาจาก carmen-inventory-frontend
+# ใช้กับไดเรกทอรีที่ copy มาจาก Next.js app ตัวเดิม (repo นั้นถูกลบไปแล้ว)
 # Usage: scripts/codemods/next-to-vite.sh [dir ...]   (default: ทุก source dir)
 #
 # Fixes applied vs. original snippet:
