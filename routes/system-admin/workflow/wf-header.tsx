@@ -59,7 +59,9 @@ export function WfHeader({
         </span>
         <span
           className={
-            docCounts.in_progress > 0 ? "text-amber-600 dark:text-amber-500" : ""
+            docCounts.in_progress > 0
+              ? "text-amber-600 dark:text-amber-500"
+              : ""
           }
           title={
             docCounts.in_progress > 0 ? tw("inProgressBlocksEdit") : undefined
@@ -111,17 +113,19 @@ export function WfHeader({
     </Button>
   );
 
-  // กันไม่ให้เข้าโหมดแก้ตั้งแต่แรกเมื่อยังมีเอกสารดำเนินการอยู่ — backend ปฏิเสธการบันทึกอยู่แล้ว
-  // การปล่อยให้เข้าไปกรอกจนเสร็จแล้วค่อยเด้งตอนกดเซฟ คือให้ผู้ใช้เสียเวลาไปกับงานที่บันทึกไม่ได้
+  // เข้าโหมดแก้ได้เสมอแล้ว: เอกสารที่เดินอยู่ล็อกแค่รายการ stage กับเส้นทางระหว่าง stage ส่วนชื่อ
+  // ผู้อนุมัติ และรายการสินค้าบันทึกได้ตลอด การปิดทั้งปุ่มจึงกันคนออกจากงานที่ทำได้จริง — ตัวที่ยังปิด
+  // อยู่คือส่วน stage ข้างในฟอร์ม ซึ่งปิดตรงจุดที่มันถูกล็อกจริง
+  // ส่วนการลบยังทำไม่ได้ เพราะทำให้รายการ stage หายไปทั้งอัน เอกสารที่ค้างจะไม่มีอะไรให้เดินต่อ
   // ถ้ายังไม่รู้คำตอบ (query ยังโหลด หรือโหลดไม่สำเร็จ) ให้ผ่านไปก่อน แล้วไปตกที่การ์ดฝั่ง backend
   // แทนที่จะล็อกปุ่มเพราะอ่านสถานะไม่ได้
-  const blockedFromEdit = availability?.can_edit === false;
-  const handleEdit = () => {
-    if (blockedFromEdit) {
+  const blockedFromDelete = availability?.can_delete === false;
+  const handleDelete = () => {
+    if (blockedFromDelete) {
       setShowBlocked(true);
       return;
     }
-    onEdit();
+    setShowDelete(true);
   };
 
   const actions = isEditing ? (
@@ -150,14 +154,14 @@ export function WfHeader({
   ) : (
     <>
       {activityButton}
-      <Button size="sm" onClick={handleEdit} className="text-sm">
+      <Button size="sm" onClick={onEdit} className="text-sm">
         <Pencil className="size-3" />
         {tc("edit")}
       </Button>
       <Button
         variant="destructive"
         size="sm"
-        onClick={() => setShowDelete(true)}
+        onClick={handleDelete}
         disabled={deleteWorkflow.isPending}
         className="text-sm"
       >

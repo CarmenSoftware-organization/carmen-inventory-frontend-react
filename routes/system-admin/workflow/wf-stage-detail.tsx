@@ -14,6 +14,8 @@ interface WfStageDetailProps {
   readonly index: number;
   readonly users: User[];
   readonly isDisabled: boolean;
+  /** ปิดเฉพาะช่องชื่อ stage — ช่องอื่นของ stage ยังแก้ได้ */
+  readonly isStructureDisabled: boolean;
   readonly isFirst: boolean;
   readonly isLast: boolean;
 }
@@ -23,6 +25,7 @@ export function WfStageDetail({
   index,
   users,
   isDisabled,
+  isStructureDisabled,
   isFirst,
   isLast,
 }: WfStageDetailProps) {
@@ -54,12 +57,8 @@ export function WfStageDetail({
     <div className="space-y-6">
       <Tabs defaultValue="general">
         <TabsList variant="line">
-          <TabsTrigger value="general">
-            {t("general")}
-          </TabsTrigger>
-          <TabsTrigger value="notifications">
-            {t("notifications")}
-          </TabsTrigger>
+          <TabsTrigger value="general">{t("general")}</TabsTrigger>
+          <TabsTrigger value="notifications">{t("notifications")}</TabsTrigger>
           <TabsTrigger value="users">
             {t("assignedUsers")}
             {!isHod && assignedUsers.length > 0 && (
@@ -80,6 +79,7 @@ export function WfStageDetail({
             index={index}
             isFirst={isFirst}
             isDisabled={isDisabled}
+            isNameDisabled={isStructureDisabled}
           />
         </TabsContent>
 
