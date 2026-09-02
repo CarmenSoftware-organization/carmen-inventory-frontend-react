@@ -29,6 +29,12 @@ import UserCard from "./user-card";
 import type { User } from "@/types/workflows";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { WfHandoverDialog } from "@/routes/system-admin/workflow/wf-handover-dialog";
+import {
+  useWorkflowAssigneeHandover,
+  useWorkflowAssigneeImpact,
+  type WorkflowAssigneeReplacement,
+} from "@/routes/system-admin/workflow/use-workflow-assignee-impact";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
@@ -52,11 +58,23 @@ import { DocumentListHeader } from "@/components/share/document-list-header";
 export default function UserComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [handoverTarget, setHandoverTarget] = useState<User | null>(null);
   const deleteUser = useDeleteUser();
+  // ถามเฉพาะตอนกำลังจะลบจริง ไม่ใช่ทุกแถวในตาราง
+  const { data: assigneeImpact } = useWorkflowAssigneeImpact(
+    deleteTarget?.user_id,
+  );
+  const handover = useWorkflowAssigneeHandover();
+  // stage ที่ผู้ใช้ถืออยู่คนเดียวคือตัวที่จะเหลือคนอนุมัติ 0 คนเมื่อเขาหายไป ส่วน stage ที่มีคนอื่นอยู่ด้วย
+  // ลบได้เลย ไม่ต้องหาคนแทน
+  const soleAssigneeStages = (assigneeImpact?.stages ?? []).filter(
+    (stage) => stage.is_sole_assignee,
+  );
   const isMobile = useIsMobile();
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const t = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
+  const tw = useTranslations("systemAdmin.workflow");
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const { printReport, exportCsv, isBusy } = useUserRoleReport();
 
@@ -291,12 +309,47 @@ export default function UserComponent() {
         isPending={deleteUser.isPending}
         onConfirm={() => {
           if (!deleteTarget) return;
+          // stage ที่เขาถือคนเดียวต้องมีคนรับช่วงก่อน ไม่งั้น stage นั้นเหลือคนอนุมัติ 0 คน แล้วเอกสาร
+          // ที่รออยู่จะหยุดเดินโดยไม่มี error แจ้งใคร — ปุ่มอนุมัติหายไปเฉย ๆ
+          if (soleAssigneeStages.length > 0) {
+            setHandoverTarget(deleteTarget);
+            setDeleteTarget(null);
+            return;
+          }
           deleteUser.mutate(deleteTarget.user_id, {
             onSuccess: () => {
               toast.success(t("deleteSuccess"));
               setDeleteTarget(null);
             },
           });
+        }}
+      />
+
+      <WfHandoverDialog
+        open={!!handoverTarget}
+        stages={soleAssigneeStages}
+        leavingUserName={
+          handoverTarget
+            ? `${handoverTarget.firstname} ${handoverTarget.lastname}`
+            : ""
+        }
+        candidates={users.filter((u) => u.user_id !== handoverTarget?.user_id)}
+        isPending={handover.isPending}
+        onCancel={() => setHandoverTarget(null)}
+        onConfirm={(replacements: WorkflowAssigneeReplacement[]) => {
+          if (!handoverTarget) return;
+          handover.mutate(
+            { userId: handoverTarget.user_id, replacements },
+            {
+              onSuccess: () => {
+                toast.success(tw("handover.success"));
+                // ส่งมอบเสร็จแล้วค่อยกลับไปที่กล่องยืนยันลบ ไม่ลบให้เองเงียบ ๆ เพราะผู้ใช้กดมาเพื่อ
+                // "หาคนแทน" ไม่ได้ยืนยันการลบซ้ำอีกครั้ง
+                setDeleteTarget(handoverTarget);
+                setHandoverTarget(null);
+              },
+            },
+          );
         }}
       />
 

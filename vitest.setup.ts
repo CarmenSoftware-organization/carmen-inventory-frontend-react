@@ -73,3 +73,10 @@ globalThis.IntersectionObserver = class IntersectionObserver {
 // jsdom does not implement scrollIntoView; form-helpers' scrollToFirstInvalidField
 // calls it on validation failure. Stub it so submit-with-errors tests don't throw.
 Element.prototype.scrollIntoView = () => {};
+
+// Radix Select reads the Pointer Events capture API on pointerdown, which jsdom does not implement.
+// Without these, opening a Select in a test throws "target.hasPointerCapture is not a function"
+// from inside Radix and the failure points at the library rather than the missing environment.
+Element.prototype.hasPointerCapture = () => false;
+Element.prototype.setPointerCapture = () => {};
+Element.prototype.releasePointerCapture = () => {};

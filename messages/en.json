@@ -1901,6 +1901,18 @@
         "blockedTitle": "Can’t delete this workflow yet",
         "blockedDescription": "{count} document(s) are still in progress on this workflow. Deleting it would take away the stages they are moving through, so finish or void them first.",
         "structureLocked": "{count} document(s) are moving through these stages right now, so stages can't be added, renamed or reordered and routing can't change. Everything else on this form still saves."
+      },
+      "handover": {
+        "title": "Someone has to take these approvals over",
+        "description": "{name} is the only approver on {count} workflow stage(s). Removing them leaves those stages with nobody able to act, and any document waiting there stops moving with no error shown to anyone. Pick who takes over each one.",
+        "waiting": "{count} waiting",
+        "pickReplacement": "Choose who takes over",
+        "confirm": "Hand over",
+        "applying": "Handing over…",
+        "success": "Approvals handed over",
+        "lastAssigneeTitle": "This is the last approver on the stage",
+        "lastAssigneeDescription": "{name} is the only person assigned to this stage. Removing them with nobody in their place cannot be saved, so pick who takes over first.",
+        "replaceAndRemove": "Replace and remove"
       }
     },
     "runningCode": {

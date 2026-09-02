@@ -10,7 +10,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Field, FieldLabel } from "@/components/ui/field";
 import type { User } from "@/types/workflows";
 import { cn } from "@/lib/utils";
+import { WfLastAssigneeDialog } from "./wf-last-assignee-dialog";
 import type { WorkflowCreateModel } from "./wf-form-schema";
+
+/** ชนิดของ assigned_users ตามสคีมาฟอร์ม — หลวมกว่า `User` ตรงที่ department เป็น optional */
+type StageAssignee = NonNullable<
+  WorkflowCreateModel["data"]["stages"][number]["assigned_users"]
+>[number];
 
 interface WfStageUsersProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
@@ -32,6 +38,9 @@ export function WfStageUsers({
   assignedUserIds,
 }: WfStageUsersProps) {
   const [userSearch, setUserSearch] = useState("");
+  const [pendingRemoval, setPendingRemoval] = useState<StageAssignee | null>(
+    null,
+  );
   const t = useTranslations("systemAdmin.workflow");
 
   const filteredUsers = (() => {
@@ -60,17 +69,35 @@ export function WfStageUsers({
     });
   })();
 
+  const setAssigned = (next: StageAssignee[]) =>
+    form.setValue(`data.stages.${index}.assigned_users`, next);
+
   const toggleUser = (user: User) => {
     if (isDisabled) return;
     const current = form.getValues(`data.stages.${index}.assigned_users`) ?? [];
-    if (assignedUserIds.has(user.user_id)) {
-      form.setValue(
-        `data.stages.${index}.assigned_users`,
-        current.filter((u) => u.user_id !== user.user_id),
-      );
-    } else {
-      form.setValue(`data.stages.${index}.assigned_users`, [...current, user]);
+    if (!assignedUserIds.has(user.user_id)) {
+      setAssigned([...current, user]);
+      return;
     }
+    // เอาคนสุดท้ายออก = stage นี้เหลือคนอนุมัติ 0 คน ซึ่ง backend ปฏิเสธตอนกดบันทึกอยู่แล้ว
+    // ถามหาคนแทนตรงนี้เลยดีกว่าปล่อยให้กรอกต่อจนเสร็จแล้วค่อยเด้ง
+    if (current.length === 1 && !isHod) {
+      setPendingRemoval(user);
+      return;
+    }
+    setAssigned(current.filter((u) => u.user_id !== user.user_id));
+  };
+
+  /** เอาคนที่ค้างอยู่ออก แล้วใส่คนแทนถ้ามี — จุดเดียวที่ปิดกล่องถามคนแทน */
+  const resolvePendingRemoval = (replacement?: StageAssignee) => {
+    const leaving = pendingRemoval;
+    setPendingRemoval(null);
+    if (!leaving || !replacement) return;
+    const current = form.getValues(`data.stages.${index}.assigned_users`) ?? [];
+    setAssigned([
+      ...current.filter((u) => u.user_id !== leaving.user_id),
+      replacement,
+    ]);
   };
 
   const assignAll = (userList: User[]) => {
@@ -88,10 +115,13 @@ export function WfStageUsers({
     if (isDisabled) return;
     const removeIds = new Set(userList.map((u) => u.user_id));
     const current = form.getValues(`data.stages.${index}.assigned_users`) ?? [];
-    form.setValue(
-      `data.stages.${index}.assigned_users`,
-      current.filter((u) => !removeIds.has(u.user_id)),
-    );
+    const remaining = current.filter((u) => !removeIds.has(u.user_id));
+    // เอาออกยกชุดจนไม่เหลือใครก็ทำให้ stage ว่างได้เหมือนกัน ถามหาคนแทนโดยอ้างคนสุดท้ายที่เหลืออยู่
+    if (remaining.length === 0 && current.length > 0 && !isHod) {
+      setPendingRemoval(current[current.length - 1]);
+      return;
+    }
+    setAssigned(remaining);
   };
 
   return (
@@ -242,6 +272,12 @@ export function WfStageUsers({
           </div>
         </div>
       )}
+
+      <WfLastAssigneeDialog
+        leavingUser={pendingRemoval}
+        candidates={users.filter((u) => !assignedUserIds.has(u.user_id))}
+        onResolve={resolvePendingRemoval}
+      />
     </>
   );
 }
