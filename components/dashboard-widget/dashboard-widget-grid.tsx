@@ -140,7 +140,7 @@ export function DashboardWidgetGrid({
       <header className="flex items-center gap-3">
         <AppTile name={moduleName} size={40} />
         <div className="min-w-0">
-          <h1 className="text-lg leading-tight font-semibold">{title}</h1>
+          <h1 className="text-lg leading-tight font-semibold tracking-tight">{title}</h1>
           <p className="text-muted-foreground text-sm leading-snug">
             {description}
           </p>

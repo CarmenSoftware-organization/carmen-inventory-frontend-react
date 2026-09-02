@@ -214,7 +214,7 @@ export default function UserProfileSetting() {
         {/* touch target 44px บนมือถือ — header นี้ sticky อยู่บนสุดของหน้าโปรไฟล์
             ซึ่งเป็นหน้าที่เปิดจากมือถือบ่อย จงใจใหญ่กว่า icon-sm ปกติ */}
         <BackButton onClick={handleBack} className="h-11 w-11 sm:h-8 sm:w-8" />
-        <h1 className="text-lg font-semibold">{t("title")}</h1>
+        <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
         <div className="ml-auto">
           <Button
             type="submit"

@@ -168,7 +168,7 @@ export function NotificationTemplateForm({
           >
             <ChevronLeft />
           </Button>
-          <h1 className="max-w-[20rem] truncate text-lg font-semibold">
+          <h1 className="max-w-[20rem] truncate text-lg font-semibold tracking-tight">
             {title}
           </h1>
           {!isAdd && (

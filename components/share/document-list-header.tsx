@@ -25,7 +25,7 @@ export function DocumentListHeader({
     <div>
       <div className="flex items-center gap-2">
         <ModuleTileIcon />
-        <h1 className="text-lg font-semibold">{title}</h1>
+        <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
         {count !== undefined && count > 0 && (
           <Badge variant="secondary" size="sm" className="text-xs tabular-nums">
             {count.toLocaleString()}
