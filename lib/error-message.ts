@@ -27,6 +27,8 @@ const CODE_TO_KEY: Record<ErrorCode, string> = {
  */
 const APP_CODE_TO_KEY: Record<string, string> = {
   WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS: "workflowInProgress",
+  WORKFLOW_STAGE_CHANGE_BLOCKED: "workflowInProgress",
+  WORKFLOW_STAGE_WOULD_HAVE_NO_ACTOR: "workflowStageNoActor",
 };
 
 /** ข้อความกลางเมื่อไม่รู้ว่าเกิดอะไร — บอกว่าให้ทำอะไรต่อ ดีกว่าบอกว่าอะไรพัง */
