@@ -4229,6 +4229,7 @@
     "notifyAt": "Notify at",
     "notifyAtHintSameDay": "Recipients are told on the same day the report runs.",
     "notifyAtHintNextDay": "Earlier than the run time, so recipients are told the next day.",
+    "notifyAtHintTooClose": "Less than {minutes} minutes after the run time — recipients are told almost as soon as the run starts. The report itself is rendered when they open the link, so this gap is not processing time.",
     "notifyAtNextDayBadge": "+1 day",
     "notifyImmediately": "As soon as the run finishes",
     "notifyAtColumn": "Notify",
