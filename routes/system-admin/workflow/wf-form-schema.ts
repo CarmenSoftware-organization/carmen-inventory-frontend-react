@@ -103,6 +103,11 @@ export const wfFormSchema = z.object({
   is_active: z.boolean(),
   data: z.object({
     document_reference_pattern: z.string(),
+    // เฉพาะ workflow ของ PO — เปิดแล้วใบสั่งซื้อจะพิมพ์ลายเซ็นของ PR ต้นทางก่อน แล้วตามด้วยของตัวเอง
+    //
+    // ต้องประกาศไว้ตรงนี้ ไม่งั้น zod ตัดทิ้งตอน `parseWorkflowData` แล้วหน้านี้ PUT `data` ทั้งก้อน
+    // กลับไป (รวมถึงปุ่ม toggle/duplicate ในหน้า list) ค่าที่เปิดไว้จะโดนปิดเงียบ ๆ ทุกครั้งที่มีคนกดเซฟ
+    inherit_signature_from_pr: z.boolean().optional(),
     stages: z.array(
       z.object({
         name: z.string().min(1).max(100),
