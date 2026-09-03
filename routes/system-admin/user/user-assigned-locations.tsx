@@ -26,7 +26,7 @@ import {
 import SearchInput from "@/components/search-input";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { INVENTORY_TYPE } from "@/constant/location";
+import { INVENTORY_TYPE, INVENTORY_TYPE_LABEL_KEY } from "@/constant/location";
 import type { UserLocationItem } from "@/hooks/use-user";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
 
@@ -39,12 +39,6 @@ const LOCATION_TYPE_ORDER: INVENTORY_TYPE[] = [
   INVENTORY_TYPE.CONSIGNMENT,
   INVENTORY_TYPE.DIRECT,
 ];
-
-const LOCATION_TYPE_LABEL: Record<INVENTORY_TYPE, string> = {
-  [INVENTORY_TYPE.INVENTORY]: "Inventory",
-  [INVENTORY_TYPE.DIRECT]: "Direct",
-  [INVENTORY_TYPE.CONSIGNMENT]: "Consignment",
-};
 
 /* ------------------------------------------------------------------ */
 /* LocationsSection — ดูอย่างเดียว (ตาราง + ตัวกรองชนิดคลัง)          */
@@ -65,6 +59,9 @@ export function LocationsSection({
 }: LocationsSectionProps) {
   const tu = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
+  // ชื่อชนิดคลังมาจาก namespace เดียวกับที่ LocationTypeLabel ใช้ในคอลัมน์ประเภท
+  // ของตารางข้างล่าง — dropdown กับคอลัมน์จะได้ไม่เรียกของอย่างเดียวกันคนละชื่อ
+  const tloc = useTranslations("config.location");
   const [typeFilter, setTypeFilter] = useState<INVENTORY_TYPE | "all">("all");
 
   const groupedLocations = (() => {
@@ -132,7 +129,7 @@ export function LocationsSection({
                       aria-hidden="true"
                     />
                   )}
-                  {`${LOCATION_TYPE_LABEL[t]} (${locationCounts[t]})`}
+                  {`${tloc(INVENTORY_TYPE_LABEL_KEY[t])} (${locationCounts[t]})`}
                 </span>
               </SelectItem>
             );

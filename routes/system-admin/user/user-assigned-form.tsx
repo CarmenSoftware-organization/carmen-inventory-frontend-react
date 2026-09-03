@@ -3,8 +3,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { useNavigate } from "react-router";
-import { Pencil, Save, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Loader2, Pencil, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -37,6 +36,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const navigate = useNavigate();
   const tt = useTranslations("toast");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
 
@@ -142,14 +142,12 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
           <BackButton onClick={handleBack} />
           <UserAvatar first={user.firstname} last={user.lastname} />
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-foreground truncate text-lg font-semibold tracking-tight">
-                {user.firstname} {user.lastname}
-              </h1>
-              <Badge variant="success-light" size="xs" className="shrink-0">
-                ● Active
-              </Badge>
-            </div>
+            {/* ไม่มี badge สถานะ — endpoint รายละเอียดผู้ใช้ไม่ส่งสถานะมาเลย
+                (formattedData ของ user_application_role.service ไม่มี is_active
+                ทั้งที่อ่าน tb_user มาแล้ว) badge ที่เขียว 100% ของเวลาแย่กว่าไม่มี */}
+            <h1 className="text-foreground truncate text-lg font-semibold tracking-tight">
+              {user.firstname} {user.lastname}
+            </h1>
             <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
               <span className="break-all">{user.email}</span>
               <span aria-hidden="true">·</span>
@@ -160,8 +158,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
         <div className="flex shrink-0 items-center gap-2">
           {isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil />
-              Edit
+              <Pencil className="size-3.5" aria-hidden="true" />
+              {tc("edit")}
             </Button>
           ) : (
             <>
@@ -173,7 +171,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
                 disabled={isPending}
               >
                 <X className="size-3.5" aria-hidden="true" />
-                Cancel
+                {tc("cancel")}
               </Button>
               <Button
                 type="submit"
@@ -181,8 +179,15 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
                 form="user-roles-form"
                 disabled={isPending}
               >
-                <Save className="size-3.5" aria-hidden="true" />
-                {isPending ? "Saving..." : "Save"}
+                {isPending ? (
+                  <Loader2
+                    className="size-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Save className="size-3.5" aria-hidden="true" />
+                )}
+                {tc("save")}
               </Button>
             </>
           )}
