@@ -4,7 +4,7 @@ import { PurchaseRequestForm } from "./pr-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-export function EditPurchaseRequestContent({ id }: { id: string }) {
+export function PrEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseRequest");
   const {
     data: purchaseRequest,

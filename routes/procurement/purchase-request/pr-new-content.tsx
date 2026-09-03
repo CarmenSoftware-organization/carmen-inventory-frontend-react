@@ -10,7 +10,7 @@ import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-const NewPurchaseRequestInner = () => {
+const PrNewInner = () => {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template_id");
   // ?duplicate_id= — สร้างสำเนาจากใบเดิม (ปุ่ม Duplicate ในหน้า detail/เมนูแถว)
@@ -43,7 +43,7 @@ const NewPurchaseRequestInner = () => {
   );
 };
 
-export function NewPurchaseRequestContent() {
+export function PrNewContent() {
   const t = useTranslations("procurement.purchaseRequest");
 
   return (
@@ -52,7 +52,7 @@ export function NewPurchaseRequestContent() {
       description={t("noCreatableWorkflow")}
     >
       <Suspense fallback={<FormSkeleton />}>
-        <NewPurchaseRequestInner />
+        <PrNewInner />
       </Suspense>
     </CreateWorkflowGate>
   );

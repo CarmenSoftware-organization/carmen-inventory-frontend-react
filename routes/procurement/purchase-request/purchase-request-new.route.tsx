@@ -1,5 +1,5 @@
-import { NewPurchaseRequestContent } from "./new-purchase-request-content";
+import { PrNewContent } from "./pr-new-content";
 
 export function Component() {
-  return <NewPurchaseRequestContent />;
+  return <PrNewContent />;
 }
