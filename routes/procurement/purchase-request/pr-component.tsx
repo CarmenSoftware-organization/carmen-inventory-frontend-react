@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -26,11 +26,6 @@ import { Button } from "@/components/ui/button";
 import {
   usePurchaseRequest,
   useMyPendingPurchaseRequest,
-  usePurchaseRequestWorkflowStages,
-  useDeletePurchaseRequest,
-  useBatchApprovePurchaseRequest,
-  useBatchRejectPurchaseRequest,
-  useBatchDeletePurchaseRequest,
   useExportPurchaseRequest,
 } from "./use-purchase-request";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
@@ -40,14 +35,11 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
-import { PR_STATUS } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrStatusSelectDialog } from "./pr-select-dialog";
-import { PrActionDialog } from "./workflow/pr-action-dialog";
+import { PrListDialogs } from "./pr-list-dialogs";
 import { ErrorState } from "@/components/ui/error-state";
-import { FieldLabel } from "@/components/ui/field";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -56,9 +48,6 @@ import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { PURCHASE_REQUEST_STATUS_OPTIONS } from "@/constant/purchase-request";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -66,9 +55,10 @@ import { ViewSelector } from "@/components/list-filter/view-selector";
 import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
-import type { FilterFieldDef } from "@/types/list-filter";
-import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import { usePrFilterFields } from "./use-pr-filter-fields";
+import { usePrSelection } from "./use-pr-selection";
+import { buildPrExportColumns } from "./pr-export-columns";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -88,7 +78,6 @@ export default function PurchaseRequestComponent() {
   const tc = useTranslations("common");
   const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
-  const tt = useTranslations("toast");
   const navigate = useNavigate();
   const { defaultCurrencyCode, dateTimeFormat } = useProfile();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
@@ -103,12 +92,6 @@ export default function PurchaseRequestComponent() {
   const [batchApproveOpen, setBatchApproveOpen] = useState(false);
   const [batchRejectOpen, setBatchRejectOpen] = useState(false);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
-  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-  // ใบที่ผู้ใช้กดติ๊กทั้งที่คนละกลุ่มกับที่เลือกค้างไว้ (รอยืนยันว่าจะสลับกลุ่ม)
-  const [switchTarget, setSwitchTarget] = useState<PurchaseRequest | null>(
-    null,
-  );
-  const [selectAllOpen, setSelectAllOpen] = useState(false);
   // viewMode อยู่ใน URL (?view=) เพื่อให้ปุ่ม back จาก detail กลับมาเจอ tab เดิม
   const [viewModeParam] = useURL("view", {
     defaultValue: "my-pending",
@@ -138,124 +121,16 @@ export default function PurchaseRequestComponent() {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
-  const deletePurchaseRequest = useDeletePurchaseRequest();
-  const batchApprovePurchaseRequest = useBatchApprovePurchaseRequest();
-  const batchRejectPurchaseRequest = useBatchRejectPurchaseRequest();
-  const batchDeletePurchaseRequest = useBatchDeletePurchaseRequest();
   const { exportPurchaseRequest, isExporting } = useExportPurchaseRequest();
 
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
   });
 
-  const { data: stages } = usePurchaseRequestWorkflowStages();
-
-  // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
-  // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
-  // เหมือนที่เคยอยู่ใน PrFilterSheet เดิม) ไม่มี value จริงจึงไม่ถูกนับใน
-  // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" (ของ tab บน URL จริง)
-  const prFilterFields = useMemo<FilterFieldDef[]>(
-    () => [
-      {
-        key: "view_mode_toggle",
-        control: "custom",
-        // labelKey ว่างเจตนา — ListFilter จะไม่ render <FieldLabel> ลอย ๆ ให้
-        // (control นี้ sm:hidden อยู่แล้ว มี label "View" ของตัวเองอยู่ข้างในสำหรับ
-        // มือถือเท่านั้น ไม่งั้น desktop จะเห็น label ค้างแต่ไม่มี control ข้างใต้)
-        labelKey: "",
-        // field นี้ไม่มี value จริง (ปุ่ม toggle ไม่ผ่าน setValue) จึงไม่ควรมี clause
-        // ลง filterParam — ถ้าไม่ประกาศ toClause ค่า default คือ pass-through ตรง
-        // ซึ่งจะไม่มีวันเกิดขึ้นเพราะ values[key] ว่างเสมออยู่แล้ว แต่ประกาศไว้ชัดเจน
-        // ให้ตรงกับ pattern ของ field หลอกตัวอื่น (เช่น transaction's dateRange)
-        toClause: () => "",
-        render: () => (
-          <div className="space-y-1.5 sm:hidden">
-            <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
-            <ViewModeToggle
-              value={viewMode}
-              onChange={handleViewModeChange}
-              myPendingLabel={t("myPending")}
-              allDocumentsLabel={t("allDocuments")}
-              className="grid grid-cols-2 gap-2"
-            />
-          </div>
-        ),
-      },
-      {
-        // ค่า option เป็น clause เต็มต่อตัว (pr_status|string:draft) — เลือกหลายตัว
-        // MultiSelectFilter join เป็น clause ซ้ำ prefix ซึ่ง gateway parse รวมเป็น
-        // IN query ให้เอง (parseFilterString รองรับทั้งสอง format โดยตั้งใจ)
-        key: "filter",
-        control: "custom",
-        labelKey: "common.status",
-        section: "listView.sectionDocument",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={PURCHASE_REQUEST_STATUS_OPTIONS}
-            className="w-full"
-          />
-        ),
-      },
-      {
-        key: "workflow_current_stage",
-        control: "stage",
-        labelKey: "procurement.purchaseRequest.stage",
-        section: "listView.sectionDocument",
-        stages: stages ?? [],
-      },
-      {
-        key: "workflow",
-        control: "workflow",
-        labelKey: "field.workflow",
-        section: "listView.sectionDocument",
-        workflowType: WORKFLOW_TYPE.PR,
-      },
-      {
-        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
-        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
-        key: "sendback",
-        control: "status",
-        labelKey: "common.sendBack",
-        section: "listView.sectionDocument",
-        options: [
-          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
-        ],
-      },
-      {
-        // ช่วงจำนวนเงินรวม — UI ฝั่ง frontend ก่อน: toClause คืนค่าว่างไว้ไม่ให้
-        // clause หลุดไป backend (QueryParams ยังไม่รู้จัก num_range เดี๋ยว 500)
-        // ค่า "จริง" ใน URL/saved views ปกติ — backend รองรับเมื่อไรค่อยถอด toClause
-        key: "amount",
-        control: "amount-range",
-        labelKey: "field.totalAmount",
-        fieldKey: "base_total_amount",
-        section: "listView.sectionDocument",
-        toClause: () => "",
-      },
-      {
-        key: "department",
-        control: "department",
-        labelKey: "field.department",
-        section: "listView.sectionPeople",
-      },
-      {
-        key: "user_id",
-        control: "requester",
-        labelKey: "common.requester",
-        section: "listView.sectionPeople",
-      },
-      {
-        key: "pr_date",
-        control: "date-range",
-        labelKey: "field.prDate",
-        fieldKey: "pr_date",
-        section: "listView.sectionDate",
-      },
-    ],
-    [stages, viewMode, t, tc],
-  );
+  const prFilterFields = usePrFilterFields({
+    viewMode,
+    onViewModeChange: handleViewModeChange,
+  });
 
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PURCHASE_REQUEST,
@@ -270,58 +145,11 @@ export default function PurchaseRequestComponent() {
       const count = await exportPurchaseRequest({
         params: queryParams,
         viewMode,
-        columns: [
-          { header: tfl("prNo"), value: (r) => r.pr_no, width: 18 },
-          { header: tfl("date"), value: (r) => r.pr_date, width: 12 },
-          { header: tfl("type"), value: (r) => r.workflow_name, width: 16 },
-          {
-            header: tfl("stage"),
-            value: (r) => r.workflow_current_stage,
-            width: 18,
-          },
-          { header: tfl("status"), value: (r) => r.pr_status, width: 14 },
-          {
-            header: tfl("requester"),
-            value: (r) => r.requestor_name,
-            width: 22,
-          },
-          {
-            header: tfl("department"),
-            value: (r) => r.department_name,
-            width: 24,
-          },
-          {
-            header: tfl("totalAmount"),
-            value: (r) => r.base_total_amount,
-            width: 16,
-          },
-          {
-            header: tfl("currency"),
-            value: () => defaultCurrencyCode,
-            width: 8,
-          },
-          {
-            header: tfl("description"),
-            value: (r) => r.description ?? "",
-            width: 40,
-          },
-          {
-            header: tfl("created"),
-            value: (r) =>
-              r.audit?.created?.at
-                ? formatDate(r.audit.created.at, dateTimeFormat)
-                : "",
-            width: 18,
-          },
-          {
-            header: tfl("updated"),
-            value: (r) =>
-              r.audit?.updated?.at
-                ? formatDate(r.audit.updated.at, dateTimeFormat)
-                : "",
-            width: 18,
-          },
-        ],
+        columns: buildPrExportColumns({
+          tfl,
+          defaultCurrencyCode,
+          dateTimeFormat,
+        }),
       });
       if (count === 0) {
         toast.warning(tc("exportNoData"));
@@ -376,41 +204,8 @@ export default function PurchaseRequestComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  // ใบฉบับร่างลบได้อย่างเดียว ใบที่เหลืออนุมัติ/ไม่อนุมัติได้ — ปุ่มคนละชุด
-  // จึงติ๊กปนกันไม่ได้
-  const groupOf = (item: PurchaseRequest) =>
-    item.pr_status === PR_STATUS.DRAFT ? "draft" : "in_progress";
-
-  const selectedItems = items.filter((item) => rowSelection[item.id]);
-  const hasSelection = selectedItems.length > 0;
-  const selectedGroup = selectedItems.length ? groupOf(selectedItems[0]) : null;
-  const draftItems = items.filter((item) => groupOf(item) === "draft");
-  const inProgressItems = items.filter(
-    (item) => groupOf(item) === "in_progress",
-  );
-
-  const selectOnly = (list: PurchaseRequest[]) =>
-    setRowSelection(Object.fromEntries(list.map((item) => [item.id, true])));
-
-  const handleRowSelect = (item: PurchaseRequest, next: boolean) => {
-    if (!next) {
-      setRowSelection(({ [item.id]: _removed, ...rest }) => rest);
-      return;
-    }
-    if (selectedGroup && selectedGroup !== groupOf(item)) {
-      setSwitchTarget(item);
-      return;
-    }
-    setRowSelection((prev) => ({ ...prev, [item.id]: true }));
-  };
-
-  const handleSelectAll = () => {
-    if (hasSelection) {
-      setRowSelection({});
-      return;
-    }
-    setSelectAllOpen(true);
-  };
+  const selection = usePrSelection(items);
+  const { selectedItems, hasSelection, selectedGroup } = selection;
 
   const table = usePurchaseRequestTable({
     items,
@@ -422,10 +217,10 @@ export default function PurchaseRequestComponent() {
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
     isMyPending: viewMode === "my-pending",
-    onRowSelect: handleRowSelect,
-    onSelectAll: handleSelectAll,
-    rowSelection,
-    onRowSelectionChange: setRowSelection,
+    onRowSelect: selection.handleRowSelect,
+    onSelectAll: selection.handleSelectAll,
+    rowSelection: selection.rowSelection,
+    onRowSelectionChange: selection.setRowSelection,
   });
 
   // ไม่มี workflow ให้เริ่มใบเลย = สร้างไม่ได้ ปุ่มจาง แต่กดแล้วยังบอกเหตุผล
@@ -438,14 +233,6 @@ export default function PurchaseRequestComponent() {
       return;
     }
     setCreateDialogOpen(true);
-  };
-
-  const handleBatchApprove = () => {
-    setBatchApproveOpen(true);
-  };
-
-  const handleBatchReject = () => {
-    setBatchRejectOpen(true);
   };
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -550,7 +337,7 @@ export default function PurchaseRequestComponent() {
                 <Button
                   size="sm"
                   variant="success"
-                  onClick={handleBatchApprove}
+                  onClick={() => setBatchApproveOpen(true)}
                 >
                   <CheckCircle2 aria-hidden="true" />
                   {tc("approve")}
@@ -558,7 +345,7 @@ export default function PurchaseRequestComponent() {
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={handleBatchReject}
+                  onClick={() => setBatchRejectOpen(true)}
                 >
                   <XCircle aria-hidden="true" />
                   {tc("reject")}
@@ -623,152 +410,28 @@ export default function PurchaseRequestComponent() {
         )}
       </div>
 
-      <PrActionDialog
-        open={!!approveTarget}
-        onOpenChange={(open) =>
-          !open &&
-          !batchApprovePurchaseRequest.isPending &&
-          setApproveTarget(null)
-        }
-        title={t("approveTitle")}
-        description={t("approveConfirm", { prNo: approveTarget?.pr_no ?? "" })}
-        confirmVariant="success"
-        confirmLabel={tc("approve")}
-        showMessage={false}
-        isPending={batchApprovePurchaseRequest.isPending}
-        onConfirm={() => {
-          if (!approveTarget) return;
-          batchApprovePurchaseRequest.mutate(
-            { pr_ids: [approveTarget.id] },
-            {
-              onSuccess: () => {
-                toast.success(tt("approveSuccess", { entity: t("entity") }));
-                setApproveTarget(null);
-              },
-            },
-          );
-        }}
-      />
-      <PrActionDialog
-        open={!!rejectTarget}
-        onOpenChange={(open) =>
-          !open &&
-          !batchRejectPurchaseRequest.isPending &&
-          setRejectTarget(null)
-        }
-        title={t("rejectTitle")}
-        description={t("rejectConfirm", { prNo: rejectTarget?.pr_no ?? "" })}
-        confirmVariant="destructive"
-        confirmLabel={tc("reject")}
-        isPending={batchRejectPurchaseRequest.isPending}
-        onConfirm={(messages) => {
-          if (!rejectTarget) return;
-          batchRejectPurchaseRequest.mutate(
-            { pr_ids: [rejectTarget.id], reject_message: messages[0] ?? "" },
-            {
-              onSuccess: () => {
-                toast.success(tt("rejectSuccess", { entity: t("entity") }));
-                setRejectTarget(null);
-              },
-            },
-          );
-        }}
-      />
-      <DeleteDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) =>
-          !open && !deletePurchaseRequest.isPending && setDeleteTarget(null)
-        }
-        title={t("deleteTitle")}
-        description={t("deleteConfirm", { prNo: deleteTarget?.pr_no ?? "" })}
-        isPending={deletePurchaseRequest.isPending}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          deletePurchaseRequest.mutate(deleteTarget.id, {
-            onSuccess: () => {
-              toast.success(tt("deleteSuccess", { entity: t("entity") }));
-              setDeleteTarget(null);
-            },
-          });
-        }}
-      />
-
-      <PrActionDialog
-        open={batchApproveOpen}
-        onOpenChange={(open) =>
-          !open &&
-          !batchApprovePurchaseRequest.isPending &&
-          setBatchApproveOpen(false)
-        }
-        title={t("batchApproveTitle")}
-        description={
-          <div className="space-y-2">
-            <p>{t("batchApproveConfirm", { count: selectedItems.length })}</p>
-            <ul className="space-y-1 text-xs">
-              {selectedItems.map((item) => (
-                <li key={item.id}>{item.pr_no}</li>
-              ))}
-            </ul>
-          </div>
-        }
-        confirmVariant="success"
-        confirmLabel={tc("approve")}
-        showMessage={false}
-        isPending={batchApprovePurchaseRequest.isPending}
-        onConfirm={() => {
-          const selectedIds = selectedItems.map((item) => item.id);
-          batchApprovePurchaseRequest.mutate(
-            { pr_ids: selectedIds },
-            {
-              onSuccess: () => {
-                toast.success(tt("approveSuccess", { entity: t("entity") }));
-                setBatchApproveOpen(false);
-                setRowSelection({});
-              },
-            },
-          );
-        }}
-      />
-
-      <PrActionDialog
-        open={batchRejectOpen}
-        onOpenChange={(open) =>
-          !open &&
-          !batchRejectPurchaseRequest.isPending &&
-          setBatchRejectOpen(false)
-        }
-        title={t("batchRejectTitle")}
-        description={
-          <div className="space-y-2">
-            <p>{t("batchRejectConfirm", { count: selectedItems.length })}</p>
-            <ul className="space-y-1 text-xs">
-              {selectedItems.map((item) => (
-                <li key={item.id}>{item.pr_no}</li>
-              ))}
-            </ul>
-          </div>
-        }
-        confirmVariant="destructive"
-        confirmLabel={tc("reject")}
-        isPending={batchRejectPurchaseRequest.isPending}
-        onConfirm={(messages) => {
-          const selectedIds = selectedItems.map((item) => item.id);
-          batchRejectPurchaseRequest.mutate(
-            { pr_ids: selectedIds, reject_message: messages[0] ?? "" },
-            {
-              onSuccess: () => {
-                toast.success(tt("rejectSuccess", { entity: t("entity") }));
-                setBatchRejectOpen(false);
-                setRowSelection({});
-              },
-            },
-          );
-        }}
+      <PrListDialogs
+        deleteTarget={deleteTarget}
+        setDeleteTarget={setDeleteTarget}
+        approveTarget={approveTarget}
+        setApproveTarget={setApproveTarget}
+        rejectTarget={rejectTarget}
+        setRejectTarget={setRejectTarget}
+        batchApproveOpen={batchApproveOpen}
+        setBatchApproveOpen={setBatchApproveOpen}
+        batchRejectOpen={batchRejectOpen}
+        setBatchRejectOpen={setBatchRejectOpen}
+        batchDeleteOpen={batchDeleteOpen}
+        setBatchDeleteOpen={setBatchDeleteOpen}
+        selectedItems={selectedItems}
+        pageItemCount={items.length}
+        clearSelection={selection.clearSelection}
+        table={table}
       />
 
       <ConfirmDialog
-        open={!!switchTarget}
-        onOpenChange={(open) => !open && setSwitchTarget(null)}
+        open={!!selection.switchTarget}
+        onOpenChange={(open) => !open && selection.setSwitchTarget(null)}
         title={t("switchSelectionTitle")}
         description={t("switchSelectionDesc", {
           count: selectedItems.length,
@@ -779,59 +442,26 @@ export default function PurchaseRequestComponent() {
         })}
         confirmText={t("switchSelectionConfirm", {
           to:
-            switchTarget && groupOf(switchTarget) === "draft"
+            selection.switchTarget &&
+            selection.groupOf(selection.switchTarget) === "draft"
               ? t("selectDraft")
               : t("selectInProgress"),
         })}
-        onConfirm={() => {
-          if (!switchTarget) return;
-          setRowSelection({ [switchTarget.id]: true });
-          setSwitchTarget(null);
-        }}
+        onConfirm={selection.confirmSwitch}
       />
 
       <PrStatusSelectDialog
-        open={selectAllOpen}
-        onOpenChange={setSelectAllOpen}
-        draftCount={draftItems.length}
-        inProgressCount={inProgressItems.length}
+        open={selection.selectAllOpen}
+        onOpenChange={selection.setSelectAllOpen}
+        draftCount={selection.draftItems.length}
+        inProgressCount={selection.inProgressItems.length}
         onSelectDraft={() => {
-          selectOnly(draftItems);
-          setSelectAllOpen(false);
+          selection.selectOnly(selection.draftItems);
+          selection.setSelectAllOpen(false);
         }}
         onSelectInProgress={() => {
-          selectOnly(inProgressItems);
-          setSelectAllOpen(false);
-        }}
-      />
-
-      <DeleteDialog
-        open={batchDeleteOpen}
-        onOpenChange={(open) =>
-          !open &&
-          !batchDeletePurchaseRequest.isPending &&
-          setBatchDeleteOpen(false)
-        }
-        title={t("batchDeleteTitle")}
-        description={t("batchDeleteConfirm", { count: selectedItems.length })}
-        isPending={batchDeletePurchaseRequest.isPending}
-        onConfirm={() => {
-          // ลบทั้งหน้า = หน้านี้จะว่างหลัง refetch ต้องถอยไปหน้าก่อนหน้าเอง
-          // ไม่งั้นคนใช้เจอหน้าเปล่าแล้วนึกว่าข้อมูลหายหมด
-          const clearsPage = selectedItems.length === items.length;
-          batchDeletePurchaseRequest.mutate(
-            { ids: selectedItems.map((item) => item.id) },
-            {
-              onSuccess: () => {
-                toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                setRowSelection({});
-                setBatchDeleteOpen(false);
-                if (clearsPage && table.getState().pagination.pageIndex > 0) {
-                  table.previousPage();
-                }
-              },
-            },
-          );
+          selection.selectOnly(selection.inProgressItems);
+          selection.setSelectAllOpen(false);
         }}
       />
 
