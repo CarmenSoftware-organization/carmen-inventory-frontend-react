@@ -22,6 +22,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   useCreateSpotCheck,
@@ -101,10 +102,23 @@ export function ScForm({
     defaultValues,
   });
 
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    isDirty: isFormDirty,
     isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
 
   const method = useWatch({ control: form.control, name: "method" });
   const items = useWatch({ control: form.control, name: "items" });
@@ -129,9 +143,12 @@ export function ScForm({
     const payload = mapFormToPayload(values);
 
     if (isEdit && spotCheck) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       updateSc.mutate(
         { id: spotCheck.id, doc_version: spotCheck.doc_version, ...payload },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/inventory-management/spot-check");
@@ -139,7 +156,10 @@ export function ScForm({
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createSc.mutate(payload, {
+        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = (res as { data?: { id?: string } } | undefined)?.data
@@ -428,6 +448,16 @@ export function ScForm({
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {spotCheck && (
         <DeleteDialog

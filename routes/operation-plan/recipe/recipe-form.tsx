@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { toast } from "sonner";
 import {
   useCreateRecipe,
@@ -72,10 +73,23 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const computed = useRecipeCostCalc(form);
   const gallery = useRecipeGallery(recipe?.images);
 
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty || gallery.isDirty;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty || gallery.isDirty,
+    isDirty: isFormDirty,
     isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
 
   const onSubmit = (values: RecipeFormValues) => {
     const payload = buildRecipePayload(values);
@@ -89,6 +103,8 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     if (isEdit && recipe) {
       // Send the full gallery manifest only when it changed (full-sync);
       // omitting it keeps the existing images untouched.
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       updateRecipe.mutate(
         {
           id: recipe.id,
@@ -98,6 +114,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           ...(galleryDirty ? { images: files, gallery: manifest } : {}),
         },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
@@ -105,12 +122,15 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         },
       );
     } else {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createRecipe.mutate(
         {
           ...payload,
           ...(count > 0 ? { images: files, gallery: manifest } : {}),
         },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
@@ -214,6 +234,16 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       )}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

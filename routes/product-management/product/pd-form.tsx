@@ -22,6 +22,7 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -305,6 +306,8 @@ export function ProductForm({ product }: ProductFormProps) {
         return;
       }
       if (isAdd) {
+        // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+        setIsSubmitting(true);
         // ตอนสร้างยังไม่มี id ให้แนบรูป ต้องสร้างก่อนแล้วค่อยอัปโหลดตามไป
         const res = await createProduct.mutateAsync(payload);
         toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -318,15 +321,30 @@ export function ProductForm({ product }: ProductFormProps) {
       }
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ค้างอยู่หน้าเดิมให้แก้ต่อ
+      // เปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty จะออกได้โดยไม่ถาม
+      setIsSubmitting(false);
     }
   };
+
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty || pendingImages.length > 0;
 
   const discard = useDiscardConfirm({
     // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
     // หายเงียบ ๆ โดยไม่ถามสักคำ
-    isDirty: form.formState.isDirty || pendingImages.length > 0,
+    isDirty: isFormDirty,
     isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
 
   /**
    * กรอกไม่ครบ → บอกสั้น ๆ ว่าไม่ครบแล้วพาไปที่ช่องแรกที่ผิด (กติกาเดียวกับ PR)
@@ -469,6 +487,16 @@ export function ProductForm({ product }: ProductFormProps) {
       )}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

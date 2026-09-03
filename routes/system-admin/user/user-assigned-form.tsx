@@ -7,6 +7,7 @@ import { Loader2, Pencil, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import { useRole } from "../shared/use-role";
@@ -79,6 +80,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await updateUserRoles.mutateAsync({
         user_id: user.user_id,
@@ -91,6 +93,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       navigate("/system-admin/user");
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ไม่ navigate ออกจากฟอร์ม
+      // ต้องเปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty อยู่จะออกได้โดยไม่ถาม
+      setIsSubmitting(false);
     }
   };
 
@@ -98,6 +102,16 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+
+  // ปิด guard ตั้งแต่กดบันทึก — submit สำเร็จแล้วเด้งกลับหน้ารายการ ถ้ายังเปิดอยู่
+  // sentinel จะค้างใน history stack กด back แล้วเจอหน้าเดิมซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    !isView && form.formState.isDirty && !isSubmitting,
+  );
 
   const handleCancel = () => {
     discard.confirm(() => {
@@ -224,6 +238,16 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       </Reveal>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

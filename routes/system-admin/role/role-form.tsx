@@ -9,6 +9,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import {
@@ -61,10 +62,23 @@ export function RoleForm({ role }: RoleFormProps) {
     defaultValues,
   });
 
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    isDirty: isFormDirty,
     isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
   const { printRole } = useRolePrint();
 
   /* Live watches — subscribe only to specific fields */
@@ -80,12 +94,15 @@ export function RoleForm({ role }: RoleFormProps) {
 
   const onSubmit = (values: RoleFormValues) => {
     if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createRole.mutate(
         {
           application_role_name: values.application_role_name,
           permissions: { add: values.permissions },
         },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
@@ -101,6 +118,8 @@ export function RoleForm({ role }: RoleFormProps) {
         (id) => !currentIds.has(id),
       );
 
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       updateRole.mutate(
         {
           id: role.id,
@@ -110,6 +129,7 @@ export function RoleForm({ role }: RoleFormProps) {
           permissions: { add, remove },
         },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
@@ -220,6 +240,16 @@ export function RoleForm({ role }: RoleFormProps) {
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {role && (
         <DeleteDialog

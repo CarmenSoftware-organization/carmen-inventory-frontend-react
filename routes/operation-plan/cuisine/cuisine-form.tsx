@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { toast } from "sonner";
 import {
   useCreateCuisine,
@@ -54,19 +55,35 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
     defaultValues: getDefaultValues(cuisine),
   });
 
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    isDirty: isFormDirty,
     isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
 
   const onSubmit = (values: CuisineFormValues) => {
     const payload = mapToPayload(values);
 
     if (isEdit && cuisine) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       updateCuisine.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
         { id: cuisine.id, doc_version: cuisine.doc_version, ...payload },
         {
+          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/cuisine");
@@ -74,7 +91,10 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
         },
       );
     } else {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createCuisine.mutate(payload, {
+        onError: () => setIsSubmitting(false),
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/operation-plan/cuisine");
@@ -147,6 +167,16 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {cuisine && (
         <DeleteDialog
