@@ -50,7 +50,7 @@ vi.mock("./use-vendor-certificate", () => ({
   useUpdateVendorCertificate: () => noop,
   useDeleteVendorCertificate: () => noop,
 }));
-vi.mock("@/hooks/use-certification", () => ({
+vi.mock("../shared/use-certification", () => ({
   useCertification: () => ({ data: undefined, isLoading: false }),
 }));
 vi.mock("@/hooks/use-profile", () => ({

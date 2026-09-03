@@ -18,7 +18,7 @@ import { SettingSection } from "@/components/ui/setting-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
-import { useCertification } from "@/hooks/use-certification";
+import { useCertification } from "../shared/use-certification";
 import {
   useDeleteVendorCertificate,
   useVendorCertificates,

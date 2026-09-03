@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import {
   useCertification,
   useDeleteCertification,
-} from "@/hooks/use-certification";
+} from "../shared/use-certification";
 import type { Certification } from "@/types/certification";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";

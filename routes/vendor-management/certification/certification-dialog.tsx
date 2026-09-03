@@ -8,7 +8,7 @@ import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog"
 import {
   useCreateCertification,
   useUpdateCertification,
-} from "@/hooks/use-certification";
+} from "../shared/use-certification";
 import {
   createCertificationSchema,
   getDefaultValues,

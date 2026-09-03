@@ -5,7 +5,7 @@ import { StatusSwitch } from "@/components/ui/status-switch";
 import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
-import { useCreateEcoLabel, useUpdateEcoLabel } from "@/hooks/use-eco-label";
+import { useCreateEcoLabel, useUpdateEcoLabel } from "../shared/use-eco-label";
 import {
   createEcoLabelSchema,
   getDefaultValues,

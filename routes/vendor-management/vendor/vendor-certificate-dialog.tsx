@@ -23,7 +23,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useCertification } from "@/hooks/use-certification";
+import { useCertification } from "../shared/use-certification";
 import {
   useCreateVendorCertificate,
   useUpdateVendorCertificate,

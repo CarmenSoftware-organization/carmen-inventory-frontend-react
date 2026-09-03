@@ -19,7 +19,7 @@ import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import EmptyComponent from "@/components/empty-component";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
-import { useEcoLabel } from "@/hooks/use-eco-label";
+import { useEcoLabel } from "../shared/use-eco-label";
 import {
   useDeleteProductEcoLabel,
   useProductEcoLabels,

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
-import { useEcoLabel, useDeleteEcoLabel } from "@/hooks/use-eco-label";
+import { useEcoLabel, useDeleteEcoLabel } from "../shared/use-eco-label";
 import type { EcoLabel } from "@/types/eco-label";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
