@@ -1771,6 +1771,8 @@
       "hideFields": "ซ่อนฟิลด์",
       "showSignatureInReport": "แสดงช่องเซ็นในรายงาน",
       "signatureLimitReached": "ช่องเซ็นในรายงานได้สูงสุด 5 ช่อง",
+      "inheritSignatureFromPr": "รับลายเซ็นจาก PR ต้นทาง",
+      "inheritSignatureFromPrHint": "ใบสั่งซื้อที่พิมพ์จะขึ้นลายเซ็นของ PR ที่มันมาก่อน แล้วตามด้วยของตัวเอง โดยใช้โควตา 5 ช่องร่วมกัน",
       "roleCreate": "สร้าง",
       "roleApprove": "อนุมัติ",
       "rolePurchase": "จัดซื้อ",

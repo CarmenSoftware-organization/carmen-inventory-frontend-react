@@ -1,4 +1,5 @@
 import { Controller, type UseFormReturn } from "react-hook-form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusSwitch } from "@/components/ui/status-switch";
@@ -12,11 +13,14 @@ import {
 import { useTranslations } from "use-intl";
 import {
   Field,
+  FieldContent,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
 import { getWorkflowTypeOptions } from "@/constant/workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 
 interface WfGeneralProps {
@@ -29,6 +33,8 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
   const tfl = useTranslations("field");
 
   const workflowTypeOptions = getWorkflowTypeOptions(t);
+  // มีแต่ PO ที่มีเอกสารต้นทางให้รับลายเซ็นต่อ — PR/SR ติ๊กไปก็ไม่มีใครอ่าน (backend ลบ key ทิ้ง)
+  const isPurchaseOrder = form.watch("workflow_type") === WORKFLOW_TYPE.PO;
 
   return (
     <div className="w-full pt-4">
@@ -94,6 +100,34 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
             {...form.register("description")}
           />
         </Field>
+
+        {isPurchaseOrder && (
+          <Field orientation="horizontal">
+            <Controller
+              control={form.control}
+              name="data.inherit_signature_from_pr"
+              render={({ field }) => (
+                <Checkbox
+                  id="wf-inherit-signature"
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                  disabled={isDisabled}
+                />
+              )}
+            />
+            <FieldContent>
+              <FieldLabel
+                htmlFor="wf-inherit-signature"
+                className="text-base"
+              >
+                {t("inheritSignatureFromPr")}
+              </FieldLabel>
+              <FieldDescription>
+                {t("inheritSignatureFromPrHint")}
+              </FieldDescription>
+            </FieldContent>
+          </Field>
+        )}
 
         <Controller
           control={form.control}

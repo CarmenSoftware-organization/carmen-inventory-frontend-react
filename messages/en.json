@@ -1771,6 +1771,8 @@
       "hideFields": "Hide Fields",
       "showSignatureInReport": "Show signature in report",
       "signatureLimitReached": "Maximum 5 signatures per report",
+      "inheritSignatureFromPr": "Inherit signatures from source PR",
+      "inheritSignatureFromPrHint": "A printed purchase order shows the signatures of the purchase requests it came from first, then its own. Both share the 5-signature limit.",
       "roleCreate": "Create",
       "roleApprove": "Approve",
       "rolePurchase": "Purchase",
