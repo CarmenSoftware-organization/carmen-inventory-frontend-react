@@ -9,14 +9,11 @@ import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
-import type { TransferItem } from "@/components/ui/transfer";
 import { toast } from "sonner";
 import { useRole } from "../shared/use-role";
-import { useLocation } from "@/hooks/use-location";
 import {
   useUpdateUserRoles,
   useUserLocations,
-  useUpdateUserLocations,
   useUserDepartments,
 } from "@/hooks/use-user";
 import type { UserDetail } from "@/types/user";
@@ -47,36 +44,12 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const updateUserRoles = useUpdateUserRoles();
   const roles = rolesData?.data ?? [];
 
+  // คลังเป็นข้อมูลอ่านอย่างเดียวในหน้านี้ — ผูก/ถอนคลังทำที่ /config/location
   const { data: userLocations = [], isLoading: locationsLoading } =
     useUserLocations(user.user_id);
-  const { data: allLocationData, isLoading: allLocationsLoading } = useLocation(
-    { perpage: 999 },
-  );
-  const updateUserLocations = useUpdateUserLocations();
 
   const { data: userDepartments, isLoading: departmentsLoading } =
     useUserDepartments(user.user_id);
-
-  /* Transfer source */
-  const locationSource: TransferItem[] = (allLocationData?.data ?? [])
-    .filter((l) => l.is_active)
-    .map((l) => ({ key: l.id, title: `${l.code} — ${l.name}` }));
-
-  const initialLocationKeys = userLocations.map((l) => l.location_id);
-  const serverLocationKey = initialLocationKeys.join("|");
-
-  const [locationTargetKeys, setLocationTargetKeys] =
-    useState<string[]>(initialLocationKeys);
-
-  // Re-seed the transfer target only when the SERVER data actually changes,
-  // via React's "adjust state during render" pattern. Depending on
-  // `initialLocationKeys` in an effect re-ran every render (fresh array each
-  // time) and reverted the user's picks the moment they moved one across.
-  const [seededLocationKey, setSeededLocationKey] = useState(serverLocationKey);
-  if (seededLocationKey !== serverLocationKey) {
-    setSeededLocationKey(serverLocationKey);
-    setLocationTargetKeys(initialLocationKeys);
-  }
 
   const memberDepartment = userDepartments?.department ?? null;
   const hodDepartments = userDepartments?.hod_departments ?? [];
@@ -90,13 +63,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     defaultValues: getDefaultValues(user),
   });
 
-  const isSaving = updateUserRoles.isPending || updateUserLocations.isPending;
-  const isPending = isSaving;
+  const isPending = updateUserRoles.isPending;
   const isDisabled = isView || isPending;
-
-  const hasLocationChanges =
-    JSON.stringify([...locationTargetKeys].sort()) !==
-    JSON.stringify([...initialLocationKeys].sort());
 
   const onSubmit = async (values: UserRolesFormValues) => {
     const addRoles = values.role_ids.filter(
@@ -105,35 +73,20 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     const removeRoles = initialRoleIds.filter(
       (id) => !values.role_ids.includes(id),
     );
-    const hasRoleChanges = addRoles.length > 0 || removeRoles.length > 0;
 
-    if (!hasRoleChanges && !hasLocationChanges) {
+    if (addRoles.length === 0 && removeRoles.length === 0) {
       setMode("view");
       return;
     }
 
     try {
-      const promises: Promise<unknown>[] = [];
-      if (hasRoleChanges) {
-        promises.push(
-          updateUserRoles.mutateAsync({
-            user_id: user.user_id,
-            application_role_id: {
-              ...(addRoles.length > 0 && { add: addRoles }),
-              ...(removeRoles.length > 0 && { remove: removeRoles }),
-            },
-          }),
-        );
-      }
-      if (hasLocationChanges) {
-        promises.push(
-          updateUserLocations.mutateAsync({
-            userId: user.user_id,
-            locationIds: locationTargetKeys,
-          }),
-        );
-      }
-      await Promise.all(promises);
+      await updateUserRoles.mutateAsync({
+        user_id: user.user_id,
+        application_role_id: {
+          ...(addRoles.length > 0 && { add: addRoles }),
+          ...(removeRoles.length > 0 && { remove: removeRoles }),
+        },
+      });
       toast.success(tt("updateSuccess", { entity: tfl("user") }));
       navigate("/system-admin/user");
     } catch {
@@ -142,14 +95,13 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   };
 
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty || hasLocationChanges,
+    isDirty: form.formState.isDirty,
     isPending,
   });
 
   const handleCancel = () => {
     discard.confirm(() => {
       form.reset({ role_ids: initialRoleIds });
-      setLocationTargetKeys(initialLocationKeys);
       setMode("view");
     });
   };
@@ -261,15 +213,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
 
       <Reveal delay={200}>
         <LocationsSection
-          isView={isView}
           isLoading={locationsLoading}
-          isDisabled={isDisabled}
           userLocations={userLocations}
-          locationSource={locationSource}
-          locationTargetKeys={locationTargetKeys}
-          onTargetKeysChange={setLocationTargetKeys}
-          transferLoading={allLocationsLoading || locationsLoading}
-          initialLocationCount={initialLocationKeys.length}
         />
       </Reveal>
 

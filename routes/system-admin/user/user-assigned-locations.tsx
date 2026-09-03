@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { ListFilter, MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -26,15 +26,9 @@ import {
 import SearchInput from "@/components/search-input";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { TransferItem } from "@/components/ui/transfer";
 import { INVENTORY_TYPE } from "@/constant/location";
 import type { UserLocationItem } from "@/hooks/use-user";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
-
-// แทน next/dynamic ด้วย React.lazy (code-split transfer chunk เหมือนเดิม)
-const Transfer = lazy(() =>
-  import("@/components/ui/transfer").then((m) => ({ default: m.Transfer })),
-);
 
 /* ------------------------------------------------------------------ */
 /* Location type constants — local to this section                     */
@@ -53,31 +47,21 @@ const LOCATION_TYPE_LABEL: Record<INVENTORY_TYPE, string> = {
 };
 
 /* ------------------------------------------------------------------ */
-/* LocationsSection — view (grouped + filter) vs edit (Transfer)       */
+/* LocationsSection — ดูอย่างเดียว (ตาราง + ตัวกรองชนิดคลัง)          */
 /* ------------------------------------------------------------------ */
 
 interface LocationsSectionProps {
-  readonly isView: boolean;
   readonly isLoading: boolean;
-  readonly isDisabled: boolean;
   readonly userLocations: UserLocationItem[];
-  readonly locationSource: TransferItem[];
-  readonly locationTargetKeys: string[];
-  readonly onTargetKeysChange: (keys: string[]) => void;
-  readonly transferLoading: boolean;
-  readonly initialLocationCount: number;
 }
 
+/**
+ * คลังที่ผูกกับผู้ใช้ — **ดูอย่างเดียว** การผูก/ถอนคลังทำที่หน้าตั้งค่าคลัง
+ * (`/config/location` มี transfer ของผู้ใช้อยู่ในตัว) ไม่ใช่ที่นี่
+ */
 export function LocationsSection({
-  isView,
   isLoading,
-  isDisabled,
   userLocations,
-  locationSource,
-  locationTargetKeys,
-  onTargetKeysChange,
-  transferLoading,
-  initialLocationCount,
 }: LocationsSectionProps) {
   const tu = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
@@ -116,7 +100,7 @@ export function LocationsSection({
   // ไม่ใช่จุดสี — คนเลือกจาก dropdown แล้วเห็นไอคอนเดิมในคอลัมน์ประเภท โยงกันได้ทันที
   // และชนิดคลังเป็นคุณสมบัติ ไม่ใช่ความคืบหน้า จึงไม่ควรมีสีตั้งแต่แรก
   const filters =
-    isView && userLocations.length > 0 ? (
+    userLocations.length > 0 ? (
       <Select
         value={typeFilter}
         onValueChange={(v) => setTypeFilter(v as INVENTORY_TYPE | "all")}
@@ -162,27 +146,14 @@ export function LocationsSection({
       wide
       title={tu("locationsTitle")}
       description={tu("locationsDesc")}
-      count={isView ? initialLocationCount : locationTargetKeys.length}
+      count={userLocations.length}
     >
-      {isView ? (
-        <LocationsView
-          isLoading={isLoading}
-          userLocations={userLocations}
-          visibleLocations={visibleLocations}
-          filters={filters}
-        />
-      ) : (
-        <Suspense fallback={null}>
-          <Transfer
-            dataSource={locationSource}
-            targetKeys={locationTargetKeys}
-            onChange={onTargetKeysChange}
-            disabled={isDisabled}
-            loading={transferLoading}
-            titles={["Available Locations", "Assigned Locations"]}
-          />
-        </Suspense>
-      )}
+      <LocationsView
+        isLoading={isLoading}
+        userLocations={userLocations}
+        visibleLocations={visibleLocations}
+        filters={filters}
+      />
     </AssignSection>
   );
 }

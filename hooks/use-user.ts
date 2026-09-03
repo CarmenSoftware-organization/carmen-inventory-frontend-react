@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -148,20 +148,6 @@ export function useUpdateUserRoles() {
 }
 
 /**
- * Hook แก้ไขการผูก location ให้กับผู้ใช้
- *
- * ยิง PUT `/api/config/{buCode}/locations-users/{userId}` ด้วย body
- * `{ location_ids: [...] }` invalidate query `user-locations` ของ userId นั้น
- * error ถูก normalize เป็น `ApiError`
- *
- * @returns UseMutationResult รับ `{ userId, locationIds }` เป็น variable
- * @example
- * ```ts
- * const update = useUpdateUserLocations();
- * update.mutate({ userId: "u1", locationIds: ["L01", "L02"] });
- * ```
- */
-/**
  * Hook ดึง department หลักและรายการ department ที่เป็น HOD ของผู้ใช้
  *
  * ยิง `GET /config/{bu}/department-user/user/{userId}` คืน object
@@ -191,31 +177,6 @@ export function useUserDepartments(userId: string | undefined) {
     },
     enabled: !!buCode && !!userId,
   });
-}
-
-export function useUpdateUserLocations() {
-  const buCode = useBuCode();
-  const queryClient = useQueryClient();
-
-  return useMutation<void, ApiError, { userId: string; locationIds: string[] }>(
-    {
-      mutationFn: async ({ userId, locationIds }) => {
-        if (!buCode) throw new Error("Missing buCode");
-        const res = await httpClient.put(
-          API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId),
-          { location_ids: locationIds },
-        );
-        if (!res.ok) {
-          throw await ApiError.from(res, "Failed to update user locations");
-        }
-      },
-      onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ["user-locations", buCode, variables.userId],
-        });
-      },
-    },
-  );
 }
 
 // --- User × Role matrix (รายงาน print/CSV) ---
