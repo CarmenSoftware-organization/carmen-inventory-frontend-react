@@ -42,13 +42,11 @@ export function useCnItemTable({
   onDelete,
 }: UseCnItemTableOptions) {
   "use no memo";
-  const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
   const type = useWatch({
     control: form.control,
     name: "credit_note_type",
   }) as CnCreditNoteType;
-  const isAmountDiscount = type === "amount_discount";
 
   const columns = useMemo<ColumnDef<CnItemField>[]>(() => {
     const rightMeta = {
@@ -262,7 +260,7 @@ export function useCnItemTable({
         cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
-  }, [form, disabled, isAmountDiscount, type, itemFields, t, tfl, onDelete]);
+  }, [form, disabled, type, itemFields, tfl, onDelete]);
 
   // กางทุกแถวไว้ตั้งแต่แรกเสมอ — ฝั่งคืนคือสาระของใบลดหนี้ ไม่ใช่รายละเอียดเสริม
   // (โหมดแก้ต้องกรอกทุกบรรทัดอยู่แล้ว โหมดอ่านก็ต้องเห็นว่าคืนอะไรไปเท่าไหร่)
