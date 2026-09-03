@@ -119,18 +119,18 @@ export function SignatureDialog({
     <Dialog open={open} onOpenChange={(o) => !isSubmitting && onOpenChange(o)}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-sm">{t("signatureTitle")}</DialogTitle>
-          <DialogDescription className="text-xs">
+          <DialogTitle>{t("signatureTitle")}</DialogTitle>
+          <DialogDescription>
             {t("signatureDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as "draw" | "upload")}>
           <TabsList className="w-full">
-            <TabsTrigger value="draw" className="flex-1 text-xs">
+            <TabsTrigger value="draw" className="flex-1">
               {t("drawSignature")}
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex-1 text-xs">
+            <TabsTrigger value="upload" className="flex-1">
               {t("uploadSignature")}
             </TabsTrigger>
           </TabsList>

@@ -1,5 +1,5 @@
 /**
- * Carmen Tile System — SubTiles (56 submodule tiles)
+ * Carmen Tile System — SubTiles (submodule tiles)
  *
  * Each tile inherits its parent module palette.
  */
@@ -1471,6 +1471,233 @@ export const SubTiles: Record<string, TileRenderer> = {
         strokeWidth="0.6"
         opacity="0.3"
         fill="none"
+      />
+    </>
+  ),
+  // ════ Accounting ════
+  // NOTE: ทุกรายละเอียดที่ต้อง "มองเห็น" ใช้ currentColor (= --tile-ink) หรือ
+  // palette.accent เท่านั้น — palette.base คือ --tile-surface ซึ่งเป็น
+  // `transparent` ทั้งแอป (styles/module-colors.css) วาดด้วยมันแล้วหายไปเงียบ ๆ
+  journalVoucher: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} />
+      <rect
+        x="14"
+        y="16"
+        width="11"
+        height="1.6"
+        rx="0.8"
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="14"
+        y="19.6"
+        width="8"
+        height="1.6"
+        rx="0.8"
+        style={{ fill: palette.accent }}
+        opacity="0.6"
+      />
+      <Glyph x={20} y={29.5} size={8.5} fill={palette.accent} anchor="middle">
+        JV
+      </Glyph>
+    </>
+  ),
+  templateVoucher: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} x={9} y={7} w={18} h={22} />
+      <rect
+        x="13"
+        y="12"
+        width="18"
+        height="22"
+        rx="1.6"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.4"
+        strokeDasharray="3 2.4"
+      />
+    </>
+  ),
+  recurringVoucher: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} />
+      <path
+        d="M 15 24 A 5 5 0 1 1 20 29"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M 15 20.5 V 24.5 H 19"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+  allocationVoucher: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <rect x="7" y="17" width="8" height="6" rx="1.2" fill="currentColor" />
+      <path
+        d="M 15 20 H 20 M 20 12 V 28 M 20 12 H 24 M 20 20 H 24 M 20 28 H 24"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <rect x="24" y="9" width="8" height="6" rx="1.2" fill="currentColor" />
+      <rect
+        x="24"
+        y="17"
+        width="8"
+        height="6"
+        rx="1.2"
+        style={{ fill: palette.accent }}
+      />
+      <rect x="24" y="25" width="8" height="6" rx="1.2" fill="currentColor" />
+    </>
+  ),
+  accountsPayable: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} />
+      <path
+        d="M 20 14 V 24 M 16.5 20.5 L 20 24 L 23.5 20.5"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Glyph x={20} y={30.5} size={7.5} fill={palette.accent} anchor="middle">
+        AP
+      </Glyph>
+    </>
+  ),
+  accountsReceivable: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} />
+      <path
+        d="M 20 24 V 14 M 16.5 17.5 L 20 14 L 23.5 17.5"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Glyph x={20} y={30.5} size={7.5} fill={palette.accent} anchor="middle">
+        AR
+      </Glyph>
+    </>
+  ),
+  financialReports: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} x={9} y={8} w={22} h={24} fold={0} />
+      <rect
+        x="13"
+        y="22"
+        width="3.6"
+        height="6"
+        rx="0.9"
+        style={{ fill: palette.accent }}
+        opacity="0.55"
+      />
+      <rect
+        x="18.2"
+        y="18"
+        width="3.6"
+        height="10"
+        rx="0.9"
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="23.4"
+        y="13.5"
+        width="3.6"
+        height="14.5"
+        rx="0.9"
+        style={{ fill: palette.accent }}
+        opacity="0.75"
+      />
+    </>
+  ),
+  // ════ Config ════
+  accountCode: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} />
+      <Glyph x={20} y={26} size={14} fill={palette.accent} anchor="middle">
+        #
+      </Glyph>
+    </>
+  ),
+  accountMapping: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <rect x="7" y="12" width="8" height="7" rx="1.2" fill="currentColor" />
+      <rect x="7" y="22" width="8" height="7" rx="1.2" fill="currentColor" />
+      <path
+        d="M 15 15.5 H 25 M 15 25.5 H 25"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <rect
+        x="25"
+        y="12"
+        width="8"
+        height="7"
+        rx="1.2"
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="25"
+        y="22"
+        width="8"
+        height="7"
+        rx="1.2"
+        style={{ fill: palette.accent }}
+      />
+    </>
+  ),
+  shelf: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <rect x="11" y="11" width="5" height="7" rx="0.9" fill="currentColor" />
+      <rect
+        x="18"
+        y="13"
+        width="6"
+        height="5"
+        rx="0.9"
+        style={{ fill: palette.accent }}
+      />
+      <rect x="11" y="21" width="7" height="6" rx="0.9" fill="currentColor" />
+      <rect
+        x="20"
+        y="20"
+        width="5"
+        height="7"
+        rx="0.9"
+        style={{ fill: palette.accent }}
+      />
+      <path
+        d="M 8 18.6 H 32 M 8 27.6 H 32"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.7"
+        strokeLinecap="round"
       />
     </>
   ),

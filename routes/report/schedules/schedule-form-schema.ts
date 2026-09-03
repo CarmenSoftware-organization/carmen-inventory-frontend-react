@@ -22,6 +22,11 @@ export function createScheduleSchema(tv: TranslationFn, tf: TranslationFn) {
         .min(1, tv("required", { field: tf("reportTemplate") })),
       frequency: z.enum(FREQUENCY),
       time: z.string().min(1, tv("required", { field: tf("time") })),
+      /**
+       * "HH:mm" หรือ "" = แจ้งทันทีที่รันเสร็จ
+       * เร็วกว่า `time` แปลว่าวันถัดไป (+1) — ไม่ใช่ค่าผิด จึงไม่มี refine ห้าม
+       */
+      notify_at: z.string(),
       days_of_week: z.array(z.number().int().min(0).max(6)),
       days_of_month: z.array(z.number().int().min(1).max(31)),
       notify_web: z.boolean(),
@@ -56,6 +61,7 @@ export const EMPTY_FORM: ScheduleFormValues = {
   report_template_id: "",
   frequency: "daily",
   time: "08:00",
+  notify_at: "",
   days_of_week: [],
   days_of_month: [],
   notify_web: false,

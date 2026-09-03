@@ -1,11 +1,10 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DocSequenceNav } from "@/components/share/doc-sequence-nav";
 import { useProfile } from "@/hooks/use-profile";
 import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
+import { BackButton } from "@/components/share/back-button";
 
 /** segment ท้าย path เป็น id ของเอกสารจริงไหม — /new (สร้างใหม่) ไม่ใช่ */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -78,15 +77,11 @@ export function DocFormHeader({
           โหมด — อยู่บรรทัดเดียวกับ title โดยไม่ push ให้ title เยื้อง */}
       <div className={cn("relative", !flush && "px-4")}>
         <div className="relative flex flex-wrap items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
+          <BackButton
             onClick={onBack}
-            aria-label={backLabel}
-            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2 hover:bg-transparent dark:hover:bg-transparent"
-          >
-            <ArrowLeft />
-          </Button>
+            label={backLabel}
+            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2"
+          />
           {leading}
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1

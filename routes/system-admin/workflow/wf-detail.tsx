@@ -23,6 +23,7 @@ import {
   type WorkflowCreateModel,
 } from "./wf-form-schema";
 import { WfHeader } from "./wf-header";
+import { useWorkflowEditAvailability } from "./use-workflow-availability";
 import { WfGeneral } from "./wf-general";
 import { WfStages } from "./wf-stages";
 import { WfRouting } from "./wf-routing";
@@ -46,6 +47,13 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   const updateWorkflow = useUpdateWorkflow();
   const isPending = updateWorkflow.isPending;
   const isDisabled = !isEditing || isPending;
+  const { data: availability } = useWorkflowEditAvailability(workflow.id);
+  // เอกสารที่กำลังเดินอยู่นำทางด้วยรายการ stage ชุดปัจจุบัน การแก้ชื่อ stage เพิ่ม ลบ สลับลำดับ หรือ
+  // เปลี่ยนเส้นทาง จึงถูก backend ปฏิเสธตราบใดที่ยังมีเอกสารค้าง — ปิดเฉพาะส่วนนั้น ที่เหลือในฟอร์ม
+  // (ผู้อนุมัติ สินค้า SLA การแจ้งเตือน) บันทึกได้ตามปกติ
+  // อ่านสถานะไม่ได้ = ไม่ปิด ปล่อยไปตกที่การ์ดฝั่ง backend ซึ่งเป็นตัวบังคับจริง
+  const isStructureDisabled =
+    isDisabled || availability?.can_edit_stages === false;
   const t = useTranslations("systemAdmin.workflow");
   const tt = useTranslations("toast");
 
@@ -182,19 +190,13 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                 variant="line"
                 className="h-auto gap-4 bg-transparent p-0"
               >
-                <TabsTrigger
-                  value="general"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
-                >
+                <TabsTrigger value="general" className="relative py-2.5">
                   {t("general")}
                   {hasGeneralErrors && (
                     <div className="bg-destructive absolute top-2 right-2 size-2 rounded-full" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger
-                  value="stages"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
-                >
+                <TabsTrigger value="stages" className="relative py-2.5">
                   {t("stages")}
                   {watchedStages && watchedStages.length > 0 && (
                     <Badge
@@ -209,10 +211,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                     <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger
-                  value="routing"
-                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
-                >
+                <TabsTrigger value="routing" className="relative py-2.5">
                   {t("routing")}
                   {routingFieldArray.fields.length > 0 && (
                     <Badge
@@ -227,10 +226,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                     <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger
-                  value="products"
-                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
-                >
+                <TabsTrigger value="products" className="py-2.5">
                   {t("products")}
                   {watchedProducts && watchedProducts.length > 0 && (
                     <Badge
@@ -242,10 +238,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger
-                  value="insights"
-                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
-                >
+                <TabsTrigger value="insights" className="py-2.5">
                   {t("insights")}
                 </TabsTrigger>
               </TabsList>
@@ -262,6 +255,8 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                   fieldArray={stagesFieldArray}
                   users={users}
                   isDisabled={isDisabled}
+                  isStructureDisabled={isStructureDisabled}
+                  inProgressCount={availability?.documents.in_progress ?? 0}
                   selectedIndex={selectedStageIndex}
                   onSelectIndex={setSelectedStageIndex}
                 />
@@ -273,7 +268,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                   fieldArray={routingFieldArray}
                   stages={stagesFieldArray.fields}
                   allProducts={products}
-                  isDisabled={isDisabled}
+                  isDisabled={isStructureDisabled}
                 />
               </TabsContent>
 

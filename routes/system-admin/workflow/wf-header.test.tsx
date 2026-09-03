@@ -41,8 +41,10 @@ const counts = (in_progress: number) => ({
   data: {
     workflow_id: "wf-1",
     workflow_type: "purchase_request",
-    can_edit: in_progress === 0,
-    blocked_reason: in_progress === 0 ? null : "WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS",
+    can_edit: true,
+    can_edit_stages: in_progress === 0,
+    can_delete: in_progress === 0,
+    blocked_reason: in_progress === 0 ? null : "WORKFLOW_STAGE_CHANGE_BLOCKED",
     documents: { draft: 318, in_progress, done: 52, total: 370 + in_progress },
   },
 });
@@ -63,34 +65,45 @@ function renderHeader(onEdit = vi.fn()) {
   return onEdit;
 }
 
-describe("WfHeader — เข้าโหมดแก้เมื่อยังมีเอกสารดำเนินการอยู่", () => {
+describe("WfHeader — สิ่งที่เอกสารดำเนินการอยู่ล็อกจริง ๆ", () => {
   beforeEach(() => mockAvailability.mockReset());
 
-  // backend ปฏิเสธการบันทึกอยู่แล้ว ปล่อยให้เข้าไปกรอกจนเสร็จคือให้เสียเวลาไปกับงานที่บันทึกไม่ได้
-  it("ไม่เข้าโหมดแก้ และเด้ง dialog บอกเหตุผล เมื่อมีเอกสาร in_progress", async () => {
+  // เดิมปุ่มนี้ถูกปิดไปด้วย ทั้งที่ชื่อ ผู้อนุมัติ และรายการสินค้าบันทึกได้ตลอด การปิดจึงกันคนออกจากงานที่ทำได้จริง
+  it("เข้าโหมดแก้ได้ ถึงจะมีเอกสาร in_progress ค้างอยู่", async () => {
     mockAvailability.mockReturnValue(counts(990));
     const onEdit = renderHeader();
 
     await userEvent.click(screen.getByRole("button", { name: /edit/i }));
 
-    expect(onEdit).not.toHaveBeenCalled();
-    expect(screen.getByText(/can’t edit this workflow yet/i)).toBeInTheDocument();
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  // ลบทำไม่ได้จริง เพราะทำให้รายการ stage หายไปทั้งอัน เอกสารที่ค้างจะไม่มีอะไรให้เดินต่อ
+  it("กดลบแล้วเด้ง dialog บอกเหตุผล แทนที่จะเปิดกล่องยืนยันลบ", async () => {
+    mockAvailability.mockReturnValue(counts(990));
+    renderHeader();
+
+    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+    expect(
+      screen.getByText(/can’t delete this workflow yet/i),
+    ).toBeInTheDocument();
     // บอกจำนวนที่ค้าง ผู้ใช้จะได้รู้ว่าต้องไปเคลียร์เท่าไร
     expect(screen.getByText(/990 document/i)).toBeInTheDocument();
   });
 
-  it("เข้าโหมดแก้ได้ตามปกติเมื่อไม่มีเอกสารค้าง", async () => {
+  it("ลบได้ตามปกติเมื่อไม่มีเอกสารค้าง", async () => {
     mockAvailability.mockReturnValue(counts(0));
-    const onEdit = renderHeader();
+    renderHeader();
 
-    await userEvent.click(screen.getByRole("button", { name: /edit/i }));
+    await userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
-    expect(onEdit).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText(/can’t edit this workflow yet/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/can’t delete this workflow yet/i),
+    ).not.toBeInTheDocument();
   });
 
   // ถ้าอ่านสถานะไม่ได้ อย่าล็อกปุ่ม — ปล่อยไปตกที่การ์ดฝั่ง backend ซึ่งเป็นตัวบังคับจริง
-  // การล็อกเพราะ "ไม่รู้" จะทำให้แก้ workflow ไม่ได้เลยเวลา endpoint ล่ม
   it.each([
     ["query ยังโหลดไม่เสร็จ", { data: undefined }],
     ["query ล้มเหลว", { data: null }],

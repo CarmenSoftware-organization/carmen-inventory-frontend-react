@@ -8,8 +8,12 @@ import { useBuCode } from "@/hooks/use-bu-code";
 export interface WorkflowEditAvailability {
   readonly workflow_id: string;
   readonly workflow_type: string;
+  /** เข้าโหมดแก้ได้ไหม — ชื่อ ผู้อนุมัติ และสินค้าแก้ได้เสมอ ค่านี้จึงเป็น true ตลอด */
   readonly can_edit: boolean;
-  /** รหัสจาก error catalog ที่บอกว่าติดอะไรอยู่ (null เมื่อแก้ได้) */
+  /** แก้รายการ stage กับเส้นทางระหว่าง stage ได้ไหม — false เมื่อยังมีเอกสารเดินอยู่บนโครงนั้น */
+  readonly can_edit_stages: boolean;
+  readonly can_delete: boolean;
+  /** รหัสจาก error catalog ที่บอกว่าติดอะไรอยู่ (null เมื่อไม่มีอะไรถูกล็อก) */
   readonly blocked_reason: string | null;
   readonly documents: {
     readonly draft: number;
@@ -22,13 +26,14 @@ export interface WorkflowEditAvailability {
 /**
  * Hook ถามว่า workflow นี้แก้ได้ไหม พร้อมจำนวนเอกสารแยกตามสถานะ
  *
- * `update` และ `delete` ของ backend จะปฏิเสธเมื่อมีเอกสาร in_progress อยู่ — hook นี้ถามคำตอบเดียวกัน
- * มาตั้งแต่ก่อนผู้ใช้กดแก้ หน้าจอจะได้บอกเหตุผลและแสดงว่าอะไรค้างอยู่ แทนที่จะไปเจอ error ตอนกดเซฟ
+ * เอกสารที่เดินอยู่ล็อกแค่รายการ stage กับเส้นทางระหว่าง stage ไม่ใช่ทั้ง workflow — backend ปฏิเสธ
+ * เฉพาะการแก้สองอย่างนั้น ส่วนชื่อ ผู้อนุมัติ และรายการสินค้าบันทึกได้ตลอด hook นี้ถามคำตอบเดียวกันมา
+ * ตั้งแต่ก่อนผู้ใช้กดแก้ หน้าจอจะได้ปิดเฉพาะส่วนที่ล็อกจริง แทนที่จะไปเจอ error ตอนกดเซฟ
  * @param id - รหัส workflow
- * @returns query ที่คืนสถานะว่าแก้ได้ไหมและจำนวนเอกสาร
+ * @returns query ที่คืนสถานะว่าแก้อะไรได้บ้างและจำนวนเอกสาร
  * @example
  * const { data } = useWorkflowEditAvailability(id);
- * if (data?.can_edit === false) showBlockedDialog();
+ * const lockStages = data?.can_edit_stages === false;
  */
 export function useWorkflowEditAvailability(id: string | undefined) {
   const buCode = useBuCode();
@@ -39,7 +44,8 @@ export function useWorkflowEditAvailability(id: string | undefined) {
       const res = await httpClient.get(
         `${API_ENDPOINTS.WORKFLOWS(buCode!)}/${id}/edit-availability`,
       );
-      if (!res.ok) throw new Error("Failed to fetch workflow edit availability");
+      if (!res.ok)
+        throw new Error("Failed to fetch workflow edit availability");
       const json = await res.json();
       return json.data;
     },

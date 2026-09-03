@@ -47,6 +47,14 @@ export interface ReportSchedule {
   format: ReportFormat;
   cron_expression: string;
   schedule_config?: ScheduleConfig;
+  /** "HH:mm" — เวลาที่ผู้รับถูกแจ้งว่ารายงานพร้อม ไม่ใช่เวลาที่รายงานรัน */
+  notify_at?: string;
+  /**
+   * จำนวนวันหลังรอบรันที่ `notify_at` ตกลง — 0 วันเดียวกัน, 1 วันถัดไป
+   * เหมือน "+1" บนตั๋วเครื่องบินที่ถึงหลังเที่ยงคืน backend เป็นคนคำนวณให้
+   * ตอนสร้าง (notify_at < schedule_config.time = วันถัดไป)
+   */
+  notify_day_offset?: number;
   is_active: boolean;
   last_run_at?: string;
   next_run_at?: string;
@@ -59,6 +67,8 @@ export interface CreateReportScheduleDto {
   format: "viewer_url";
   delivery: ScheduleDelivery;
   schedule_config: ScheduleConfig;
+  /** "HH:mm" — ไม่ส่ง = แจ้งทันทีที่รันเสร็จ */
+  notify_at?: string;
   notifications: ScheduleNotifications;
   filters?: Record<string, string>;
   recipients?: string[];

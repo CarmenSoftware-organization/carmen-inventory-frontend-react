@@ -181,6 +181,7 @@ export default function AccountingList() {
           <DocumentListHeader
             title={t(`${config.kind}.title`)}
             description={t(`${config.kind}.description`)}
+            count={documents.length}
           />
           <div className="flex gap-2">
             <Button variant="outline" size="sm">

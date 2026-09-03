@@ -783,7 +783,8 @@
     "goToDashboard": "Go to dashboard",
     "noBusinessUnit": "No business unit selected — pick one from the top bar first.",
     "buSwitchFailed": "Could not switch business unit. Please try again.",
-    "workflowInProgress": "Can’t edit this workflow while documents are still in progress. Finish or void them first."
+    "workflowInProgress": "Only the stages and their routing are locked while documents are in progress — approvers, products and the rest of the form can still be saved.",
+    "workflowStageNoActor": "That stage would be left with nobody able to approve, and documents are waiting there. Assign at least one person before saving."
   },
   "validation": {
     "required": "{field} is required",
@@ -1896,9 +1897,10 @@
         "draft": "Draft",
         "inProgress": "In progress",
         "done": "Done",
-        "inProgressBlocksEdit": "Documents still in progress — this workflow can't be edited or deleted until they finish",
-        "blockedTitle": "Can’t edit this workflow yet",
-        "blockedDescription": "{count} document(s) are still in progress on this workflow. Editing would change the stages they are moving through, so finish or void them first."
+        "inProgressBlocksEdit": "Documents still in progress — stages and routing are locked until they finish",
+        "blockedTitle": "Can’t delete this workflow yet",
+        "blockedDescription": "{count} document(s) are still in progress on this workflow. Deleting it would take away the stages they are moving through, so finish or void them first.",
+        "structureLocked": "{count} document(s) are moving through these stages right now, so stages can't be added, renamed or reordered and routing can't change. Everything else on this form still saves."
       }
     },
     "runningCode": {
@@ -4224,6 +4226,12 @@
     "notifications": "Notifications",
     "notifyWebApplication": "Web Application",
     "notifyEmail": "Email",
+    "notifyAt": "Notify at",
+    "notifyAtHintSameDay": "Recipients are told on the same day the report runs.",
+    "notifyAtHintNextDay": "Earlier than the run time, so recipients are told the next day.",
+    "notifyAtNextDayBadge": "+1 day",
+    "notifyImmediately": "As soon as the run finishes",
+    "notifyAtColumn": "Notify",
     "namePlaceholder": "Daily Inventory Report",
     "creating": "Creating…",
     "createFailed": "Failed to create schedule"

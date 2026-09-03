@@ -25,7 +25,15 @@ function makeStageWithoutSignatureKey(name: string) {
 }
 
 /** render WfStageGeneral ของ stage หนึ่งตัว โดยมี stages ทั้งชุดอยู่ใน form state */
-function Harness({ stages, index }: { stages: Stage[]; index: number }) {
+function Harness({
+  stages,
+  index,
+  nameDisabled = false,
+}: {
+  stages: Stage[];
+  index: number;
+  nameDisabled?: boolean;
+}) {
   const form = useForm<WorkflowCreateModel>({
     defaultValues: {
       name: "wf",
@@ -41,19 +49,38 @@ function Harness({ stages, index }: { stages: Stage[]; index: number }) {
       index={index}
       isFirst={false}
       isDisabled={false}
+      isNameDisabled={nameDisabled}
     />
   );
 }
 
-function renderStage(stages: Stage[], index: number) {
+function renderStage(stages: Stage[], index: number, nameDisabled = false) {
   render(
     <IntlProvider locale="en" messages={en}>
-      <Harness stages={stages} index={index} />
+      <Harness stages={stages} index={index} nameDisabled={nameDisabled} />
     </IntlProvider>,
   );
 }
 
 const label = en.systemAdmin.workflow.showSignatureInReport;
+
+describe("WfStageGeneral — ช่องชื่อ stage ตอนโครงถูกล็อก", () => {
+  // เอกสารที่กำลังเดินอยู่เก็บชื่อ stage ไว้แล้วใช้ค้นหาทุกครั้งที่ทำ action เปลี่ยนชื่อเมื่อไรมันหาไม่เจอ
+  // และเดินต่อไม่ได้เลย — ช่องนี้จึงต้องปิด ทั้งที่ช่องอื่นของ stage เดียวกันยังกรอกได้
+  it("ปิดเฉพาะช่องชื่อ ช่อง SLA ในฟอร์มเดียวกันยังกรอกได้", () => {
+    renderStage([makeStage(false, "HOD")], 0, true);
+
+    expect(screen.getByDisplayValue("HOD")).toBeDisabled();
+    // ช่อง SLA อยู่ในฟอร์มเดียวกัน แต่ไม่ได้ถูกอ่านตอนเอกสารนำทาง จึงต้องยังกรอกได้
+    expect(screen.getByDisplayValue("0")).not.toBeDisabled();
+  });
+
+  it("เปิดช่องชื่อตามปกติเมื่อไม่มีอะไรล็อก", () => {
+    renderStage([makeStage(false, "HOD")], 0, false);
+
+    expect(screen.getByDisplayValue("HOD")).not.toBeDisabled();
+  });
+});
 
 describe("WfStageGeneral — show signature in report", () => {
   it("ติ๊ก checkbox แล้วสถานะเปลี่ยนเป็น checked", async () => {
