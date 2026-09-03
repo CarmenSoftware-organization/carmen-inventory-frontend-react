@@ -12,7 +12,7 @@ import {
   useCreateEquipment,
   useUpdateEquipment,
   useDeleteEquipment,
-} from "./use-equipment";
+} from "./use-eq";
 import type { Equipment } from "@/types/equipment";
 import type { FormMode } from "@/types/form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";

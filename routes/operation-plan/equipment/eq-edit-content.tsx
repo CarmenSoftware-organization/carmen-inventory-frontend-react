@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useEquipmentById } from "./use-equipment";
+import { useEquipmentById } from "./use-eq";
 import { EquipmentForm } from "./eq-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัสอุปกรณ์ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `EquipmentForm` เมื่อได้ข้อมูล
  */
-export function EditEquipmentContent({ id }: { id: string }) {
+export function EqEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.equipment");
   const { data: equipment, isLoading, error, refetch } = useEquipmentById(id);
 

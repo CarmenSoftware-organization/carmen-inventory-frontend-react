@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส Department ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `DepartmentForm` เมื่อได้ข้อมูล
  */
-export function EditDepartmentContent({ id }: { id: string }) {
+export function DepartmentEditContent({ id }: { id: string }) {
   const tErr = useTranslations("config.department");
   const { data: department, isLoading, error, refetch } = useDepartmentById(id);
 

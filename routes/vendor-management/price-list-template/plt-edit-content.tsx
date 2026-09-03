@@ -11,7 +11,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส template ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` พร้อม retry เมื่อล้มเหลวหรือไม่พบ · ฟอร์มเมื่อได้ข้อมูล
  */
-export function EditPriceListTemplateContent({ id }: { id: string }) {
+export function PltEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.priceListTemplate");
   const {
     data: priceListTemplate,

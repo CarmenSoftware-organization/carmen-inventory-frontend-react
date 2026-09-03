@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส cuisine ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `CuisineForm` เมื่อได้ข้อมูล
  */
-export function EditCuisineContent({ id }: { id: string }) {
+export function CuisineEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.cuisine");
   const { data: cuisine, isLoading, error, refetch } = useCuisineById(id);
 

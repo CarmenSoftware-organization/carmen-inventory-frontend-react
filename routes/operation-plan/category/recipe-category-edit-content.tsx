@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัสหมวดหมู่ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `RecipeCategoryForm` เมื่อได้ข้อมูล
  */
-export function EditRecipeCategoryContent({ id }: { id: string }) {
+export function RecipeCategoryEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.recipeCategory");
   const {
     data: category,

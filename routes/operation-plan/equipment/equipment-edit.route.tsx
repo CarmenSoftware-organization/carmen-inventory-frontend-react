@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { EditEquipmentContent } from "./edit-equipment-content";
+import { EqEditContent } from "./eq-edit-content";
 
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;
-  return <EditEquipmentContent id={id} />;
+  return <EqEditContent id={id} />;
 }

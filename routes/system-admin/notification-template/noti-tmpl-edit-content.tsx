@@ -6,7 +6,7 @@ import {
   NotificationTemplateFormSkeleton,
 } from "./noti-tmpl-form";
 
-export function NotiTmplDetailContent({ id }: { readonly id: string }) {
+export function NotiTmplEditContent({ id }: { readonly id: string }) {
   const tc = useTranslations("common");
   const { data, isLoading, error, refetch } = useNotificationTemplateById(id);
 

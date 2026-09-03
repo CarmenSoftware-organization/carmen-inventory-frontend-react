@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { EditPriceListTemplateContent } from "./edit-price-list-template-content";
+import { PltEditContent } from "./plt-edit-content";
 
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;
-  return <EditPriceListTemplateContent id={id} />;
+  return <PltEditContent id={id} />;
 }

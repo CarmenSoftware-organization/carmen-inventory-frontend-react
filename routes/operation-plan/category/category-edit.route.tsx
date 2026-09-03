@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { EditRecipeCategoryContent } from "./edit-category-content";
+import { RecipeCategoryEditContent } from "./recipe-category-edit-content";
 
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;
-  return <EditRecipeCategoryContent id={id} />;
+  return <RecipeCategoryEditContent id={id} />;
 }
