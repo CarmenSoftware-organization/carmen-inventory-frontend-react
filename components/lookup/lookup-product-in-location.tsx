@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
 import { useProductsByLocation } from "@/hooks/use-products-by-location";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
-import type { Product } from "@/types/product";
+import type { ProductLookupItem } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
 
@@ -13,7 +13,7 @@ interface LookupProductInLocationProps {
    * ส่งมาแต่ยังว่าง = รอเลือก workflow ก่อน จะยังไม่ fetch */
   readonly workflowId?: string;
   readonly value: string;
-  readonly onValueChange: (value: string, product?: Product) => void;
+  readonly onValueChange: (value: string, product?: ProductLookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -82,11 +82,11 @@ export function LookupProductInLocation({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Product>({
+  } = useLookupPagination<ProductLookupItem>({
     useListHook,
     search,
     perpage: 30,
-    filter: (p: Product) => {
+    filter: (p: ProductLookupItem) => {
       if (excludedSet && excludedSet.has(p.id)) return false;
       return true;
     },

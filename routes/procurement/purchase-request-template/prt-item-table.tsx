@@ -27,7 +27,7 @@ import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
-import type { Product } from "@/types/product";
+import type { ProductLookupItem } from "@/types/product";
 import type { PrtFormValues } from "./prt-form-schema";
 
 /**
@@ -41,7 +41,7 @@ const setProductToItem = (
   form: UseFormReturn<PrtFormValues>,
   index: number,
   value: string,
-  product?: Product,
+  product?: ProductLookupItem,
 ) => {
   const current = form.getValues(`items.${index}`);
   // shouldDirty: true จำเป็น — setValue ทั้ง object เลี่ยง field.onChange ของ
@@ -55,10 +55,14 @@ const setProductToItem = (
       ...(product
         ? {
             product_name: product.name,
-            inventory_unit_id: product.inventory_unit.id,
-            inventory_unit_name: product.inventory_unit.name,
-            requested_unit_id: product.inventory_unit.id,
-            requested_unit_name: product.inventory_unit.name,
+            // สอง endpoint ของ lookup คืนหน่วยคนละทรง — เส้นธรรมดาเป็น object
+            // เส้น workflow เป็น flat string อ่านทั้งสองทางไว้ (ท่าเดียวกับ IA)
+            inventory_unit_id: product.inventory_unit?.id ?? null,
+            inventory_unit_name:
+              product.inventory_unit?.name ?? product.inventory_unit_name ?? "",
+            requested_unit_id: product.inventory_unit?.id ?? null,
+            requested_unit_name:
+              product.inventory_unit?.name ?? product.inventory_unit_name ?? "",
           }
         : {
             product_name: "",
