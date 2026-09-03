@@ -444,12 +444,12 @@ export const moduleList: ModuleDto[] = [
         // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
         // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
         // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
-        name: "accountCode",
-        path: "/config/account-code",
+        name: "chartOfAccount",
+        path: "/config/chart-of-account",
         icon: BookText,
       },
       {
-        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ accountCode
+        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccount
         name: "accountMapping",
         path: "/config/account-mapping",
         icon: Link2,

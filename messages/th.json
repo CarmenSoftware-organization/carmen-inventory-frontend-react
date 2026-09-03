@@ -1326,13 +1326,13 @@
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบเหตุผลใบลดหนี้ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "namePlaceholder": "เช่น สินค้าเสียหาย"
     },
-    "accountCode": {
-      "entity": "รหัสบัญชี",
-      "title": "รหัสบัญชี",
-      "desc": "รหัสบัญชีที่ระบบบัญชีของคุณใช้ลงรายการ",
-      "add": "เพิ่มรหัสบัญชี",
-      "deleteTitle": "ลบรหัสบัญชี",
-      "deleteConfirm": "ยืนยันลบรหัสบัญชี \"{name}\" ไหม ลบแล้วเอากลับไม่ได้",
+    "chartOfAccount": {
+      "entity": "ผังบัญชี",
+      "title": "ผังบัญชี",
+      "desc": "ผังบัญชีที่ระบบบัญชีของคุณใช้ลงรายการ",
+      "add": "เพิ่มบัญชี",
+      "deleteTitle": "ลบบัญชี",
+      "deleteConfirm": "ยืนยันลบบัญชี \"{name}\" ไหม ลบแล้วเอากลับไม่ได้",
       "codePlaceholder": "เช่น 1010000",
       "accountName": "ชื่อบัญชี",
       "accountNamePlaceholder": "เช่น สินค้าคงคลัง - อาหาร",
@@ -4419,7 +4419,7 @@
     "setting": "ตั้งค่า",
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
-    "accountCode": "รหัสบัญชี",
+    "chartOfAccount": "ผังบัญชี",
     "accountMapping": "การผูกบัญชี"
   },
   "commentSheet": {

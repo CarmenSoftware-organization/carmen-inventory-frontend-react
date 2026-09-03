@@ -1,10 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { createAcSchema } from "./ac-form-schema";
-import { ACCOUNT_CODE_TYPE, ACCOUNT_NATURE } from "@/types/account-code";
+import { createCoaSchema } from "./coa-form-schema";
+import {
+  CHART_OF_ACCOUNT_TYPE,
+  ACCOUNT_NATURE,
+} from "@/types/chart-of-account";
 
 const tv = ((k: string) => k) as never;
 const tf = ((k: string) => k) as never;
-const schema = createAcSchema(tv, tf);
+const schema = createCoaSchema(tv, tf);
 
 /** ใบที่กรอกครบตามสัญญาใหม่ของ backend */
 const valid = {
@@ -12,11 +15,11 @@ const valid = {
   description_1: "Inventory - Food",
   description_2: "",
   nature: ACCOUNT_NATURE.DEBIT,
-  type: ACCOUNT_CODE_TYPE.BALANCE_SHEET,
+  type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
   is_active: true,
 };
 
-describe("createAcSchema", () => {
+describe("createCoaSchema", () => {
   it("ผ่านเมื่อกรอกครบทุกช่องที่บังคับ", () => {
     expect(schema.safeParse(valid).success).toBe(true);
   });

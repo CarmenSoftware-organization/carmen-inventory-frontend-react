@@ -11,54 +11,54 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
-import { useCreateAccountCode, useUpdateAccountCode } from "./use-account-code";
+import { useCreateChartOfAccount, useUpdateChartOfAccount } from "./use-coa";
 import {
-  ACCOUNT_CODE_TYPE,
-  ACCOUNT_CODE_TYPES,
+  CHART_OF_ACCOUNT_TYPE,
+  CHART_OF_ACCOUNT_TYPES,
   ACCOUNT_NATURE,
   ACCOUNT_NATURES,
-  type AccountCode,
-} from "@/types/account-code";
-import { createAcSchema, type AcFormValues } from "./ac-form-schema";
+  type ChartOfAccount,
+} from "@/types/chart-of-account";
+import { createCoaSchema, type CoaFormValues } from "./coa-form-schema";
 
-interface AcDialogProps {
+interface CoaDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly accountCode?: AccountCode | null;
+  readonly chartOfAccount?: ChartOfAccount | null;
   readonly readOnly?: boolean;
 }
 
-type AcPayload = {
+type CoaPayload = {
   code: string;
   description_1: string;
   description_2: string | null;
   nature: ACCOUNT_NATURE;
-  type: ACCOUNT_CODE_TYPE;
+  type: CHART_OF_ACCOUNT_TYPE;
   is_active: boolean;
 };
 
-export function AcDialog({
+export function CoaDialog({
   open,
   onOpenChange,
-  accountCode,
+  chartOfAccount,
   readOnly,
-}: AcDialogProps) {
-  const t = useTranslations("config.accountCode");
+}: CoaDialogProps) {
+  const t = useTranslations("config.chartOfAccount");
   const tfl = useTranslations("field");
 
   return (
-    <ConfigEntityDialog<AccountCode, AcFormValues, AcPayload>
+    <ConfigEntityDialog<ChartOfAccount, CoaFormValues, CoaPayload>
       open={open}
       onOpenChange={onOpenChange}
-      entity={accountCode}
+      entity={chartOfAccount}
       readOnly={readOnly}
       icon={BookText}
       // สองคอลัมน์ต้องการที่ — กว้าง md เดิมบีบจนช่องแคบกว่าที่อ่านสบาย
       contentClassName="sm:max-w-2xl"
-      translationNamespace="config.accountCode"
-      useCreate={useCreateAccountCode}
-      useUpdate={useUpdateAccountCode}
-      buildSchema={createAcSchema}
+      translationNamespace="config.chartOfAccount"
+      useCreate={useCreateChartOfAccount}
+      useUpdate={useUpdateChartOfAccount}
+      buildSchema={createCoaSchema}
       toFormValues={(e) =>
         e
           ? {
@@ -74,7 +74,7 @@ export function AcDialog({
               description_1: "",
               description_2: "",
               nature: ACCOUNT_NATURE.DEBIT,
-              type: ACCOUNT_CODE_TYPE.BALANCE_SHEET,
+              type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
               is_active: true,
             }
       }
@@ -91,11 +91,11 @@ export function AcDialog({
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field>
-              <FieldLabel htmlFor="account-code-code" required>
+              <FieldLabel htmlFor="coa-code" required>
                 {tfl("code")}
               </FieldLabel>
               <FieldInput
-                id="account-code-code"
+                id="coa-code"
                 placeholder={t("codePlaceholder")}
                 className="h-8"
                 disabled={disabled}
@@ -106,11 +106,11 @@ export function AcDialog({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="account-code-description-1" required>
+              <FieldLabel htmlFor="coa-description-1" required>
                 {t("accountName")}
               </FieldLabel>
               <FieldInput
-                id="account-code-description-1"
+                id="coa-description-1"
                 placeholder={t("accountNamePlaceholder")}
                 className="h-8"
                 disabled={disabled}
@@ -161,7 +161,7 @@ export function AcDialog({
                     className="h-8 text-sm"
                   >
                     <SelectContent>
-                      {ACCOUNT_CODE_TYPES.map((value) => (
+                      {CHART_OF_ACCOUNT_TYPES.map((value) => (
                         <SelectItem key={value} value={value}>
                           {t(`accountType.${value}`)}
                         </SelectItem>
@@ -174,11 +174,11 @@ export function AcDialog({
           </div>
 
           <Field>
-            <FieldLabel htmlFor="account-code-description-2">
+            <FieldLabel htmlFor="coa-description-2">
               {tfl("description")}
             </FieldLabel>
             <Textarea
-              id="account-code-description-2"
+              id="coa-description-2"
               placeholder={tfl("optional")}
               rows={2}
               className="resize-none text-xs"
@@ -192,7 +192,7 @@ export function AcDialog({
             name="is_active"
             render={({ field }) => (
               <StatusSwitch
-                id="account-code-is-active"
+                id="coa-is-active"
                 checked={field.value}
                 onCheckedChange={field.onChange}
                 disabled={disabled}

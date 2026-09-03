@@ -282,7 +282,7 @@
       "entryDetails": "Accounting Entry Details",
       "journalEntryDetails": "Journal Entry Details",
       "department": "Department",
-      "accountCode": "Account Code",
+      "chartOfAccount": "Chart of Account",
       "comment": "Comment",
       "currency": "Currency",
       "debit": "Debit",
@@ -1326,13 +1326,13 @@
       "deleteConfirm": "Are you sure you want to delete credit note reason \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Damaged Goods"
     },
-    "accountCode": {
-      "entity": "Account Code",
-      "title": "Account Code",
-      "desc": "The account codes your accounting system posts to.",
-      "add": "Add Account Code",
-      "deleteTitle": "Delete Account Code",
-      "deleteConfirm": "Are you sure you want to delete account code \"{name}\"? This action cannot be undone.",
+    "chartOfAccount": {
+      "entity": "Chart of Account",
+      "title": "Chart of Account",
+      "desc": "The accounts your accounting system posts to.",
+      "add": "Add Account",
+      "deleteTitle": "Delete Account",
+      "deleteConfirm": "Are you sure you want to delete account \"{name}\"? This action cannot be undone.",
       "codePlaceholder": "e.g. 1010000",
       "accountName": "Account name",
       "accountNamePlaceholder": "e.g. Inventory - Food",
@@ -4429,7 +4429,7 @@
     "setting": "Settings",
     "notifications": "Notifications",
     "fromPriceList": "From price list",
-    "accountCode": "Account Code",
+    "chartOfAccount": "Chart of Account",
     "accountMapping": "Account Mapping"
   },
   "commentSheet": {

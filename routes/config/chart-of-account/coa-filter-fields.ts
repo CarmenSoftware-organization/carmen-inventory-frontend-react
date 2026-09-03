@@ -1,5 +1,8 @@
 import type { FilterFieldDef } from "@/types/list-filter";
-import { ACCOUNT_CODE_TYPE, ACCOUNT_NATURE } from "@/types/account-code";
+import {
+  CHART_OF_ACCOUNT_TYPE,
+  ACCOUNT_NATURE,
+} from "@/types/chart-of-account";
 
 /**
  * ตัวกรองของหน้ารหัสบัญชี — ทุกช่องเก็บ clause เต็มใน URL param ของตัวเอง
@@ -10,7 +13,7 @@ import { ACCOUNT_CODE_TYPE, ACCOUNT_NATURE } from "@/types/account-code";
  * ต่อ clause ซ้ำ prefix ให้เอง แล้ว gateway แปลงเป็น IN query (แบบเดียวกับ
  * ประเภทใบเบิกในหน้า store-requisition)
  */
-export const AC_FILTER_FIELDS: FilterFieldDef[] = [
+export const COA_FILTER_FIELDS: FilterFieldDef[] = [
   {
     key: "filter",
     control: "status",
@@ -26,11 +29,11 @@ export const AC_FILTER_FIELDS: FilterFieldDef[] = [
     labelKey: "field.nature",
     options: [
       {
-        labelKey: "config.accountCode.nature.debit",
+        labelKey: "config.chartOfAccount.nature.debit",
         value: `nature|string:${ACCOUNT_NATURE.DEBIT}`,
       },
       {
-        labelKey: "config.accountCode.nature.credit",
+        labelKey: "config.chartOfAccount.nature.credit",
         value: `nature|string:${ACCOUNT_NATURE.CREDIT}`,
       },
     ],
@@ -41,20 +44,20 @@ export const AC_FILTER_FIELDS: FilterFieldDef[] = [
     labelKey: "field.type",
     options: [
       {
-        labelKey: "config.accountCode.accountType.header",
-        value: `type|string:${ACCOUNT_CODE_TYPE.HEADER}`,
+        labelKey: "config.chartOfAccount.accountType.header",
+        value: `type|string:${CHART_OF_ACCOUNT_TYPE.HEADER}`,
       },
       {
-        labelKey: "config.accountCode.accountType.balance_sheet",
-        value: `type|string:${ACCOUNT_CODE_TYPE.BALANCE_SHEET}`,
+        labelKey: "config.chartOfAccount.accountType.balance_sheet",
+        value: `type|string:${CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET}`,
       },
       {
-        labelKey: "config.accountCode.accountType.income_statement",
-        value: `type|string:${ACCOUNT_CODE_TYPE.INCOME_STATEMENT}`,
+        labelKey: "config.chartOfAccount.accountType.income_statement",
+        value: `type|string:${CHART_OF_ACCOUNT_TYPE.INCOME_STATEMENT}`,
       },
       {
-        labelKey: "config.accountCode.accountType.statistic",
-        value: `type|string:${ACCOUNT_CODE_TYPE.STATISTIC}`,
+        labelKey: "config.chartOfAccount.accountType.statistic",
+        value: `type|string:${CHART_OF_ACCOUNT_TYPE.STATISTIC}`,
       },
     ],
   },

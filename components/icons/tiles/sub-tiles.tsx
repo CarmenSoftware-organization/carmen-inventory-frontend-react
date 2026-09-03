@@ -1632,7 +1632,7 @@ export const SubTiles: Record<string, TileRenderer> = {
     </>
   ),
   // ════ Config ════
-  accountCode: ({ palette }) => (
+  chartOfAccount: ({ palette }) => (
     <>
       <TileBase palette={palette} />
       <Paper palette={palette} />

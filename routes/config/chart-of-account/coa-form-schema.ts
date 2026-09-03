@@ -1,6 +1,9 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import { ACCOUNT_CODE_TYPE, ACCOUNT_NATURE } from "@/types/account-code";
+import {
+  CHART_OF_ACCOUNT_TYPE,
+  ACCOUNT_NATURE,
+} from "@/types/chart-of-account";
 
 /**
  * สร้าง Zod schema สำหรับฟอร์มรหัสบัญชี พร้อมข้อความแปลจาก i18n
@@ -8,10 +11,10 @@ import { ACCOUNT_CODE_TYPE, ACCOUNT_NATURE } from "@/types/account-code";
  * @param tf - ฟังก์ชันแปลชื่อ field
  * @returns Zod schema สำหรับตรวจสอบฟอร์มรหัสบัญชี
  * @example
- * // route: /config/account-code (dialog)
- * const schema = createAcSchema(tv, tfl);
+ * // route: /config/chart-of-account (dialog)
+ * const schema = createCoaSchema(tv, tfl);
  */
-export function createAcSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     code: z.string().min(1, tv("required", { field: tf("code") })),
     description_1: z
@@ -22,11 +25,11 @@ export function createAcSchema(tv: TranslationFn, tf: TranslationFn) {
     nature: z.enum(ACCOUNT_NATURE, {
       error: tv("required", { field: tf("nature") }),
     }),
-    type: z.enum(ACCOUNT_CODE_TYPE, {
+    type: z.enum(CHART_OF_ACCOUNT_TYPE, {
       error: tv("required", { field: tf("type") }),
     }),
     is_active: z.boolean(),
   });
 }
 
-export type AcFormValues = z.infer<ReturnType<typeof createAcSchema>>;
+export type CoaFormValues = z.infer<ReturnType<typeof createCoaSchema>>;

@@ -7,11 +7,11 @@ import en from "@/messages/en.json";
 import type { ParamsDto } from "@/types/params";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import {
-  ACCOUNT_CODE_TYPE,
+  CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
-  type AccountCode,
-} from "@/types/account-code";
-import { useAcTable } from "./use-ac-table";
+  type ChartOfAccount,
+} from "@/types/chart-of-account";
+import { useCoaTable } from "./use-coa-table";
 
 // useConfigTable → useCan() → useLicense() อ่าน runtime config — ไม่มีอันนี้
 // จะโยน "Runtime config not loaded" ตั้งแต่ render แรก
@@ -33,7 +33,7 @@ const tableConfig = {
   onSortingChange: () => {},
 };
 
-const rows: AccountCode[] = [
+const rows: ChartOfAccount[] = [
   {
     id: "ac-1",
     doc_version: 1,
@@ -41,7 +41,7 @@ const rows: AccountCode[] = [
     description_1: "Inventory - Food",
     description_2: "ครัวร้อน",
     nature: ACCOUNT_NATURE.DEBIT,
-    type: ACCOUNT_CODE_TYPE.BALANCE_SHEET,
+    type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
     is_active: true,
   },
 ];
@@ -57,10 +57,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-function renderAcTable(data: AccountCode[] = rows) {
+function renderCoaTable(data: ChartOfAccount[] = rows) {
   return renderHook(
     () =>
-      useAcTable({
+      useCoaTable({
         data,
         totalRecords: data.length,
         params,
@@ -72,9 +72,9 @@ function renderAcTable(data: AccountCode[] = rows) {
   );
 }
 
-describe("useAcTable", () => {
+describe("useCoaTable", () => {
   it("มีคอลัมน์ครบตามฟิลด์ที่ backend ส่งมา", () => {
-    const { result } = renderAcTable();
+    const { result } = renderCoaTable();
     for (const id of [
       "code",
       "description_1",
@@ -87,7 +87,7 @@ describe("useAcTable", () => {
   });
 
   it("ไม่เหลือคอลัมน์ name/description ของสัญญาเดิม", () => {
-    const { result } = renderAcTable();
+    const { result } = renderCoaTable();
     // id ของคอลัมน์คือฟิลด์ที่ส่งไป sort ฝั่ง backend (`${id}:${dir}`) —
     // เหลือชื่อเก่าไว้ = กดหัวคอลัมน์แล้วยิงฟิลด์ที่ไม่มีอยู่จริง
     expect(result.current.getColumn("name")).toBeUndefined();
@@ -95,7 +95,7 @@ describe("useAcTable", () => {
   });
 
   it("แปลงค่า enum เป็นคำที่คนอ่านออก ไม่ใช่ค่าดิบ", () => {
-    const { result } = renderAcTable();
+    const { result } = renderCoaTable();
     const cells = result.current.getRowModel().rows[0].getVisibleCells();
     const render = (id: string) => {
       const cell = cells.find((c) => c.column.id === id);
@@ -109,7 +109,7 @@ describe("useAcTable", () => {
   });
 
   it("ซ่อนคอลัมน์วันที่สร้าง/แก้ไขไว้ก่อน (เปิดเองได้จากเมนูคอลัมน์)", () => {
-    const { result } = renderAcTable();
+    const { result } = renderCoaTable();
     expect(result.current.getColumn("created_at")?.getIsVisible()).toBe(false);
     expect(result.current.getColumn("updated_at")?.getIsVisible()).toBe(false);
   });

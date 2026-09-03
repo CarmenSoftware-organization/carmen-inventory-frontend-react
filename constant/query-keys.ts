@@ -18,7 +18,7 @@ export const QUERY_KEYS = {
   CN_REASONS_CONFIG: "cn-reasons-config",
   CREDIT_NOTES: "credit-notes",
   CREDIT_NOTE_COMMENTS: "credit-note-comments",
-  ACCOUNT_CODES: "account-codes",
+  CHART_OF_ACCOUNTS: "chart-of-accounts",
   CREDIT_TERMS: "credit-terms",
   CUISINES: "cuisines",
   CURRENCIES: "currencies",

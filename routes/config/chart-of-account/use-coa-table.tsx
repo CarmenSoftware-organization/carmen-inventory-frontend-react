@@ -8,18 +8,18 @@ import {
   columnSkeletons,
   statusColumn,
 } from "@/components/ui/data-grid/columns";
-import type { AccountCode } from "@/types/account-code";
+import type { ChartOfAccount } from "@/types/chart-of-account";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 
-interface UseAcTableOptions {
-  data: AccountCode[];
+interface UseCoaTableOptions {
+  data: ChartOfAccount[];
   totalRecords: number;
   params: ParamsDto;
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
-  onEdit: (item: AccountCode) => void;
-  onDelete: (item: AccountCode) => void;
+  onEdit: (item: ChartOfAccount) => void;
+  onDelete: (item: ChartOfAccount) => void;
 }
 
 /**
@@ -28,22 +28,22 @@ interface UseAcTableOptions {
  * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
  * @returns TanStack table instance
  * @example
- * // route: /config/account-code
- * const { table } = useAcTable({ data, ... });
+ * // route: /config/chart-of-account
+ * const { table } = useCoaTable({ data, ... });
  */
-export function useAcTable({
+export function useCoaTable({
   data,
   totalRecords,
   params,
   tableConfig,
   onEdit,
   onDelete,
-}: UseAcTableOptions) {
-  const t = useTranslations("config.accountCode");
+}: UseCoaTableOptions) {
+  const t = useTranslations("config.chartOfAccount");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 
-  const columns: ColumnDef<AccountCode>[] = [
+  const columns: ColumnDef<ChartOfAccount>[] = [
     {
       accessorKey: "code",
       header: ({ column }) => (
@@ -93,11 +93,11 @@ export function useAcTable({
       size: 180,
       meta: { headerTitle: tfl("type"), skeleton: columnSkeletons.text },
     },
-    statusColumn<AccountCode>(),
-    ...auditColumns<AccountCode>(tfl, dateTimeFormat),
+    statusColumn<ChartOfAccount>(),
+    ...auditColumns<ChartOfAccount>(tfl, dateTimeFormat),
   ];
 
-  return useConfigTable<AccountCode>({
+  return useConfigTable<ChartOfAccount>({
     data,
     columns,
     totalRecords,
