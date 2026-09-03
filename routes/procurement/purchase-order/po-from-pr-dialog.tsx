@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -375,7 +375,10 @@ const SelectPrStep = ({
     enabled: !!buCode && open && hasWorkflow,
     ...CACHE_DYNAMIC,
   });
-  const purchaseRequests = data?.data ?? [];
+  // TanStack ต้องได้ reference ที่นิ่ง — `data?.data ?? []` สร้าง array ใหม่ทุก
+  // render แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section
+  // หลังเซฟ vendor สำเร็จ วนไป 245,156 รอบ)
+  const purchaseRequests = useMemo(() => data?.data ?? [], [data]);
 
   const columns: ColumnDef<PurchaseRequest>[] = [
     selectColumn<PurchaseRequest>(),

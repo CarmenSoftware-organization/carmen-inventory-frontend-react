@@ -47,7 +47,11 @@ export function VendorCertificateSection({
   const { dateFormat } = useProfile();
 
   const { data, isLoading } = useVendorCertificates(vendorId);
-  const items = data?.data ?? [];
+  // **ต้อง memo** — `data?.data ?? []` สร้าง array ใหม่ทุก render แล้ว
+  // `useReactTable({ data: items })` จะ sync state ไม่จบ · เจอจริงหลังเซฟ vendor
+  // สำเร็จ (onSuccess → form.reset + setMode("view")) section นี้ re-render
+  // 245,156 รอบใน 60 วิ หน้าค้างสนิท · ใส่ memo แล้วเหลือ 5 รอบ 22ms
+  const items = useMemo(() => data?.data ?? [], [data]);
   const { data: masterData } = useCertification({ perpage: -1 });
   const masterMap = new Map(
     (masterData?.data ?? []).map((c) => [c.id, c] as const),

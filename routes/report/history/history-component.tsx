@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import {
@@ -41,7 +41,12 @@ export default function HistoryComponent() {
     enabled: isGridMode,
   });
 
-  const items = isGridMode ? grid.items : (listQuery.data?.data ?? []);
+  // TanStack ต้องได้ reference ที่นิ่ง — สาขา list สร้าง array ใหม่ทุก render
+  // แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section)
+  const items = useMemo(
+    () => (isGridMode ? grid.items : (listQuery.data?.data ?? [])),
+    [isGridMode, grid.items, listQuery.data],
+  );
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (listQuery.data?.paginate?.total ?? 0);

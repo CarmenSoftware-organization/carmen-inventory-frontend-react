@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, fireEvent } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
+import en from "@/messages/en.json";
+import type { VendorDetail } from "@/types/vendor";
 import {
   fakeMutation,
+  firstPayload,
   renderForm,
   submitForm,
 } from "@/lib/test-utils/form-characterization";
@@ -21,8 +24,16 @@ vi.mock("@/hooks/use-vendor", () => ({
   useUpdateVendor: () => updateMut,
   useDeleteVendor: () => deleteMut,
 }));
-// section ใบรับรองโผล่เฉพาะตอนมี vendor แล้วยิง query ของตัวเอง — ไม่เกี่ยวกับ
-// เส้นทางหลัง save
+
+/**
+ * **VendorCertificateSection ยิง query ของตัวเองสามตัว — ต้อง mock ให้ครบ**
+ *
+ * section นี้ render เฉพาะตอนมี `vendor` แล้วเรียก `useVendorCertificates` +
+ * `useCertification` + `useProfile` ปล่อยตัวใดตัวหนึ่งไว้ query จะ retry แบบ
+ * backoff อยู่เบื้องหลัง แล้ว `await act()` จะรอมันจนหมดเวลาเทสต์ (วัดได้ 59,896ms)
+ * ทั้งที่ mutation ถูกเรียกไปตั้งแต่มิลลิวินาทีแรก — อาการหน้าตาเหมือนฟอร์มช้า
+ * ทั้งที่ฟอร์มไม่ได้ช้า mock ครบแล้วเหลือ 1ms
+ */
 vi.mock("./use-vendor-certificate", () => ({
   useVendorCertificates: () => ({ data: undefined, isLoading: false }),
   useVendorCertificateById: () => ({ data: undefined, isLoading: false }),
@@ -30,6 +41,29 @@ vi.mock("./use-vendor-certificate", () => ({
   useUpdateVendorCertificate: () => updateMut,
   useDeleteVendorCertificate: () => deleteMut,
 }));
+vi.mock("@/hooks/use-certification", () => ({
+  useCertification: () => ({ data: undefined, isLoading: false }),
+}));
+vi.mock("@/hooks/use-profile", () => ({
+  useProfile: () => ({
+    dateFormat: "DD/MM/YYYY",
+    dateTimeFormat: "DD/MM/YYYY HH:mm",
+    defaultCurrencyCode: "THB",
+    buCode: "BU-1",
+  }),
+}));
+
+// VendorGeneral → LookupBuType → useBusinessType · VendorAddress → lookup ที่อยู่ไทย
+// ทั้งหมดเป็น query จริง ปล่อยไว้ act() จะรอ retry จนหมดเวลา
+vi.mock("@/hooks/use-business-type", () => ({
+  useBusinessType: () => ({ data: undefined, isLoading: false }),
+}));
+vi.mock("@/hooks/use-thai-address", () => ({
+  useThaiProvinces: () => ({ data: [], isLoading: false }),
+  useThaiDistricts: () => ({ data: [], isLoading: false }),
+  useThaiSubDistricts: () => ({ data: [], isLoading: false }),
+}));
+
 vi.mock("@/hooks/use-can", () => ({
   useCan: () => ({
     can: () => true,
@@ -44,6 +78,19 @@ vi.mock("@/hooks/use-can", () => ({
 
 const { VendorForm } = await import("./vendor-form");
 
+const VENDOR: VendorDetail = {
+  id: "ven-1",
+  doc_version: 9,
+  code: "V-001",
+  name: "Acme Foods",
+  description: "",
+  is_active: true,
+  business_type: [],
+  info: [],
+  vendor_address: [],
+  vendor_contact: [],
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -51,41 +98,48 @@ beforeEach(() => {
 /**
  * บันทึกพฤติกรรมปัจจุบันของ VendorForm ไว้ก่อนยุบเข้า hook กลาง
  * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้
- *
- * ฟอร์มนี้ใหญ่ (field array ของที่อยู่/ผู้ติดต่อ) — `userEvent.click` ไล่เช็ค
- * pointer-events ทั้งต้นไม้จนหมดเวลา 5 วิ ใช้ `fireEvent` ใน `act` แทน
  */
 describe("VendorForm — characterization", () => {
   /**
-   * **ยังครอบไม่ได้ และเป็นบั๊กที่ควรไล่ก่อน refactor**
-   *
-   * submit ในโหมด edit ไม่จบภายใน 45 วิ · probe แยกที่ให้ budget 30 วิวัดได้
-   * `submit ms: 29842` แล้วโดนตัด — mutation ถูกเรียกจริงและ payload ถูกต้อง
-   * แค่ช้าจนใช้ไม่ได้ ฟอร์มอื่นทั้ง 12 ใบในชุดนี้ submit เสร็จใน ~30ms
-   *
-   * ตัดออกทีละอย่างแล้ว ไม่ใช่ query ค้าง (mock ครบทั้ง use-vendor ·
-   * use-vendor-certificate · use-thai-address) ไม่ใช่ตอน render (65ms) และไม่ใช่
-   * ตอนคลิก Edit (28ms) — อยู่ในจังหวะ submit ล้วน ๆ สงสัย buildNestedPayload
-   * ที่เดินผ่าน dirtyFields ของ field array ที่อยู่/ผู้ติดต่อ
-   *
-   * โหมด add (เคสข้างล่าง) เร็วปกติ ต่างกันแค่มี entity
+   * ฟอร์มนี้ใหญ่ (field array ของที่อยู่/ผู้ติดต่อ) — `userEvent.click` ไล่เช็ค
+   * pointer-events ทั้งต้นไม้จนช้า ใช้ `fireEvent` ใน `act` พอ
    */
-  it.todo("[update] เซฟแล้วอยู่หน้าเดิม + payload แนบ id กับ doc_version");
+  async function enterEditMode() {
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: en.common.edit }));
+    });
+  }
+
+  it("[update] เซฟแล้วอยู่หน้าเดิม ไม่เด้งกลับหน้ารายการ", async () => {
+    renderForm(<VendorForm vendor={VENDOR} />);
+    await enterEditMode();
+    await act(async () => submitForm("vendor-form"));
+
+    expect(updateMut.mutate).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("[update] payload แนบ id กับ doc_version ที่โหลดมา", async () => {
+    renderForm(<VendorForm vendor={VENDOR} />);
+    await enterEditMode();
+    await act(async () => submitForm("vendor-form"));
+
+    expect(firstPayload(updateMut)).toMatchObject({
+      id: "ven-1",
+      doc_version: 9,
+    });
+  });
 
   it("[create] เซฟแล้ว replace ไปหน้าใบที่เพิ่งสร้าง", async () => {
     renderForm(<VendorForm />);
     await act(async () => {
       fireEvent.change(
         document.getElementById("vendor-code") as HTMLInputElement,
-        {
-          target: { value: "V-002" },
-        },
+        { target: { value: "V-002" } },
       );
       fireEvent.change(
         document.getElementById("vendor-name") as HTMLInputElement,
-        {
-          target: { value: "Beta Foods" },
-        },
+        { target: { value: "Beta Foods" } },
       );
     });
     await act(async () => submitForm("vendor-form"));
