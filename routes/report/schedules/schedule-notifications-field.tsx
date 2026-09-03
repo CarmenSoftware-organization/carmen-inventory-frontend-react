@@ -9,7 +9,29 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import type { ScheduleFormValues } from "./schedule-form-schema";
+
+/**
+ * ต่ำกว่านี้ถือว่า "แจ้งแทบจะพร้อมกับที่รอบรันเริ่ม" แล้วขึ้นคำเตือน
+ *
+ * เป็นแค่คำเตือน ไม่ใช่กฎ — หลังบ้านยอมรับ gap เท่าไรก็ได้ และตั้งใจไม่แปลง
+ * gap สั้น ๆ เป็น "พรุ่งนี้" ให้อัตโนมัติ เพราะ "แจ้งหลังรัน 5 นาที" เป็นเจตนา
+ * ที่พบได้ปกติ การดันไปอีก 24 ชม. ให้เองคือเดาผิดแบบที่ผู้ใช้ไม่รู้ตัว
+ */
+const NOTIFY_GAP_WARNING_MINUTES = 10;
+
+/**
+ * แปลง "HH:mm" เป็นจำนวนนาทีนับจากเที่ยงคืน
+ *
+ * @param value - เวลารูปแบบ "HH:mm"
+ * @returns จำนวนนาที หรือ null ถ้ารูปแบบไม่ใช่
+ */
+function toMinutes(value: string): number | null {
+  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
 
 interface ScheduleNotificationsFieldProps {
   readonly form: UseFormReturn<ScheduleFormValues>;
@@ -42,6 +64,19 @@ export function ScheduleNotificationsField({
   // ใช้ตัดสิน notify_day_offset ตอนสร้าง schedule
   const isNextDay = !!notifyAt && !!runTime && notifyAt < runTime;
 
+  // รอบรันแบบ viewer_url แค่ mint ลิงก์แล้วยิง noti ต่อในฟังก์ชันเดียว ใช้เวลา
+  // ไม่กี่วินาที ตั้งใกล้แค่ไหนก็ไม่มี race — แต่คนตั้งมักคิดว่าเลขนี้คือ
+  // "เผื่อเวลารายงานประมวลผล" ซึ่งไม่ใช่ จึงบอกไปตรง ๆ ว่าจะได้แจ้งเกือบทันที
+  const gapMinutes = (() => {
+    if (!notifyAt || isNextDay) return null;
+    const run = toMinutes(runTime ?? "");
+    const notify = toMinutes(notifyAt);
+    if (run === null || notify === null) return null;
+    return notify - run;
+  })();
+  const isTooClose =
+    gapMinutes !== null && gapMinutes < NOTIFY_GAP_WARNING_MINUTES;
+
   return (
     <Field>
       <FieldLabel>{t("notifications")}</FieldLabel>
@@ -62,12 +97,18 @@ export function ScheduleNotificationsField({
               </Badge>
             )}
           </div>
-          <FieldDescription>
+          <FieldDescription
+            className={cn(isTooClose && "text-warning-ink")}
+          >
             {!notifyAt
               ? t("notifyImmediately")
               : isNextDay
                 ? t("notifyAtHintNextDay")
-                : t("notifyAtHintSameDay")}
+                : isTooClose
+                  ? t("notifyAtHintTooClose", {
+                      minutes: NOTIFY_GAP_WARNING_MINUTES,
+                    })
+                  : t("notifyAtHintSameDay")}
           </FieldDescription>
         </Field>
 
