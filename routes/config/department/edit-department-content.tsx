@@ -5,18 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าแก้ไข Department ตาม id พร้อมโหลดข้อมูลและจัดการสถานะโหลด/ผิดพลาด
+ * หน้าดู/แก้ไข Department ตาม id — ดึงข้อมูลผ่าน `useDepartmentById`
  *
- * ดึงข้อมูลผ่าน `useDepartmentById` แสดง FormSkeleton ระหว่างโหลด,
- * ErrorState เมื่อผิดพลาด แล้ว render `DepartmentForm` ในโหมด view
- *
- * @param params - Promise ของ route params ที่มีค่า id
- * @returns React element ของฟอร์มแก้ไข Department
- * @example
- * ```tsx
- * // route: /config/department/[id]
- * <EditDepartmentPage params={params} />
- * ```
+ * @param props.id - รหัส Department ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `DepartmentForm` เมื่อได้ข้อมูล
  */
 export function EditDepartmentContent({ id }: { id: string }) {
   const tErr = useTranslations("config.department");

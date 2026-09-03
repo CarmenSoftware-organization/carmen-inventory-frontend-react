@@ -5,12 +5,11 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าแสดงรายละเอียดและแก้ไขการกำหนด Role/Location ของผู้ใช้ตาม id
- * @param props - params ที่มี id ของผู้ใช้ (Promise ตาม Next.js 16)
- * @returns JSX element ของหน้า User Detail
- * @example
- * // ใช้เป็น Next.js route: /system-admin/user/[id]
- * <UserDetailPage params={Promise.resolve({ id: "u-1" })} />
+ * หน้ารายละเอียดผู้ใช้ — แก้ได้เฉพาะ Role ส่วน Department กับ Location ดูอย่างเดียว
+ * (ผูก/ถอนคลังทำที่ /config/location)
+ *
+ * @param props.id - รหัสผู้ใช้ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns skeleton ระหว่างโหลด · `ErrorState` เมื่อ error หรือไม่พบ · ฟอร์มเมื่อได้ข้อมูล
  */
 export function UserDetailContent({ id }: { id: string }) {
   const tErr = useTranslations("systemAdmin.user");

@@ -5,12 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าสำหรับแก้ไขสูตรอาหารที่มีอยู่
- * @param props - params ที่มี id ของสูตรอาหาร
- * @returns React element ของหน้าแก้ไขสูตรอาหาร
- * @example
- * // route: /operation-plan/recipe/abc-123
- * <EditRecipePage params={Promise.resolve({ id: "abc-123" })} />
+ * หน้าดู/แก้ไขสูตรอาหาร ตาม id — ดึงข้อมูลผ่าน `useRecipeById`
+ *
+ * @param props.id - รหัสสูตรอาหารที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `RecipeForm` เมื่อได้ข้อมูล
  */
 export function EditRecipeContent({ id }: { id: string }) {
   const t = useTranslations("operationPlan.recipe");

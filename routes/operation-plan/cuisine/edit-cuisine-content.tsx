@@ -5,12 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าสำหรับแก้ไขข้อมูล cuisine ที่มีอยู่
- * @param props - params ที่มี id ของ cuisine
- * @returns React element ของหน้าแก้ไข cuisine
- * @example
- * // route: /operation-plan/cuisine/abc-123
- * <EditCuisinePage params={Promise.resolve({ id: "abc-123" })} />
+ * หน้าดู/แก้ไขประเภทอาหาร ตาม id — ดึงข้อมูลผ่าน `useCuisineById`
+ *
+ * @param props.id - รหัส cuisine ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `CuisineForm` เมื่อได้ข้อมูล
  */
 export function EditCuisineContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.cuisine");

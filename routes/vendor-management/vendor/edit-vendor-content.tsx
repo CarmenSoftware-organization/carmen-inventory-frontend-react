@@ -5,21 +5,11 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าแก้ไขข้อมูล vendor ตาม id ที่ระบุใน URL
+ * หน้าแก้ไขข้อมูล vendor ตาม id — ดึงข้อมูลผ่าน `useVendorById`
+ * เมื่อได้ข้อมูลส่งให้ `VendorForm` ซึ่งเปิดมาที่โหมด view แล้วกดแก้ต่อได้
  *
- * รายละเอียด: Client Component ที่ unwrap params ด้วย `use()`, ดึงข้อมูล vendor
- * ผ่าน `useVendorById(id)`, แสดง `FormSkeleton` ระหว่างโหลด, `ErrorState`
- * เมื่อเกิด error พร้อมปุ่ม retry, หรือ "Vendor not found" เมื่อไม่พบข้อมูล,
- * เมื่อโหลดสำเร็จจะส่ง `vendor` ให้ `VendorForm` ทำให้อยู่ในโหมด view/edit
- *
- * @param props - properties ของหน้า
- * @param props.params - Promise ของ route params ที่มี `id` ของ vendor
- * @returns React element ของหน้าแก้ไข vendor
- * @example
- * ```tsx
- * // เข้าผ่าน Next.js App Router ที่ path /vendor-management/vendor/abc-123
- * <EditVendorPage params={Promise.resolve({ id: "abc-123" })} />
- * ```
+ * @param props.id - รหัส vendor ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` พร้อม retry เมื่อล้มเหลวหรือไม่พบ · ฟอร์มเมื่อได้ข้อมูล
  */
 export function EditVendorContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.vendor");

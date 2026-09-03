@@ -5,16 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าดู/แก้ไขใบรับสินค้าตาม id ที่ระบุใน URL
- * unwrap params Promise ด้วย use() ตาม Next.js 16
- * โหลด GRN ผ่าน useGoodsReceiveNoteById แล้ว render GrnForm
- * แสดง FormSkeleton ระหว่างโหลด และ ErrorState เมื่อเกิดข้อผิดพลาด
+ * หน้าดู/แก้ไขใบรับสินค้าตาม id — ดึงข้อมูลผ่าน `useGoodsReceiveNoteById`
  *
- * @param props - props ของ page
- * @param props.params - Promise ของ { id } จาก App Router
- * @returns React element ของหน้า
- * @example
- * // Accessed via URL: /procurement/goods-receive-note/123
+ * @param props.id - รหัส GRN ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `GrnForm` เมื่อได้ข้อมูล
  */
 export function EditGoodsReceiveNoteContent({ id }: { id: string }) {
   const t = useTranslations("procurement.goodsReceiveNote");

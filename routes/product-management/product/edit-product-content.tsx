@@ -37,18 +37,11 @@ const EditProductInner = ({ id }: { id: string }) => {
 };
 
 /**
- * หน้าแก้ไขสินค้าตาม id
+ * หน้าแก้ไขสินค้าตาม id — ห่อ `EditProductInner` ไว้ใน Suspense พร้อม
+ * `FormSkeleton` เป็น fallback (ฟอร์มสินค้า lazy-load ของหนักหลายก้อน)
  *
- * Route `/product-management/product/[id]` — unwrap `params` (Next.js 16 Promise) ด้วย `use()`
- * แล้วส่ง id ให้ `EditProductContent` ภายใต้ Suspense + FormSkeleton fallback
- *
- * @param props - props ของ Next.js page ที่มี `params` เป็น Promise ของ `{ id }`
+ * @param props.id - รหัสสินค้าที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns JSX ของหน้าแก้ไขสินค้า
- * @example
- * ```tsx
- * // Route: /product-management/product/prod-123
- * <EditProductPage params={Promise.resolve({ id: "prod-123" })} />
- * ```
  */
 export function EditProductContent({ id }: { id: string }) {
   return (

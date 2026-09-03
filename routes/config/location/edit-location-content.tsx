@@ -5,18 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าแก้ไข Location ตาม id พร้อมโหลดข้อมูลและจัดการสถานะโหลด/ผิดพลาด
+ * หน้าดู/แก้ไข Location ตาม id — ดึงข้อมูลผ่าน `useLocationById`
  *
- * ดึงข้อมูลผ่าน `useLocationById` แสดง FormSkeleton ระหว่างโหลด,
- * ErrorState เมื่อผิดพลาด แล้ว render `LocationForm` ในโหมด view
- *
- * @param params - Promise ของ route params ที่มีค่า id
- * @returns React element ของฟอร์มแก้ไข Location
- * @example
- * ```tsx
- * // route: /config/location/[id]
- * <EditLocationPage params={params} />
- * ```
+ * @param props.id - รหัสคลังที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `LocationForm` เมื่อได้ข้อมูล
  */
 export function EditLocationContent({ id }: { id: string }) {
   const tErr = useTranslations("config.location");

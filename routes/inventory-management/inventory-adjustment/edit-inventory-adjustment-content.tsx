@@ -54,14 +54,11 @@ const EditWithType = ({
 };
 
 /**
- * หน้าแก้ไข/ดู Inventory Adjustment ตาม id ใน route parameters
- * โหลดข้อมูลผ่าน useInventoryAdjustmentById และแสดง skeleton/error ตามสถานะ
- * @param props - พร็อพของ page component
- * @param props.params - Promise ของ route parameters ที่มี id ของ adjustment
- * @returns React element ของหน้าแก้ไข adjustment
- * @example
- * // route: /inventory-management/inventory-adjustment/123?type=stock-in
- * <EditInventoryAdjustmentPage params={Promise.resolve({ id: "123" })} />
+ * หน้าดู/แก้ไข Inventory Adjustment ตาม id — ห่อไว้ใน Suspense พร้อม `FormSkeleton`
+ * ชนิดใบ (stock-in / stock-out) อ่านจาก query `?type=` ไม่ใช่จาก path
+ *
+ * @param props.id - รหัสใบปรับปรุงที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns JSX ของหน้าแก้ไขใบปรับปรุงสต๊อก
  */
 export function EditInventoryAdjustmentContent({ id }: { id: string }) {
   return (

@@ -5,18 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าดู/แก้ไขใบสั่งซื้อตาม id ของ PO โดย unwrap `params` แบบ async ตาม
- * มาตรฐาน Next.js 16 แล้วดึงข้อมูลผ่าน `usePurchaseOrderById` จะแสดง
- * `FormSkeleton` ระหว่างโหลด, `ErrorState` เมื่อ fetch ล้มเหลวหรือไม่พบ
- * ข้อมูล และเรนเดอร์ `PoForm` เมื่อมีข้อมูลพร้อมใช้
+ * หน้าดู/แก้ไขใบสั่งซื้อตาม id — ดึงข้อมูลผ่าน `usePurchaseOrderById`
  *
- * @param props - props ของเพจ
- * @param props.params - Promise ที่ resolve เป็น object `{ id }` ของ PO
- * @returns React element ของฟอร์มแก้ไขใบสั่งซื้อ หรือสถานะ loading/error
- * @example
- * // ถูกเรียกอัตโนมัติโดย Next.js App Router เมื่อเข้า URL
- * // /procurement/purchase-order/abc-123
- * <EditPurchaseOrderPage params={Promise.resolve({ id: "abc-123" })} />
+ * @param props.id - รหัส PO ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PoForm` เมื่อได้ข้อมูล
  */
 export function EditPurchaseOrderContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseOrder");

@@ -5,12 +5,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * หน้าสำหรับแก้ไขหมวดหมู่สูตรอาหารที่มีอยู่
- * @param props - params ที่มี id ของหมวดหมู่
- * @returns React element ของหน้าแก้ไขหมวดหมู่สูตรอาหาร
- * @example
- * // route: /operation-plan/category/abc-123
- * <EditRecipeCategoryPage params={Promise.resolve({ id: "abc-123" })} />
+ * หน้าดู/แก้ไขหมวดหมู่สูตรอาหาร ตาม id — ดึงข้อมูลผ่าน `useRecipeCategoryById`
+ *
+ * @param props.id - รหัสหมวดหมู่ที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `RecipeCategoryForm` เมื่อได้ข้อมูล
  */
 export function EditRecipeCategoryContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.recipeCategory");
