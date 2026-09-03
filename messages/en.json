@@ -4226,6 +4226,12 @@
     "notifications": "Notifications",
     "notifyWebApplication": "Web Application",
     "notifyEmail": "Email",
+    "notifyAt": "Notify at",
+    "notifyAtHintSameDay": "Recipients are told on the same day the report runs.",
+    "notifyAtHintNextDay": "Earlier than the run time, so recipients are told the next day.",
+    "notifyAtNextDayBadge": "+1 day",
+    "notifyImmediately": "As soon as the run finishes",
+    "notifyAtColumn": "Notify",
     "namePlaceholder": "Daily Inventory Report",
     "creating": "Creating…",
     "createFailed": "Failed to create schedule"

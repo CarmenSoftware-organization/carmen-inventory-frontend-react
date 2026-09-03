@@ -108,6 +108,18 @@ export function useScheduleTableColumns({
       size: 200,
     },
     {
+      accessorKey: "notify_at",
+      header: t("notifyAtColumn"),
+      cell: ({ row }) => {
+        const { notify_at, notify_day_offset } = row.original;
+        if (!notify_at) return t("notifyImmediately");
+        // "+1" ต่อท้ายเหมือนเวลาถึงของเที่ยวบินที่ข้ามวัน — ไม่งั้นเวลาที่เร็วกว่า
+        // เวลารันจะอ่านดูเหมือนตั้งผิด
+        return notify_day_offset ? `${notify_at} (+${notify_day_offset})` : notify_at;
+      },
+      size: 120,
+    },
+    {
       accessorKey: "is_active",
       header: t("active"),
       cell: ({ getValue }) => (

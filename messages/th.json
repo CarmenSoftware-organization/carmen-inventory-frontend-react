@@ -4216,6 +4216,12 @@
     "notifications": "การแจ้งเตือน",
     "notifyWebApplication": "แจ้งเตือนในเว็บแอปพลิเคชัน",
     "notifyEmail": "แจ้งเตือนทางอีเมล",
+    "notifyAt": "เวลาแจ้งเตือน",
+    "notifyAtHintSameDay": "ผู้รับจะได้รับแจ้งในวันเดียวกับที่รายงานรัน",
+    "notifyAtHintNextDay": "เร็วกว่าเวลารัน ผู้รับจะได้รับแจ้งในวันถัดไป",
+    "notifyAtNextDayBadge": "+1 วัน",
+    "notifyImmediately": "ทันทีที่รันเสร็จ",
+    "notifyAtColumn": "แจ้งเตือน",
     "namePlaceholder": "รายงานคงคลังประจำวัน",
     "creating": "กำลังสร้าง…",
     "createFailed": "สร้างกำหนดการไม่สำเร็จ"
