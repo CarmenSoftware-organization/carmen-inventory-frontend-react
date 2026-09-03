@@ -31,7 +31,7 @@ export function useEcoLabelTable({
   onDelete,
 }: UseEcoLabelTableOptions) {
   const tfl = useTranslations("field");
-  const t = useTranslations("config.eco");
+  const t = useTranslations("productManagement.eco");
   const { dateTimeFormat } = useProfile();
   const columns: ColumnDef<EcoLabel>[] = [
     {

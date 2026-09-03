@@ -37,7 +37,7 @@ export function EcoLabelDialog({
   ecoLabel,
   readOnly,
 }: EcoLabelDialogProps) {
-  const t = useTranslations("config.eco");
+  const t = useTranslations("productManagement.eco");
   const tfl = useTranslations("field");
 
   return (
@@ -47,7 +47,7 @@ export function EcoLabelDialog({
       entity={ecoLabel}
       readOnly={readOnly}
       icon={Leaf}
-      translationNamespace="config.eco"
+      translationNamespace="productManagement.eco"
       useCreate={useCreateEcoLabel}
       useUpdate={useUpdateEcoLabel}
       buildSchema={createEcoLabelSchema}

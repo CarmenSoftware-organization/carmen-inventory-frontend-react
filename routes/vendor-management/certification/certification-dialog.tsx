@@ -36,7 +36,7 @@ export function CertificationDialog({
   certification,
   readOnly,
 }: CertificationDialogProps) {
-  const t = useTranslations("config.certification");
+  const t = useTranslations("vendorManagement.certification");
   const tfl = useTranslations("field");
 
   return (
@@ -50,7 +50,7 @@ export function CertificationDialog({
       entity={certification}
       readOnly={readOnly}
       icon={Award}
-      translationNamespace="config.certification"
+      translationNamespace="vendorManagement.certification"
       useCreate={useCreateCertification}
       useUpdate={useUpdateCertification}
       buildSchema={createCertificationSchema}

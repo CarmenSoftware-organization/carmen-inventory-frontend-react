@@ -193,6 +193,16 @@ export const moduleList: ModuleDto[] = [
         icon: Box,
         permission: PERMISSIONS.product_management.product.view,
       },
+      {
+        // licenseFeature ชี้ product_management มาตั้งแต่แรก — ย้ายมาให้ตรงกัน
+        // permission ย้ายตามด้วย (เดิม configuration.view)
+        name: "eco",
+        path: "/product-management/eco",
+        licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
+        icon: Leaf,
+        separatorBefore: true,
+        permission: PERMISSIONS.product_management.view,
+      },
     ],
   },
   {
@@ -225,6 +235,18 @@ export const moduleList: ModuleDto[] = [
         path: "/vendor-management/request-price-list",
         licenseFeature: "vendor_management.request_price_list", // app:request-for-pricings
         icon: FileSpreadsheet,
+        permission: PERMISSIONS.vendor_management.view,
+      },
+      {
+        // licenseFeature ชี้ vendor_management มาตั้งแต่แรก — ย้ายมาอยู่ใต้เมนูนี้
+        // ให้ตรงกับที่ backend จัดหมวดไว้ · permission ย้ายตามด้วย (เดิม
+        // configuration.view) คนที่มีสิทธิ์ config แต่ไม่มี vendor_management
+        // จะไม่เห็นเมนูนี้อีก — เป็นผลที่ตั้งใจ ไม่ใช่ผลข้างเคียง
+        name: "certification",
+        path: "/vendor-management/certification",
+        licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
+        icon: Award,
+        separatorBefore: true,
         permission: PERMISSIONS.vendor_management.view,
       },
     ],
@@ -537,21 +559,6 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "configuration.extra_cost_type", // config:extra-cost-types
         icon: Coins,
         permission: PERMISSIONS.configuration.extra_cost.view,
-      },
-      {
-        name: "certification",
-        path: "/config/certification",
-        licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
-        icon: Award,
-        separatorBefore: true,
-        permission: PERMISSIONS.configuration.view,
-      },
-      {
-        name: "eco",
-        path: "/config/eco",
-        licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
-        icon: Leaf,
-        permission: PERMISSIONS.configuration.view,
       },
     ],
   },

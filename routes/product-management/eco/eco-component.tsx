@@ -1,38 +1,34 @@
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
-import {
-  useCertification,
-  useDeleteCertification,
-} from "@/hooks/use-certification";
-import type { Certification } from "@/types/certification";
+import { useEcoLabel, useDeleteEcoLabel } from "@/hooks/use-eco-label";
+import type { EcoLabel } from "@/types/eco-label";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
-import { useCertificationTable } from "./use-certification-table";
-import { CERTIFICATION_FILTER_FIELDS } from "./certification-filter-fields";
-import CertificationCard from "./certification-card";
+import { useEcoLabelTable } from "./use-eco-table";
+import { ECO_FILTER_FIELDS } from "./eco-filter-fields";
+import EcoLabelCard from "./eco-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
-const CertificationDialog = lazy(() =>
-  import("./certification-dialog").then((mod) => ({
-    default: mod.CertificationDialog,
-  })),
+const EcoLabelDialog = lazy(() =>
+  import("./eco-dialog").then((mod) => ({ default: mod.EcoLabelDialog })),
 );
 
-export default function CertificationComponent() {
+export default function EcoComponent() {
+  const t = useTranslations("productManagement.eco");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   return (
-    <ConfigListTemplate<Certification>
-      translationNamespace="config.certification"
+    <ConfigListTemplate<EcoLabel>
+      translationNamespace="productManagement.eco"
       entityNameField="name"
-      useList={useCertification}
-      useDelete={useDeleteCertification}
-      useTable={useCertificationTable}
-      pageKey={LIST_PAGE_KEYS.CERTIFICATION}
-      filterFields={CERTIFICATION_FILTER_FIELDS}
+      useList={useEcoLabel}
+      useDelete={useDeleteEcoLabel}
+      useTable={useEcoLabelTable}
+      pageKey={LIST_PAGE_KEYS.ECO}
+      filterFields={ECO_FILTER_FIELDS}
       defaultSort="code:asc"
       exportColumns={[
-        { header: tfl("code"), value: (r) => r.code, width: 16 },
+        { header: t("iso"), value: (r) => r.code, width: 16 },
         { header: tfl("name"), value: (r) => r.name, width: 28 },
         {
           header: tfl("status"),
@@ -42,16 +38,16 @@ export default function CertificationComponent() {
       ]}
       renderDialog={({ open, onOpenChange, entity, readOnly }) => (
         <Suspense fallback={null}>
-          <CertificationDialog
+          <EcoLabelDialog
             open={open}
             onOpenChange={onOpenChange}
-            certification={entity}
+            ecoLabel={entity}
             readOnly={readOnly}
           />
         </Suspense>
       )}
       renderCard={({ item, onEdit, onDelete }) => (
-        <CertificationCard item={item} onEdit={onEdit} onDelete={onDelete} />
+        <EcoLabelCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

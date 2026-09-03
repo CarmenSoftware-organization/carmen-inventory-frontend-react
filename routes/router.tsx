@@ -107,11 +107,6 @@ export const router = createBrowserRouter([
                   import("./config/business-type/business-type.route"),
               },
               {
-                path: "certification",
-                lazy: () =>
-                  import("./config/certification/certification.route"),
-              },
-              {
                 path: "credit-note-reason",
                 lazy: () =>
                   import("./config/credit-note-reason/credit-note-reason.route"),
@@ -125,7 +120,6 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import("./config/delivery-point/delivery-point.route"),
               },
-              { path: "eco", lazy: () => import("./config/eco/eco.route") },
               {
                 path: "exchange-rate",
                 lazy: () =>
@@ -359,6 +353,11 @@ export const router = createBrowserRouter([
                   import("./vendor-management/vendor-management.route"),
               },
               {
+                path: "certification",
+                lazy: () =>
+                  import("./vendor-management/certification/certification.route"),
+              },
+              {
                 path: "vendor",
                 lazy: () => import("./vendor-management/vendor/vendor.route"),
               },
@@ -537,6 +536,10 @@ export const router = createBrowserRouter([
                 index: true,
                 lazy: () =>
                   import("./product-management/product-management.route"),
+              },
+              {
+                path: "eco",
+                lazy: () => import("./product-management/eco/eco.route"),
               },
               {
                 path: "category",

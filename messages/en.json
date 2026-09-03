@@ -1264,18 +1264,6 @@
       "deleteConfirm": "Are you sure you want to delete extra cost type \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Shipping, Insurance"
     },
-    "eco": {
-      "entity": "Eco Certification",
-      "title": "Eco Certification",
-      "iso": "ISO",
-      "desc": "Green certifications a product can carry — organic, fair-trade, carbon-neutral.",
-      "add": "Add Eco Certification",
-      "edit": "Edit Eco Certification",
-      "deleteTitle": "Delete Eco Certification",
-      "deleteConfirm": "Are you sure you want to delete eco certification \"{name}\"? This action cannot be undone.",
-      "codePlaceholder": "e.g. ORG, FT, CN",
-      "namePlaceholder": "e.g. USDA Organic, Fair Trade, Carbon Neutral"
-    },
     "businessType": {
       "entity": "Business Type",
       "title": "Business Type",
@@ -1284,16 +1272,6 @@
       "deleteTitle": "Delete Business Type",
       "deleteConfirm": "Are you sure you want to delete business type \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Manufacturer, Distributor"
-    },
-    "certification": {
-      "entity": "Certification",
-      "title": "Certification",
-      "desc": "Certifications you ask vendors to hold — HACCP, GMP, halal — and check before buying.",
-      "add": "Add Certification",
-      "deleteTitle": "Delete Certification",
-      "deleteConfirm": "Are you sure you want to delete certification \"{name}\"? This action cannot be undone.",
-      "codePlaceholder": "e.g. ISO-9001",
-      "namePlaceholder": "e.g. ISO 9001 Quality Management"
     },
     "adjustmentType": {
       "entity": "Adjustment Type",
@@ -2105,6 +2083,16 @@
     }
   },
   "vendorManagement": {
+    "certification": {
+      "entity": "Certification",
+      "title": "Certification",
+      "desc": "Certifications you ask vendors to hold — HACCP, GMP, halal — and check before buying.",
+      "add": "Add Certification",
+      "deleteTitle": "Delete Certification",
+      "deleteConfirm": "Are you sure you want to delete certification \"{name}\"? This action cannot be undone.",
+      "codePlaceholder": "e.g. ISO-9001",
+      "namePlaceholder": "e.g. ISO 9001 Quality Management"
+    },
     "title": "Vendor Management",
     "dashboard": {
       "title": "Vendor Overview",
@@ -3090,6 +3078,18 @@
     }
   },
   "productManagement": {
+    "eco": {
+      "entity": "Eco Certification",
+      "title": "Eco Certification",
+      "iso": "ISO",
+      "desc": "Green certifications a product can carry — organic, fair-trade, carbon-neutral.",
+      "add": "Add Eco Certification",
+      "edit": "Edit Eco Certification",
+      "deleteTitle": "Delete Eco Certification",
+      "deleteConfirm": "Are you sure you want to delete eco certification \"{name}\"? This action cannot be undone.",
+      "codePlaceholder": "e.g. ORG, FT, CN",
+      "namePlaceholder": "e.g. USDA Organic, Fair Trade, Carbon Neutral"
+    },
     "title": "Product Management",
     "dashboard": {
       "title": "Product Overview",
