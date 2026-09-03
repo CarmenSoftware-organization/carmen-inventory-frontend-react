@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส Role ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `RoleForm` เมื่อได้ข้อมูล
  */
-export function EditRoleContent({ id }: { id: string }) {
+export function RoleEditContent({ id }: { id: string }) {
   const tErr = useTranslations("systemAdmin.role");
   const { data: role, isLoading, error, refetch } = useRoleById(id);
 

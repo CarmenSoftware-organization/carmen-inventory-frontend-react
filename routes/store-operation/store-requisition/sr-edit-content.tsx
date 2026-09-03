@@ -1,10 +1,10 @@
 import { useTranslations } from "use-intl";
-import { useStoreRequisitionById } from "./use-store-requisition";
+import { useStoreRequisitionById } from "./use-sr";
 import { StoreRequisitionForm } from "./sr-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-export function EditStoreRequisitionContent({ id }: { id: string }) {
+export function SrEditContent({ id }: { id: string }) {
   const t = useTranslations("storeOperation.storeRequisition");
   const {
     data: storeRequisition,

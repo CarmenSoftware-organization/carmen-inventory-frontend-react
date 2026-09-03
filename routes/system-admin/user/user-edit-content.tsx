@@ -11,7 +11,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัสผู้ใช้ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns skeleton ระหว่างโหลด · `ErrorState` เมื่อ error หรือไม่พบ · ฟอร์มเมื่อได้ข้อมูล
  */
-export function UserDetailContent({ id }: { id: string }) {
+export function UserEditContent({ id }: { id: string }) {
   const tErr = useTranslations("systemAdmin.user");
   const { data: user, isLoading, error, refetch } = useUserById(id);
 

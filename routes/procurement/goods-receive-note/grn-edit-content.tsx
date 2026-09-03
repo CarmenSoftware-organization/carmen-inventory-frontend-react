@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส GRN ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `GrnForm` เมื่อได้ข้อมูล
  */
-export function EditGoodsReceiveNoteContent({ id }: { id: string }) {
+export function GrnEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.goodsReceiveNote");
   const {
     data: goodsReceiveNote,

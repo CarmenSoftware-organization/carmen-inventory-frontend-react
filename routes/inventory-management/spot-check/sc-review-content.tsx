@@ -1,5 +1,5 @@
 import { ErrorState } from "@/components/ui/error-state";
-import { useSpotCheckById, useSpotCheckReview } from "./use-spot-check";
+import { useSpotCheckById, useSpotCheckReview } from "./use-sc";
 import { ItemListSkeleton } from "../shared/inv-shared";
 import { ScReviewComponent } from "./sc-review-component";
 

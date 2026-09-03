@@ -16,7 +16,7 @@ import {
   useWorkflow,
   type WorkflowDocType,
 } from "@/hooks/use-workflow";
-import { useDeleteWorkflow } from "./use-workflow-mutations";
+import { useDeleteWorkflow } from "./use-wf-mutations";
 import type { WorkflowDto } from "@/types/workflows";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useDataGridState } from "@/hooks/use-data-grid-state";

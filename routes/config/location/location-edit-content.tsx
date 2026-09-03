@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัสคลังที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `LocationForm` เมื่อได้ข้อมูล
  */
-export function EditLocationContent({ id }: { id: string }) {
+export function LocationEditContent({ id }: { id: string }) {
   const tErr = useTranslations("config.location");
   const { data: location, isLoading, error, refetch } = useLocationById(id);
 

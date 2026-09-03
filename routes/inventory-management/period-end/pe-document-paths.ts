@@ -14,7 +14,7 @@ const MODULE_PATHS: Record<ReviewTransactionKey, string> = {
  * สร้างลิงก์ไปหน้าเอกสารต้นทางของแต่ละโมดูล
  *
  * `si`/`so` ไม่มีหน้าโมดูลของตัวเอง — ใช้หน้า Inventory Adjustment ร่วมกัน และ `?type=`
- * เป็นข้อบังคับ ไม่ใช่ของประดับ เพราะ `edit-inventory-adjustment-content.tsx` เรนเดอร์
+ * เป็นข้อบังคับ ไม่ใช่ของประดับ เพราะ `ia-edit-content.tsx` เรนเดอร์
  * `ErrorState` ทันทีถ้าไม่มี query นี้
  *
  * @param moduleKey - โมดูลของเอกสาร

@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { ReviewContent } from "./physical-count-review-content";
+import { ReviewContent } from "./pc-review-content";
 
 /** หน้า Review ของ Physical Count — id มาจาก route param */
 export function Component() {

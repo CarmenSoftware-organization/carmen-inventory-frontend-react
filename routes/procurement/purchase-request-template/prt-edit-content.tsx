@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัสเทมเพลตที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PrtForm` เมื่อได้ข้อมูล
  */
-export function EditPurchaseRequestTemplateContent({ id }: { id: string }) {
+export function PrtEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseRequestTemplate");
   const { data: template, isLoading, error, refetch } = usePrtById(id);
 

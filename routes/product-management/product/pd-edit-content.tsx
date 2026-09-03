@@ -6,19 +6,12 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 /**
- * เนื้อหาหน้าแก้ไขสินค้า
+ * เนื้อหาจริงของหน้าแก้ไขสินค้า — โหลดด้วย `useProductById(id)`
  *
- * โหลดข้อมูลสินค้าด้วย `useProductById(id)` แล้วจัดการสถานะ loading (FormSkeleton),
- * error (ErrorState + refetch), not-found (ErrorState) และ success (ProductForm)
- *
- * @param props - object ที่มี id ของสินค้าที่ต้องการโหลด
- * @returns JSX ของเนื้อหาหน้าแก้ไขสินค้า
- * @example
- * ```tsx
- * <EditProductContent id="prod-123" />
- * ```
+ * @param props.id - รหัสสินค้าที่ต้องการโหลด
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `ProductForm` เมื่อได้ข้อมูล
  */
-const EditProductInner = ({ id }: { id: string }) => {
+const PdEditInner = ({ id }: { id: string }) => {
   const t = useTranslations("productManagement.product");
   const { data: product, isLoading, error, refetch } = useProductById(id);
 
@@ -37,16 +30,16 @@ const EditProductInner = ({ id }: { id: string }) => {
 };
 
 /**
- * หน้าแก้ไขสินค้าตาม id — ห่อ `EditProductInner` ไว้ใน Suspense พร้อม
+ * หน้าแก้ไขสินค้าตาม id — ห่อ `PdEditInner` ไว้ใน Suspense พร้อม
  * `FormSkeleton` เป็น fallback (ฟอร์มสินค้า lazy-load ของหนักหลายก้อน)
  *
  * @param props.id - รหัสสินค้าที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns JSX ของหน้าแก้ไขสินค้า
  */
-export function EditProductContent({ id }: { id: string }) {
+export function PdEditContent({ id }: { id: string }) {
   return (
     <Suspense fallback={<FormSkeleton />}>
-      <EditProductInner id={id} />
+      <PdEditInner id={id} />
     </Suspense>
   );
 }

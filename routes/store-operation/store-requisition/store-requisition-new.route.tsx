@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { StoreRequisitionForm } from "./sr-form";
-import { useStoreRequisitionById } from "./use-store-requisition";
+import { useStoreRequisitionById } from "./use-sr";
 import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import { WORKFLOW_TYPE } from "@/types/workflows";

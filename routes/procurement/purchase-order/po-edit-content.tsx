@@ -10,7 +10,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส PO ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PoForm` เมื่อได้ข้อมูล
  */
-export function EditPurchaseOrderContent({ id }: { id: string }) {
+export function PoEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseOrder");
   const {
     data: purchaseOrder,

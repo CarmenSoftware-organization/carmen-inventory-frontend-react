@@ -7,7 +7,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
 import { parseWorkflowData } from "./wf-form-schema";
 import { WfDetail } from "./wf-detail";
 
-export function EditWorkflowContent({ id }: { id: string }) {
+export function WfEditContent({ id }: { id: string }) {
   const t = useTranslations("systemAdmin.workflow");
   const {
     data: workflow,

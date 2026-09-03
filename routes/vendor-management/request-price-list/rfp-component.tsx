@@ -17,7 +17,7 @@ import {
   useRequestPriceList,
   useDeleteRequestPriceList,
   useExportRequestPriceList,
-} from "./use-request-price-list";
+} from "./use-rfp";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";

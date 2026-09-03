@@ -6,15 +6,12 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
 import type { PhysicalCount } from "@/types/physical-count";
 
 /**
- * หน้าแก้ไข Physical Count ตาม id
- * โหลด entity ผ่าน usePhysicalCountById แล้วส่งเข้า PcForm
+ * หน้าดู/แก้ไข Physical Count ตาม id — ดึงข้อมูลผ่าน `usePhysicalCountById`
  *
- * @param props - { id } จาก route param ที่ unwrap แล้วใน page.tsx
- * @returns React element ของหน้าแก้ไข physical count
- * @example
- * // URL: /inventory-management/physical-count/abc-123 → id = "abc-123"
+ * @param props.id - รหัสใบตรวจนับที่ route อ่านมาจาก URL segment (`useParams`)
+ * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PcForm` เมื่อได้ข้อมูล
  */
-export function EditPhysicalCountContent({ id }: Readonly<{ id: string }>) {
+export function PcEditContent({ id }: Readonly<{ id: string }>) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const {
     data: physicalCount,

@@ -28,7 +28,7 @@ import {
   useCreateSpotCheck,
   useDeleteSpotCheck,
   useUpdateSpotCheck,
-} from "./use-spot-check";
+} from "./use-sc";
 import type { SpotCheck } from "@/types/spot-check";
 import type { ProductLocation } from "@/types/location";
 import type { FormMode } from "@/types/form";

@@ -11,7 +11,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props.id - รหัส vendor ที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` พร้อม retry เมื่อล้มเหลวหรือไม่พบ · ฟอร์มเมื่อได้ข้อมูล
  */
-export function EditVendorContent({ id }: { id: string }) {
+export function VendorEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.vendor");
   const { data: vendor, isLoading, error, refetch } = useVendorById(id);
 

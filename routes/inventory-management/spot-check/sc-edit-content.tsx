@@ -6,6 +6,6 @@ import { ScEntryComponent } from "./sc-entry-component";
  *
  * @param props - { id } จาก route param ที่ unwrap แล้ว
  */
-export function EditSpotCheckContent({ id }: Readonly<{ id: string }>) {
+export function ScEditContent({ id }: Readonly<{ id: string }>) {
   return <ScEntryComponent spotCheckId={id} />;
 }

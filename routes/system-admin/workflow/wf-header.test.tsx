@@ -7,10 +7,10 @@ import type { Workflow } from "@/types/workflows";
 
 const mockAvailability = vi.fn();
 
-vi.mock("./use-workflow-mutations", () => ({
+vi.mock("./use-wf-mutations", () => ({
   useDeleteWorkflow: () => ({ mutate: vi.fn(), isPending: false }),
 }));
-vi.mock("./use-workflow-availability", () => ({
+vi.mock("./use-wf-availability", () => ({
   useWorkflowEditAvailability: () => mockAvailability(),
 }));
 // DocFormHeader ใช้ useLocation กับ useProfile ด้วย ไม่ได้ใช้แค่ useNavigate

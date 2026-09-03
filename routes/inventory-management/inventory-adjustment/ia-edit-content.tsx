@@ -7,7 +7,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-const EditInventoryAdjustmentInner = ({ id }: { id: string }) => {
+const IaEditInner = ({ id }: { id: string }) => {
   const [searchParams] = useSearchParams();
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const type = searchParams.get("type") as InventoryAdjustmentType | null;
@@ -60,10 +60,10 @@ const EditWithType = ({
  * @param props.id - รหัสใบปรับปรุงที่ route อ่านมาจาก URL segment (`useParams`)
  * @returns JSX ของหน้าแก้ไขใบปรับปรุงสต๊อก
  */
-export function EditInventoryAdjustmentContent({ id }: { id: string }) {
+export function IaEditContent({ id }: { id: string }) {
   return (
     <Suspense fallback={<FormSkeleton />}>
-      <EditInventoryAdjustmentInner id={id} />
+      <IaEditInner id={id} />
     </Suspense>
   );
 }

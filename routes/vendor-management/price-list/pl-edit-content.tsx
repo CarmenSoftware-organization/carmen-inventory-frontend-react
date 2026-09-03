@@ -4,7 +4,7 @@ import { PriceListForm } from "./pl-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-export function EditPriceListContent({ id }: { id: string }) {
+export function PlEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.priceList");
   const { data: priceList, isLoading, error, refetch } = usePriceListById(id);
 

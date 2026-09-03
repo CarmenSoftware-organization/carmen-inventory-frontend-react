@@ -29,7 +29,7 @@ import {
   useCreateRequestPriceList,
   useDeleteRequestPriceList,
   useUpdateRequestPriceList,
-} from "./use-request-price-list";
+} from "./use-rfp";
 import type { Vendor } from "@/types/vendor";
 import type {
   CreateRequestPriceListDto,

@@ -18,7 +18,7 @@ function NewInventoryAdjustmentInner() {
   return <InventoryAdjustmentForm adjustmentType={type} />;
 }
 
-export function NewInventoryAdjustmentContent() {
+export function IaNewContent() {
   return (
     <Suspense
       fallback={

@@ -1,5 +1,5 @@
-import { NewInventoryAdjustmentContent } from "./new-inventory-adjustment-content";
+import { IaNewContent } from "./ia-new-content";
 
 export function Component() {
-  return <NewInventoryAdjustmentContent />;
+  return <IaNewContent />;
 }

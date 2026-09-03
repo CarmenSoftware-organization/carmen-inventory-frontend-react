@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useRequestPriceListById } from "./use-request-price-list";
+import { useRequestPriceListById } from "./use-rfp";
 import { RequestPriceListForm } from "./rfp-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
@@ -9,9 +9,9 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * @param props - id ของ RFP ที่จะแก้ไข
  * @returns React element ของ content แก้ไข RFP
  * @example
- * <EditRequestPriceListContent id="rfp-001" />
+ * <RfpEditContent id="rfp-001" />
  */
-export function EditRequestPriceListContent({ id }: { id: string }) {
+export function RfpEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.requestPriceList");
   const {
     data: requestPriceList,

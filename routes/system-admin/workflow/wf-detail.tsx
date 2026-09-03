@@ -11,7 +11,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useUpdateWorkflow } from "./use-workflow-mutations";
+import { useUpdateWorkflow } from "./use-wf-mutations";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -23,7 +23,7 @@ import {
   type WorkflowCreateModel,
 } from "./wf-form-schema";
 import { WfHeader } from "./wf-header";
-import { useWorkflowEditAvailability } from "./use-workflow-availability";
+import { useWorkflowEditAvailability } from "./use-wf-availability";
 import { WfGeneral } from "./wf-general";
 import { WfStages } from "./wf-stages";
 import { WfRouting } from "./wf-routing";
