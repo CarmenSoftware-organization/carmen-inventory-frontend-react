@@ -1,7 +1,13 @@
-import { Controller, type UseFormReturn } from "react-hook-form";
+import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldInput,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { ScheduleFormValues } from "./schedule-form-schema";
 
@@ -11,7 +17,12 @@ interface ScheduleNotificationsFieldProps {
 }
 
 /**
- * Two checkboxes ใช้สื่อช่องทาง notification (web app + email)
+ * เวลาแจ้งเตือน + ช่องทาง notification (web app + email)
+ *
+ * `notify_at` คือเวลาที่ "บอกผู้รับว่ารายงานพร้อม" ไม่ใช่เวลาที่รายงานรัน
+ * ว่างไว้ = แจ้งทันทีที่รันเสร็จ ถ้าใส่เวลาที่เร็วกว่าเวลารัน แปลว่าวันถัดไป
+ * และจะขึ้น badge "+1 วัน" แบบเดียวกับเวลาถึงของตั๋วเครื่องบินที่บินข้ามวัน —
+ * backend คำนวณ offset เองจากคู่ (time, notify_at) จึงไม่ต้องส่งขึ้นไป
  *
  * Pair `htmlFor` + `id` ตามที่ CLAUDE.md กำหนด — shadcn Checkbox อย่างเดียว
  * ไม่ปนกับ `<input type="checkbox">` native
@@ -25,11 +36,41 @@ export function ScheduleNotificationsField({
   disabled,
 }: ScheduleNotificationsFieldProps) {
   const t = useTranslations("reportSchedule");
+  const runTime = useWatch({ control: form.control, name: "time" });
+  const notifyAt = useWatch({ control: form.control, name: "notify_at" });
+  // "HH:mm" zero-padded เทียบกันเป็น string ได้ตรง ๆ — ตรรกะเดียวกับที่ gateway
+  // ใช้ตัดสิน notify_day_offset ตอนสร้าง schedule
+  const isNextDay = !!notifyAt && !!runTime && notifyAt < runTime;
 
   return (
     <Field>
       <FieldLabel>{t("notifications")}</FieldLabel>
-      <div className="flex flex-col gap-2 rounded-md border p-3">
+      <div className="flex flex-col gap-3 rounded-md border p-3">
+        <Field>
+          <FieldLabel htmlFor="notify-at">{t("notifyAt")}</FieldLabel>
+          <div className="flex items-center gap-2">
+            <FieldInput
+              id="notify-at"
+              type="time"
+              className="h-8 w-32"
+              disabled={disabled}
+              {...form.register("notify_at")}
+            />
+            {isNextDay && (
+              <Badge variant="secondary" size="sm">
+                {t("notifyAtNextDayBadge")}
+              </Badge>
+            )}
+          </div>
+          <FieldDescription>
+            {!notifyAt
+              ? t("notifyImmediately")
+              : isNextDay
+                ? t("notifyAtHintNextDay")
+                : t("notifyAtHintSameDay")}
+          </FieldDescription>
+        </Field>
+
         <Controller
           control={form.control}
           name="notify_web"
