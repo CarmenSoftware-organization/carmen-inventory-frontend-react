@@ -132,6 +132,16 @@ export const API_ENDPOINTS = {
   LOCATIONS: (buCode: string) => `/api/proxy/api/config/${buCode}/locations`,
   LOCATIONS_BY_PRODUCT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/user-locations/product/${productId}`,
+  /**
+   * location ของ product ที่ **workflow นั้นอนุญาต** — แคบกว่า
+   * `LOCATIONS_BY_PRODUCT` ที่กรองด้วยสิทธิ์ user อย่างเดียว ใช้ในฟอร์ม PO
+   */
+  LOCATIONS_BY_WORKFLOW_PRODUCT: (
+    buCode: string,
+    workflowId: string,
+    productId: string,
+  ) =>
+    `/api/proxy/api/config/${buCode}/workflows/${workflowId}/products/${productId}/locations`,
   LOCATIONS_WITH_ANY_MOVEMENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/products/movement/locations`,
   LOCATIONS_WITH_MOVEMENT: (buCode: string, productId: string) =>

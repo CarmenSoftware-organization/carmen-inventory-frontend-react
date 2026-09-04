@@ -295,6 +295,9 @@ export function LocationsEditor({
   const productId =
     useWatch({ control: form.control, name: `items.${index}.product_id` }) ??
     "";
+  // location ต้องมาจากรายการที่ workflow ของ PO ใบนี้อนุญาต ไม่ใช่ทุกคลังที่ user เห็น
+  const workflowId =
+    useWatch({ control: form.control, name: "workflow_id" }) ?? "";
   const unitName =
     useWatch({
       control: form.control,
@@ -417,6 +420,7 @@ export function LocationsEditor({
                     render={({ field, fieldState }) => (
                       <LookupProductLocation
                         productId={productId}
+                        workflowId={workflowId}
                         value={field.value}
                         onValueChange={field.onChange}
                         onItemChange={(loc) => {

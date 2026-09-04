@@ -10,6 +10,8 @@ import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductLocationProps {
   readonly productId: string;
+  /** ส่งมาแล้วจะดึง location ที่ workflow นั้นอนุญาตแทน location ตามสิทธิ์ user */
+  readonly workflowId?: string;
   readonly value: string;
   readonly onValueChange: (value: string) => void;
   readonly onItemChange?: (location: Location) => void;
@@ -38,6 +40,7 @@ interface LookupProductLocationProps {
  * ใช้ `useLocationsByProduct(productId)` ดึงเฉพาะ location ที่ผูกกับ product นั้น
  * พร้อม server-side search และ infinite scroll (perpage 30) disabled เมื่อไม่มี `productId`
  * มี `onItemChange` ส่ง object `Location` เต็ม
+ * ใส่ `workflowId` เพิ่มได้ถ้าอยากได้เฉพาะ location ที่ workflow นั้นอนุญาต (ฟอร์ม PO)
  *
  * @param value - location id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -52,6 +55,7 @@ interface LookupProductLocationProps {
  */
 export function LookupProductLocation({
   productId,
+  workflowId,
   value,
   onValueChange,
   onItemChange,
@@ -79,7 +83,7 @@ export function LookupProductLocation({
     search?: string;
     perpage: number;
     page?: number;
-  }) => useLocationsByProduct(productId || undefined, params);
+  }) => useLocationsByProduct(productId || undefined, params, workflowId);
 
   const {
     items: locations,

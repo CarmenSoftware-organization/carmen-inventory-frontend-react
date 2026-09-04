@@ -49,6 +49,7 @@ export const QUERY_KEYS = {
   TRANSACTIONS: "transactions",
   LOCATIONS: "locations",
   LOCATIONS_BY_PRODUCT: "locations-by-product",
+  LOCATIONS_BY_WORKFLOW_PRODUCT: "locations-by-workflow-product",
   MY_PENDING_PURCHASE_ORDERS: "my-pending-purchase-orders",
   MY_PENDING_PURCHASE_ORDERS_COUNT: "my-pending-purchase-orders-count",
   MY_PENDING_PURCHASE_REQUESTS: "my-pending-purchase-requests",
