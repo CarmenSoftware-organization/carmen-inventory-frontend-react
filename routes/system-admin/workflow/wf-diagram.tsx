@@ -290,11 +290,7 @@ export default function WfDiagram({
   const t = useTranslations("systemAdmin.workflow");
 
   const isLargeScreen = useIsLargeScreen();
-  // Responsive: caller asks for vertical (desktop left-rail layout); on smaller
-  // screens the diagram is full-width above the form, so render horizontal.
   const vertical = orientation === "vertical" && isLargeScreen;
-  // Drag (node reorder + canvas pan) is allowed only when editable — i.e. an
-  // onMoveStage handler is supplied (edit mode). View mode is fully static.
   const editable = !!onMoveStage;
   const { nodes, edges } = buildGraph(
     stages,
@@ -350,8 +346,8 @@ export default function WfDiagram({
 
       <div
         className={cn(
-          "bg-muted/20 w-full overflow-hidden rounded border",
-          vertical ? "h-[32rem]" : "h-56",
+          "mt-2 w-full overflow-hidden rounded-lg border",
+          vertical ? "h-128" : "h-56",
         )}
       >
         <ReactFlowProvider>

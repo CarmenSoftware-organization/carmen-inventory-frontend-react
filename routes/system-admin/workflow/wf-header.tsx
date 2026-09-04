@@ -4,7 +4,7 @@ import { History, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { WarningDialog } from "@/components/ui/warning-dialog";
@@ -40,7 +40,6 @@ export function WfHeader({
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
-  const ts = useTranslations("status");
   const tw = useTranslations("systemAdmin.workflow.documents");
   const tt = useTranslations("toast");
 
@@ -79,13 +78,7 @@ export function WfHeader({
   // status + type-label (คั่นด้วย separator) แสดงข้าง title
   const badges = !isEditing ? (
     <>
-      <Badge
-        variant={workflow.is_active ? "success" : "secondary"}
-        size="sm"
-        className="text-sm"
-      >
-        {workflow.is_active ? ts("active") : ts("inactive")}
-      </Badge>
+      <StatusBadge active={workflow.is_active} />
       <Separator orientation="vertical" className="mx-0.5 h-3.5" />
       <span className="text-muted-foreground text-sm">
         {typeLabels[workflow.workflow_type] ?? workflow.workflow_type}
@@ -159,7 +152,7 @@ export function WfHeader({
         {tc("edit")}
       </Button>
       <Button
-        variant="destructive"
+        variant="outline"
         size="sm"
         onClick={handleDelete}
         disabled={deleteWorkflow.isPending}
