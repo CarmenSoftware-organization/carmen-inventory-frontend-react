@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateEquipment,
@@ -14,7 +12,6 @@ import {
   useDeleteEquipment,
 } from "./use-eq";
 import type { Equipment } from "@/types/equipment";
-import type { FormMode } from "@/types/form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   createEquipmentSchema,
@@ -36,17 +33,13 @@ interface EquipmentFormProps {
 /**
  * ฟอร์มสร้างและแก้ไขข้อมูลอุปกรณ์ รองรับโหมด view/edit/add
  */
+const LIST_PATH = "/operation-plan/equipment";
+
 export function EquipmentForm({ equipment }: EquipmentFormProps) {
   const t = useTranslations("operationPlan.equipment");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(equipment ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createEquipment = useCreateEquipment();
   const updateEquipment = useUpdateEquipment();
   const deleteEquipment = useDeleteEquipment();
@@ -54,7 +47,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState(false);
   const isPending = createEquipment.isPending || updateEquipment.isPending;
-  const isDisabled = isView || isPending;
 
   const resetImage = () => {
     setImageFile(null);
@@ -67,29 +59,17 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   };
 
   const equipmentSchema = createEquipmentSchema(tv, tfl);
-  const form = useForm<EquipmentFormValues>({
+  const f = useEntityForm<EquipmentFormValues>({
+    entity: equipment,
     resolver: zodResolver(equipmentSchema) as Resolver<EquipmentFormValues>,
     defaultValues: getDefaultValues(equipment),
-  });
-
-  const isImageDirty = imageFile !== null || imageRemoved;
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty || isImageDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
+    listPath: LIST_PATH,
     isPending,
+    // รูปที่เลือกไว้แต่ยังไม่อัปโหลดก็นับเป็นของที่จะหาย
+    extraDirty: imageFile !== null || imageRemoved,
+    onResetExtra: resetImage,
   });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const { form, isEdit, isDisabled } = f;
 
   const onSubmit = (values: EquipmentFormValues) => {
     const payload = {
@@ -135,24 +115,21 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             // reset baseline ให้ isDirty กลับเป็น false — ไม่งั้น discard dialog
             // จะเด้งตอน Cancel ทั้งที่ผู้ใช้ save ไปแล้ว
             form.reset(values);
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
     } else {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createEquipment.mutate(
         { ...payload, image: imageFile },
         {
-          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             resetImage();
             // navigate กลับ list เหมือน form อื่นใน operation-plan — ถ้าค้างที่หน้า
             // /new toolbar จะโชว์ Edit แล้วกด Save อีกครั้งจะ create ซ้ำ (equipment
             // prop ยัง undefined)
-            navigate("/operation-plan/equipment");
+            f.backToList();
           },
         },
       );
@@ -162,38 +139,12 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/equipment");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && equipment) {
-        form.reset(getDefaultValues(equipment));
-        resetImage();
-        setMode("view");
-      } else {
-        navigate("/operation-plan/equipment");
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!equipment) return;
     deleteEquipment.mutate(equipment.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/equipment");
+        f.backToList();
       },
     });
   };
@@ -202,12 +153,12 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <EqToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteEquipment.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={equipment ? () => setShowDelete(true) : undefined}
       />
 
@@ -231,15 +182,15 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
         <EqAdditionalSection form={form} isDisabled={isDisabled} />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

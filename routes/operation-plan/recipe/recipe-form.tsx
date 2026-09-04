@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateRecipe,
@@ -14,7 +12,6 @@ import {
   useDeleteRecipe,
 } from "./use-recipe";
 import type { Recipe } from "@/types/recipe";
-import type { FormMode } from "@/types/form";
 import {
   createRecipeSchema,
   type RecipeFormValues,
@@ -42,54 +39,39 @@ interface RecipeFormProps {
   readonly recipe?: Recipe;
 }
 
+const LIST_PATH = "/operation-plan/recipe";
+
 export function RecipeForm({ recipe }: RecipeFormProps) {
   "use no memo";
   const t = useTranslations("operationPlan.recipe");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(recipe ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const deleteRecipe = useDeleteRecipe();
   const [showDelete, setShowDelete] = useState(false);
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const isPending = createRecipe.isPending || updateRecipe.isPending;
-  const isDisabled = isView || isPending;
 
   const defaultValues = getDefaultValues(recipe);
 
   const recipeSchema = createRecipeSchema(tv, tfl);
-  const form = useForm<RecipeFormValues>({
-    resolver: zodResolver(recipeSchema) as Resolver<RecipeFormValues>,
-    defaultValues,
-  });
-
-  const computed = useRecipeCostCalc(form);
   const gallery = useRecipeGallery(recipe?.images);
 
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty || gallery.isDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
+  const f = useEntityForm<RecipeFormValues>({
+    entity: recipe,
+    resolver: zodResolver(recipeSchema) as Resolver<RecipeFormValues>,
+    defaultValues,
+    listPath: LIST_PATH,
     isPending,
+    // รูปใน gallery ที่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย
+    extraDirty: gallery.isDirty,
+    onResetExtra: gallery.reset,
   });
+  const { form, isEdit, isDisabled } = f;
 
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const computed = useRecipeCostCalc(form);
 
   const onSubmit = (values: RecipeFormValues) => {
     const payload = buildRecipePayload(values);
@@ -103,8 +85,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     if (isEdit && recipe) {
       // Send the full gallery manifest only when it changed (full-sync);
       // omitting it keeps the existing images untouched.
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       updateRecipe.mutate(
         {
           id: recipe.id,
@@ -114,26 +94,22 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           ...(galleryDirty ? { images: files, gallery: manifest } : {}),
         },
         {
-          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/recipe");
+            f.backToList();
           },
         },
       );
     } else {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createRecipe.mutate(
         {
           ...payload,
           ...(count > 0 ? { images: files, gallery: manifest } : {}),
         },
         {
-          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/recipe");
+            f.backToList();
           },
         },
       );
@@ -143,38 +119,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/recipe");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && recipe) {
-        form.reset(getDefaultValues(recipe));
-        gallery.reset();
-        setMode("view");
-      } else {
-        navigate("/operation-plan/recipe");
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!recipe) return;
     deleteRecipe.mutate(recipe.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/recipe");
+        f.backToList();
       },
     });
   };
@@ -183,12 +133,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteRecipe.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={recipe ? () => setShowDelete(true) : undefined}
       />
 
@@ -233,15 +183,15 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
     </div>
