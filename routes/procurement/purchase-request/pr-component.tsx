@@ -1,15 +1,7 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  CheckCircle2,
-  Columns3,
-  LayoutGrid,
-  LayoutList,
-  Trash2,
-  XCircle,
-  Loader2,
-} from "lucide-react";
+import { CheckCircle2, Trash2, XCircle, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { toast } from "sonner";
@@ -35,24 +27,19 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
-import SearchInput from "@/components/search-input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PrStatusSelectDialog } from "./pr-select-dialog";
 import { PrListDialogs } from "./pr-list-dialogs";
 import { ErrorState } from "@/components/ui/error-state";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
@@ -255,12 +242,16 @@ export default function PurchaseRequestComponent() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-            <div className="w-full sm:w-auto sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={prFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+          beforeViewSelector={
             <ViewModeToggle
               value={viewMode}
               onChange={handleViewModeChange}
@@ -268,57 +259,8 @@ export default function PurchaseRequestComponent() {
               allDocumentsLabel={t("allDocuments")}
               className="hidden items-center gap-2 sm:flex"
             />
-            {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={prFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label={tc("aria.toggleColumns")}
-                >
-                  <Columns3 className="size-4" />
-                </Button>
-              }
-            />
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+          }
+        />
       </div>
 
       <div className="mt-3 space-y-3">

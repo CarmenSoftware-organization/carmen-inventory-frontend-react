@@ -1,16 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Download,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-  MoreHorizontal,
-  Plus,
-  Printer,
-} from "lucide-react";
+import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import {
   DropdownMenu,
@@ -27,8 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { Button } from "@/components/ui/button";
 import { usePrt, useDeletePrt, useExportPrt } from "./use-prt";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -36,17 +25,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { usePrtTable } from "./use-prt-table";
 import PrtCard from "./prt-card";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -79,8 +65,14 @@ export default function PrtComponent() {
   const useInfiniteScroll = !!isMobile;
 
   const prtFilterFields = useMemo<FilterFieldDef[]>(
-    () => [{ key: "filter",
-        section: "listView.sectionDocument", control: "status", labelKey: "common.status" }],
+    () => [
+      {
+        key: "filter",
+        section: "listView.sectionDocument",
+        control: "status",
+        labelKey: "common.status",
+      },
+    ],
     [],
   );
 
@@ -252,61 +244,16 @@ export default function PrtComponent() {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-            <div className="w-full sm:w-auto sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={prtFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label={tc("aria.toggleColumns")}
-                >
-                  <Columns3 className="size-4" />
-                </Button>
-              }
-            />
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={prtFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+        />
       </div>
 
       <div className="mt-3 space-y-3">

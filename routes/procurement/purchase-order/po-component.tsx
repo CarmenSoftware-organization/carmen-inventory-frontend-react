@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { toast } from "sonner";
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import {
   usePurchaseOrder,
   useMyPendingPurchaseOrder,
@@ -30,16 +29,12 @@ import {
 } from "@/constant/purchase-order";
 import { useVendor } from "@/hooks/use-vendor";
 import type { PurchaseOrder } from "@/types/purchase-order";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
 import { DocumentListActions } from "@/components/share/document-list-actions";
@@ -48,8 +43,7 @@ import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { FieldLabel } from "@/components/ui/field";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -393,12 +387,16 @@ export default function PoComponent() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-            <div className="w-full sm:w-auto sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={poFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+          beforeViewSelector={
             <ViewModeToggle
               value={viewMode}
               onChange={handleViewModeChange}
@@ -406,55 +404,8 @@ export default function PoComponent() {
               allDocumentsLabel={t("allDocuments")}
               className="hidden items-center gap-2 sm:flex"
             />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={poFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label={tc("aria.toggleColumns")}
-                >
-                  <Columns3 className="size-4" />
-                </Button>
-              }
-            />
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+          }
+        />
       </div>
 
       <div className="mt-3 space-y-3">

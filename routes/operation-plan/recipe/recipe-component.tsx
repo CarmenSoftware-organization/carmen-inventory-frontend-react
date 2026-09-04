@@ -1,16 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Download,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-  MoreHorizontal,
-  Plus,
-  Printer,
-} from "lucide-react";
+import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,21 +27,16 @@ import { useGridPagination } from "@/hooks/use-grid-pagination";
 import type { Recipe } from "@/types/recipe";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { RECIPE_DIFFICULTY_OPTIONS } from "@/constant/recipe";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { useRecipeTable } from "./use-recipe-table";
 import RecipeCard from "./recipe-card";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -286,63 +272,16 @@ export default function RecipeComponent() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={recipeFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            {!isGridMode && (
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
-            )}
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={recipeFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+        />
       </div>
 
       <div className="mt-3 space-y-3">
