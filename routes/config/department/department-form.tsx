@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useForm, Controller, type Resolver } from "react-hook-form";
+import { Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -8,8 +8,7 @@ import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { Badge } from "@/components/ui/badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   Field,
   FieldInput,
@@ -30,7 +29,6 @@ import {
 import { useAllUsers } from "@/hooks/use-all-users";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { Department } from "@/types/department";
-import type { FormMode } from "@/types/form";
 import { transferHandler } from "@/lib/transfer-handler";
 import {
   createDepartmentSchema,
@@ -49,19 +47,15 @@ interface DepartmentFormProps {
   readonly department?: Department;
 }
 
+const LIST_PATH = "/config/department";
+
 export function DepartmentForm({ department }: DepartmentFormProps) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(department ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createDepartment = useCreateDepartment();
   const updateDepartment = useUpdateDepartment();
   const deleteDepartment = useDeleteDepartment();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createDepartment.isPending || updateDepartment.isPending;
-  const isDisabled = isView || isPending;
   const t = useTranslations("config.department");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
@@ -108,7 +102,8 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     () => department?.hod_users.map((u) => u.user_id) ?? [],
   );
 
-  const form = useForm<DepartmentFormValues>({
+  const f = useEntityForm<DepartmentFormValues>({
+    entity: department,
     resolver: zodResolver(
       createDepartmentSchema(tv, tfl),
     ) as Resolver<DepartmentFormValues>,
@@ -131,25 +126,17 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           department_users: { ...emptyTransfer },
           hod_users: { ...emptyTransfer },
         },
-  });
-
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
+    listPath: LIST_PATH,
     isPending,
+    // transfer สองชุดถือ state นอก RHF — กด Cancel ต้องคืนค่าเดิมให้ด้วย
+    onResetExtra: () => {
+      setDeptUserTargetKeys(
+        department?.department_users.map((u) => u.user_id) ?? [],
+      );
+      setHodUserTargetKeys(department?.hod_users.map((u) => u.user_id) ?? []);
+    },
   });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   // Transfer onChange handlers
   const handleDeptUsersChange = (
@@ -189,63 +176,25 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
     } else if (isAdd) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createDepartment.mutate(payload, {
-        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate(`/config/department/${id}`, { replace: true });
-          setMode("view");
+          f.setMode("view");
         },
       });
     }
   };
 
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && department) {
-        form.reset({
-          code: department.code,
-          name: department.name,
-          description: department.description,
-          account_code: department.account_code ?? "",
-          is_active: department.is_active,
-          department_users: { ...emptyTransfer },
-          hod_users: { ...emptyTransfer },
-        });
-        setDeptUserTargetKeys(
-          department.department_users.map((u) => u.user_id),
-        );
-        setHodUserTargetKeys(department.hod_users.map((u) => u.user_id));
-        setMode("view");
-      } else {
-        navigate("/config/department");
-      }
-    });
-  };
-
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/config/department");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
   const codeBadge =
     department && !isAdd ? (
       <Badge
@@ -265,12 +214,12 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
       <Reveal>
         <FormToolbar
           entity={department?.name || t("entity")}
-          mode={mode}
+          mode={f.mode}
           formId={FORM_ID}
           isPending={isPending}
-          onBack={handleBack}
-          onCancel={handleCancel}
-          onEdit={() => setMode("edit")}
+          onBack={f.handleBack}
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
           onDelete={department ? () => setShowDelete(true) : undefined}
           deleteIsPending={deleteDepartment.isPending}
           statusBadge={codeBadge}
@@ -447,15 +396,15 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         </Reveal>
       </div>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 
@@ -472,7 +421,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
             deleteDepartment.mutate(department.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/config/department");
+                f.backToList();
               },
             });
           }}
