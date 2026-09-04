@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
+import { WfProductsTable } from "./wf-products-table";
 import { cn } from "@/lib/utils";
 
 interface TreeNode {
@@ -97,9 +98,16 @@ interface WfProductsProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
   readonly allProducts: Product[];
   readonly isDisabled: boolean;
+  /** โหมดอ่าน (ยังไม่กด Edit) — ต่างจาก `isDisabled` ที่ true ตอนกำลังบันทึกด้วย */
+  readonly readOnly: boolean;
 }
 
-export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
+export function WfProducts({
+  form,
+  allProducts,
+  isDisabled,
+  readOnly,
+}: WfProductsProps) {
   const [search, setSearch] = useState("");
   const t = useTranslations("systemAdmin.workflow");
   const tfl = useTranslations("field");
@@ -229,6 +237,42 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
       form.setValue("data.products", [...current, ...toAdd]);
     }
   };
+
+  // โหมดอ่าน: เอาเฉพาะสินค้าที่เลือกไว้มาลงตาราง — ต้นไม้ทั้งก้อนมีไว้ติ๊ก
+  // ไม่ได้มีไว้อ่าน คนเปิดดูอยากรู้แค่ว่า workflow นี้ครอบสินค้าอะไรบ้าง
+  if (readOnly) {
+    const q = search.trim().toLowerCase();
+    const rows = allProducts.filter((p) => {
+      if (!selectedIds.has(p.id)) return false;
+      if (!q) return true;
+      return (
+        p.code?.toLowerCase().includes(q) ||
+        p.name?.toLowerCase().includes(q) ||
+        (p.local_name?.toLowerCase().includes(q) ?? false)
+      );
+    });
+
+    return (
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center gap-4">
+          <div className="relative max-w-sm flex-1">
+            <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+            <Input
+              placeholder={t("searchProducts")}
+              className="h-9 pl-9 text-sm placeholder:text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <span className="text-muted-foreground text-sm font-medium">
+            {t("nSelected", { count: selectedProducts?.length ?? 0 })}
+          </span>
+        </div>
+
+        <WfProductsTable products={rows} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 pt-4">

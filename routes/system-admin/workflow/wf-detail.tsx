@@ -277,6 +277,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                   form={form}
                   allProducts={products}
                   isDisabled={isDisabled}
+                  readOnly={!isEditing}
                 />
               </TabsContent>
 
