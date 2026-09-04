@@ -1,8 +1,6 @@
 import { Link } from "react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import { Bell, type LucideIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import { columnSkeletons } from "@/components/ui/data-grid/columns";
@@ -20,35 +18,9 @@ interface UseNotiTmplTableOptions {
   readonly tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-const CHANNEL: Record<
-  NotificationTemplateType,
-  { label: string; Icon: LucideIcon }
-> = {
-  app: { label: "App", Icon: Bell },
-};
-
-const ChannelBadge = ({
-  type,
-}: {
-  readonly type: NotificationTemplateType | string;
-}) => {
-  const channel = CHANNEL[type as NotificationTemplateType];
-
-  if (!channel) {
-    return (
-      <Badge variant="secondary" size="sm" className="gap-1 font-semibold">
-        <span className="capitalize">{String(type)}</span>
-      </Badge>
-    );
-  }
-
-  const { label, Icon } = channel;
-  return (
-    <Badge variant="secondary" size="sm" className="gap-1 font-semibold">
-      <Icon aria-hidden />
-      {label}
-    </Badge>
-  );
+/** ชื่อช่องทางที่อ่านออก — ค่าดิบจาก API เป็น `app` ตัวเล็กล้วน */
+const CHANNEL_LABEL: Record<NotificationTemplateType, string> = {
+  app: "App",
 };
 
 export function useNotiTmplTable({
@@ -81,8 +53,12 @@ export function useNotiTmplTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("colChannel")} />
       ),
-      cell: ({ row }) => <ChannelBadge type={row.original.type} />,
-      meta: { headerTitle: t("colChannel"), skeleton: columnSkeletons.badge },
+      cell: ({ row }) => (
+        <span className="capitalize">
+          {CHANNEL_LABEL[row.original.type] ?? row.original.type ?? "—"}
+        </span>
+      ),
+      meta: { headerTitle: t("colChannel"), skeleton: columnSkeletons.text },
     },
     {
       accessorKey: "subject",

@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { Badge } from "@/components/ui/badge";
+import { ActivityActionLabel } from "../shared/activity-action-label";
 import {
   Tooltip,
   TooltipContent,
@@ -13,18 +13,6 @@ import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-
-const ACTION_VARIANT: Record<string, string> = {
-  create:
-    "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent",
-  update:
-    "bg-[var(--status-pending)] text-[var(--status-pending-fg)] border-transparent",
-  delete: "bg-destructive text-destructive-foreground border-transparent",
-  login:
-    "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent",
-  logout:
-    "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent",
-};
 
 /**
  * แปลงข้อความ snake_case เป็น Title Case สำหรับแสดงชื่อ entity type
@@ -91,17 +79,9 @@ export function useActivityLogTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("action")} />
       ),
-      cell: ({ row }) => {
-        const action: string = row.getValue("action");
-        const className =
-          ACTION_VARIANT[action.toLowerCase()] ??
-          "bg-muted text-muted-foreground";
-        return (
-          <Badge size="sm" className={`${className} text-xs`}>
-            {action}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <ActivityActionLabel action={row.getValue("action")} />
+      ),
       meta: { headerTitle: t("action") },
       size: 100,
     },
@@ -140,14 +120,11 @@ export function useActivityLogTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("entityType")} />
       ),
-      cell: ({ row }) => {
-        const raw: string = row.getValue("entity_type");
-        return (
-          <Badge variant="outline" size="sm" className="text-xs font-normal">
-            {formatEntityType(raw)}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <span className="text-xs">
+          {formatEntityType(row.getValue("entity_type")) || "—"}
+        </span>
+      ),
       meta: { headerTitle: t("entityType") },
       size: 150,
     },
