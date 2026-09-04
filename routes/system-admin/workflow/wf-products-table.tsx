@@ -14,15 +14,6 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { indexColumn } from "@/components/ui/data-grid/columns";
 import type { Product } from "@/types/workflows";
 
-/**
- * ตารางสินค้าที่ workflow เลือกไว้ — ใช้ตอนโหมดอ่าน แทน tree ที่มีไว้ติ๊กเลือก
- *
- * โหมดอ่านคนอ่านอยากรู้ว่า "workflow นี้ครอบสินค้าอะไรบ้าง" ตารางแบนตอบตรงกว่า
- * ต้นไม้ที่ต้องกางทีละกิ่ง ส่วนตอนแก้ไขยังเป็น tree เหมือนเดิมเพราะติ๊กทั้งหมวดทีเดียวได้
- *
- * ไม่เปิด sort — คอลัมน์ # ใช้ `row.index` ซึ่งเป็นลำดับในข้อมูลต้นทาง เปิด
- * client sort เมื่อไหร่เลขจะไม่ตรงกับลำดับที่เห็นบนจอ
- */
 export function WfProductsTable({
   products,
 }: {
@@ -36,7 +27,7 @@ export function WfProductsTable({
     indexColumn<Product>({}),
     {
       accessorKey: "code",
-      size: 140,
+      size: 100,
       header: tfl("code"),
       cell: ({ row }) => (
         <span className="tabular-nums">{row.original.code}</span>
@@ -44,7 +35,7 @@ export function WfProductsTable({
     },
     {
       accessorKey: "name",
-      size: 320,
+      size: 200,
       header: tfl("productName"),
       cell: ({ row }) => (
         <div className="min-w-0">
@@ -59,19 +50,19 @@ export function WfProductsTable({
     },
     {
       id: "category",
-      size: 180,
+      size: 140,
       header: tfl("category"),
       cell: ({ row }) => row.original.product_category?.name || "—",
     },
     {
       id: "sub_category",
-      size: 180,
+      size: 140,
       header: tfl("subCategory"),
       cell: ({ row }) => row.original.product_sub_category?.name || "—",
     },
     {
       id: "item_group",
-      size: 180,
+      size: 140,
       header: tfl("itemGroup"),
       cell: ({ row }) => row.original.product_item_group?.name || "—",
     },
