@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,11 +18,9 @@ import {
   type CreateProductDto,
   createProductSchema,
 } from "@/types/product";
-import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -208,10 +206,6 @@ export function ProductForm({ product }: ProductFormProps) {
       ? rawReturnUrl
       : "/product-management/product";
 
-  const [mode, setMode] = useState<FormMode>(product ? "view" : "add");
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -224,15 +218,22 @@ export function ProductForm({ product }: ProductFormProps) {
     createProduct.isPending ||
     updateProduct.isPending ||
     uploadImages.isPending;
-  const isDisabled = mode === "view" || isPending;
 
   const defaultValues = getDefaultValues(product);
-  const form = useForm<ProductFormValues>({
+  const f = useEntityForm<ProductFormValues>({
+    entity: product,
     resolver: zodResolver(
       createProductSchema(tv, tfl),
     ) as Resolver<ProductFormValues>,
     defaultValues,
+    // ปุ่ม Back/Cancel กลับไปที่ที่ผู้ใช้มา ไม่ใช่หน้ารายการเสมอ (?returnUrl=)
+    listPath: returnUrl,
+    isPending,
+    // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
+    // หายเงียบ ๆ โดยไม่ถามสักคำ
+    extraDirty: pendingImages.length > 0,
   });
+  const { form, isAdd, isEdit, isDisabled } = f;
 
   const fieldErrors = form.formState.errors;
   const GENERAL_FIELDS = [
@@ -302,12 +303,12 @@ export function ProductForm({ product }: ProductFormProps) {
         });
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         form.reset(normalizedValues);
-        setMode("view");
+        f.setMode("view");
         return;
       }
       if (isAdd) {
         // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-        setIsSubmitting(true);
+        f.setIsSubmitting(true);
         // ตอนสร้างยังไม่มี id ให้แนบรูป ต้องสร้างก่อนแล้วค่อยอัปโหลดตามไป
         const res = await createProduct.mutateAsync(payload);
         toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -316,35 +317,15 @@ export function ProductForm({ product }: ProductFormProps) {
           await flushPendingImages(newId);
           navigate(`/product-management/product/${newId}`);
         } else {
-          navigate(returnUrl);
+          f.backToList();
         }
       }
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ค้างอยู่หน้าเดิมให้แก้ต่อ
       // เปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty จะออกได้โดยไม่ถาม
-      setIsSubmitting(false);
+      f.setIsSubmitting(false);
     }
   };
-
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty || pendingImages.length > 0;
-
-  const discard = useDiscardConfirm({
-    // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
-    // หายเงียบ ๆ โดยไม่ถามสักคำ
-    isDirty: isFormDirty,
-    isPending,
-  });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
 
   /**
    * กรอกไม่ครบ → บอกสั้น ๆ ว่าไม่ครบแล้วพาไปที่ช่องแรกที่ผิด (กติกาเดียวกับ PR)
@@ -357,44 +338,18 @@ export function ProductForm({ product }: ProductFormProps) {
     scrollToFirstInvalidField();
   };
 
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && product) {
-        form.reset(getDefaultValues(product));
-        setMode("view");
-      } else {
-        navigate(returnUrl);
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate(returnUrl);
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => goBack());
-    } else {
-      goBack();
-    }
-  };
-
   return (
     <div className="mx-auto w-full space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         deleteIsPending={deleteProduct.isPending}
         hasPendingImages={pendingImages.length > 0}
-        onBack={handleBack}
-        onEdit={() => setMode("edit")}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={() => setShowDelete(true)}
       />
 
@@ -479,22 +434,22 @@ export function ProductForm({ product }: ProductFormProps) {
             deleteProduct.mutate(product.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate(returnUrl);
+                f.backToList();
               },
             });
           }}
         />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
     </div>
