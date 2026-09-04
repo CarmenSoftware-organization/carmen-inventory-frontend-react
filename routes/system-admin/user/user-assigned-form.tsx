@@ -53,7 +53,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     useUserDepartments(user.user_id);
 
   const memberDepartment = userDepartments?.department ?? null;
-  const hodDepartments = userDepartments?.hod_departments ?? [];
 
   const initialRoleIds = user.application_roles.map(
     (r) => r.application_role_id,
@@ -141,7 +140,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     name: "role_ids",
   });
   const selectedRoleCount = watchedRoleIds?.length ?? 0;
-  const totalDeptCount = (memberDepartment ? 1 : 0) + hodDepartments.length;
   const roleCountForDisplay = isView
     ? initialRoleIds.length
     : selectedRoleCount;
@@ -151,9 +149,15 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       <AnimationStyles />
 
       {/* ── Header: identity + actions (company-profile layout) ── */}
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <BackButton onClick={handleBack} />
+      {/* ปุ่ม back ห้อยออกนอกคอลัมน์ซ้ายแบบเดียวกับ DocFormHeader ที่ฟอร์มอื่น
+          ใช้ (location/vendor/…) — absolute อ้างแถวหัวข้อ ชื่อผู้ใช้จึงเริ่มตรง
+          ขอบเดียวกับเนื้อฟอร์มข้างล่าง ไม่โดนปุ่มดันเยื้องเข้ามา */}
+      <header className="relative mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex min-w-0 items-center gap-3">
+          <BackButton
+            onClick={handleBack}
+            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2"
+          />
           <UserAvatar first={user.firstname} last={user.lastname} />
           <div className="min-w-0">
             {/* ไม่มี badge สถานะ — endpoint รายละเอียดผู้ใช้ไม่ส่งสถานะมาเลย
@@ -224,9 +228,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       <Reveal delay={140}>
         <DepartmentsSection
           memberDepartment={memberDepartment}
-          hodDepartments={hodDepartments}
           isLoading={departmentsLoading}
-          totalCount={totalDeptCount}
         />
       </Reveal>
 
