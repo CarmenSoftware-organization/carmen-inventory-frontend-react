@@ -23,20 +23,17 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import WfCard from "./wf-card";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useWfTable } from "./wf-table";
 import { useWfRowMutations } from "./use-wf-row-mutations";
 import { STATUS_OPTIONS, WF_TYPE_OPTIONS } from "./wf-filter-options";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -181,27 +178,14 @@ export default function WorkflowComponent({
           </div>
         </div>
 
-        <div className="flex w-full items-center gap-2">
-          <div className="flex-1">
-            <SearchInput defaultValue={search} onSearch={setSearch} />
-          </div>
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={workflowFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          variant="row"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={workflowFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       </div>
 
       <div className="mt-3 space-y-3">

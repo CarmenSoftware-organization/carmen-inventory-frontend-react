@@ -10,7 +10,6 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { useWastageReport } from "./use-wastage-report";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
@@ -21,8 +20,7 @@ import { formatCurrency } from "@/lib/currency-utils";
 import { WASTAGE_STATUS_OPTIONS } from "@/constant/wastage-reporting";
 import { useWastageReportTable } from "./use-wr-table";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -94,21 +92,14 @@ export default function WrComponent() {
       title={t("title")}
       description={t("desc")}
       toolbar={
-        <>
-          <SearchInput defaultValue={search} onSearch={setSearch} />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={wrFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </>
+        <ListToolbar
+          variant="bare"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={wrFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       }
       filterBar={
         <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />

@@ -28,6 +28,17 @@ interface ListToolbarProps {
   readonly onDisplayModeChange?: (mode: "list" | "grid") => void;
   /** แทรกระหว่างช่องค้นกับ ViewSelector — PR/PO ใช้วาง toggle my-pending */
   readonly beforeViewSelector?: ReactNode;
+  /**
+   * ทรงของแถบซ้าย — `"wrap"` (ค่าตั้งต้น) ให้ช่องค้นกว้างเต็มบนจอแคบแล้วขึ้น
+   * บรรทัดใหม่ ใช้กับหน้าที่มีปุ่มฝั่งขวาเยอะ · `"row"` บีบทุกอย่างไว้แถวเดียว
+   * ช่องค้นยืดตามที่เหลือ ใช้กับหน้าที่ไม่มีปุ่มฝั่งขวา
+   */
+  /**
+   * `"bare"` = render เฉพาะของข้างใน ไม่ห่อ div และไม่ต่อ ActiveFilterBar —
+   * ใช้กับ `DisplayTemplate` ที่แยก slot `toolbar` กับ `filterBar` เป็นคนละ prop
+   * ตามดีไซน์ (หน้านั้นส่ง ActiveFilterBar เข้า filterBar เอง)
+   */
+  readonly variant?: "wrap" | "row" | "bare";
 }
 
 /**
@@ -60,15 +71,55 @@ export function ListToolbar({
   displayMode,
   onDisplayModeChange,
   beforeViewSelector,
+  variant = "wrap",
 }: ListToolbarProps) {
   const tc = useTranslations("common");
   const showRight = !!table;
+  const isRow = variant === "row";
+  const isBare = variant === "bare";
+
+  const inner = (
+    <>
+      <SearchInput defaultValue={search} onSearch={onSearch} />
+      {beforeViewSelector}
+      <ViewSelector
+        view={lf.view}
+        snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+      />
+      <ListFilter
+        fields={fields}
+        values={lf.values}
+        setValue={lf.setValue}
+        onClearAll={lf.clearAll}
+        onSaveClick={onSaveViewClick}
+        activeCount={lf.activeFilters.length}
+      />
+    </>
+  );
+
+  // DisplayTemplate มี slot toolbar/filterBar แยกกัน — หน้าที่ใช้ variant นี้
+  // ส่ง ActiveFilterBar เข้า filterBar เอง ตรงนี้จึงต้องไม่ห่อ div และไม่ต่อท้าย
+  if (isBare) return inner;
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-          <div className="w-full sm:w-auto sm:flex-initial">
+      <div
+        className={
+          isRow
+            ? "flex w-full items-center gap-2"
+            : "flex flex-wrap items-center justify-between gap-2"
+        }
+      >
+        <div
+          className={
+            isRow
+              ? "contents"
+              : "flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap"
+          }
+        >
+          <div
+            className={isRow ? "flex-1" : "w-full sm:w-auto sm:flex-initial"}
+          >
             <SearchInput defaultValue={search} onSearch={onSearch} />
           </div>
           <span className="bg-border hidden h-4 w-px sm:block" />

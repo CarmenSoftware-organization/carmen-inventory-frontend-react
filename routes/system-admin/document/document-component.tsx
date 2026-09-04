@@ -23,20 +23,17 @@ import DocumentCard from "./document-card";
 import DocumentSummaryBar from "./document-summary-bar";
 import DocumentSummarySheet from "./document-summary-sheet";
 import type { DocumentFile } from "@/types/document";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useDocumentTable } from "./use-document-table";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -222,27 +219,14 @@ export default function DocumentComponent() {
           onViewAll={() => setSummarySheetOpen(true)}
         />
 
-        <div className="flex w-full items-center gap-2">
-          <div className="flex-1">
-            <SearchInput defaultValue={search} onSearch={setSearch} />
-          </div>
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={documentFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          variant="row"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={documentFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       </div>
 
       <div className="mt-3 space-y-3">

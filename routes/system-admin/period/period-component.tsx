@@ -35,11 +35,9 @@ import type { Period } from "@/types/period";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import PeriodCard from "./period-card";
 import { PERIOD_STATUS_OPTIONS, PERIOD_STATUS_CONFIG } from "@/constant/period";
-import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const PeriodDialog = lazy(() =>
   import("./period-dialog").then((mod) => ({ default: mod.PeriodDialog })),
@@ -47,8 +45,7 @@ const PeriodDialog = lazy(() =>
 import { cn } from "@/lib/utils";
 import { usePeriodTable } from "./use-period-table";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -278,27 +275,14 @@ export default function PeriodComponent() {
           </div>
         </div>
 
-        <div className="flex w-full items-center gap-2">
-          <div className="flex-1">
-            <SearchInput defaultValue={search} onSearch={setSearch} />
-          </div>
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={periodFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          variant="row"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={periodFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       </div>
 
       <div className="mt-3 space-y-3">
