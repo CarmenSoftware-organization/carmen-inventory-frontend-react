@@ -8,30 +8,19 @@ import {
   Boxes,
   ChevronLeft,
   ClipboardCheck,
-  History,
   MapPin,
-  Pencil,
   Save,
   Sparkles,
-  Trash2,
   X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import {
-  useCreateSpotCheck,
-  useDeleteSpotCheck,
-  useUpdateSpotCheck,
-} from "./use-sc";
-import type { SpotCheck } from "@/types/spot-check";
+import { useCreateSpotCheck } from "./use-sc";
 import type { ProductLocation } from "@/types/location";
-import type { FormMode } from "@/types/form";
 import {
   CardLabel,
   GlassCard,
@@ -50,13 +39,10 @@ import {
   mapFormToPayload,
   type SpotCheckFormValues,
 } from "./sc-form-schema";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "sc-form";
 
 interface ScFormProps {
-  /** Spot check entity สำหรับ edit/view mode */
-  readonly spotCheck?: SpotCheck;
   /** location_id locked — required เสมอ (SC ต้องเริ่มจาก location) */
   readonly defaultLocationId: string;
   /** ชื่อ location ที่ pre-fill — ใช้แสดงใน title/meta แทน placeholder */
@@ -66,33 +52,22 @@ interface ScFormProps {
 }
 
 export function ScForm({
-  spotCheck,
   defaultLocationId,
   defaultLocationName,
   availableProducts = [],
 }: ScFormProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tform = useTranslations("form");
   const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(spotCheck ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createSc = useCreateSpotCheck();
-  const updateSc = useUpdateSpotCheck();
-  const deleteSc = useDeleteSpotCheck();
-  const [showDelete, setShowDelete] = useState(false);
-  const isPending = createSc.isPending || updateSc.isPending;
-  const isDisabled = isView || isPending;
+  const isPending = createSc.isPending;
 
   const defaultValues = {
-    ...getDefaultValues(spotCheck),
+    ...getDefaultValues(),
     location_id: defaultLocationId,
   };
 
@@ -116,9 +91,7 @@ export function ScForm({
 
   // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
   // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const navGuard = useNavigationGuard(isFormDirty && !isSubmitting);
 
   const method = useWatch({ control: form.control, name: "method" });
   const items = useWatch({ control: form.control, name: "items" });
@@ -136,53 +109,29 @@ export function ScForm({
   };
 
   const methodConfig = getMethodConfig(method, t);
-  const displayLocationName = spotCheck?.location_name || defaultLocationName;
-  const hideLocation = !spotCheck;
+  const displayLocationName = defaultLocationName;
 
   const onSubmit = (values: SpotCheckFormValues) => {
     const payload = mapFormToPayload(values);
 
-    if (isEdit && spotCheck) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
-      updateSc.mutate(
-        { id: spotCheck.id, doc_version: spotCheck.doc_version, ...payload },
-        {
-          onError: () => setIsSubmitting(false),
-          onSuccess: () => {
-            toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/inventory-management/spot-check");
-          },
-        },
-      );
-    } else if (isAdd) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
-      createSc.mutate(payload, {
-        onError: () => setIsSubmitting(false),
-        onSuccess: (res) => {
-          toast.success(tt("createSuccess", { entity: t("entity") }));
-          const newId = (res as { data?: { id?: string } } | undefined)?.data
-            ?.id;
-          navigate(
-            newId
-              ? `/inventory-management/spot-check/${newId}`
-              : "/inventory-management/spot-check",
-          );
-        },
-      });
-    }
+    // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+    setIsSubmitting(true);
+    createSc.mutate(payload, {
+      onError: () => setIsSubmitting(false),
+      onSuccess: (res) => {
+        toast.success(tt("createSuccess", { entity: t("entity") }));
+        const newId = (res as { data?: { id?: string } } | undefined)?.data?.id;
+        navigate(
+          newId
+            ? `/inventory-management/spot-check/${newId}`
+            : "/inventory-management/spot-check",
+        );
+      },
+    });
   };
 
   const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && spotCheck) {
-        form.reset(defaultValues);
-        setMode("view");
-      } else {
-        navigate("/inventory-management/spot-check");
-      }
-    });
+    discard.confirm(() => navigate("/inventory-management/spot-check"));
   };
 
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
@@ -190,25 +139,9 @@ export function ScForm({
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => navigate("/inventory-management/spot-check");
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
+  const handleBack = () => discard.confirm(goBack);
 
-  const handleConfirmDelete = () => {
-    if (!spotCheck) return;
-    deleteSc.mutate(spotCheck.id, {
-      onSuccess: () => {
-        toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/inventory-management/spot-check");
-      },
-    });
-  };
-
-  const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
+  const submitLabel = getSubmitLabel(isPending, true, tc, tform);
 
   return (
     <div className="relative isolate -mx-3 -my-3">
@@ -242,72 +175,25 @@ export function ScForm({
                 <StatusPill statusConfig={methodConfig} large />
               </div>
               <div className="flex items-center gap-2">
-                {isView ? (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setMode("edit")}
-                    >
-                      <Pencil />
-                      {tc("edit")}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                      disabled={isPending}
-                    >
-                      <X />
-                      {tc("cancel")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      form={FORM_ID}
-                      disabled={isPending}
-                    >
-                      <Save />
-                      {submitLabel}
-                    </Button>
-                  </>
-                )}
-                {spotCheck && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowDelete(true)}
-                    disabled={deleteSc.isPending || isPending}
-                  >
-                    <Trash2 />
-                    {tc("delete")}
-                  </Button>
-                )}
-                {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-                {spotCheck && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      openActivity(spotCheck.id, spotCheck.spot_check_no)
-                    }
-                  >
-                    <History />
-                    {tActivity("title")}
-                  </Button>
-                )}
-                {isView && spotCheck?.id && (
-                  <PrintDocumentButton
-                    documentType="SC"
-                    documentId={spotCheck.id}
-                  />
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                  disabled={isPending}
+                >
+                  <X />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={isPending}
+                >
+                  <Save />
+                  {submitLabel}
+                </Button>
               </div>
             </div>
 
@@ -379,15 +265,15 @@ export function ScForm({
           <div className="flex flex-col gap-4">
             <ScGeneralFields
               form={form}
-              disabled={isDisabled}
-              isView={isView}
-              hideLocation={hideLocation}
+              disabled={isPending}
+              isView={false}
+              hideLocation
             />
             {method === "manual" && (
               <ScProductTransfer
                 form={form}
-                disabled={isDisabled}
-                isView={isView}
+                disabled={isPending}
+                isView={false}
                 availableProducts={availableProducts}
               />
             )}
@@ -458,19 +344,6 @@ export function ScForm({
         onCancel={navGuard.cancel}
         variant="warning"
       />
-
-      {spotCheck && (
-        <DeleteDialog
-          open={showDelete}
-          onOpenChange={(open) =>
-            !open && !deleteSc.isPending && setShowDelete(false)
-          }
-          title={t("deleteTitle")}
-          description={t("deleteConfirm")}
-          isPending={deleteSc.isPending}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
     </div>
   );
 }
