@@ -4,7 +4,11 @@ import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import type { Location } from "@/types/location";
+import type {
+  Location,
+  LocationOption,
+  WorkflowProductLocationRaw,
+} from "@/types/location";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_NORMAL } from "@/lib/cache-config";
 
@@ -20,7 +24,7 @@ import { CACHE_NORMAL } from "@/lib/cache-config";
  * @param productId - id ของ product
  * @param params - พารามิเตอร์สำหรับ search/pagination
  * @param workflowId - id ของ workflow (ถ้ามี = ใช้ endpoint แบบ workflow-scoped)
- * @returns ผลลัพธ์ useQuery แบบ paginate ของ Location
+ * @returns ผลลัพธ์ useQuery แบบ paginate ของ LocationOption
  * @example
  * const { data } = useLocationsByProduct(productId, { search: "store" });
  */
@@ -32,7 +36,7 @@ export function useLocationsByProduct(
   const buCode = useBuCode();
   const scoped = !!workflowId;
 
-  return useQuery<PaginatedResponse<Location>>({
+  return useQuery<PaginatedResponse<LocationOption>>({
     queryKey: scoped
       ? [
           QUERY_KEYS.LOCATIONS_BY_WORKFLOW_PRODUCT,
@@ -59,7 +63,23 @@ export function useLocationsByProduct(
       );
       const res = await httpClient.get(url);
       if (!res.ok) throw new Error("Failed to fetch locations");
-      return res.json();
+      if (!scoped) {
+        return (await res.json()) as PaginatedResponse<Location>;
+      }
+      // endpoint แบบ workflow-scoped คืน field ชื่อ location_* ไม่ใช่ id/code/name
+      // แปลงตรงนี้ทีเดียว ตัว lookup กับ caller จะได้ไม่ต้องรู้ว่ามาจาก endpoint ไหน
+      const raw =
+        (await res.json()) as PaginatedResponse<WorkflowProductLocationRaw>;
+      return {
+        ...raw,
+        data: (raw.data ?? []).map((l) => ({
+          id: l.location_id,
+          code: l.location_code,
+          name: l.location_name,
+          location_type: l.location_type,
+          is_active: l.is_active,
+        })),
+      };
     },
     enabled: !!buCode && !!productId,
     ...CACHE_NORMAL,
