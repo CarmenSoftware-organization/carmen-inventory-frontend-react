@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
+import { Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ChevronLeft, History, Pencil, Save, Trash2, X } from "lucide-react";
@@ -24,8 +23,7 @@ import {
 } from "@/components/ui/setting-section";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   useCreateNotificationTemplate,
@@ -33,7 +31,6 @@ import {
   useUpdateNotificationTemplate,
 } from "@/hooks/use-notification-template";
 import type { NotificationTemplate } from "@/types/noti-tmpl";
-import type { FormMode } from "@/types/form";
 import {
   NOTIFICATION_CHANNEL_OPTIONS,
   getDefaultValues,
@@ -61,45 +58,23 @@ export function NotificationTemplateForm({
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
-  const navigate = useNavigate();
-
-  const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
-  const isView = mode === "view";
-  const isAdd = mode === "add";
-  const isEdit = mode === "edit";
 
   const createMut = useCreateNotificationTemplate();
   const updateMut = useUpdateNotificationTemplate();
   const deleteMut = useDeleteNotificationTemplate();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createMut.isPending || updateMut.isPending;
-  const isDisabled = isView || isPending;
-
-  const form = useForm<NotificationTemplateFormValues>({
+  const f = useEntityForm<NotificationTemplateFormValues>({
+    entity: template,
     resolver: zodResolver(
       notificationTemplateSchema,
     ) as Resolver<NotificationTemplateFormValues>,
     defaultValues: getDefaultValues(template),
-  });
-  const errors = form.formState.errors;
-
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
+    listPath: LIST_PATH,
     isPending,
   });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
+  const errors = form.formState.errors;
 
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedActive = useWatch({ control: form.control, name: "is_active" });
@@ -108,28 +83,22 @@ export function NotificationTemplateForm({
   const onSubmit = (values: NotificationTemplateFormValues) => {
     const payload = mapToPayload(values);
     if (isEdit && template) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       updateMut.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
         { id: template.id, doc_version: template.doc_version, ...payload },
         {
-          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate(LIST_PATH);
+            f.backToList();
           },
         },
       );
       return;
     }
-    // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-    setIsSubmitting(true);
     createMut.mutate(payload, {
-      onError: () => setIsSubmitting(false),
       onSuccess: () => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
-        navigate(LIST_PATH);
+        f.backToList();
       },
     });
   };
@@ -137,35 +106,12 @@ export function NotificationTemplateForm({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate(LIST_PATH);
-  };
-
-  const handleBack = () => {
-    if (isView) {
-      goBack();
-      return;
-    }
-    discard.confirm(goBack);
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && template) {
-        form.reset(getDefaultValues(template));
-        setMode("view");
-      } else {
-        navigate(LIST_PATH);
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!template) return;
     deleteMut.mutate(template.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate(LIST_PATH);
+        f.backToList();
       },
     });
   };
@@ -184,7 +130,7 @@ export function NotificationTemplateForm({
             className="w-fit"
             type="button"
             aria-label={tc("goBack")}
-            onClick={handleBack}
+            onClick={f.handleBack}
           >
             <ChevronLeft />
           </Button>
@@ -215,7 +161,7 @@ export function NotificationTemplateForm({
             </Button>
           )}
           {isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
+            <Button size="sm" onClick={f.handleEdit}>
               <Pencil />
               {tc("edit")}
             </Button>
@@ -225,7 +171,7 @@ export function NotificationTemplateForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleCancel}
+                onClick={f.handleCancel}
                 disabled={isPending}
               >
                 <X />
@@ -371,15 +317,15 @@ export function NotificationTemplateForm({
         </SettingSection>
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

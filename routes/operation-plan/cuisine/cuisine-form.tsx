@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateCuisine,
@@ -14,7 +12,6 @@ import {
   useDeleteCuisine,
 } from "@/hooks/use-cuisine";
 import type { Cuisine } from "@/types/cuisine";
-import type { FormMode } from "@/types/form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   cuisineSchema,
@@ -34,101 +31,45 @@ interface CuisineFormProps {
 /**
  * ฟอร์มสำหรับสร้างและแก้ไขข้อมูล cuisine รองรับโหมด view/edit/add
  */
+const LIST_PATH = "/operation-plan/cuisine";
+
 export function CuisineForm({ cuisine }: CuisineFormProps) {
   const t = useTranslations("operationPlan.cuisine");
   const tt = useTranslations("toast");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(cuisine ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createCuisine = useCreateCuisine();
   const updateCuisine = useUpdateCuisine();
   const deleteCuisine = useDeleteCuisine();
   const [showDelete, setShowDelete] = useState(false);
-  const isPending = createCuisine.isPending || updateCuisine.isPending;
-  const isDisabled = isView || isPending;
 
-  const form = useForm<CuisineFormValues>({
+  const f = useEntityForm<CuisineFormValues>({
+    entity: cuisine,
     resolver: zodResolver(cuisineSchema) as Resolver<CuisineFormValues>,
     defaultValues: getDefaultValues(cuisine),
+    listPath: LIST_PATH,
+    isPending: createCuisine.isPending || updateCuisine.isPending,
   });
-
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
-    isPending,
-  });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const { form, isEdit, isDisabled } = f;
+  const isPending = createCuisine.isPending || updateCuisine.isPending;
 
   const onSubmit = (values: CuisineFormValues) => {
     const payload = mapToPayload(values);
 
     if (isEdit && cuisine) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
-      updateCuisine.mutate(
+      f.submit(
+        updateCuisine,
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
         { id: cuisine.id, doc_version: cuisine.doc_version, ...payload },
-        {
-          onError: () => setIsSubmitting(false),
-          onSuccess: () => {
-            toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/cuisine");
-          },
+        () => {
+          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          f.backToList();
         },
       );
     } else {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
-      createCuisine.mutate(payload, {
-        onError: () => setIsSubmitting(false),
-        onSuccess: () => {
-          toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate("/operation-plan/cuisine");
-        },
+      f.submit(createCuisine, payload, () => {
+        toast.success(tt("createSuccess", { entity: t("entity") }));
+        f.backToList();
       });
     }
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/cuisine");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && cuisine) {
-        form.reset(getDefaultValues(cuisine));
-        setMode("view");
-      } else {
-        navigate("/operation-plan/cuisine");
-      }
-    });
   };
 
   const handleDelete = () => {
@@ -136,7 +77,7 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
     deleteCuisine.mutate(cuisine.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/cuisine");
+        f.backToList();
       },
     });
   };
@@ -145,12 +86,12 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <CuisineToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteCuisine.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={cuisine ? () => setShowDelete(true) : undefined}
         activityId={cuisine?.id}
       />
@@ -166,15 +107,15 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
         <CuisineAdditionalFields form={form} isDisabled={isDisabled} />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

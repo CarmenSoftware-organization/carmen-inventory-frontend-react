@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateRecipeCategory,
@@ -16,7 +14,6 @@ import {
 } from "@/hooks/use-recipe-category";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RecipeCategory } from "@/types/recipe-category";
-import type { FormMode } from "@/types/form";
 import {
   recipeCategorySchema,
   getDefaultValues,
@@ -35,14 +32,11 @@ interface RecipeCategoryFormProps {
 /**
  * ฟอร์มสร้างและแก้ไขหมวดหมู่สูตรอาหาร พร้อมการคำนวณระดับและต้นทุนเริ่มต้น
  */
+const LIST_PATH = "/operation-plan/category";
+
 export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tt = useTranslations("toast");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(category ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
 
   const { data: allCategoryData } = useRecipeCategory({ perpage: -1 });
   const categoryMap = new Map(
@@ -54,32 +48,17 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const deleteCategory = useDeleteRecipeCategory();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createCategory.isPending || updateCategory.isPending;
-  const isDisabled = isView || isPending;
 
-  const form = useForm<RecipeCategoryFormValues>({
+  const f = useEntityForm<RecipeCategoryFormValues>({
+    entity: category,
     resolver: zodResolver(
       recipeCategorySchema,
     ) as Resolver<RecipeCategoryFormValues>,
     defaultValues: getDefaultValues(category),
-  });
-
-  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
-  const isFormDirty = form.formState.isDirty;
-
-  const discard = useDiscardConfirm({
-    isDirty: isFormDirty,
+    listPath: LIST_PATH,
     isPending,
   });
-
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && isFormDirty && !isSubmitting,
-  );
+  const { form, isEdit, isDisabled } = f;
 
   const handleParentChange = (parentId: string) => {
     if (!parentId) {
@@ -94,58 +73,24 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
     const payload = mapToPayload(values);
 
     if (isEdit && category) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       updateCategory.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
         { id: category.id, doc_version: category.doc_version, ...payload },
         {
-          onError: () => setIsSubmitting(false),
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/category");
+            f.backToList();
           },
         },
       );
     } else {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createCategory.mutate(payload, {
-        onError: () => setIsSubmitting(false),
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate("/operation-plan/category");
+          f.backToList();
         },
       });
     }
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/category");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && category) {
-        form.reset(getDefaultValues(category));
-        setMode("view");
-      } else {
-        navigate("/operation-plan/category");
-      }
-    });
   };
 
   const handleDelete = () => {
@@ -153,7 +98,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
     deleteCategory.mutate(category.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/category");
+        f.backToList();
       },
     });
   };
@@ -164,12 +109,12 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeCategoryToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteCategory.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={category ? () => setShowDelete(true) : undefined}
         activityId={category?.id}
       />
@@ -203,15 +148,15 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
     </div>
