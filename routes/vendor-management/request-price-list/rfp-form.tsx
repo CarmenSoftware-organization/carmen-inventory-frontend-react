@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
+import { Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   Field,
   FieldDatePicker,
@@ -36,7 +35,6 @@ import type {
   RequestPriceList,
   RequestPriceListVendor,
 } from "@/types/request-price-list";
-import type { FormMode } from "@/types/form";
 
 import { SettingSection } from "@/components/ui/setting-section";
 import {
@@ -55,6 +53,8 @@ interface RequestPriceListFormProps {
   readonly requestPriceList?: RequestPriceList;
 }
 
+const LIST_PATH = "/vendor-management/request-price-list";
+
 export function RequestPriceListForm({
   requestPriceList,
 }: RequestPriceListFormProps) {
@@ -68,37 +68,25 @@ export function RequestPriceListForm({
   const tc = useTranslations("common");
   const tform = useTranslations("form");
 
-  const [mode, setMode] = useState<FormMode>(requestPriceList ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createRfp = useCreateRequestPriceList();
   const updateRfp = useUpdateRequestPriceList();
   const deleteRfp = useDeleteRequestPriceList();
   const [showDelete, setShowDelete] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const isPending = createRfp.isPending || updateRfp.isPending;
-  const isDisabled = isView || isPending;
 
   const defaultValues = getDefaultValues(requestPriceList);
 
-  const form = useForm<RfpFormValues>({
+  const f = useEntityForm<RfpFormValues>({
+    entity: requestPriceList,
     resolver: zodResolver(createRfpSchema(tv, tfl)) as Resolver<RfpFormValues>,
     defaultValues,
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
+    // แถวเพิ่ม vendor ที่ค้างอยู่ต้องปิดตอนกด Cancel ด้วย
+    onResetExtra: () => setIsAdding(false),
   });
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   const today = (() => {
     const d = new Date();
@@ -221,15 +209,12 @@ export function RequestPriceListForm({
             // existingVendors มี vendor ที่เพิ่งเพิ่มแล้ว ถ้ายังค้าง add ไว้ใน form
             // จะ render ซ้ำใน view mode และ Save รอบถัดไปจะ re-send สร้าง vendor ซ้ำ
             form.reset({ ...values, vendors: { add: [], remove: [] } });
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
     } else if (isAdd) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createRfp.mutate(payload, {
-        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           const id = (res as { data: { id: string } }).data.id;
           toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -241,37 +226,12 @@ export function RequestPriceListForm({
     }
   };
 
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && requestPriceList) {
-        form.reset(getDefaultValues(requestPriceList));
-        setIsAdding(false);
-        setMode("view");
-      } else {
-        navigate("/vendor-management/request-price-list");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => navigate("/vendor-management/request-price-list");
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
   const handleConfirmDelete = () => {
     if (!requestPriceList) return;
     deleteRfp.mutate(requestPriceList.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/vendor-management/request-price-list");
+        f.backToList();
       },
     });
   };
@@ -286,16 +246,12 @@ export function RequestPriceListForm({
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
           backLabel={tc("goBack")}
-          onBack={handleBack}
+          onBack={f.handleBack}
           actions={
             <>
               {isView ? (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setMode("edit")}
-                  >
+                  <Button size="sm" variant="outline" onClick={f.handleEdit}>
                     <Pencil />
                     {tc("edit")}
                   </Button>
@@ -306,7 +262,7 @@ export function RequestPriceListForm({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleCancel}
+                    onClick={f.handleCancel}
                     disabled={isPending}
                   >
                     <X />
@@ -511,15 +467,15 @@ export function RequestPriceListForm({
         />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useRef, useState } from "react";
-import { useForm, Controller, type Resolver } from "react-hook-form";
+import { Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -8,8 +8,7 @@ import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { Badge } from "@/components/ui/badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   Field,
   FieldInput,
@@ -43,7 +42,6 @@ import {
   PHYSICAL_COUNT_TYPE_OPTIONS,
 } from "@/constant/location";
 import type { Location } from "@/types/location";
-import type { FormMode } from "@/types/form";
 import { transferHandler } from "@/lib/transfer-handler";
 import {
   createLocationSchema,
@@ -62,20 +60,16 @@ interface LocationFormProps {
   readonly location?: Location;
 }
 
+const LIST_PATH = "/config/location";
+
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createLocation = useCreateLocation();
   const updateLocation = useUpdateLocation();
   const deleteLocation = useDeleteLocation();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createLocation.isPending || updateLocation.isPending;
-  const isDisabled = isView || isPending;
   const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
@@ -144,24 +138,19 @@ export function LocationForm({ location }: LocationFormProps) {
   );
 
   const locationSchema = createLocationSchema(tv, tfl);
-  const form = useForm<LocationFormValues>({
+  const f = useEntityForm<LocationFormValues>({
+    entity: location,
     resolver: zodResolver(locationSchema) as Resolver<LocationFormValues>,
     defaultValues: getDefaultValues(location),
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
+    // transfer ผู้ใช้กับสินค้าถือ state นอก RHF — กด Cancel ต้องคืนค่าเดิมด้วย
+    onResetExtra: () => {
+      setUserTargetKeys(initialUserKeys);
+      setSelectedProductIds(new Set(initialProductIds));
+    },
   });
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
-  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   const handleUsersChange = (
     nextTargetKeys: string[],
@@ -215,7 +204,7 @@ export function LocationForm({ location }: LocationFormProps) {
               users: { add: [], remove: [] },
               products: { add: [], remove: [] },
             });
-            setMode("view");
+            f.setMode("view");
             requestAnimationFrame(() => {
               containerRef.current?.focus();
             });
@@ -223,42 +212,14 @@ export function LocationForm({ location }: LocationFormProps) {
         },
       );
     } else if (isAdd) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createLocation.mutate(payload, {
-        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate(`/config/location/${id}`, { replace: true });
-          setMode("view");
+          f.setMode("view");
         },
       });
-    }
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && location) {
-        form.reset(getDefaultValues(location));
-        setUserTargetKeys(initialUserKeys);
-        setSelectedProductIds(new Set(initialProductIds));
-        setMode("view");
-      } else {
-        navigate("/config/location");
-      }
-    });
-  };
-
-  const goBack = () => {
-    navigate("/config/location");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
     }
   };
 
@@ -284,13 +245,13 @@ export function LocationForm({ location }: LocationFormProps) {
       {/* ── Toolbar ─────────── */}
       <Reveal>
         <FormToolbar
-          entity={location && mode !== "add" ? location.name : t("entity")}
-          mode={mode}
+          entity={location && f.mode !== "add" ? location.name : t("entity")}
+          mode={f.mode}
           formId={FORM_ID}
           isPending={isPending}
-          onBack={handleBack}
-          onEdit={() => setMode("edit")}
-          onCancel={handleCancel}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
           onDelete={location ? () => setShowDelete(true) : undefined}
           deleteIsPending={deleteLocation.isPending}
           statusBadge={codeBadge}
@@ -539,15 +500,15 @@ export function LocationForm({ location }: LocationFormProps) {
         </Reveal>
       </div>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 
@@ -564,7 +525,7 @@ export function LocationForm({ location }: LocationFormProps) {
             deleteLocation.mutate(location.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/config/location");
+                f.backToList();
               },
             });
           }}
