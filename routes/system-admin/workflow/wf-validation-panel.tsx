@@ -25,33 +25,19 @@ interface WfValidationPanelProps {
   readonly onSelectStage?: (index: number) => void;
 }
 
+/**
+ * สีของ severity อยู่ที่ไอคอนที่เดียว (DESIGN.md "avoid neon") — กล่อง ขอบ
+ * และตัวอักษรเป็นสีกลางหมด ส่วน text ใช้ token `-ink` ไม่ใช่ `-foreground`
+ * ซึ่งเป็นสีของ label ที่นั่งอยู่ *บน* พื้นสีนั้น (`destructive` ผ่าน AA
+ * เป็น text อยู่แล้ว จึงไม่มี ink ของตัวเอง)
+ */
 const SEVERITY_CONFIG: Record<
   IssueSeverity,
-  {
-    container: string;
-    icon: typeof AlertCircle;
-    iconClass: string;
-    badgeVariant: "destructive" | "warning" | "secondary";
-  }
+  { icon: typeof AlertCircle; iconClass: string }
 > = {
-  error: {
-    container: "border-destructive/40 bg-destructive/5",
-    icon: AlertCircle,
-    iconClass: "text-destructive",
-    badgeVariant: "destructive",
-  },
-  warning: {
-    container: "border-warning/40 bg-warning/10",
-    icon: AlertTriangle,
-    iconClass: "text-warning-foreground",
-    badgeVariant: "warning",
-  },
-  info: {
-    container: "border-info/40 bg-info/10",
-    icon: Info,
-    iconClass: "text-info-foreground",
-    badgeVariant: "secondary",
-  },
+  error: { icon: AlertCircle, iconClass: "text-destructive" },
+  warning: { icon: AlertTriangle, iconClass: "text-warning-ink" },
+  info: { icon: Info, iconClass: "text-info-ink" },
 };
 
 export default function WfValidationPanel({
@@ -70,27 +56,23 @@ export default function WfValidationPanel({
     return (
       <div
         role="status"
-        className="border-success/40 bg-success/10 flex items-center gap-4 rounded-xl border p-4 shadow-sm"
+        className="bg-card flex items-center gap-4 rounded-xl border p-4"
       >
-        <CheckCircle2 className="text-success-foreground size-5 shrink-0" />
-        <p className="text-success-foreground text-sm font-semibold">
-          {t("validationReady")}
-        </p>
+        <CheckCircle2
+          className="text-success-ink size-5 shrink-0"
+          aria-hidden="true"
+        />
+        <p className="text-sm font-semibold">{t("validationReady")}</p>
       </div>
     );
   }
 
-  const headerContainer = isReady
-    ? "border-warning/40 bg-warning/10"
-    : "border-destructive/40 bg-destructive/5";
   const HeaderIcon = isReady ? AlertTriangle : AlertCircle;
-  const headerIconClass = isReady
-    ? "text-warning-foreground"
-    : "text-destructive";
+  const headerIconClass = isReady ? "text-warning-ink" : "text-destructive";
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className={cn("rounded-xl border shadow-sm", headerContainer)}>
+      <div className="bg-card rounded-xl border">
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
@@ -102,18 +84,13 @@ export default function WfValidationPanel({
                 className={cn("size-5 shrink-0", headerIconClass)}
                 aria-hidden="true"
               />
-              <p
-                className={cn(
-                  "text-sm font-semibold",
-                  isReady ? "text-warning-foreground" : "text-destructive",
-                )}
-              >
+              <p className="text-sm font-semibold">
                 {t("validationIssuesFound", { count: totalIssues })}
               </p>
               <div className="flex items-center gap-1">
                 {errorCount > 0 && (
                   <Badge
-                    variant="destructive"
+                    variant="destructive-light"
                     size="xs"
                     className="tabular-nums"
                   >
@@ -121,7 +98,11 @@ export default function WfValidationPanel({
                   </Badge>
                 )}
                 {warningCount > 0 && (
-                  <Badge variant="warning" size="xs" className="tabular-nums">
+                  <Badge
+                    variant="warning-light"
+                    size="xs"
+                    className="tabular-nums"
+                  >
                     {warningCount} {t("issueWarningLabel")}
                   </Badge>
                 )}
@@ -138,7 +119,7 @@ export default function WfValidationPanel({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <ul className="space-y-3 border-t border-current/10 p-4">
+          <ul className="space-y-3 border-t p-4">
             {issues.map((issue, i) => {
               const config = SEVERITY_CONFIG[issue.severity];
               const Icon = config.icon;
@@ -159,7 +140,7 @@ export default function WfValidationPanel({
                       )}
                     </p>
                     {issue.stageName && (
-                      <p className="text-muted-foreground mt-1 text-sm">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         {t("stageName")}: {issue.stageName}
                       </p>
                     )}
@@ -173,7 +154,7 @@ export default function WfValidationPanel({
                     <button
                       type="button"
                       onClick={() => onSelectStage(issue.stageIndex!)}
-                      className="hover:bg-foreground/5 focus-visible:ring-ring w-full rounded-xl px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      className="hover:bg-accent focus-visible:ring-ring w-full rounded-md px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {content}
                     </button>

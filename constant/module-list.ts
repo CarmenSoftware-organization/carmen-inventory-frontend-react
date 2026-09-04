@@ -9,7 +9,6 @@ import {
   Building,
   ShoppingCart,
   FileText,
-  ClipboardList,
   PackageCheck,
   Package,
   Box,
@@ -30,7 +29,6 @@ import {
   Building2,
   BadgeDollarSign,
   Store,
-  ListChecks,
   PackagePlus,
   AlertTriangle,
   ArrowUpDown,
@@ -146,7 +144,7 @@ export const moduleList: ModuleDto[] = [
         name: "purchaseRequest",
         path: "/procurement/purchase-request",
         licenseFeature: "procurement.purchase_request", // app:purchase-requests
-        icon: FileText,
+        icon: ShoppingCart,
       },
       {
         name: "purchaseRequestTemplate",
@@ -158,7 +156,7 @@ export const moduleList: ModuleDto[] = [
         name: "purchaseOrder",
         path: "/procurement/purchase-order",
         licenseFeature: "procurement.purchase_order", // app:purchase-orders
-        icon: ClipboardList,
+        icon: Receipt,
         separatorBefore: false,
       },
       {
@@ -260,7 +258,7 @@ export const moduleList: ModuleDto[] = [
         name: "storeRequisition",
         path: "/store-operation/store-requisition",
         licenseFeature: "store_operations.store_requisition", // app:store-requisitions
-        icon: ListChecks,
+        icon: Store,
       },
       {
         name: "stockReplenishment",

@@ -1,3 +1,4 @@
+import { Receipt, ShoppingCart, Store, type LucideIcon } from "lucide-react";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { createVariantMap } from "@/constant/status-config";
 
@@ -31,14 +32,18 @@ export const WF_TYPE_VARIANT = createVariantMap({
 });
 
 /**
- * Dot color per workflow type — for the muted "dot badge" (neutral chip +
- * colored dot, per DESIGN.md "avoid neon"), matching `LocationTypeLabel`.
- * Same color semantics as `WF_TYPE_VARIANT`: PR=info, PO=warning, SR=success.
+ * ไอคอนประจำชนิด workflow — **ไม่มีสี** ตามกติกาเดียวกับ `TYPE_ICON` ใน
+ * `status-icon-label.tsx`: ชนิดของใบเป็นคุณสมบัติ ไม่ใช่ความคืบหน้า ให้สีเมื่อไร
+ * ก็แย่งสายตาไปจากคอลัมน์สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง
+ *
+ * ใช้ไอคอนชุดเดียวกับเมนูย่อยของ System Admin › Workflow ใน `constant/module-list.ts`
+ * (`workflowPurchaseRequest` / `workflowPurchaseOrder` / `workflowStoreRequisition`)
+ * คนจะได้โยงแถวในตารางกับเมนูซ้ายมือที่อยู่หน้าเดียวกันเข้าด้วยกันได้ทันที
  */
-export const WF_TYPE_DOT_COLOR: Record<string, string> = {
-  [WF_ROW_TYPE.PR]: "bg-info",
-  [WF_ROW_TYPE.PO]: "bg-warning",
-  [WF_ROW_TYPE.SR]: "bg-success",
+export const WF_TYPE_ICON: Record<string, LucideIcon> = {
+  [WF_ROW_TYPE.PR]: ShoppingCart,
+  [WF_ROW_TYPE.PO]: Receipt,
+  [WF_ROW_TYPE.SR]: Store,
 };
 
 type WfI18nFn = (key: string) => string;
