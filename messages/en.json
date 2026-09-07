@@ -2002,6 +2002,8 @@
       "apiKeyHint": "Leave untouched to keep the stored key.",
       "statusEnabled": "Enabled",
       "statusDisabled": "Disabled",
+      "expiredBadge": "Expired",
+      "expiredNotice": "The contract granting this interface has expired — read-only until it is renewed",
       "frequencyOption": {
         "manual": "Manual",
         "hourly": "Hourly",
