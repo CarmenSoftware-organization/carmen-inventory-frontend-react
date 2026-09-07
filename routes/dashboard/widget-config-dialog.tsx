@@ -20,7 +20,7 @@ import {
   defaultParamsFor,
   inferModuleName,
   inferSubTile,
-  inferWidgetTypeFromShape,
+  defaultWidgetTypeFor,
 } from "./widget-shape";
 
 interface WidgetConfigDialogProps {
@@ -104,7 +104,7 @@ export function WidgetConfigDialog({
                 widget={{
                   id: "preview",
                   dataset_id: dataset.id,
-                  widget_type: inferWidgetTypeFromShape(dataset.shape),
+                  widget_type: defaultWidgetTypeFor(dataset),
                   title: dataset.name,
                   order_index: 0,
                   params: values,
