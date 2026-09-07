@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
   useFormState,
@@ -227,24 +227,32 @@ export function GrnItemTable({
   };
 
   // เพิ่ม location ในกลุ่ม → insert row ต่อท้าย indices ของกลุ่ม (product เดิม, location ว่าง)
-  const handleAddLocation = (group: GrnGroup) => {
-    const idx = group.indices[0];
-    const productId = form.getValues(`items.${idx}.product_id`);
-    const productName = form.getValues(`items.${idx}.product_name`);
-    const insertAt = group.indices[group.indices.length - 1] + 1;
-    insertItem(insertAt, {
-      ...EMPTY_DETAIL,
-      _group_key: group.key,
-      product_id: productId,
-      product_name: productName,
-      // ราคาเป็นของสินค้า ไม่ใช่ของคลัง — คลังที่เพิ่งเพิ่มต้องได้ราคาเดียวกับ
-      // พี่น้องในกลุ่มทันที ไม่งั้นแถวใหม่ราคาเป็น 0 ทั้งที่หัวกลุ่มโชว์ราคาอยู่
-      // แล้วยอดรวมจะขาดไปเงียบ ๆ จนกว่าจะไปแตะช่องราคาที่หัว
-      unit_price: form.getValues(`items.${idx}.unit_price`) ?? 0,
-    });
-    setAutoOpenLocationKey(group.key);
-    setAutoOpenProductKey(null);
-  };
+  //
+  // callback ทุกตัวที่ส่งเข้า useGrnItemTable ห่อ useCallback ไว้ เพราะมันเป็น dep
+  // ของ columns useMemo — ปล่อยให้เป็นฟังก์ชันใหม่ทุก render เท่ากับ columns
+  // recompute ทุก render แล้ว cell ที่มีช่องกรอกจะโดนสร้างใหม่จนโฟกัสหลุด
+  // (RHF ห่อ insert/remove ของ useFieldArray มาให้แล้ว จึงเสถียรพอเป็น dep)
+  const handleAddLocation = useCallback(
+    (group: GrnGroup) => {
+      const idx = group.indices[0];
+      const productId = form.getValues(`items.${idx}.product_id`);
+      const productName = form.getValues(`items.${idx}.product_name`);
+      const insertAt = group.indices[group.indices.length - 1] + 1;
+      insertItem(insertAt, {
+        ...EMPTY_DETAIL,
+        _group_key: group.key,
+        product_id: productId,
+        product_name: productName,
+        // ราคาเป็นของสินค้า ไม่ใช่ของคลัง — คลังที่เพิ่งเพิ่มต้องได้ราคาเดียวกับ
+        // พี่น้องในกลุ่มทันที ไม่งั้นแถวใหม่ราคาเป็น 0 ทั้งที่หัวกลุ่มโชว์ราคาอยู่
+        // แล้วยอดรวมจะขาดไปเงียบ ๆ จนกว่าจะไปแตะช่องราคาที่หัว
+        unit_price: form.getValues(`items.${idx}.unit_price`) ?? 0,
+      });
+      setAutoOpenLocationKey(group.key);
+      setAutoOpenProductKey(null);
+    },
+    [form, insertItem],
+  );
 
   /**
    * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
@@ -256,16 +264,21 @@ export function GrnItemTable({
    * สินค้า กรอกทีเดียวจบทั้งกลุ่ม ส่วนคลังกับจำนวนต้องกรอกซ้ำทุกแถว — ถามของ
    * ที่ถามครั้งเดียวให้จบก่อน แล้วค่อยเข้าลูป
    */
-  const handleProductPicked = (groupKey: string) => {
+  const handleProductPicked = useCallback((groupKey: string) => {
     setAutoOpenProductKey(null);
     setAutoFocusPriceKey(groupKey);
-  };
+  }, []);
 
   /** กรอกราคาเสร็จ (Enter) → เปิดตัวเลือกคลังของแถวแรกในกลุ่มต่อ */
-  const handlePriceCommitted = (groupKey: string) => {
+  const handlePriceCommitted = useCallback((groupKey: string) => {
     setAutoFocusPriceKey(null);
     setOpenLocationKey(groupKey);
-  };
+  }, []);
+
+  const handleLocationOpenChange = useCallback(
+    (key: string, open: boolean) => setOpenLocationKey(open ? key : null),
+    [],
+  );
 
   // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
   // ผู้ใช้จะได้เห็นว่าต้องกรอกช่องไหน แทนที่จะได้แค่ toast แล้วหน้าว่าง (กติกา
@@ -292,7 +305,7 @@ export function GrnItemTable({
     autoFocusPriceKey,
     autoOpenLocationKey,
     openLocationKey,
-    onLocationOpenChange: (key, open) => setOpenLocationKey(open ? key : null),
+    onLocationOpenChange: handleLocationOpenChange,
     onProductPicked: handleProductPicked,
     onPriceCommitted: handlePriceCommitted,
     onAddLocation: handleAddLocation,
