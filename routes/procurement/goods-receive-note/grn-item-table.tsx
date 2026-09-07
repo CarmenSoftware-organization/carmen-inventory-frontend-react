@@ -174,6 +174,16 @@ export function GrnItemTable({
   // เพราะแถวถูก mount ไปแล้วตั้งแต่ตอนกดเพิ่มรายการ)
   const [openLocationKey, setOpenLocationKey] = useState<string | null>(null);
 
+  // สลับโหมดดู↔แก้ = เริ่มกรอกรอบใหม่ ล้างสถานะนำทางทั้งชุด — ตารางไม่ได้ unmount
+  // ตอนสลับโหมด ของค้างจากรอบก่อน (เช่นเลือกสินค้าไว้แล้วกด Cancel) จะกลับมาเด้ง
+  // lookup หรือดูดเคอร์เซอร์ทันทีที่กด Edit ทั้งที่ผู้ใช้ยังไม่ได้แตะอะไร
+  useEffect(() => {
+    setAutoOpenProductKey(null);
+    setAutoOpenLocationKey(null);
+    setOpenLocationKey(null);
+    setAutoFocusPriceKey(null);
+  }, [disabled]);
+
   const {
     fields: itemFields,
     prepend: prependItem,
