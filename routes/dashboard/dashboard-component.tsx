@@ -1,11 +1,14 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
 import {
-  closestCenter,
+  closestCorners,
   DndContext,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
@@ -63,6 +66,21 @@ const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
   if (hour < 18) return "afternoon";
   return "evening";
+};
+
+/**
+ * หาเป้าหมายของการลากจากตำแหน่ง "ปลายเมาส์" ก่อน แล้วค่อยถอยไปใช้มุมที่ใกล้ที่สุด
+ *
+ * `closestCenter` ที่ใช้เดิมวัดจากจุดกึ่งกลางของการ์ด ซึ่งใช้ได้เมื่อทุกใบขนาดเท่ากัน
+ * พอการ์ดกว้าง 3/4/6/12 ช่องและสูงไม่เท่ากัน จุดกึ่งกลางของใบใหญ่จะอยู่ไกลจากที่
+ * ผู้ใช้เล็งมาก ของเลยไปลงผิดช่อง (ลากไปทับใบขวา แต่ไปโผล่ซ้าย)
+ *
+ * `pointerWithin` แม่นที่สุดเพราะถามว่า "ตอนนี้เมาส์อยู่บนใบไหน" แต่คืนค่าว่างเมื่อ
+ * เมาส์อยู่บนช่องว่างระหว่างการ์ด จึงต้องมี `closestCorners` รับช่วง
+ */
+const dashboardCollision: CollisionDetection = (args) => {
+  const withinPointer = pointerWithin(args);
+  return withinPointer.length > 0 ? withinPointer : closestCorners(args);
 };
 
 const subscribeNoop = () => () => {};
@@ -446,7 +464,10 @@ const SavedWidgetsSection = () => {
       {renderable.length > 0 && (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={dashboardCollision}
+          // การ์ดขยับตำแหน่ง/ขนาดระหว่างลาก (span ไม่เท่ากัน) ถ้าวัดกรอบแค่ตอนเริ่มลาก
+          // ค่าที่ cache ไว้จะเก่าทันที แล้วปลายทางที่คำนวณได้ก็เพี้ยนตาม
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
