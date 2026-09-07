@@ -22,6 +22,11 @@ describe("WidgetRouter covers every render the menu can offer", () => {
     availableRenders(shape).map((type) => [shape, type] as const),
   );
 
+  it("covers more than one option for the shapes users switch most", () => {
+    expect(availableRenders("categorical").length).toBeGreaterThanOrEqual(3);
+    expect(availableRenders("time_series").length).toBeGreaterThanOrEqual(3);
+  });
+
   it.each(cases)("%s → %s renders a card", (shape, type) => {
     const widget = makeWidget(shape as DatasetShape, type) as ResolvedWidgetLike;
     const { container } = render(

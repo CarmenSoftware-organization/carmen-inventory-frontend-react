@@ -639,12 +639,21 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
 
 export function BarCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   const t = useTranslations("dashboardWidget");
-  if (!isCategoricalData(widget.data)) return null;
-  const data = widget.data as readonly CategoricalPoint[];
-  const sorted = data
-    .slice()
-    .sort((a, b) => b.value - a.value)
-    .map((d) => ({ name: d.label, value: d.value }));
+  // time_series วาดเป็นแท่งได้ (backend ประกาศไว้) — แกนเป็นวันที่ จึงต้องคงลำดับเวลา
+  // ไม่ใช่เรียงตามค่าเหมือน categorical
+  const isSeries = widget.meta.shape === "time_series";
+  if (!isSeries && !isCategoricalData(widget.data)) return null;
+  if (isSeries && !isTimeSeriesData(widget.data)) return null;
+
+  const sorted = isSeries
+    ? (widget.data as readonly TimeSeriesPoint[]).map((d) => ({
+        name: d.date,
+        value: d.value,
+      }))
+    : (widget.data as readonly CategoricalPoint[])
+        .slice()
+        .sort((a, b) => b.value - a.value)
+        .map((d) => ({ name: d.label, value: d.value }));
   const isCurrency = widget.meta.unit === "฿";
   // แท่งบางเกินไปเมื่อบีบให้พอดีกล่อง — คงความสูงต่อแท่งไว้แล้วให้กล่องเลื่อนแทน
   const chartHeight = Math.max(120, sorted.length * 26);
@@ -835,10 +844,60 @@ function renderTableCell(
  * dynamic columns from `data.columns` and rows from `data.rows`. Reusable for any
  * table-shaped dataset (the column set is data-driven, not hardcoded).
  */
+/**
+ * ข้อมูลของ widget ในรูปตาราง — ตัวที่เป็น `table` อยู่แล้วส่งต่อตรง ๆ ส่วน
+ * categorical/ranked สร้างคอลัมน์ให้เอง
+ *
+ * backend ประกาศไว้แล้วว่า categorical กับ ranked วาดเป็นตารางได้ (`supported_renders`)
+ * แต่ payload เป็น `[{label, value}]` ไม่ใช่ `{columns, rows}` ที่ `TableCard` ต้องการ
+ * ตัวแปลงนี้คือส่วนที่ขาด — ไม่ต้องแตะ dataset หรือ SQL เลย
+ *
+ * @param widget - widget ที่ resolve ข้อมูลแล้ว
+ * @param labels - หัวคอลัมน์ที่แปลแล้ว
+ * @returns TableData หรือ null เมื่อรูปข้อมูลใช้ไม่ได้
+ */
+function asTableData(
+  widget: ResolvedWidget,
+  labels: { label: string; value: string; rank: string },
+): TableData | null {
+  if (isTableData(widget.data)) return widget.data as TableData;
+  if (!isCategoricalData(widget.data)) return null;
+
+  const points = widget.data as readonly CategoricalPoint[];
+  // ranked พ่วง `rank` มาด้วย — โชว์เป็นคอลัมน์แรกเพื่อไม่ให้ลำดับหายไปตอนเป็นตาราง
+  const isRanked =
+    points.length > 0 && typeof (points[0] as { rank?: number }).rank === "number";
+
+  const columns: TableColumn[] = [
+    ...(isRanked
+      ? [{ key: "rank", label: labels.rank, type: "number" as const }]
+      : []),
+    { key: "label", label: labels.label, type: "text" },
+    {
+      key: "value",
+      label: widget.meta.unit ? `${labels.value} (${widget.meta.unit})` : labels.value,
+      type: "number",
+    },
+  ];
+
+  return {
+    columns,
+    rows: points.map((p, i) => ({
+      ...(isRanked ? { rank: (p as { rank?: number }).rank ?? i + 1 } : {}),
+      label: humanizeLabel(p.label),
+      value: p.value,
+    })),
+  };
+}
+
 export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   "use no memo";
   const t = useTranslations("dashboardWidget");
-  const data = isTableData(widget.data) ? (widget.data as TableData) : null;
+  const data = asTableData(widget, {
+    label: t("tableCol.label"),
+    value: t("tableCol.value"),
+    rank: t("tableCol.rank"),
+  });
 
   const columns = useMemo<ColumnDef<TableRow>[]>(
     () =>

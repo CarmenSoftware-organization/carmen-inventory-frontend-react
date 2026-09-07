@@ -375,7 +375,12 @@
     "sectionDistribution": "Distribution",
     "sectionComparison": "Comparison",
     "sectionTrends": "Trends",
-    "gaugeEstimated": "(auto)"
+    "gaugeEstimated": "(auto)",
+    "tableCol": {
+      "label": "Name",
+      "value": "Value",
+      "rank": "#"
+    }
   },
   "profileGate": {
     "loadingTitle": "Loading your workspace",

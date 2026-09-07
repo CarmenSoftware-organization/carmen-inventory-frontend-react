@@ -375,7 +375,12 @@
     "sectionDistribution": "สัดส่วน",
     "sectionComparison": "เปรียบเทียบ",
     "sectionTrends": "แนวโน้ม",
-    "gaugeEstimated": "(ประมาณ)"
+    "gaugeEstimated": "(ประมาณ)",
+    "tableCol": {
+      "label": "รายการ",
+      "value": "ค่า",
+      "rank": "อันดับ"
+    }
   },
   "profileGate": {
     "loadingTitle": "กำลังโหลดพื้นที่ทำงาน",
