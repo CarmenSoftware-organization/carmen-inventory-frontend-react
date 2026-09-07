@@ -227,10 +227,20 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
-  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — fetch เฉพาะเมื่อหน้ามี field ชนิดนั้น
-  // (ค่าใน clause เป็น id ล้วน ชื่ออยู่ในทะเบียนกลาง ไม่ใช่ในตัว control)
-  const hasDepartmentField = fields.some((f) => f.control === "department");
-  const hasRequesterField = fields.some((f) => f.control === "requester");
+  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
+  // ทะเบียนกลาง ไม่ใช่ในตัว control
+  //
+  // เงื่อนไขคือ "มี chip ที่ต้องแปลงชื่อจริง ๆ" ไม่ใช่แค่ "หน้านี้มี field ชนิดนั้น" —
+  // เปิดหน้าเปล่าโดยไม่มี filter ค้าง (เกือบทุกครั้งที่เข้าหน้า) จะได้ไม่ลากทะเบียน
+  // ผู้ใช้ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester
+  // ยิงเองตอนเปิดอยู่แล้ว และพอเลือกเสร็จ chip ก็มาขอทะเบียนชุดเดียวกัน
+  // (query key เดียวกัน react-query จึงใช้ของที่ cache ไว้ ไม่ยิงซ้ำ)
+  const hasDepartmentField = fields.some(
+    (f) => f.control === "department" && !!values[f.key]?.trim(),
+  );
+  const hasRequesterField = fields.some(
+    (f) => f.control === "requester" && !!values[f.key]?.trim(),
+  );
   const { data: departmentData } = useDepartment(
     { perpage: -1 },
     { enabled: hasDepartmentField },
