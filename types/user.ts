@@ -7,13 +7,27 @@ export interface UserDetail {
   application_roles: { application_role_id: string }[];
 }
 
-export interface UpdateUserRolesDto {
-  user_id: string;
-  application_role_id: {
-    add?: string[];
-    remove?: string[];
-  };
+/** ชุด id ที่เพิ่ม/ถอนในหนึ่งครั้ง — ส่งเฉพาะฝั่งที่มีของ ว่างทั้งคู่ = ไม่ต้องส่ง field นั้น */
+export interface IdPatch {
+  add?: string[];
+  remove?: string[];
 }
+
+/**
+ * body ของ `PATCH /config/{bu}/users/{user_id}` — ทุก field เป็น optional
+ * ตามสัญญาของ PATCH ส่งเฉพาะส่วนที่เปลี่ยนจริง
+ *
+ * `user_id` ไม่อยู่ในนี้เพราะย้ายไปอยู่ใน path แล้ว (ดู `UpdateUserDto`)
+ * department เป็นค่าเดี่ยว ไม่ใช่ add/remove — ผู้ใช้สังกัดแผนกเดียว
+ */
+export interface UpdateUserPayload {
+  application_role_id?: IdPatch;
+  location_id?: IdPatch;
+  department_id?: string;
+}
+
+/** payload + user_id ที่ hook เอาไปประกอบ URL (ไม่ถูกส่งไปใน body) */
+export type UpdateUserDto = UpdateUserPayload & { user_id: string };
 
 export interface DepartmentRef {
   id: string;

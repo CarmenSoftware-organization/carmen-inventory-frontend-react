@@ -12,7 +12,7 @@ import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import { useRole } from "../shared/use-role";
 import {
-  useUpdateUserRoles,
+  useUpdateUser,
   useUserLocations,
   useUserDepartments,
 } from "@/hooks/use-user";
@@ -43,7 +43,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const isView = mode === "view";
 
   const { data: rolesData, isLoading: rolesLoading } = useRole();
-  const updateUserRoles = useUpdateUserRoles();
+  const updateUser = useUpdateUser();
   const roles = rolesData?.data ?? [];
 
   // คลังเป็นข้อมูลอ่านอย่างเดียวในหน้านี้ — ผูก/ถอนคลังทำที่ /config/location
@@ -64,7 +64,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     defaultValues: getDefaultValues(user),
   });
 
-  const isPending = updateUserRoles.isPending;
+  const isPending = updateUser.isPending;
   const isDisabled = isView || isPending;
 
   const onSubmit = async (values: UserRolesFormValues) => {
@@ -80,7 +80,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
 
     setIsSubmitting(true);
     try {
-      await updateUserRoles.mutateAsync({
+      await updateUser.mutateAsync({
         user_id: user.user_id,
         application_role_id: {
           ...(addRoles.length > 0 && { add: addRoles }),

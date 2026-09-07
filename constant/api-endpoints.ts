@@ -61,6 +61,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/credit-note-reasons`,
   CONFIG_LOCATION_USER: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/locations-users/${userId}`,
+  /** ผู้ใช้รายคน (อ่าน/แก้ไข) — แทน user-application-roles/{id} ของเดิม */
+  CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
+    `/api/proxy/api/config/${buCode}/users/${userId}`,
   CREDIT_NOTE: (buCode: string) => `/api/proxy/api/${buCode}/credit-notes`,
   CREDIT_NOTE_COMMENT: (buCode: string, cnId?: string) =>
     cnId

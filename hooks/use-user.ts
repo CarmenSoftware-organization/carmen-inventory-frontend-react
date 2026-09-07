@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api-error";
 import type { User } from "@/types/workflows";
 import type {
   UserDetail,
-  UpdateUserRolesDto,
+  UpdateUserDto,
   UserDepartmentResponse,
   UserApplicationRole,
   UserRoleSummaryRole,
@@ -55,9 +55,8 @@ export const useDeleteUser = crud.useDelete;
 /**
  * Hook ดึงข้อมูลผู้ใช้พร้อมบทบาท (role) ตามรหัส
  *
- * ใช้ endpoint เฉพาะ `/users/application-roles/{id}` ที่ return ข้อมูล role ด้วย
- * แตกต่างจาก `crud.useById` ตรงที่ได้ UserDetail พร้อม role mapping
- * enabled เมื่อมีทั้ง buCode และ id
+ * ยิง `GET /config/{bu}/users/{id}` ที่คืน UserDetail พร้อม role mapping มาในตัว
+ * (ย้ายมาจาก `user-application-roles/{id}` เดิม) enabled เมื่อมีทั้ง buCode และ id
  *
  * @param id - รหัสผู้ใช้
  * @returns UseQueryResult ของ UserDetail
@@ -74,7 +73,7 @@ export function useUserById(id: string | undefined) {
     queryFn: async () => {
       if (!buCode) throw new Error("Missing buCode");
       const res = await httpClient.get(
-        `${API_ENDPOINTS.USER_APPLICATION_ROLES(buCode)}/${id}`,
+        API_ENDPOINTS.CONFIG_USER_BY_ID(buCode, id!),
       );
       if (!res.ok) throw new Error("Failed to fetch user");
       const json = await res.json();
@@ -126,24 +125,28 @@ export function useUserLocations(userId: string | undefined) {
 }
 
 /**
- * Hook แก้ไขบทบาท (role) ของผู้ใช้
+ * Hook แก้ไขผู้ใช้รายคน — บทบาท คลังที่ผูก และแผนกที่สังกัด
  *
- * ส่ง PATCH ไป `/users/application-roles` พร้อม payload `UpdateUserRolesDto`
+ * ส่ง PATCH ไป `/config/{bu}/users/{user_id}` โดยดึง `user_id` ออกจาก payload
+ * ไปประกอบ path ไม่ส่งซ้ำใน body — field ที่ไม่ได้ส่งคือ "ไม่แตะ" ตามสัญญาของ
+ * PATCH (ดู `UpdateUserPayload`) ตอนนี้ UI ส่งแค่ `application_role_id`
+ * ส่วนคลังกับแผนกยังแก้จากหน้าอื่น
+ *
  * invalidate `QUERY_KEYS.USERS` หลังสำเร็จ ใช้ใน system-admin > user edit
  *
- * @returns UseMutationResult สำหรับอัพเดต role
+ * @returns UseMutationResult สำหรับอัพเดตผู้ใช้
  * @example
  * ```ts
- * const update = useUpdateUserRoles();
- * update.mutate({ user_id: "...", application_role_ids: ["..."] });
+ * const update = useUpdateUser();
+ * update.mutate({ user_id: "...", application_role_id: { add: ["..."] } });
  * ```
  */
-export function useUpdateUserRoles() {
-  return useApiMutation<UpdateUserRolesDto>({
-    mutationFn: (data, buCode) =>
-      httpClient.patch(API_ENDPOINTS.USER_APPLICATION_ROLES(buCode), data),
+export function useUpdateUser() {
+  return useApiMutation<UpdateUserDto>({
+    mutationFn: ({ user_id, ...body }, buCode) =>
+      httpClient.patch(API_ENDPOINTS.CONFIG_USER_BY_ID(buCode, user_id), body),
     invalidateKeys: [QUERY_KEYS.USERS],
-    errorMessage: "Failed to update user roles",
+    errorMessage: "Failed to update user",
   });
 }
 
