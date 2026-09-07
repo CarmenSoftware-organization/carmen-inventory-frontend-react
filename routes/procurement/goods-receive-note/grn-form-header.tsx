@@ -99,24 +99,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-        <Field className={viewFieldGap}>
-          <FieldLabel required>{t("receivedAt")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="received_at"
-            render={({ field }) => (
-              <FieldDatePicker
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                placeholder={tc("selectDate")}
-                className="w-full text-xs"
-                error={errors.received_at?.message}
-              />
-            )}
-          />
-        </Field>
-
         {/* วันที่ใบรับสินค้า — ต่อจากวันที่รับของเพราะอ่านคู่กัน (ของมาถึงวันไหน
             เปิดใบวันไหน ไม่จำเป็นต้องวันเดียวกัน) เดิมโชว์เป็นข้อความอ่านอย่างเดียว
             อยู่บนหัวใบ แก้ไม่ได้ทั้งที่ schema บังคับกรอกและรับค่าได้อยู่แล้ว */}
@@ -202,6 +184,32 @@ export function GrnFormHeader({
         </Field>
 
         <Field className={viewFieldGap}>
+          <FieldLabel>{tfl("creditTerm")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="credit_term_id"
+            render={({ field }) => (
+              <LookupCreditTerm
+                value={field.value ?? ""}
+                onValueChange={(value, creditTerm) => {
+                  field.onChange(value);
+                  if (creditTerm) {
+                    form.setValue("credit_term_name", creditTerm.name);
+                    form.setValue("credit_term_days", creditTerm.value);
+                    syncDueDate(
+                      form.getValues("invoice_date"),
+                      creditTerm.value,
+                    );
+                  }
+                }}
+                className="w-full text-xs"
+                disabled={disabled}
+              />
+            )}
+          />
+        </Field>
+
+        <Field className={viewFieldGap}>
           <FieldLabel htmlFor="grn-invoice-no" required>
             {tfl("invoiceNo")}
           </FieldLabel>
@@ -231,32 +239,6 @@ export function GrnFormHeader({
                 placeholder={tc("selectDate")}
                 className="w-full text-xs"
                 error={errors.invoice_date?.message}
-              />
-            )}
-          />
-        </Field>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel>{tfl("creditTerm")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="credit_term_id"
-            render={({ field }) => (
-              <LookupCreditTerm
-                value={field.value ?? ""}
-                onValueChange={(value, creditTerm) => {
-                  field.onChange(value);
-                  if (creditTerm) {
-                    form.setValue("credit_term_name", creditTerm.name);
-                    form.setValue("credit_term_days", creditTerm.value);
-                    syncDueDate(
-                      form.getValues("invoice_date"),
-                      creditTerm.value,
-                    );
-                  }
-                }}
-                className="w-full text-xs"
-                disabled={disabled}
               />
             )}
           />
