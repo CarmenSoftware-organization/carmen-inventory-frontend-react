@@ -80,6 +80,11 @@ export interface BusinessUnitLicense {
    * "ไม่ซ่อนอะไรเลย" (fail-open) ไม่ใช่ "ซ่อนทุกอย่าง"
    */
   hidden_features?: string[];
+  /**
+   * คีย์ที่ BU นี้เคยมีแต่สัญญาหมดอายุ — **ไม่ทับกับ `features`**
+   * `undefined` = backend รุ่นเก่ายังไม่ส่ง ตีความว่า "ไม่มีอะไรหมดอายุ"
+   */
+  expired_features?: string[];
   seat: BusinessUnitSeat;
 }
 
