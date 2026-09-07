@@ -163,6 +163,8 @@ interface UpdateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
   readonly params?: WidgetParams;
+  /** สลับชนิดกราฟ — backend ปฏิเสธ (400) ถ้า shape ของ dataset วาดแบบนั้นไม่ได้ */
+  readonly widget_type?: WidgetType;
 }
 
 interface WidgetConfigListResponse {
@@ -207,22 +209,12 @@ export interface SystemWidgetConfigListResponse {
 }
 
 // -------------------------------------------------------------
-// Shape ↔ Widget type compatibility (picker filter)
+// Shape ↔ Widget type compatibility
 // -------------------------------------------------------------
-/** First entry of each list is the default widget type for that shape. */
-export const SUPPORTED_WIDGETS: Record<DatasetShape, readonly WidgetType[]> = {
-  scalar: ["kpi", "gauge"],
-  scalar_delta: ["kpi", "gauge"],
-  time_series: ["line", "area", "sparkline"],
-  categorical: ["pie", "bar"],
-  ranked: ["bar", "table"],
-  matrix: ["heatmap", "table"],
-  table: ["table"],
-};
-
-export function getWidgetsForShape(shape: DatasetShape): readonly WidgetType[] {
-  return SUPPORTED_WIDGETS[shape] ?? [];
-}
+// เดิมตรงนี้มี `SUPPORTED_WIDGETS` ที่ hardcode ว่า shape ไหนวาดเป็นอะไรได้ —
+// เป็นสำเนาของสัญญาฝั่ง backend (`SupportedRenders` ใน micro-data) ที่ drift ไปแล้ว
+// (time_series ขาด bar, categorical ขาด table) ตอนนี้ backend ส่งชุดนั้นมาเป็น
+// `supported_renders` บน dataset แต่ละตัว ดู `components/dashboard-widget/render-support.ts`
 
 // -------------------------------------------------------------
 // Type guards

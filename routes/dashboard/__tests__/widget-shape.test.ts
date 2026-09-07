@@ -1,35 +1,55 @@
 import { describe, it, expect } from "vitest";
 import type { DatasetParam } from "@/types/dashboard-widget";
+import type { DashboardDataset } from "@/types/dashboard-dataset";
 import {
   defaultParamsFor,
+  defaultWidgetTypeFor,
   inferSubTile,
-  inferWidgetTypeFromShape,
   shouldShowAllOption,
   SUPPORTED_SHAPES,
 } from "../widget-shape";
 
-describe("inferWidgetTypeFromShape", () => {
+const ds = (
+  shape: string,
+  supported_renders?: readonly string[],
+): DashboardDataset => ({
+  id: "x.y",
+  name: "X",
+  description: "",
+  shape,
+  category: "workflow",
+  unit: "items",
+  supported_renders,
+});
+
+describe("defaultWidgetTypeFor", () => {
+  // ค่าเริ่มต้นต้องไม่เปลี่ยนจากของเดิมที่เคย hardcode ไว้ฝั่ง frontend
   it.each([
     ["scalar", "kpi"],
     ["scalar_delta", "kpi"],
     ["time_series", "line"],
     ["categorical", "pie"],
     ["ranked", "bar"],
-    ["matrix", "heatmap"],
     ["table", "table"],
   ])("maps %s → %s", (shape, expected) => {
-    expect(inferWidgetTypeFromShape(shape)).toBe(expected);
+    expect(defaultWidgetTypeFor(ds(shape))).toBe(expected);
   });
 
   it("falls back to kpi for an unknown shape", () => {
-    expect(inferWidgetTypeFromShape("nonsense")).toBe("kpi");
+    expect(defaultWidgetTypeFor(ds("nonsense"))).toBe("kpi");
   });
 
-  it("only yields widget types that SUPPORTED_SHAPES can render", () => {
-    // ทุก shape ที่เรารองรับต้อง map ไปเป็น type ที่ WidgetRenderer มี case รองรับ
+  // backend เป็นเจ้าของชุดที่อนุญาต — ถ้าตัดตัวไหนออก frontend ต้องไม่เลือกตัวนั้น
+  it("obeys supported_renders when the backend narrows the set", () => {
+    expect(defaultWidgetTypeFor(ds("categorical", ["bar", "table"]))).toBe(
+      "bar",
+    );
+  });
+
+  it("only yields widget types that WidgetRenderer has a case for", () => {
     const renderable = new Set(["kpi", "pie", "bar", "line", "area", "table"]);
     for (const shape of SUPPORTED_SHAPES) {
-      expect(renderable).toContain(inferWidgetTypeFromShape(shape));
+      expect(renderable).toContain(defaultWidgetTypeFor(ds(shape)));
     }
   });
 

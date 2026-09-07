@@ -1,10 +1,11 @@
-import {
-  getWidgetsForShape,
-  type DatasetParam,
-  type DatasetShape,
-  type WidgetParams,
-  type WidgetType,
+import { defaultRenderFor } from "@/components/dashboard-widget/render-support";
+import type {
+  DatasetParam,
+  DatasetShape,
+  WidgetParams,
+  WidgetType,
 } from "@/types/dashboard-widget";
+import type { DashboardDataset } from "@/types/dashboard-dataset";
 
 /** Shapes ที่ frontend render ได้ (มี Card component) — `matrix` ยังไม่มี */
 export const SUPPORTED_SHAPES = [
@@ -17,11 +18,15 @@ export const SUPPORTED_SHAPES = [
 ] as const satisfies readonly DatasetShape[];
 
 /**
- * Widget type เริ่มต้นของแต่ละ shape — ตัวแรกใน SUPPORTED_WIDGETS
- * scalar/scalar_delta→kpi, time_series→line, categorical→pie, ranked→bar
+ * ชนิดกราฟเริ่มต้นตอนเพิ่ม widget — ตัวแรกที่ทั้ง backend อนุญาต (`supported_renders`)
+ * และ frontend มีการ์ดให้วาด: scalar/scalar_delta→kpi, time_series→line,
+ * categorical→pie, ranked→bar (ผู้ใช้สลับทีหลังได้จากปุ่มบนการ์ด)
+ *
+ * @param dataset - dataset ที่เลือกจาก picker
+ * @returns ชนิดกราฟเริ่มต้น
  */
-export function inferWidgetTypeFromShape(shape: string): WidgetType {
-  return getWidgetsForShape(shape as DatasetShape)[0] ?? "kpi";
+export function defaultWidgetTypeFor(dataset: DashboardDataset): WidgetType {
+  return defaultRenderFor(dataset.shape, dataset.supported_renders);
 }
 
 /** ค่าเริ่มต้นของ params จาก descriptor (`default`) */

@@ -41,6 +41,7 @@ import type {
   MyDashboardWidget,
   MyDashboardWidgetListResponse,
   WidgetParams,
+  WidgetType,
 } from "@/types/dashboard-widget";
 import { SortableWidgetItem } from "./sortable-widget-item";
 import {
@@ -55,7 +56,7 @@ import {
 } from "./status-group";
 import { StatusGroupCard } from "./status-group-card";
 import { WidgetConfigDialog } from "./widget-config-dialog";
-import { inferWidgetTypeFromShape, SUPPORTED_SHAPES } from "./widget-shape";
+import { defaultWidgetTypeFor, SUPPORTED_SHAPES } from "./widget-shape";
 
 const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
@@ -215,7 +216,7 @@ const SavedWidgetsSection = () => {
     createWidget.mutate(
       {
         dataset_id: ds.id,
-        widget_type: inferWidgetTypeFromShape(ds.shape),
+        widget_type: defaultWidgetTypeFor(ds),
         title: ds.name,
       },
       {
@@ -230,7 +231,7 @@ const SavedWidgetsSection = () => {
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
-        widget_type: inferWidgetTypeFromShape(pendingAdd.shape),
+        widget_type: defaultWidgetTypeFor(pendingAdd),
         title: pendingAdd.name,
         params,
       },
@@ -256,6 +257,34 @@ const SavedWidgetsSection = () => {
             queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGET_DATA, buCode, target.id],
           });
           setPendingConfig(null);
+        },
+      },
+    );
+  };
+
+  // สลับชนิดกราฟของ widget — dataset เป็นเจ้าของ "รูปทรงข้อมูล" ส่วนการวาดเป็นของ
+  // widget เปลี่ยนได้ตลอด (backend ปฏิเสธ 400 ถ้า shape วาดแบบนั้นไม่ได้)
+  const handleChangeType = (w: MyDashboardWidget, widgetType: WidgetType) => {
+    // optimistic — การ์ดเปลี่ยนทรงทันที ข้อมูลชุดเดิมใช้ต่อได้ ไม่ต้อง refetch
+    queryClient.setQueryData<MyDashboardWidgetListResponse>(
+      [QUERY_KEYS.MY_DASHBOARD_WIDGETS, buCode],
+      (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((it) =>
+                it.id === w.id ? { ...it, widget_type: widgetType } : it,
+              ),
+            }
+          : old,
+    );
+    updateWidget.mutate(
+      { id: w.id, widget_type: widgetType },
+      {
+        onError: () => {
+          queryClient.invalidateQueries({
+            queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGETS],
+          });
         },
       },
     );
@@ -425,6 +454,7 @@ const SavedWidgetsSection = () => {
                   onDelete={() => setPendingDelete(widget)}
                   onConfigure={() => setPendingConfig(widget)}
                   onVisible={markVisible}
+                  onChangeType={(t) => handleChangeType(widget, t)}
                 />
               ))}
             </ul>
