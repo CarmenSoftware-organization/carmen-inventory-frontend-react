@@ -46,4 +46,12 @@ describe("interfaceEntitlement", () => {
   it("ทั้งสายอยู่ใน expired = expired", () => {
     expect(interfaceEntitlement([], FULL_POS, "pos", "micros")).toBe("expired");
   });
+
+  it("leaf อยู่ใน expired แต่บรรพบุรุษไม่อยู่ในทั้งสองรายการ = none", () => {
+    // ปิดช่องโหว่: ถ้า impl ตรวจ expired path ด้วยแค่ leaf key (ไม่รวม chain) เคสนี้จะ
+    // หลุดเป็น "expired" ทั้งที่บรรพบุรุษไม่เคยอยู่ใน features หรือ expiredFeatures เลย
+    expect(
+      interfaceEntitlement([], ["interface.pos.micros"], "pos", "micros"),
+    ).toBe("none");
+  });
 });

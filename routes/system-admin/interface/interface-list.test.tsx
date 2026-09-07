@@ -85,4 +85,18 @@ describe("interfaceGroups", () => {
     const groups = interfaceGroups(INTERFACE_CATEGORIES, [], () => "none");
     expect(groups).toHaveLength(0);
   });
+
+  it("keeps an expired brand visible instead of dropping it like none", () => {
+    // Regression guard: someone changing the filter from `!== "none"` to
+    // `=== "entitled"` would silently un-ship the expired-badge feature with
+    // an otherwise-green suite, since no other case here ever returns "expired".
+    const groups = interfaceGroups(
+      INTERFACE_CATEGORIES,
+      [],
+      (c: string, b: string) =>
+        c === "pos" && b === "micros" ? "expired" : "none",
+    );
+    const pos = groups.find((g) => g.category.key === "pos");
+    expect(pos?.brands.map((b) => b.brand.key)).toEqual(["micros"]);
+  });
 });

@@ -122,10 +122,7 @@ export default function InterfaceList() {
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
                         {entitlement === "expired" && (
-                          <Badge
-                            variant="outline"
-                            className="text-destructive border-destructive/40"
-                          >
+                          <Badge variant="destructive-outline">
                             {t("expiredBadge")}
                           </Badge>
                         )}
