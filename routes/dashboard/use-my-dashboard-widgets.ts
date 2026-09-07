@@ -50,11 +50,13 @@ export function useMyDashboardWidgets() {
  * คืน `{ meta, data }` พร้อม render ตาม `meta.shape`
  * @param buCode - รหัส business unit ปัจจุบัน
  * @param widgetId - ID ของ personal widget
+ * @param enabled - ส่ง false เพื่อเลื่อนการยิงจนกว่าการ์ดจะเข้า viewport
  * @returns useQuery options ของ widget นั้น
  */
 export function myDashboardWidgetDataQueryOptions(
   buCode: string | undefined,
   widgetId: string | undefined,
+  enabled = true,
 ) {
   return {
     queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGET_DATA, buCode, widgetId],
@@ -67,7 +69,7 @@ export function myDashboardWidgetDataQueryOptions(
       const json = await res.json();
       return json.data as DashboardDatasetDetail;
     },
-    enabled: !!buCode && !!widgetId,
+    enabled: enabled && !!buCode && !!widgetId,
     ...CACHE_DYNAMIC,
   };
 }

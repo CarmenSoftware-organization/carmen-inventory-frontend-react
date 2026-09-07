@@ -187,6 +187,26 @@ interface CompositeWidgetListResponse {
 }
 
 // -------------------------------------------------------------
+// System widget config (from /dashboard-widgets/{module}/config)
+// — config เปล่า ๆ ไม่มี data: หน้า module dashboard ยิงตัวนี้ก่อนเพื่อวาดกริด
+// แล้วค่อยให้แต่ละใบยิง dataset ของตัวเอง (ดู `useDashboardWidgetConfigs`)
+// ไม่มี `id` เพราะ system widget hardcode ที่ gateway ไม่มีแถวใน DB
+// -------------------------------------------------------------
+export type SystemWidgetConfigItem = Omit<
+  CompositeWidgetItem,
+  "id" | "module"
+> & {
+  /** system widget ไม่มีแถวใน DB — ใบที่มาจาก personal/mock ถึงจะมี */
+  readonly id?: string;
+  readonly module?: string;
+};
+
+export interface SystemWidgetConfigListResponse {
+  readonly items: readonly SystemWidgetConfigItem[];
+  readonly count: number;
+}
+
+// -------------------------------------------------------------
 // Shape ↔ Widget type compatibility (picker filter)
 // -------------------------------------------------------------
 /** First entry of each list is the default widget type for that shape. */

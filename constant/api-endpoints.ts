@@ -84,6 +84,10 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/dashboard-lab/widgets/${widgetId}/data?scope=personal`,
   DASHBOARD_WIDGETS: (buCode: string, module: string) =>
     `/api/proxy/api/${buCode}/dashboard-widgets/${module}`,
+  // config อย่างเดียว (ไม่ exec dataset) — คู่กับ DASHBOARD_DATASET_BY_ID ที่ยิงค่า
+  // ของแต่ละ widget แยกใบ ดู `useDashboardWidgetConfigs`
+  DASHBOARD_WIDGET_CONFIGS: (buCode: string, module: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/${module}/config`,
   DELIVERY_POINTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/delivery-points`,
   DEPARTMENTS: (buCode: string) =>
