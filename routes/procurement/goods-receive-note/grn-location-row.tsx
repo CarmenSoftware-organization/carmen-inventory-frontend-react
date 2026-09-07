@@ -559,8 +559,10 @@ export const GrnLocationRow = memo(function GrnLocationRow({
 
   return (
     <tr className="hover:bg-muted/40 h-11 align-middle transition-colors">
-      {/* Location (align ใต้ product) */}
-      <td className="px-3 py-1">
+      {/* Location — กิน 2 คอลัมน์ (product + unit) เพราะช่องเลือกคลังยาวกว่าชื่อ
+          สินค้า และคอลัมน์ unit ของแถวนี้ว่างอยู่แล้ว (หน่วยโชว์ที่แถวสินค้า
+          หน่วยเดียวกันทุกคลัง) — คอลัมน์ที่เหลือยังตรงกับตารางแถวสินค้าเหมือนเดิม */}
+      <td className="px-3 py-1" colSpan={2}>
         {isManual && !disabled ? (
           <Controller
             control={form.control}
@@ -608,10 +610,6 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           </p>
         )}
       </td>
-
-      {/* Unit — ค่าโชว์อยู่ที่แถวสินค้าแล้ว (หน่วยเดียวกันทุก location) ตรงนี้เว้นไว้
-          ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบนเท่านั้น */}
-      <td className="px-3 py-1" />
 
       {/* Order (PO เท่านั้น — disabled) */}
       {isPo && (

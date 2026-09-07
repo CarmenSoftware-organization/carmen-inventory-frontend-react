@@ -527,7 +527,14 @@ export function useGrnItemTable({
                 <TooltipContent>{t("addLocation")}</TooltipContent>
               </Tooltip>
             </div>
-          ) : null,
+          ) : (
+            // โหมดอ่าน/ใบอิง PO เพิ่มคลังเองไม่ได้ — ที่ว่างตรงนี้เลยใช้บอกว่า
+            // ตารางข้าง ๆ คือคลัง ใช้สี/น้ำหนักชุดเดียวกับหัวคอลัมน์ของตาราง
+            // (data-grid-table.tsx) มันจึงอ่านเป็นหัวคอลัมน์ ไม่ใช่ข้อมูลลอย
+            <div className="text-muted-foreground flex justify-end pt-3 text-xs font-semibold">
+              {tfl("location")}
+            </div>
+          ),
         expandedContent: (group: GrnGroup) => (
           <GrnGroupLocations
             group={group}
