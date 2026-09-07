@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { useAppConfigs } from "@/hooks/use-app-config";
-import { useInterfaceEntitlement } from "./use-interface-entitlement";
+import {
+  useInterfaceEntitlement,
+  type InterfaceEntitlement,
+} from "./use-interface-entitlement";
 import type { AppConfig } from "@/types/app-config";
 import {
   INTERFACE_CATEGORIES,
@@ -15,6 +18,8 @@ import {
 export type BrandStatus = {
   readonly brand: BrandDef;
   readonly enabled: boolean;
+  /** `expired` = อยู่ในสัญญาที่หมดอายุ ยังแสดงแต่แก้ไม่ได้ · `none` ถูกกรองทิ้งไปแล้วตั้งแต่ interfaceGroups */
+  readonly entitlement: InterfaceEntitlement;
 };
 
 export type CategoryGroup = {
@@ -25,29 +30,32 @@ export type CategoryGroup = {
 /**
  * จับคู่ brand ในแต่ละ category กับ config ที่มีอยู่ แล้วกรองด้วย entitlement
  *
- * brand ที่ platform ไม่ได้ให้สิทธิ์ถูกตัดออก; category ที่ไม่เหลือ brand เลยถูกตัดทั้งกลุ่ม
+ * brand ที่ `none` ถูกตัดออก; category ที่ไม่เหลือ brand เลยถูกตัดทั้งกลุ่ม
+ * brand ที่ `expired` **ยังแสดง** พร้อมป้ายบอก — ต่างจาก `none` ที่หายไปเงียบ เพราะสองอย่างนี้
+ * ผู้ใช้แก้ด้วยการกระทำคนละอย่าง (ต่ออายุ vs ซื้อเพิ่ม)
  * brand ที่ยังไม่มี row ใน app_config ถือว่า disabled — เป็นสถานะปกติ ไม่ใช่ error
  *
  * @param categories - รายการ category จาก registry
  * @param configs - app config ทั้งหมดของ BU ปัจจุบัน (มี key อื่นปนมาด้วย)
- * @param isEntitled - predicate จาก `useInterfaceEntitlement`
+ * @param entitlementOf - ตัวตัดสินจาก `useInterfaceEntitlement`
  * @returns กลุ่มต่อ category (เฉพาะที่มี brand เห็นได้) เรียงตาม registry
  */
 export function interfaceGroups(
   categories: readonly InterfaceCategoryDef[],
   configs: readonly AppConfig[],
-  isEntitled: (categoryKey: string, brandKey: string) => boolean,
+  entitlementOf: (categoryKey: string, brandKey: string) => InterfaceEntitlement,
 ): readonly CategoryGroup[] {
   const byKey = new Map(configs.map((c) => [c.key, c]));
   return categories
     .map((category) => ({
       category,
       brands: category.brands
-        .filter((brand) => isEntitled(category.key, brand.key))
         .map((brand) => ({
           brand,
+          entitlement: entitlementOf(category.key, brand.key),
           enabled: byKey.get(brand.configKey)?.value?.enabled === true,
-        })),
+        }))
+        .filter((row) => row.entitlement !== "none"),
     }))
     .filter((group) => group.brands.length > 0);
 }
@@ -59,10 +67,10 @@ export function interfaceGroups(
  */
 export default function InterfaceList() {
   const t = useTranslations("systemAdmin.interface");
-  const { isEntitled } = useInterfaceEntitlement();
+  const { entitlementOf } = useInterfaceEntitlement();
   const { data, isLoading, isError, refetch } = useAppConfigs();
 
-  const groups = interfaceGroups(INTERFACE_CATEGORIES, data ?? [], isEntitled);
+  const groups = interfaceGroups(INTERFACE_CATEGORIES, data ?? [], entitlementOf);
 
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
@@ -103,7 +111,7 @@ export default function InterfaceList() {
                   </h2>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {brands.map(({ brand, enabled }) => (
+                  {brands.map(({ brand, enabled, entitlement }) => (
                     <Link
                       key={brand.key}
                       to={`/system-admin/interface/${category.key}/${brand.key}`}
@@ -112,9 +120,19 @@ export default function InterfaceList() {
                       <span className="text-sm font-medium">
                         {t(`${category.key}.brand.${brand.key}`)}
                       </span>
-                      <Badge variant={enabled ? "default" : "secondary"}>
-                        {enabled ? t("statusEnabled") : t("statusDisabled")}
-                      </Badge>
+                      <span className="flex shrink-0 items-center gap-2">
+                        {entitlement === "expired" && (
+                          <Badge
+                            variant="outline"
+                            className="text-destructive border-destructive/40"
+                          >
+                            {t("expiredBadge")}
+                          </Badge>
+                        )}
+                        <Badge variant={enabled ? "default" : "secondary"}>
+                          {enabled ? t("statusEnabled") : t("statusDisabled")}
+                        </Badge>
+                      </span>
                     </Link>
                   ))}
                 </div>

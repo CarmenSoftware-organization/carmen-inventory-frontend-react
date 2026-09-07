@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { interfaceGroups } from "./interface-list";
 import { INTERFACE_CATEGORIES } from "./interface-registry";
-import { interfaceEntitled } from "./use-interface-entitlement";
 import type { AppConfig } from "@/types/app-config";
 
 function config(key: string, value: Record<string, unknown>): AppConfig {
@@ -13,7 +12,7 @@ function config(key: string, value: Record<string, unknown>): AppConfig {
 }
 
 /** show every brand — mirrors a BU the platform entitled to all interfaces */
-const allowAll = () => true;
+const allowAll = () => "entitled" as const;
 
 describe("interfaceGroups", () => {
   it("marks a brand enabled when its config row says so", () => {
@@ -58,9 +57,12 @@ describe("interfaceGroups", () => {
   });
 
   it("filters brands by entitlement and drops empty categories", () => {
-    const enabled = ["pos_micros", "pos_square"];
-    const groups = interfaceGroups(INTERFACE_CATEGORIES, [], (c, b) =>
-      interfaceEntitled(enabled, c, b),
+    const enabled = ["interface.pos.micros", "interface.pos.square"];
+    const groups = interfaceGroups(
+      INTERFACE_CATEGORIES,
+      [],
+      (c: string, b: string) =>
+        enabled.includes(`interface.${c}.${b}`) ? "entitled" : "none",
     );
     // only POS survives; accounting + pms have no entitled brand
     expect(groups.map((g) => g.category.key)).toEqual(["pos"]);
@@ -80,7 +82,7 @@ describe("interfaceGroups", () => {
   });
 
   it("returns no groups when nothing is entitled", () => {
-    const groups = interfaceGroups(INTERFACE_CATEGORIES, [], () => false);
+    const groups = interfaceGroups(INTERFACE_CATEGORIES, [], () => "none");
     expect(groups).toHaveLength(0);
   });
 });

@@ -2002,6 +2002,8 @@
       "apiKeyHint": "ปล่อยไว้เหมือนเดิมหากไม่ต้องการเปลี่ยน key",
       "statusEnabled": "เปิดใช้งาน",
       "statusDisabled": "ปิดใช้งาน",
+      "expiredBadge": "หมดอายุ",
+      "expiredNotice": "สัญญาที่ให้สิทธิ์ interface นี้หมดอายุแล้ว — ดูข้อมูลได้แต่แก้ไขไม่ได้",
       "frequencyOption": {
         "manual": "ด้วยตนเอง",
         "hourly": "ทุกชั่วโมง",
