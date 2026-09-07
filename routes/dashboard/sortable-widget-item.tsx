@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CircleAlert, GripVertical, Settings2, Trash2 } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useInViewport } from "@/hooks/use-in-viewport";
 import { cn } from "@/lib/utils";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
@@ -41,6 +43,11 @@ interface SortableWidgetItemProps {
   /** descriptor ของ dataset — ใช้ตัดสินว่าจะโชว์ปุ่มตั้งค่า param ไหม */
   readonly dataset?: DashboardDataset;
   readonly onConfigure?: () => void;
+  /**
+   * บอก parent ว่าการ์ดใบนี้เลื่อนถึงแล้ว — parent ถึงจะ enable query ของมัน
+   * (ดู `SavedWidgetsSection`) เรียกครั้งเดียวต่อการ์ด
+   */
+  readonly onVisible: (widgetId: string) => void;
 }
 
 /** col-span ตาม widget_type — match procurement/inventory dashboards */
@@ -57,6 +64,7 @@ export function SortableWidgetItem({
   onDelete,
   dataset,
   onConfigure,
+  onVisible,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
   const {
@@ -67,6 +75,11 @@ export function SortableWidgetItem({
     transition,
     isDragging,
   } = useSortable({ id: widget.id });
+  const { ref: viewRef, inView } = useInViewport<HTMLLIElement>();
+
+  useEffect(() => {
+    if (inView) onVisible(widget.id);
+  }, [inView, onVisible, widget.id]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -79,7 +92,11 @@ export function SortableWidgetItem({
 
   return (
     <li
-      ref={setNodeRef}
+      // dnd-kit ถือ ref ของ node นี้อยู่แล้ว — ผูก observer เพิ่มโดยไม่แย่งกัน
+      ref={(node) => {
+        setNodeRef(node);
+        viewRef.current = node;
+      }}
       style={style}
       className={cn(
         colSpanClass,

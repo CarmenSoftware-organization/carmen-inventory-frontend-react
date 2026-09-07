@@ -22,7 +22,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { UseQueryResult } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useMemo, type ReactNode } from "react";
 import {
   useReactTable,
@@ -49,6 +49,9 @@ import {
 } from "@/components/dashboard-widget/widget-status";
 import { statusOf } from "@/components/dashboard-widget/status-meta";
 import { cn } from "@/lib/utils";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { useInViewport } from "@/hooks/use-in-viewport";
+import { dashboardDatasetDataQueryOptions } from "@/hooks/use-dashboard-dataset";
 import {
   isCategoricalData,
   isScalarDeltaData,
@@ -56,7 +59,9 @@ import {
   isTimeSeriesData,
   type CategoricalPoint,
   type CompositeWidgetItem,
-  type DashboardWidgetListResponse,
+  type DashboardDatasetDetail,
+  type SystemWidgetConfigItem,
+  type SystemWidgetConfigListResponse,
   type DatasetData,
   type DatasetMeta,
   type DatasetShape,
@@ -110,7 +115,8 @@ export interface DashboardWidgetGridProps {
   readonly description: string;
   readonly moduleName: string;
   readonly subTileFor: (datasetId: string) => string;
-  readonly query: UseQueryResult<DashboardWidgetListResponse>;
+  /** config ล้วนของ module (ไม่มีค่า dataset) — แต่ละใบยิงค่าของตัวเอง */
+  readonly query: UseQueryResult<SystemWidgetConfigListResponse>;
   /** dataset_id ที่ต้องการซ่อน (ไม่ render) */
   readonly hiddenDatasets?: ReadonlySet<string>;
 }
@@ -128,6 +134,9 @@ export function DashboardWidgetGrid({
 
   const widgets = (data?.items ?? [])
     .filter((w) => !hiddenDatasets?.has(w.dataset_id))
+    // ชนิดที่ยังไม่มี card รองรับ (gauge/sparkline/heatmap) เดิมก็ render ไม่ออกอยู่แล้ว
+    // — คัดออกตรงนี้เพื่อไม่ให้กินช่องกริดเปล่าและไม่ยิง dataset ทิ้ง
+    .filter((w) => RENDERABLE_TYPES.has(w.widget_type))
     .sort((a, b) => {
       const groupDiff =
         WIDGET_TYPE_ORDER[a.widget_type] - WIDGET_TYPE_ORDER[b.widget_type];
@@ -165,9 +174,9 @@ export function DashboardWidgetGrid({
           <WidgetSkeletonCards />
         ) : (
           widgets.map((w) => (
-            <WidgetRouter
+            <LazyWidgetCard
               key={w.dataset_id}
-              widget={w}
+              config={w}
               moduleName={moduleName}
               subTileFor={subTileFor}
             />
@@ -190,70 +199,180 @@ interface WidgetCardProps {
   readonly subTileFor: (datasetId: string) => string;
 }
 
-interface UnresolvedWidgetCardProps {
-  readonly widget: CompositeWidgetItem;
+/** col-span ตาม widget_type — ใช้ทั้งตอนโชว์ skeleton และตอน render จริง
+ * กริดจึงไม่ขยับตำแหน่งเมื่อค่าของแต่ละใบทยอยมาถึง */
+function colSpanFor(widgetType: string): string {
+  if (widgetType === "kpi") return "lg:col-span-1";
+  if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";
+  return "sm:col-span-2 lg:col-span-2";
+}
+
+function skeletonVariantFor(widgetType: string): "kpi" | "bar" | "pie" {
+  if (widgetType === "pie") return "pie";
+  if (widgetType === "kpi") return "kpi";
+  return "bar";
+}
+
+/** widget_type ที่ `WidgetRouter` วาดได้จริง — ตัวอื่นไม่ต้องยิง dataset ให้เปลือง */
+const RENDERABLE_TYPES = new Set([
+  "kpi",
+  "pie",
+  "bar",
+  "line",
+  "area",
+  "table",
+]);
+
+/**
+ * รวม config + payload ที่ resolve แล้วให้อยู่ในรูปที่การ์ดทุกใบรับได้
+ * @param config - config ของ widget (อาจพ่วง meta/data มาด้วยถ้า caller มีอยู่แล้ว)
+ * @param detail - payload จาก `GET /api/{bu}/datasets/{id}` (ถ้ายิงเอง)
+ * @returns ResolvedWidget เมื่อมีข้อมูลครบ ไม่งั้น undefined
+ */
+function resolveWidget(
+  config: SystemWidgetConfigItem,
+  detail: DashboardDatasetDetail | undefined,
+): ResolvedWidget | undefined {
+  const base = {
+    // system widget ไม่มีแถวใน DB — ใช้ dataset_id เป็น identity
+    id: config.id ?? config.dataset_id,
+    dataset_id: config.dataset_id,
+    widget_type: config.widget_type,
+    title: config.title,
+    order_index: config.order_index,
+    params: config.params,
+  };
+  if (config.meta && config.data)
+    return { ...base, meta: config.meta, data: config.data };
+  if (detail) return { ...base, meta: detail.meta, data: detail.data };
+  return undefined;
+}
+
+/**
+ * widget 1 ใบ = 1 query ของตัวเอง ยิงตอนเลื่อนเข้าใกล้ viewport แล้วส่ง payload
+ * ที่ resolve แล้วให้ `children` วาด (ผู้เรียกเลือกการ์ดเองได้ เช่นหน้าที่จัดกลุ่ม
+ * เป็น section)
+ *
+ * เดิมทั้งหน้าใช้ response ก้อนเดียวที่ gateway exec dataset ให้ครบทุกตัวก่อน จึง
+ * เห็นข้อมูลพร้อมกันหลังตัวช้าสุด ตอนนี้ใบที่เสร็จก่อนขึ้นก่อน และใบที่ dataset พัง
+ * ก็หายไปแค่ใบเดียว (เท่าพฤติกรรมเดิมที่ item มี `error` แล้วไม่ถูก render)
+ *
+ * config ที่พ่วง `meta`/`data` มาแล้ว (mock dashboard) จะไม่ยิง query เลย
+ *
+ * @param config - config ของ widget ใบนี้
+ * @param className - class ของ wrapper — ผู้เรียกคุม col-span เอง
+ * @param children - ฟังก์ชันวาดการ์ดจาก widget ที่ resolve แล้ว
+ */
+export function LazyWidget({
+  config,
+  className,
+  children,
+}: {
+  readonly config: SystemWidgetConfigItem;
+  readonly className?: string;
+  readonly children: (widget: ResolvedWidget) => ReactNode;
+}) {
+  const buCode = useBuCode();
+  const { ref, inView } = useInViewport<HTMLDivElement>();
+  const preResolved = !!config.meta && !!config.data;
+  const { data: detail, isError } = useQuery(
+    dashboardDatasetDataQueryOptions(
+      buCode,
+      config.dataset_id,
+      inView && !preResolved,
+    ),
+  );
+
+  if (isError) return null;
+
+  const resolved = resolveWidget(config, detail);
+
+  return (
+    <div ref={ref} className={className}>
+      {resolved ? (
+        children(resolved)
+      ) : (
+        <WidgetSkeleton variant={skeletonVariantFor(config.widget_type)} />
+      )}
+    </div>
+  );
+}
+
+/** ใบเดียวในกริดมาตรฐาน — เลือกการ์ดตาม widget_type ให้เอง */
+function LazyWidgetCard({
+  config,
+  moduleName,
+  subTileFor,
+}: {
+  readonly config: SystemWidgetConfigItem;
   readonly moduleName: string;
   readonly subTileFor: (datasetId: string) => string;
+}) {
+  return (
+    <LazyWidget config={config} className={colSpanFor(config.widget_type)}>
+      {(widget) => (
+        <WidgetRouter
+          widget={widget}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      )}
+    </LazyWidget>
+  );
 }
 
 function WidgetRouter({
   widget,
   moduleName,
   subTileFor,
-}: UnresolvedWidgetCardProps) {
+}: {
+  readonly widget: CompositeWidgetItem;
+  readonly moduleName: string;
+  readonly subTileFor: (datasetId: string) => string;
+}) {
   if (!widget.meta || !widget.data) return null;
   const resolved = widget as ResolvedWidget;
   switch (widget.widget_type) {
     case "kpi":
       return (
-        <div className="lg:col-span-1">
-          <KpiCard
-            widget={resolved}
-            moduleName={moduleName}
-            subTileFor={subTileFor}
-          />
-        </div>
+        <KpiCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
       );
     case "pie":
       return (
-        <div className="sm:col-span-2 lg:col-span-2">
-          <PieCard
-            widget={resolved}
-            moduleName={moduleName}
-            subTileFor={subTileFor}
-          />
-        </div>
+        <PieCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
       );
     case "bar":
       return (
-        <div className="sm:col-span-2 lg:col-span-2">
-          <BarCard
-            widget={resolved}
-            moduleName={moduleName}
-            subTileFor={subTileFor}
-          />
-        </div>
+        <BarCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
       );
     case "line":
     case "area":
       return (
-        <div className="sm:col-span-2 lg:col-span-2">
-          <LineCard
-            widget={resolved}
-            moduleName={moduleName}
-            subTileFor={subTileFor}
-          />
-        </div>
+        <LineCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
       );
     case "table":
       return (
-        <div className="sm:col-span-2 lg:col-span-4">
-          <TableCard
-            widget={resolved}
-            moduleName={moduleName}
-            subTileFor={subTileFor}
-          />
-        </div>
+        <TableCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
       );
     default:
       return null;

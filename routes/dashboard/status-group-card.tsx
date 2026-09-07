@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { useDashboardDatasetPreview } from "@/hooks/use-dashboard-dataset";
+import { useInViewport } from "@/hooks/use-in-viewport";
 import { TIME_RANGE_OPTIONS } from "./status-group";
 
 /** dataset by-status ของ doc เดียวกัน (document.pr-count → document.pr-by-status) —
@@ -103,9 +104,13 @@ export function StatusGroupCard({
     () => ({ time_range: timeRange, owner_visibility: ownerVisibility }),
     [timeRange, ownerVisibility],
   );
-  const { data: detail, isLoading } = useDashboardDatasetPreview(
+  // ใบแรกอยู่เหนือ fold เสมอ แต่ใบที่ 3-4 ไม่ — GROUP BY ต่อใบไม่ถูก จึงยิงตอน
+  // เลื่อนถึงเหมือนการ์ดในกริด (`LazyWidget`)
+  const { ref, inView } = useInViewport<HTMLDivElement>();
+  const { data: detail, isError } = useDashboardDatasetPreview(
     byStatusDatasetId(datasetId),
     params,
+    inView,
   );
 
   // categorical [{label:status, value:count}] → map status → count (สถานะที่ไม่มี
@@ -119,7 +124,7 @@ export function StatusGroupCard({
   }, [detail]);
 
   return (
-    <Card className="group/gcard relative gap-3 py-4">
+    <Card ref={ref} className="group/gcard relative gap-3 py-4">
       {onDelete && (
         <div className="absolute top-1 right-1 z-10 opacity-0 transition-opacity group-hover/gcard:opacity-100 focus-within:opacity-100">
           <Button
@@ -180,7 +185,9 @@ export function StatusGroupCard({
               <StatusFlowTile
                 status={s}
                 value={counts.get(s) ?? 0}
-                loading={isLoading}
+                // ยังไม่เข้า viewport = ยังไม่ยิง — pulse ต่อไป (isLoading ของ query
+                // ที่ disabled เป็น false) ส่วนเคส error โชว์ 0 เหมือนเดิม
+                loading={!isError && !detail}
               />
               {i < statuses.length - 1 && (
                 <ChevronRight
