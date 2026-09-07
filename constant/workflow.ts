@@ -1,6 +1,5 @@
 import { Receipt, ShoppingCart, Store, type LucideIcon } from "lucide-react";
 import { WORKFLOW_TYPE } from "@/types/workflows";
-import { createVariantMap } from "@/constant/status-config";
 
 export const workflowTypeField = [
   { label: "Purchase Request", value: WORKFLOW_TYPE.PR },
@@ -19,17 +18,6 @@ export const WF_ROW_TYPE = {
   PO: "purchase_order",
   SR: "store_requisition",
 } as const;
-
-/**
- * Badge variant per workflow type — semantic `-light` tokens (quiet, single
- * signal per DESIGN.md), distinct color per type: PR=green, PO=amber, SR=blue.
- * Keyed on the row values, which equal the `WORKFLOW_TYPE` enum values.
- */
-export const WF_TYPE_VARIANT = createVariantMap({
-  [WF_ROW_TYPE.PR]: "info",
-  [WF_ROW_TYPE.PO]: "warning",
-  [WF_ROW_TYPE.SR]: "success",
-});
 
 /**
  * ไอคอนประจำชนิด workflow — **ไม่มีสี** ตามกติกาเดียวกับ `TYPE_ICON` ใน

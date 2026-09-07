@@ -13,6 +13,30 @@ import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_NORMAL } from "@/lib/cache-config";
 
 /**
+ * แปลงแถวดิบจาก endpoint แบบ workflow-scoped ให้เป็นรูปที่ lookup ใช้
+ *
+ * endpoint นั้นคืนฟิลด์ขึ้นต้น `location_` ทั้งชุด ไม่ใช่ `id`/`code`/`name` เหมือน
+ * `Location` ปกติ — หยิบ `id` มาตรง ๆ จะได้ `undefined` แล้ว lookup โล่งเงียบ ๆ
+ * โดยไม่มี error (typecheck ช่วยไม่ได้เพราะ `res.json()` เป็น any)
+ *
+ * @param raw - แถวดิบจาก API
+ * @returns รูปที่ `LookupProductLocation` ใช้
+ * @example
+ * normalizeWorkflowProductLocation({ location_id: "x", location_code: "1AG01", … })
+ */
+export function normalizeWorkflowProductLocation(
+  raw: WorkflowProductLocationRaw,
+): LocationOption {
+  return {
+    id: raw.location_id,
+    code: raw.location_code,
+    name: raw.location_name,
+    location_type: raw.location_type,
+    is_active: raw.is_active,
+  };
+}
+
+/**
  * Hook ดึงรายการ Location ที่มี stock ของ product ที่ระบุ
  * ใช้สำหรับ lookup ตอนเลือกต้นทาง/ปลายทางใน stock transfer
  * ใช้ CACHE_NORMAL (staleTime 5 นาที) จะไม่ fetch จนกว่า buCode และ productId จะพร้อม
@@ -72,13 +96,7 @@ export function useLocationsByProduct(
         (await res.json()) as PaginatedResponse<WorkflowProductLocationRaw>;
       return {
         ...raw,
-        data: (raw.data ?? []).map((l) => ({
-          id: l.location_id,
-          code: l.location_code,
-          name: l.location_name,
-          location_type: l.location_type,
-          is_active: l.is_active,
-        })),
+        data: (raw.data ?? []).map(normalizeWorkflowProductLocation),
       };
     },
     enabled: !!buCode && !!productId,

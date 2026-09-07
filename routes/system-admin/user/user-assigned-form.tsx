@@ -21,6 +21,7 @@ import type { FormMode } from "@/types/form";
 import {
   userRolesSchema,
   getDefaultValues,
+  buildRolePatch,
   type UserRolesFormValues,
 } from "./user-roles-form-schema";
 import { UserAvatar } from "./user-assigned-ui";
@@ -67,11 +68,9 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const isDisabled = isView || isPending;
 
   const onSubmit = async (values: UserRolesFormValues) => {
-    const addRoles = values.role_ids.filter(
-      (id) => !initialRoleIds.includes(id),
-    );
-    const removeRoles = initialRoleIds.filter(
-      (id) => !values.role_ids.includes(id),
+    const { add: addRoles, remove: removeRoles } = buildRolePatch(
+      initialRoleIds,
+      values.role_ids,
     );
 
     if (addRoles.length === 0 && removeRoles.length === 0) {

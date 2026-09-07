@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { WorkflowDto } from "@/types/workflows";
-import { WF_TYPE_ICON, getWorkflowTypeLabels } from "@/constant/workflow";
+import { WfTypeLabel } from "./wf-type-label";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -48,8 +48,6 @@ export function useWfTable({
   const t = useTranslations("systemAdmin.workflow");
   const tfl = useTranslations("field");
   const locale = useLocale();
-
-  const typeLabels = getWorkflowTypeLabels(t);
 
   const columns: ColumnDef<WorkflowDto>[] = [
     {
@@ -101,25 +99,12 @@ export function useWfTable({
           className="justify-center"
         />
       ),
-      cell: ({ row }) => {
-        const wfType = row.getValue("workflow_type") as string;
-        const inactive = !row.original.is_active;
-        const Icon = WF_TYPE_ICON[wfType];
-        return (
-          // data-slot กัน clamp ของ DataGrid เปลี่ยน span เป็น -webkit-box
-          // ซึ่งจะดันไอคอนกับป้ายไปคนละบรรทัด (ดู data-grid-table.tsx)
-          <span
-            data-slot="type"
-            className={cn(
-              "text-foreground text-micro inline-flex items-center gap-1.5 tracking-wide whitespace-nowrap",
-              inactive && "opacity-60",
-            )}
-          >
-            {Icon && <Icon className="size-3.5 shrink-0" aria-hidden="true" />}
-            {typeLabels[wfType] ?? wfType}
-          </span>
-        );
-      },
+      cell: ({ row }) => (
+        <WfTypeLabel
+          type={row.getValue("workflow_type")}
+          className={cn(!row.original.is_active && "opacity-60")}
+        />
+      ),
       size: 180,
       meta: { cellClassName: "text-center" },
     },

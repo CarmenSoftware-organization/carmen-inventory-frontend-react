@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS, type Permission } from "@/constant/permissions";
 import {
+  Boxes,
   Link2,
   BookText,
   LayoutDashboard,
@@ -252,7 +253,9 @@ export const moduleList: ModuleDto[] = [
   {
     name: "storeOperations",
     path: "/store-operation",
-    icon: Store,
+    // ไม่ใช้ Store — เมนูลูก storeRequisition ใช้ไอคอนนั้นแล้ว และ ModuleLanding
+    // โชว์ไอคอนแม่เป็นหัวเพจโดยมีการ์ดลูกอยู่ข้างล่างหน้าเดียวกัน จะซ้ำกันเอง
+    icon: Boxes,
     subModules: [
       {
         name: "storeRequisition",
