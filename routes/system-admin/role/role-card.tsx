@@ -19,7 +19,7 @@ export default function RoleCard({ item, onEdit, onDelete }: Props) {
   const t = useTranslations("systemAdmin.role");
   const tfl = useTranslations("field");
 
-  const permCount = item.permissions?.length ?? 0;
+  const permCount = item.permissions?.count ?? 0;
 
   return (
     <ListCard

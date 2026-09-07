@@ -54,13 +54,13 @@ export function useRoleTable({
     },
     {
       id: "permission_count",
-      accessorFn: (row) => row.permissions.length,
+      accessorFn: (row) => row.permissions?.count ?? 0,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("permissions")} />
       ),
       enableSorting: false,
       cell: ({ row }) => {
-        const count = row.original.permissions.length;
+        const count = row.original.permissions?.count ?? 0;
         return `${count} permissions`;
       },
       meta: { skeleton: columnSkeletons.textShort },
