@@ -1,4 +1,10 @@
-import { Fragment, useRef, useState } from "react";
+import {
+  Fragment,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Activity,
   Banknote,
@@ -144,6 +150,59 @@ interface ListFilterMenuProps {
   readonly activeCount: number;
 }
 
+/** ระยะกันชนขอบ viewport ของ submenu — เท่ากับ collisionPadding ที่ Radix ใช้ */
+const EDGE_PADDING = 8;
+
+/**
+ * กล่องตัวเลือกชั้นสอง — กางขวาตามทิศ chevron แต่ **พลิกไปซ้ายเองเมื่อขอบขวา
+ * ไม่พอ** และเลื่อนขึ้นเมื่อก้นกล่องล้นจอ
+ *
+ * ตัวนี้เป็น div absolute ธรรมดา ไม่ใช่ Radix Popover จึงไม่มี collision detection
+ * มาให้ฟรี — และแปลงเป็น Popover ไม่ได้ง่าย ๆ เพราะ Portal จะพา submenu ออกไป
+ * นอก wrapper จน hover-delay กับ `wrapper.contains(document.activeElement)`
+ * ข้างล่างพัง จึงวัดเอาเองตอน mount แทน
+ *
+ * วัดจากทรงจริงหลัง render (`useLayoutEffect` = ก่อน paint ไม่มีกระพริบ) ไม่ใช่
+ * เทียบกับความกว้างที่ hardcode ไว้ เพราะ `SUBMENU_CLASS` มีทั้ง w-48/w-56/w-72
+ * และ `w-auto` ของปฏิทินที่กว้างไม่ตายตัว
+ */
+function Submenu({
+  control,
+  children,
+}: {
+  readonly control: FilterFieldDef["control"];
+  readonly children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [flipX, setFlipX] = useState(false);
+  const [shiftY, setShiftY] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setFlipX(rect.right > document.documentElement.clientWidth - EDGE_PADDING);
+    // ล้นล่างแล้วดันขึ้นเท่าที่ล้น ไม่พลิกทิศ — พลิกไปกาง "ขึ้น" จะทำให้กล่อง
+    // สูง ๆ อย่างปฏิทินไปล้นบนแทน ได้ปัญหาเดิมคนละด้าน
+    const overflowY = rect.bottom - (window.innerHeight - EDGE_PADDING);
+    setShiftY(overflowY > 0 ? -overflowY : 0);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={shiftY ? { transform: `translateY(${shiftY}px)` } : undefined}
+      className={cn(
+        "bg-popover text-popover-foreground absolute top-0 z-50 rounded-md border shadow-md",
+        flipX ? "right-full mr-1" : "left-full ml-1",
+        SUBMENU_CLASS[control],
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 /** แถวเมนูชั้นแรก — ใช้ร่วมกันทั้งแถว field และแถวคำสั่งท้ายเมนู */
 function MenuRow({
   icon: Icon,
@@ -199,7 +258,8 @@ function MenuRow({
  *
  * submenu เปิดฝั่งขวา — ทิศเดียวกับ chevron ที่ปลายแถว สายตาจึงไหลไปทางเดียวกับ
  * ที่ลูกศรชี้ (เคยเปิดฝั่งซ้ายเพราะปุ่ม Filter ชิดขวาของ toolbar แต่มันสวนทางกับ
- * chevron และสวนทางกับเมนูซ้อนของที่อื่นในแอปที่กางไปทางขวาหมด)
+ * chevron และสวนทางกับเมนูซ้อนของที่อื่นในแอปที่กางไปทางขวาหมด) — ที่ไม่พอเมื่อไหร่
+ * `Submenu` พลิกไปซ้ายให้เอง
  *
  * มือถือไม่ใช้ตัวนี้ — ListFilter สลับไป bottom sheet เดิมให้เอง
  * props ชุดเดียวกับ ListFilter ทั้งชุด (ตัว sheet ส่งต่อมาตรง ๆ)
@@ -309,12 +369,7 @@ export function ListFilterMenu({
                   }
                 />
                 {activeKey === f.key && (
-                  <div
-                    className={cn(
-                      "bg-popover text-popover-foreground absolute top-0 left-full z-50 ml-1 rounded-md border shadow-md",
-                      SUBMENU_CLASS[f.control],
-                    )}
-                  >
+                  <Submenu control={f.control}>
                     <FilterInlineContext.Provider value={true}>
                       <FilterFieldControl
                         field={f}
@@ -323,7 +378,7 @@ export function ListFilterMenu({
                         peer={peer}
                       />
                     </FilterInlineContext.Provider>
-                  </div>
+                  </Submenu>
                 )}
               </div>
             </Fragment>
