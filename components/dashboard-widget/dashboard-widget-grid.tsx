@@ -502,10 +502,13 @@ export function GaugeCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
         />
       </CardHeader>
       <CardContent className="min-h-0 flex-1 px-4">
-        <div className="flex flex-col items-center">
+        {/* จัดให้พอดีกล่อง: การ์ดสูงเท่าที่ประกาศแล้ว svg ที่กว้างเต็มจะดันบรรทัด
+            min/max ตกขอบ (การ์ดเป็น overflow-hidden) ให้ svg ย่อตามที่เหลือแทน */}
+        <div className="flex h-full min-h-0 flex-col items-center justify-center">
           <svg
             viewBox="0 0 128 72"
-            className="w-full max-w-[12rem]"
+            preserveAspectRatio="xMidYMid meet"
+            className="max-h-full min-h-0 w-full max-w-[12rem] flex-1"
             role="img"
             aria-label={`${value} / ${max}`}
           >
@@ -573,7 +576,9 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
             {t("noData")}
           </p>
         ) : (
-          <div className="flex items-center gap-3">
+          // แถวต้อง h-full ด้วย: กล่องวงกลมกว้างตามความสูงตัวเอง (aspect-square)
+          // ถ้าแถวสูงตามเนื้อหา ความสูงจะเป็น 0 แล้ววงกลมหายทั้งวง เหลือแต่ legend
+          <div className="flex h-full items-center gap-3">
             <div className="aspect-square h-full shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -581,8 +586,10 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
                     data={chartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={38}
-                    outerRadius={64}
+                    // รัศมีเป็น % ไม่ใช่ px คงที่: ขนาดการ์ดปรับได้แล้ว เลข px เดิม
+                    // (38/64 ที่ทำไว้ตอนกล่องคงที่ 160px) จะโดนตัดขอบเมื่อการ์ดเล็กลง
+                    innerRadius="55%"
+                    outerRadius="85%"
                     dataKey="value"
                     labelLine={false}
                     isAnimationActive={false}
@@ -754,50 +761,56 @@ export function LineCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
             {t("noData")}
           </p>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={points}
-              margin={{ top: 8, right: 16, bottom: 0, left: -16 }}
+          <div className="relative h-full min-h-0">
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              className="absolute inset-0"
             >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--border)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v: string) => v.slice(5)}
-              />
-              <YAxis
-                tick={{ fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                width={40}
-              />
-              <Tooltip
-                formatter={(v: number) => [
-                  `${isCurrency ? "฿" : ""}${formatValue(v, widget.meta.unit ?? "")}${
-                    !isCurrency ? ` ${widget.meta.unit ?? ""}` : ""
-                  }`,
-                  "",
-                ]}
-                contentStyle={{ fontSize: "0.6875rem" }}
-                cursor={{ stroke: "var(--muted)", strokeWidth: 1 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="var(--chart-1)"
-                strokeWidth={2}
-                dot={{ r: 2, fill: "var(--chart-1)" }}
-                activeDot={{ r: 4 }}
-                isAnimationActive={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+              <LineChart
+                data={points}
+                margin={{ top: 8, right: 16, bottom: 0, left: -16 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--border)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v: string) => v.slice(5)}
+                />
+                <YAxis
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+                <Tooltip
+                  formatter={(v: number) => [
+                    `${isCurrency ? "฿" : ""}${formatValue(v, widget.meta.unit ?? "")}${
+                      !isCurrency ? ` ${widget.meta.unit ?? ""}` : ""
+                    }`,
+                    "",
+                  ]}
+                  contentStyle={{ fontSize: "0.6875rem" }}
+                  cursor={{ stroke: "var(--muted)", strokeWidth: 1 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2}
+                  dot={{ r: 2, fill: "var(--chart-1)" }}
+                  activeDot={{ r: 4 }}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -872,7 +885,8 @@ function asTableData(
   const points = raw as readonly CategoricalPoint[];
   // ranked พ่วง `rank` มาด้วย — โชว์เป็นคอลัมน์แรกเพื่อไม่ให้ลำดับหายไปตอนเป็นตาราง
   const isRanked =
-    points.length > 0 && typeof (points[0] as { rank?: number }).rank === "number";
+    points.length > 0 &&
+    typeof (points[0] as { rank?: number }).rank === "number";
 
   const columns: TableColumn[] = [
     ...(isRanked
@@ -984,7 +998,9 @@ export function WidgetSkeleton({
   readonly className?: string;
 }) {
   return (
-    <Card className={cn("h-full min-h-0 gap-2 overflow-hidden py-4", className)}>
+    <Card
+      className={cn("h-full min-h-0 gap-2 overflow-hidden py-4", className)}
+    >
       <CardHeader className="px-4">
         <div className="flex items-start gap-3">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
@@ -1032,12 +1048,30 @@ export function WidgetSkeleton({
 export function WidgetSkeletonCards() {
   return (
     <>
-      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
-      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
-      <WidgetSkeleton variant="pie" className="md:col-span-3 lg:col-span-6 row-span-3" />
-      <WidgetSkeleton variant="bar" className="md:col-span-3 lg:col-span-6 row-span-3" />
-      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
-      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
+      <WidgetSkeleton
+        variant="kpi"
+        className="row-span-2 md:col-span-2 lg:col-span-3"
+      />
+      <WidgetSkeleton
+        variant="kpi"
+        className="row-span-2 md:col-span-2 lg:col-span-3"
+      />
+      <WidgetSkeleton
+        variant="pie"
+        className="row-span-3 md:col-span-3 lg:col-span-6"
+      />
+      <WidgetSkeleton
+        variant="bar"
+        className="row-span-3 md:col-span-3 lg:col-span-6"
+      />
+      <WidgetSkeleton
+        variant="kpi"
+        className="row-span-2 md:col-span-2 lg:col-span-3"
+      />
+      <WidgetSkeleton
+        variant="kpi"
+        className="row-span-2 md:col-span-2 lg:col-span-3"
+      />
     </>
   );
 }
