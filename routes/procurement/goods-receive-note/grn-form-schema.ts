@@ -123,10 +123,6 @@ export function createGrnSchema(tv: TranslationFn, tf: TranslationFn) {
     currency_name: z.string(),
     exchange_rate: z.coerce.number().nullable(),
     exchange_rate_date: z.string().nullable(),
-    received_at: z
-      .string()
-      .nullable()
-      .refine((v) => !!v, tv("required", { field: tf("receivedAt") })),
     info: z.string(),
     dimension: z.string(),
     // Extra cost header
@@ -227,7 +223,6 @@ export function getDefaultValues(
       currency_name: options?.defaultCurrencyCode ?? "",
       exchange_rate: 1,
       exchange_rate_date: new Date().toISOString(),
-      received_at: new Date().toISOString(),
       info: "",
       dimension: "",
       allocate_extra_cost_type: "by_qty",
@@ -258,7 +253,6 @@ export function getDefaultValues(
     currency_name: grn.currency_name ?? "",
     exchange_rate: grn.exchange_rate ?? 1,
     exchange_rate_date: grn.exchange_rate_date,
-    received_at: grn.received_at,
     info: objectToText(grn.info),
     dimension: objectToText(grn.dimension),
     allocate_extra_cost_type:

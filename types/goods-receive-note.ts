@@ -28,8 +28,7 @@ export interface GrnLocationItem {
 
 // --- Detail Item (line item inside a detail group) ---
 
-interface GrnDetailItem
-  extends TaxFields, DiscountFields, ItemMoneyFields {
+interface GrnDetailItem extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   good_received_note_detail_id: string;
   inventory_transaction_id: string | null;
@@ -132,7 +131,6 @@ export interface GoodsReceiveNote {
   signature_image_url: string | null;
   received_by_id: string | null;
   received_by_name: string | null;
-  received_at: string | null;
   credit_term_id: string | null;
   credit_term_name: string | null;
   credit_term_days: number | null;
@@ -219,7 +217,6 @@ export interface CreateGrnDto {
   post_type?: GrnPostType;
   received_by_id?: string | null;
   received_by_name?: string | null;
-  received_at?: string | null;
   credit_term_days?: number | null;
   credit_term_id?: string | null;
   payment_due_date?: string | null;
