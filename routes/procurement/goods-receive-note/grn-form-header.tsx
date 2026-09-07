@@ -139,40 +139,6 @@ export function GrnFormHeader({
         </Field>
 
         <Field className={viewFieldGap}>
-          <FieldLabel htmlFor="grn-invoice-no" required>
-            {tfl("invoiceNo")}
-          </FieldLabel>
-          <FieldInput
-            id="grn-invoice-no"
-            placeholder={t("invoiceNoPlaceholder")}
-            className="w-full"
-            disabled={disabled}
-            error={errors.invoice_no?.message}
-            {...form.register("invoice_no")}
-          />
-        </Field>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel required>{t("invoiceDate")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="invoice_date"
-            render={({ field }) => (
-              <FieldDatePicker
-                value={field.value ?? ""}
-                onValueChange={(v) => {
-                  field.onChange(v);
-                  syncDueDate(v, form.getValues("credit_term_days"));
-                }}
-                disabled={disabled}
-                placeholder={tc("selectDate")}
-                className="w-full text-xs"
-                error={errors.invoice_date?.message}
-              />
-            )}
-          />
-        </Field>
-        <Field className={viewFieldGap}>
           <FieldLabel htmlFor="grn-exchange-rate" required>
             {tfl("currency")}
           </FieldLabel>
@@ -209,6 +175,67 @@ export function GrnFormHeader({
             </InputSuffixAddon>
           </InputSuffixField>
         </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel>{t("postType")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="post_type"
+            render={({ field }) => (
+              <FieldSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={disabled}
+                className="w-full text-xs"
+                error={errors.post_type?.message}
+              >
+                <SelectContent>
+                  <SelectItem value="ap">{t("ap")}</SelectItem>
+                  <SelectItem value="consignment">
+                    {t("consignment")}
+                  </SelectItem>
+                  <SelectItem value="cash">{t("cash")}</SelectItem>
+                </SelectContent>
+              </FieldSelect>
+            )}
+          />
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel htmlFor="grn-invoice-no" required>
+            {tfl("invoiceNo")}
+          </FieldLabel>
+          <FieldInput
+            id="grn-invoice-no"
+            placeholder={t("invoiceNoPlaceholder")}
+            className="w-full"
+            disabled={disabled}
+            error={errors.invoice_no?.message}
+            {...form.register("invoice_no")}
+          />
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel required>{t("invoiceDate")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="invoice_date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value ?? ""}
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  syncDueDate(v, form.getValues("credit_term_days"));
+                }}
+                disabled={disabled}
+                placeholder={tc("selectDate")}
+                className="w-full text-xs"
+                error={errors.invoice_date?.message}
+              />
+            )}
+          />
+        </Field>
+
         <Field className={viewFieldGap}>
           <FieldLabel>{tfl("creditTerm")}</FieldLabel>
           <Controller
@@ -254,35 +281,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel>{t("postType")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="post_type"
-            render={({ field }) => (
-              <FieldSelect
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                className="w-full text-xs"
-                error={errors.post_type?.message}
-              >
-                <SelectContent>
-                  <SelectItem value="ap">{t("ap")}</SelectItem>
-                  <SelectItem value="consignment">
-                    {t("consignment")}
-                  </SelectItem>
-                  <SelectItem value="cash">{t("cash")}</SelectItem>
-                </SelectContent>
-              </FieldSelect>
-            )}
-          />
-        </Field>
-
-        {/* คำอธิบายอยู่ต่อจาก Post Type ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
-            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เต็ม
-            ความกว้าง เพราะคำอธิบายใบเป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
         <Field className="lg:col-span-2">
           <FieldLabel htmlFor="grn-description">
             {tfl("description")}
