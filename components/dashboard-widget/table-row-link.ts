@@ -14,6 +14,11 @@ const DOC_ROUTES: Record<string, string> = {
   "document.po-rejected": "/procurement/purchase-order",
   "document.sr-sent-back": "/store-operation/store-requisition",
   "document.sr-rejected": "/store-operation/store-requisition",
+  // ranked ของเอกสาร — คลิกได้เมื่อสลับเป็นตาราง (id มาใน extras แล้ว `asTableData`
+  // ยกขึ้นเป็นคอลัมน์ id ให้)
+  "procurement.slowest-pr-approvals": "/procurement/purchase-request",
+  "procurement.slowest-po-approvals": "/procurement/purchase-order",
+  "workflow.my-pending-pr": "/procurement/purchase-request",
 };
 
 /** คีย์ของคอลัมน์ที่ถือ id (type `id`) — ไม่มี = แถวนี้ลิงก์ไม่ได้ */

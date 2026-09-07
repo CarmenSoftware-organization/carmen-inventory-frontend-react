@@ -892,8 +892,16 @@ function asTableData(
   const isRanked =
     points.length > 0 &&
     typeof (points[0] as { rank?: number }).rank === "number";
+  // ranked ของเอกสารพก id มาใน extras — ยกขึ้นเป็นคอลัมน์ `id` ให้แถวคลิกได้
+  // เหมือนตารางตระกูล document.* (คอลัมน์ชนิดนี้ไม่ถูกวาด ดู TableCard)
+  const extraId = (p: CategoricalPoint): string | undefined => {
+    const v = (p as { extras?: Record<string, unknown> }).extras?.id;
+    return typeof v === "string" && v.length > 0 ? v : undefined;
+  };
+  const hasId = points.some((p) => extraId(p) !== undefined);
 
   const columns: TableColumn[] = [
+    ...(hasId ? [{ key: "id", label: "", type: "id" as const }] : []),
     ...(isRanked
       ? [{ key: "rank", label: labels.rank, type: "number" as const }]
       : []),
@@ -908,6 +916,7 @@ function asTableData(
   return {
     columns,
     rows: points.map((p, i) => ({
+      ...(hasId ? { id: extraId(p) ?? "" } : {}),
       ...(isRanked ? { rank: (p as { rank?: number }).rank ?? i + 1 } : {}),
       label: humanizeLabel(p.label),
       value: p.value,

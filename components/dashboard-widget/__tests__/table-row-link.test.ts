@@ -43,6 +43,27 @@ describe("docHref", () => {
     );
   });
 
+  // ranked ของเอกสาร (id มาใน extras แล้ว asTableData ยกขึ้นเป็นคอลัมน์ id)
+  it("routes the ranked document datasets too", () => {
+    expect(
+      docHref("procurement.slowest-po-approvals", { id: "po-9" }, "id"),
+    ).toBe("/procurement/purchase-order/po-9");
+    expect(
+      docHref("procurement.slowest-pr-approvals", { id: "pr-9" }, "id"),
+    ).toBe("/procurement/purchase-request/pr-9");
+    expect(docHref("workflow.my-pending-pr", { id: "pr-1" }, "id")).toBe(
+      "/procurement/purchase-request/pr-1",
+    );
+  });
+
+  // ranked ที่ไม่ใช่เอกสาร (สินค้า/ผู้ขาย) ยังไม่มีหน้าปลายทาง ต้องไม่กดได้
+  it("leaves non-document ranked datasets alone", () => {
+    expect(
+      docHref("procurement.top-products-by-quantity", { id: "p-1" }, "id"),
+    ).toBeNull();
+    expect(docHref("inventory.most-active-products", { id: "p-1" }, "id")).toBeNull();
+  });
+
   // ตารางที่ไม่ได้ชี้ไปเอกสาร (below-par ฯลฯ) ต้องไม่กลายเป็นแถวกดได้ที่กดแล้วเงียบ
   it("returns null for a dataset with no detail page", () => {
     expect(docHref("inventory.below-par-items", row, "id")).toBeNull();
