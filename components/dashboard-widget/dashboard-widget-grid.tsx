@@ -325,7 +325,20 @@ function LazyWidgetCard({
   );
 }
 
-function WidgetRouter({
+/**
+ * เลือกการ์ดตาม `widget_type` — **ตัวเดียวในระบบ** ทั้งกริดของ module dashboard,
+ * การ์ดบน personal dashboard และ preview ในหน้าตั้งค่าใช้ตัวนี้ร่วมกัน
+ *
+ * เคยมี switch ตัวที่สองอยู่ใน `sortable-widget-item.tsx` แล้วตอนเพิ่มการ์ด gauge
+ * ใส่ case ไว้ที่นี่ที่เดียว อีกตัวตกไปเข้า `default: return null` — widget หายทั้งใบ
+ * โดยไม่มี error ให้เห็น รวมเหลือตัวเดียวเพื่อไม่ให้พลาดซ้ำ
+ *
+ * @param widget - widget ที่ resolve ข้อมูลแล้ว
+ * @param moduleName - ชื่อ module สำหรับเลือกไอคอน
+ * @param subTileFor - map dataset_id → ชื่อ sub-tile
+ * @returns การ์ดของชนิดนั้น หรือ null เมื่อยังไม่มีการ์ดรองรับ
+ */
+export function WidgetRouter({
   widget,
   moduleName,
   subTileFor,

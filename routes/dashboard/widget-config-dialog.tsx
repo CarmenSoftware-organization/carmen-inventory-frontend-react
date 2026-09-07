@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { WidgetSkeleton } from "@/components/dashboard-widget/dashboard-widget-grid";
+import {
+  WidgetRouter,
+  WidgetSkeleton,
+} from "@/components/dashboard-widget/dashboard-widget-grid";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,7 +21,6 @@ import type {
   WidgetParams,
   WidgetType,
 } from "@/types/dashboard-widget";
-import { WidgetRenderer } from "./sortable-widget-item";
 import { WidgetDisplayFields } from "./widget-display-fields";
 import { WidgetParamFields } from "./widget-param-fields";
 import {
@@ -127,7 +129,7 @@ export function WidgetConfigDialog({
             ) : isLoading || !preview ? (
               <WidgetSkeleton />
             ) : (
-              <WidgetRenderer
+              <WidgetRouter
                 widget={{
                   id: "preview",
                   dataset_id: dataset.id,

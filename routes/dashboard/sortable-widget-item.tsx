@@ -18,11 +18,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
-  BarCard,
-  KpiCard,
-  LineCard,
-  PieCard,
-  TableCard,
+  WidgetRouter,
   WidgetSkeleton,
   type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
@@ -217,7 +213,7 @@ export function SortableWidgetItem({
       ) : SUPPORTED_SHAPES.includes(
           detail.meta.shape as (typeof SUPPORTED_SHAPES)[number],
         ) ? (
-        <WidgetRenderer
+        <WidgetRouter
           widget={buildFullWidget(
             widget,
             detail.meta,
@@ -232,62 +228,6 @@ export function SortableWidgetItem({
       )}
     </li>
   );
-}
-
-export function WidgetRenderer({
-  widget,
-  moduleName,
-  subTileFor,
-}: {
-  readonly widget: ResolvedWidget;
-  readonly moduleName: string;
-  readonly subTileFor: (id: string) => string;
-}) {
-  switch (widget.widget_type) {
-    case "kpi":
-      return (
-        <KpiCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "pie":
-      return (
-        <PieCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "bar":
-      return (
-        <BarCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "line":
-    case "area":
-      return (
-        <LineCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "table":
-      return (
-        <TableCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    default:
-      return null;
-  }
 }
 
 function UnsupportedCard({
