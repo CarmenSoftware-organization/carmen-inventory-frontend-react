@@ -5,6 +5,7 @@ import {
   WidgetRouter,
   WidgetSkeleton,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
+import { gridSize } from "@/components/dashboard-widget/widget-display";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -67,6 +68,9 @@ export function WidgetConfigDialog({
   );
   const [display, setDisplay] = useState<WidgetDisplay>({});
   const renderType = widgetType ?? defaultWidgetTypeFor(dataset);
+  // 1 แถว = 4rem (64px) + gap 0.75rem (12px) ระหว่างแถว — ตรงกับ auto-rows ของกริดจริง
+  const previewRows = gridSize(renderType, display).height;
+  const previewHeight = previewRows * 64 + (previewRows - 1) * 12;
 
   useEffect(() => {
     if (!open) return;
@@ -120,6 +124,8 @@ export function WidgetConfigDialog({
             <h3 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
               {t("preview")}
             </h3>
+            {/* การ์ดกิน 100% ของช่องกริด — ใน dialog ไม่มีกริด ต้องกำหนดความสูงให้
+                ตามขนาดที่เลือก ไม่งั้นพื้นที่กราฟยุบเป็น 0 แล้ว preview ว่างเปล่า */}
             {isError ? (
               <p role="alert" className="text-destructive text-sm">
                 {t("previewError", {
@@ -127,23 +133,27 @@ export function WidgetConfigDialog({
                 })}
               </p>
             ) : isLoading || !preview ? (
-              <WidgetSkeleton />
+              <div style={{ height: previewHeight }}>
+                <WidgetSkeleton />
+              </div>
             ) : (
-              <WidgetRouter
-                widget={{
-                  id: "preview",
-                  dataset_id: dataset.id,
-                  widget_type: renderType,
-                  title: dataset.name,
-                  order_index: 0,
-                  params: values,
-                  display,
-                  meta: preview.meta,
-                  data: preview.data,
-                }}
-                moduleName={inferModuleName(dataset.id)}
-                subTileFor={inferSubTile}
-              />
+              <div style={{ height: previewHeight }}>
+                <WidgetRouter
+                  widget={{
+                    id: "preview",
+                    dataset_id: dataset.id,
+                    widget_type: renderType,
+                    title: dataset.name,
+                    order_index: 0,
+                    params: values,
+                    display,
+                    meta: preview.meta,
+                    data: preview.data,
+                  }}
+                  moduleName={inferModuleName(dataset.id)}
+                  subTileFor={inferSubTile}
+                />
+              </div>
             )}
           </div>
         </div>

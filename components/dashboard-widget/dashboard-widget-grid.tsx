@@ -852,18 +852,24 @@ function renderTableCell(
  * แต่ payload เป็น `[{label, value}]` ไม่ใช่ `{columns, rows}` ที่ `TableCard` ต้องการ
  * ตัวแปลงนี้คือส่วนที่ขาด — ไม่ต้องแตะ dataset หรือ SQL เลย
  *
- * @param widget - widget ที่ resolve ข้อมูลแล้ว
+ * รับค่าดิบ (ไม่ใช่ทั้ง widget) เพราะฝั่งผู้เรียกต้อง memo ผลลัพธ์ให้ได้ — `widget`
+ * ถูกสร้างใหม่ทุก render ที่ `buildFullWidget` ถ้าเอามาเป็น dependency ตรง ๆ
+ * `useReactTable` จะได้ data/columns ชุดใหม่ทุกรอบแล้ววนไม่จบ
+ *
+ * @param raw - `widget.data` ดิบ
+ * @param unit - หน่วยของ dataset สำหรับเติมในหัวคอลัมน์ค่า
  * @param labels - หัวคอลัมน์ที่แปลแล้ว
  * @returns TableData หรือ null เมื่อรูปข้อมูลใช้ไม่ได้
  */
 function asTableData(
-  widget: ResolvedWidget,
+  raw: unknown,
+  unit: string | undefined,
   labels: { label: string; value: string; rank: string },
 ): TableData | null {
-  if (isTableData(widget.data)) return widget.data as TableData;
-  if (!isCategoricalData(widget.data)) return null;
+  if (isTableData(raw)) return raw as TableData;
+  if (!isCategoricalData(raw)) return null;
 
-  const points = widget.data as readonly CategoricalPoint[];
+  const points = raw as readonly CategoricalPoint[];
   // ranked พ่วง `rank` มาด้วย — โชว์เป็นคอลัมน์แรกเพื่อไม่ให้ลำดับหายไปตอนเป็นตาราง
   const isRanked =
     points.length > 0 && typeof (points[0] as { rank?: number }).rank === "number";
@@ -875,7 +881,7 @@ function asTableData(
     { key: "label", label: labels.label, type: "text" },
     {
       key: "value",
-      label: widget.meta.unit ? `${labels.value} (${widget.meta.unit})` : labels.value,
+      label: unit ? `${labels.value} (${unit})` : labels.value,
       type: "number",
     },
   ];
@@ -893,11 +899,20 @@ function asTableData(
 export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   "use no memo";
   const t = useTranslations("dashboardWidget");
-  const data = asTableData(widget, {
-    label: t("tableCol.label"),
-    value: t("tableCol.value"),
-    rank: t("tableCol.rank"),
-  });
+  const colLabel = t("tableCol.label");
+  const colValue = t("tableCol.value");
+  const colRank = t("tableCol.rank");
+  // ต้อง memo: categorical/ranked ถูกแปลงเป็นตารางใหม่ทุก render ถ้าไม่ตรึงไว้
+  // `useReactTable` จะเห็น data/columns เป็นของใหม่ทุกรอบ แล้ว set state วนจนหน้าค้าง
+  const data = useMemo(
+    () =>
+      asTableData(widget.data, widget.meta.unit, {
+        label: colLabel,
+        value: colValue,
+        rank: colRank,
+      }),
+    [widget.data, widget.meta.unit, colLabel, colValue, colRank],
+  );
 
   const columns = useMemo<ColumnDef<TableRow>[]>(
     () =>
