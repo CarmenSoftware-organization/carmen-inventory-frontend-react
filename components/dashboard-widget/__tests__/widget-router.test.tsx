@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { WidgetRouter } from "../dashboard-widget-grid";
 import { availableRenders } from "../render-support";
 import type {
@@ -35,6 +36,7 @@ describe("WidgetRouter covers every render the menu can offer", () => {
         moduleName="procurement"
         subTileFor={() => "document"}
       />,
+      { wrapper: MemoryRouter },
     );
     expect(container.innerHTML, `${type} on ${shape} rendered nothing`).not.toBe(
       "",

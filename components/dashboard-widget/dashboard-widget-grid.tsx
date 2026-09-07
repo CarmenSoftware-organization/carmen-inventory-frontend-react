@@ -50,7 +50,12 @@ import {
 import { statusOf } from "@/components/dashboard-widget/status-meta";
 import { cn } from "@/lib/utils";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { useNavigate } from "react-router";
 import { useInViewport } from "@/hooks/use-in-viewport";
+import {
+  docHref,
+  idColumnKey,
+} from "@/components/dashboard-widget/table-row-link";
 import {
   applyDecimals,
   gaugeRange,
@@ -930,18 +935,21 @@ export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
 
   const columns = useMemo<ColumnDef<TableRow>[]>(
     () =>
-      (data?.columns ?? []).map((col) => ({
-        id: col.key,
-        accessorFn: (row: TableRow) => row[col.key],
-        header: col.label,
-        cell: ({ getValue }) => renderTableCell(getValue(), col.type),
-        meta: isNumericColumn(col.type)
-          ? {
-              headerClassName: "text-right",
-              cellClassName: "text-right tabular-nums",
-            }
-          : undefined,
-      })),
+      // คอลัมน์ id มีไว้ทำลิงก์ ไม่ใช่ข้อมูลที่คนอ่าน — ข้ามไม่วาดเป็นคอลัมน์
+      (data?.columns ?? [])
+        .filter((col) => col.type !== "id")
+        .map((col) => ({
+          id: col.key,
+          accessorFn: (row: TableRow) => row[col.key],
+          header: col.label,
+          cell: ({ getValue }) => renderTableCell(getValue(), col.type),
+          meta: isNumericColumn(col.type)
+            ? {
+                headerClassName: "text-right",
+                cellClassName: "text-right tabular-nums",
+              }
+            : undefined,
+        })),
     [data?.columns],
   );
 
@@ -952,6 +960,19 @@ export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  // แถวคลิกได้เฉพาะ dataset ที่รู้ปลายทาง และแถวที่มี id จริง — ไม่งั้น
+  // `DataGridTable` จะทำให้ทุกแถวดูกดได้ (cursor + focus ring) ทั้งที่กดแล้วไม่ไปไหน
+  const navigate = useNavigate();
+  const idKey = idColumnKey(data);
+  const canLink =
+    idKey !== null && rows.some((r) => docHref(widget.dataset_id, r, idKey));
+  const onRowClick = canLink
+    ? (row: TableRow) => {
+        const href = docHref(widget.dataset_id, row, idKey);
+        if (href) navigate(href);
+      }
+    : undefined;
 
   return (
     <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
@@ -971,6 +992,7 @@ export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           <DataGrid
             table={table}
             recordCount={rows.length}
+            onRowClick={onRowClick}
             tableLayout={{ dense: true, headerSticky: true, width: "auto" }}
             emptyMessage={
               <p className="text-muted-foreground py-6 text-center text-xs">

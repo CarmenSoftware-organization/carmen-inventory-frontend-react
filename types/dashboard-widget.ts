@@ -98,7 +98,17 @@ interface MatrixData {
   readonly values: readonly (readonly number[])[];
 }
 
-type TableColumnType = "text" | "number" | "currency" | "date" | "icon";
+/**
+ * `id` ไม่ใช่คอลัมน์ที่โชว์ — เป็นค่าที่ client เอาไปทำลิงก์ไปหาเอกสารของแถวนั้น
+ * (label ของมันว่างเสมอ) ตารางต้องข้ามไม่เอาไปวาดเป็นคอลัมน์
+ */
+type TableColumnType =
+  | "text"
+  | "number"
+  | "currency"
+  | "date"
+  | "icon"
+  | "id";
 
 /** One column of a table-shaped dataset (header label + the row key it reads). */
 export interface TableColumn {

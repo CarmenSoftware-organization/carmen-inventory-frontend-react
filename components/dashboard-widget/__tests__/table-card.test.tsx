@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { TableCard } from "../dashboard-widget-grid";
 import type { ResolvedWidget } from "../dashboard-widget-grid";
 import type { TableData } from "@/types/dashboard-widget";
@@ -51,6 +52,7 @@ describe("TableCard", () => {
         moduleName="procurement"
         subTileFor={noop}
       />,
+      { wrapper: MemoryRouter },
     );
     expect(container.textContent).toContain("PR Number");
     expect(container.textContent).toContain("Item Name");
@@ -73,6 +75,7 @@ describe("TableCard", () => {
         moduleName="procurement"
         subTileFor={noop}
       />,
+      { wrapper: MemoryRouter },
     );
     // lucide renders an <svg class="lucide lucide-undo-2 ...">
     expect(container.querySelector("svg.lucide-undo-2")).not.toBeNull();
@@ -93,6 +96,7 @@ describe("TableCard", () => {
         moduleName="procurement"
         subTileFor={noop}
       />,
+      { wrapper: MemoryRouter },
     );
     expect(container.querySelector("svg.lucide-circle-x")).not.toBeNull();
     expect(container.textContent).toContain("MOOZE VODKA 700ml.");
@@ -109,6 +113,7 @@ describe("TableCard", () => {
         moduleName="procurement"
         subTileFor={noop}
       />,
+      { wrapper: MemoryRouter },
     );
     expect(container.querySelector("svg.lucide")).toBeNull();
   });
@@ -120,6 +125,7 @@ describe("TableCard", () => {
         moduleName="procurement"
         subTileFor={noop}
       />,
+      { wrapper: MemoryRouter },
     );
     expect(container.textContent).toContain("noData");
   });
