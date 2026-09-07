@@ -398,6 +398,11 @@ export const moduleList: ModuleDto[] = [
         separatorBefore: true,
         subModules: [
           {
+            name: "apDashboard",
+            path: "/accounting/accounts-payable",
+            icon: LayoutDashboard,
+          },
+          {
             name: "apInvoice",
             path: "/accounting/accounts-payable/invoice",
             icon: FileInput,

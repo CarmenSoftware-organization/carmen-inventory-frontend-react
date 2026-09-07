@@ -166,8 +166,6 @@ export default function AccountingDetail() {
   const config = accountingDocumentFromPath(pathname);
   const hasWorkflowApproval =
     config.kind === "journalVoucher" ||
-    config.kind === "apInvoice" ||
-    config.kind === "apPayment" ||
     config.kind === "arInvoice" ||
     config.kind === "arReceipt";
   const hasInlineApproval =

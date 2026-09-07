@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carmen Cloud ERP - AP Payment Approval</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --radius: 0.625rem;
+      /* Brand ERP Light Mode - OKLCH */
+      --background: oklch(0.98 0.004 258.7);
+      --foreground: oklch(0.16 0.02 258.7);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.16 0.02 258.7);
+      --popover: oklch(1 0 0);
+      --popover-foreground: oklch(0.16 0.02 258.7);
+      --primary: oklch(0.4714 0.1794 258.7);
+      --primary-foreground: oklch(0.99 0 0);
+      --secondary: oklch(0.94 0.014 258.7);
+      --secondary-foreground: oklch(0.22 0.02 258.7);
+      --muted: oklch(0.95 0.008 258.7);
+      --muted-foreground: oklch(0.46 0.016 258.7);
+      --accent: oklch(0.93 0.024 258.7);
+      --accent-foreground: oklch(0.22 0.02 258.7);
+      --destructive: oklch(0.666 0.2013 24.11);
+      --destructive-foreground: oklch(1 0 0);
+      --border: oklch(0.91 0.008 258.7);
+      --input: oklch(0.91 0.008 258.7);
+      --ring: oklch(0.4714 0.1794 258.7);
+      --sidebar: oklch(0.97 0.006 258.7);
+      --sidebar-foreground: oklch(0.16 0.02 258.7);
+      --sidebar-primary: oklch(0.4714 0.1794 258.7);
+      --sidebar-accent: oklch(0.93 0.024 258.7);
+      --sidebar-border: oklch(0.90 0.010 258.7);
+      --success: oklch(0.7515 0.1117 188.43);
+      --warning: oklch(0.78 0.15 75);
+    }
+
+    .dark {
+      /* Brand ERP Dark Mode - OKLCH */
+      --background: oklch(0.18 0.02 258.7);
+      --foreground: oklch(0.94 0.006 258.7);
+      --card: oklch(0.22 0.024 258.7);
+      --card-foreground: oklch(0.94 0.006 258.7);
+      --popover: oklch(0.23 0.026 258.7);
+      --popover-foreground: oklch(0.94 0.006 258.7);
+      --primary: oklch(0.5852 0.1706 253.27);
+      --primary-foreground: oklch(0.99 0 0);
+      --secondary: oklch(0.28 0.026 258.7);
+      --secondary-foreground: oklch(0.92 0.006 258.7);
+      --muted: oklch(0.26 0.022 258.7);
+      --muted-foreground: oklch(0.65 0.016 258.7);
+      --accent: oklch(0.30 0.034 258.7);
+      --accent-foreground: oklch(0.94 0.006 258.7);
+      --destructive: oklch(0.666 0.2013 24.11);
+      --destructive-foreground: oklch(0.98 0 0);
+      --border: oklch(0.32 0.026 258.7);
+      --input: oklch(0.30 0.026 258.7);
+      --ring: oklch(0.5852 0.1706 253.27);
+      --sidebar: oklch(0.16 0.018 258.7);
+      --sidebar-foreground: oklch(0.92 0.006 258.7);
+      --sidebar-primary: oklch(0.5852 0.1706 253.27);
+      --sidebar-accent: oklch(0.28 0.030 258.7);
+      --sidebar-border: oklch(0.30 0.022 258.7);
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Thai', sans-serif;
+    }
+
+    .bg-erp-card { background-color: var(--card); }
+    .text-erp-card-fg { color: var(--card-foreground); }
+    .bg-erp-primary { background-color: var(--primary); }
+    .text-erp-primary-fg { color: var(--primary-foreground); }
+    .bg-erp-secondary { background-color: var(--secondary); }
+    .text-erp-secondary-fg { color: var(--secondary-foreground); }
+    .bg-erp-muted { background-color: var(--muted); }
+    .text-erp-muted-fg { color: var(--muted-foreground); }
+    .border-erp { border-color: var(--border); }
+    .bg-erp-sidebar { background-color: var(--sidebar); }
+    .border-erp-sidebar { border-color: var(--sidebar-border); }
+    
+    /* Smooth transitions */
+    .transition-theme {
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.5); }
+
+    .ai-gradient {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(147, 51, 234, 0.12) 100%);
+      border: 1px solid rgba(129, 140, 248, 0.35);
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden transition-theme">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="sidebar" class="bg-erp-sidebar border-r border-erp-sidebar flex flex-col justify-between transition-all duration-300 w-64 z-30 shrink-0 select-none">
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-16 flex items-center justify-between px-4 border-b border-erp-sidebar">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-9 h-9 rounded-lg bg-erp-primary flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
+            C
+          </div>
+          <div id="brand-text" class="flex flex-col">
+            <span class="font-bold text-base tracking-wide leading-tight flex items-center gap-1">
+              CARMEN <span class="text-xs px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-medium">Cloud</span>
+            </span>
+            <span class="text-[11px] text-erp-muted-fg leading-none" data-lang-key="hotel_group">Hospitality ERP Suite</span>
+          </div>
+        </div>
+        <button id="toggle-sidebar-btn" onclick="toggleSidebar()" class="p-1.5 rounded hover:bg-erp-secondary text-erp-muted-fg hover:text-erp-card-fg transition-colors">
+          <i data-lucide="chevron-left" id="sidebar-icon" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Hotel Property Selector -->
+      <div class="p-3 border-b border-erp-sidebar" id="property-selector-box">
+        <label class="text-[10px] font-semibold text-erp-muted-fg uppercase tracking-wider block mb-1" data-lang-key="property_label">Business Unit (BU)</label>
+        <div class="flex items-center justify-between p-2 rounded-lg bg-erp-card border border-erp text-xs font-medium cursor-pointer hover:border-blue-500 transition-colors">
+          <div class="flex items-center gap-2 truncate">
+            <i data-lucide="hotel" class="w-4 h-4 text-blue-600 shrink-0"></i>
+            <span class="truncate">Grand Carmen Hotel & Resort</span>
+          </div>
+          <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-erp-muted-fg shrink-0"></i>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-250px)]">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-erp-muted-fg hover:bg-erp-secondary hover:text-erp-card-fg transition-colors">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label" data-lang-key="menu_dashboard">Dashboard</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-erp-muted-fg hover:bg-erp-secondary hover:text-erp-card-fg transition-colors">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label" data-lang-key="menu_gl">General Ledger (GL)</span>
+        </a>
+        
+        <!-- Active AP Module -->
+        <div class="space-y-1">
+          <a href="#" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold bg-erp-secondary text-blue-600 dark:text-blue-400">
+            <div class="flex items-center gap-3">
+              <i data-lucide="receipt" class="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400"></i>
+              <span class="sidebar-label" data-lang-key="menu_ap">Accounts Payable (AP)</span>
+            </div>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 sidebar-label"></i>
+          </a>
+          <div class="pl-9 pr-2 py-1 space-y-1 sidebar-submenu">
+            <a href="#" class="block px-2.5 py-1.5 text-xs text-erp-muted-fg hover:text-erp-card-fg rounded hover:bg-erp-secondary/60 transition-colors" data-lang-key="sub_ap_invoice">AP Invoice & Receiving</a>
+            <a href="#" class="block px-2.5 py-1.5 text-xs text-erp-muted-fg hover:text-erp-card-fg rounded hover:bg-erp-secondary/60 transition-colors" data-lang-key="sub_ap_payment">Payment Processing</a>
+            <a href="#" class="flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded border border-blue-200 dark:border-blue-900/50">
+              <span data-lang-key="sub_ap_approval">Payment Approval</span>
+              <span class="px-1.5 py-0.2 text-[10px] rounded-full bg-blue-600 text-white font-bold" id="badge-pending-count">4</span>
+            </a>
+            <a href="#" class="block px-2.5 py-1.5 text-xs text-erp-muted-fg hover:text-erp-card-fg rounded hover:bg-erp-secondary/60 transition-colors" data-lang-key="sub_ap_tax">Input Tax (ภาษีซื้อ)</a>
+            <a href="#" class="block px-2.5 py-1.5 text-xs text-erp-muted-fg hover:text-erp-card-fg rounded hover:bg-erp-secondary/60 transition-colors" data-lang-key="sub_ap_wht">Withholding Tax (50 ทวิ)</a>
+          </div>
+        </div>
+
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-erp-muted-fg hover:bg-erp-secondary hover:text-erp-card-fg transition-colors">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label" data-lang-key="menu_ar">Accounts Receivable (AR)</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-erp-muted-fg hover:bg-erp-secondary hover:text-erp-card-fg transition-colors">
+          <i data-lucide="package-search" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label" data-lang-key="menu_asset">Asset Management</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-erp-muted-fg hover:bg-erp-secondary hover:text-erp-card-fg transition-colors">
+          <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+          <span class="sidebar-label" data-lang-key="menu_config">Configuration</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Profile Bottom Widget -->
+    <div class="p-3 border-t border-erp-sidebar bg-erp-card/50">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center font-semibold text-xs shrink-0">
+            MC
+          </div>
+          <div class="truncate sidebar-label">
+            <p class="text-xs font-semibold leading-tight text-erp-card-fg truncate">Michael Chen</p>
+            <p class="text-[10px] text-erp-muted-fg truncate">General Manager (GM)</p>
+          </div>
+        </div>
+        <button onclick="toggleProfileMenu()" class="p-1 rounded hover:bg-erp-secondary text-erp-muted-fg sidebar-label">
+          <i data-lucide="more-vertical" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="h-16 bg-erp-card border-b border-erp flex items-center justify-between px-6 z-20 shrink-0">
+      <div class="flex items-center gap-4">
+        <div>
+          <h1 class="text-base font-bold text-erp-card-fg flex items-center gap-2" data-lang-key="page_title">
+            <i data-lucide="check-check" class="w-5 h-5 text-blue-600"></i>
+            AP Payment Approval
+          </h1>
+          <p class="text-xs text-erp-muted-fg" data-lang-key="page_desc">
+            อนุมัติใบสำคัญจ่ายเงิน (Payment Vouchers), ตรวจสอบภาษี และสรุปงบประมาณด้วยระบบ AI
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls & Header Actions -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Search Input -->
+        <div class="relative hidden sm:block">
+          <i data-lucide="search" class="w-4 h-4 text-erp-muted-fg absolute left-3 top-2.5"></i>
+          <input type="text" id="filter-search" oninput="applyFilters()" placeholder="ค้นหา PV, Vendor, เช็ค..." data-lang-placeholder="search_placeholder" 
+                 class="pl-9 pr-3 py-1.5 text-xs rounded-lg border border-erp bg-erp-background focus:outline-none focus:ring-1 focus:ring-blue-500 w-56 text-erp-card-fg transition-all">
+        </div>
+
+        <!-- AI Notification / Log Drawer Trigger -->
+        <button onclick="toggleNotificationDrawer()" class="relative p-2 rounded-lg border border-erp bg-erp-card hover:bg-erp-secondary text-erp-card-fg transition-colors" title="AI System Notifications">
+          <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-indigo-600 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+        </button>
+
+        <!-- Language Switcher -->
+        <button onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-lg border border-erp bg-erp-card hover:bg-erp-secondary text-xs font-semibold text-erp-card-fg flex items-center gap-1.5 transition-colors">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-erp-muted-fg"></i>
+          <span id="lang-indicator">TH</span>
+        </button>
+
+        <!-- Theme Toggle Switcher -->
+        <button onclick="toggleTheme()" class="p-2 rounded-lg border border-erp bg-erp-card hover:bg-erp-secondary text-erp-card-fg transition-colors" title="สลับโหมดมืด/สว่าง">
+          <i data-lucide="moon" id="theme-icon" class="w-4 h-4"></i>
+        </button>
+
+        <div class="h-6 w-px bg-erp-muted"></div>
+
+        <!-- GM Quick Approval Status -->
+        <div class="flex items-center gap-2 pl-1">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span id="header-pending-count">4 รายการรออนุมัติ</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- Executive KPIs & Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-erp-card p-4 rounded-xl border border-erp shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-erp-muted-fg font-medium" data-lang-key="kpi_pending_total">ยอดรวมรออนุมัติ (Pending)</p>
+            <h3 class="text-xl font-bold text-erp-card-fg mt-1">฿725,640.00</h3>
+            <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3"></i> 4 ใบสำคัญจ่าย (PV)
+            </p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center">
+            <i data-lucide="file-clock" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-erp-card p-4 rounded-xl border border-erp shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-erp-muted-fg font-medium" data-lang-key="kpi_due_today">ครบกำหนดจ่ายวันนี้ (Due Today)</p>
+            <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mt-1">฿348,500.00</h3>
+            <p class="text-[11px] text-red-500 mt-0.5 flex items-center gap-1">
+              <i data-lucide="alert-circle" class="w-3 h-3"></i> 2 รายการเร่งด่วน
+            </p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 flex items-center justify-center">
+            <i data-lucide="calendar-alert" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-erp-card p-4 rounded-xl border border-erp shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-erp-muted-fg font-medium" data-lang-key="kpi_wht_deducted">ภาษีหัก ณ ที่จ่ายรวม (WHT)</p>
+            <h3 class="text-xl font-bold text-erp-card-fg mt-1">฿14,280.00</h3>
+            <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-3 h-3"></i> ภ.ง.ด. 3 และ 53 พร้อมยื่น
+            </p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="file-check" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-erp-card p-4 rounded-xl border border-erp shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-erp-muted-fg font-medium" data-lang-key="kpi_ai_confidence">AI Audit & Matching Score</p>
+            <h3 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">100% Valid</h3>
+            <p class="text-[11px] text-indigo-500 mt-0.5 flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i> 3-Way Match Passed
+            </p>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="cpu" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar & Tabs Filter -->
+      <div class="bg-erp-card p-4 rounded-xl border border-erp shadow-sm space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          
+          <!-- Filter Tabs -->
+          <div class="flex items-center gap-1 p-1 rounded-lg bg-erp-background border border-erp text-xs font-medium w-fit">
+            <button onclick="setTab('pending')" id="tab-pending" class="px-3 py-1.5 rounded-md bg-erp-card text-blue-600 dark:text-blue-400 font-semibold shadow-sm transition-all flex items-center gap-1.5">
+              <span data-lang-key="tab_pending">รออนุมัติ</span>
+              <span class="px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[10px]">4</span>
+            </button>
+            <button onclick="setTab('urgent')" id="tab-urgent" class="px-3 py-1.5 rounded-md text-erp-muted-fg hover:text-erp-card-fg transition-all flex items-center gap-1.5">
+              <span data-lang-key="tab_urgent">จ่ายด่วน/วันนี้</span>
+              <span class="px-1.5 py-0.2 rounded-full bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 text-[10px]">2</span>
+            </button>
+            <button onclick="setTab('approved')" id="tab-approved" class="px-3 py-1.5 rounded-md text-erp-muted-fg hover:text-erp-card-fg transition-all">
+              <span data-lang-key="tab_approved">อนุมัติแล้ว (Approved MTD)</span>
+            </button>
+            <button onclick="setTab('all')" id="tab-all" class="px-3 py-1.5 rounded-md text-erp-muted-fg hover:text-erp-card-fg transition-all">
+              <span data-lang-key="tab_all">ทั้งหมด</span>
+            </button>
+          </div>
+
+          <!-- Batch Action Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="batchApproveSelected()" class="px-3.5 py-2 rounded-lg bg-erp-primary text-white text-xs font-semibold hover:opacity-90 shadow-sm flex items-center gap-1.5 transition-all">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span data-lang-key="btn_batch_approve">อนุมัติรายการที่เลือก (Batch Approve)</span>
+            </button>
+            <button onclick="refreshData()" class="p-2 rounded-lg border border-erp hover:bg-erp-secondary text-erp-muted-fg hover:text-erp-card-fg transition-colors" title="รีเฟรชข้อมูล">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Approval Table List -->
+      <div class="bg-erp-card rounded-xl border border-erp shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-erp-muted/70 text-erp-muted-fg font-semibold border-b border-erp uppercase tracking-wider text-[11px]">
+                <th class="p-3.5 w-10 text-center">
+                  <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" class="rounded border-erp text-blue-600 focus:ring-blue-500">
+                </th>
+                <th class="p-3.5" data-lang-key="th_pv_no">เลขที่เอกสาร / วันที่</th>
+                <th class="p-3.5" data-lang-key="th_vendor">ผู้ขาย (Vendor) / แผนก USALI</th>
+                <th class="p-3.5" data-lang-key="th_method">วิธีชำระ / เลขที่เช็ค</th>
+                <th class="p-3.5 text-right" data-lang-key="th_gross">ยอดรวม (Gross)</th>
+                <th class="p-3.5 text-right" data-lang-key="th_wht">ภาษีหัก (WHT)</th>
+                <th class="p-3.5 text-right" data-lang-key="th_net">ยอดจ่ายสุทธิ (Net Pay)</th>
+                <th class="p-3.5 text-center" data-lang-key="th_status">สถานะ / AI Score</th>
+                <th class="p-3.5 text-center w-36" data-lang-key="th_action">การดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody id="payment-table-body" class="divide-y divide-erp">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Table Pagination Footer -->
+        <div class="p-3.5 border-t border-erp flex items-center justify-between text-xs text-erp-muted-fg bg-erp-card">
+          <span id="pagination-info">แสดง 1 - 4 จากทั้งหมด 4 รายการ</span>
+          <div class="flex items-center gap-1">
+            <button class="px-2.5 py-1 rounded border border-erp hover:bg-erp-secondary disabled:opacity-40" disabled><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+            <button class="px-2.5 py-1 rounded bg-erp-primary text-white font-semibold">1</button>
+            <button class="px-2.5 py-1 rounded border border-erp hover:bg-erp-secondary disabled:opacity-40" disabled><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================= PAYMENT DETAIL & AI APPROVAL DRAWER / MODAL ================= -->
+  <div id="approval-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-erp-card border border-erp w-full max-w-5xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="h-16 px-6 border-b border-erp flex items-center justify-between bg-erp-secondary/40">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold">
+            <i data-lucide="file-signature" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="modal-pv-no" class="font-bold text-base text-erp-card-fg">PV-202610-0042</h2>
+              <span id="modal-payment-type-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Cheque Payment</span>
+            </div>
+            <p id="modal-vendor-sub" class="text-xs text-erp-muted-fg">บริษัท ไทย เบฟเวอเรจ ซัพพลายส์ จำกัด (Tax ID: 0105554019283)</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="printVoucherPreview()" class="px-3 py-1.5 rounded-lg border border-erp bg-erp-card hover:bg-erp-secondary text-xs font-medium text-erp-card-fg flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span data-lang-key="btn_print_pv">พิมพ์เอกสาร PV / เช็ค</span>
+          </button>
+          <button onclick="closeApprovalModal()" class="p-1.5 rounded-lg hover:bg-erp-secondary text-erp-muted-fg hover:text-erp-card-fg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <!-- ⭐ AI EXECUTIVE BRIEF & SUMMARY BOX ⭐ -->
+        <div class="ai-gradient rounded-xl p-4.5 text-xs relative overflow-hidden shadow-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-bold text-sm">
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600 animate-spin" style="animation-duration: 4s;"></i>
+              <span data-lang-key="ai_summary_title">Carmen AI Executive Brief (สรุปสำหรับ GM อนุมัติ)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200">
+              Confidence 99.8% • USALI Schedule 2 (F&B)
+            </span>
+          </div>
+
+          <!-- AI Generated Text -->
+          <div class="space-y-2 text-erp-card-fg leading-relaxed" id="modal-ai-summary-content">
+            <!-- Dynamic AI content inserted here -->
+          </div>
+
+          <!-- AI Verification Badges -->
+          <div class="mt-3 pt-3 border-t border-indigo-200/40 dark:border-indigo-800/40 grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+            <div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span data-lang-key="ai_check_1">3-Way Match ตรงกับ PO & Receiving 100%</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span data-lang-key="ai_check_2">หักภาษี ณ ที่จ่าย 3% (ภ.ง.ด.53) ถูกต้อง</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-medium">
+              <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
+              <span data-lang-key="ai_check_3">ค่าใช้จ่ายต่ำกว่างบประมาณเดือนนี้ 4.2%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: Attached AP Invoices & Breakdown -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-erp-muted-fg flex items-center gap-1.5" data-lang-key="sec_invoice_list">
+              <i data-lucide="files" class="w-4 h-4 text-blue-600"></i>
+              รายการใบแจ้งหนี้ที่เบิกจ่ายในรอบนี้ (Attached Invoices & 3-Way Match)
+            </h3>
+            <span class="text-xs text-erp-muted-fg" id="modal-invoice-count">3 ใบแจ้งหนี้</span>
+          </div>
+
+          <div class="border border-erp rounded-xl overflow-hidden">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-erp-muted/60 text-erp-muted-fg font-semibold border-b border-erp text-[11px]">
+                  <th class="p-3">เลขที่ Invoice (Inv. No.)</th>
+                  <th class="p-3">เลขที่ PO / ใบรับสินค้า (GRN)</th>
+                  <th class="p-3">แผนก & ผังบัญชี (USALI Code)</th>
+                  <th class="p-3 text-right">ยอดก่อนภาษี</th>
+                  <th class="p-3 text-right">VAT 7%</th>
+                  <th class="p-3 text-right">WHT Rate</th>
+                  <th class="p-3 text-right font-bold">ยอดสุทธิ (THB)</th>
+                  <th class="p-3 text-center">ไฟล์แนบ</th>
+                </tr>
+              </thead>
+              <tbody id="modal-invoice-rows" class="divide-y divide-erp">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 2: GL Posting Preview & Accounting Double Entry -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- GL Posting Simulation -->
+          <div class="border border-erp rounded-xl p-4 bg-erp-card">
+            <h4 class="text-xs font-bold text-erp-card-fg mb-2 flex items-center gap-1.5" data-lang-key="sec_gl_preview">
+              <i data-lucide="scale" class="w-4 h-4 text-purple-600"></i>
+              การบันทึกบัญชีแยกประเภทอัตโนมัติ (GL Entry - Prefix PV)
+            </h4>
+            <div class="space-y-1.5 text-xs font-mono">
+              <div class="flex justify-between py-1 border-b border-erp text-erp-muted-fg text-[11px]">
+                <span>Account & Description</span>
+                <span>Debit / Credit (THB)</span>
+              </div>
+              <div class="flex justify-between text-erp-card-fg">
+                <span>Dr. 2110-00 เจ้าหนี้การค้า (AP Trade)</span>
+                <span class="font-bold text-blue-600" id="gl-dr-ap">248,500.00</span>
+              </div>
+              <div class="flex justify-between text-erp-card-fg pl-3">
+                <span>Cr. 2130-00 ภาษีหัก ณ ที่จ่ายค้างจ่าย (WHT 3%)</span>
+                <span class="font-bold text-amber-600" id="gl-cr-wht">6,967.29</span>
+              </div>
+              <div class="flex justify-between text-erp-card-fg pl-3">
+                <span>Cr. 1112-01 ธนาคารกรุงเทพ - กระแสรายวัน (BBL Cheque)</span>
+                <span class="font-bold text-emerald-600" id="gl-cr-bank">241,532.71</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cheque & Bank Information -->
+          <div class="border border-erp rounded-xl p-4 bg-erp-card flex flex-col justify-between">
+            <div>
+              <h4 class="text-xs font-bold text-erp-card-fg mb-2 flex items-center gap-1.5" data-lang-key="sec_payment_specs">
+                <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i>
+                รายละเอียดการสั่งจ่าย (Disbursement Details)
+              </h4>
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-erp-muted-fg">Payment Date:</span>
+                  <span class="font-semibold text-erp-card-fg" id="modal-pay-date">15/10/2026</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-erp-muted-fg">Cheque / Ref No:</span>
+                  <span class="font-semibold font-mono text-erp-card-fg" id="modal-cheque-no">CHQ-8839021</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-erp-muted-fg">Bank Account:</span>
+                  <span class="font-semibold text-erp-card-fg">BBL Current A/C #142-3-09887-1</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-erp-muted-fg">Prepared By:</span>
+                  <span class="font-semibold text-erp-card-fg">Somchai P. (Senior AP Officer)</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 p-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4 shrink-0"></i>
+              <span>ระบบจะทำการล็อคยอดและสร้างทะเบียน 50 ทวิ & ภ.ง.ด.53 อัตโนมัติเมื่ออนุมัติ</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Controls -->
+      <div class="h-20 px-6 border-t border-erp bg-erp-card flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <button onclick="requestClarification()" class="px-4 py-2.5 rounded-xl border border-erp hover:bg-erp-secondary text-xs font-semibold text-erp-card-fg flex items-center gap-1.5 transition-colors">
+            <i data-lucide="message-square" class="w-4 h-4 text-amber-600"></i>
+            <span data-lang-key="btn_ask_ap">ขอคำชี้แจงเพิ่มเติม (Ask AP Staff)</span>
+          </button>
+          <button onclick="rejectPayment()" class="px-4 py-2.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5 transition-colors">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>
+            <span data-lang-key="btn_reject">ปฏิเสธรายการ (Reject)</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <p class="text-[11px] text-erp-muted-fg" data-lang-key="lbl_total_approve_pay">ยอดเงินสุทธิที่ต้องลงนามอนุมัติ</p>
+            <p class="text-lg font-bold text-erp-card-fg" id="modal-footer-net-pay">฿241,532.71</p>
+          </div>
+          <button onclick="approveCurrentPayment()" class="px-6 py-2.5 rounded-xl bg-erp-primary text-white text-xs font-bold hover:opacity-90 shadow-md flex items-center gap-2 transition-all">
+            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+            <span data-lang-key="btn_approve_sign">ลงนาม & อนุมัติสั่งจ่าย (GM Approve)</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= AI NOTIFICATION & AUDIT DRAWER ================= -->
+  <div id="ai-drawer" class="fixed inset-y-0 right-0 z-50 w-96 bg-erp-card border-l border-erp shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="h-16 px-5 border-b border-erp flex items-center justify-between bg-erp-secondary/50">
+      <div class="flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+        <h3 class="font-bold text-sm text-erp-card-fg" data-lang-key="drawer_ai_title">Carmen AI Assistant Logs</h3>
+      </div>
+      <button onclick="toggleNotificationDrawer()" class="p-1 rounded hover:bg-erp-secondary text-erp-muted-fg">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+      <div class="p-3 rounded-lg border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30">
+        <div class="flex items-center justify-between text-indigo-700 dark:text-indigo-300 font-bold mb-1">
+          <span>AI Audit Completed</span>
+          <span class="text-[10px]">Just now</span>
+        </div>
+        <p class="text-erp-card-fg">ตรวจสอบชุด Payment PV-202610-0042 เรียบร้อยแล้ว ยอดรวมตรงกับเอกสารแนบ 100%</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30">
+        <div class="flex items-center justify-between text-amber-700 dark:text-amber-300 font-bold mb-1">
+          <span>Budget Alert</span>
+          <span class="text-[10px]">10 mins ago</span>
+        </div>
+        <p class="text-erp-card-fg">แผนก Food & Beverage ใช้งบประมาณจัดซื้อวัตถุดิบไปแล้ว 78.4% ของงบเดือนตุลาคม</p>
+      </div>
+
+      <div class="p-3 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30">
+        <div class="flex items-center justify-between text-emerald-700 dark:text-emerald-300 font-bold mb-1">
+          <span>Bank e-Tax Reconciled</span>
+          <span class="text-[10px]">1 hr ago</span>
+        </div>
+        <p class="text-erp-card-fg">นำเข้าใบเสร็จค่าธรรมเนียมบัตรเครดิต KBank Ingestion อัตโนมัติ 12 รายการ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-xs">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message">อนุมัติเอกสารเรียบร้อยแล้ว</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC & STATE MANAGEMENT -->
+  <script>
+    // State
+    let currentLang = 'th';
+    let currentTheme = 'light';
+    let currentTab = 'pending';
+    let selectedPVId = null;
+    let sidebarCollapsed = false;
+
+    // Mock Dataset: AP Payment Vouchers
+    const paymentData = [
+      {
+        id: 'PV-202610-0042',
+        vendorCode: 'V-00109',
+        vendorName: 'บริษัท ไทย เบฟเวอเรจ ซัพพลายส์ จำกัด',
+        vendorNameEn: 'Thai Beverage Supplies Co., Ltd.',
+        taxId: '0105554019283',
+        department: 'Food & Beverage (USALI Sch. 2)',
+        payDate: '15/10/2026',
+        dueDate: '15/10/2026',
+        isUrgent: true,
+        method: 'Cheque',
+        chequeNo: 'CHQ-8839021',
+        bankAccount: 'BBL Current A/C #142-3-09887-1',
+        grossAmount: 248500.00,
+        whtAmount: 6967.29,
+        netAmount: 241532.71,
+        status: 'Pending GM',
+        statusColor: 'amber',
+        aiScore: 100,
+        aiSummaryTh: 'การจ่ายชำระค่าเครื่องดื่มแอลกอฮอล์และมิกเซอร์ สำหรับห้องอาหาร Riva Terrace และ Bar Lounge ประจำรอบครึ่งเดือนแรกของเดือนตุลาคม 2569 รวมใบกำกับภาษี 3 ฉบับ ยอดเงินสอดคล้องกับใบสั่งซื้อ (PO) และการตรวจรับสโตร์ (GRN) 100% มีการหักภาษี ณ ที่จ่าย 3% (ภ.ง.ด.53) ถูกต้องครบถ้วน ยอดค่าใช้จ่ายรวมอยู่ในเกณฑ์งบประมาณที่กำหนดไว้',
+        aiSummaryEn: 'Payment for alcoholic and mixer beverages for Riva Terrace & Bar Lounge for the 1st half of Oct 2026. Covers 3 tax invoices fully matched with PO & GRN (100%). WHT 3% deducted in accordance with Thai Revenue Code. Total expense is within monthly F&B budget limit.',
+        invoices: [
+          { no: 'INV-TB-89410', po: 'PO-2610-012', usali: 'F&B - Beverage Cost', gross: 98000.00, vat: 6860.00, wht: '3%', net: 95060.00, file: 'e-Tax_89410.pdf' },
+          { no: 'INV-TB-89445', po: 'PO-2610-019', usali: 'F&B - Beverage Cost', gross: 85500.00, vat: 5985.00, wht: '3%', net: 82935.00, file: 'e-Tax_89445.pdf' },
+          { no: 'INV-TB-89502', po: 'PO-2610-025', usali: 'F&B - Bar Supplies', gross: 65000.00, vat: 4550.00, wht: '3%', net: 63537.71, file: 'e-Tax_89502.pdf' }
+        ]
+      },
+      {
+        id: 'PV-202610-0043',
+        vendorCode: 'V-00045',
+        vendorName: 'การไฟฟ้านครหลวง (MEA)',
+        vendorNameEn: 'Metropolitan Electricity Authority',
+        taxId: '0994000164891',
+        department: 'Energy, Water & Waste (USALI Sch. 9)',
+        payDate: '15/10/2026',
+        dueDate: '15/10/2026',
+        isUrgent: true,
+        method: 'Direct Debit',
+        chequeNo: 'AUTO-EFT-9941',
+        bankAccount: 'SCB Corporate #045-3-11290-8',
+        grossAmount: 348500.00,
+        whtAmount: 0.00,
+        netAmount: 348500.00,
+        status: 'Pending GM',
+        statusColor: 'amber',
+        aiScore: 100,
+        aiSummaryTh: 'ค่ากระแสไฟฟ้าประจำอาคารโรงแรมส่วนหน้าและห้องพัก ประจำรอบบิล ก.ย. 2569 หน่วยการใช้ไฟลดลง 3.8% เมื่อเทียบกับเดือนก่อนหน้า เนื่องจากการปรับรอบระบบ Chiller ประหยัดพลังงาน เอกสารถูกต้องตาม e-Bill ของ กฟน.',
+        aiSummaryEn: 'Electricity utility expense for hotel building & guest rooms (Sept 2026 billing). Consumption decreased by 3.8% MoM due to Chiller optimization schedule. Fully matched with MEA e-Billing system.',
+        invoices: [
+          { no: 'MEA-2026-09-881', po: 'N/A (Utility)', usali: 'Energy, Water & Waste', gross: 325700.93, vat: 22799.07, wht: '0%', net: 348500.00, file: 'MEA_Sept2026.pdf' }
+        ]
+      },
+      {
+        id: 'PV-202610-0044',
+        vendorCode: 'V-00218',
+        vendorName: 'บริษัท คลีน ลินิน เซอร์วิสเซส จำกัด',
+        vendorNameEn: 'Clean Linen Services Co., Ltd.',
+        taxId: '0105549081231',
+        department: 'Rooms Department (USALI Sch. 1)',
+        payDate: '18/10/2026',
+        dueDate: '20/10/2026',
+        isUrgent: false,
+        method: 'Cheque',
+        chequeNo: 'CHQ-8839022',
+        bankAccount: 'BBL Current A/C #142-3-09887-1',
+        grossAmount: 76400.00,
+        whtAmount: 2142.06,
+        netAmount: 74257.94,
+        status: 'Pending GM',
+        statusColor: 'amber',
+        aiScore: 98,
+        aiSummaryTh: 'ค่าบริการซักรีดผ้าปูที่นอนและผ้าเช็ดตัวสำหรับห้องพัก (Housekeeping Linen Outsourcing) ประจำงวดวันที่ 16-30 ก.ย. มีการหักภาษี ณ ที่จ่ายค่าบริการ 3% (ภ.ง.ด.53) ตามมาตรฐาน',
+        aiSummaryEn: 'Guest room linen and towel laundry outsourcing services for Sept 16-30 period. Withholding tax on services 3% properly deducted.',
+        invoices: [
+          { no: 'CLS-6910-09', po: 'PO-2609-088', usali: 'Rooms - Laundry Cost', gross: 71401.87, vat: 4998.13, wht: '3%', net: 74257.94, file: 'CLS_Invoice_09.pdf' }
+        ]
+      },
+      {
+        id: 'PV-202610-0045',
+        vendorCode: 'V-00512',
+        vendorName: 'บริษัท โอทิส เอเลเวเตอร์ (ประเทศไทย) จำกัด',
+        vendorNameEn: 'Otis Elevator (Thailand) Co., Ltd.',
+        taxId: '0105524018239',
+        department: 'Property Ops & Maint (USALI Sch. 8)',
+        payDate: '22/10/2026',
+        dueDate: '25/10/2026',
+        isUrgent: false,
+        method: 'Direct Debit',
+        chequeNo: 'EFT-OTIS-2610',
+        bankAccount: 'SCB Corporate #045-3-11290-8',
+        grossAmount: 52240.00,
+        whtAmount: 1464.67,
+        netAmount: 50775.33,
+        status: 'Pending GM',
+        statusColor: 'amber',
+        aiScore: 100,
+        aiSummaryTh: 'ค่าบริการบำรุงรักษาลิฟต์โดยสารและลิฟต์ขนของประจำไตรมาสที่ 4/2569 ตามสัญญาบริการรายปี ตรวจสอบรายงาน Preventive Maintenance ผ่านเกณฑ์วิศวกรรมเรียบร้อย',
+        aiSummaryEn: 'Quarterly preventative maintenance service for passenger & service elevators (Q4/2026) under annual service contract. Engineering PM report verified.',
+        invoices: [
+          { no: 'OTIS-Q4-2691', po: 'CONTRACT-2026-OTIS', usali: 'POM - Elevator Maint.', gross: 48822.43, vat: 3417.57, wht: '3%', net: 50775.33, file: 'OTIS_Service_Q4.pdf' }
+        ]
+      }
+    ];
+
+    // Language Dictionary
+    const translations = {
+      th: {
+        hotel_group: 'Hospitality ERP Suite',
+        property_label: 'สถานประกอบการ (BU)',
+        menu_dashboard: 'แดชบอร์ด (Dashboard)',
+        menu_gl: 'บัญชีแยกประเภท (GL)',
+        menu_ap: 'บัญชีเจ้าหนี้ (AP)',
+        sub_ap_invoice: 'ใบแจ้งหนี้ & การรับของ',
+        sub_ap_payment: 'การทำจ่ายเงิน (Payment)',
+        sub_ap_approval: 'อนุมัติการจ่ายเงิน (Approval)',
+        sub_ap_tax: 'ทะเบียนภาษีซื้อ (Input Tax)',
+        sub_ap_wht: 'ภาษีหัก ณ ที่จ่าย (50 ทวิ)',
+        menu_ar: 'บัญชีลูกหนี้ (AR)',
+        menu_asset: 'ระบบสินทรัพย์ (Asset)',
+        menu_config: 'การตั้งค่าระบบ (Config)',
+        page_title: 'อนุมัติการจ่ายเงิน (AP Payment Approval)',
+        page_desc: 'อนุมัติใบสำคัญจ่ายเงิน (Payment Vouchers), ตรวจสอบภาษี และสรุปงบประมาณด้วยระบบ AI',
+        search_placeholder: 'ค้นหา PV, ผู้ขาย, เช็ค...',
+        kpi_pending_total: 'ยอดรวมรออนุมัติ (Pending)',
+        kpi_due_today: 'ครบกำหนดจ่ายวันนี้ (Due Today)',
+        kpi_wht_deducted: 'ภาษีหัก ณ ที่จ่ายรวม (WHT)',
+        kpi_ai_confidence: 'AI 3-Way Match Score',
+        tab_pending: 'รออนุมัติ',
+        tab_urgent: 'จ่ายด่วน/วันนี้',
+        tab_approved: 'อนุมัติแล้ว (Approved)',
+        tab_all: 'ทั้งหมด',
+        btn_batch_approve: 'อนุมัติรายการที่เลือก (Batch Approve)',
+        th_pv_no: 'เลขที่เอกสาร / วันที่',
+        th_vendor: 'ผู้ขาย (Vendor) / แผนก USALI',
+        th_method: 'วิธีชำระ / เลขที่เช็ค',
+        th_gross: 'ยอดรวม (Gross)',
+        th_wht: 'ภาษีหัก (WHT)',
+        th_net: 'ยอดจ่ายสุทธิ (Net Pay)',
+        th_status: 'สถานะ / AI Check',
+        th_action: 'การดำเนินการ',
+        btn_review: 'ตรวจสอบ & AI',
+        btn_print_pv: 'พิมพ์เอกสาร PV / เช็ค',
+        ai_summary_title: 'Carmen AI Executive Brief (สรุปสำหรับ GM อนุมัติ)',
+        ai_check_1: '3-Way Match ตรงกับ PO & Receiving 100%',
+        ai_check_2: 'หักภาษี ณ ที่จ่าย 3% (ภ.ง.ด.53) ถูกต้อง',
+        ai_check_3: 'ค่าใช้จ่ายต่ำกว่างบประมาณเดือนนี้ 4.2%',
+        sec_invoice_list: 'รายการใบแจ้งหนี้ที่เบิกจ่ายในรอบนี้ (Attached Invoices & 3-Way Match)',
+        sec_gl_preview: 'การบันทึกบัญชีแยกประเภทอัตโนมัติ (GL Entry - Prefix PV)',
+        sec_payment_specs: 'รายละเอียดการสั่งจ่าย (Disbursement Details)',
+        btn_ask_ap: 'ขอคำชี้แจงเพิ่มเติม (Ask AP)',
+        btn_reject: 'ปฏิเสธรายการ (Reject)',
+        btn_approve_sign: 'ลงนาม & อนุมัติสั่งจ่าย (GM Approve)',
+        lbl_total_approve_pay: 'ยอดเงินสุทธิที่ต้องลงนามอนุมัติ',
+        drawer_ai_title: 'Carmen AI Assistant Logs'
+      },
+      en: {
+        hotel_group: 'Hospitality ERP Suite',
+        property_label: 'Business Unit (BU)',
+        menu_dashboard: 'Dashboard',
+        menu_gl: 'General Ledger (GL)',
+        menu_ap: 'Accounts Payable (AP)',
+        sub_ap_invoice: 'AP Invoice & Receiving',
+        sub_ap_payment: 'Payment Processing',
+        sub_ap_approval: 'Payment Approval',
+        sub_ap_tax: 'Input Tax Reconciliation',
+        sub_ap_wht: 'Withholding Tax (WHT)',
+        menu_ar: 'Accounts Receivable (AR)',
+        menu_asset: 'Asset Management',
+        menu_config: 'Configuration',
+        page_title: 'AP Payment Approval',
+        page_desc: 'Review & sign Payment Vouchers, verify WHT compliance and AI budget summaries',
+        search_placeholder: 'Search PV, Vendor, Cheque...',
+        kpi_pending_total: 'Total Pending Approval',
+        kpi_due_today: 'Due Today (Urgent)',
+        kpi_wht_deducted: 'Total WHT Deducted',
+        kpi_ai_confidence: 'AI 3-Way Match Score',
+        tab_pending: 'Pending Approval',
+        tab_urgent: 'Due Today',
+        tab_approved: 'Approved MTD',
+        tab_all: 'All Records',
+        btn_batch_approve: 'Batch Approve Selected',
+        th_pv_no: 'PV No. / Date',
+        th_vendor: 'Vendor / USALI Dept',
+        th_method: 'Payment Method / Ref',
+        th_gross: 'Gross Amount',
+        th_wht: 'WHT Amount',
+        th_net: 'Net Pay',
+        th_status: 'Status / AI Audit',
+        th_action: 'Action',
+        btn_review: 'Review & AI',
+        btn_print_pv: 'Print PV / Cheque',
+        ai_summary_title: 'Carmen AI Executive Brief (For GM Approval)',
+        ai_check_1: '3-Way Matching with PO & GRN: 100% Valid',
+        ai_check_2: 'WHT 3% properly deducted (P.N.D. 53)',
+        ai_check_3: 'Total expense is 4.2% below monthly budget',
+        sec_invoice_list: 'Attached Invoices & 3-Way Match Breakdown',
+        sec_gl_preview: 'Automated GL Journal Entry (Prefix: PV)',
+        sec_payment_specs: 'Disbursement & Cheque Details',
+        btn_ask_ap: 'Ask AP Staff',
+        btn_reject: 'Reject Payment',
+        btn_approve_sign: 'Sign & Authorize (GM Approve)',
+        lbl_total_approve_pay: 'Net Amount for Signature',
+        drawer_ai_title: 'Carmen AI Assistant Logs'
+      }
+    };
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderPaymentTable();
+    });
+
+    // Render Table Data
+    function renderPaymentTable() {
+      const tbody = document.getElementById('payment-table-body');
+      tbody.innerHTML = '';
+
+      const query = document.getElementById('filter-search')?.value.toLowerCase() || '';
+
+      const filtered = paymentData.filter(item => {
+        const matchQuery = item.id.toLowerCase().includes(query) || 
+                           item.vendorName.toLowerCase().includes(query) || 
+                           item.vendorNameEn.toLowerCase().includes(query) ||
+                           item.chequeNo.toLowerCase().includes(query);
+
+        if (currentTab === 'pending') return matchQuery && item.status.includes('Pending');
+        if (currentTab === 'urgent') return matchQuery && item.isUrgent;
+        if (currentTab === 'approved') return matchQuery && item.status === 'Approved';
+        return matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="p-8 text-center text-erp-muted-fg">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+              <p>ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา</p>
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(item => {
+        const vendorDisplay = currentLang === 'th' ? item.vendorName : item.vendorNameEn;
+        const isApproved = item.status === 'Approved';
+
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-erp-secondary/50 transition-colors ${item.isUrgent && !isApproved ? 'bg-red-50/20 dark:bg-red-950/10' : ''}`;
+        
+        tr.innerHTML = `
+          <td class="p-3.5 text-center">
+            <input type="checkbox" value="${item.id}" class="pv-checkbox rounded border-erp text-blue-600 focus:ring-blue-500" ${isApproved ? 'disabled' : ''}>
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-erp-card-fg flex items-center gap-1.5 font-mono">
+              ${item.id}
+              ${item.isUrgent ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">DUE TODAY</span>' : ''}
+            </div>
+            <div class="text-[11px] text-erp-muted-fg">Pay: ${item.payDate}</div>
+          </td>
+          <td class="p-3.5">
+            <div class="font-semibold text-erp-card-fg truncate max-w-xs">${vendorDisplay}</div>
+            <div class="text-[11px] text-erp-muted-fg">${item.department}</div>
+          </td>
+          <td class="p-3.5">
+            <div class="flex items-center gap-1.5 font-medium text-erp-card-fg">
+              <i data-lucide="${item.method === 'Cheque' ? 'credit-card' : 'arrow-right-left'}" class="w-3.5 h-3.5 text-blue-600"></i>
+              ${item.method}
+            </div>
+            <div class="text-[11px] font-mono text-erp-muted-fg">${item.chequeNo}</div>
+          </td>
+          <td class="p-3.5 text-right font-medium text-erp-muted-fg">
+            ฿${item.grossAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </td>
+          <td class="p-3.5 text-right font-medium text-amber-600 dark:text-amber-400">
+            ${item.whtAmount > 0 ? '฿' + item.whtAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-'}
+          </td>
+          <td class="p-3.5 text-right font-bold text-erp-card-fg">
+            ฿${item.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </td>
+          <td class="p-3.5 text-center">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              isApproved 
+                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
+                : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+            }">
+              <span class="w-1.5 h-1.5 rounded-full ${isApproved ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+              ${isApproved ? 'Approved' : 'Pending GM'}
+            </span>
+            <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-center gap-0.5 mt-0.5">
+              <i data-lucide="sparkles" class="w-2.5 h-2.5"></i> Match ${item.aiScore}%
+            </div>
+          </td>
+          <td class="p-3.5 text-center">
+            <button onclick="openApprovalModal('${item.id}')" class="px-3 py-1.5 rounded-lg bg-erp-secondary hover:bg-erp-primary hover:text-white text-xs font-semibold text-erp-card-fg transition-all flex items-center justify-center gap-1.5 mx-auto">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>${translations[currentLang].btn_review}</span>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Modal Control
+    function openApprovalModal(pvId) {
+      selectedPVId = pvId;
+      const data = paymentData.find(p => p.id === pvId);
+      if (!data) return;
+
+      document.getElementById('modal-pv-no').textContent = data.id;
+      document.getElementById('modal-payment-type-badge').textContent = `${data.method} Disbursement`;
+      document.getElementById('modal-vendor-sub').textContent = `${currentLang === 'th' ? data.vendorName : data.vendorNameEn} (Tax ID: ${data.taxId})`;
+      
+      // Dynamic AI summary
+      document.getElementById('modal-ai-summary-content').innerHTML = `
+        <p><strong>วัตถุประสงค์และการเบิกจ่าย:</strong> ${currentLang === 'th' ? data.aiSummaryTh : data.aiSummaryEn}</p>
+        <p class="text-erp-muted-fg mt-1"><strong>ผังงบประมาณ:</strong> จัดอยู่ในหมวด <em>${data.department}</em></p>
+      `;
+
+      // GL Entries preview
+      document.getElementById('gl-dr-ap').textContent = data.grossAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('gl-cr-wht').textContent = data.whtAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('gl-cr-bank').textContent = data.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+      // Disbursement info
+      document.getElementById('modal-pay-date').textContent = data.payDate;
+      document.getElementById('modal-cheque-no').textContent = data.chequeNo;
+      document.getElementById('modal-footer-net-pay').textContent = '฿' + data.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('modal-invoice-count').textContent = `${data.invoices.length} ใบแจ้งหนี้`;
+
+      // Invoices table
+      const invBody = document.getElementById('modal-invoice-rows');
+      invBody.innerHTML = '';
+      data.invoices.forEach(inv => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-erp-secondary/30';
+        row.innerHTML = `
+          <td class="p-3 font-semibold font-mono text-erp-card-fg">${inv.no}</td>
+          <td class="p-3 font-mono text-erp-muted-fg">${inv.po}</td>
+          <td class="p-3 text-erp-card-fg">${inv.usali}</td>
+          <td class="p-3 text-right">฿${inv.gross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="p-3 text-right text-erp-muted-fg">฿${inv.vat.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="p-3 text-right text-amber-600 font-medium">${inv.wht}</td>
+          <td class="p-3 text-right font-bold text-erp-card-fg">฿${inv.net.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td class="p-3 text-center">
+            <button onclick="previewInvoiceDoc('${inv.file}')" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 font-medium">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF
+            </button>
+          </td>
+        `;
+        invBody.appendChild(row);
+      });
+
+      document.getElementById('approval-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeApprovalModal() {
+      document.getElementById('approval-modal').classList.add('hidden');
+    }
+
+    // Actions
+    function approveCurrentPayment() {
+      if (!selectedPVId) return;
+      const target = paymentData.find(p => p.id === selectedPVId);
+      if (target) {
+        target.status = 'Approved';
+        target.isUrgent = false;
+      }
+      closeApprovalModal();
+      showToast(`อนุมัติและลงนามอิเล็กทรอนิกส์ในเอกสาร ${selectedPVId} เรียบร้อยแล้ว (เช็คพร้อมสั่งพิมพ์)`);
+      renderPaymentTable();
+      updateBadgeCounts();
+    }
+
+    function batchApproveSelected() {
+      const checkedBoxes = document.querySelectorAll('.pv-checkbox:checked');
+      if (checkedBoxes.length === 0) {
+        showToast('กรุณาเลือกอย่างน้อย 1 รายการเพื่ออนุมัติ');
+        return;
+      }
+      checkedBoxes.forEach(cb => {
+        const item = paymentData.find(p => p.id === cb.value);
+        if (item) item.status = 'Approved';
+      });
+      showToast(`อนุมัติรายการชำระเงินทั้งหมด ${checkedBoxes.length} รายการสำเร็จแล้ว`);
+      renderPaymentTable();
+      updateBadgeCounts();
+    }
+
+    function requestClarification() {
+      showToast('ระบบได้ส่ง Notification แจ้งขอคำชี้แจงไปยัง AP Officer (Somchai P.) เรียบร้อยแล้ว');
+      closeApprovalModal();
+    }
+
+    function rejectPayment() {
+      showToast(`ปฏิเสธเอกสาร ${selectedPVId} แล้ว พร้อมส่งอีเมลแจ้งเหตุผลให้แผนกบัญชีทราบ`);
+      closeApprovalModal();
+    }
+
+    function previewInvoiceDoc(fileName) {
+      showToast(`เปิดดูเอกสารแนบต้นฉบับ: ${fileName}`);
+    }
+
+    function printVoucherPreview() {
+      showToast(`กำลังสร้างรายงานใบสำคัญจ่าย PV & ฟอร์มเช็คธนาคาร...`);
+    }
+
+    // Filter controls
+    function setTab(tab) {
+      currentTab = tab;
+      ['pending', 'urgent', 'approved', 'all'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = 'px-3 py-1.5 rounded-md bg-erp-card text-blue-600 dark:text-blue-400 font-semibold shadow-sm transition-all flex items-center gap-1.5';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-md text-erp-muted-fg hover:text-erp-card-fg transition-all flex items-center gap-1.5';
+        }
+      });
+      renderPaymentTable();
+    }
+
+    function applyFilters() {
+      renderPaymentTable();
+    }
+
+    function refreshData() {
+      showToast('อัปเดตข้อมูลสถานะเอกสารล่าสุดเรียบร้อยแล้ว');
+      renderPaymentTable();
+    }
+
+    function toggleSelectAll(master) {
+      const cbs = document.querySelectorAll('.pv-checkbox:not(:disabled)');
+      cbs.forEach(cb => cb.checked = master.checked);
+    }
+
+    function updateBadgeCounts() {
+      const pendingCount = paymentData.filter(p => p.status.includes('Pending')).length;
+      document.getElementById('badge-pending-count').textContent = pendingCount;
+      document.getElementById('header-pending-count').textContent = `${pendingCount} รายการรออนุมัติ`;
+    }
+
+    // Language Toggle
+    function toggleLanguage() {
+      currentLang = currentLang === 'th' ? 'en' : 'th';
+      document.getElementById('lang-indicator').textContent = currentLang.toUpperCase();
+      
+      document.querySelectorAll('[data-lang-key]').forEach(el => {
+        const key = el.getAttribute('data-lang-key');
+        if (translations[currentLang][key]) {
+          el.textContent = translations[currentLang][key];
+        }
+      });
+
+      document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-lang-placeholder');
+        if (translations[currentLang][key]) {
+          el.placeholder = translations[currentLang][key];
+        }
+      });
+
+      renderPaymentTable();
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      } else {
+        html.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      }
+      lucide.createIcons();
+    }
+
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const brandText = document.getElementById('brand-text');
+      const propertyBox = document.getElementById('property-selector-box');
+      const labels = document.querySelectorAll('.sidebar-label');
+      const submenus = document.querySelectorAll('.sidebar-submenu');
+      const icon = document.getElementById('sidebar-icon');
+
+      sidebarCollapsed = !sidebarCollapsed;
+
+      if (sidebarCollapsed) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-20');
+        brandText.classList.add('hidden');
+        propertyBox.classList.add('hidden');
+        labels.forEach(l => l.classList.add('hidden'));
+        submenus.forEach(s => s.classList.add('hidden'));
+        icon.setAttribute('data-lucide', 'chevron-right');
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-64');
+        brandText.classList.remove('hidden');
+        propertyBox.classList.remove('hidden');
+        labels.forEach(l => l.classList.remove('hidden'));
+        submenus.forEach(s => s.classList.remove('hidden'));
+        icon.setAttribute('data-lucide', 'chevron-left');
+      }
+      lucide.createIcons();
+    }
+
+    // Notification Drawer Toggle
+    function toggleNotificationDrawer() {
+      const drawer = document.getElementById('ai-drawer');
+      drawer.classList.toggle('translate-x-full');
+    }
+
+    function toggleProfileMenu() {
+      showToast('เปิดเมนูการจัดการ User Profile: Michael Chen (GM)');
+    }
+
+    // Toast Function
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

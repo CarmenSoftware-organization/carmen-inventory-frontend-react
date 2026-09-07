@@ -63,6 +63,10 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     why: "accounting ยังไม่มีใน catalog",
   },
   {
+    path: "/accounting/accounts-payable",
+    why: "accounting ยังไม่มีใน catalog",
+  },
+  {
     path: "/accounting/accounts-payable/invoice",
     why: "accounting ยังไม่มีใน catalog",
   },

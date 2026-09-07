@@ -700,15 +700,18 @@ export const router = createBrowserRouter([
               },
               {
                 path: "journal-voucher",
-                lazy: () => import("./accounting/journal-voucher/journal-voucher-list.route"),
+                lazy: () =>
+                  import("./accounting/journal-voucher/journal-voucher-list.route"),
               },
               {
                 path: "journal-voucher/:id",
-                lazy: () => import("./accounting/journal-voucher/journal-voucher-form.route"),
+                lazy: () =>
+                  import("./accounting/journal-voucher/journal-voucher-form.route"),
               },
               {
                 path: "journal-staging",
-                lazy: () => import("./accounting/journal-staging/journal-staging.route"),
+                lazy: () =>
+                  import("./accounting/journal-staging/journal-staging.route"),
               },
               {
                 path: "settings",
@@ -740,25 +743,32 @@ export const router = createBrowserRouter([
               },
               {
                 path: "accounts-payable",
-                element: (
-                  <Navigate to="/accounting/accounts-payable/invoice" replace />
-                ),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-dashboard.route"),
               },
               {
                 path: "accounts-payable/invoice",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-invoice-list.route"),
               },
               {
                 path: "accounts-payable/invoice/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-invoice-detail.route"),
               },
               {
                 path: "accounts-payable/payment",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-payment-list.route"),
               },
               {
                 path: "accounts-payable/payment/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-payment-detail.route"),
+              },
+              {
+                path: "accounts-payable/payment-approvals",
+                element: <Navigate to="/accounting/accounts-payable/payment?lifecycle=submitted" replace />,
               },
               {
                 path: "accounts-receivable",

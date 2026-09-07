@@ -9,6 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { moduleList } from "@/constant/module-list";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
@@ -157,6 +160,57 @@ export function SideMain() {
                         <Link to={sub.path}>{content}</Link>
                       )}
                     </SidebarMenuButton>
+                    {sub.subModules && sub.subModules.length > 0 && (
+                      <SidebarMenuSub className="group-data-[collapsible=icon]:hidden">
+                        {sub.subModules.map((child) => {
+                          const childActive =
+                            pathname === child.path ||
+                            (child.path !== sub.path &&
+                              pathname.startsWith(child.path + "/"));
+                          const childContent = (
+                            <>
+                              <child.icon
+                                aria-hidden="true"
+                                className="size-3.5"
+                              />
+                              <span>{t(child.name)}</span>
+                              {child.locked && (
+                                <Lock
+                                  className="ml-auto size-3 opacity-70"
+                                  aria-hidden
+                                />
+                              )}
+                            </>
+                          );
+                          return (
+                            <SidebarMenuSubItem key={child.path}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={childActive}
+                              >
+                                {child.locked || child.denied ? (
+                                  <button
+                                    type="button"
+                                    className="w-full opacity-50"
+                                    onClick={() =>
+                                      dispatchPermissionDenied(
+                                        child.permission,
+                                        undefined,
+                                        child.locked ? "license" : "permission",
+                                      )
+                                    }
+                                  >
+                                    {childContent}
+                                  </button>
+                                ) : (
+                                  <Link to={child.path}>{childContent}</Link>
+                                )}
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    )}
                   </SidebarMenuItem>
                 </Fragment>
               );

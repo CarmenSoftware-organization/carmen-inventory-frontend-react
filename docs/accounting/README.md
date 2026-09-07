@@ -10,6 +10,10 @@
 | --- | --- |
 | [Accounting Foundation](accounting-foundation.md) | ขอบเขต Accounting, shared services, domain model, posting engine, period/currency rules และ integration contract |
 | [General Ledger — Journal Voucher](specs/general-ledger-journal-voucher-design.md) | Functional design ของ GL/JV รวม Schedule Post และ Auto-Reverse |
+| [Accounts Payable — Module](specs/accounts-payable-design.md) | ขอบเขต AP, shared status, dashboard/aging, integration และ delivery slices |
+| [Accounts Payable — Dashboard](specs/accounts-payable-dashboard-design.md) | Functional design ของ KPI, Aging, Due Date, approval queue, tax exceptions และ drill-down |
+| [Accounts Payable — Invoice](specs/accounts-payable-invoice-design.md) | Functional design ของ Invoice, matching, tax, open item และ posting |
+| [Accounts Payable — Payment](specs/accounts-payable-payment-design.md) | Functional design ของ Payment Voucher, WHT/FX, approval, execution และ settlement |
 | [Phase 1 Runbook](phase1-runbook.md) | ขั้นตอน migration, smoke test และ verification สำหรับ dev2 |
 
 ## ลำดับการส่งมอบ

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel AP ERP Mockup V4.4.4 - Carmen Cloud Style</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef6ff',
+                            100: '#e0f0fe',
+                            500: '#1e88e5', // Carmen Blue
+                            600: '#1565c0',
+                            700: '#0d47a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13px;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        /* SIDEBAR PINNED FIX: Forces text & badges to remain 100% visible when pinned */
+        #app-sidebar.sidebar-pinned {
+            width: 14rem !important; /* 224px (w-56) */
+        }
+        #app-sidebar.sidebar-pinned .sidebar-text {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: inline-block !important;
+        }
+        #app-sidebar.sidebar-pinned .sidebar-text-block {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+        #app-sidebar.sidebar-pinned .sidebar-badge {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col antialiased text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
+
+    <!-- TOP CARMEN ERP HEADER -->
+    <header class="bg-slate-900 text-white px-5 py-2.5 flex items-center justify-between shadow-md shrink-0 z-20 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded-lg transition-colors" title="Toggle & Lock Sidebar Menu">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-500 text-white rounded-lg flex items-center justify-center font-black text-base shadow-sm">C</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold tracking-tight text-base">CARMEN CLOUD ERP</span>
+                        <span class="bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] px-2 py-0.5 rounded-md font-mono font-bold">v4.4.4</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400 block" id="lbl-tenant-url">Tenant URL: carmensoftware.com.cengu.com</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs">
+            <!-- Business Unit (BU) Switcher -->
+            <div class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700">
+                <i data-lucide="building-2" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span class="text-[10px] font-bold text-slate-400 uppercase hidden sm:inline">Active BU:</span>
+                <select id="bu-switcher" onchange="handleBuChange(this.value)" class="bg-transparent font-bold text-white text-xs focus:outline-none cursor-pointer">
+                    <option value="BU_BKK" class="text-slate-900">BU-01 : Bangkok Grand Hotel & Spa</option>
+                    <option value="BU_HKT" class="text-slate-900">BU-02 : Phuket Beach Resort</option>
+                    <option value="BU_CNX" class="text-slate-900">BU-03 : Chiang Mai Heritage</option>
+                </select>
+            </div>
+
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition-all flex items-center justify-center shadow-sm" title="Toggle Light/Dark Mode">
+                <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-300"></i>
+                <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-sky-200"></i>
+            </button>
+
+            <!-- Language Switcher -->
+            <div class="flex bg-slate-800 rounded-xl p-0.5 border border-slate-700">
+                <button onclick="changeLanguage('en')" id="lang-en" class="px-2 py-0.5 rounded-lg font-bold transition-all bg-brand-500 text-white shadow-sm text-xs">EN</button>
+                <button onclick="changeLanguage('th')" id="lang-th" class="px-2 py-0.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white text-xs">TH</button>
+            </div>
+
+            <!-- User Profile & Logout -->
+            <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
+                <div class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-xs">A</div>
+                <span class="font-semibold text-xs hidden lg:inline">admin @CarmenCloud</span>
+                <button onclick="handleLogout()" class="p-1.5 hover:bg-rose-600 rounded-lg transition-colors text-slate-400 hover:text-white" title="Logout">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex min-h-0 overflow-hidden">
+        <!-- SIDEBAR NAV WITH SIDEBAR-TEXT PIN FIX -->
+        <aside id="app-sidebar" class="w-16 hover:w-56 bg-slate-800 dark:bg-slate-900 text-slate-300 transition-all duration-300 flex flex-col shrink-0 z-10 border-r border-slate-700/40 group overflow-hidden">
+            <div class="p-2.5 space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
+                
+                <!-- MODULE MENUS -->
+                <span class="sidebar-text-block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2 opacity-0 group-hover:opacity-100 transition-opacity">MODULE MENUS</span>
+                
+                <!-- Dashboard -->
+                <button onclick="switchView('dashboard')" id="side-nav-dashboard" class="w-full flex items-center gap-3 p-2 rounded-xl bg-brand-500 text-white font-bold shadow-md">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0 mx-1"></i>
+                    <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity" id="menu-dashboard">Dashboard</span>
+                </button>
+
+                <!-- PO & Deposit Requests -->
+                <button onclick="switchView('procurement')" id="side-nav-procurement" class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                    <span class="flex items-center gap-3">
+                        <i data-lucide="layers" class="w-5 h-5 shrink-0 mx-1 text-purple-400"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity" id="menu-procurement">PO & Deposit Requests</span>
+                    </span>
+                    <span id="badge-po-count" class="sidebar-badge bg-brand-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-opacity">2</span>
+                </button>
+
+                <!-- DOCUMENTS SECTION -->
+                <div class="pt-3 border-t border-slate-700/50 space-y-1">
+                    <span class="sidebar-text-block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2 opacity-0 group-hover:opacity-100 transition-opacity">DOCUMENTS</span>
+                    
+                    <button onclick="switchDocumentFilter('Deposit')" id="side-doc-Deposit" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-blue-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Deposit</span>
+                    </button>
+
+                    <button onclick="switchDocumentFilter('Standard')" id="side-doc-Standard" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="file-check-2" class="w-5 h-5 text-indigo-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Invoice</span>
+                    </button>
+
+                    <button onclick="switchDocumentFilter('DebitNote')" id="side-doc-DebitNote" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-amber-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Debit Note</span>
+                    </button>
+
+                    <button onclick="switchDocumentFilter('CreditNote')" id="side-doc-CreditNote" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="trending-down" class="w-5 h-5 text-rose-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Credit Note</span>
+                    </button>
+
+                    <button onclick="switchView('payments')" id="side-doc-Payment" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="credit-card" class="w-5 h-5 text-emerald-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Payment</span>
+                    </button>
+                </div>
+
+                <!-- SYSTEM MASTERS & CONFIG -->
+                <div class="pt-3 border-t border-slate-700/50 space-y-1">
+                    <span class="sidebar-text-block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2 opacity-0 group-hover:opacity-100 transition-opacity">SYSTEM & MASTERS</span>
+
+                    <button onclick="openVendorModal()" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300" title="Vendor Management">
+                        <i data-lucide="users" class="w-5 h-5 text-amber-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Vendor</span>
+                    </button>
+
+                    <button onclick="openProcedureModal()" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300" title="System Procedures">
+                        <i data-lucide="play-circle" class="w-5 h-5 text-blue-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Procedure</span>
+                    </button>
+
+                    <button onclick="openSettingModal()" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300" title="Preferences & Settings">
+                        <i data-lucide="settings" class="w-5 h-5 text-purple-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Setting</span>
+                    </button>
+
+                    <button onclick="openConfigModal()" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300" title="Configuration & Rules">
+                        <i data-lucide="sliders" class="w-5 h-5 text-rose-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Configuration</span>
+                    </button>
+
+                    <button onclick="switchView('gl')" class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-700/60 transition-colors text-slate-300">
+                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-400 shrink-0 mx-1"></i>
+                        <span class="sidebar-text text-xs font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">General Ledger</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-slate-700/50">
+                <div class="flex items-center gap-3 text-slate-400 text-xs">
+                    <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+                    <span class="sidebar-text whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity text-[11px]">Carmen ERP v4.4.4</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 overflow-hidden relative">
+            
+            <!-- VIEW 1: DASHBOARD VIEW -->
+            <div id="view-dashboard" class="flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-6 animate-fade-in">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100" id="lbl-dash-title">Hotel AP Dashboard</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" id="lbl-dash-sub">Actionable summary of aging payables, pending approvals, and audits under USALI 12.</p>
+                </div>
+
+                <!-- TOP HERO KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">TOTAL AP OUTSTANDING</span>
+                            <h3 class="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">฿405,280.00</h3>
+                            <p class="text-[11px] text-slate-400">Pending deposits & final invoices</p>
+                        </div>
+                        <div class="p-4 bg-brand-50 dark:bg-brand-950/40 text-brand-500 rounded-xl">
+                            <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">PREPAID DEPOSITS</span>
+                            <h3 class="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">฿0.00</h3>
+                            <p class="text-[11px] text-slate-400">Prepaid assets before delivery</p>
+                        </div>
+                        <div class="p-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 rounded-xl">
+                            <i data-lucide="building-2" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">TOTAL PAID OUT</span>
+                            <h3 class="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">฿0.00</h3>
+                            <p class="text-[11px] text-slate-400">Successfully cash outflowed</p>
+                        </div>
+                        <div class="p-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-xl">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AGING ANALYSIS & DUE DATE TRACKER -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- AP AGING ANALYSIS -->
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-4 h-4 text-brand-500"></i> AP Aging Analysis
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Outstanding accounts payable structured in time horizons (Click card to action)</p>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+                            <div onclick="openDashboardListPayContext('1 - 30 Days')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-slate-400 block">1 - 30 Days</span>
+                                <span class="text-sm font-extrabold text-slate-800 dark:text-slate-200 block mt-1">฿133,500</span>
+                            </div>
+                            <div onclick="openDashboardListPayContext('31 - 60 Days')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-slate-400 block">31 - 60 Days</span>
+                                <span class="text-sm font-extrabold text-slate-800 dark:text-slate-200 block mt-1">฿37,450</span>
+                            </div>
+                            <div onclick="openDashboardListPayContext('61 - 90 Days')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-slate-400 block">61 - 90 Days</span>
+                                <span class="text-sm font-extrabold text-slate-800 dark:text-slate-200 block mt-1">฿23,540</span>
+                            </div>
+                            <div onclick="openDashboardListPayContext('Over 90 Days')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-rose-500 block">Over 90 Days</span>
+                                <span class="text-sm font-black text-rose-600 dark:text-rose-400 block mt-1">฿146,590</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DUE DATE TRACKER -->
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                                <i data-lucide="clock" class="w-4 h-4 text-brand-500"></i> Due Date Tracker
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Status tracking based on payment terms & target due dates</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 font-mono">
+                            <div onclick="openDashboardListPayContext('Not Yet Due')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-slate-400 block">Not Yet Due</span>
+                                <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300 block mt-1">฿48,150</span>
+                            </div>
+                            <div onclick="openDashboardListPayContext('Due Today')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-amber-500 block">Due Today</span>
+                                <span class="text-sm font-extrabold text-amber-600 block mt-1">฿16,050</span>
+                            </div>
+                            <div onclick="openDashboardListPayContext('Overdue')" class="bg-slate-50 dark:bg-slate-950 hover:bg-brand-50/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer transition-all">
+                                <span class="text-[10px] font-bold text-rose-500 block">Overdue</span>
+                                <span class="text-sm font-black text-rose-600 dark:text-rose-400 block mt-1">฿341,080</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- PENDING APPROVALS QUEUE -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                            <i data-lucide="check-square" class="w-4 h-4 text-brand-500"></i> Pending Approvals Queue
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Documents awaiting manager signature (Click card to open queue list with Approve/Reject/Send back actions)</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div onclick="openDashboardPendingApprovalsContext('Standard')" class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                            <span class="text-[10px] font-bold text-slate-400 block">AP Invoices</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-slate-200 block mt-1 font-mono">1</span>
+                        </div>
+                        <div onclick="openDashboardPendingApprovalsContext('Deposit')" class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                            <span class="text-[10px] font-bold text-slate-400 block">Deposit Invoices</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-slate-200 block mt-1 font-mono">1</span>
+                        </div>
+                        <div onclick="openDashboardPendingApprovalsContext('CreditNote')" class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                            <span class="text-[10px] font-bold text-slate-400 block">Credit Notes (CN)</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-slate-200 block mt-1 font-mono">1</span>
+                        </div>
+                        <div onclick="openDashboardPendingApprovalsContext('DebitNote')" class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                            <span class="text-[10px] font-bold text-slate-400 block">Debit Notes (DN)</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-slate-200 block mt-1 font-mono">1</span>
+                        </div>
+                        <div onclick="openDashboardPendingApprovalsContext('Payment')" class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                            <span class="text-[10px] font-bold text-slate-400 block">Payments</span>
+                            <span class="text-2xl font-black text-slate-800 dark:text-slate-200 block mt-1 font-mono">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAX RECONCILIATION & AUDIT TRACKER -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                                <i data-lucide="receipt" class="w-4 h-4 text-emerald-500"></i> Tax Reconciliation & VAT
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Thai Revenue input tax filing pipeline (Current & past 3 months)</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div onclick="openDashboardTaxContext('pending')" class="bg-brand-50/40 dark:bg-slate-950 p-3.5 rounded-xl border border-brand-100 dark:border-slate-800 text-center cursor-pointer hover:border-brand-500 transition-all">
+                                <span class="text-[10px] font-bold text-brand-600 block">Pending Input VAT</span>
+                                <span class="text-lg font-black text-brand-700 dark:text-brand-400 block font-mono mt-1">฿26,513.64</span>
+                            </div>
+                            <div onclick="openDashboardTaxContext('over6m')" class="bg-amber-50/40 dark:bg-slate-950 p-3.5 rounded-xl border border-amber-200 dark:border-slate-800 text-center cursor-pointer hover:border-amber-500 transition-all">
+                                <span class="text-[10px] font-bold text-amber-700 block">Tax Invoices > 6 Mos</span>
+                                <span class="text-xl font-black text-amber-800 dark:text-amber-400 block font-mono mt-1">2</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] space-y-1">
+                                <span class="font-bold text-slate-400 block uppercase">FILING HISTORY</span>
+                                <div class="flex justify-between"><span>May 2026</span><strong class="font-mono">฿14,500</strong></div>
+                                <div class="flex justify-between"><span>April 2026</span><strong class="font-mono">฿12,800</strong></div>
+                                <div class="flex justify-between"><span>March 2026</span><strong class="font-mono">฿19,200</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500"></i> Review & Status Audit Tracker
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Discrepancy and exception monitoring</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-amber-50/50 dark:bg-slate-950 p-4 rounded-xl border border-amber-200 dark:border-slate-800 text-center">
+                                <span class="text-[10px] font-bold text-amber-700 block">Missing Tax Invoices</span>
+                                <span class="text-2xl font-black text-amber-800 dark:text-amber-400 block mt-1 font-mono">1</span>
+                            </div>
+                            <div class="bg-rose-50/50 dark:bg-slate-950 p-4 rounded-xl border border-rose-200 dark:border-slate-800 text-center">
+                                <span class="text-[10px] font-bold text-rose-700 block">Pending Corrections</span>
+                                <span class="text-2xl font-black text-rose-800 dark:text-rose-400 block mt-1 font-mono">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 3: INVOICE LIST VIEW -->
+            <div id="view-invoice-list" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-4 animate-fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100" id="lbl-list-heading">Accounts Payable Documents</h2>
+                        <p class="text-xs text-slate-400 mt-0.5" id="lbl-list-sub">Filter, inspect, and select invoice records to view complete details or execute batch actions.</p>
+                    </div>
+                    <div id="list-header-action-container" class="flex items-center gap-2">
+                        <button onclick="openCreateInvoiceView()" id="btn-list-action" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
+                            <i data-lucide="file-plus" class="w-4 h-4"></i> New Invoice Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABLE LIST CONTAINER -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex-1 flex flex-col">
+                    <div class="overflow-x-auto custom-scrollbar flex-1">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead id="invoice-list-thead">
+                                <tr class="bg-slate-800 text-slate-200 uppercase font-bold text-[10px] tracking-wider border-b border-slate-700">
+                                    <th class="p-3 w-10 text-center"><input type="checkbox" id="chk-list-all" onchange="toggleAllInvoiceListCheckboxes(this.checked)" class="rounded text-brand-500"></th>
+                                    <th class="p-3 w-24">Doc Type</th>
+                                    <th class="p-3 w-32">Doc No (doc_no)</th>
+                                    <th class="p-3 w-28">Doc Date</th>
+                                    <th class="p-3 w-32">Vendor Invoice No</th>
+                                    <th class="p-3">Vendor / Supplier</th>
+                                    <th class="p-3 w-28">Due Date</th>
+                                    <th class="p-3 w-32 text-right">Net Amount</th>
+                                    <th class="p-3 w-24 text-center">Status</th>
+                                    <th class="p-3 w-20 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoice-list-tbody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <!-- Dynamic List Rows Inserted via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OTHER MODULE VIEWS -->
+            <div id="view-procurement" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-6 animate-fade-in">
+                <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">PO & Deposit Requests</h2>
+                <p class="text-xs text-slate-500">Fetch approved Purchase Orders to issue deposit requests or simulate delivery.</p>
+            </div>
+
+            <div id="view-invoice-detail" class="hidden flex-1 flex flex-col min-h-0 overflow-hidden relative">
+                <!-- Detail View Header & Content -->
+            </div>
+
+            <div id="view-payments" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-4">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Payment Settlements</h2>
+            </div>
+
+            <div id="view-gl" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-4">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">General Ledger Explorer</h2>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MULTI-CURRENCY PAYMENT SETTLEMENT EXECUTION MODAL (v4.4.4 REQ 1, 2, 3) -->
+    <div id="payment-settlement-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in flex flex-col max-h-[92vh]">
+            <!-- Modal Header -->
+            <div class="p-4 bg-slate-900 text-white flex items-center justify-between shrink-0 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-emerald-400"></i>
+                    <h3 class="font-extrabold text-sm sm:text-base tracking-wider uppercase">Multi-Currency Payment Settlement Execution</h3>
+                </div>
+                <button onclick="closePaymentSettlementModal()" class="text-slate-400 hover:text-white transition-colors">✕</button>
+            </div>
+
+            <!-- Settlement Container -->
+            <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar text-xs" id="settlement-modal-content">
+                <!-- Dynamic Currency & Vendor Group Blocks Injected Here -->
+            </div>
+
+            <!-- Footer Toolbar -->
+            <div class="p-4 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center shrink-0">
+                <div class="text-slate-500 font-mono text-[11px]" id="settlement-modal-summary-lbl">
+                    Processing 0 Vendor Payment(s)
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="closePaymentSettlementModal()" class="bg-white dark:bg-slate-900 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold">
+                        Cancel
+                    </button>
+                    <button onclick="confirmAndPostAllSettlements()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition-all flex items-center gap-1.5">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Confirm & Post All Payments
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHT PARAMETERS ADJUSTMENT MODAL (v4.4.4 REQ 3.6.1) -->
+    <div id="wht-adjustment-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in flex flex-col">
+            <div class="p-4 bg-purple-700 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calculator" class="w-5 h-5"></i>
+                    <h3 class="font-bold text-sm uppercase tracking-wider">Withholding Tax (WHT) Parameters</h3>
+                </div>
+                <button onclick="closeWhtAdjustmentModal()" class="text-white/80 hover:text-white transition-colors">✕</button>
+            </div>
+
+            <div class="p-5 space-y-4 text-xs">
+                <div class="p-3 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-900 space-y-1">
+                    <span id="wht-modal-vendor-lbl" class="font-bold text-purple-700 dark:text-purple-300 block text-xs">Vendor: -</span>
+                    <span id="wht-modal-total-lbl" class="text-slate-500 font-mono block text-[11px]">Total Invoice Amount: 0.00</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-600 dark:text-slate-300 block">WHT Form Type</label>
+                        <select id="wht-edit-type" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 font-bold">
+                            <option value="PND53">ภ.ง.ด. 53 (Corporate Supplier)</option>
+                            <option value="PND3">ภ.ง.ด. 3 (Personal Supplier)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-bold text-slate-600 dark:text-slate-300 block">WHT Service Type & Rate</label>
+                        <select id="wht-edit-service" onchange="recalculateWhtModalMath()" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 font-bold text-purple-600">
+                            <option value="0.0">Exempt (0%)</option>
+                            <option value="3.0">Services / Commission (3%)</option>
+                            <option value="1.0">Transportation / Freight (1%)</option>
+                            <option value="5.0">Building Rental (5%)</option>
+                            <option value="2.0">Advertising Fees (2%)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="font-bold text-slate-600 dark:text-slate-300 block">Base Payment Amt (THB)</label>
+                            <input type="number" id="wht-edit-base-amt" step="0.01" oninput="recalculateWhtModalMath()" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 font-mono font-bold">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-bold text-purple-600 block">Calculated WHT Amt (THB)</label>
+                            <input type="number" id="wht-edit-tax-amt" step="0.01" class="w-full bg-white dark:bg-slate-950 border border-purple-300 rounded-lg px-3 py-1.5 font-mono font-bold text-right text-purple-600">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2 shrink-0">
+                <button onclick="closeWhtAdjustmentModal()" class="bg-white dark:bg-slate-900 border border-slate-300 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold">Cancel</button>
+                <button onclick="saveWhtAdjustment()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md">Apply WHT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic V4.4.4 -->
+    <script>
+        const VENDOR_PROFILES = {
+            C003: { code: 'C003', name: 'Carmen Transport Co., Ltd.', currency: 'USD', creditTerm: 0, defaultPayType: 'Bank Transfer (SCB)', whtRate: 3.0, whtType: 'PND53' },
+            CP001: { code: 'CP001', name: 'CPF Public Company Limited', currency: 'THB', creditTerm: 30, defaultPayType: 'Direct Debit (K-Bank)', whtRate: 0.0, whtType: 'PND53' },
+            LOT02: { code: 'LOT02', name: 'Ek-Chai Distribution System Co., Ltd. (Lotus)', currency: 'THB', creditTerm: 45, defaultPayType: 'Bank Transfer (SCB)', whtRate: 0.0, whtType: 'PND53' },
+            SINO04: { code: 'SINO04', name: 'Sino-Thai Beverage Co., Ltd.', currency: 'THB', creditTerm: 30, defaultPayType: 'Cheque Disbursement', whtRate: 3.0, whtType: 'PND53' }
+        };
+
+        let invoiceMasterList = [
+            { id: 'IV26060002', docType: 'Standard', docNo: 'IV26060002', docDate: '2026-06-27', taxInvNo: 'C003-TX2606001', taxInvDate: '2026-06-17', currency: 'USD', bookingRate: 35.00, vendorInvNo: 'INV-2026-8891', vendorCode: 'C003', vendorName: 'Carmen Transport Co., Ltd.', dueDate: '2026-06-16', netAmount: 3000.00, taxAmount: 210.00, totalAmount: 3210.00, status: 'Draft' },
+            { id: 'IV26060001', docType: 'Standard', docNo: 'IV26060001', docDate: '2026-06-20', taxInvNo: 'CPF-TX2606001', taxInvDate: '2026-06-20', currency: 'THB', bookingRate: 1.00, vendorInvNo: 'INV-CPF-1102', vendorCode: 'CP001', vendorName: 'CPF Public Company Limited', dueDate: '2026-07-20', netAmount: 143925.23, taxAmount: 10074.77, totalAmount: 154000.00, status: 'Effective' },
+            { id: 'DP26060001', docType: 'Deposit', docNo: 'DP26060001', docDate: '2026-06-15', taxInvNo: 'LOT-TX2606001', taxInvDate: '2026-06-15', currency: 'THB', bookingRate: 1.00, vendorInvNo: 'DEP-LOT-0012', vendorCode: 'LOT02', vendorName: 'Ek-Chai Distribution System Co., Ltd. (Lotus)', dueDate: '2026-06-15', netAmount: 37383.18, taxAmount: 2616.82, totalAmount: 40000.00, status: 'Paid' },
+            { id: 'DN26060001', docType: 'DebitNote', docNo: 'DN26060001', docDate: '2026-06-18', taxInvNo: 'SINO-TX2606001', taxInvDate: '2026-06-18', currency: 'THB', bookingRate: 1.00, vendorInvNo: 'DN-SINO-881', vendorCode: 'SINO04', vendorName: 'Sino-Thai Beverage Co., Ltd.', dueDate: '2026-07-18', netAmount: 11682.24, taxAmount: 817.76, totalAmount: 12500.00, status: 'Effective' },
+            { id: 'CN26060001', docType: 'CreditNote', docNo: 'CN26060001', docDate: '2026-06-22', taxInvNo: 'LOT-CN2606001', taxInvDate: '2026-06-22', currency: 'THB', bookingRate: 1.00, vendorInvNo: 'CN-LOT-0091', vendorCode: 'LOT02', vendorName: 'Ek-Chai Distribution System Co., Ltd. (Lotus)', dueDate: '2026-06-22', netAmount: -10000.00, taxAmount: -700.00, totalAmount: -10700.00, status: 'Effective' }
+        ];
+
+        let state = {
+            sidebarPinned: false,
+            listHeaderMode: 'normal',
+            activeDocFilter: 'Standard',
+            activeSettlements: [],
+            editingWhtSettlementId: null,
+            currencyRates: {
+                USD: 35.05,
+                THB: 1.00,
+                EUR: 38.50
+            }
+        };
+
+        window.onload = function() {
+            lucide.createIcons();
+            renderInvoiceListTable();
+        };
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            state.sidebarPinned = !state.sidebarPinned;
+            if (state.sidebarPinned) {
+                sidebar.classList.add('w-56', 'sidebar-pinned');
+            } else {
+                sidebar.classList.remove('w-56', 'sidebar-pinned');
+            }
+        }
+
+        function switchView(viewName) {
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-procurement').classList.add('hidden');
+            document.getElementById('view-invoice-list').classList.add('hidden');
+            document.getElementById('view-invoice-detail').classList.add('hidden');
+            document.getElementById('view-payments').classList.add('hidden');
+            document.getElementById('view-gl').classList.add('hidden');
+
+            if (viewName === 'dashboard') document.getElementById('view-dashboard').classList.remove('hidden');
+            else if (viewName === 'invoice-list') document.getElementById('view-invoice-list').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function openDashboardListPayContext(horizonContextLabel) {
+            state.listHeaderMode = 'pay';
+            switchView('invoice-list');
+            document.getElementById('lbl-list-heading').innerText = `AP Invoices - ${horizonContextLabel}`;
+            renderListHeaderActionButton();
+            renderInvoiceListTable();
+        }
+
+        function openDashboardPendingApprovalsContext(docType) {
+            state.listHeaderMode = 'approval';
+            switchView('invoice-list');
+            document.getElementById('lbl-list-heading').innerText = `Pending Approvals Queue - ${docType}`;
+            renderListHeaderActionButton();
+            renderInvoiceListTable();
+        }
+
+        function openDashboardTaxContext(taxMode) {
+            state.listHeaderMode = taxMode === 'pending' ? 'tax-pending' : 'tax-over6m';
+            switchView('invoice-list');
+            renderListHeaderActionButton();
+            renderInvoiceListTable();
+        }
+
+        function renderListHeaderActionButton() {
+            const container = document.getElementById('list-header-action-container');
+            if (state.listHeaderMode === 'pay') {
+                container.innerHTML = `
+                    <button onclick="handlePaySelectedInvoices()" id="btn-list-pay" disabled class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md opacity-50 cursor-not-allowed">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i> Pay
+                    </button>
+                `;
+            } else if (state.listHeaderMode === 'approval') {
+                container.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <button onclick="handleBatchApprovalAction('approve')" id="btn-approval-approve" disabled class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 opacity-50 cursor-not-allowed">Approve</button>
+                        <button onclick="handleBatchApprovalAction('reject')" id="btn-approval-reject" disabled class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 opacity-50 cursor-not-allowed">Reject</button>
+                        <button onclick="handleBatchApprovalAction('sendback')" id="btn-approval-sendback" disabled class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 opacity-50 cursor-not-allowed">Send back</button>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function renderInvoiceListTable() {
+            const tbody = document.getElementById('invoice-list-tbody');
+            tbody.innerHTML = '';
+
+            invoiceMasterList.forEach((inv) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50";
+                tr.innerHTML = `
+                    <td class="p-3 text-center"><input type="checkbox" onchange="updateInvoiceListSelection()" class="chk-inv-row rounded text-brand-500 cursor-pointer" data-id="${inv.id}"></td>
+                    <td class="p-3"><span class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-bold">${inv.docType}</span></td>
+                    <td class="p-3 font-mono font-bold text-brand-600">${inv.docNo}</td>
+                    <td class="p-3 font-mono">${inv.docDate}</td>
+                    <td class="p-3 font-mono">${inv.vendorInvNo}</td>
+                    <td class="p-3 font-bold">${inv.vendorName} (${inv.currency})</td>
+                    <td class="p-3 font-mono text-amber-600">${inv.dueDate}</td>
+                    <td class="p-3 text-right font-mono font-extrabold">${inv.netAmount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${inv.currency}</td>
+                    <td class="p-3 text-center"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">${inv.status}</span></td>
+                    <td class="p-3 text-center"><button class="px-2.5 py-1 bg-brand-50 text-brand-600 rounded-lg font-bold">View</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateInvoiceListSelection();
+        }
+
+        function toggleAllInvoiceListCheckboxes(checked) {
+            document.querySelectorAll('.chk-inv-row').forEach(cb => cb.checked = checked);
+            updateInvoiceListSelection();
+        }
+
+        function updateInvoiceListSelection() {
+            const checkedRows = document.querySelectorAll('.chk-inv-row:checked');
+            const btnPay = document.getElementById('btn-list-pay');
+            if (btnPay) {
+                if (checkedRows.length > 0) {
+                    btnPay.disabled = false;
+                    btnPay.className = "bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md opacity-100 cursor-pointer";
+                    btnPay.innerHTML = `<i data-lucide="credit-card" class="w-4 h-4"></i> Pay (${checkedRows.length})`;
+                } else {
+                    btnPay.disabled = true;
+                    btnPay.className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md opacity-50 cursor-not-allowed";
+                    btnPay.innerHTML = `<i data-lucide="credit-card" class="w-4 h-4"></i> Pay`;
+                }
+            }
+            lucide.createIcons();
+        }
+
+        /* v4.4.4 REQ 1, 2, 3: Open Payment Settlement Execution Modal grouped by Currency & Vendor */
+        function handlePaySelectedInvoices() {
+            const checkedBoxes = document.querySelectorAll('.chk-inv-row:checked');
+            if (checkedBoxes.length === 0) return;
+
+            const selectedIds = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+            const selectedInvoices = invoiceMasterList.filter(inv => selectedIds.includes(inv.id));
+
+            // Grouping Step 1 & 2: Group selected invoices by Currency -> Vendor
+            state.activeSettlements = [];
+            let seqCounter = 1;
+
+            const currencyGroups = {};
+            selectedInvoices.forEach(inv => {
+                const curr = inv.currency || 'THB';
+                if (!currencyGroups[curr]) currencyGroups[curr] = {};
+                if (!currencyGroups[curr][inv.vendorCode]) currencyGroups[curr][inv.vendorCode] = [];
+                currencyGroups[curr][inv.vendorCode].push(inv);
+            });
+
+            // Build active Settlement State
+            Object.keys(currencyGroups).forEach(curr => {
+                Object.keys(currencyGroups[curr]).forEach(vCode => {
+                    const invList = currencyGroups[curr][vCode];
+                    const vProfile = VENDOR_PROFILES[vCode] || { name: invList[0].vendorName, defaultPayType: 'Bank Transfer (SCB)', whtRate: 3.0 };
+                    
+                    const totalInvoiceAmt = invList.reduce((sum, item) => sum + item.netAmount, 0);
+                    const rate = curr === 'THB' ? 1.00 : (state.currencyRates[curr] || 35.05);
+                    const baseTotalAmt = totalInvoiceAmt * rate;
+                    const whtAmt = baseTotalAmt * (vProfile.whtRate / 100);
+                    const paidAmt = baseTotalAmt - whtAmt;
+                    
+                    // FX Gain/Loss calculation against booking rate
+                    const avgBookingRate = invList.reduce((sum, i) => sum + (i.bookingRate || rate), 0) / invList.length;
+                    const gainLoss = curr === 'THB' ? 0.00 : totalInvoiceAmt * (rate - avgBookingRate);
+
+                    state.activeSettlements.push({
+                        settlementId: `SETTL-${Date.now()}-${seqCounter}`,
+                        paySeqNo: `PAY2608-${String(seqCounter).padStart(4, '0')}`,
+                        currency: curr,
+                        currRate: rate,
+                        vendorCode: vCode,
+                        vendorName: vProfile.name || invList[0].vendorName,
+                        paymentDate: '2026-08-29', // Default today date
+                        paymentType: vProfile.defaultPayType,
+                        totalAmt: totalInvoiceAmt,
+                        whtAmt: whtAmt,
+                        whtRate: vProfile.whtRate,
+                        whtType: vProfile.whtType || 'PND53',
+                        paidAmt: paidAmt,
+                        gainLoss: gainLoss,
+                        invoices: invList
+                    });
+                    seqCounter++;
+                });
+            });
+
+            renderPaymentSettlementModal();
+            document.getElementById('payment-settlement-modal').classList.remove('hidden');
+            document.getElementById('payment-settlement-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        /* Render Settlement Modal Content Grouped by Currency */
+        function renderPaymentSettlementModal() {
+            const container = document.getElementById('settlement-modal-content');
+            container.innerHTML = '';
+
+            // Group Active Settlements by Currency Code
+            const currMap = {};
+            state.activeSettlements.forEach(s => {
+                if (!currMap[s.currency]) currMap[s.currency] = [];
+                currMap[s.currency].push(s);
+            });
+
+            Object.keys(currMap).forEach(curr => {
+                const settlements = currMap[curr];
+                const isBaseCurrency = curr === 'THB';
+                const currentRate = settlements[0].currRate;
+
+                const currBlock = document.createElement('div');
+                currBlock.className = "bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border-2 border-brand-200 dark:border-slate-800 space-y-4";
+                
+                currBlock.innerHTML = `
+                    <!-- 1.1 Currency Box Header with Exchange Rate Input -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-brand-500 text-white font-extrabold px-3 py-1 rounded-xl text-xs font-mono shadow-xs">${curr}</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200 text-sm">Currency Settlement Block</span>
+                            ${isBaseCurrency ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Base Currency (THB)</span>' : ''}
+                        </div>
+
+                        <!-- 1.1 & 1.2 Rate Input (Fixed = 1 for THB) -->
+                        <div class="flex items-center gap-2 font-mono">
+                            <label class="font-bold text-slate-500">Exchange Rate (THB / ${curr}):</label>
+                            <input type="number" step="0.00001" value="${currentRate.toFixed(5)}" 
+                                ${isBaseCurrency ? 'disabled' : ''} 
+                                onchange="updateSettlementRate('${curr}', parseFloat(this.value))" 
+                                class="w-32 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-extrabold text-right text-brand-600 dark:text-brand-400 ${isBaseCurrency ? 'opacity-70 cursor-not-allowed' : 'focus:ring-2 focus:ring-brand-500'}">
+                        </div>
+                    </div>
+
+                    <!-- 2. Vendor Groups Table -->
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-200 uppercase font-bold text-[10px] tracking-wider border-b border-slate-700">
+                                    <th class="p-2.5 w-32">3.1 Pay Seq No</th>
+                                    <th class="p-2.5 min-w-[200px]">3.2 Vendor Name</th>
+                                    <th class="p-2.5 w-32">3.3 Payment Date</th>
+                                    <th class="p-2.5 w-40">3.4 Payment Type</th>
+                                    <th class="p-2.5 w-32 text-right">3.5 Total Invoice Amt</th>
+                                    <th class="p-2.5 w-32 text-right">3.6 WHT Amt (Click)</th>
+                                    <th class="p-2.5 w-36 text-right">3.7 Paid Amt (Net THB)</th>
+                                    <th class="p-2.5 w-28 text-right">3.8 FX Gain/Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                                ${settlements.map(s => `
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td class="p-2.5 font-mono font-extrabold text-brand-600 dark:text-brand-400">${s.paySeqNo}</td>
+                                        <td class="p-2.5 font-bold text-slate-800 dark:text-slate-200">
+                                            ${s.vendorName}
+                                            <span class="block text-[10px] text-slate-400 font-mono">${s.invoices.length} Invoice(s) Linked</span>
+                                        </td>
+                                        <td class="p-2.5">
+                                            <input type="date" value="${s.paymentDate}" onchange="updateSettlementField('${s.settlementId}', 'paymentDate', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-lg px-2 py-1 font-mono font-bold text-xs">
+                                        </td>
+                                        <td class="p-2.5">
+                                            <select onchange="updateSettlementField('${s.settlementId}', 'paymentType', this.value)" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-lg px-2 py-1 font-bold text-xs">
+                                                <option value="Bank Transfer (SCB)" ${s.paymentType.includes('SCB') ? 'selected' : ''}>Bank Transfer (SCB)</option>
+                                                <option value="Direct Debit (K-Bank)" ${s.paymentType.includes('K-Bank') ? 'selected' : ''}>Direct Debit (K-Bank)</option>
+                                                <option value="Cheque Disbursement" ${s.paymentType.includes('Cheque') ? 'selected' : ''}>Cheque Disbursement</option>
+                                            </select>
+                                        </td>
+                                        <td class="p-2.5 text-right font-mono font-extrabold text-slate-900 dark:text-slate-100">
+                                            ${s.totalAmt.toLocaleString(undefined, {minimumFractionDigits: 2})} ${s.currency}
+                                        </td>
+                                        <!-- 3.6 & 3.6.1 WHT Amount Clickable Button -->
+                                        <td class="p-2.5 text-right">
+                                            <button onclick="openWhtAdjustmentModal('${s.settlementId}')" class="px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 text-purple-700 dark:text-purple-300 font-mono font-bold border border-purple-200 dark:border-purple-800 flex items-center justify-end gap-1 ml-auto" title="Click to edit WHT Details">
+                                                <i data-lucide="edit-3" class="w-3 h-3 text-purple-500"></i> ฿${s.whtAmt.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                            </button>
+                                        </td>
+                                        <!-- 3.7 Paid Amt in THB -->
+                                        <td class="p-2.5 text-right font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                                            ฿${s.paidAmt.toLocaleString(undefined, {minimumFractionDigits: 2})} THB
+                                        </td>
+                                        <!-- 3.8 FX Gain / Loss -->
+                                        <td class="p-2.5 text-right font-mono font-bold">
+                                            ${s.gainLoss > 0 
+                                                ? `<span class="text-emerald-600 dark:text-emerald-400">+฿${s.gainLoss.toFixed(2)} (Gain)</span>`
+                                                : s.gainLoss < 0
+                                                    ? `<span class="text-rose-600 dark:text-rose-400">-฿${Math.abs(s.gainLoss).toFixed(2)} (Loss)</span>`
+                                                    : `<span class="text-slate-400">0.00</span>`}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(currBlock);
+            });
+
+            document.getElementById('settlement-modal-summary-lbl').innerText = `Processing ${state.activeSettlements.length} Vendor Payment Group(s) Across ${Object.keys(currMap).length} Currency Block(s)`;
+            lucide.createIcons();
+        }
+
+        /* 1.1 Update Currency Rate and recalculate row amounts */
+        function updateSettlementRate(currCode, newRate) {
+            if (currCode === 'THB') return;
+            state.currencyRates[currCode] = newRate;
+
+            state.activeSettlements.forEach(s => {
+                if (s.currency === currCode) {
+                    s.currRate = newRate;
+                    const baseTotalAmt = s.totalAmt * newRate;
+                    s.whtAmt = baseTotalAmt * (s.whtRate / 100);
+                    s.paidAmt = baseTotalAmt - s.whtAmt;
+                    const avgBookingRate = s.invoices.reduce((sum, i) => sum + (i.bookingRate || newRate), 0) / s.invoices.length;
+                    s.gainLoss = s.totalAmt * (newRate - avgBookingRate);
+                }
+            });
+
+            renderPaymentSettlementModal();
+            showToast(`Updated ${currCode} Exchange Rate to ${newRate.toFixed(5)}. Recalculated Paid Amounts.`, 'info');
+        }
+
+        function updateSettlementField(settlementId, field, value) {
+            const s = state.activeSettlements.find(item => item.settlementId === settlementId);
+            if (!s) return;
+            s[field] = value;
+            renderPaymentSettlementModal();
+        }
+
+        /* 3.6.1 Open WHT Adjustment Modal */
+        function openWhtAdjustmentModal(settlementId) {
+            const s = state.activeSettlements.find(item => item.settlementId === settlementId);
+            if (!s) return;
+
+            state.editingWhtSettlementId = settlementId;
+            document.getElementById('wht-modal-vendor-lbl').innerText = `Vendor: ${s.vendorName} (${s.paySeqNo})`;
+            document.getElementById('wht-modal-total-lbl').innerText = `Total Invoice Amount: ${s.totalAmt.toLocaleString()} ${s.currency} (Base THB: ${(s.totalAmt * s.currRate).toLocaleString()})`;
+            document.getElementById('wht-edit-type').value = s.whtType || 'PND53';
+            document.getElementById('wht-edit-service').value = String(s.whtRate.toFixed(1));
+            document.getElementById('wht-edit-base-amt').value = (s.totalAmt * s.currRate).toFixed(2);
+            document.getElementById('wht-edit-tax-amt').value = s.whtAmt.toFixed(2);
+
+            document.getElementById('wht-adjustment-modal').classList.remove('hidden');
+            document.getElementById('wht-adjustment-modal').classList.add('flex');
+        }
+
+        function closeWhtAdjustmentModal() {
+            document.getElementById('wht-adjustment-modal').classList.add('hidden');
+            document.getElementById('wht-adjustment-modal').classList.remove('flex');
+        }
+
+        function recalculateWhtModalMath() {
+            const baseAmt = parseFloat(document.getElementById('wht-edit-base-amt').value) || 0;
+            const rate = parseFloat(document.getElementById('wht-edit-service').value) || 0;
+            document.getElementById('wht-edit-tax-amt').value = (baseAmt * (rate / 100)).toFixed(2);
+        }
+
+        function saveWhtAdjustment() {
+            const s = state.activeSettlements.find(item => item.settlementId === state.editingWhtSettlementId);
+            if (s) {
+                s.whtType = document.getElementById('wht-edit-type').value;
+                s.whtRate = parseFloat(document.getElementById('wht-edit-service').value) || 0;
+                s.whtAmt = parseFloat(document.getElementById('wht-edit-tax-amt').value) || 0;
+                s.paidAmt = (s.totalAmt * s.currRate) - s.whtAmt;
+            }
+            closeWhtAdjustmentModal();
+            renderPaymentSettlementModal();
+            showToast('WHT parameters updated for settlement row.', 'success');
+        }
+
+        function closePaymentSettlementModal() {
+            document.getElementById('payment-settlement-modal').classList.add('hidden');
+            document.getElementById('payment-settlement-modal').classList.remove('flex');
+        }
+
+        function confirmAndPostAllSettlements() {
+            if (state.activeSettlements.length === 0) return;
+
+            let count = 0;
+            state.activeSettlements.forEach(s => {
+                s.invoices.forEach(inv => {
+                    inv.status = 'Paid';
+                });
+                count += s.invoices.length;
+            });
+
+            closePaymentSettlementModal();
+            renderInvoiceListTable();
+            showToast(`Posted multi-currency payments for ${count} invoice(s) across ${state.activeSettlements.length} vendor group(s)!`, 'success');
+        }
+
+        function handleBatchApprovalAction(action) {
+            const checkedBoxes = document.querySelectorAll('.chk-inv-row:checked');
+            if (checkedBoxes.length === 0) return;
+
+            const ids = Array.from(checkedBoxes).map(cb => cb.getAttribute('data-id'));
+            ids.forEach(id => {
+                const inv = invoiceMasterList.find(i => i.id === id);
+                if (inv) inv.status = action === 'approve' ? 'Effective' : 'Draft';
+            });
+
+            renderInvoiceListTable();
+            showToast(`Batch ${action.toUpperCase()} applied to ${ids.length} document(s)!`, 'success');
+        }
+
+        function showToast(msg, type = 'success') {
+            const bar = document.createElement('div');
+            bar.className = `fixed bottom-20 right-6 px-4 py-3 rounded-xl shadow-2xl border text-xs font-bold z-50 animate-fade-in flex items-center gap-2 ${
+                type === 'error' ? 'bg-rose-900 text-white border-rose-700' : type === 'info' ? 'bg-slate-900 text-white border-slate-700' : 'bg-emerald-900 text-white border-emerald-700'
+            }`;
+            bar.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle-2'}" class="w-4 h-4"></i> ${msg}`;
+            document.body.appendChild(bar);
+            lucide.createIcons();
+            setTimeout(() => { bar.remove(); }, 3500);
+        }
+    </script>
+</body>
+</html>

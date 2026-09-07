@@ -8,12 +8,12 @@ import {
 describe("accounting navigation", () => {
   it("maps nested list and detail paths to the same document type", () => {
     expect(
-      accountingDocumentFromPath("/accounting/accounts-payable/invoice/ap-1")
+      accountingDocumentFromPath("/accounting/accounts-receivable/invoice/ar-1")
         .kind,
-    ).toBe("apInvoice");
+    ).toBe("arInvoice");
   });
 
-  it("opens the dashboard from the module root without a dashboard submenu", () => {
+  it("exposes the dedicated AP dashboard and approval queue", () => {
     const accounting = getModule("/accounting");
     expect(
       accounting.subModules?.some(
@@ -21,9 +21,10 @@ describe("accounting navigation", () => {
       ),
     ).toBe(false);
     expect(
-      accounting.subModules?.find((item) => item.name === "accountsPayable")
-        ?.subModules,
-    ).toHaveLength(2);
+      accounting.subModules
+        ?.find((item) => item.name === "accountsPayable")
+        ?.subModules?.map((item) => item.name),
+    ).toEqual(["apDashboard", "apInvoice", "apPayment"]);
   });
 
   it("keeps existing documents read-only until edit and opens new documents in add mode", () => {
