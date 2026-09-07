@@ -93,6 +93,14 @@ export function PoItemFields({
   // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
   const showStatusBadge = isPoInWorkflow;
 
+  // แถวที่เพิ่งกรอกราคาเสร็จ (Enter) — กางตัวเลือกคลังของแถวนั้นต่อให้เลย
+  // เส้นทางกรอกคือ สินค้า → ราคา → คลัง → จำนวน (ท่าเดียวกับ GRN) สองท่อนแรก
+  // กับท่อนสุดท้ายใช้ nextFocusRef ของ lookup เอง ท่อนนี้ต้องสั่งเปิด popover
+  // จึงต้องมี state
+  const [openLocationIndex, setOpenLocationIndex] = useState<number | null>(
+    null,
+  );
+
   const table = usePoItemTable({
     form,
     itemFields,
@@ -103,6 +111,10 @@ export function PoItemFields({
     showStatusBadge,
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
+    openLocationIndex,
+    onPriceCommitted: setOpenLocationIndex,
+    onLocationOpenChange: (index, open) =>
+      setOpenLocationIndex(open ? index : null),
     onDelete: setDeleteIndex,
   });
 

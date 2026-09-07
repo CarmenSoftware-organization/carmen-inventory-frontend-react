@@ -1,8 +1,9 @@
 import { memo } from "react";
-import { useWatch, type UseFormReturn } from "react-hook-form";
+import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { InputAmount } from "@/components/ui/input/input-amount";
 import { formatCurrency } from "@/lib/currency-utils";
+import { cn } from "@/lib/utils";
 import { ProductCell, StatusCell } from "./po-item-table";
 import type { PoFormValues } from "./po-form-schema";
 
@@ -14,42 +15,75 @@ interface CellProps {
 }
 
 /**
- * Inline unit-price input cell — number, right-align, mono
+ * ช่องราคาต่อหน่วยบนแถวสินค้า — ราคาเป็นของสินค้า คลังทุกใบใช้ราคาเดียวกัน
  *
- * Uses `form.setValue` ตรง ๆ ใน onChange แทน register's onChange
- * เพราะ RHF v7 + React Compiler + memo() ทำให้ `valueAsNumber: true`
- * ไม่ commit value ลง form state (debug 2026-05-29)
+ * **ต้องเป็น `Controller` + `InputAmount` เท่านั้น** (ท่าเดียวกับ GRN):
+ * - `<input type="number">` อ่าน `valueAsNumber` เป็น NaN ระหว่างพิมพ์ "17."
+ *   ยอดต่อบรรทัดเลยแกว่งและทศนิยมหายกลางคัน · `InputAmount` sanitize เอง
+ *   คุมทศนิยมตามสกุลเงินของ BU และคง trailing zero
+ * - `shouldValidate` ทุก keystroke ทำให้ validate ทั้งฟอร์มแล้ว cell ถูกสร้างใหม่
+ *   จนโฟกัสหลุดกลางที่พิมพ์ — Controller คุม subscription ไว้ในตัวเอง
+ *
+ * **และห้ามมี `useWatch` ในตัวนี้** — ค่าที่โหมดอ่านต้องใช้อยู่ใน `PricePlain`
+ * แยกไปแล้ว การ subscribe ที่นี่ทำให้ cell re-render ทุกตัวอักษรที่พิมพ์ ซึ่งพา
+ * `InputAmount` (ถือ draft/focused เป็น state ภายใน) ไปด้วยจนโฟกัสหลุด — เป็น
+ * บั๊กเดิมที่ GRN เคยเจอแล้วครั้งหนึ่ง
  */
+/** ราคาในโหมดอ่าน — แยกเป็นคอมโพเนนต์ของตัวเองเพื่อกัน `useWatch` ไปโผล่ในโหมดแก้ */
+const PricePlain = memo(function PricePlain({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PoFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const price =
+    useWatch({ control: form.control, name: `items.${index}.price` }) ?? 0;
+  return <span className="tabular-nums">{formatCurrency(price)}</span>;
+});
+
 export const PriceCell = memo(function PriceCell({
   form,
   index,
   disabled,
   readOnly,
-}: CellProps) {
+  onCommit,
+}: CellProps & {
+  /** กรอกราคาเสร็จ (Enter) — ไปเปิดตัวเลือกคลังต่อ */
+  readonly onCommit?: () => void;
+}) {
   "use no memo";
-  const price =
-    useWatch({ control: form.control, name: `items.${index}.price` }) ?? 0;
   if (disabled || readOnly) {
-    return <span className="tabular-nums">{formatCurrency(price)}</span>;
+    return <PricePlain form={form} index={index} />;
   }
   return (
-    <Input
-      type="number"
-      inputMode="decimal"
-      min={0}
-      step="0.01"
-      placeholder="0.00"
-      className="h-8 text-right tabular-nums"
-      disabled={disabled}
-      defaultValue={price}
-      {...form.register(`items.${index}.price`)}
-      onChange={(e) => {
-        const n = e.target.valueAsNumber;
-        form.setValue(`items.${index}.price`, Number.isNaN(n) ? 0 : n, {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
-      }}
+    <Controller
+      control={form.control}
+      name={`items.${index}.price`}
+      render={({ field, fieldState }) => (
+        <InputAmount
+          // name ให้ `fieldFocusRef` หาช่องนี้เจอ — lookup สินค้าเด้งโฟกัสมาที่นี่
+          // ต่อหลังเลือกสินค้าเสร็จ
+          name={field.name}
+          // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
+          className={cn(
+            "h-8 w-full text-right text-xs",
+            fieldState.error && "pl-7",
+          )}
+          error={fieldState.error?.message}
+          errorIconAlign="left"
+          // Enter = กรอกเสร็จแล้ว ไปเลือกคลังต่อ · preventDefault กัน Enter ใน
+          // ฟอร์มไปกด submit แทน (ทั้งใบยังกรอกไม่ครบด้วยซ้ำ)
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            onCommit?.();
+          }}
+          value={Number(field.value ?? 0)}
+          onValueChange={field.onChange}
+        />
+      )}
     />
   );
 });

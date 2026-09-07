@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import {
   type ColumnDef,
+  type Row,
   getCoreRowModel,
   getExpandedRowModel,
   useReactTable,
@@ -74,16 +75,12 @@ const ProductCol = memo(function ProductCol({
  */
 const PoItemActionCell = memo(function PoItemActionCell({
   index,
-  expanded,
-  canAddLocation,
   canDelete,
   history,
   productName,
   onDelete,
 }: {
   index: number;
-  expanded: boolean;
-  canAddLocation: boolean;
   /** โหมดอ่านยังเห็นคอลัมน์นี้ได้ถ้ามีประวัติ — แต่ห้ามมีปุ่มลบ */
   canDelete: boolean;
   history?: PoItemHistoryEntry[];
@@ -92,7 +89,6 @@ const PoItemActionCell = memo(function PoItemActionCell({
 }) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
-  const registry = useAddLocationRegistry();
   return (
     <div className="flex items-center justify-center">
       {(history?.length ?? 0) > 0 && (
@@ -105,23 +101,6 @@ const PoItemActionCell = memo(function PoItemActionCell({
       )}
       {/* ไอคอนล้วน เดาจากรูปไม่ออกว่าลบอะไร โดยเฉพาะถังขยะที่หน้าตาเหมือนกับ
           ของแถวย่อยเป๊ะแต่ลบคนละขนาด — บอกด้วย tooltip (ท่าเดียวกับ GRN) */}
-      {expanded && canAddLocation && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label={t("addLocation")}
-              className="text-primary hover:bg-primary/10 hover:text-primary"
-              onClick={() => registry?.get(index)?.()}
-            >
-              <MapPinPlus className="size-3.5" aria-hidden="true" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("addLocation")}</TooltipContent>
-        </Tooltip>
-      )}
       {canDelete && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -154,6 +133,10 @@ interface UsePoItemTableOptions {
   showStatusBadge: boolean;
   /** ล้างสถานะรายแถวกลับเป็นรอได้ไหม (ผู้อนุมัติในโหมดแก้ไข) */
   canResetStatus: boolean;
+  /** แถวที่เพิ่งกรอกราคาเสร็จ — กางตัวเลือกคลังของแถวนั้นต่อ */
+  openLocationIndex: number | null;
+  onPriceCommitted: (index: number) => void;
+  onLocationOpenChange: (index: number, open: boolean) => void;
   onDelete: (index: number) => void;
 }
 
@@ -169,16 +152,17 @@ export function usePoItemTable({
   showApproveCheckbox,
   showStatusBadge,
   canResetStatus,
+  openLocationIndex,
+  onPriceCommitted,
+  onLocationOpenChange,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const t = useTranslations("procurement.purchaseOrder");
+  // ปุ่มเพิ่มคลังใน gutter สั่งงานผ่าน registry เดียวกับที่ LocationsEditor ลงทะเบียนไว้
+  const registry = useAddLocationRegistry();
 
-  // indent ของ expanded content ให้ตรงขอบซ้าย column Product — คิดเป็น % ของผลรวม
-  // column size เพราะ table เป็น table-fixed w-full (column scale ตามสัดส่วน)
-  const preProductSize =
-    PO_LEADING_COL * 2 /* expand + index */ +
-    (showApproveCheckbox ? PO_LEADING_COL : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
   // โหมดอ่านก็ยังต้องมีคอลัมน์ action ถ้ามีประวัติรายบรรทัดให้กด (เงื่อนไขเดียวกับ PR)
   // — ประวัติมีก็ต่อเมื่อใบผ่าน workflow มาแล้ว ซึ่งตอนนั้นฟอร์มมักอยู่โหมดอ่าน
@@ -192,12 +176,7 @@ export function usePoItemTable({
   // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน พอมี
   // รายการแรกค่อยขยาย · ตาราง location ใช้แค่ showActionCol ได้เพราะมัน render
   // ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
-  const { col: PO_COL, dataTotal } = poItemCols(
-    showAction && itemFields.length > 0,
-  );
-  const totalSize =
-    preProductSize + dataTotal + (showActionCol ? PO_COL.action : 0);
-  const leftInsetPct = (preProductSize / totalSize) * 100;
+  const { col: PO_COL } = poItemCols(showAction && itemFields.length > 0);
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
     const expandColumn: ColumnDef<PoItemField> = {
@@ -224,18 +203,57 @@ export function usePoItemTable({
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
-        expandedContent: (item: PoItemField) => (
-          <PoItemExpanded
-            item={item}
-            form={form}
-            itemFields={itemFields}
-            disabled={disabled}
-            locationsDisabled={locationsDisabled}
-            readOnly={readOnly}
-            showActionCol={showActionCol}
-            leftInsetPct={leftInsetPct}
-          />
-        ),
+        // เนื้อหา expand เริ่มที่คอลัมน์ Product — เว้นช่องเล็กหัวแถวไว้เป็น gutter
+        // (checkbox ถ้ามี + expand + index) แทนการ indent ด้วย paddingLeft %
+        expandedColStart: showApproveCheckbox ? 3 : 2,
+        // ปุ่มเพิ่มคลังอยู่ใน gutter ซ้ายนี้ ไม่ใช่ในคอลัมน์ action ของแถวสินค้า —
+        // มันสร้างของในตารางย่อย ปุ่มจึงควรอยู่กับตารางย่อย ไม่ใช่ไปปนกับปุ่มลบ
+        // ทั้งรายการที่ทำงานคนละระดับกัน (ท่าเดียวกับ GRN) · แก้ไม่ได้ก็ใช้ที่ว่าง
+        // ตรงนี้บอกว่าตารางข้าง ๆ คือคลัง ด้วยสี/น้ำหนักชุดเดียวกับหัวคอลัมน์
+        expandedLeading: (row: Row<PoItemField>) =>
+          locationsDisabled ? (
+            <div className="text-muted-foreground flex justify-end pt-3 text-xs font-semibold">
+              {tfl("location")}
+            </div>
+          ) : (
+            <div className="flex justify-end pt-2.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-7.5"
+                    aria-label={t("addLocation")}
+                    onClick={() => registry?.get(row.index)?.()}
+                  >
+                    <MapPinPlus aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("addLocation")}</TooltipContent>
+              </Tooltip>
+            </div>
+          ),
+        expandedContent: (item: PoItemField) => {
+          const rowIndex = Math.max(
+            itemFields.findIndex((f) => f.id === item.id),
+            0,
+          );
+          return (
+            <PoItemExpanded
+              item={item}
+              form={form}
+              itemFields={itemFields}
+              disabled={disabled}
+              locationsDisabled={locationsDisabled}
+              readOnly={readOnly}
+              showActionCol={showActionCol}
+              locationOpen={rowIndex === openLocationIndex}
+              onLocationOpenChange={(open) =>
+                onLocationOpenChange(rowIndex, open)
+              }
+            />
+          );
+        },
       },
     };
 
@@ -318,6 +336,7 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            onCommit={() => onPriceCommitted(row.index)}
           />
         ),
       },
@@ -397,8 +416,6 @@ export function usePoItemTable({
       cell: ({ row }) => (
         <PoItemActionCell
           index={row.index}
-          expanded={row.getIsExpanded()}
-          canAddLocation={!locationsDisabled}
           canDelete={showAction}
           history={row.original.history}
           productName={row.original.product_name}
@@ -457,8 +474,12 @@ export function usePoItemTable({
     showStatusBadge,
     canResetStatus,
     onDelete,
+    openLocationIndex,
+    onPriceCommitted,
+    onLocationOpenChange,
     tfl,
-    leftInsetPct,
+    t,
+    registry,
     showAction,
   ]);
 
