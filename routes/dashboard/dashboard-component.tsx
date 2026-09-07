@@ -40,6 +40,7 @@ import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,
   MyDashboardWidgetListResponse,
+  WidgetDisplay,
   WidgetParams,
   WidgetType,
 } from "@/types/dashboard-widget";
@@ -226,7 +227,10 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleCreateWithParams = (params: WidgetParams) => {
+  const handleCreateWithParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+  ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
@@ -234,6 +238,7 @@ const SavedWidgetsSection = () => {
         widget_type: defaultWidgetTypeFor(pendingAdd),
         title: pendingAdd.name,
         params,
+        display,
       },
       {
         onSuccess: () => {
@@ -244,11 +249,14 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleUpdateParams = (params: WidgetParams) => {
+  const handleUpdateParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params },
+      { id: target.id, params, display },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -361,6 +369,8 @@ const SavedWidgetsSection = () => {
 
   const deleteTitleText =
     pendingDelete?.title || pendingDelete?.dataset_id || "";
+  // dataset ที่ไม่อยู่ใน catalogue (ถูกถอดออกไปแล้ว) เปิด dialog ไม่ได้ เพราะฟอร์ม
+  // param สร้างจาก descriptor ของมัน
   const configDataset = pendingConfig
     ? datasetById.get(pendingConfig.dataset_id)
     : undefined;
@@ -402,7 +412,7 @@ const SavedWidgetsSection = () => {
         <div
           aria-busy="true"
           aria-live="polite"
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid auto-rows-[4rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
         >
           <WidgetSkeletonCards />
         </div>
@@ -443,7 +453,7 @@ const SavedWidgetsSection = () => {
             items={renderable.map(({ widget }) => widget.id)}
             strategy={rectSortingStrategy}
           >
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="grid auto-rows-[4rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12">
               {renderable.map(({ widget, query }) => (
                 <SortableWidgetItem
                   key={widget.id}
@@ -487,6 +497,8 @@ const SavedWidgetsSection = () => {
           onOpenChange={(o) => !o && setPendingConfig(null)}
           dataset={configDataset}
           initialParams={pendingConfig.params}
+          initialDisplay={pendingConfig.display}
+          widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleUpdateParams}
         />

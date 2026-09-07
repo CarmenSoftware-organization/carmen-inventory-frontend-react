@@ -142,6 +142,32 @@ type DatasetResponse = {
 // -------------------------------------------------------------
 // Personal saved widget — bound to dataset_id + widget_type
 // -------------------------------------------------------------
+/**
+ * ค่าตั้งการแสดงผลต่อ widget — backend เก็บให้เฉย ๆ ไม่ตีความ (ตรวจแค่ว่าเป็น object
+ * และไม่เกิน 8KB) **frontend เป็นเจ้าของ schema นี้** เพิ่มคีย์ใหม่ได้โดยไม่ต้อง
+ * deploy backend ดู migration 130 ของ micro-data
+ */
+export interface WidgetDisplay {
+  /**
+   * ความกว้างเป็นหน่วยคอลัมน์ของกริด 12 คอลัมน์ (เหมือน grid ของ css framework)
+   * 3=¼ · 4=⅓ · 6=½ · 8=⅔ · 9=¾ · 12=เต็มแถว — ไม่ใส่ = ตามชนิดกราฟ
+   */
+  readonly width?: number;
+  /**
+   * ความสูงเป็นจำนวนแถวของกริด (1 แถว = 4rem) — การ์ดสูงเท่าที่ประกาศ ไม่ยืดตาม
+   * การ์ดที่สูงที่สุดในแถวเดียวกันเหมือนก่อนหน้านี้ เนื้อที่ล้นจะเลื่อนในกล่องเอง
+   */
+  readonly height?: number;
+  /** ทศนิยมของตัวเลขบนการ์ด */
+  readonly decimals?: number;
+  /** ต้นสเกลของ gauge (default 0) */
+  readonly min?: number;
+  /** ปลายสเกลของ gauge — ไม่ใส่ = เดาจากค่าปัจจุบัน ซึ่งอ่านความหมายไม่ได้ */
+  readonly max?: number;
+  /** เปลี่ยนสีเมื่อค่าถึงขีด เรียงจากน้อยไปมาก (UI ปัจจุบันแก้ได้ตัวแรกตัวเดียว) */
+  readonly thresholds?: readonly { readonly value: number; readonly color: string }[];
+}
+
 interface WidgetConfig {
   readonly id: string;
   readonly dataset_id: string;
@@ -149,6 +175,7 @@ interface WidgetConfig {
   readonly title?: string | null;
   readonly order_index: number;
   readonly params?: WidgetParams | null;
+  readonly display?: WidgetDisplay | null;
 }
 
 interface CreateWidgetDto {
@@ -157,6 +184,7 @@ interface CreateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
   readonly params?: WidgetParams;
+  readonly display?: WidgetDisplay;
 }
 
 interface UpdateWidgetDto {
@@ -165,6 +193,8 @@ interface UpdateWidgetDto {
   readonly params?: WidgetParams;
   /** สลับชนิดกราฟ — backend ปฏิเสธ (400) ถ้า shape ของ dataset วาดแบบนั้นไม่ได้ */
   readonly widget_type?: WidgetType;
+  /** แทนที่ทั้งก้อน (replace ไม่ใช่ merge — เหมือน params) */
+  readonly display?: WidgetDisplay;
 }
 
 interface WidgetConfigListResponse {

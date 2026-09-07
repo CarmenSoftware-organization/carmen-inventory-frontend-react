@@ -16,8 +16,11 @@ describe("availableRenders", () => {
     expect(
       availableRenders("time_series", ["line", "area", "bar", "sparkline"]),
     ).toEqual(["line", "area"]);
-    // gauge ยังไม่มีการ์ด
-    expect(availableRenders("scalar", ["kpi", "gauge"])).toEqual(["kpi"]);
+    // scalar วาดได้ทั้ง kpi และ gauge ตั้งแต่มี GaugeCard
+    expect(availableRenders("scalar", ["kpi", "gauge"])).toEqual([
+      "kpi",
+      "gauge",
+    ]);
   });
 
   it("drops a render the backend does not advertise", () => {
@@ -27,6 +30,7 @@ describe("availableRenders", () => {
 
   it("falls back to card capability when the backend sends no set", () => {
     expect(availableRenders("categorical")).toEqual(["pie", "bar"]);
+    expect(availableRenders("scalar_delta")).toEqual(["kpi", "gauge"]);
     expect(availableRenders("time_series", [])).toEqual(["line", "area"]);
   });
 

@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   AreaChart,
   BarChart3,
+  Gauge,
   Check,
   CircleAlert,
   GripVertical,
@@ -26,6 +27,7 @@ import {
   type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { availableRenders } from "@/components/dashboard-widget/render-support";
+import { gridClasses } from "@/components/dashboard-widget/widget-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -77,19 +79,13 @@ interface SortableWidgetItemProps {
 /** ไอคอนประจำชนิดกราฟ — ใช้ทั้งบนปุ่มและในเมนู */
 const RENDER_ICON: Record<string, LucideIcon> = {
   kpi: Hash,
+  gauge: Gauge,
   pie: PieChart,
   bar: BarChart3,
   line: LineChart,
   area: AreaChart,
   table: Table,
 };
-
-/** col-span ตาม widget_type — match procurement/inventory dashboards */
-function getColSpan(widgetType: string): string {
-  if (widgetType === "kpi") return "lg:col-span-1";
-  if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";
-  return "sm:col-span-2 lg:col-span-2";
-}
 
 export function SortableWidgetItem({
   widget,
@@ -123,7 +119,7 @@ export function SortableWidgetItem({
 
   const displayTitle = widget.title || detail?.meta.name || widget.dataset_id;
   const moduleName = inferModuleName(widget.dataset_id);
-  const colSpanClass = getColSpan(widget.widget_type);
+  const gridClass = gridClasses(widget.widget_type, widget.display);
   // shape มาจาก catalogue ก่อน (รู้ตั้งแต่ยังไม่โหลดข้อมูล) แล้วค่อย fallback ไป meta
   // ของ payload สำหรับ widget ที่ dataset ไม่อยู่ใน catalogue
   const renders = availableRenders(
@@ -141,8 +137,8 @@ export function SortableWidgetItem({
       }}
       style={style}
       className={cn(
-        colSpanClass,
-        "group/sortable relative",
+        gridClass,
+        "group/sortable relative h-full",
         isDragging && "z-10 opacity-50",
       )}
     >
@@ -190,7 +186,9 @@ export function SortableWidgetItem({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {!!dataset?.params?.length && onConfigure && (
+        {/* เฟืองโผล่ทุกใบแล้ว — dialog คุมทั้ง param และการแสดงผล ซึ่งตั้งได้แม้
+            dataset จะไม่มี param เลย */}
+        {!!dataset && onConfigure && (
           <Button
             type="button"
             variant="ghost"
@@ -328,6 +326,7 @@ function buildFullWidget(
 ): ResolvedWidget {
   return {
     id: saved.id,
+    display: saved.display,
     dataset_id: saved.dataset_id,
     widget_type: saved.widget_type,
     title,

@@ -374,7 +374,8 @@
     "sectionKpi": "ตัวชี้วัด",
     "sectionDistribution": "สัดส่วน",
     "sectionComparison": "เปรียบเทียบ",
-    "sectionTrends": "แนวโน้ม"
+    "sectionTrends": "แนวโน้ม",
+    "gaugeEstimated": "(ประมาณ)"
   },
   "profileGate": {
     "loadingTitle": "กำลังโหลดพื้นที่ทำงาน",
@@ -3919,6 +3920,37 @@
         "line": "เส้น",
         "area": "พื้นที่",
         "table": "ตาราง"
+      },
+      "display": {
+        "section": "การแสดงผล",
+        "width": "ความกว้าง",
+        "widthOption": {
+          "3": "หนึ่งในสี่",
+          "4": "หนึ่งในสาม",
+          "6": "ครึ่งแถว",
+          "8": "สองในสาม",
+          "9": "สามในสี่",
+          "12": "เต็มแถว"
+        },
+        "height": "ความสูงกราฟ",
+        "heightOption": {
+          "2": "เตี้ย",
+          "3": "กลาง",
+          "4": "สูง",
+          "6": "สูงมาก"
+        },
+        "decimals": "ทศนิยม",
+        "min": "สเกลเริ่มที่",
+        "max": "สเกลจบที่",
+        "maxPlaceholder": "อัตโนมัติ",
+        "threshold": "เตือนเมื่อเกิน",
+        "thresholdColor": "สีตอนเตือน",
+        "color": {
+          "chart-4": "เหลืองอำพัน",
+          "chart-2": "เขียวน้ำทะเล",
+          "chart-1": "น้ำเงิน",
+          "destructive": "แดง"
+        }
       }
     },
     "greeting": {

@@ -51,6 +51,12 @@ import { statusOf } from "@/components/dashboard-widget/status-meta";
 import { cn } from "@/lib/utils";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useInViewport } from "@/hooks/use-in-viewport";
+import {
+  applyDecimals,
+  gaugeRange,
+  gridClasses,
+  thresholdColor,
+} from "@/components/dashboard-widget/widget-display";
 import { dashboardDatasetDataQueryOptions } from "@/hooks/use-dashboard-dataset";
 import {
   isCategoricalData,
@@ -149,7 +155,9 @@ export function DashboardWidgetGrid({
       <header className="flex items-center gap-3">
         <AppTile name={moduleName} size={40} />
         <div className="min-w-0">
-          <h1 className="text-lg leading-tight font-semibold tracking-tight">{title}</h1>
+          <h1 className="text-lg leading-tight font-semibold tracking-tight">
+            {title}
+          </h1>
           <p className="text-muted-foreground text-sm leading-snug">
             {description}
           </p>
@@ -168,7 +176,7 @@ export function DashboardWidgetGrid({
       <section
         aria-busy={isLoading}
         aria-live="polite"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid auto-rows-[4rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
       >
         {isLoading ? (
           <WidgetSkeletonCards />
@@ -199,23 +207,16 @@ interface WidgetCardProps {
   readonly subTileFor: (datasetId: string) => string;
 }
 
-/** col-span ตาม widget_type — ใช้ทั้งตอนโชว์ skeleton และตอน render จริง
- * กริดจึงไม่ขยับตำแหน่งเมื่อค่าของแต่ละใบทยอยมาถึง */
-function colSpanFor(widgetType: string): string {
-  if (widgetType === "kpi") return "lg:col-span-1";
-  if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";
-  return "sm:col-span-2 lg:col-span-2";
-}
-
 function skeletonVariantFor(widgetType: string): "kpi" | "bar" | "pie" {
   if (widgetType === "pie") return "pie";
-  if (widgetType === "kpi") return "kpi";
+  if (widgetType === "kpi" || widgetType === "gauge") return "kpi";
   return "bar";
 }
 
 /** widget_type ที่ `WidgetRouter` วาดได้จริง — ตัวอื่นไม่ต้องยิง dataset ให้เปลือง */
 const RENDERABLE_TYPES = new Set([
   "kpi",
+  "gauge",
   "pie",
   "bar",
   "line",
@@ -288,7 +289,7 @@ export function LazyWidget({
   const resolved = resolveWidget(config, detail);
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={cn("h-full", className)}>
       {resolved ? (
         children(resolved)
       ) : (
@@ -309,7 +310,10 @@ function LazyWidgetCard({
   readonly subTileFor: (datasetId: string) => string;
 }) {
   return (
-    <LazyWidget config={config} className={colSpanFor(config.widget_type)}>
+    <LazyWidget
+      config={config}
+      className={gridClasses(config.widget_type, config.display)}
+    >
       {(widget) => (
         <WidgetRouter
           widget={widget}
@@ -336,6 +340,14 @@ function WidgetRouter({
     case "kpi":
       return (
         <KpiCard
+          widget={resolved}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      );
+    case "gauge":
+      return (
+        <GaugeCard
           widget={resolved}
           moduleName={moduleName}
           subTileFor={subTileFor}
@@ -415,11 +427,12 @@ function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
 
 export function KpiCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   if (!isScalarDeltaData(widget.data)) return null;
-  const { value, prev } = widget.data;
+  const { value: raw, prev } = widget.data;
+  const value = applyDecimals(raw, widget.display);
   const hasDelta = widget.meta.shape === "scalar_delta" && prev !== undefined;
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
       <CardHeader className="px-4">
         <WidgetHeader
           widget={widget}
@@ -427,7 +440,7 @@ export function KpiCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           subTileFor={subTileFor}
         />
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         <div className="flex items-baseline gap-1.5">
           <span className="text-3xl font-bold tabular-nums">
             {value.toLocaleString()}
@@ -438,7 +451,85 @@ export function KpiCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
             </span>
           )}
         </div>
-        {hasDelta && <DeltaIndicator value={value} prev={prev} />}
+        {hasDelta && <DeltaIndicator value={raw} prev={prev} />}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Gauge — ค่าเดียวเทียบกับช่วงที่ตั้งไว้ (`display.min`/`max`)
+ *
+ * วาดเป็นครึ่งวงกลมด้วย SVG ไม่ใช่ recharts เพราะ RadialBarChart ต้องแปลงข้อมูล
+ * เป็น series ก่อนทั้งที่ตรงนี้มีค่าเดียว และคุมมุม/ความหนาได้ตรงกว่า
+ *
+ * ผู้ใช้ที่ยังไม่ตั้ง `max` จะได้สเกลที่เดาให้ (ปัดขึ้นเป็นเลขกลม) พร้อมป้ายบอกว่า
+ * เป็นค่าประมาณ — gauge ที่ไม่รู้ปลายทางอ่านความหมายไม่ได้ ต้องบอกให้รู้ตัว
+ */
+export function GaugeCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
+  const t = useTranslations("dashboardWidget");
+  if (!isScalarDeltaData(widget.data)) return null;
+  const raw = widget.data.value;
+  const value = applyDecimals(raw, widget.display);
+  const { min, max, isEstimated } = gaugeRange(raw, widget.display);
+  const ratio = Math.min(Math.max((raw - min) / (max - min), 0), 1);
+  const color = thresholdColor(raw, widget.display, "var(--chart-1)");
+
+  // ครึ่งวงกลม: เส้นรอบวง = π × r ใช้ dasharray ตัดตามสัดส่วน
+  const r = 52;
+  const circumference = Math.PI * r;
+
+  return (
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
+      <CardHeader className="px-4">
+        <WidgetHeader
+          widget={widget}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      </CardHeader>
+      <CardContent className="min-h-0 flex-1 px-4">
+        <div className="flex flex-col items-center">
+          <svg
+            viewBox="0 0 128 72"
+            className="w-full max-w-[12rem]"
+            role="img"
+            aria-label={`${value} / ${max}`}
+          >
+            <path
+              d={`M 12 64 A ${r} ${r} 0 0 1 116 64`}
+              fill="none"
+              stroke="var(--muted)"
+              strokeWidth="12"
+              strokeLinecap="round"
+            />
+            <path
+              d={`M 12 64 A ${r} ${r} 0 0 1 116 64`}
+              fill="none"
+              stroke={color}
+              strokeWidth="12"
+              strokeLinecap="round"
+              strokeDasharray={`${ratio * circumference} ${circumference}`}
+            />
+          </svg>
+          <div className="-mt-6 flex items-baseline gap-1.5">
+            <span className="text-3xl font-bold tabular-nums" style={{ color }}>
+              {value.toLocaleString()}
+            </span>
+            {widget.meta.unit && widget.meta.unit !== "฿" && (
+              <span className="text-muted-foreground text-xs">
+                {widget.meta.unit}
+              </span>
+            )}
+          </div>
+          <div className="text-muted-foreground text-micro mt-1 flex w-full max-w-[12rem] justify-between tabular-nums">
+            <span>{min.toLocaleString()}</span>
+            <span>
+              {max.toLocaleString()}
+              {isEstimated ? ` ${t("gaugeEstimated")}` : ""}
+            </span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -455,7 +546,7 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   }));
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
       <CardHeader className="px-4">
         <WidgetHeader
           widget={widget}
@@ -463,14 +554,14 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           subTileFor={subTileFor}
         />
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         {chartData.length === 0 ? (
           <p className="text-muted-foreground py-6 text-center text-xs">
             {t("noData")}
           </p>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="h-40 w-40 shrink-0">
+            <div className="aspect-square h-full shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -542,10 +633,11 @@ export function BarCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
     .sort((a, b) => b.value - a.value)
     .map((d) => ({ name: d.label, value: d.value }));
   const isCurrency = widget.meta.unit === "฿";
-  const chartHeight = Math.max(140, sorted.length * 26);
+  // แท่งบางเกินไปเมื่อบีบให้พอดีกล่อง — คงความสูงต่อแท่งไว้แล้วให้กล่องเลื่อนแทน
+  const chartHeight = Math.max(120, sorted.length * 26);
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
       <CardHeader className="px-4">
         <WidgetHeader
           widget={widget}
@@ -553,61 +645,65 @@ export function BarCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           subTileFor={subTileFor}
         />
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         {sorted.length === 0 ? (
           <p className="text-muted-foreground py-6 text-center text-xs">
             {t("noData")}
           </p>
         ) : (
-          <ResponsiveContainer width="100%" height={chartHeight}>
-            <BarChart
-              layout="vertical"
-              data={sorted}
-              margin={{ top: 0, right: 60, bottom: 0, left: 0 }}
-              barCategoryGap="20%"
-            >
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="name"
-                tick={{ fontSize: 10 }}
-                tickLine={false}
-                axisLine={false}
-                width={120}
-                interval={0}
-              />
-              <Tooltip
-                formatter={(v: number) => [
-                  `${isCurrency ? "฿" : ""}${formatValue(v, widget.meta.unit ?? "")}${
-                    !isCurrency ? ` ${widget.meta.unit ?? ""}` : ""
-                  }`,
-                  "",
-                ]}
-                contentStyle={{ fontSize: "0.6875rem" }}
-                cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-              />
-              <Bar
-                dataKey="value"
-                radius={[0, 3, 3, 0]}
-                isAnimationActive={false}
+          <div className="h-full min-h-0 overflow-y-auto">
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <BarChart
+                layout="vertical"
+                data={sorted}
+                margin={{ top: 0, right: 60, bottom: 0, left: 0 }}
+                barCategoryGap="20%"
               >
-                {sorted.map((item, i) => (
-                  <Cell
-                    key={item.name}
-                    style={{ fill: CHART_COLORS[i % CHART_COLORS.length] }}
-                  />
-                ))}
-                <LabelList
-                  dataKey="value"
-                  position="right"
-                  formatter={(v: number) =>
-                    isCurrency ? `฿${formatValue(v, "฿")}` : formatValue(v, "")
-                  }
-                  style={{ fontSize: 10, fill: "var(--foreground)" }}
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={120}
+                  interval={0}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <Tooltip
+                  formatter={(v: number) => [
+                    `${isCurrency ? "฿" : ""}${formatValue(v, widget.meta.unit ?? "")}${
+                      !isCurrency ? ` ${widget.meta.unit ?? ""}` : ""
+                    }`,
+                    "",
+                  ]}
+                  contentStyle={{ fontSize: "0.6875rem" }}
+                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                />
+                <Bar
+                  dataKey="value"
+                  radius={[0, 3, 3, 0]}
+                  isAnimationActive={false}
+                >
+                  {sorted.map((item, i) => (
+                    <Cell
+                      key={item.name}
+                      style={{ fill: CHART_COLORS[i % CHART_COLORS.length] }}
+                    />
+                  ))}
+                  <LabelList
+                    dataKey="value"
+                    position="right"
+                    formatter={(v: number) =>
+                      isCurrency
+                        ? `฿${formatValue(v, "฿")}`
+                        : formatValue(v, "")
+                    }
+                    style={{ fontSize: 10, fill: "var(--foreground)" }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -622,7 +718,7 @@ export function LineCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   const isCurrency = widget.meta.unit === "฿";
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
       <CardHeader className="px-4">
         <WidgetHeader
           widget={widget}
@@ -630,13 +726,13 @@ export function LineCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           subTileFor={subTileFor}
         />
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         {points.length === 0 ? (
           <p className="text-muted-foreground py-6 text-center text-xs">
             {t("noData")}
           </p>
         ) : (
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={points}
               margin={{ top: 8, right: 16, bottom: 0, left: -16 }}
@@ -757,7 +853,7 @@ export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
   });
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="h-full min-h-0 gap-2 overflow-hidden py-4">
       <CardHeader className="px-4">
         <WidgetHeader
           widget={widget}
@@ -765,7 +861,7 @@ export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
           subTileFor={subTileFor}
         />
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         {!data || columns.length === 0 ? (
           <p className="text-muted-foreground py-6 text-center text-xs">
             {t("noData")}
@@ -801,7 +897,7 @@ export function WidgetSkeleton({
   readonly className?: string;
 }) {
   return (
-    <Card className={cn("gap-2 py-4", className)}>
+    <Card className={cn("h-full min-h-0 gap-2 overflow-hidden py-4", className)}>
       <CardHeader className="px-4">
         <div className="flex items-start gap-3">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
@@ -811,7 +907,7 @@ export function WidgetSkeleton({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-4">
+      <CardContent className="min-h-0 flex-1 px-4">
         {variant === "kpi" && (
           <div className="space-y-2">
             <Skeleton className="h-7 w-20" />
@@ -849,12 +945,12 @@ export function WidgetSkeleton({
 export function WidgetSkeletonCards() {
   return (
     <>
-      <WidgetSkeleton variant="kpi" />
-      <WidgetSkeleton variant="kpi" />
-      <WidgetSkeleton variant="pie" className="sm:col-span-2" />
-      <WidgetSkeleton variant="bar" className="sm:col-span-2" />
-      <WidgetSkeleton variant="kpi" />
-      <WidgetSkeleton variant="kpi" />
+      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
+      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
+      <WidgetSkeleton variant="pie" className="md:col-span-3 lg:col-span-6 row-span-3" />
+      <WidgetSkeleton variant="bar" className="md:col-span-3 lg:col-span-6 row-span-3" />
+      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
+      <WidgetSkeleton variant="kpi" className="md:col-span-2 lg:col-span-3 row-span-2" />
     </>
   );
 }

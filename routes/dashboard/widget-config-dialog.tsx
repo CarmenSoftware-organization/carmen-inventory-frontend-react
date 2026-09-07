@@ -13,8 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { useDashboardDatasetPreview } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
-import type { WidgetParams } from "@/types/dashboard-widget";
+import type {
+  WidgetDisplay,
+  WidgetParams,
+  WidgetType,
+} from "@/types/dashboard-widget";
 import { WidgetRenderer } from "./sortable-widget-item";
+import { WidgetDisplayFields } from "./widget-display-fields";
 import { WidgetParamFields } from "./widget-param-fields";
 import {
   defaultParamsFor,
@@ -29,8 +34,12 @@ interface WidgetConfigDialogProps {
   readonly dataset: DashboardDataset;
   /** ค่าเดิมของ widget ที่ save แล้ว — ไม่ส่ง = ใช้ default จาก descriptor */
   readonly initialParams?: WidgetParams | null;
+  /** ค่าการแสดงผลเดิม — ไม่ส่ง = ยังไม่เคยตั้ง */
+  readonly initialDisplay?: WidgetDisplay | null;
+  /** ชนิดกราฟที่ใช้อยู่ — คุมทั้ง preview และฟิลด์ที่โผล่ (min/max เฉพาะ gauge) */
+  readonly widgetType?: WidgetType;
   readonly isPending?: boolean;
-  readonly onSubmit: (params: WidgetParams) => void;
+  readonly onSubmit: (params: WidgetParams, display: WidgetDisplay) => void;
 }
 
 /**
@@ -42,6 +51,8 @@ export function WidgetConfigDialog({
   onOpenChange,
   dataset,
   initialParams,
+  initialDisplay,
+  widgetType,
   isPending,
   onSubmit,
 }: WidgetConfigDialogProps) {
@@ -52,9 +63,13 @@ export function WidgetConfigDialog({
   const [values, setValues] = useState<WidgetParams>(() =>
     defaultParamsFor(params),
   );
+  const [display, setDisplay] = useState<WidgetDisplay>({});
+  const renderType = widgetType ?? defaultWidgetTypeFor(dataset);
 
   useEffect(() => {
-    if (open) setValues(initialParams ?? defaultParamsFor(dataset.params));
+    if (!open) return;
+    setValues(initialParams ?? defaultParamsFor(dataset.params));
+    setDisplay(initialDisplay ?? {});
     // seed เฉพาะตอนเปิด/เปลี่ยน dataset — ไม่ผูกกับ values ที่ผู้ใช้กำลังพิมพ์
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, dataset.id]);
@@ -89,6 +104,18 @@ export function WidgetConfigDialog({
 
           <div className="space-y-1.5">
             <h3 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
+              {t("display.section")}
+            </h3>
+            <WidgetDisplayFields
+              widgetType={renderType}
+              value={display}
+              onChange={setDisplay}
+              disabled={isPending}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <h3 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
               {t("preview")}
             </h3>
             {isError ? (
@@ -104,10 +131,11 @@ export function WidgetConfigDialog({
                 widget={{
                   id: "preview",
                   dataset_id: dataset.id,
-                  widget_type: defaultWidgetTypeFor(dataset),
+                  widget_type: renderType,
                   title: dataset.name,
                   order_index: 0,
                   params: values,
+                  display,
                   meta: preview.meta,
                   data: preview.data,
                 }}
@@ -130,7 +158,7 @@ export function WidgetConfigDialog({
           </Button>
           <Button
             type="button"
-            onClick={() => onSubmit(values)}
+            onClick={() => onSubmit(values, display)}
             disabled={isPending}
           >
             <Save />

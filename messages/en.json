@@ -374,7 +374,8 @@
     "sectionKpi": "Metrics",
     "sectionDistribution": "Distribution",
     "sectionComparison": "Comparison",
-    "sectionTrends": "Trends"
+    "sectionTrends": "Trends",
+    "gaugeEstimated": "(auto)"
   },
   "profileGate": {
     "loadingTitle": "Loading your workspace",
@@ -3924,6 +3925,37 @@
         "line": "Line",
         "area": "Area",
         "table": "Table"
+      },
+      "display": {
+        "section": "Appearance",
+        "width": "Width",
+        "widthOption": {
+          "3": "Quarter",
+          "4": "Third",
+          "6": "Half",
+          "8": "Two thirds",
+          "9": "Three quarters",
+          "12": "Full row"
+        },
+        "height": "Chart height",
+        "heightOption": {
+          "2": "Short",
+          "3": "Medium",
+          "4": "Tall",
+          "6": "Extra tall"
+        },
+        "decimals": "Decimals",
+        "min": "Scale from",
+        "max": "Scale to",
+        "maxPlaceholder": "auto",
+        "threshold": "Warn above",
+        "thresholdColor": "Warning colour",
+        "color": {
+          "chart-4": "Amber",
+          "chart-2": "Teal",
+          "chart-1": "Blue",
+          "destructive": "Red"
+        }
       }
     },
     "greeting": {

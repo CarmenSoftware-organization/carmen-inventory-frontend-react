@@ -9,7 +9,7 @@ import type { DatasetShape, WidgetType } from "@/types/dashboard-widget";
  * ตัดกันแล้วได้สิ่งที่ "สมเหตุสมผล และวาดออกมาได้จริง" — เดิม frontend เก็บ map
  * ของ backend ไว้เองแล้ว drift (time_series ขาด bar, categorical ขาด table)
  *
- * ที่ยังไม่มี: `gauge` `sparkline` `heatmap` (ไม่มีการ์ด) และ `table` อ่านได้เฉพาะ
+ * ที่ยังไม่มี: `sparkline` `heatmap` (ไม่มีการ์ด) และ `table` อ่านได้เฉพาะ
  * shape `table` เพราะ `TableCard` ต้องการ `{ columns, rows }` — payload ของ
  * categorical/ranked/matrix ยังไม่มี adapter แปลงให้
  */
@@ -18,6 +18,7 @@ const RENDERERS: readonly {
   readonly reads: readonly DatasetShape[];
 }[] = [
   { type: "kpi", reads: ["scalar", "scalar_delta"] },
+  { type: "gauge", reads: ["scalar", "scalar_delta"] },
   { type: "pie", reads: ["categorical", "ranked"] },
   { type: "bar", reads: ["categorical", "ranked"] },
   { type: "line", reads: ["time_series"] },

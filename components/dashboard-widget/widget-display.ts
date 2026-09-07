@@ -1,0 +1,153 @@
+import type { WidgetDisplay } from "@/types/dashboard-widget";
+
+/**
+ * กริดของ dashboard — 12 คอลัมน์บนจอใหญ่ 6 บนจอกลาง เต็มแถวบนมือถือ
+ * 1 แถว = 4rem (คู่กับ `auto-rows-[4rem]` ของ container)
+ *
+ * ต้องเป็น string เต็มตัวในตาราง ไม่ใช่ประกอบด้วย template literal — Tailwind
+ * สแกน class จาก source แบบ static ถ้าประกอบชื่อตอน runtime จะไม่มี class นั้นใน bundle
+ */
+const COL_SPAN_LG: Record<number, string> = {
+  1: "lg:col-span-1",
+  2: "lg:col-span-2",
+  3: "lg:col-span-3",
+  4: "lg:col-span-4",
+  5: "lg:col-span-5",
+  6: "lg:col-span-6",
+  7: "lg:col-span-7",
+  8: "lg:col-span-8",
+  9: "lg:col-span-9",
+  10: "lg:col-span-10",
+  11: "lg:col-span-11",
+  12: "lg:col-span-12",
+};
+
+/** จอกลาง 6 คอลัมน์ = ครึ่งหนึ่งของความกว้างที่ตั้งไว้ (ปัดขึ้น, อย่างน้อย 1) */
+const COL_SPAN_MD: Record<number, string> = {
+  1: "md:col-span-1",
+  2: "md:col-span-2",
+  3: "md:col-span-3",
+  4: "md:col-span-4",
+  5: "md:col-span-5",
+  6: "md:col-span-6",
+};
+
+const ROW_SPAN: Record<number, string> = {
+  1: "row-span-1",
+  2: "row-span-2",
+  3: "row-span-3",
+  4: "row-span-4",
+  5: "row-span-5",
+  6: "row-span-6",
+};
+
+/** ความกว้าง/สูงเริ่มต้นต่อชนิดกราฟ เมื่อผู้ใช้ยังไม่ได้ตั้งเอง */
+const DEFAULT_SIZE: Record<string, { width: number; height: number }> = {
+  kpi: { width: 3, height: 2 },
+  gauge: { width: 3, height: 3 },
+  pie: { width: 6, height: 3 },
+  bar: { width: 6, height: 3 },
+  line: { width: 6, height: 3 },
+  area: { width: 6, height: 3 },
+  table: { width: 12, height: 4 },
+};
+
+const clamp = (n: number, lo: number, hi: number) =>
+  Math.min(Math.max(Math.round(n), lo), hi);
+
+/**
+ * ขนาดของ widget เป็นหน่วยกริด — ค่าที่ผู้ใช้ตั้งมาก่อน ไม่งั้นใช้ค่าตามชนิดกราฟ
+ *
+ * @param widgetType - ชนิดกราฟ
+ * @param display - ค่าตั้งการแสดงผล (อาจไม่มี)
+ * @returns `{ width, height }` เป็นหน่วยคอลัมน์/แถว
+ */
+export function gridSize(
+  widgetType: string,
+  display?: WidgetDisplay | null,
+): { width: number; height: number } {
+  const fallback = DEFAULT_SIZE[widgetType] ?? { width: 6, height: 3 };
+  return {
+    width: clamp(display?.width ?? fallback.width, 1, 12),
+    height: clamp(display?.height ?? fallback.height, 1, 6),
+  };
+}
+
+/**
+ * class ของช่องที่ widget กินบนกริด
+ *
+ * `row-span` คือหัวใจ: การ์ดสูงเท่าที่ประกาศ ไม่ยืดตามการ์ดที่สูงที่สุดในแถว
+ * (พฤติกรรมเดิมของ `align-items: stretch` ที่ทำให้ KPI ข้าง ๆ กราฟใหญ่บวมตาม)
+ *
+ * @param widgetType - ชนิดกราฟ
+ * @param display - ค่าตั้งการแสดงผล
+ * @returns class string สำหรับ grid item
+ */
+export function gridClasses(
+  widgetType: string,
+  display?: WidgetDisplay | null,
+): string {
+  const { width, height } = gridSize(widgetType, display);
+  const md = clamp(Math.ceil(width / 2), 1, 6);
+  return `${COL_SPAN_MD[md]} ${COL_SPAN_LG[width]} ${ROW_SPAN[height]}`;
+}
+
+/**
+ * ปัดทศนิยมตามที่ผู้ใช้ตั้ง — ไม่ได้ตั้ง = ปล่อยตามเดิม (ไม่บังคับปัด)
+ *
+ * @param value - ตัวเลขดิบ
+ * @param display - ค่าตั้งการแสดงผล
+ * @returns ตัวเลขที่ปัดแล้ว หรือค่าเดิมเมื่อไม่ได้ตั้ง
+ */
+export function applyDecimals(
+  value: number,
+  display?: WidgetDisplay | null,
+): number {
+  const d = display?.decimals;
+  if (d === undefined || d === null) return value;
+  return Number(value.toFixed(clamp(d, 0, 4)));
+}
+
+/**
+ * ช่วงสเกลของ gauge
+ *
+ * `max` ที่ไม่ได้ตั้งคือปัญหาจริง — gauge ที่ไม่รู้ปลายทางอ่านไม่ได้ความหมาย จึงต้อง
+ * เดาให้ดูไม่หลอกตา: ปัดขึ้นเป็นเลขกลม ๆ เหนือค่าปัจจุบัน แล้วให้ dialog ชวนตั้งเอง
+ *
+ * @param value - ค่าปัจจุบัน
+ * @param display - ค่าตั้งการแสดงผล
+ * @returns `{ min, max, isEstimated }` — `isEstimated` = ยังไม่ได้ตั้ง max เอง
+ */
+export function gaugeRange(
+  value: number,
+  display?: WidgetDisplay | null,
+): { min: number; max: number; isEstimated: boolean } {
+  const min = display?.min ?? 0;
+  if (display?.max !== undefined && display.max !== null && display.max > min) {
+    return { min, max: display.max, isEstimated: false };
+  }
+  const span = Math.max(value - min, 1);
+  const step = 10 ** Math.floor(Math.log10(span));
+  const max = min + Math.max(Math.ceil((span * 1.25) / step) * step, step);
+  return { min, max, isEstimated: true };
+}
+
+/**
+ * สีของค่าปัจจุบันตาม threshold ที่ตั้งไว้ — ขีดที่ค่าผ่านแล้วและสูงที่สุดชนะ
+ *
+ * @param value - ค่าปัจจุบัน
+ * @param display - ค่าตั้งการแสดงผล
+ * @param fallback - สีเมื่อไม่มี threshold ไหนถูกข้าม
+ * @returns CSS color
+ */
+export function thresholdColor(
+  value: number,
+  display: WidgetDisplay | null | undefined,
+  fallback: string,
+): string {
+  const crossed = (display?.thresholds ?? [])
+    .filter((t) => value >= t.value)
+    .sort((a, b) => a.value - b.value)
+    .at(-1);
+  return crossed?.color ?? fallback;
+}
