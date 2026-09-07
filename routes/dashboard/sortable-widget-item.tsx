@@ -1,7 +1,20 @@
 import { useEffect } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CircleAlert, GripVertical, Settings2, Trash2 } from "lucide-react";
+import {
+  AreaChart,
+  BarChart3,
+  Check,
+  CircleAlert,
+  GripVertical,
+  Hash,
+  LineChart,
+  PieChart,
+  Settings2,
+  Table,
+  Trash2,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
   BarCard,
@@ -12,8 +25,16 @@ import {
   WidgetSkeleton,
   type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
+import { availableRenders } from "@/components/dashboard-widget/render-support";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useInViewport } from "@/hooks/use-in-viewport";
 import { cn } from "@/lib/utils";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
@@ -23,6 +44,7 @@ import type {
   DatasetMeta,
   DatasetShape,
   MyDashboardWidget,
+  WidgetType,
 } from "@/types/dashboard-widget";
 import {
   inferModuleName,
@@ -48,7 +70,19 @@ interface SortableWidgetItemProps {
    * (ดู `SavedWidgetsSection`) เรียกครั้งเดียวต่อการ์ด
    */
   readonly onVisible: (widgetId: string) => void;
+  /** สลับชนิดกราฟ — ปุ่มจะโผล่เมื่อ dataset นี้วาดได้มากกว่าหนึ่งแบบ */
+  readonly onChangeType?: (widgetType: WidgetType) => void;
 }
+
+/** ไอคอนประจำชนิดกราฟ — ใช้ทั้งบนปุ่มและในเมนู */
+const RENDER_ICON: Record<string, LucideIcon> = {
+  kpi: Hash,
+  pie: PieChart,
+  bar: BarChart3,
+  line: LineChart,
+  area: AreaChart,
+  table: Table,
+};
 
 /** col-span ตาม widget_type — match procurement/inventory dashboards */
 function getColSpan(widgetType: string): string {
@@ -65,6 +99,7 @@ export function SortableWidgetItem({
   dataset,
   onConfigure,
   onVisible,
+  onChangeType,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
   const {
@@ -89,6 +124,13 @@ export function SortableWidgetItem({
   const displayTitle = widget.title || detail?.meta.name || widget.dataset_id;
   const moduleName = inferModuleName(widget.dataset_id);
   const colSpanClass = getColSpan(widget.widget_type);
+  // shape มาจาก catalogue ก่อน (รู้ตั้งแต่ยังไม่โหลดข้อมูล) แล้วค่อย fallback ไป meta
+  // ของ payload สำหรับ widget ที่ dataset ไม่อยู่ใน catalogue
+  const renders = availableRenders(
+    dataset?.shape ?? detail?.meta.shape,
+    dataset?.supported_renders,
+  );
+  const CurrentIcon = RENDER_ICON[widget.widget_type] ?? BarChart3;
 
   return (
     <li
@@ -114,6 +156,40 @@ export function SortableWidgetItem({
         >
           <GripVertical className="size-3.5" aria-hidden="true" />
         </button>
+        {renders.length > 1 && onChangeType && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={t("chartTypeAria", { title: displayTitle })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <CurrentIcon className="size-3.5" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-36">
+              <DropdownMenuLabel>{t("chartType.label")}</DropdownMenuLabel>
+              {renders.map((r) => {
+                const Icon = RENDER_ICON[r] ?? BarChart3;
+                return (
+                  <DropdownMenuItem
+                    key={r}
+                    onSelect={() => onChangeType(r)}
+                    className="gap-2"
+                  >
+                    <Icon className="size-3.5" aria-hidden="true" />
+                    <span className="flex-1">{t(`chartType.${r}`)}</span>
+                    {r === widget.widget_type && (
+                      <Check className="size-3.5" aria-hidden="true" />
+                    )}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         {!!dataset?.params?.length && onConfigure && (
           <Button
             type="button"

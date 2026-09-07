@@ -3914,6 +3914,16 @@
         "3days": "Last 3 days",
         "7days": "Last 7 days",
         "1month": "Last month"
+      },
+      "chartTypeAria": "Change chart type for {title}",
+      "chartType": {
+        "label": "Chart type",
+        "kpi": "Number",
+        "pie": "Pie",
+        "bar": "Bar",
+        "line": "Line",
+        "area": "Area",
+        "table": "Table"
       }
     },
     "greeting": {
