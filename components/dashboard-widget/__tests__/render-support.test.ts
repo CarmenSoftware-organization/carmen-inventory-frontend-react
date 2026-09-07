@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
-import {
-  availableRenders,
-  defaultRenderFor,
-} from "../render-support";
+import en from "@/messages/en.json";
+import th from "@/messages/th.json";
+import { availableRenders, defaultRenderFor } from "../render-support";
 
 describe("availableRenders", () => {
   // ชุดจริง = สิ่งที่ backend บอกว่าสมเหตุสมผล ∩ การ์ดที่ frontend มี
@@ -55,5 +54,35 @@ describe("defaultRenderFor", () => {
 
   it("falls back to kpi when nothing is drawable", () => {
     expect(defaultRenderFor("matrix", ["heatmap"])).toBe("kpi");
+  });
+});
+
+// เมนูสลับกราฟตั้งชื่อปุ่มด้วย `chartType.<type>` ที่ประกอบตอน runtime — คีย์ที่ขาด
+// จึงไม่มีอะไรจับได้ นอกจากผู้ใช้เห็น "dashboard.savedWidget.chartType.gauge" บนจอ
+// (เกิดมาแล้วตอนเพิ่มการ์ด gauge) เทสต์นี้กันซ้ำตอนเพิ่ม sparkline/heatmap
+describe("chart type labels", () => {
+  const SHAPES = [
+    "scalar",
+    "scalar_delta",
+    "categorical",
+    "time_series",
+    "ranked",
+    "matrix",
+    "table",
+  ];
+  const offered = [...new Set(SHAPES.flatMap((s) => availableRenders(s)))];
+
+  it.each([
+    ["en", en],
+    ["th", th],
+  ])("%s has a label for every render the menu can offer", (_locale, msgs) => {
+    const labels = (
+      msgs as unknown as {
+        dashboard: { savedWidget: { chartType: Record<string, string> } };
+      }
+    ).dashboard.savedWidget.chartType;
+    for (const type of offered) {
+      expect(labels[type], `missing chartType.${type}`).toBeTruthy();
+    }
   });
 });

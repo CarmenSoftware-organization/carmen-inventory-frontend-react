@@ -3920,6 +3920,7 @@
       "chartType": {
         "label": "Chart type",
         "kpi": "Number",
+        "gauge": "Gauge",
         "pie": "Pie",
         "bar": "Bar",
         "line": "Line",
