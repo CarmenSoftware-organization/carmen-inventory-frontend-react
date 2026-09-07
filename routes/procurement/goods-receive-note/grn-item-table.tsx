@@ -166,6 +166,10 @@ export function GrnItemTable({
   const [autoOpenLocationKey, setAutoOpenLocationKey] = useState<string | null>(
     null,
   );
+  // กลุ่มที่ต้องพาเคอร์เซอร์ไปลงช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ)
+  const [autoFocusPriceKey, setAutoFocusPriceKey] = useState<string | null>(
+    null,
+  );
   // กลุ่มที่ location lookup ต้องเปิดอยู่ตอนนี้ (คุมจากข้างนอก ไม่ใช่ defaultOpen
   // เพราะแถวถูก mount ไปแล้วตั้งแต่ตอนกดเพิ่มรายการ)
   const [openLocationKey, setOpenLocationKey] = useState<string | null>(null);
@@ -236,12 +240,20 @@ export function GrnItemTable({
    * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
    *
    * Radix คืน focus ให้ปุ่มที่เพิ่งกดเป็นค่า default ซึ่งกลายเป็นทางตัน: ผู้ใช้พิมพ์
-   * จำนวนต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
-   * ที่นี่จึงเปิด location ต่อให้เลย (เพิ่งกดได้เพราะ lookup ปลดล็อกตาม product_id)
-   * แล้วพอเลือกคลังเสร็จ GrnLocationRow จะโฟกัสช่องจำนวนต่อเอง
+   * ต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
+   *
+   * เส้นทางคือ **สินค้า → ราคา → คลัง → จำนวน** ราคาแทรกกลางเพราะมันเป็นของ
+   * สินค้า กรอกทีเดียวจบทั้งกลุ่ม ส่วนคลังกับจำนวนต้องกรอกซ้ำทุกแถว — ถามของ
+   * ที่ถามครั้งเดียวให้จบก่อน แล้วค่อยเข้าลูป
    */
   const handleProductPicked = (groupKey: string) => {
     setAutoOpenProductKey(null);
+    setAutoFocusPriceKey(groupKey);
+  };
+
+  /** กรอกราคาเสร็จ (Enter) → เปิดตัวเลือกคลังของแถวแรกในกลุ่มต่อ */
+  const handlePriceCommitted = (groupKey: string) => {
+    setAutoFocusPriceKey(null);
     setOpenLocationKey(groupKey);
   };
 
@@ -267,10 +279,12 @@ export function GrnItemTable({
     plainText,
     isPo: !isManual,
     autoOpenProductKey,
+    autoFocusPriceKey,
     autoOpenLocationKey,
     openLocationKey,
     onLocationOpenChange: (key, open) => setOpenLocationKey(open ? key : null),
     onProductPicked: handleProductPicked,
+    onPriceCommitted: handlePriceCommitted,
     onAddLocation: handleAddLocation,
     onDeleteGroup: setDeleteGroup,
     onDeleteItem: removeItem,
@@ -299,6 +313,7 @@ export function GrnItemTable({
     prependItem({ ...EMPTY_DETAIL, _group_key: key });
     setAutoOpenProductKey(key);
     setAutoOpenLocationKey(null);
+    setAutoFocusPriceKey(null);
     // auto-expand product ใหม่ (บนสุด) ให้กรอก location ได้เลย
     table.setExpanded((prev) => ({
       ...(typeof prev === "object" ? prev : {}),

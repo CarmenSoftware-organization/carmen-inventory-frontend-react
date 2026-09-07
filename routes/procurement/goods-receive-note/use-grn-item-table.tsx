@@ -1,7 +1,6 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import {
   Controller,
-  useFormState,
   useWatch,
   type Control,
   type UseFormReturn,
@@ -217,59 +216,98 @@ const GroupQtySum = memo(function GroupQtySum({
  * ที่รับของคนละที่จึงต้องใช้ราคาเดียวกันเสมอ — แถว location แสดงอย่างเดียว
  * ส่วน payload ยังส่ง `received_price` ราย detail ตามที่ backend ต้องการเหมือนเดิม
  *
+ * **ต้องเป็น `Controller` เท่านั้น อย่าเปลี่ยนไปใช้ `useWatch` + `setValue`** —
+ * นี่เป็นช่องกรอกช่องเดียวในโปรเจกต์ที่อยู่ใน cell ของ `DataGrid` (ที่อื่น input
+ * อยู่ในตารางย่อยซึ่งเป็น JSX ธรรมดา) เคยเขียนเป็น useWatch แล้วโฟกัสหลุดทันที
+ * ที่พิมพ์ตัวแรก เพราะ cell ถูกสร้างใหม่แล้ว `InputAmount` ที่ถือ draft/focused
+ * เป็น state ภายในโดน remount · Controller คุม subscription ไว้ในตัวเอง cell
+ * จึงไม่ถูกกระตุ้นจากข้างนอก (เทสต์ jsdom จับเรื่องนี้ไม่ได้ — vitest ไม่ได้รัน
+ * react-compiler ที่ vite.config เปิดไว้)
+ *
  * ใช้ `InputAmount` (text input ที่ sanitize เอง) ไม่ใช่ `<input type="number">`:
  * ระหว่างพิมพ์ "17." เบราว์เซอร์อ่าน valueAsNumber เป็น NaN → ยอดต่อบรรทัดแกว่ง
  * และทศนิยมหายกลางคัน
- *
- * error ของ `unit_price` ผูกอยู่กับ item ราย index (schema เช็คทีละแถว) — แถว
- * location ไม่มีช่องให้โชว์แล้ว จึงยกมาแสดงที่นี่ พอมี index ไหนในกลุ่มติดก็พอ
  */
 const GroupUnitPrice = memo(function GroupUnitPrice({
   form,
   indices,
   disabled,
+  autoFocus,
+  onCommit,
 }: {
   form: UseFormReturn<GrnFormValues>;
   indices: number[];
   disabled: boolean;
+  /** เพิ่งเลือกสินค้าเสร็จ — ให้เคอร์เซอร์มาลงที่ช่องนี้ต่อ */
+  autoFocus?: boolean;
+  /** กรอกราคาเสร็จ (Enter/Tab) — ไปเปิดตัวเลือกคลังต่อ */
+  onCommit?: () => void;
 }) {
   "use no memo";
   const primary = indices[0];
-  const price = useWatch({
-    control: form.control,
-    name: `items.${primary}.unit_price`,
-  });
-  const { errors } = useFormState({ control: form.control, name: "items" });
-  const error = indices
-    .map((i) => errors.items?.[i]?.unit_price?.message)
-    .find(Boolean);
+  const ref = useRef<HTMLInputElement>(null);
+
+  // autoFocus ของ React ทำงานตอน mount เท่านั้น แต่ cell ตัวนี้ mount ไปแล้ว
+  // ตั้งแต่แถวเกิด จังหวะที่ต้องโฟกัสคือตอน "เพิ่งเลือกสินค้า" ซึ่งมาทีหลัง
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus();
+  }, [autoFocus]);
 
   if (disabled) {
-    return (
-      <span className="text-foreground text-xs font-medium tabular-nums">
-        {formatCurrency(Number(price) || 0)}
-      </span>
-    );
+    return <GroupUnitPricePlain control={form.control} index={primary} />;
   }
 
   return (
-    <InputAmount
-      // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
-      className={cn("h-8 w-full text-right text-xs", error && "pl-7")}
-      error={error}
-      errorIconAlign="left"
-      value={Number(price) || 0}
-      onValueChange={(v) => {
-        // เขียนทุกคลังในกลุ่มพร้อมกัน — ตัวที่ทำให้ "ราคาเดียวทั้งกลุ่ม" เป็นจริง
-        // shouldValidate เพื่อให้ error ของแถวที่ยังราคาเป็น 0 หายทันทีที่กรอก
-        for (const i of indices) {
-          form.setValue(`items.${i}.unit_price`, v, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-        }
-      }}
+    <Controller
+      control={form.control}
+      name={`items.${primary}.unit_price`}
+      render={({ field, fieldState }) => (
+        <InputAmount
+          ref={ref}
+          // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
+          className={cn(
+            "h-8 w-full text-right text-xs",
+            fieldState.error && "pl-7",
+          )}
+          error={fieldState.error?.message}
+          errorIconAlign="left"
+          // Enter = กรอกเสร็จแล้ว ไปเลือกคลังต่อ · preventDefault กัน Enter ใน
+          // ฟอร์มไปกด submit แทน (ทั้งใบยังกรอกไม่ครบด้วยซ้ำ)
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            onCommit?.();
+          }}
+          value={Number(field.value ?? 0)}
+          onValueChange={(v) => {
+            field.onChange(v);
+            // คลังที่เหลือตามหัวไปเงียบ ๆ — ไม่ validate ต่อ ให้ Controller ของ
+            // แถวหัวเป็นคนเดียวที่คุมจังหวะ validate ตาม mode ของฟอร์ม
+            for (const i of indices) {
+              if (i === primary) continue;
+              form.setValue(`items.${i}.unit_price`, v, { shouldDirty: true });
+            }
+          }}
+        />
+      )}
     />
+  );
+});
+
+/** ราคาของกลุ่มในโหมดอ่าน — ทุกคลังราคาเท่ากัน อ่านจากแถวแรกพอ */
+const GroupUnitPricePlain = memo(function GroupUnitPricePlain({
+  control,
+  index,
+}: {
+  control: Control<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const price = useWatch({ control, name: `items.${index}.unit_price` });
+  return (
+    <span className="text-foreground text-xs font-medium tabular-nums">
+      {formatCurrency(Number(price) || 0)}
+    </span>
   );
 });
 
@@ -403,12 +441,16 @@ interface UseGrnItemTableOptions {
   plainText: boolean;
   isPo: boolean;
   autoOpenProductKey: string | null;
+  /** กลุ่มที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
+  autoFocusPriceKey: string | null;
   autoOpenLocationKey: string | null;
   /** กลุ่มที่ location lookup ต้องเปิดอยู่ (คุมจากข้างนอก) */
   openLocationKey: string | null;
   onLocationOpenChange: (groupKey: string, open: boolean) => void;
   /** เลือกสินค้าของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
   onProductPicked: (groupKey: string) => void;
+  /** กรอกราคาของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onPriceCommitted: (groupKey: string) => void;
   onAddLocation: (group: GrnGroup) => void;
   onDeleteGroup: (group: GrnGroup) => void;
   onDeleteItem: (index: number) => void;
@@ -422,10 +464,12 @@ export function useGrnItemTable({
   plainText,
   isPo,
   autoOpenProductKey,
+  autoFocusPriceKey,
   autoOpenLocationKey,
   openLocationKey,
   onLocationOpenChange,
   onProductPicked,
+  onPriceCommitted,
   onAddLocation,
   onDeleteGroup,
   onDeleteItem,
@@ -607,6 +651,8 @@ export function useGrnItemTable({
             form={form}
             indices={row.original.indices}
             disabled={disabled}
+            autoFocus={row.original.key === autoFocusPriceKey}
+            onCommit={() => onPriceCommitted(row.original.key)}
           />
         ),
       },
@@ -733,8 +779,10 @@ export function useGrnItemTable({
     plainText,
     isPo,
     autoOpenProductKey,
+    autoFocusPriceKey,
     autoOpenLocationKey,
     onAddLocation,
+    onPriceCommitted,
     onDeleteGroup,
     onDeleteItem,
     tfl,
