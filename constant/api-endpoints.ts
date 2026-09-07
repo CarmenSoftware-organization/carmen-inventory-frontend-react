@@ -59,8 +59,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/credit-note-reasons`,
-  CONFIG_LOCATION_USER: (buCode: string, userId: string) =>
-    `/api/proxy/api/config/${buCode}/locations-users/${userId}`,
   /** ผู้ใช้รายคน (อ่าน/แก้ไข) — แทน user-application-roles/{id} ของเดิม */
   CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/users/${userId}`,
@@ -91,8 +89,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/delivery-points`,
   DEPARTMENTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/departments`,
-  DEPARTMENT_USER_BY_USER: (buCode: string, userId: string) =>
-    `/api/proxy/api/config/${buCode}/department-users/user/${userId}`,
   DOCUMENTS: (buCode: string) => `/api/proxy/api/${buCode}/documents`,
   DOCUMENTS_SUMMARY: (buCode: string) =>
     `/api/proxy/api/${buCode}/documents/summary`,

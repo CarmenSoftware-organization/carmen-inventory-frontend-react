@@ -1,44 +1,50 @@
-import { Building2 } from "lucide-react";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { DepartmentRef } from "@/types/user";
-import { AssignSection, EmptyState } from "./user-assigned-ui";
+import { LookupDepartment } from "@/components/lookup/lookup-department";
+import { FieldPlainText } from "@/components/ui/field";
+import { AssignSection } from "./user-assigned-ui";
+import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 
 interface DepartmentsSectionProps {
-  readonly memberDepartment: DepartmentRef | null;
-  readonly isLoading: boolean;
+  readonly form: UseFormReturn<UserAssignedFormValues>;
+  readonly isDisabled: boolean;
+  /** ชื่อแผนกที่สังกัดอยู่ตอนเปิดหน้า — มากับตัวผู้ใช้แล้ว */
+  readonly departmentName: string | undefined;
 }
 
+/**
+ * แผนกที่ผู้ใช้สังกัด — **เลือกได้ค่าเดียว** จึงเป็น lookup ไม่ใช่ชุด checkbox
+ *
+ * โหมดดูแสดงชื่อที่มากับตัวผู้ใช้ตรง ๆ ไม่ผ่าน `readOnly` ของ `LookupDepartment`
+ * เพราะตัวนั้นต้องลากทะเบียนแผนกทั้ง BU มาแปลง id เป็นชื่อ ทั้งที่ชื่ออยู่ในมือ
+ * แล้ว — ทะเบียนถูกยิงตอนกด Edit เท่านั้น
+ */
 export function DepartmentsSection({
-  memberDepartment,
-  isLoading,
+  form,
+  isDisabled,
+  departmentName,
 }: DepartmentsSectionProps) {
   const t = useTranslations("systemAdmin.user");
+
   return (
     <AssignSection
       title={t("departmentsTitle")}
       description={t("departmentsDesc")}
     >
-      {isLoading ? (
-        <Skeleton className="h-10 w-full rounded-lg" />
-      ) : !memberDepartment ? (
-        <EmptyState
-          icon={Building2}
-          title={t("notAssigned")}
-          desc={t("notAssignedDesc")}
-        />
+      {isDisabled ? (
+        <FieldPlainText>{departmentName}</FieldPlainText>
       ) : (
-        <div className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs">
-          <Building2
-            className="text-muted-foreground size-3.5 shrink-0"
-            aria-hidden="true"
-          />
-          <span className="text-micro font-semibold">
-            {memberDepartment.code}
-          </span>
-          <span className="text-muted-foreground/60">·</span>
-          <span>{memberDepartment.name}</span>
-        </div>
+        <Controller
+          control={form.control}
+          name="department_id"
+          render={({ field }) => (
+            <LookupDepartment
+              value={field.value}
+              onValueChange={field.onChange}
+              className="w-full"
+            />
+          )}
+        />
       )}
     </AssignSection>
   );

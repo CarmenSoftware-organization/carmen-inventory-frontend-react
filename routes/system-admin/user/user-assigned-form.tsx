@@ -10,25 +10,23 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
+import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useRole } from "../shared/use-role";
-import {
-  useUpdateUser,
-  useUserLocations,
-  useUserDepartments,
-} from "@/hooks/use-user";
+import { useUpdateUser } from "@/hooks/use-user";
 import type { UserDetail } from "@/types/user";
 import type { FormMode } from "@/types/form";
 import {
-  userRolesSchema,
+  userAssignedSchema,
   getDefaultValues,
-  buildRolePatch,
-  type UserRolesFormValues,
-} from "./user-roles-form-schema";
+  buildUserPatch,
+  type UserAssignedFormValues,
+} from "./user-assigned-form-schema";
 import { UserAvatar } from "./user-assigned-ui";
 import { RolesSection } from "./user-assigned-roles";
 import { DepartmentsSection } from "./user-assigned-departments";
 import { LocationsSection } from "./user-assigned-locations";
 import { BackButton } from "@/components/share/back-button";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface UserAssignedFormProps {
   readonly user: UserDetail;
@@ -46,47 +44,41 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const updateUser = useUpdateUser();
   const roles = rolesData?.data ?? [];
 
-  // คลังเป็นข้อมูลอ่านอย่างเดียวในหน้านี้ — ผูก/ถอนคลังทำที่ /config/location
-  const { data: userLocations = [], isLoading: locationsLoading } =
-    useUserLocations(user.user_id);
+  // ค่าตั้งต้นของทั้งสามส่วนมาพร้อมตัวผู้ใช้ในนัดเดียว — เก็บไว้เทียบตอน submit
+  // ว่าอะไรเปลี่ยนบ้าง (PATCH รับ diff ไม่ใช่ทั้งชุด)
+  const initialValues = getDefaultValues(user);
 
-  const { data: userDepartments, isLoading: departmentsLoading } =
-    useUserDepartments(user.user_id);
+  // middlename เพิ่งมากับสัญญาใหม่ — ชื่อเต็มจึงตรงกับที่การ์ดในหน้ารายการแสดง
+  const fullName = [
+    user.user.firstname,
+    user.user.middlename,
+    user.user.lastname,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  const memberDepartment = userDepartments?.department ?? null;
-
-  const initialRoleIds = user.application_roles.map(
-    (r) => r.application_role_id,
-  );
-
-  const form = useForm<UserRolesFormValues>({
-    resolver: zodResolver(userRolesSchema) as Resolver<UserRolesFormValues>,
-    defaultValues: getDefaultValues(user),
+  const form = useForm<UserAssignedFormValues>({
+    resolver: zodResolver(
+      userAssignedSchema,
+    ) as Resolver<UserAssignedFormValues>,
+    defaultValues: initialValues,
   });
 
   const isPending = updateUser.isPending;
   const isDisabled = isView || isPending;
 
-  const onSubmit = async (values: UserRolesFormValues) => {
-    const { add: addRoles, remove: removeRoles } = buildRolePatch(
-      initialRoleIds,
-      values.role_ids,
-    );
+  const onSubmit = async (values: UserAssignedFormValues) => {
+    const payload = buildUserPatch(initialValues, values);
 
-    if (addRoles.length === 0 && removeRoles.length === 0) {
+    // กด Save ทั้งที่ไม่ได้แตะอะไร = กลับไปโหมดดูเฉย ๆ ไม่ต้องกวน backend
+    if (!payload) {
       setMode("view");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await updateUser.mutateAsync({
-        user_id: user.user_id,
-        application_role_id: {
-          ...(addRoles.length > 0 && { add: addRoles }),
-          ...(removeRoles.length > 0 && { remove: removeRoles }),
-        },
-      });
+      await updateUser.mutateAsync({ user_id: user.user_id, ...payload });
       toast.success(tt("updateSuccess", { entity: tfl("user") }));
       navigate("/system-admin/user");
     } catch {
@@ -113,7 +105,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
 
   const handleCancel = () => {
     discard.confirm(() => {
-      form.reset({ role_ids: initialRoleIds });
+      form.reset(initialValues);
       setMode("view");
     });
   };
@@ -138,10 +130,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     control: form.control,
     name: "role_ids",
   });
-  const selectedRoleCount = watchedRoleIds?.length ?? 0;
-  const roleCountForDisplay = isView
-    ? initialRoleIds.length
-    : selectedRoleCount;
+  const roleCount = watchedRoleIds?.length ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
@@ -157,18 +146,20 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
             onClick={handleBack}
             className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2"
           />
-          <UserAvatar first={user.firstname} last={user.lastname} />
+          <UserAvatar first={user.user.firstname} last={user.user.lastname} />
           <div className="min-w-0">
-            {/* ไม่มี badge สถานะ — endpoint รายละเอียดผู้ใช้ไม่ส่งสถานะมาเลย
-                (formattedData ของ user_application_role.service ไม่มี is_active
-                ทั้งที่อ่าน tb_user มาแล้ว) badge ที่เขียว 100% ของเวลาแย่กว่าไม่มี */}
-            <h1 className="text-foreground truncate text-lg font-semibold tracking-tight">
-              {user.firstname} {user.lastname}
-            </h1>
+            <div className="flex min-w-0 items-center gap-2">
+              <h1 className="text-foreground truncate text-lg font-semibold tracking-tight">
+                {fullName}
+              </h1>
+              {/* endpoint เพิ่งเริ่มส่ง is_active มาพร้อมตัวผู้ใช้ — ก่อนหน้านี้ไม่มี
+                  badge เพราะไม่มีข้อมูล ไม่ใช่เพราะไม่อยากให้มี */}
+              <StatusBadge active={user.user.is_active} className="shrink-0" />
+            </div>
             <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
-              <span className="break-all">{user.email}</span>
+              <span className="break-all">{user.user.email}</span>
               <span aria-hidden="true">·</span>
-              <span>@{user.username}</span>
+              <span>@{user.user.username}</span>
             </div>
           </div>
         </div>
@@ -193,7 +184,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
               <Button
                 type="submit"
                 size="sm"
-                form="user-roles-form"
+                form="user-assigned-form"
                 disabled={isPending}
               >
                 {isPending ? (
@@ -212,31 +203,42 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       </header>
 
       {/* ── Settings-style sections (title+desc left · body right) ── */}
-      <Reveal delay={80}>
-        <RolesSection
-          first
-          form={form}
-          roles={roles}
-          isLoading={rolesLoading}
-          isDisabled={isDisabled}
-          count={roleCountForDisplay}
-          onSubmit={onSubmit}
-        />
-      </Reveal>
+      {/* ฟอร์มเดียวครอบทั้งสาม section — ปุ่ม Save อยู่นอกฟอร์มแล้วอ้างด้วย
+          `form=` เดิม `<form>` ซ่อนอยู่ใน RolesSection ซึ่ง render เฉพาะตอนมี
+          role ให้เลือก กดบันทึกตอนไม่มี role เลยเงียบสนิทเพราะปุ่มชี้ไปที่ไม่มีอยู่ */}
+      <form
+        id="user-assigned-form"
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
+      >
+        <Reveal delay={80}>
+          <RolesSection
+            first
+            form={form}
+            roles={roles}
+            isLoading={rolesLoading}
+            isDisabled={isDisabled}
+            count={roleCount}
+          />
+        </Reveal>
 
-      <Reveal delay={140}>
-        <DepartmentsSection
-          memberDepartment={memberDepartment}
-          isLoading={departmentsLoading}
-        />
-      </Reveal>
+        <Reveal delay={140}>
+          <DepartmentsSection
+            form={form}
+            isDisabled={isDisabled}
+            departmentName={user.department?.name}
+          />
+        </Reveal>
 
-      <Reveal delay={200}>
-        <LocationsSection
-          isLoading={locationsLoading}
-          userLocations={userLocations}
-        />
-      </Reveal>
+        <Reveal delay={200}>
+          <LocationsSection
+            form={form}
+            isDisabled={isDisabled}
+            userLocations={user.locations}
+          />
+        </Reveal>
+      </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

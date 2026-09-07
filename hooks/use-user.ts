@@ -11,11 +11,9 @@ import type { User } from "@/types/workflows";
 import type {
   UserDetail,
   UpdateUserDto,
-  UserDepartmentResponse,
   UserApplicationRole,
   UserRoleSummaryRole,
 } from "@/types/user";
-import type { INVENTORY_TYPE } from "@/constant/location";
 
 const crud = createConfigCrud<User, never>({
   queryKey: QUERY_KEYS.USERS,
@@ -83,47 +81,6 @@ export function useUserById(id: string | undefined) {
   });
 }
 
-export interface UserLocationItem {
-  id: string;
-  location_id: string;
-  location_code: string;
-  location_name: string;
-  location_type: INVENTORY_TYPE;
-  is_active: boolean;
-}
-
-/**
- * Hook ดึงรายการ location ที่ผูกกับผู้ใช้คนหนึ่ง
- *
- * ยิง `GET /config/{bu}/locations/user/{userId}` คืน array ของ location mapping
- * ใช้ query key `["user-locations", bu, userId]` ไม่ใช้ key มาตรฐานของ user
- * enabled เมื่อ buCode และ userId พร้อม
- *
- * @param userId - รหัสผู้ใช้
- * @returns UseQueryResult ของ array UserLocationItem
- * @example
- * ```ts
- * const { data: locations } = useUserLocations(user.id);
- * ```
- */
-export function useUserLocations(userId: string | undefined) {
-  const buCode = useBuCode();
-
-  return useQuery<UserLocationItem[]>({
-    queryKey: ["user-locations", buCode, userId],
-    queryFn: async () => {
-      if (!buCode) throw new Error("Missing buCode");
-      const res = await httpClient.get(
-        API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId!),
-      );
-      if (!res.ok) throw new Error("Failed to fetch user locations");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    enabled: !!buCode && !!userId,
-  });
-}
-
 /**
  * Hook แก้ไขผู้ใช้รายคน — บทบาท คลังที่ผูก และแผนกที่สังกัด
  *
@@ -147,38 +104,6 @@ export function useUpdateUser() {
       httpClient.patch(API_ENDPOINTS.CONFIG_USER_BY_ID(buCode, user_id), body),
     invalidateKeys: [QUERY_KEYS.USERS],
     errorMessage: "Failed to update user",
-  });
-}
-
-/**
- * Hook ดึง department หลักและรายการ department ที่เป็น HOD ของผู้ใช้
- *
- * ยิง `GET /config/{bu}/department-user/user/{userId}` คืน object
- * `{ department, hod_departments }` ใช้ query key `["user-departments", bu, userId]`
- *
- * @param userId - รหัสผู้ใช้
- * @returns UseQueryResult ของ UserDepartmentResponse
- * @example
- * ```ts
- * const { data } = useUserDepartments(user.id);
- * console.log(data?.department, data?.hod_departments);
- * ```
- */
-export function useUserDepartments(userId: string | undefined) {
-  const buCode = useBuCode();
-
-  return useQuery<UserDepartmentResponse>({
-    queryKey: ["user-departments", buCode, userId],
-    queryFn: async () => {
-      if (!buCode) throw new Error("Missing buCode");
-      const res = await httpClient.get(
-        API_ENDPOINTS.DEPARTMENT_USER_BY_USER(buCode, userId!),
-      );
-      if (!res.ok) throw new Error("Failed to fetch user departments");
-      const json = await res.json();
-      return json.data ?? { department: null, hod_departments: [] };
-    },
-    enabled: !!buCode && !!userId,
   });
 }
 

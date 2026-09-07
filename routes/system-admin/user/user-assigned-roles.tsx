@@ -2,11 +2,10 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Check, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types/role";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
-import type { UserRolesFormValues } from "./user-roles-form-schema";
+import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 
 /* ------------------------------------------------------------------ */
 /* RoleToggleCard — single role pickable card                          */
@@ -72,13 +71,12 @@ function RoleToggleCard({
 /* ------------------------------------------------------------------ */
 
 interface RolesSectionProps {
-  readonly form: UseFormReturn<UserRolesFormValues>;
+  readonly form: UseFormReturn<UserAssignedFormValues>;
   readonly roles: Role[];
   readonly isLoading: boolean;
   readonly isDisabled: boolean;
   readonly count: number;
   readonly first?: boolean;
-  readonly onSubmit: (values: UserRolesFormValues) => void;
 }
 
 export function RolesSection({
@@ -88,7 +86,6 @@ export function RolesSection({
   isDisabled,
   count,
   first,
-  onSubmit,
 }: RolesSectionProps) {
   const t = useTranslations("systemAdmin.user");
   return (
@@ -111,41 +108,34 @@ export function RolesSection({
           desc={t("noRolesAvailableDesc")}
         />
       ) : (
-        <form
-          id="user-roles-form"
-          onSubmit={form.handleSubmit(onSubmit, () =>
-            scrollToFirstInvalidField(),
-          )}
-        >
-          <div className="divide-border/60 divide-y overflow-hidden rounded-lg border">
-            {roles.map((role: Role) => (
-              <Controller
-                key={role.id}
-                control={form.control}
-                name="role_ids"
-                render={({ field }) => {
-                  const isChecked = field.value?.includes(role.id);
-                  return (
-                    <RoleToggleCard
-                      role={role}
-                      checked={!!isChecked}
-                      disabled={isDisabled}
-                      onChange={(c) => {
-                        if (c) {
-                          field.onChange([...field.value, role.id]);
-                        } else {
-                          field.onChange(
-                            field.value.filter((v) => v !== role.id),
-                          );
-                        }
-                      }}
-                    />
-                  );
-                }}
-              />
-            ))}
-          </div>
-        </form>
+        <div className="divide-border/60 divide-y overflow-hidden rounded-lg border">
+          {roles.map((role: Role) => (
+            <Controller
+              key={role.id}
+              control={form.control}
+              name="role_ids"
+              render={({ field }) => {
+                const isChecked = field.value?.includes(role.id);
+                return (
+                  <RoleToggleCard
+                    role={role}
+                    checked={!!isChecked}
+                    disabled={isDisabled}
+                    onChange={(c) => {
+                      if (c) {
+                        field.onChange([...field.value, role.id]);
+                      } else {
+                        field.onChange(
+                          field.value.filter((v) => v !== role.id),
+                        );
+                      }
+                    }}
+                  />
+                );
+              }}
+            />
+          ))}
+        </div>
       )}
     </AssignSection>
   );
