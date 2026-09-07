@@ -41,22 +41,114 @@ const ROW_SPAN: Record<number, string> = {
   6: "row-span-6",
 };
 
-/** ความกว้าง/สูงเริ่มต้นต่อชนิดกราฟ เมื่อผู้ใช้ยังไม่ได้ตั้งเอง */
-const DEFAULT_SIZE: Record<string, { width: number; height: number }> = {
-  kpi: { width: 3, height: 2 },
-  gauge: { width: 3, height: 3 },
-  pie: { width: 6, height: 3 },
-  bar: { width: 6, height: 3 },
-  line: { width: 6, height: 3 },
-  area: { width: 6, height: 3 },
-  table: { width: 12, height: 4 },
+/** ขนาดหนึ่งตัวเลือก — [กว้างเป็นคอลัมน์ (จาก 12), สูงเป็นแถว] */
+export type GridSize = readonly [width: number, height: number];
+
+/**
+ * ขนาดที่เลือกได้ต่อชนิดกราฟ เรียงจากเล็กไปใหญ่ — **ตัวแรกคือขนาดต่ำสุด**
+ *
+ * ไม่ปล่อยให้ตั้งได้อิสระทุกค่า เพราะ KPI ที่ถูกย่อจนเลขล้นกล่อง หรือกราฟแท่งกว้าง
+ * 3 คอลัมน์สูง 2 แถว มันอ่านไม่ออกจริง ๆ — ขอบล่างต่อชนิดคือสิ่งที่กันไม่ให้
+ * dashboard เละจากการปรับของผู้ใช้เอง
+ */
+const SIZE_OPTIONS: Record<string, readonly GridSize[]> = {
+  kpi: [
+    [3, 2],
+    [3, 3],
+    [4, 2],
+    [4, 3],
+    [6, 2],
+    [6, 3],
+  ],
+  gauge: [
+    [3, 3],
+    [4, 3],
+    [4, 4],
+    [6, 3],
+    [6, 4],
+  ],
+  pie: [
+    [4, 3],
+    [6, 3],
+    [6, 4],
+    [8, 4],
+    [12, 4],
+  ],
+  bar: [
+    [4, 3],
+    [6, 3],
+    [6, 4],
+    [8, 4],
+    [12, 4],
+    [12, 6],
+  ],
+  line: [
+    [4, 3],
+    [6, 3],
+    [6, 4],
+    [8, 4],
+    [12, 4],
+  ],
+  area: [
+    [4, 3],
+    [6, 3],
+    [6, 4],
+    [8, 4],
+    [12, 4],
+  ],
+  table: [
+    [6, 4],
+    [8, 4],
+    [12, 4],
+    [12, 6],
+  ],
 };
+
+const FALLBACK_OPTIONS: readonly GridSize[] = [
+  [4, 3],
+  [6, 3],
+  [12, 4],
+];
+
+/** ขนาดเริ่มต้นเมื่อยังไม่เคยตั้งเอง — ไม่ใช่ตัวเล็กสุดเสมอไป */
+const DEFAULT_SIZE: Record<string, GridSize> = {
+  kpi: [3, 2],
+  gauge: [3, 3],
+  pie: [6, 3],
+  bar: [6, 3],
+  line: [6, 3],
+  area: [6, 3],
+  table: [12, 4],
+};
+
+/**
+ * ขนาดทั้งหมดที่ชนิดกราฟนี้เลือกได้ เรียงจากเล็กไปใหญ่
+ *
+ * @param widgetType - ชนิดกราฟ
+ * @returns รายการ `[กว้าง, สูง]`
+ */
+export function sizeOptionsFor(widgetType: string): readonly GridSize[] {
+  return SIZE_OPTIONS[widgetType] ?? FALLBACK_OPTIONS;
+}
+
+/**
+ * ขนาดต่ำสุดที่ชนิดกราฟนี้ยอมให้ย่อลงไปได้
+ *
+ * @param widgetType - ชนิดกราฟ
+ * @returns `[กว้าง, สูง]` ตัวเล็กสุด
+ */
+export function minSizeFor(widgetType: string): GridSize {
+  return sizeOptionsFor(widgetType)[0];
+}
 
 const clamp = (n: number, lo: number, hi: number) =>
   Math.min(Math.max(Math.round(n), lo), hi);
 
 /**
  * ขนาดของ widget เป็นหน่วยกริด — ค่าที่ผู้ใช้ตั้งมาก่อน ไม่งั้นใช้ค่าตามชนิดกราฟ
+ *
+ * บังคับขอบล่างต่อชนิดเสมอ ไม่ใช่แค่ตอนเลือกในฟอร์ม เพราะขนาดที่เคย valid อาจเล็ก
+ * เกินไปหลังผู้ใช้สลับชนิดกราฟ (KPI 3×2 → เปลี่ยนเป็นกราฟแท่งที่ต่ำสุด 4×3)
  *
  * @param widgetType - ชนิดกราฟ
  * @param display - ค่าตั้งการแสดงผล (อาจไม่มี)
@@ -66,10 +158,11 @@ export function gridSize(
   widgetType: string,
   display?: WidgetDisplay | null,
 ): { width: number; height: number } {
-  const fallback = DEFAULT_SIZE[widgetType] ?? { width: 6, height: 3 };
+  const [defW, defH] = DEFAULT_SIZE[widgetType] ?? [6, 3];
+  const [minW, minH] = minSizeFor(widgetType);
   return {
-    width: clamp(display?.width ?? fallback.width, 1, 12),
-    height: clamp(display?.height ?? fallback.height, 1, 6),
+    width: clamp(display?.width ?? defW, minW, 12),
+    height: clamp(display?.height ?? defH, minH, 6),
   };
 }
 

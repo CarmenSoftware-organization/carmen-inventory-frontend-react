@@ -6,6 +6,10 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  gridSize,
+  sizeOptionsFor,
+} from "@/components/dashboard-widget/widget-display";
 import type { WidgetDisplay, WidgetType } from "@/types/dashboard-widget";
 
 /** สีที่เลือกให้ threshold ได้ — token ของธีม ไม่ใช่ hex เพื่อให้ dark mode ตามด้วย */
@@ -16,11 +20,6 @@ const THRESHOLD_COLORS = [
   "var(--destructive)",
 ] as const;
 
-/** ความกว้างที่เลือกได้บนกริด 12 คอลัมน์ — เศษส่วนที่คนคิดถึงจริง ๆ ไม่ใช่ทั้ง 12 ค่า */
-const WIDTHS = [3, 4, 6, 8, 9, 12] as const;
-/** ความสูงเป็นจำนวนแถว (1 แถว = 4rem) */
-const HEIGHTS = [2, 3, 4, 6] as const;
-
 interface WidgetDisplayFieldsProps {
   readonly widgetType: WidgetType;
   readonly value: WidgetDisplay;
@@ -29,8 +28,11 @@ interface WidgetDisplayFieldsProps {
 }
 
 /**
- * ฟอร์มการแสดงผลของ widget — ฟิลด์ที่ขึ้นกับชนิดกราฟ (min/max ของ gauge, ความสูง
- * ของกราฟ) จะโผล่เฉพาะกับชนิดที่ใช้จริง ส่วนความกว้างใช้ได้กับทุกชนิด
+ * ฟอร์มการแสดงผลของ widget
+ *
+ * ขนาดเลือกเป็น "กว้าง × สูง" ในหน่วยกริดจริง (คอลัมน์จาก 12 × แถว) ทีเดียวจบ ไม่ได้
+ * แยกสองช่อง เพราะสองค่านี้ต้องเข้าคู่กันถึงจะดูดี และรายการที่ให้เลือกเริ่มที่ขนาด
+ * ต่ำสุดของชนิดกราฟนั้นเสมอ ฟิลด์ min/max/threshold โผล่เฉพาะ gauge
  *
  * ค่าว่างแปลว่า "ไม่ตั้ง" ไม่ใช่ 0 — ส่ง `undefined` กลับไปเพื่อให้ key นั้นหายจาก
  * jsonb ที่บันทึก ไม่ใช่บันทึกเลข 0 ที่ทำให้ gauge สเกลพัง
@@ -44,6 +46,10 @@ export function WidgetDisplayFields({
   const t = useTranslations("dashboard.savedWidget.display");
   const isGauge = widgetType === "gauge";
 
+  // ขนาดที่เลือกได้ขึ้นกับชนิดกราฟ และมีขอบล่างของมันเอง — กันไม่ให้ย่อจนอ่านไม่ออก
+  const options = sizeOptionsFor(widgetType);
+  const size = gridSize(widgetType, value);
+
   const set = (patch: Partial<WidgetDisplay>) =>
     onChange({ ...value, ...patch });
   const num = (raw: string): number | undefined =>
@@ -52,35 +58,20 @@ export function WidgetDisplayFields({
   return (
     <div className="grid grid-cols-2 gap-3">
       <Field>
-        <FieldLabel>{t("width")}</FieldLabel>
+        <FieldLabel>{t("size")}</FieldLabel>
         <FieldSelect
-          value={String(value.width ?? "")}
-          onValueChange={(v) => set({ width: Number(v) })}
+          value={`${size.width}x${size.height}`}
+          onValueChange={(v) => {
+            const [w, h] = v.split("x").map(Number);
+            set({ width: w, height: h });
+          }}
           disabled={disabled}
           className="h-8 text-sm"
         >
           <SelectContent>
-            {WIDTHS.map((w) => (
-              <SelectItem key={w} value={String(w)}>
-                {t(`widthOption.${w}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </FieldSelect>
-      </Field>
-
-      <Field>
-        <FieldLabel>{t("height")}</FieldLabel>
-        <FieldSelect
-          value={String(value.height ?? "")}
-          onValueChange={(v) => set({ height: Number(v) })}
-          disabled={disabled}
-          className="h-8 text-sm"
-        >
-          <SelectContent>
-            {HEIGHTS.map((h) => (
-              <SelectItem key={h} value={String(h)}>
-                {t(`heightOption.${h}`)}
+            {options.map(([w, h]) => (
+              <SelectItem key={`${w}x${h}`} value={`${w}x${h}`}>
+                {t("sizeOption", { width: w, height: h })}
               </SelectItem>
             ))}
           </SelectContent>

@@ -4,6 +4,8 @@ import {
   gaugeRange,
   gridClasses,
   gridSize,
+  minSizeFor,
+  sizeOptionsFor,
   thresholdColor,
 } from "../widget-display";
 
@@ -27,10 +29,60 @@ describe("gridSize", () => {
       width: 12,
       height: 6,
     });
-    expect(gridSize("kpi", { width: 0, height: 0 })).toEqual({
-      width: 1,
-      height: 1,
+  });
+
+  // ขอบล่างต่อชนิดคือสิ่งที่กัน dashboard ไม่ให้เละจากการย่อของผู้ใช้
+  it("never goes below the type's minimum, even from a saved value", () => {
+    expect(gridSize("bar", { width: 1, height: 1 })).toEqual({
+      width: 4,
+      height: 3,
     });
+    expect(gridSize("table", { width: 3, height: 2 })).toEqual({
+      width: 6,
+      height: 4,
+    });
+  });
+
+  // สลับชนิดกราฟแล้วขนาดเดิมอาจเล็กเกินขอบล่างของชนิดใหม่
+  it("lifts a KPI-sized widget to the chart minimum after a render switch", () => {
+    const savedAsKpi = { width: 3, height: 2 };
+    expect(gridSize("kpi", savedAsKpi)).toEqual({ width: 3, height: 2 });
+    expect(gridSize("bar", savedAsKpi)).toEqual({ width: 4, height: 3 });
+  });
+});
+
+describe("sizeOptionsFor / minSizeFor", () => {
+  it("offers a per-type list whose first entry is the minimum", () => {
+    for (const type of ["kpi", "gauge", "pie", "bar", "line", "area", "table"]) {
+      const options = sizeOptionsFor(type);
+      expect(options.length).toBeGreaterThan(1);
+      expect(minSizeFor(type)).toEqual(options[0]);
+    }
+  });
+
+  it("keeps every option inside the grid and in a predictable order", () => {
+    for (const type of ["kpi", "bar", "table"]) {
+      const options = sizeOptionsFor(type);
+      for (const [w, h] of options) {
+        expect(w).toBeGreaterThanOrEqual(1);
+        expect(w).toBeLessThanOrEqual(12);
+        expect(h).toBeGreaterThanOrEqual(1);
+        expect(h).toBeLessThanOrEqual(6);
+      }
+      // เรียงตามกว้างก่อนแล้วสูง — ลำดับที่คนกวาดตาใน dropdown ไม่ใช่ตามพื้นที่
+      const sorted = [...options].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      expect(options).toEqual(sorted);
+    }
+  });
+
+  it("gives a table more room than a KPI", () => {
+    const [kpiW, kpiH] = minSizeFor("kpi");
+    const [tableW, tableH] = minSizeFor("table");
+    expect(tableW * tableH).toBeGreaterThan(kpiW * kpiH);
+  });
+
+  it("falls back to a usable list for an unknown type", () => {
+    expect(sizeOptionsFor("nonsense").length).toBeGreaterThan(0);
   });
 });
 

@@ -3928,22 +3928,8 @@
       },
       "display": {
         "section": "Appearance",
-        "width": "Width",
-        "widthOption": {
-          "3": "Quarter",
-          "4": "Third",
-          "6": "Half",
-          "8": "Two thirds",
-          "9": "Three quarters",
-          "12": "Full row"
-        },
-        "height": "Chart height",
-        "heightOption": {
-          "2": "Short",
-          "3": "Medium",
-          "4": "Tall",
-          "6": "Extra tall"
-        },
+        "size": "Size (columns × rows)",
+        "sizeOption": "{width} × {height}",
         "decimals": "Decimals",
         "min": "Scale from",
         "max": "Scale to",
