@@ -21,7 +21,6 @@ import { useUser, useDeleteUser } from "@/hooks/use-user";
 import { useUserRoleReport } from "./use-user-role-report";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
-import { useDepartment } from "@/hooks/use-department";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
@@ -30,9 +29,9 @@ import type { User } from "@/types/workflows";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
 import { cn } from "@/lib/utils";
 import { useUserTable } from "./use-user-table";
+import { UserDepartmentFilter } from "./user-department-filter";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -57,24 +56,13 @@ export default function UserComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const { printReport, exportCsv, isBusy } = useUserRoleReport();
 
-  const { data: deptData } = useDepartment({ perpage: -1 });
-  // department เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
-  // array reference เปลี่ยนทุก render จน userFilterFields memo ข้างล่างไม่เคย hit
-  const deptOptions = useMemo(
-    () =>
-      (deptData?.data ?? [])
-        .filter((d) => d.is_active)
-        .map((d) => ({
-          label: `${d.code} - ${d.name}`,
-          value: `department_id|string:${d.id}`,
-        })),
-    [deptData],
-  );
-
   // filter (department) เป็น single-select (StatusFilter ไม่ใช่ MultiSelectFilter)
   // เหมือนโค้ดเดิมทุกประการ — label เป็น literal string จริงจึงต้องใช้
   // control: "custom" ห่อ StatusFilter ตรง ๆ แทน control: "status" ทั่วไป (ตัวนั้น
   // เรียก t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  //
+  // ทะเบียนแผนกอยู่ใน UserDepartmentFilter ไม่ใช่ตรงนี้ — `render` ถูกเรียกเฉพาะ
+  // ตอนคนเปิดตัวกรองจริง ๆ ทะเบียนจึงถูกยิงตอน hover ไม่ใช่ตอนเปิดหน้า
   const userFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -83,17 +71,11 @@ export default function UserComponent() {
         control: "custom",
         labelKey: "systemAdmin.user.department",
         render: (value, onChange) => (
-          <StatusFilter
-            value={value}
-            onChange={onChange}
-            placeholder={t("department")}
-            options={deptOptions}
-            className="w-full"
-          />
+          <UserDepartmentFilter value={value} onChange={onChange} />
         ),
       },
     ],
-    [deptOptions, t],
+    [],
   );
 
   const lf = useListFilters({
