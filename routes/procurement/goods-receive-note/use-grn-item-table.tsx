@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import {
   Controller,
+  useFormState,
   useWatch,
   type Control,
   type UseFormReturn,
@@ -8,6 +9,7 @@ import {
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type Row,
   getCoreRowModel,
   getExpandedRowModel,
   useReactTable,
@@ -19,6 +21,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { InputAmount } from "@/components/ui/input/input-amount";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
@@ -138,13 +141,6 @@ function ProductGroupCell({
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 }
 
-/**
- * หน่วยนับของสินค้า (inventory unit จาก product master) — โชว์อย่างเดียว
- *
- * ไม่ใช่หน่วยที่รับ (`received_unit_id` ซึ่งเลือกได้ต่อ location) แต่เป็นหน่วยที่
- * สินค้าตัวนี้ถือสต๊อกอยู่ ใช้เทียบตาว่าหน่วยที่กำลังรับเป็นคนละตัวกับหน่วยสต๊อกไหม
- * · API ของ GRN ไม่ได้ส่งมาด้วย จึงอ่านจาก product master (แคช 5 นาที ต่อ 1 สินค้า)
- */
 const ProductUnitCell = memo(function ProductUnitCell({
   control,
   index,
@@ -215,38 +211,65 @@ const GroupQtySum = memo(function GroupQtySum({
 });
 
 /**
- * ราคาต่อหน่วยของ product row — ราคาอยู่ระดับ location จึงถัวเฉลี่ยตามจำนวนที่รับ
- * (ยอดก่อนส่วนลดรวม ÷ จำนวนรับรวม) ไม่ใช่เฉลี่ยเปล่า ๆ ไม่งั้นแถวที่รับ 1 หน่วย
- * จะถ่วงเท่าแถวที่รับ 100 · ยังไม่ได้กรอกจำนวน = ยังเฉลี่ยไม่ได้ → โชว์ราคาเดียว
- * ที่มี (ทุกแถวราคาเท่ากันอยู่แล้วในกรณีปกติ), ไม่มีอะไรเลย = 0.00
+ * ราคาต่อหน่วยของสินค้า — **กรอกที่แถวสินค้าที่เดียว** แล้วเขียนลงทุกคลังในกลุ่ม
+ *
+ * ราคาเป็นคุณสมบัติของสินค้าในใบนี้ ไม่ใช่ของคลัง (PO ใบหนึ่งมีราคาเดียว) คลัง
+ * ที่รับของคนละที่จึงต้องใช้ราคาเดียวกันเสมอ — แถว location แสดงอย่างเดียว
+ * ส่วน payload ยังส่ง `received_price` ราย detail ตามที่ backend ต้องการเหมือนเดิม
+ *
+ * ใช้ `InputAmount` (text input ที่ sanitize เอง) ไม่ใช่ `<input type="number">`:
+ * ระหว่างพิมพ์ "17." เบราว์เซอร์อ่าน valueAsNumber เป็น NaN → ยอดต่อบรรทัดแกว่ง
+ * และทศนิยมหายกลางคัน
+ *
+ * error ของ `unit_price` ผูกอยู่กับ item ราย index (schema เช็คทีละแถว) — แถว
+ * location ไม่มีช่องให้โชว์แล้ว จึงยกมาแสดงที่นี่ พอมี index ไหนในกลุ่มติดก็พอ
  */
 const GroupUnitPrice = memo(function GroupUnitPrice({
-  control,
+  form,
   indices,
+  disabled,
 }: {
-  control: Control<GrnFormValues>;
+  form: UseFormReturn<GrnFormValues>;
   indices: number[];
+  disabled: boolean;
 }) {
   "use no memo";
-  const prices = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.unit_price` as const),
+  const primary = indices[0];
+  const price = useWatch({
+    control: form.control,
+    name: `items.${primary}.unit_price`,
   });
-  const qtys = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.received_qty` as const),
-  });
-  const priceList = (prices ?? []).map((p) => Number(p) || 0);
-  const qtyList = (qtys ?? []).map((q) => Number(q) || 0);
-  const totalQty = qtyList.reduce((a, n) => a + n, 0);
-  const avg =
-    totalQty > 0
-      ? priceList.reduce((a, p, i) => a + p * (qtyList[i] ?? 0), 0) / totalQty
-      : (priceList.find((p) => p > 0) ?? 0);
+  const { errors } = useFormState({ control: form.control, name: "items" });
+  const error = indices
+    .map((i) => errors.items?.[i]?.unit_price?.message)
+    .find(Boolean);
+
+  if (disabled) {
+    return (
+      <span className="text-foreground text-xs font-medium tabular-nums">
+        {formatCurrency(Number(price) || 0)}
+      </span>
+    );
+  }
+
   return (
-    <span className="text-foreground text-xs font-medium tabular-nums">
-      {formatCurrency(avg)}
-    </span>
+    <InputAmount
+      // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
+      className={cn("h-8 w-full text-right text-xs", error && "pl-7")}
+      error={error}
+      errorIconAlign="left"
+      value={Number(price) || 0}
+      onValueChange={(v) => {
+        // เขียนทุกคลังในกลุ่มพร้อมกัน — ตัวที่ทำให้ "ราคาเดียวทั้งกลุ่ม" เป็นจริง
+        // shouldValidate เพื่อให้ error ของแถวที่ยังราคาเป็น 0 หายทันทีที่กรอก
+        for (const i of indices) {
+          form.setValue(`items.${i}.unit_price`, v, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }
+      }}
+    />
   );
 });
 
@@ -278,7 +301,10 @@ const GroupAmountSum = memo(function GroupAmountSum({
 
 /**
  * เนื้อหา expand ของแถว product — location rows เป็น `<table table-fixed>` ที่ align
- * คอลัมน์กับ group row ผ่าน GRN_COL (mirror po-items-grid-locations) พร้อม thead labels
+ * คอลัมน์กับ group row ผ่าน GRN_COL (mirror po-items-grid-locations)
+ *
+ * ไม่มีหัวคอลัมน์เป็นของตัวเอง — colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกัน
+ * อยู่แล้ว หัวอีกชุดคือการอ่านคำเดิมซ้ำห่างกันไม่กี่สิบพิกเซล
  */
 function GrnGroupLocations({
   group,
@@ -304,7 +330,6 @@ function GrnGroupLocations({
   onDeleteItem: (index: number) => void;
 }) {
   "use no memo";
-  const tfl = useTranslations("field");
   const showActionCol = !disabled;
 
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
@@ -330,25 +355,6 @@ function GrnGroupLocations({
         <col style={{ width: pct(GRN_COL.amt) }} />
         {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
       </colgroup>
-      <thead className="text-muted-foreground text-xs font-semibold">
-        {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
-            หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
-            เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี */}
-        <tr className="border-border/60 h-11 border-b">
-          <th className="px-3 py-1 text-left">{tfl("location")}</th>
-          <th className="px-3 py-1" />
-          {isPo && <th className="px-3 py-1" />}
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          {showActionCol && <th className="px-3 py-1" />}
-        </tr>
-      </thead>
       <tbody className="divide-border/60 divide-y">
         {group.indices.length === 0 && (
           <tr>
@@ -455,6 +461,29 @@ export function useGrnItemTable({
         cellClassName: "text-center",
         // expanded content เริ่มที่ column Product (index 2 = expand, index, product)
         expandedColStart: 2,
+        // ปุ่มเพิ่มคลังอยู่ใน gutter ซ้ายนี้ ไม่ใช่ในคอลัมน์ action ของแถวสินค้า —
+        // มันสร้างของในตารางย่อย ปุ่มจึงควรอยู่กับตารางย่อย ไม่ใช่ไปปนกับปุ่มลบ
+        // ทั้งรายการที่ทำงานคนละระดับกัน · align-top ของ gutter ทำให้ปุ่มอยู่
+        // บรรทัดเดียวกับแถวคลังแถวแรกพอดี
+        expandedLeading: (row: Row<GrnGroup>) =>
+          row.original.isManual && !disabled ? (
+            <div className="flex justify-end pt-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-7.5"
+                    aria-label={t("addLocation")}
+                    onClick={() => onAddLocation(row.original)}
+                  >
+                    <MapPinPlus aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("addLocation")}</TooltipContent>
+              </Tooltip>
+            </div>
+          ) : null,
         expandedContent: (group: GrnGroup) => (
           <GrnGroupLocations
             group={group}
@@ -575,8 +604,9 @@ export function useGrnItemTable({
         meta: rightMeta,
         cell: ({ row }) => (
           <GroupUnitPrice
-            control={form.control}
+            form={form}
             indices={row.original.indices}
+            disabled={disabled}
           />
         ),
       },
@@ -650,29 +680,7 @@ export function useGrnItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
-        // ปุ่มไอคอนล้วนสองตัวติดกัน เดาจากรูปอย่างเดียวไม่ออกว่าอันไหนลบอะไร
-        // (ลบสินค้าทั้งบรรทัด vs ลบเฉพาะที่เก็บในแถวย่อย) — บอกด้วย tooltip
         <div className="flex items-center justify-center gap-0.5">
-          {row.original.isManual && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="text-primary hover:bg-primary/10 hover:text-primary"
-                  aria-label={t("addLocation")}
-                  onClick={() => {
-                    onAddLocation(row.original);
-                    if (!row.getIsExpanded()) row.toggleExpanded();
-                  }}
-                >
-                  <MapPinPlus className="size-3.5" aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t("addLocation")}</TooltipContent>
-            </Tooltip>
-          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

@@ -223,6 +223,10 @@ export function GrnItemTable({
       _group_key: group.key,
       product_id: productId,
       product_name: productName,
+      // ราคาเป็นของสินค้า ไม่ใช่ของคลัง — คลังที่เพิ่งเพิ่มต้องได้ราคาเดียวกับ
+      // พี่น้องในกลุ่มทันที ไม่งั้นแถวใหม่ราคาเป็น 0 ทั้งที่หัวกลุ่มโชว์ราคาอยู่
+      // แล้วยอดรวมจะขาดไปเงียบ ๆ จนกว่าจะไปแตะช่องราคาที่หัว
+      unit_price: form.getValues(`items.${idx}.unit_price`) ?? 0,
     });
     setAutoOpenLocationKey(group.key);
     setAutoOpenProductKey(null);
@@ -358,8 +362,6 @@ export function GrnItemTable({
         table={table}
         recordCount={groups.length}
         tableLayout={{
-          // table กว้างเกิน container → scroll แนวนอน (เหมือน PO): width =
-          // getTotalSize(), column กว้างตาม size px ที่กำหนด
           columnsResizable: true,
         }}
         emptyMessage={
@@ -370,10 +372,6 @@ export function GrnItemTable({
           />
         }
       >
-        {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
-            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับเนื้อหา
-            โดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
         <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>

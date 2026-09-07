@@ -36,7 +36,7 @@ export function grnItemCols(isPo: boolean, editable: boolean) {
     net: 92,
     tax: comboColWidth("tax", editable),
     amt: 104,
-    action: 64, // group row = add-location + delete (2 ปุ่ม); location row = delete
+    action: 64, // ปุ่มลบ — แถวสินค้าลบทั้งรายการ, แถวคลังลบเฉพาะคลังนั้น
   } as const;
 
   /** ผลรวมความกว้างของ data columns (product → amt) — ไม่รวม action */

@@ -15,7 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { InputAmount } from "@/components/ui/input/input-amount";
 import {
   InputSuffixAddon,
   InputSuffixField,
@@ -321,47 +320,6 @@ const PricePlain = memo(function PricePlain({
   );
 });
 
-/**
- * ช่อง unit price บน location row — view → plain text
- *
- * ใช้ `InputAmount` (text input ที่ sanitize เอง) ไม่ใช่ `<input type="number">`:
- * ระหว่างพิมพ์ "17." เบราว์เซอร์อ่าน valueAsNumber เป็น NaN → ยอดต่อบรรทัดแกว่ง
- * และทศนิยมหายกลางคัน · ตัวนี้คุมทศนิยมตามสกุลเงินของ BU และคง trailing zero
- */
-function PriceCell({
-  form,
-  index,
-  disabled,
-  plainText,
-  error,
-}: {
-  form: UseFormReturn<GrnFormValues>;
-  index: number;
-  disabled: boolean;
-  plainText?: boolean;
-  error?: string;
-}) {
-  "use no memo";
-  if (plainText) return <PricePlain control={form.control} index={index} />;
-  return (
-    <Controller
-      control={form.control}
-      name={`items.${index}.unit_price`}
-      render={({ field }) => (
-        <InputAmount
-          // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
-          className={`h-8 w-full text-right text-xs ${error ? "pl-7" : ""}`}
-          disabled={disabled}
-          error={error}
-          errorIconAlign="left"
-          value={Number(field.value ?? 0)}
-          onValueChange={field.onChange}
-        />
-      )}
-    />
-  );
-}
-
 /** ยอดเงินของ location เดียว (plain text) — honor override */
 function GrnAmountCell({
   form,
@@ -596,7 +554,6 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   });
   const itemError = errors.items?.[index];
   const receivedQtyError = itemError?.received_qty?.message;
-  const unitPriceError = itemError?.unit_price?.message;
 
   const editable = !disabled && !plainText; // discount/tax combo แก้ได้
 
@@ -699,15 +656,10 @@ export const GrnLocationRow = memo(function GrnLocationRow({
         />
       </td>
 
-      {/* Unit price */}
+      {/* Unit price — ราคาเป็นของสินค้า กรอกที่แถวสินค้าที่เดียว ทุกคลังของ
+          สินค้าเดียวกันจึงใช้ราคาเดียวกันเสมอ ที่นี่แค่แสดง */}
       <td className="px-3 py-1 text-right">
-        <PriceCell
-          form={form}
-          index={index}
-          disabled={disabled}
-          plainText={plainText}
-          error={unitPriceError}
-        />
+        <PricePlain control={form.control} index={index} />
       </td>
 
       {/* Sub */}
