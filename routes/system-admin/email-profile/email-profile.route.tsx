@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { EmailProfile } from "@/types/email-profile";
 import { EmailProfileDialog } from "./email-profile-dialog";
-import { useEmailProfiles } from "./use-email-profiles";
+import { useEmailProfiles } from "@/hooks/use-email-profiles";
 
 /**
  * หน้าตั้งค่าโปรไฟล์อีเมลผู้ส่งของหน่วยธุรกิจ — สร้าง/แก้/ลบ/ตั้งค่าเริ่มต้น และทดสอบส่ง

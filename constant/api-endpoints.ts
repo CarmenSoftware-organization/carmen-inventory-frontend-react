@@ -317,6 +317,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_SEND_EMAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/${id}/send-email`,
   PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>

@@ -21,6 +21,15 @@ export interface TestEmailProfileResult {
   error?: string;
 }
 
+/**
+ * อ่าน/เขียนโปรไฟล์อีเมลผู้ส่งของหน่วยธุรกิจ (app-config key `email_profiles`)
+ *
+ * ย้ายมาจาก `routes/system-admin/email-profile/` (Task C1) มาไว้ที่นี่ตอน Task C3
+ * เพราะเริ่มมีผู้ใช้ข้ามโมดูล — หน้าตั้งค่า (`routes/system-admin/email-profile/`)
+ * และ dialog ส่ง PO ทางอีเมล (`routes/procurement/purchase-order/`) ทั้งคู่ต้องอ่าน
+ * ค่านี้ ในขณะที่ ESLint กันไม่ให้ `routes/<A>/` import จาก `routes/<B>/` ตรง ๆ —
+ * ตรงกับกติกาของ CLAUDE.md ("ใช้ข้ามโมดูล → อยู่ hooks/")
+ */
 export function useEmailProfiles() {
   const query = useAppConfigByKey(EMAIL_PROFILES_CONFIG_KEY);
   const upsert = useUpsertAppConfig();

@@ -1,5 +1,15 @@
+import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
+import {
+  Building2,
+  Lock,
+  Mail,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
@@ -10,6 +20,16 @@ import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { PoSendEmailDialog } from "./po-send-email-dialog";
+
+/** สถานะ PO ที่ส่งอีเมลให้ผู้ขายได้ — backend กันซ้ำที่ 422 อยู่แล้ว นี่คือชั้นที่สอง
+ * (ซ่อนปุ่มไปเลย ไม่ใช่ปล่อยให้กดแล้วเด้ง error) module scope กันสร้าง array ใหม่ทุก render */
+const SEND_EMAIL_STATUSES: readonly PO_STATUS[] = [
+  PO_STATUS.SENT,
+  PO_STATUS.PARTIAL,
+  PO_STATUS.CLOSED,
+  PO_STATUS.COMPLETED,
+];
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -56,11 +76,17 @@ export function PoHeader({
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
+  const [showSendEmail, setShowSendEmail] = useState(false);
 
   const isView = mode === "view";
   const isEditMode = mode === "edit";
   const isAdd = !purchaseOrder;
   const headerTitle = purchaseOrder?.po_no ?? t("entity");
+  // ไม่ผูกกับโหมด view/edit — สถานะ partial ยังแก้ไขได้ (ไม่ใช่ terminalStatus) แต่
+  // ต้องส่งอีเมลได้เหมือนกัน เอกสารที่ส่งจริงมาจาก DB ที่ persist แล้วเสมอ ไม่ใช่
+  // ฟอร์มที่ยังไม่ได้บันทึก
+  const canSendEmail =
+    !!purchaseOrder && SEND_EMAIL_STATUSES.includes(purchaseOrder.po_status);
   const poStatusConfig = purchaseOrder
     ? PO_STATUS_CONFIG[purchaseOrder.po_status]
     : null;
@@ -157,6 +183,17 @@ export function PoHeader({
               {tc("delete")}
             </Button>
           )}
+          {canSendEmail && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isPending}
+              onClick={() => setShowSendEmail(true)}
+            >
+              <Mail aria-hidden="true" />
+              {t("sendEmail.button")}
+            </Button>
+          )}
           <DocActionsMenu
             onComment={onShowComment}
             commentCount={comments?.length}
@@ -239,20 +276,31 @@ export function PoHeader({
   ) : undefined;
 
   return (
-    <DocFormHeader
-      title={headerTitle}
-      subtitle={
-        docMeta || workflowStep ? (
-          <span className="flex flex-col gap-1">
-            {docMeta}
-            {workflowStep}
-          </span>
-        ) : undefined
-      }
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-    />
+    <>
+      <DocFormHeader
+        title={headerTitle}
+        subtitle={
+          docMeta || workflowStep ? (
+            <span className="flex flex-col gap-1">
+              {docMeta}
+              {workflowStep}
+            </span>
+          ) : undefined
+        }
+        backLabel={tc("goBack")}
+        onBack={onBack}
+        badges={badges}
+        actions={actions}
+      />
+      {/* mount เฉพาะเมื่อสถานะส่งอีเมลได้ — กัน useEmailProfiles/useVendorById ยิง
+          ทุกครั้งที่เปิดหน้า PO แม้ปุ่มจะไม่มีทางกดได้ (draft/in_progress) */}
+      {canSendEmail && purchaseOrder && (
+        <PoSendEmailDialog
+          open={showSendEmail}
+          onOpenChange={setShowSendEmail}
+          purchaseOrder={purchaseOrder}
+        />
+      )}
+    </>
   );
 }
