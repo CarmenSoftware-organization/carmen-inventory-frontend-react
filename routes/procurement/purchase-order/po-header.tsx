@@ -292,9 +292,14 @@ export function PoHeader({
         badges={badges}
         actions={actions}
       />
-      {/* mount เฉพาะเมื่อสถานะส่งอีเมลได้ — กัน useEmailProfiles/useVendorById ยิง
-          ทุกครั้งที่เปิดหน้า PO แม้ปุ่มจะไม่มีทางกดได้ (draft/in_progress) */}
-      {canSendEmail && purchaseOrder && (
+      {/* mount เฉพาะตอน dialog เปิดจริง (ไม่ใช่แค่เช็คสถานะ PO) — ใบที่ส่งได้แล้ว
+          (sent/partial/closed/completed) คือใบส่วนใหญ่ที่คนเปิดดู เช็คแค่ canSendEmail
+          จะทำให้ useEmailProfiles/useVendorById ยิงทุกครั้งที่เปิดหน้า PO เหล่านี้
+          ทั้งที่ยังไม่ได้กดปุ่ม — unmount/remount ทุกรอบตั้งใจ: EmailChipField กับ
+          state ในตัว dialog reset เองผ่าน lifecycle ของ component (initializedRef
+          ออกแบบมารองรับ mount ใหม่ทุกครั้งที่เปิดอยู่แล้ว) เหมือน pattern ของ
+          PoFromPrDialog ใน po-create-dialog.tsx */}
+      {canSendEmail && showSendEmail && purchaseOrder && (
         <PoSendEmailDialog
           open={showSendEmail}
           onOpenChange={setShowSendEmail}
