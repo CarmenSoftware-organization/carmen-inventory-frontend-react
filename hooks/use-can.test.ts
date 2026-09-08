@@ -3,12 +3,17 @@ import { renderHook } from "@testing-library/react";
 import { useCan } from "./use-can";
 import { PERMISSIONS } from "@/constant/permissions";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
-import type { BusinessUnitLicense } from "@/types/profile";
+import type { BusinessUnitLicense } from "@/types/license";
 
 // Mock ที่ระดับ @/hooks/use-profile เดียว (ตามแบบ route-guard.test.tsx /
 // use-visible-modules.test.ts) — useCan ประกอบจาก useProfile + useLicense จริง
 // ทั้งคู่ เพื่อยืนยันการต่อสายจริง ไม่ใช่แค่ mock useLicense เอง
 const profile = vi.fn();
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
 vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => profile(),
 }));
@@ -19,6 +24,7 @@ vi.mock("@/components/permission-denied-dialog", () => ({
     dispatchPermissionDenied(...args),
 }));
 
+const BU_ID = "bu-1";
 const PERMISSION = PERMISSIONS.configuration.department.create;
 
 function license(
@@ -50,8 +56,10 @@ function setup({
     LICENSE_ENFORCEMENT: enforced,
   });
   profile.mockReturnValue({
-    defaultBu: { system_level: systemLevel, permissions },
-    license: buLicense,
+    defaultBu: { id: BU_ID, system_level: systemLevel, permissions },
+  });
+  licenseQuery.mockReturnValue({
+    data: buLicense ? { business_unit: { [BU_ID]: buLicense } } : undefined,
   });
 }
 
