@@ -132,7 +132,7 @@ export default function WorkflowNewForm() {
                   onValueChange={field.onChange}
                   disabled={isPending}
                 >
-                  <SelectTrigger id="wf-type" className="h-9">
+                  <SelectTrigger id="wf-type">
                     <SelectValue placeholder={t("selectType")} />
                   </SelectTrigger>
                   <SelectContent>

@@ -122,7 +122,7 @@ export function WfRouting({
   return (
     <div className="flex flex-col gap-6 pt-4 lg:flex-row">
       {/* Left: Rule list */}
-      <div className="w-full shrink-0 space-y-4 lg:w-72 xl:w-80">
+      <div className="w-full shrink-0 space-y-3 lg:w-64">
         <div className="flex items-center justify-between px-1">
           <span className="text-foreground text-sm font-semibold">
             {t("rules")}
@@ -142,12 +142,13 @@ export function WfRouting({
         </div>
 
         <div className="relative px-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
           <Input
             placeholder={tc("search") || "Search..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 pl-9"
+            size="sm"
+            className="pl-8"
           />
         </div>
 
@@ -218,19 +219,19 @@ export function WfRouting({
       </div>
 
       {/* Right: Rule detail */}
-      <div className="bg-card flex-1 rounded-xl border p-4 md:p-6">
+      <div className="@container min-w-0 flex-1">
         {fields.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {t("selectOrAddRule")}
           </p>
         ) : (
           <div className="space-y-8">
-            <FieldGroup className="gap-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FieldGroup className="gap-4">
+              <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
                 <Field>
                   <FieldLabel>{t("ruleName")}</FieldLabel>
                   <Input
-                    className="h-9"
+                    size="sm"
                     disabled={isDisabled}
                     {...form.register(`data.routing_rules.${safeIndex}.name`)}
                   />
@@ -247,7 +248,7 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -283,12 +284,12 @@ export function WfRouting({
                 {t("condition")}
               </span>
 
-              <FieldGroup className="gap-6 pt-4">
+              <FieldGroup className="gap-4 pt-4">
                 <div
                   className={cn(
-                    "grid gap-6",
+                    "grid gap-4",
                     watchedField === "total_amount"
-                      ? "grid-cols-1 md:grid-cols-2"
+                      ? "grid-cols-1 @md:grid-cols-2"
                       : "grid-cols-1",
                   )}
                 >
@@ -299,7 +300,7 @@ export function WfRouting({
                       onValueChange={handleFieldChange}
                       disabled={isDisabled}
                     >
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger>
                         <SelectValue placeholder={t("selectField")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -324,7 +325,7 @@ export function WfRouting({
                             onValueChange={field.onChange}
                             disabled={isDisabled}
                           >
-                            <SelectTrigger className="h-9">
+                            <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -347,7 +348,7 @@ export function WfRouting({
                       <FieldLabel>{t("value")}</FieldLabel>
                       <Input
                         type="number"
-                        className="h-9"
+                        size="sm"
                         disabled={isDisabled}
                         value={watchedConditionValue?.[0] ?? ""}
                         onChange={(e) =>
@@ -362,12 +363,12 @@ export function WfRouting({
 
                 {watchedField === "total_amount" &&
                   watchedOperator === "between" && (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
                       <Field>
                         <FieldLabel>{t("minValue")}</FieldLabel>
                         <Input
                           type="number"
-                          className="h-9"
+                          size="sm"
                           disabled={isDisabled}
                           {...form.register(
                             `data.routing_rules.${safeIndex}.condition.min_value`,
@@ -378,7 +379,7 @@ export function WfRouting({
                         <FieldLabel>{t("maxValue")}</FieldLabel>
                         <Input
                           type="number"
-                          className="h-9"
+                          size="sm"
                           disabled={isDisabled}
                           {...form.register(
                             `data.routing_rules.${safeIndex}.condition.max_value`,
@@ -419,7 +420,7 @@ export function WfRouting({
                 {t("actionLabel")}
               </span>
 
-              <div className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 pt-4 @md:grid-cols-2">
                 <Field>
                   <FieldLabel>{tfl("type")}</FieldLabel>
                   <Controller
@@ -431,7 +432,7 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -457,7 +458,7 @@ export function WfRouting({
                         onValueChange={field.onChange}
                         disabled={isDisabled}
                       >
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

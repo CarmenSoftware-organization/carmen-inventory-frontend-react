@@ -73,6 +73,7 @@ export function WfStageGeneral({
         <Field>
           <FieldLabel>{t("stageName")}</FieldLabel>
           <Input
+            size="sm"
             disabled={isDisabled || isNameDisabled}
             {...form.register(`data.stages.${index}.name`)}
           />
@@ -164,6 +165,7 @@ export function WfStageGeneral({
           <FieldLabel>{t("sla")}</FieldLabel>
           <Input
             type="number"
+            size="sm"
             disabled={isDisabled}
             {...form.register(`data.stages.${index}.sla`)}
           />
