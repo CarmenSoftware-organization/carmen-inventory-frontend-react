@@ -1,3 +1,4 @@
+import { useLicenseQuery } from "@/hooks/use-license-query";
 import { useProfile } from "@/hooks/use-profile";
 
 /**
@@ -54,8 +55,8 @@ export function interfaceEntitlement(
 /**
  * Hook คืนตัวตัดสินสิทธิ์ของ brand ตาม profile ปัจจุบัน
  *
- * ผูกกับ `useProfile()` โดยตรงจึง share cache เดียวกัน — สลับ BU แล้ว profile refetch
- * ทำให้สิทธิ์อัปเดตเองโดยไม่ต้องยิงเพิ่ม
+ * อ่านจาก `GET /api/license` (ก้อนเดียวกับ `useLicense()` — share cache) โดยเลือกใบของ BU
+ * ปัจจุบันจาก `business_unit` เอง · response ครอบทุก BU ในคำขอเดียว สลับ BU จึงไม่ต้องยิงเพิ่ม
  *
  * **จงใจไม่เดินผ่าน `useLicense()` / `enforced`** — สวิตช์ `LICENSE_ENFORCEMENT` เป็น shadow
  * mode ของ license ทั่วไป แต่ interface ถูกบังคับใช้เสมอมาตั้งแต่ก่อนย้ายมาอยู่บนท่อ license
@@ -66,7 +67,9 @@ export function interfaceEntitlement(
  * @returns `entitlementOf(category, brand)` และ `isEntitled(category, brand)` (= ไม่ใช่ `none`)
  */
 export function useInterfaceEntitlement() {
-  const { license } = useProfile();
+  const { defaultBu } = useProfile();
+  const { data } = useLicenseQuery();
+  const license = defaultBu ? data?.business_unit[defaultBu.id] : undefined;
 
   const entitlementOf = (
     categoryKey: string,

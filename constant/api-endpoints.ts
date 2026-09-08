@@ -141,6 +141,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/product/${productId}/location`,
   INVENTORY_ADJUSTMENTS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-adjustments`,
+  LICENSE: "/api/proxy/api/license",
   LOCATIONS: (buCode: string) => `/api/proxy/api/config/${buCode}/locations`,
   LOCATIONS_BY_PRODUCT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/user-locations/product/${productId}`,
