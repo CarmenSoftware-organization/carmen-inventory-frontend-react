@@ -16,7 +16,6 @@ import {
 } from "./use-recipe-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { RecipeEquipmentCategory } from "@/types/recipe-equipment-category";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
@@ -24,8 +23,7 @@ import DisplayTemplate from "@/components/display-template";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useRecipeEquipmentCategoryTable } from "./use-recipe-equipment-category-table";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -60,8 +58,14 @@ export default function RecipeEquipmentCategoryComponent() {
   // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
   // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ
   const recipeEquipmentCategoryFilterFields = useMemo<FilterFieldDef[]>(
-    () => [{ key: "filter",
-        section: "listView.sectionDocument", control: "status", labelKey: "common.status" }],
+    () => [
+      {
+        key: "filter",
+        section: "listView.sectionDocument",
+        control: "status",
+        labelKey: "common.status",
+      },
+    ],
     [],
   );
 
@@ -97,21 +101,14 @@ export default function RecipeEquipmentCategoryComponent() {
       title={t("title")}
       description={t("desc")}
       toolbar={
-        <>
-          <SearchInput defaultValue={search} onSearch={setSearch} />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={recipeEquipmentCategoryFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </>
+        <ListToolbar
+          variant="bare"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={recipeEquipmentCategoryFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       }
       filterBar={
         <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />

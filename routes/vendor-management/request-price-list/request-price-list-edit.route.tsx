@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { EditRequestPriceListContent } from "./edit-request-price-list-content";
+import { RfpEditContent } from "./rfp-edit-content";
 
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;
-  return <EditRequestPriceListContent id={id} />;
+  return <RfpEditContent id={id} />;
 }

@@ -1,7 +1,7 @@
 # carmen-inventory-frontend-react
 
 CARMEN BLUE — ERP for hospitality supply chain. **Vite + React Router 7 SPA**, fully
-migrated from the Next.js app at [carmen-inventory-frontend](../carmen-inventory-frontend)
+migrated from the legacy Next.js app (that repo has since been removed)
 and built for static hosting on **S3 + CloudFront** (no server runtime; the browser talks
 to the backend directly).
 

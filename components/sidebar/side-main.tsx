@@ -80,8 +80,15 @@ export function SideMain() {
         <SidebarGroup className="pt-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu>
             {visibleSubs.map((sub) => {
-              const isActive =
+              const onPath =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
+              // อยู่หน้าของลูกตัวไหนอยู่ไหม — ลูกมี path ของตัวเองซึ่งซ้อนอยู่ใต้
+              // path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออก
+              // จะสว่างพร้อมกันสองอัน
+              const activeChild = sub.subModules?.find(
+                (c) => pathname === c.path || pathname.startsWith(c.path + "/"),
+              );
+              const isActive = onPath && !activeChild;
               // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
               // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
               const content = (
@@ -212,6 +219,47 @@ export function SideMain() {
                       </SidebarMenuSub>
                     )}
                   </SidebarMenuItem>
+
+                  {/* เมนูย่อยอีกชั้น — เยื้องเข้าไปและซ่อนตอนย่อ sidebar เป็นไอคอน
+                      (ไอคอนเรียงกันสามตัวที่ชี้หน้าเดียวกันแยกไม่ออกอยู่ดี) */}
+                  {sub.subModules?.map((child) => {
+                    const childActive =
+                      pathname === child.path ||
+                      pathname.startsWith(child.path + "/");
+                    return (
+                      <SidebarMenuItem
+                        key={child.path}
+                        className="group-data-[collapsible=icon]:hidden"
+                      >
+                        <SidebarMenuButton
+                          asChild
+                          size="sm"
+                          isActive={childActive}
+                          className="ms-4 w-auto rounded-md"
+                        >
+                          <Link to={child.path}>
+                            <child.icon
+                              aria-hidden="true"
+                              className={cn(
+                                "shrink-0",
+                                childActive
+                                  ? "text-primary"
+                                  : "text-muted-foreground",
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "text-xs",
+                                childActive && "text-primary",
+                              )}
+                            >
+                              {t(child.name)}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </Fragment>
               );
             })}

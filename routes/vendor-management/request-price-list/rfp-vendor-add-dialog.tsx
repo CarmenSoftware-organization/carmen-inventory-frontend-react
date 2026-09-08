@@ -83,7 +83,10 @@ export function RfpVendorAddDialog({
     { enabled: open },
   );
 
-  const vendors = data?.data ?? [];
+  // TanStack ต้องได้ reference ที่นิ่ง — `data?.data ?? []` สร้าง array ใหม่ทุก
+  // render แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section
+  // หลังเซฟ vendor สำเร็จ วนไป 245,156 รอบ)
+  const vendors = useMemo(() => data?.data ?? [], [data]);
   const totalRecords = data?.paginate?.total ?? 0;
 
   const closeAndReset = (nextOpen: boolean) => {

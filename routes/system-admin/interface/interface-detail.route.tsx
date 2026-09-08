@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { useParams } from "react-router";
 import { useTranslations } from "use-intl";
+import { CalendarX } from "lucide-react";
 import { ErrorState } from "@/components/ui/error-state";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
 import { useInterfaceEntitlement } from "./use-interface-entitlement";
@@ -21,12 +22,16 @@ import { findCategory, findBrand } from "./interface-registry";
 export function Component() {
   const t = useTranslations("systemAdmin.interface");
   const { category, brand } = useParams<{ category: string; brand: string }>();
-  const { isEntitled } = useInterfaceEntitlement();
+  const { entitlementOf } = useInterfaceEntitlement();
 
   const categoryDef = findCategory(category);
   const brandDef = findBrand(category, brand);
+  const entitlement =
+    categoryDef && brandDef
+      ? entitlementOf(categoryDef.key, brandDef.key)
+      : "none";
 
-  if (!categoryDef || !brandDef || !isEntitled(categoryDef.key, brandDef.key)) {
+  if (!categoryDef || !brandDef || entitlement === "none") {
     return (
       <ErrorState message={t("notFound")} backTo="/system-admin/interface" />
     );
@@ -34,17 +39,31 @@ export function Component() {
 
   const Form = brandDef.form ?? categoryDef.form;
   return (
-    <Suspense
-      fallback={
-        <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-          <SettingSectionSkeleton
-            first
-            fields={["half", "half", "half", "half"]}
-          />
+    <>
+      {entitlement === "expired" && (
+        // จงใจไม่ใช้ `LicenseExpiredBanner` ตรง ๆ — ตัวนั้น `return null` เมื่อสวิตช์
+        // `LICENSE_ENFORCEMENT` ปิด แต่การล็อก interface ไม่ขึ้นกับสวิตช์นั้น
+        // คำอธิบายต้องมองเห็นได้ทุกที่ที่การล็อกมองเห็นได้
+        <div
+          role="alert"
+          className="bg-muted flex items-center justify-center gap-2 border-b px-4 py-2 text-xs"
+        >
+          <CalendarX className="text-destructive size-4 shrink-0" aria-hidden />
+          <span className="text-muted-foreground">{t("expiredNotice")}</span>
         </div>
-      }
-    >
-      <Form />
-    </Suspense>
+      )}
+      <Suspense
+        fallback={
+          <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+            <SettingSectionSkeleton
+              first
+              fields={["half", "half", "half", "half"]}
+            />
+          </div>
+        }
+      >
+        <Form />
+      </Suspense>
+    </>
   );
 }

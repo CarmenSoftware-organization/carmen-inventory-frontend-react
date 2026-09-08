@@ -99,24 +99,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-        <Field className={viewFieldGap}>
-          <FieldLabel required>{t("receivedAt")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="received_at"
-            render={({ field }) => (
-              <FieldDatePicker
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                placeholder={tc("selectDate")}
-                className="w-full text-xs"
-                error={errors.received_at?.message}
-              />
-            )}
-          />
-        </Field>
-
         {/* วันที่ใบรับสินค้า — ต่อจากวันที่รับของเพราะอ่านคู่กัน (ของมาถึงวันไหน
             เปิดใบวันไหน ไม่จำเป็นต้องวันเดียวกัน) เดิมโชว์เป็นข้อความอ่านอย่างเดียว
             อยู่บนหัวใบ แก้ไม่ได้ทั้งที่ schema บังคับกรอกและรับค่าได้อยู่แล้ว */}
@@ -133,6 +115,95 @@ export function GrnFormHeader({
                 placeholder={tc("selectDate")}
                 className="w-full text-xs"
                 error={errors.grn_date?.message}
+              />
+            )}
+          />
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel htmlFor="grn-exchange-rate" required>
+            {tfl("currency")}
+          </FieldLabel>
+          <InputSuffixField
+            className="w-full"
+            disabled={disabled}
+            error={!!errors.currency_id?.message}
+          >
+            <InputSuffixInput
+              id="grn-exchange-rate"
+              type="number"
+              inputMode="decimal"
+              step="0.0001"
+              disabled={disabled}
+              {...form.register("exchange_rate")}
+            />
+            <InputSuffixAddon>
+              <Controller
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <LookupCurrency
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                    onItemChange={(currency) => {
+                      form.setValue("currency_name", currency.code);
+                      form.setValue("exchange_rate", currency.exchange_rate);
+                    }}
+                    disabled={disabled || fromWizard}
+                    className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                  />
+                )}
+              />
+            </InputSuffixAddon>
+          </InputSuffixField>
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel>{t("postType")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="post_type"
+            render={({ field }) => (
+              <FieldSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={disabled}
+                className="w-full text-xs"
+                error={errors.post_type?.message}
+              >
+                <SelectContent>
+                  <SelectItem value="ap">{t("ap")}</SelectItem>
+                  <SelectItem value="consignment">
+                    {t("consignment")}
+                  </SelectItem>
+                  <SelectItem value="cash">{t("cash")}</SelectItem>
+                </SelectContent>
+              </FieldSelect>
+            )}
+          />
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel>{tfl("creditTerm")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="credit_term_id"
+            render={({ field }) => (
+              <LookupCreditTerm
+                value={field.value ?? ""}
+                onValueChange={(value, creditTerm) => {
+                  field.onChange(value);
+                  if (creditTerm) {
+                    form.setValue("credit_term_name", creditTerm.name);
+                    form.setValue("credit_term_days", creditTerm.value);
+                    syncDueDate(
+                      form.getValues("invoice_date"),
+                      creditTerm.value,
+                    );
+                  }
+                }}
+                className="w-full text-xs"
+                disabled={disabled}
               />
             )}
           />
@@ -172,68 +243,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-        <Field className={viewFieldGap}>
-          <FieldLabel htmlFor="grn-exchange-rate" required>
-            {tfl("currency")}
-          </FieldLabel>
-          <InputSuffixField
-            className="w-full"
-            disabled={disabled}
-            error={!!errors.currency_id?.message}
-          >
-            <InputSuffixInput
-              id="grn-exchange-rate"
-              type="number"
-              inputMode="decimal"
-              step="0.0001"
-              disabled={disabled}
-              {...form.register("exchange_rate")}
-            />
-            <InputSuffixAddon>
-              <Controller
-                control={form.control}
-                name="currency_id"
-                render={({ field }) => (
-                  <LookupCurrency
-                    value={field.value ?? ""}
-                    onValueChange={field.onChange}
-                    onItemChange={(currency) => {
-                      form.setValue("currency_name", currency.code);
-                      form.setValue("exchange_rate", currency.exchange_rate);
-                    }}
-                    disabled={disabled || fromWizard}
-                    className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-                  />
-                )}
-              />
-            </InputSuffixAddon>
-          </InputSuffixField>
-        </Field>
-        <Field className={viewFieldGap}>
-          <FieldLabel>{tfl("creditTerm")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="credit_term_id"
-            render={({ field }) => (
-              <LookupCreditTerm
-                value={field.value ?? ""}
-                onValueChange={(value, creditTerm) => {
-                  field.onChange(value);
-                  if (creditTerm) {
-                    form.setValue("credit_term_name", creditTerm.name);
-                    form.setValue("credit_term_days", creditTerm.value);
-                    syncDueDate(
-                      form.getValues("invoice_date"),
-                      creditTerm.value,
-                    );
-                  }
-                }}
-                className="w-full text-xs"
-                disabled={disabled}
-              />
-            )}
-          />
-        </Field>
 
         <Field className={viewFieldGap}>
           <FieldLabel required>{t("dueDate")}</FieldLabel>
@@ -254,35 +263,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel>{t("postType")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="post_type"
-            render={({ field }) => (
-              <FieldSelect
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                className="w-full text-xs"
-                error={errors.post_type?.message}
-              >
-                <SelectContent>
-                  <SelectItem value="ap">{t("ap")}</SelectItem>
-                  <SelectItem value="consignment">
-                    {t("consignment")}
-                  </SelectItem>
-                  <SelectItem value="cash">{t("cash")}</SelectItem>
-                </SelectContent>
-              </FieldSelect>
-            )}
-          />
-        </Field>
-
-        {/* คำอธิบายอยู่ต่อจาก Post Type ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
-            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เต็ม
-            ความกว้าง เพราะคำอธิบายใบเป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
         <Field className="lg:col-span-2">
           <FieldLabel htmlFor="grn-description">
             {tfl("description")}

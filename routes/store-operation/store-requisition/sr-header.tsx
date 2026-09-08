@@ -16,7 +16,7 @@ import { WORKFLOW_TYPE } from "@/types/workflows";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
-import { useStoreRequisitionComments } from "./use-store-requisition";
+import { useStoreRequisitionComments } from "./use-sr";
 import {
   Sheet,
   SheetContent,

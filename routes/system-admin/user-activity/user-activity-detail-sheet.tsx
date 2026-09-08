@@ -1,6 +1,5 @@
 import { CalendarDays, User, Globe, Monitor } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -11,15 +10,9 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProfile } from "@/hooks/use-profile";
+import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
-
-const ACTION_VARIANT: Record<string, string> = {
-  login:
-    "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent",
-  logout:
-    "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent",
-};
 
 /**
  * แถวแสดงข้อมูลคู่ label/value พร้อมไอคอนใน detail sheet
@@ -89,11 +82,6 @@ export function UserActivityDetailSheet({
   const t = useTranslations("systemAdmin.userActivity");
   const { dateFormat } = useProfile();
 
-  const actionClass = log
-    ? (ACTION_VARIANT[log.action?.toLowerCase()] ??
-      "bg-muted text-muted-foreground")
-    : "";
-
   const actorName = log
     ? [log.actor_firstname, log.actor_middlename, log.actor_lastname]
         .filter(Boolean)
@@ -113,9 +101,7 @@ export function UserActivityDetailSheet({
           <>
             <SheetHeader className="animate-fade-in-left space-y-1">
               <SheetTitle className="text-sm">
-                <Badge size="sm" className={`${actionClass} text-xs`}>
-                  {log.action}
-                </Badge>
+                <ActivityActionLabel action={log.action} />
               </SheetTitle>
               <SheetDescription className="text-xs">
                 {log.description || t("desc")}

@@ -85,3 +85,41 @@ describe("every code maps to a key that both locales define", () => {
     expect(th.errors, `th.errors.${key}`).toHaveProperty(key);
   });
 });
+
+// รหัสจาก error catalog ต้องชนะข้อความกลาง — ไม่งั้นเหตุผลที่ผู้ใช้แก้เองได้จะถูกกลบ
+describe("app code mapping", () => {
+  it("uses the specific message when the backend names a code the user can act on", () => {
+    const err = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "Some document in workflow is in_progress",
+      400,
+      false,
+      undefined,
+      "Some document in workflow is in_progress",
+      "WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS",
+    );
+
+    expect(getUserErrorMessage(err, t)).toBe("workflowInProgress");
+  });
+
+  // รหัสที่ยังไม่ได้ map ต้องตกไปที่ข้อความกลางตามเดิม ไม่ใช่พังหรือโชว์รหัสดิบ
+  it("falls back to the generic message for a code that is not mapped", () => {
+    const err = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "boom",
+      400,
+      false,
+      undefined,
+      "boom",
+      "SOME_INTERNAL_CODE",
+    );
+
+    expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+
+  it("still falls back when there is no code at all", () => {
+    const err = new ApiError(ERROR_CODES.VALIDATION_ERROR, "boom", 400);
+
+    expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+});

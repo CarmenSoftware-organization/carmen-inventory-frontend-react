@@ -17,7 +17,8 @@ import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
 import { fieldFocusRef } from "@/lib/field-focus";
 import { CN_ITEM } from "./cn-form-schema";
-import { CnItemComputedSync, useCnItemTable } from "./use-cn-item-table";
+import { CnItemComputedSync } from "./cn-item-cells";
+import { useCnItemTable } from "./use-cn-item-table";
 import { CnAddItemDialog, type CnGrnLine } from "./cn-add-item-dialog";
 
 interface Props {

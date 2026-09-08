@@ -36,7 +36,10 @@ export const EMPTY_FORM: CurrencyFormValues = {
   code: "",
   name: "",
   symbol: "",
-  exchange_rate: 0.01,
+  // ไม่มีค่าเริ่มต้นที่ "ถูก" ได้ — อัตราแลกเปลี่ยนต้องมาจากคนกรอกหรือจากแหล่งอัตราจริง
+  // 0 ตกด่าน .positive() ของ schema ผู้ใช้จึงถูกบังคับให้กรอกก่อน save (เท่ากับ
+  // exchange-rate-form-schema ที่ใช้ 0 เหมือนกัน)
+  exchange_rate: 0,
   description: "",
   decimal_places: 2,
   is_active: true,

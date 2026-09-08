@@ -14,14 +14,14 @@ interface PoItemExpandedProps {
   /** ตารางแถวสินค้ามีคอลัมน์ action ไหม — ต้องตรงกันสองตาราง ไม่งั้นคอลัมน์เหลื่อม
    *  (โหมดอ่านก็ยังมีได้ ถ้ามีประวัติรายบรรทัดให้กด) */
   readonly showActionCol: boolean;
-  /** % ของความกว้าง table ที่ต้อง indent ให้ตรงขอบซ้าย column Product */
-  readonly leftInsetPct: number;
+  /** เพิ่งกรอกราคาเสร็จ — กางตัวเลือกคลังของแถวแรกต่อให้เลย */
+  readonly locationOpen?: boolean;
+  readonly onLocationOpenChange?: (open: boolean) => void;
 }
 
 /**
  * เนื้อหาแถวที่ expand ของ PO item — location rows คอลัมน์เดียวกับ product row
  * (order/rec/disc%/tax แก้ได้รายตัว, Sub/Dis/Net/Tax/Amt คำนวณต่อ location)
- * indent ให้ตรง column Product
  */
 export function PoItemExpanded({
   item,
@@ -31,7 +31,8 @@ export function PoItemExpanded({
   locationsDisabled,
   readOnly,
   showActionCol,
-  leftInsetPct,
+  locationOpen,
+  onLocationOpenChange,
 }: PoItemExpandedProps) {
   "use no memo";
   const index = Math.max(
@@ -40,11 +41,9 @@ export function PoItemExpanded({
   );
   return (
     // w-0 min-w-full → เนื้อหา expand กว้างเท่า table (sum ของ column) เท่านั้น
-    // paddingLeft = % ให้ตรงขอบ column Product → location table align กับ product row
-    <div
-      className="w-0 min-w-full overflow-x-auto py-1"
-      style={{ paddingLeft: `${leftInsetPct}%` }}
-    >
+    // ส่วน indent ให้ตรงขอบ column Product เป็นหน้าที่ของ `expandedColStart`
+    // (DataGridTable เว้น colSpan ให้เอง) ไม่ต้องคิด % เอง
+    <div className="w-0 min-w-full overflow-x-auto py-1">
       <LocationsEditor
         form={form}
         index={index}
@@ -52,6 +51,8 @@ export function PoItemExpanded({
         fieldsDisabled={disabled}
         readOnly={readOnly}
         showActionCol={showActionCol}
+        locationOpen={locationOpen}
+        onLocationOpenChange={onLocationOpenChange}
       />
     </div>
   );

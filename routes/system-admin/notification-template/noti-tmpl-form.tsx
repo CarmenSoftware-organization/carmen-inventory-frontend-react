@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
+import { Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ChevronLeft, History, Pencil, Save, Trash2, X } from "lucide-react";
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/setting-section";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   useCreateNotificationTemplate,
@@ -32,7 +31,6 @@ import {
   useUpdateNotificationTemplate,
 } from "@/hooks/use-notification-template";
 import type { NotificationTemplate } from "@/types/noti-tmpl";
-import type { FormMode } from "@/types/form";
 import {
   NOTIFICATION_CHANNEL_OPTIONS,
   getDefaultValues,
@@ -60,32 +58,23 @@ export function NotificationTemplateForm({
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
-  const navigate = useNavigate();
-
-  const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
-  const isView = mode === "view";
-  const isAdd = mode === "add";
-  const isEdit = mode === "edit";
 
   const createMut = useCreateNotificationTemplate();
   const updateMut = useUpdateNotificationTemplate();
   const deleteMut = useDeleteNotificationTemplate();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createMut.isPending || updateMut.isPending;
-  const isDisabled = isView || isPending;
-
-  const form = useForm<NotificationTemplateFormValues>({
+  const f = useEntityForm<NotificationTemplateFormValues>({
+    entity: template,
     resolver: zodResolver(
       notificationTemplateSchema,
     ) as Resolver<NotificationTemplateFormValues>,
     defaultValues: getDefaultValues(template),
-  });
-  const errors = form.formState.errors;
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
   });
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
+  const errors = form.formState.errors;
 
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedActive = useWatch({ control: form.control, name: "is_active" });
@@ -100,7 +89,7 @@ export function NotificationTemplateForm({
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate(LIST_PATH);
+            f.backToList();
           },
         },
       );
@@ -109,7 +98,7 @@ export function NotificationTemplateForm({
     createMut.mutate(payload, {
       onSuccess: () => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
-        navigate(LIST_PATH);
+        f.backToList();
       },
     });
   };
@@ -117,35 +106,12 @@ export function NotificationTemplateForm({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate(LIST_PATH);
-  };
-
-  const handleBack = () => {
-    if (isView) {
-      goBack();
-      return;
-    }
-    discard.confirm(goBack);
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && template) {
-        form.reset(getDefaultValues(template));
-        setMode("view");
-      } else {
-        navigate(LIST_PATH);
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!template) return;
     deleteMut.mutate(template.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate(LIST_PATH);
+        f.backToList();
       },
     });
   };
@@ -164,11 +130,11 @@ export function NotificationTemplateForm({
             className="w-fit"
             type="button"
             aria-label={tc("goBack")}
-            onClick={handleBack}
+            onClick={f.handleBack}
           >
             <ChevronLeft />
           </Button>
-          <h1 className="max-w-[20rem] truncate text-lg font-semibold">
+          <h1 className="max-w-[20rem] truncate text-lg font-semibold tracking-tight">
             {title}
           </h1>
           {!isAdd && (
@@ -195,7 +161,7 @@ export function NotificationTemplateForm({
             </Button>
           )}
           {isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
+            <Button size="sm" onClick={f.handleEdit}>
               <Pencil />
               {tc("edit")}
             </Button>
@@ -205,7 +171,7 @@ export function NotificationTemplateForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleCancel}
+                onClick={f.handleCancel}
                 disabled={isPending}
               >
                 <X />
@@ -351,7 +317,17 @@ export function NotificationTemplateForm({
         </SettingSection>
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
 
       {template && (
         <DeleteDialog

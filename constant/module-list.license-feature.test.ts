@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { moduleList, type ModuleDto } from "./module-list";
+import { findRouteLeaf, moduleList, type ModuleDto } from "./module-list";
 import { licenseFeatureOf } from "@/hooks/use-license";
 import {
   LICENSE_FEATURE_KEYS,
@@ -40,8 +40,8 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-approve ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
   },
   {
-    path: "/config/account-code",
-    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — backend ยังไม่มี endpoint ของตัวเอง (account-code เป็น sub-resource ของสินค้า/หมวดสินค้า) และ catalog ยังไม่มีคีย์ให้ผูก",
+    path: "/config/chart-of-account",
+    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — backend ยังไม่มี endpoint ของตัวเอง (ผังบัญชีเป็น sub-resource ของสินค้า/หมวดสินค้า) และ catalog ยังไม่มีคีย์ให้ผูก",
   },
   {
     path: "/config/account-mapping",
@@ -134,8 +134,11 @@ describe("moduleList → license feature key", () => {
   });
 
   it("จับ regression ของ key ที่เคยพังจริงทั้ง 4 กลุ่ม", () => {
+    // ใช้ findRouteLeaf ตัวเดียวกับที่ RouteGuard ใช้จริง ไม่ใช่ตัวเก็บ leaf ของ
+    // เทสต์เอง — โหนดที่เป็นทั้งหน้าและมีเมนูย่อย (เช่น workflow) ไม่ใช่ leaf
+    // ในสายตาตัวเก็บ แต่ RouteGuard ยังต้องหา feature ของมันเจอ
     const featureOf = (path: string) => {
-      const leaf = leaves().find((l) => l.path === path);
+      const leaf = findRouteLeaf(path);
       if (!leaf) throw new Error(`leaf not found: ${path}`);
       return licenseFeatureOf(leaf);
     };

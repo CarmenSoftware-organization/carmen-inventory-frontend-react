@@ -68,6 +68,8 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     control: form.control,
     name: "delivery_date",
   });
+  const workflowId =
+    useWatch({ control: form.control, name: "workflow_id" }) ?? "";
   const itemsRaw = useWatch({ control: form.control, name: "items" });
   const items = (itemsRaw ?? []) as FromPriceListSelectedItem[];
   // ต้อง subscribe ผ่าน useFormState — อ่าน form.formState.errors ตรง ๆ จะได้ค่า
@@ -232,6 +234,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
             <ProductCard
               key={item.product_id ?? `item-${index}`}
               item={item}
+              workflowId={workflowId}
               errors={
                 Array.isArray(itemsError)
                   ? (itemsError[index] as ProductCardError)

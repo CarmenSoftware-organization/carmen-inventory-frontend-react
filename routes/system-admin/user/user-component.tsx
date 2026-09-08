@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,27 +21,23 @@ import { useUser, useDeleteUser } from "@/hooks/use-user";
 import { useUserRoleReport } from "./use-user-role-report";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
-import { useDepartment } from "@/hooks/use-department";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import UserCard from "./user-card";
 import type { User } from "@/types/workflows";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
-import { StatusFilter } from "@/components/ui/status-filter";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useUserTable } from "./use-user-table";
+import { UserDepartmentFilter } from "./user-department-filter";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 /**
  * คอมโพเนนต์หลักของหน้า User list รองรับ DataGrid (desktop), infinite card (mobile) และตัวกรองแผนก
@@ -61,24 +56,13 @@ export default function UserComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const { printReport, exportCsv, isBusy } = useUserRoleReport();
 
-  const { data: deptData } = useDepartment({ perpage: -1 });
-  // department เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
-  // array reference เปลี่ยนทุก render จน userFilterFields memo ข้างล่างไม่เคย hit
-  const deptOptions = useMemo(
-    () =>
-      (deptData?.data ?? [])
-        .filter((d) => d.is_active)
-        .map((d) => ({
-          label: `${d.code} - ${d.name}`,
-          value: `department_id|string:${d.id}`,
-        })),
-    [deptData],
-  );
-
   // filter (department) เป็น single-select (StatusFilter ไม่ใช่ MultiSelectFilter)
   // เหมือนโค้ดเดิมทุกประการ — label เป็น literal string จริงจึงต้องใช้
   // control: "custom" ห่อ StatusFilter ตรง ๆ แทน control: "status" ทั่วไป (ตัวนั้น
   // เรียก t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  //
+  // ทะเบียนแผนกอยู่ใน UserDepartmentFilter ไม่ใช่ตรงนี้ — `render` ถูกเรียกเฉพาะ
+  // ตอนคนเปิดตัวกรองจริง ๆ ทะเบียนจึงถูกยิงตอน hover ไม่ใช่ตอนเปิดหน้า
   const userFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -87,17 +71,11 @@ export default function UserComponent() {
         control: "custom",
         labelKey: "systemAdmin.user.department",
         render: (value, onChange) => (
-          <StatusFilter
-            value={value}
-            onChange={onChange}
-            placeholder={t("department")}
-            options={deptOptions}
-            className="w-full"
-          />
+          <UserDepartmentFilter value={value} onChange={onChange} />
         ),
       },
     ],
-    [deptOptions, t],
+    [],
   );
 
   const lf = useListFilters({
@@ -138,22 +116,11 @@ export default function UserComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm">{t("desc")}</p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -204,27 +171,14 @@ export default function UserComponent() {
           </div>
         </div>
 
-        <div className="flex w-full items-center gap-2">
-          <div className="flex-1">
-            <SearchInput defaultValue={search} onSearch={setSearch} />
-          </div>
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={userFilterFields}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          variant="row"
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={userFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       </div>
 
       <div className="mt-3 space-y-3">

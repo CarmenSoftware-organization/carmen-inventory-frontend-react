@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { summarizeVariance } from "../shared/variance-summary";
 import { toast } from "sonner";
-import { useSubmitSpotCheck } from "./use-spot-check";
+import { useSubmitSpotCheck } from "./use-sc";
 import { useUnit } from "@/hooks/use-unit";
 import type {
   SpotCheckReviewData,

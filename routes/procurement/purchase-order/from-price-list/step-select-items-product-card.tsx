@@ -12,6 +12,8 @@ import type {
 
 interface ProductCardProps {
   readonly item: FromPriceListSelectedItem;
+  /** workflow ที่เลือกไว้ใน step 1 — ใช้กรอง location ที่เลือกได้ */
+  readonly workflowId: string;
   readonly errors?:
     | {
         locations?:
@@ -37,6 +39,7 @@ interface ProductCardProps {
 
 export const ProductCard = memo(function ProductCard({
   item,
+  workflowId,
   errors,
   onRemoveItem,
   onAddLocation,
@@ -124,6 +127,7 @@ export const ProductCard = memo(function ProductCard({
               <div>
                 <LookupProductLocation
                   productId={productId}
+                  workflowId={workflowId}
                   value={loc.id ?? ""}
                   onValueChange={(v) =>
                     onLocationChange(productId, idx, { id: v })

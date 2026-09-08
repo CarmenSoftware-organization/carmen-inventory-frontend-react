@@ -13,7 +13,7 @@ export interface WorkflowHistoryEntry {
 }
 
 /** ประวัติ workflow ระดับรายการ (per-item) — backend ส่งมากับแต่ละ detail */
-export interface SrItemHistoryEntry {
+interface SrItemHistoryEntry {
   seq: number;
   name: string;
   user: { id: string; name: string };
@@ -22,7 +22,7 @@ export interface SrItemHistoryEntry {
   at: string;
 }
 
-export interface StoreRequisitionDetail {
+interface StoreRequisitionDetail {
   id: string;
   sequence_no: number;
   product_id: string;
@@ -87,7 +87,7 @@ export interface StoreRequisition {
   audit?: Audit;
 }
 
-export interface SrDetailPayload {
+interface SrDetailPayload {
   doc_version?: number;
   product_id: string;
   description: string;

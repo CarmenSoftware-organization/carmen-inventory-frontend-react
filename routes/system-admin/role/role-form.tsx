@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
+import { useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { KeySquare, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError } from "@/components/ui/field";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import {
@@ -18,7 +17,6 @@ import {
 } from "../shared/use-role";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
-import type { FormMode } from "@/types/form";
 import { SectionCard } from "../shared/admin-ui";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
@@ -33,22 +31,17 @@ interface RoleFormProps {
   readonly role?: RoleDetail;
 }
 
+const LIST_PATH = "/system-admin/role";
+
 export function RoleForm({ role }: RoleFormProps) {
-  const navigate = useNavigate();
   const t = useTranslations("systemAdmin.role");
   const tt = useTranslations("toast");
-  const [mode, setMode] = useState<FormMode>(role ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createRole = useCreateRole();
   const updateRole = useUpdateRole();
   const deleteRole = useDeleteRole();
   const [showDelete, setShowDelete] = useState(false);
 
   const isPending = createRole.isPending || updateRole.isPending;
-  const isDisabled = isView || isPending;
 
   const originalPermissionIds = new Set(
     role?.permissions.map((p) => p.permission_id) ?? [],
@@ -56,15 +49,14 @@ export function RoleForm({ role }: RoleFormProps) {
 
   const defaultValues = getDefaultValues(role);
 
-  const form = useForm<RoleFormValues>({
+  const f = useEntityForm<RoleFormValues>({
+    entity: role,
     resolver: zodResolver(roleSchema) as Resolver<RoleFormValues>,
     defaultValues,
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
   });
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
   const { printRole } = useRolePrint();
 
   /* Live watches — subscribe only to specific fields */
@@ -88,7 +80,7 @@ export function RoleForm({ role }: RoleFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
-            navigate("/system-admin/role");
+            f.backToList();
           },
         },
       );
@@ -112,36 +104,10 @@ export function RoleForm({ role }: RoleFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/system-admin/role");
+            f.backToList();
           },
         },
       );
-    }
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && role) {
-        form.reset(defaultValues);
-        setMode("view");
-      } else {
-        navigate("/system-admin/role");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/system-admin/role");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
     }
   };
 
@@ -161,10 +127,10 @@ export function RoleForm({ role }: RoleFormProps) {
           canDelete={isView && !!role}
           isDeleting={deleteRole.isPending}
           isSaving={isPending}
-          onBack={handleBack}
+          onBack={f.handleBack}
           onDelete={() => setShowDelete(true)}
-          onEdit={() => setMode("edit")}
-          onCancel={handleCancel}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
           onPrint={() => printRole(heroName, watchedPermissions ?? [])}
         />
       </Reveal>
@@ -219,7 +185,17 @@ export function RoleForm({ role }: RoleFormProps) {
         </Reveal>
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
 
       {role && (
         <DeleteDialog
@@ -236,7 +212,7 @@ export function RoleForm({ role }: RoleFormProps) {
             deleteRole.mutate(role.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/system-admin/role");
+                f.backToList();
               },
             });
           }}

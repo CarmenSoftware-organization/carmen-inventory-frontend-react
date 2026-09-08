@@ -1,8 +1,8 @@
 import { useParams } from "react-router";
-import { EditCuisineContent } from "./edit-cuisine-content";
+import { CuisineEditContent } from "./cuisine-edit-content";
 
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;
-  return <EditCuisineContent id={id} />;
+  return <CuisineEditContent id={id} />;
 }

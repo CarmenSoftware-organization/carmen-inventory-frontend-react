@@ -27,6 +27,13 @@ interface WfStageGeneralProps {
   readonly index: number;
   readonly isFirst: boolean;
   readonly isDisabled: boolean;
+  /**
+   * ปิดเฉพาะช่องชื่อ stage
+   *
+   * เอกสารที่กำลังเดินอยู่เก็บชื่อ stage ปัจจุบันไว้แล้วใช้ค้นหาใน workflow ทุกครั้งที่ทำ action
+   * เปลี่ยนชื่อเมื่อไร เอกสารเหล่านั้นจะหา stage ไม่เจอและเดินต่อไม่ได้เลย
+   */
+  readonly isNameDisabled: boolean;
 }
 
 export function WfStageGeneral({
@@ -34,14 +41,14 @@ export function WfStageGeneral({
   index,
   isFirst,
   isDisabled,
+  isNameDisabled,
 }: WfStageGeneralProps) {
   const t = useTranslations("systemAdmin.workflow");
   const tfl = useTranslations("field");
   const prefix = `data.stages.${index}` as const;
 
   const watchedStages = form.watch("data.stages") as
-    | SignatureStageLike[]
-    | undefined;
+    SignatureStageLike[] | undefined;
   const signatureDisabled = isSignatureCheckboxDisabled(
     watchedStages ?? [],
     index,
@@ -67,7 +74,7 @@ export function WfStageGeneral({
           <FieldLabel>{t("stageName")}</FieldLabel>
           <Input
             className="h-9"
-            disabled={isDisabled}
+            disabled={isDisabled || isNameDisabled}
             {...form.register(`data.stages.${index}.name`)}
           />
         </Field>

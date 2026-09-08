@@ -328,7 +328,11 @@ export default function TransactionComponent() {
       <div className="relative px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))] lg:p-4">
         {/* ── Page header ─────────── */}
         <Reveal>
-          <DocumentListHeader title={t("title")} description={t("desc")} />
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
         </Reveal>
 
         {/* ── Search + filters ─────────── */}

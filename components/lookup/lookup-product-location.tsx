@@ -3,16 +3,18 @@ import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
 import { useLocationsByProduct } from "@/hooks/use-locations-by-product";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
-import type { Location } from "@/types/location";
+import type { LocationOption } from "@/types/location";
 import { Badge } from "@/components/ui/badge";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductLocationProps {
   readonly productId: string;
+  /** ส่งมาแล้วจะดึง location ที่ workflow นั้นอนุญาตแทน location ตามสิทธิ์ user */
+  readonly workflowId?: string;
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (location: Location) => void;
+  readonly onItemChange?: (location: LocationOption) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -37,7 +39,8 @@ interface LookupProductLocationProps {
  *
  * ใช้ `useLocationsByProduct(productId)` ดึงเฉพาะ location ที่ผูกกับ product นั้น
  * พร้อม server-side search และ infinite scroll (perpage 30) disabled เมื่อไม่มี `productId`
- * มี `onItemChange` ส่ง object `Location` เต็ม
+ * มี `onItemChange` ส่ง object `LocationOption` (id/code/name/location_type)
+ * ใส่ `workflowId` เพิ่มได้ถ้าอยากได้เฉพาะ location ที่ workflow นั้นอนุญาต (ฟอร์ม PO)
  *
  * @param value - location id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -52,6 +55,7 @@ interface LookupProductLocationProps {
  */
 export function LookupProductLocation({
   productId,
+  workflowId,
   value,
   onValueChange,
   onItemChange,
@@ -79,7 +83,7 @@ export function LookupProductLocation({
     search?: string;
     perpage: number;
     page?: number;
-  }) => useLocationsByProduct(productId || undefined, params);
+  }) => useLocationsByProduct(productId || undefined, params, workflowId);
 
   const {
     items: locations,
@@ -87,11 +91,11 @@ export function LookupProductLocation({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Location>({
+  } = useLookupPagination<LocationOption>({
     useListHook,
     search,
     perpage: 30,
-    filter: (l: Location) => {
+    filter: (l: LocationOption) => {
       if (excludedSet && excludedSet.has(l.id)) return false;
       return true;
     },
@@ -129,8 +133,16 @@ export function LookupProductLocation({
       popoverAlign="start"
       popoverWidth="w-[26.25rem]"
       emptyIcon={Warehouse}
-      emptyTitle={tl("noFound", { entity: tfl("location") })}
-      emptyDescription={tl("noFoundDesc")}
+      // ค้นแล้วไม่เจอ กับ "workflow นี้ไม่ให้สั่งสินค้าชิ้นนี้จากคลังไหนเลย" คนละเรื่องกัน
+      // และผู้ใช้แก้คนละวิธี — อันแรกลบคำค้น อันหลังต้องไปเปลี่ยนสินค้า/เวิร์กโฟลว์
+      emptyTitle={
+        workflowId && !search
+          ? tl("noLocationInScope")
+          : tl("noFound", { entity: tfl("location") })
+      }
+      emptyDescription={
+        workflowId && !search ? tl("noLocationInScopeDesc") : tl("noFoundDesc")
+      }
       isLoading={isLoading}
       modal={modal}
       defaultLabel={defaultLabel}

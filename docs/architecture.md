@@ -1,7 +1,7 @@
 # Architecture
 
 CARMEN BLUE frontend — a **Vite + React 19 + React Router 7** single-page
-app, ported from the Next.js app at `../carmen-inventory-frontend/`. It ships as a
+app, ported from the legacy Next.js app (that repo has since been removed). It ships as a
 static bundle (S3/CloudFront, GCS/Cloud CDN, or a Docker nginx image); the browser
 talks to the backend gateway directly. There is **no application server** of our own.
 

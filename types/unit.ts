@@ -1,6 +1,6 @@
 import type { Audit } from "./audit";
 
-export interface UnitDimension {
+interface UnitDimension {
   name: string;
   value: number;
   unit: string;

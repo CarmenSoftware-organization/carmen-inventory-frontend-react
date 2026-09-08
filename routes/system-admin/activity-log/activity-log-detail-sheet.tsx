@@ -7,7 +7,6 @@ import {
   Hash,
 } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -18,20 +17,9 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProfile } from "@/hooks/use-profile";
+import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
-
-const ACTION_VARIANT: Record<string, string> = {
-  create:
-    "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent",
-  update:
-    "bg-[var(--status-pending)] text-[var(--status-pending-fg)] border-transparent",
-  delete: "bg-destructive text-destructive-foreground border-transparent",
-  login:
-    "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent",
-  logout:
-    "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent",
-};
 
 /**
  * แปลงข้อความ snake_case เป็น Title Case สำหรับแสดงชื่อ entity type
@@ -116,11 +104,6 @@ export function ActivityLogDetailSheet({
   const t = useTranslations("systemAdmin.activityLog");
   const { dateFormat } = useProfile();
 
-  const actionClass = log
-    ? (ACTION_VARIANT[log.action?.toLowerCase()] ??
-      "bg-muted text-muted-foreground")
-    : "";
-
   const actorName = log
     ? [log.actor_firstname, log.actor_middlename, log.actor_lastname]
         .filter(Boolean)
@@ -143,16 +126,10 @@ export function ActivityLogDetailSheet({
             <SheetHeader className="animate-fade-in-left space-y-1">
               <SheetTitle className="text-sm">
                 <div className="flex items-center gap-2">
-                  <Badge size="sm" className={`${actionClass} text-xs`}>
-                    {log.action}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    size="sm"
-                    className="text-xs font-normal"
-                  >
-                    {formatEntityType(log.entity_type)}
-                  </Badge>
+                  <ActivityActionLabel action={log.action} />
+                  <span className="text-muted-foreground text-xs font-normal">
+                    {formatEntityType(log.entity_type) || "—"}
+                  </span>
                 </div>
               </SheetTitle>
               <SheetDescription className="text-xs">

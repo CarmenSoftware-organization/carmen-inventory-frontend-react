@@ -5,8 +5,8 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { useSpotCheckCurrent } from "./use-spot-check-current";
-import { useSpotCheck } from "./use-spot-check";
+import { useSpotCheckCurrent } from "./use-sc-current";
+import { useSpotCheck } from "./use-sc";
 import { ErrorState } from "@/components/ui/error-state";
 import {
   SPOT_CHECK_METHODS,
@@ -202,6 +202,7 @@ export default function ScComponent() {
                 <DocumentListHeader
                   title={t("title")}
                   description={t("desc")}
+                  count={locations.length}
                 />
               </div>
               <ViewToggle view={view} setView={setView} t={t} />

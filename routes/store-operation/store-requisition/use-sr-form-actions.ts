@@ -31,7 +31,7 @@ import {
   useDeleteStoreRequisition,
   type SrActionPayload,
   type SrStageDetail,
-} from "./use-store-requisition";
+} from "./use-sr";
 import type {
   StoreRequisition,
   CreateStoreRequisitionDto,

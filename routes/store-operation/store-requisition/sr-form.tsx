@@ -258,10 +258,10 @@ export function StoreRequisitionForm({
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList variant="line">
-            <TabsTrigger value="items" className="text-xs">
+            <TabsTrigger value="items">
               {t("tabItems")}
             </TabsTrigger>
-            <TabsTrigger value="stock" className="text-xs">
+            <TabsTrigger value="stock">
               {t("tabStock")}
             </TabsTrigger>
           </TabsList>

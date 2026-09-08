@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import SearchInput from "@/components/search-input";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import {
   useCategory,
   useCreateCategory,
@@ -31,6 +30,7 @@ import { useCategoryDialog } from "./use-category-dialog";
 import { CategoryDialog } from "./category-dialog";
 import type { CategoryFormValues } from "./category-form-schema";
 import TreeContent from "./tree-content";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 export default function CategoryComponent() {
   const t = useTranslations("productManagement.category");
@@ -233,15 +233,10 @@ export default function CategoryComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-            </div>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {t("desc")}
-            </p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+          />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button onClick={() => handleAdd()} size="sm">
               <Plus className="h-3 w-3" />

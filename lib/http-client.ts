@@ -248,16 +248,9 @@ const handleClientErrors = async (
   if (url.startsWith(EXTERNAL_PREFIX)) return response;
 
   if (response.status === 401) {
-    const message = await readErrorMessage(response);
-    const isPermission = message?.toLowerCase().includes("permission");
-
-    if (isPermission) {
-      dispatchAuthError(message);
-      throw new ApiError(ERROR_CODES.FORBIDDEN, message!, 403);
-    }
-
+    // refresh + retry ก่อนเสมอ — 401 หมายถึง "token ใช้ไม่ได้" เท่านั้น
     // หลัง refresh แล้ว retry ยังได้ 401 อีก (isRetry) แปลว่า token ที่ refresh มา
-    // ก็ยังถูกปฏิเสธ — เคลียร์ session เลย ไม่ refresh วนซ้ำ (กัน loop)
+    // ก็ยังถูกปฏิเสธ — ค่อยไปตัดสินด้านล่าง ไม่ refresh วนซ้ำ (กัน loop)
     if (!isRetry) {
       const refreshed = await refreshTokens();
       if (refreshed) {
@@ -266,6 +259,17 @@ const handleClientErrors = async (
         const retried = await safeFetch(url, init);
         return handleClientErrors(retried, url, init, true);
       }
+    }
+
+    // Legacy shim: gateway เก่าตอบ 401 ให้เรื่องสิทธิ์ BU ด้วย ("...do not have
+    // permission for the following BU code(s)...") ซึ่งไม่ใช่ session หมดอายุ —
+    // เคลียร์ session ตรงนี้จะเตะผู้ใช้ออกทั้งที่ token ยังดี gateway รุ่นใหม่ตอบ
+    // 403 ให้เคสนี้แล้ว (ดู `KeycloakGuard`) ตัวนี้จึงเหลือไว้เผื่อช่วง deploy
+    // คร่อมกันเท่านั้น และเช็คหลัง refresh เพื่อไม่ให้บังการ refresh ที่ควรเกิด
+    const message = await readErrorMessage(response);
+    if (message?.toLowerCase().includes("permission")) {
+      dispatchAuthError(message);
+      throw new ApiError(ERROR_CODES.FORBIDDEN, message, 403);
     }
 
     tokenStore.clear();

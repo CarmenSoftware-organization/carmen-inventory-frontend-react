@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import {
   closestCenter,
   DndContext,
@@ -18,6 +18,7 @@ import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, Hash, PieChart } from "lucide-react";
 import { useLocale, useTranslations } from "use-intl";
 import { toast } from "sonner";
+import { WidgetSkeletonCards } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { LookupDataset } from "@/components/lookup/lookup-dataset";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { AppTile } from "@/components/icons/tiles";
@@ -40,6 +41,7 @@ import type {
   MyDashboardWidget,
   MyDashboardWidgetListResponse,
   WidgetParams,
+  WidgetType,
 } from "@/types/dashboard-widget";
 import { SortableWidgetItem } from "./sortable-widget-item";
 import {
@@ -54,7 +56,7 @@ import {
 } from "./status-group";
 import { StatusGroupCard } from "./status-group-card";
 import { WidgetConfigDialog } from "./widget-config-dialog";
-import { inferWidgetTypeFromShape, SUPPORTED_SHAPES } from "./widget-shape";
+import { defaultWidgetTypeFor, SUPPORTED_SHAPES } from "./widget-shape";
 
 const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
@@ -128,6 +130,13 @@ const SavedWidgetsSection = () => {
     null,
   );
   const { data, isLoading, isError, error } = useMyDashboardWidgets();
+  // id ของ widget ที่เลื่อนถึงแล้ว — เพิ่มอย่างเดียว ไม่ถอดออกตอน scroll ผ่านไป
+  const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const markVisible = useCallback((id: string) => {
+    setVisibleIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+  }, []);
   // catalogue ใช้ query key เดียวกับ LookupDataset — ดึงตรงนี้ = warm cache ให้ picker ด้วย
   const { data: catalogue } = useDashboardDatasets();
   const createWidget = useCreateMyDashboardWidget();
@@ -164,9 +173,13 @@ const SavedWidgetsSection = () => {
   // backend ตอบ 404) fetch ที่นี่แทนที่จะให้แต่ละการ์ด fetch เอง เพราะต้องรู้ก่อนว่า
   // เหลือกี่ตัวถึงจะตัดสินใจได้ว่าโชว์ grid หรือ empty state
   // ยิงตาม widget id ไม่ใช่ dataset id — backend เอา `params` ที่เก็บบน widget ไป exec ให้
+  //
+  // แต่ละใบยิงตอนเลื่อนเข้าใกล้ viewport เท่านั้น — การ์ดรายงานตัวผ่าน `onVisible`
+  // (ดู `SortableWidgetItem`) query ยังอยู่ที่ parent เหมือนเดิมเพื่อให้ยัง
+  // ตัดสินใจ layout จาก error ของแต่ละใบได้
   const detailQueries = useQueries({
     queries: normalItems.map((w) =>
-      myDashboardWidgetDataQueryOptions(buCode, w.id),
+      myDashboardWidgetDataQueryOptions(buCode, w.id, visibleIds.has(w.id)),
     ),
   });
 
@@ -203,7 +216,7 @@ const SavedWidgetsSection = () => {
     createWidget.mutate(
       {
         dataset_id: ds.id,
-        widget_type: inferWidgetTypeFromShape(ds.shape),
+        widget_type: defaultWidgetTypeFor(ds),
         title: ds.name,
       },
       {
@@ -218,7 +231,7 @@ const SavedWidgetsSection = () => {
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
-        widget_type: inferWidgetTypeFromShape(pendingAdd.shape),
+        widget_type: defaultWidgetTypeFor(pendingAdd),
         title: pendingAdd.name,
         params,
       },
@@ -244,6 +257,34 @@ const SavedWidgetsSection = () => {
             queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGET_DATA, buCode, target.id],
           });
           setPendingConfig(null);
+        },
+      },
+    );
+  };
+
+  // สลับชนิดกราฟของ widget — dataset เป็นเจ้าของ "รูปทรงข้อมูล" ส่วนการวาดเป็นของ
+  // widget เปลี่ยนได้ตลอด (backend ปฏิเสธ 400 ถ้า shape วาดแบบนั้นไม่ได้)
+  const handleChangeType = (w: MyDashboardWidget, widgetType: WidgetType) => {
+    // optimistic — การ์ดเปลี่ยนทรงทันที ข้อมูลชุดเดิมใช้ต่อได้ ไม่ต้อง refetch
+    queryClient.setQueryData<MyDashboardWidgetListResponse>(
+      [QUERY_KEYS.MY_DASHBOARD_WIDGETS, buCode],
+      (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((it) =>
+                it.id === w.id ? { ...it, widget_type: widgetType } : it,
+              ),
+            }
+          : old,
+    );
+    updateWidget.mutate(
+      { id: w.id, widget_type: widgetType },
+      {
+        onError: () => {
+          queryClient.invalidateQueries({
+            queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGETS],
+          });
         },
       },
     );
@@ -355,6 +396,18 @@ const SavedWidgetsSection = () => {
         </p>
       )}
 
+      {/* ระหว่างรอ list ของ user (ยังไม่รู้ว่ามีกี่ใบ/ทรงอะไร) โชว์ bento ชุดเดียว
+          กับ module dashboard — เดิมตรงนี้ว่างเปล่าจนกว่า list จะมา แล้วของโผล่ทีเดียว */}
+      {isLoading && (
+        <div
+          aria-busy="true"
+          aria-live="polite"
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <WidgetSkeletonCards />
+        </div>
+      )}
+
       {!isLoading &&
         !isError &&
         renderable.length === 0 &&
@@ -400,6 +453,8 @@ const SavedWidgetsSection = () => {
                   isLoading={query?.isLoading ?? true}
                   onDelete={() => setPendingDelete(widget)}
                   onConfigure={() => setPendingConfig(widget)}
+                  onVisible={markVisible}
+                  onChangeType={(t) => handleChangeType(widget, t)}
                 />
               ))}
             </ul>

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/share/form-toolbar";
@@ -15,10 +14,9 @@ import type {
   PhysicalCount,
   CreatePhysicalCountDto,
 } from "@/types/physical-count";
-import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PcGeneralFields } from "./pc-general-fields";
 import {
@@ -31,38 +29,32 @@ interface PcFormProps {
   readonly physicalCount?: PhysicalCount;
 }
 
+const LIST_PATH = "/inventory-management/physical-count";
+
 export function PcForm({ physicalCount }: PcFormProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(physicalCount ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createPc = useCreatePhysicalCount();
   const updatePc = useUpdatePhysicalCount();
   const deletePc = useDeletePhysicalCount();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createPc.isPending || updatePc.isPending;
-  const isDisabled = isView || isPending;
 
   const physicalCountSchema = createPhysicalCountSchema(tv, tfl);
   const defaultValues = getDefaultValues(physicalCount);
 
-  const form = useForm<PhysicalCountFormValues>({
+  const f = useEntityForm<PhysicalCountFormValues>({
+    entity: physicalCount,
     resolver: zodResolver(
       physicalCountSchema,
     ) as Resolver<PhysicalCountFormValues>,
-    defaultValues,
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    defaultValues: defaultValues,
+    listPath: LIST_PATH,
     isPending,
   });
+  const { form, isAdd, isEdit, isDisabled } = f;
 
   const onSubmit = (values: PhysicalCountFormValues) => {
     const payload = {
@@ -79,7 +71,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
@@ -87,35 +79,9 @@ export function PcForm({ physicalCount }: PcFormProps) {
       createPc.mutate(payload, {
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate("/inventory-management/physical-count");
+          f.backToList();
         },
       });
-    }
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && physicalCount) {
-        form.reset(defaultValues);
-        setMode("view");
-      } else {
-        navigate("/inventory-management/physical-count");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/inventory-management/physical-count");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
     }
   };
 
@@ -126,19 +92,19 @@ export function PcForm({ physicalCount }: PcFormProps) {
     <div className="space-y-4 px-4">
       <FormToolbar
         entity={t("entity")}
-        mode={mode}
+        mode={f.mode}
         formId="pc-form"
         isPending={isPending}
-        onBack={handleBack}
-        onCancel={handleCancel}
-        onEdit={() => setMode("edit")}
+        onBack={f.handleBack}
+        onCancel={f.handleCancel}
+        onEdit={f.handleEdit}
         onDelete={physicalCount ? () => setShowDelete(true) : undefined}
         deleteIsPending={deletePc.isPending}
-        // ไม่ส่ง label เพราะ edit-physical-count-content cast `PhysicalCountData`
+        // ไม่ส่ง label เพราะ pc-edit-content cast `PhysicalCountData`
         // เป็น `PhysicalCount` — ฟิลด์ชื่อที่ type ประกาศไว้ไม่มีอยู่จริงตอนรัน
         activity={physicalCount && { id: physicalCount.id }}
       >
-        {mode === "view" && physicalCount?.id && (
+        {f.mode === "view" && physicalCount?.id && (
           <PrintDocumentButton
             documentType="PC"
             documentId={physicalCount.id}
@@ -156,7 +122,17 @@ export function PcForm({ physicalCount }: PcFormProps) {
         <PcGeneralFields form={form} disabled={isDisabled} />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
 
       {physicalCount && (
         <DeleteDialog
@@ -171,7 +147,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
             deletePc.mutate(physicalCount.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/inventory-management/physical-count");
+                f.backToList();
               },
             });
           }}

@@ -1,13 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  Columns3,
-  Download,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-  MoreHorizontal,
-  Printer,
-} from "lucide-react";
+import { Download, Loader2, MoreHorizontal, Printer } from "lucide-react";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -18,24 +10,18 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useActivityLog, useExportActivityLog } from "@/hooks/use-activity-log";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { ActivityCardSkeletonGrid } from "@/components/loader/activity-card-skeleton";
 import { useAllUsers } from "@/hooks/use-all-users";
 import { getUserFullName } from "@/components/lookup/lookup-user";
@@ -46,12 +32,12 @@ import { ActivityLogCard } from "./activity-log-card";
 import { ActivityLogDetailSheet } from "./activity-log-detail-sheet";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 type DisplayMode = "list" | "grid";
 
@@ -258,22 +244,11 @@ export default function ActivityLogComponent() {
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm">{t("desc")}</p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -328,64 +303,16 @@ export default function ActivityLogComponent() {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={activityLogFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            {displayMode === "list" && (
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
-            )}
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={activityLogFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+        />
       </div>
 
       <div className="mt-3 space-y-3">

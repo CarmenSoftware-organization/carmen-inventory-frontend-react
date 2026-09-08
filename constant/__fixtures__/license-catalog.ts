@@ -21,7 +21,7 @@
  * ห้ามแก้ไฟล์นี้เพื่อ "ทำให้เทสต์ผ่าน" — ถ้าเทสต์แดง แปลว่า `module-list.ts` ชี้ไป feature
  * ที่ backend ไม่รู้จัก ต้องแก้ที่ `module-list.ts`
  *
- * ขนาด catalog: 76 feature (10 module + 66 resource)
+ * ขนาด catalog: 101 feature (12 module + 89 resource)
  *
  * **ไม่มีวันที่ในไฟล์นี้โดยตั้งใจ** — เพื่อให้ `bun run gen:license-fixture && git diff --exit-code`
  * เป็นด่านตรวจความสดได้: diff ว่าง = fixture ตรงกับ backend ณ ตอนนั้นจริง
@@ -29,6 +29,16 @@
 
 /** feature key ทั้งหมดใน catalog (module + resource) */
 export const LICENSE_FEATURE_KEYS: readonly string[] = [
+  "accounting",
+  "accounting.ap",
+  "accounting.ar",
+  "accounting.asset",
+  "accounting.config",
+  "accounting.config.ap",
+  "accounting.config.ar",
+  "accounting.config.asset",
+  "accounting.config.gl",
+  "accounting.gl",
   "configuration",
   "configuration.adjustment_type",
   "configuration.app_config",
@@ -50,6 +60,18 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "dashboard",
   "dashboard.dataset",
   "dashboard.widget",
+  "interface",
+  "interface.accounting",
+  "interface.accounting.blueledgers",
+  "interface.accounting.carmen_gl",
+  "interface.accounting.external",
+  "interface.pms",
+  "interface.pms.opera",
+  "interface.pms.protel",
+  "interface.pos",
+  "interface.pos.infrasys",
+  "interface.pos.micros",
+  "interface.pos.square",
   "inventory_management",
   "inventory_management.cost",
   "inventory_management.inventory_adjustment",
@@ -97,6 +119,9 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "system_admin.running_code",
   "system_admin.user",
   "system_admin.workflow",
+  "system_admin.workflow.purchase_order",
+  "system_admin.workflow.purchase_request",
+  "system_admin.workflow.store_requisition",
   "vendor_management",
   "vendor_management.price_list",
   "vendor_management.price_list_template",
@@ -109,8 +134,10 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
 
 /** เฉพาะ module-level key (entry ที่ `parent_key: null` ใน catalog) */
 export const LICENSE_MODULE_KEYS: readonly string[] = [
+  "accounting",
   "configuration",
   "dashboard",
+  "interface",
   "inventory_management",
   "operation_plan",
   "procurement",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,10 +18,9 @@ import {
   type CreateProductDto,
   createProductSchema,
 } from "@/types/product";
-import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -207,10 +206,6 @@ export function ProductForm({ product }: ProductFormProps) {
       ? rawReturnUrl
       : "/product-management/product";
 
-  const [mode, setMode] = useState<FormMode>(product ? "view" : "add");
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -223,15 +218,22 @@ export function ProductForm({ product }: ProductFormProps) {
     createProduct.isPending ||
     updateProduct.isPending ||
     uploadImages.isPending;
-  const isDisabled = mode === "view" || isPending;
 
   const defaultValues = getDefaultValues(product);
-  const form = useForm<ProductFormValues>({
+  const f = useEntityForm<ProductFormValues>({
+    entity: product,
     resolver: zodResolver(
       createProductSchema(tv, tfl),
     ) as Resolver<ProductFormValues>,
     defaultValues,
+    // ปุ่ม Back/Cancel กลับไปที่ที่ผู้ใช้มา ไม่ใช่หน้ารายการเสมอ (?returnUrl=)
+    listPath: returnUrl,
+    isPending,
+    // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
+    // หายเงียบ ๆ โดยไม่ถามสักคำ
+    extraDirty: pendingImages.length > 0,
   });
+  const { form, isAdd, isEdit, isDisabled } = f;
 
   const fieldErrors = form.formState.errors;
   const GENERAL_FIELDS = [
@@ -301,10 +303,12 @@ export function ProductForm({ product }: ProductFormProps) {
         });
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         form.reset(normalizedValues);
-        setMode("view");
+        f.setMode("view");
         return;
       }
       if (isAdd) {
+        // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+        f.setIsSubmitting(true);
         // ตอนสร้างยังไม่มี id ให้แนบรูป ต้องสร้างก่อนแล้วค่อยอัปโหลดตามไป
         const res = await createProduct.mutateAsync(payload);
         toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -313,20 +317,15 @@ export function ProductForm({ product }: ProductFormProps) {
           await flushPendingImages(newId);
           navigate(`/product-management/product/${newId}`);
         } else {
-          navigate(returnUrl);
+          f.backToList();
         }
       }
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ค้างอยู่หน้าเดิมให้แก้ต่อ
+      // เปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty จะออกได้โดยไม่ถาม
+      f.setIsSubmitting(false);
     }
   };
-
-  const discard = useDiscardConfirm({
-    // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
-    // หายเงียบ ๆ โดยไม่ถามสักคำ
-    isDirty: form.formState.isDirty || pendingImages.length > 0,
-    isPending,
-  });
 
   /**
    * กรอกไม่ครบ → บอกสั้น ๆ ว่าไม่ครบแล้วพาไปที่ช่องแรกที่ผิด (กติกาเดียวกับ PR)
@@ -339,44 +338,18 @@ export function ProductForm({ product }: ProductFormProps) {
     scrollToFirstInvalidField();
   };
 
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && product) {
-        form.reset(getDefaultValues(product));
-        setMode("view");
-      } else {
-        navigate(returnUrl);
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate(returnUrl);
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => goBack());
-    } else {
-      goBack();
-    }
-  };
-
   return (
     <div className="mx-auto w-full space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         deleteIsPending={deleteProduct.isPending}
         hasPendingImages={pendingImages.length > 0}
-        onBack={handleBack}
-        onEdit={() => setMode("edit")}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={() => setShowDelete(true)}
       />
 
@@ -387,12 +360,12 @@ export function ProductForm({ product }: ProductFormProps) {
       >
         <Tabs defaultValue="general">
           <TabsList variant="line">
-            <TabsTrigger value="general" className="text-xs">
+            <TabsTrigger value="general">
               {t("tabGeneral")}
               <TabArrayCount form={form} name="info" />
               {hasGeneralError && <TabErrorDot />}
             </TabsTrigger>
-            <TabsTrigger value="units" className="text-xs">
+            <TabsTrigger value="units">
               {t("tabUnits")}
               <TabArrayCount
                 form={form}
@@ -400,13 +373,13 @@ export function ProductForm({ product }: ProductFormProps) {
               />
               {hasUnitsError && <TabErrorDot />}
             </TabsTrigger>
-            <TabsTrigger value="locations" className="text-xs">
+            <TabsTrigger value="locations">
               {t("tabLocations")}
               <TabArrayCount form={form} name="locations" />
               {hasLocationsError && <TabErrorDot />}
             </TabsTrigger>
             {product?.id && (
-              <TabsTrigger value="eco-labels" className="text-xs">
+              <TabsTrigger value="eco-labels">
                 {t("tabEcoLabels")}
                 <TabEcoLabelCount productId={product.id} />
               </TabsTrigger>
@@ -461,14 +434,24 @@ export function ProductForm({ product }: ProductFormProps) {
             deleteProduct.mutate(product.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate(returnUrl);
+                f.backToList();
               },
             });
           }}
         />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

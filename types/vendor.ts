@@ -1,12 +1,12 @@
 import type { Audit } from "@/types/audit";
 
-export interface VendorInfoItem {
+interface VendorInfoItem {
   label: string;
   value: string;
   data_type: string;
 }
 
-export interface VendorAddressData {
+interface VendorAddressData {
   address_line1: string;
   address_line2: string;
   city: string;

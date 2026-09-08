@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { ListFilter, MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -11,9 +12,11 @@ import {
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
+import { Checkbox } from "@/components/ui/checkbox";
 import { HighlightText } from "@/components/ui/highlight-text";
 import { lookupIcon } from "@/components/ui/status-icon-label";
 import {
@@ -26,15 +29,11 @@ import {
 import SearchInput from "@/components/search-input";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { TransferItem } from "@/components/ui/transfer";
-import { INVENTORY_TYPE } from "@/constant/location";
-import type { UserLocationItem } from "@/hooks/use-user";
+import { INVENTORY_TYPE, INVENTORY_TYPE_LABEL_KEY } from "@/constant/location";
+import { useLocation } from "@/hooks/use-location";
+import type { UserLocation } from "@/types/user";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
-
-// แทน next/dynamic ด้วย React.lazy (code-split transfer chunk เหมือนเดิม)
-const Transfer = lazy(() =>
-  import("@/components/ui/transfer").then((m) => ({ default: m.Transfer })),
-);
+import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 
 /* ------------------------------------------------------------------ */
 /* Location type constants — local to this section                     */
@@ -46,55 +45,88 @@ const LOCATION_TYPE_ORDER: INVENTORY_TYPE[] = [
   INVENTORY_TYPE.DIRECT,
 ];
 
-const LOCATION_TYPE_LABEL: Record<INVENTORY_TYPE, string> = {
-  [INVENTORY_TYPE.INVENTORY]: "Inventory",
-  [INVENTORY_TYPE.DIRECT]: "Direct",
-  [INVENTORY_TYPE.CONSIGNMENT]: "Consignment",
-};
+/**
+ * แถวในตาราง — ทรงเดียวกันไม่ว่าจะมาจากคลังที่ผูกไว้ (`UserLocation`) หรือจาก
+ * ทะเบียนคลังทั้ง BU (`Location`) ที่ตั้งชื่อฟิลด์คนละแบบ
+ */
+interface LocationRow {
+  id: string;
+  code: string;
+  name: string;
+  type: INVENTORY_TYPE;
+  is_active: boolean;
+}
+
+const fromAssigned = (l: UserLocation): LocationRow => ({
+  id: l.location_id,
+  code: l.location_code,
+  name: l.location_name,
+  type: l.location_type,
+  is_active: l.is_active,
+});
 
 /* ------------------------------------------------------------------ */
-/* LocationsSection — view (grouped + filter) vs edit (Transfer)       */
+/* LocationsSection — ดูคลังที่ผูก · แก้ = ติ๊กจากคลังทั้งหมด          */
 /* ------------------------------------------------------------------ */
 
 interface LocationsSectionProps {
-  readonly isView: boolean;
-  readonly isLoading: boolean;
+  readonly form: UseFormReturn<UserAssignedFormValues>;
   readonly isDisabled: boolean;
-  readonly userLocations: UserLocationItem[];
-  readonly locationSource: TransferItem[];
-  readonly locationTargetKeys: string[];
-  readonly onTargetKeysChange: (keys: string[]) => void;
-  readonly transferLoading: boolean;
-  readonly initialLocationCount: number;
+  /** คลังที่ผูกอยู่ตอนเปิดหน้า — ใช้เป็นแถวของโหมดดู */
+  readonly userLocations: UserLocation[];
 }
 
+/**
+ * คลังที่ผูกกับผู้ใช้
+ *
+ * โหมดดูแสดงเฉพาะคลังที่ผูกไว้ (มากับตัวผู้ใช้แล้ว ไม่ต้องยิงอะไรเพิ่ม) กด Edit
+ * ถึงจะลากทะเบียนคลังทั้ง BU มาแล้วโชว์ทุกใบให้ติ๊ก — ตารางเดิมทั้งดุ้น เพิ่มแค่
+ * คอลัมน์ checkbox หน้าสุด ค้น/เรียง/กรองชนิดใช้ได้เหมือนกันทั้งสองโหมด
+ *
+ * คลังยังแก้ได้จาก `/config/location` อีกทาง — payload จึงส่งเป็น diff
+ * (`{add, remove}`) ไม่ใช่ทั้งชุด ดู `buildUserPatch`
+ */
 export function LocationsSection({
-  isView,
-  isLoading,
+  form,
   isDisabled,
   userLocations,
-  locationSource,
-  locationTargetKeys,
-  onTargetKeysChange,
-  transferLoading,
-  initialLocationCount,
 }: LocationsSectionProps) {
   const tu = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
+  // ชื่อชนิดคลังมาจาก namespace เดียวกับที่ LocationTypeLabel ใช้ในคอลัมน์ประเภท
+  // ของตารางข้างล่าง — dropdown กับคอลัมน์จะได้ไม่เรียกของอย่างเดียวกันคนละชื่อ
+  const tloc = useTranslations("config.location");
   const [typeFilter, setTypeFilter] = useState<INVENTORY_TYPE | "all">("all");
 
+  // ทะเบียนคลังทั้ง BU ยิงตอนกด Edit เท่านั้น — คนเปิดดูเฉย ๆ ไม่ต้องเสีย
+  const { data: allLocationsData, isLoading } = useLocation(
+    { perpage: -1 },
+    { enabled: !isDisabled },
+  );
+
+  const rows = useMemo<LocationRow[]>(() => {
+    if (isDisabled) return userLocations.map(fromAssigned);
+    return (allLocationsData?.data ?? []).map((l) => ({
+      id: l.id,
+      code: l.code,
+      name: l.name,
+      type: l.location_type,
+      is_active: l.is_active,
+    }));
+  }, [isDisabled, userLocations, allLocationsData]);
+
   const groupedLocations = (() => {
-    const m = new Map<INVENTORY_TYPE, UserLocationItem[]>();
-    for (const loc of userLocations) {
-      const arr = m.get(loc.location_type) ?? [];
+    const m = new Map<INVENTORY_TYPE, LocationRow[]>();
+    for (const loc of rows) {
+      const arr = m.get(loc.type) ?? [];
       arr.push(loc);
-      m.set(loc.location_type, arr);
+      m.set(loc.type, arr);
     }
     return m;
   })();
 
   const locationCounts = {
-    all: userLocations.length,
+    all: rows.length,
     [INVENTORY_TYPE.INVENTORY]:
       groupedLocations.get(INVENTORY_TYPE.INVENTORY)?.length ?? 0,
     [INVENTORY_TYPE.DIRECT]:
@@ -104,9 +136,7 @@ export function LocationsSection({
   };
 
   const visibleLocations =
-    typeFilter === "all"
-      ? userLocations
-      : userLocations.filter((loc) => loc.location_type === typeFilter);
+    typeFilter === "all" ? rows : rows.filter((loc) => loc.type === typeFilter);
 
   // ตัวกรองชนิดคลังเป็น dropdown ตัวเดียว ไม่ใช่ชิปสี่อันเรียงกัน — สี่อันกินความ
   // กว้างจนแถวเดียวกับช่องค้นไม่พอบนจอแคบ และ dropdown บอกได้ในตัวว่าตอนนี้กรอง
@@ -116,7 +146,7 @@ export function LocationsSection({
   // ไม่ใช่จุดสี — คนเลือกจาก dropdown แล้วเห็นไอคอนเดิมในคอลัมน์ประเภท โยงกันได้ทันที
   // และชนิดคลังเป็นคุณสมบัติ ไม่ใช่ความคืบหน้า จึงไม่ควรมีสีตั้งแต่แรก
   const filters =
-    isView && userLocations.length > 0 ? (
+    rows.length > 0 ? (
       <Select
         value={typeFilter}
         onValueChange={(v) => setTypeFilter(v as INVENTORY_TYPE | "all")}
@@ -148,7 +178,7 @@ export function LocationsSection({
                       aria-hidden="true"
                     />
                   )}
-                  {`${LOCATION_TYPE_LABEL[t]} (${locationCounts[t]})`}
+                  {`${tloc(INVENTORY_TYPE_LABEL_KEY[t])} (${locationCounts[t]})`}
                 </span>
               </SelectItem>
             );
@@ -162,27 +192,18 @@ export function LocationsSection({
       wide
       title={tu("locationsTitle")}
       description={tu("locationsDesc")}
-      count={isView ? initialLocationCount : locationTargetKeys.length}
+      // หัว section นับ "คลังของคนนี้" เสมอ ไม่ใช่จำนวนแถวในตาราง — ตอนแก้
+      // ตารางโชว์ทั้ง BU ตัวเลขจะกระโดดเป็นหลักร้อยทั้งที่ยังไม่ได้ติ๊กอะไร
+      count={form.watch("location_ids").length}
     >
-      {isView ? (
-        <LocationsView
-          isLoading={isLoading}
-          userLocations={userLocations}
-          visibleLocations={visibleLocations}
-          filters={filters}
-        />
-      ) : (
-        <Suspense fallback={null}>
-          <Transfer
-            dataSource={locationSource}
-            targetKeys={locationTargetKeys}
-            onChange={onTargetKeysChange}
-            disabled={isDisabled}
-            loading={transferLoading}
-            titles={["Available Locations", "Assigned Locations"]}
-          />
-        </Suspense>
-      )}
+      <LocationsView
+        form={form}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        allRows={rows}
+        visibleLocations={visibleLocations}
+        filters={filters}
+      />
     </AssignSection>
   );
 }
@@ -193,17 +214,19 @@ export function LocationsSection({
 /* ------------------------------------------------------------------ */
 
 interface LocationsViewProps {
+  readonly form: UseFormReturn<UserAssignedFormValues>;
+  readonly isDisabled: boolean;
   readonly isLoading: boolean;
-  /** ทั้งหมดที่ผูกกับผู้ใช้ — ใช้แยกว่า "ยังไม่ผูกเลย" กับ "กรองแล้วไม่เหลือ" */
-  readonly userLocations: UserLocationItem[];
+  /** แถวทั้งหมดของโหมดปัจจุบัน — ใช้แยกว่า "ยังไม่มีเลย" กับ "กรองแล้วไม่เหลือ" */
+  readonly allRows: LocationRow[];
   /** เหลือหลังกรองตามชนิด — คือแถวที่แสดงจริง */
-  readonly visibleLocations: UserLocationItem[];
+  readonly visibleLocations: LocationRow[];
   /** ชิปกรองตามชนิดคลัง — วางแถวเดียวกับช่องค้น */
   readonly filters?: ReactNode;
 }
 
 /**
- * ตารางคลังที่ผูกกับผู้ใช้ (โหมดดูอย่างเดียว)
+ * ตารางคลัง — โหมดดูคือคลังที่ผูก โหมดแก้คือทั้ง BU พร้อมคอลัมน์ติ๊ก
  *
  * เดิมเป็นการ์ดรายแถวจัดกลุ่มตามชนิดคลัง พร้อมหัวกลุ่มและแถบสีซ้าย — ย้ายมาใช้
  * `DataGrid` ตัวเดียวกับตารางอื่นทั้งแอป ชนิดคลังจึงกลายเป็น **คอลัมน์** แทนการ
@@ -211,8 +234,10 @@ interface LocationsViewProps {
  * ตัวเดียวกับหน้ารายการคลังกับแท็บคลังของสินค้า ข้อมูลเดียวกันจึงหน้าตาเดียวกันทุกที่
  */
 function LocationsView({
+  form,
+  isDisabled,
   isLoading,
-  userLocations,
+  allRows,
   visibleLocations,
   filters,
 }: LocationsViewProps) {
@@ -222,20 +247,53 @@ function LocationsView({
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // กรองในหน่วยความจำ — คลังที่ผูกกับผู้ใช้คนหนึ่งมาทั้งก้อนอยู่แล้ว ไม่มี API
-  // ให้ยิงต่อ · ค้นทั้งรหัสและชื่อ คนจำได้อย่างใดอย่างหนึ่ง
+  // กรองในหน่วยความจำ — คลังมาทั้งก้อนอยู่แล้วทั้งสองโหมด ไม่มี API ให้ยิงต่อ
+  // ค้นทั้งรหัสและชื่อ คนจำได้อย่างใดอย่างหนึ่ง
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return visibleLocations;
     return visibleLocations.filter(
       (loc) =>
-        loc.location_code.toLowerCase().includes(q) ||
-        loc.location_name.toLowerCase().includes(q),
+        loc.code.toLowerCase().includes(q) ||
+        loc.name.toLowerCase().includes(q),
     );
   }, [visibleLocations, search]);
 
-  const columns = useMemo<ColumnDef<UserLocationItem>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<LocationRow>[]>(() => {
+    const assignColumn: ColumnDef<LocationRow> = {
+      id: "assigned",
+      header: "",
+      enableSorting: false,
+      size: 40,
+      cell: ({ row }) => (
+        <Controller
+          control={form.control}
+          name="location_ids"
+          render={({ field }) => {
+            const checked = field.value.includes(row.original.id);
+            return (
+              <Checkbox
+                checked={checked}
+                aria-label={row.original.name}
+                onCheckedChange={(next) =>
+                  field.onChange(
+                    next
+                      ? [...field.value, row.original.id]
+                      : field.value.filter((id) => id !== row.original.id),
+                  )
+                }
+              />
+            );
+          }}
+        />
+      ),
+      meta: {
+        headerClassName: "text-center",
+        cellClassName: "text-center",
+      },
+    };
+
+    const base: ColumnDef<LocationRow>[] = [
       {
         id: "index",
         header: "#",
@@ -250,21 +308,21 @@ function LocationsView({
       {
         // accessorKey ไม่ใช่แค่ id — sort ฝั่ง client ต้องมีค่าให้เทียบ ถ้ามีแต่
         // `cell` ตัว column จะไม่มีค่าอะไรเลยแล้วกดหัวคอลัมน์ก็ไม่ขยับ
-        accessorKey: "location_code",
-        id: "location_code",
+        accessorKey: "code",
+        id: "code",
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title={tfl("code")} />
         ),
         size: 120,
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            <HighlightText text={row.original.location_code} query={search} />
+            <HighlightText text={row.original.code} query={search} />
           </span>
         ),
       },
       {
-        accessorKey: "location_name",
-        id: "location_name",
+        accessorKey: "name",
+        id: "name",
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title={tfl("name")} />
         ),
@@ -273,13 +331,13 @@ function LocationsView({
         // สิทธิ์เปิดหน้าตั้งค่าคลัง ต้องเช็ค permission ก่อนถึงจะให้กดได้
         cell: ({ row }) => (
           <span className="font-medium">
-            <HighlightText text={row.original.location_name} query={search} />
+            <HighlightText text={row.original.name} query={search} />
           </span>
         ),
       },
       {
-        accessorKey: "location_type",
-        id: "location_type",
+        accessorKey: "type",
+        id: "type",
         header: ({ column }) => (
           <DataGridColumnHeader
             column={column}
@@ -288,9 +346,7 @@ function LocationsView({
           />
         ),
         size: 140,
-        cell: ({ row }) => (
-          <LocationTypeLabel type={row.original.location_type} />
-        ),
+        cell: ({ row }) => <LocationTypeLabel type={row.original.type} />,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",
@@ -313,9 +369,10 @@ function LocationsView({
           cellClassName: "text-center",
         },
       },
-    ],
-    [tfl, search],
-  );
+    ];
+
+    return isDisabled ? base : [assignColumn, ...base];
+  }, [tfl, search, isDisabled, form.control]);
 
   const table = useReactTable({
     data: rows,
@@ -325,7 +382,7 @@ function LocationsView({
     getCoreRowModel: getCoreRowModel(),
     // เรียงฝั่ง client ล้วน — ข้อมูลมาทั้งก้อนแล้ว ไม่ต้องยิงกลับไปเรียงที่ backend
     getSortedRowModel: getSortedRowModel(),
-    getRowId: (row) => row.location_id,
+    getRowId: (row) => row.id,
   });
 
   return (
@@ -344,9 +401,10 @@ function LocationsView({
         table={table}
         recordCount={rows.length}
         isLoading={isLoading}
+        tableLayout={{ headerSticky: true }}
         emptyMessage={
           // ยังไม่ผูกคลังเลย กับ กรองแล้วไม่เหลือ แก้คนละวิธี — ข้อความจึงต้องต่างกัน
-          userLocations.length === 0 ? (
+          allRows.length === 0 ? (
             <EmptyState
               icon={MapPin}
               title={tu("noLocationsAssigned")}
@@ -361,8 +419,13 @@ function LocationsView({
           )
         }
       >
-        <DataGridContainer>
-          <DataGridTable />
+        {/* จำกัดความสูงแล้วให้เลื่อนในกล่อง — โหมดแก้โชว์คลังทั้ง BU ปล่อยยาว
+            ตามจำนวนแถวจะดันปุ่ม Save กับ section อื่นหลุดจอไปเลย · หัวตาราง
+            sticky ไว้ ไม่งั้นเลื่อนไปกลางตารางแล้วไม่รู้ว่าคอลัมน์ไหนคืออะไร */}
+        <DataGridContainer className="flex max-h-96 flex-col">
+          <DataGridScrollArea>
+            <DataGridTable />
+          </DataGridScrollArea>
         </DataGridContainer>
       </DataGrid>
     </div>

@@ -25,6 +25,7 @@ import { computePoAction } from "@/constant/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 import { PO_ITEM } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
+import { PoWorkflowRequiredDialog } from "./po-workflow-required-dialog";
 import { usePoItemTable } from "./use-po-item-table";
 import {
   AddLocationRegistryContext,
@@ -32,6 +33,7 @@ import {
 } from "./po-locations-add-context";
 import { PoItemComputedSync } from "./po-item-table";
 import { getDeleteDescription } from "@/lib/form-utils";
+import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
 interface PoItemFieldsProps {
   form: UseFormReturn<PoFormValues>;
@@ -71,6 +73,7 @@ export function PoItemFields({
   const [bulkAction, setBulkAction] = useState<"close" | "reject" | null>(null);
   // signal นับครั้ง add — เพิ่มทีละ 1 ทุกครั้งที่ prepend item ใหม่ (auto-expand row บนสุด)
   const [addSignal, setAddSignal] = useState(0);
+  const [noWorkflowWarning, setNoWorkflowWarning] = useState(false);
 
   const {
     fields: itemFields,
@@ -90,6 +93,14 @@ export function PoItemFields({
   // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
   const showStatusBadge = isPoInWorkflow;
 
+  // แถวที่เพิ่งกรอกราคาเสร็จ (Enter) — กางตัวเลือกคลังของแถวนั้นต่อให้เลย
+  // เส้นทางกรอกคือ สินค้า → ราคา → คลัง → จำนวน (ท่าเดียวกับ GRN) สองท่อนแรก
+  // กับท่อนสุดท้ายใช้ nextFocusRef ของ lookup เอง ท่อนนี้ต้องสั่งเปิด popover
+  // จึงต้องมี state
+  const [openLocationIndex, setOpenLocationIndex] = useState<number | null>(
+    null,
+  );
+
   const table = usePoItemTable({
     form,
     itemFields,
@@ -100,6 +111,10 @@ export function PoItemFields({
     showStatusBadge,
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
+    openLocationIndex,
+    onPriceCommitted: setOpenLocationIndex,
+    onLocationOpenChange: (index, open) =>
+      setOpenLocationIndex(open ? index : null),
     onDelete: setDeleteIndex,
   });
 
@@ -109,6 +124,18 @@ export function PoItemFields({
   const handleAddItem = () => {
     prependItem({ ...PO_ITEM });
     setAddSignal((c) => c + 1);
+  };
+
+  // location ของแต่ละรายการดึงมาตามเวิร์กโฟลว์ที่เลือกไว้ ยังไม่เลือกก็ยังไม่รู้ว่า
+  // สั่งจากคลังไหนได้บ้าง — กันไว้ตั้งแต่ปุ่มเพิ่มรายการ ดีกว่าปล่อยให้กรอกไปครึ่งทาง
+  // แล้วค่อยเจอ lookup คลังว่างเปล่า
+  const workflowId = useWatch({ control: form.control, name: "workflow_id" });
+  const handleAddItemClick = () => {
+    if (!workflowId) {
+      setNoWorkflowWarning(true);
+      return;
+    }
+    handleAddItem();
   };
 
   // add item ใหม่ → prepend อยู่ index 0 → auto-expand ให้กรอก location ได้เลย
@@ -244,7 +271,12 @@ export function PoItemFields({
   const itemsError = form.formState.errors.items?.message;
 
   const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
-    <Button type="button" size="sm" variant="secondary" onClick={handleAddItem}>
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      onClick={handleAddItemClick}
+    >
       <Plus /> {t("addItem")}
     </Button>
   );
@@ -404,6 +436,22 @@ export function PoItemFields({
           if (deleteIndex === null) return;
           removeItem(deleteIndex);
           setDeleteIndex(null);
+        }}
+      />
+
+      <PoWorkflowRequiredDialog
+        open={noWorkflowWarning}
+        onOpenChange={setNoWorkflowWarning}
+        title={t("selectWorkflowFirst")}
+        description={t("selectWorkflowBeforeItemsDesc")}
+        confirmLabel={t("goToWorkflow")}
+        onConfirm={() => {
+          setNoWorkflowWarning(false);
+          // ยิง validate เฉพาะช่องเวิร์กโฟลว์ให้มันขึ้น aria-invalid ก่อน
+          // แล้วใช้ตัวเดิมที่ฟอร์มใช้ตอน submit พาไป focus ให้
+          void form
+            .trigger("workflow_id")
+            .then(() => scrollToFirstInvalidField());
         }}
       />
 

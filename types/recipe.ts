@@ -20,25 +20,25 @@ export type RecipeGalleryManifestItem =
     }
   | { file_index: number; is_primary?: boolean; alt_text?: string | null };
 
-export interface RecipeCategoryRef {
+interface RecipeCategoryRef {
   id: string;
   name: string;
   code: string;
 }
 
-export interface RecipeCuisineRef {
+interface RecipeCuisineRef {
   id: string;
   name: string;
   region: string;
 }
 
-export interface RecipeAuditEntry {
+interface RecipeAuditEntry {
   at: string;
   id: string;
   name: string;
 }
 
-export interface RecipeAudit {
+interface RecipeAudit {
   created: RecipeAuditEntry;
   updated: RecipeAuditEntry;
 }

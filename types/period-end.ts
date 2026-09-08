@@ -18,7 +18,7 @@ export interface PeriodEnd {
   audit: AuditInfo;
 }
 
-export type PeriodEndStatus = "open" | "closed" | "locked";
+type PeriodEndStatus = "open" | "closed" | "locked";
 
 export type ReviewTransactionKey = "pr" | "po" | "grn" | "cn" | "sr" | "si" | "so";
 
@@ -60,7 +60,7 @@ export interface ReviewTransactionStat {
  * ของโมดูล PC — reuse type เพื่อความ consistent (id, code, name,
  * location_type, physical_count_status, ฯลฯ)
  */
-export type ReviewPhysicalCountItem = PhysicalCountLocation;
+type ReviewPhysicalCountItem = PhysicalCountLocation;
 
 export interface PeriodEndReview {
   id: string;
@@ -98,8 +98,3 @@ export interface PeriodEndReview {
   };
 }
 
-export enum StatusEop {
-  IN_PROGRESS = "in_progress",
-  NOT_CREATED = "not_created",
-  COUNTED = "counted",
-}

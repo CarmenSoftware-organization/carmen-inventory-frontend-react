@@ -68,10 +68,6 @@ export function useAdjustmentTypeTable({
           className="justify-center"
         />
       ),
-      // chip เดียวกับคอลัมน์ Type ของ inventory-adjustment: กล่อง neutral +
-      // ไอคอนสี (สีอยู่ที่ไอคอนที่เดียว) ของเดิมเป็น badge ทึบ variant
-      // default/warning ซึ่งเอาสี primary "กดได้" มาใช้กับข้อมูล และเสียงดัง
-      // กว่าทุกอย่างในตาราง · label ยังเป็นข้อความที่แปลแล้ว (IA hardcode อังกฤษ)
       cell: ({ row }) => {
         const type = row.getValue<string>("type");
         const iaType =

@@ -14,7 +14,7 @@ export type NotificationDocType =
   | "credit_note";
 
 /** เหตุการณ์ที่ทำให้เกิดการแจ้งเตือน — ตรงกับ `enum_notification_event` */
-export type NotificationEvent = "info" | "workflow" | "comment";
+type NotificationEvent = "info" | "workflow" | "comment";
 
 /**
  * แหล่งของแถว — `personal` = `tb_notification`, `broadcast` = `tb_broadcast_notification`
@@ -78,7 +78,7 @@ export interface Notification {
  * ค่าสรุปยังไม่ได้อ่าน/อ่านแล้วทั้งชุดผลลัพธ์ — backend สร้างใน try/catch จึงเป็น
  * optional บนสาย **การไม่มีแปลว่า "สร้างค่าสรุปไม่ได้" ไม่ใช่ศูนย์**
  */
-export interface NotificationSummary {
+interface NotificationSummary {
   unread: number;
   read: number;
 }

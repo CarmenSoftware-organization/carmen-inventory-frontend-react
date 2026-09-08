@@ -19,7 +19,7 @@ import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import EmptyComponent from "@/components/empty-component";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
-import { useEcoLabel } from "@/hooks/use-eco-label";
+import { useEcoLabel } from "../shared/use-eco-label";
 import {
   useDeleteProductEcoLabel,
   useProductEcoLabels,
@@ -45,7 +45,10 @@ export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
   const { dateFormat } = useProfile();
 
   const { data, isLoading } = useProductEcoLabels(productId);
-  const items = data?.data ?? [];
+  // TanStack ต้องได้ reference ที่นิ่ง — `data?.data ?? []` สร้าง array ใหม่ทุก
+  // render แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section
+  // หลังเซฟ vendor สำเร็จ วนไป 245,156 รอบ)
+  const items = useMemo(() => data?.data ?? [], [data]);
   const { data: masterData } = useEcoLabel({ perpage: -1 });
   const masterMap = new Map(
     (masterData?.data ?? []).map((c) => [c.id, c] as const),

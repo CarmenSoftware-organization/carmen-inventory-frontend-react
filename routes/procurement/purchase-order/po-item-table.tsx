@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ItemStatusDot } from "@/components/share/item-status-dot";
 import { LookupProduct } from "@/components/lookup/lookup-product";
+import { fieldFocusRef } from "@/lib/field-focus";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
@@ -109,6 +110,10 @@ const ProductCellEditable = memo(function ProductCellEditable({
             }
           }}
           excludeIds={excludeIds}
+          // เลือกสินค้าเสร็จ → ไปช่องราคาต่อ (สินค้า → ราคา → คลัง → จำนวน)
+          // ราคาแทรกกลางเพราะเป็นของสินค้า กรอกทีเดียวจบ ส่วนคลังกับจำนวนต้อง
+          // กรอกซ้ำทุกแถว — ถามของที่ถามครั้งเดียวให้จบก่อนแล้วค่อยเข้าลูป
+          nextFocusRef={fieldFocusRef(`items.${index}.price`)}
           className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />

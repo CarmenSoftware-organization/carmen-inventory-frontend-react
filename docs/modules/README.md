@@ -11,7 +11,7 @@ endpoints from `constant/api-endpoints.ts` via `lib/http-client.ts`.
 
 ## config
 
-Master/config data — units, currencies, tax profiles, departments, locations, credit terms, delivery points, ECO, extra costs, exchange rate.
+Master/config data — units, currencies, tax profiles, departments, locations, credit terms, delivery points, extra costs, exchange rate.
 
 | Route | Page |
 |---|---|
@@ -20,11 +20,9 @@ Master/config data — units, currencies, tax profiles, departments, locations, 
 | `currency` | `routes/config/currency/page.tsx` |
 | `adjustment-type` | `routes/config/adjustment-type/page.tsx` |
 | `business-type` | `routes/config/business-type/page.tsx` |
-| `certification` | `routes/config/certification/page.tsx` |
 | `credit-note-reason` | `routes/config/credit-note-reason/page.tsx` |
 | `credit-term` | `routes/config/credit-term/page.tsx` |
 | `delivery-point` | `routes/config/delivery-point/page.tsx` |
-| `eco` | `routes/config/eco/page.tsx` |
 | `exchange-rate` | `routes/config/exchange-rate/page.tsx` |
 | `extra-cost` | `routes/config/extra-cost/page.tsx` |
 | `tax-profile` | `routes/config/tax-profile/page.tsx` |
@@ -85,11 +83,12 @@ Stock control — inventory adjustments, spot checks, physical counts, stock car
 
 ## vendor-management
 
-Vendors and pricing — vendor master, price lists, price-list templates, request-for-pricing (RFP).
+Vendors and pricing — vendor master, price lists, price-list templates, request-for-pricing (RFP), certifications.
 
 | Route | Page |
 |---|---|
 | `(index)` | `routes/vendor-management/page.tsx` |
+| `certification` | `routes/vendor-management/certification/certification.route.tsx` |
 | `vendor` | `routes/vendor-management/vendor/page.tsx` |
 | `vendor/new` | `routes/vendor-management/vendor/new/page.tsx` |
 | `vendor/:id` | `routes/vendor-management/vendor/[id]/page.tsx` |
@@ -142,12 +141,13 @@ F&B planning — recipes, recipe categories, cuisines, equipment.
 
 ## product-management
 
-Product master — products, categories, sub-categories, item groups.
+Product master — products, categories, sub-categories, item groups, eco certifications.
 
 | Route | Page |
 |---|---|
 | `(index)` | `routes/product-management/page.tsx` |
 | `category` | `routes/product-management/category/page.tsx` |
+| `eco` | `routes/product-management/eco/eco.route.tsx` |
 | `product` | `routes/product-management/product/page.tsx` |
 | `product/new` | `routes/product-management/product/new/page.tsx` |
 | `product/:id` | `routes/product-management/product/[id]/page.tsx` |

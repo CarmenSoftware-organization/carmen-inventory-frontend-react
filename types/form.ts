@@ -1,6 +1,6 @@
 export type FormMode = "add" | "view" | "edit";
 
-export interface ModeLabels {
+interface ModeLabels {
   title: string;
   submit: string;
   pending: string;

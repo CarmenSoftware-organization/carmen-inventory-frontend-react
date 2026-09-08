@@ -3,12 +3,11 @@ import {
   BarCard,
   KpiCard,
   PieCard,
+  LazyWidget,
   WidgetSkeleton,
-  type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { AppTile } from "@/components/icons/tiles";
 import { useConfigWidgets } from "@/hooks/use-dashboard-widgets";
-import type { CompositeWidgetItem } from "@/types/dashboard-widget";
 
 const MODULE_NAME = "config";
 
@@ -26,26 +25,22 @@ function subTileFor(datasetId: string): string {
   return DATASET_TO_SUB_TILE[datasetId] ?? "document";
 }
 
-function isResolved(w: CompositeWidgetItem): w is ResolvedWidget {
-  return !!w.meta && !!w.data;
-}
-
 export default function ConfigDashboard() {
   const t = useTranslations("config.dashboard");
   const td = useTranslations("dashboardWidget");
   const { data, isLoading, isError, error } = useConfigWidgets();
 
-  const resolved = (data?.items ?? [])
+  // เรียงจาก config ล้วน — ค่าของแต่ละใบมาทีหลังแยกกัน (ดู `LazyWidget`)
+  const widgets = (data?.items ?? [])
     .filter((w) => !HIDDEN_DATASETS.has(w.dataset_id))
-    .filter(isResolved)
     .slice()
     .sort((a, b) => a.order_index - b.order_index);
 
-  const kpis = resolved.filter(
+  const kpis = widgets.filter(
     (w) => w.widget_type === "kpi" || w.widget_type === "gauge",
   );
-  const pies = resolved.filter((w) => w.widget_type === "pie");
-  const bars = resolved.filter((w) => w.widget_type === "bar");
+  const pies = widgets.filter((w) => w.widget_type === "pie");
+  const bars = widgets.filter((w) => w.widget_type === "bar");
   const hasAny = kpis.length + pies.length + bars.length > 0;
 
   return (
@@ -53,7 +48,7 @@ export default function ConfigDashboard() {
       <header className="flex items-center gap-3">
         <AppTile name={MODULE_NAME} size={40} />
         <div className="min-w-0">
-          <h1 className="text-lg leading-tight font-semibold">{t("title")}</h1>
+          <h1 className="text-lg leading-tight font-semibold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground text-sm leading-snug">
             {t("description")}
           </p>
@@ -91,12 +86,15 @@ export default function ConfigDashboard() {
         <Section heading={td("sectionKpi")}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {kpis.map((w) => (
-              <KpiCard
-                key={w.dataset_id}
-                widget={w}
-                moduleName={MODULE_NAME}
-                subTileFor={subTileFor}
-              />
+              <LazyWidget key={w.dataset_id} config={w}>
+                {(rw) => (
+                  <KpiCard
+                    widget={rw}
+                    moduleName={MODULE_NAME}
+                    subTileFor={subTileFor}
+                  />
+                )}
+              </LazyWidget>
             ))}
           </div>
         </Section>
@@ -106,12 +104,15 @@ export default function ConfigDashboard() {
         <Section heading={td("sectionComparison")}>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {bars.map((w) => (
-              <BarCard
-                key={w.dataset_id}
-                widget={w}
-                moduleName={MODULE_NAME}
-                subTileFor={subTileFor}
-              />
+              <LazyWidget key={w.dataset_id} config={w}>
+                {(rw) => (
+                  <BarCard
+                    widget={rw}
+                    moduleName={MODULE_NAME}
+                    subTileFor={subTileFor}
+                  />
+                )}
+              </LazyWidget>
             ))}
           </div>
         </Section>
@@ -121,12 +122,15 @@ export default function ConfigDashboard() {
         <Section heading={td("sectionDistribution")}>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {pies.map((w) => (
-              <PieCard
-                key={w.dataset_id}
-                widget={w}
-                moduleName={MODULE_NAME}
-                subTileFor={subTileFor}
-              />
+              <LazyWidget key={w.dataset_id} config={w}>
+                {(rw) => (
+                  <PieCard
+                    widget={rw}
+                    moduleName={MODULE_NAME}
+                    subTileFor={subTileFor}
+                  />
+                )}
+              </LazyWidget>
             ))}
           </div>
         </Section>

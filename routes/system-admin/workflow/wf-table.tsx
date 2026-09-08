@@ -8,14 +8,13 @@ import {
   customActionColumn,
   statusColumn,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { WorkflowDto } from "@/types/workflows";
-import { WF_TYPE_DOT_COLOR, getWorkflowTypeLabels } from "@/constant/workflow";
+import { WfTypeLabel } from "./wf-type-label";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -49,8 +48,6 @@ export function useWfTable({
   const t = useTranslations("systemAdmin.workflow");
   const tfl = useTranslations("field");
   const locale = useLocale();
-
-  const typeLabels = getWorkflowTypeLabels(t);
 
   const columns: ColumnDef<WorkflowDto>[] = [
     {
@@ -102,26 +99,12 @@ export function useWfTable({
           className="justify-center"
         />
       ),
-      cell: ({ row }) => {
-        const wfType = row.getValue("workflow_type") as string;
-        const inactive = !row.original.is_active;
-        return (
-          <Badge
-            size="sm"
-            variant="secondary"
-            className={cn("font-normal", inactive && "opacity-60")}
-          >
-            <span
-              className={cn(
-                "size-1.5 shrink-0 rounded-full",
-                WF_TYPE_DOT_COLOR[wfType] ?? "bg-muted-foreground/50",
-              )}
-              aria-hidden="true"
-            />
-            {typeLabels[wfType] ?? wfType}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <WfTypeLabel
+          type={row.getValue("workflow_type")}
+          className={cn(!row.original.is_active && "opacity-60")}
+        />
+      ),
       size: 180,
       meta: { cellClassName: "text-center" },
     },

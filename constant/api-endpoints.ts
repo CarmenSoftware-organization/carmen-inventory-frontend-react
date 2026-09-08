@@ -59,8 +59,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/credit-note-reasons`,
-  CONFIG_LOCATION_USER: (buCode: string, userId: string) =>
-    `/api/proxy/api/config/${buCode}/locations-users/${userId}`,
+  /** ผู้ใช้รายคน (อ่าน/แก้ไข) — แทน user-application-roles/{id} ของเดิม */
+  CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
+    `/api/proxy/api/config/${buCode}/users/${userId}`,
   CREDIT_NOTE: (buCode: string) => `/api/proxy/api/${buCode}/credit-notes`,
   CREDIT_NOTE_COMMENT: (buCode: string, cnId?: string) =>
     cnId
@@ -84,12 +85,14 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/dashboard-lab/widgets/${widgetId}/data?scope=personal`,
   DASHBOARD_WIDGETS: (buCode: string, module: string) =>
     `/api/proxy/api/${buCode}/dashboard-widgets/${module}`,
+  // config อย่างเดียว (ไม่ exec dataset) — คู่กับ DASHBOARD_DATASET_BY_ID ที่ยิงค่า
+  // ของแต่ละ widget แยกใบ ดู `useDashboardWidgetConfigs`
+  DASHBOARD_WIDGET_CONFIGS: (buCode: string, module: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/${module}/config`,
   DELIVERY_POINTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/delivery-points`,
   DEPARTMENTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/departments`,
-  DEPARTMENT_USER_BY_USER: (buCode: string, userId: string) =>
-    `/api/proxy/api/config/${buCode}/department-users/user/${userId}`,
   DOCUMENTS: (buCode: string) => `/api/proxy/api/${buCode}/documents`,
   DOCUMENTS_SUMMARY: (buCode: string) =>
     `/api/proxy/api/${buCode}/documents/summary`,
@@ -138,6 +141,16 @@ export const API_ENDPOINTS = {
   LOCATIONS: (buCode: string) => `/api/proxy/api/config/${buCode}/locations`,
   LOCATIONS_BY_PRODUCT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/user-locations/product/${productId}`,
+  /**
+   * location ของ product ที่ **workflow นั้นอนุญาต** — แคบกว่า
+   * `LOCATIONS_BY_PRODUCT` ที่กรองด้วยสิทธิ์ user อย่างเดียว ใช้ในฟอร์ม PO
+   */
+  LOCATIONS_BY_WORKFLOW_PRODUCT: (
+    buCode: string,
+    workflowId: string,
+    productId: string,
+  ) =>
+    `/api/proxy/api/config/${buCode}/workflows/${workflowId}/products/${productId}/locations`,
   LOCATIONS_WITH_ANY_MOVEMENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/products/movement/locations`,
   LOCATIONS_WITH_MOVEMENT: (buCode: string, productId: string) =>
@@ -436,6 +449,14 @@ export const API_ENDPOINTS = {
   VENDOR_CERTIFICATES_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/config/${buCode}/vendor-certificates/vendor/${vendorId}`,
   WORKFLOWS: (buCode: string) => `/api/proxy/api/config/${buCode}/workflows`,
+  /**
+   * รายการ workflow ของชนิดเอกสารเดียว — `slug` เป็น kebab-case ของชนิดใบ
+   * (`purchase-request` · `purchase-order` · `store-requisition`)
+   *
+   * คนละตัวกับ `WORKFLOW_BY_TYPE` ที่อยู่นอก `config/` และใช้กับ lookup ในฟอร์ม
+   */
+  WORKFLOWS_BY_DOC_TYPE: (buCode: string, slug: string) =>
+    `/api/proxy/api/config/${buCode}/workflows/${slug}`,
   WORKFLOW_BY_TYPE: (buCode: string, type: string) =>
     `/api/proxy/api/${buCode}/workflows/type/${type}`,
 } as const;

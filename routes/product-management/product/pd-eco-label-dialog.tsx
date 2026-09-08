@@ -22,7 +22,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useEcoLabel } from "@/hooks/use-eco-label";
+import { useEcoLabel } from "../shared/use-eco-label";
 import {
   useCreateProductEcoLabel,
   useUpdateProductEcoLabel,

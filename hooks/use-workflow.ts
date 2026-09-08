@@ -41,6 +41,77 @@ export function useWorkflow(
   });
 }
 
+/** ชนิดเอกสารที่มีหน้ารายการ workflow ของตัวเอง — ค่าเป็น slug ใน URL ของ endpoint */
+export const WORKFLOW_DOC_TYPES = [
+  "purchase-request",
+  "purchase-order",
+  "store-requisition",
+] as const;
+
+export type WorkflowDocType = (typeof WORKFLOW_DOC_TYPES)[number];
+
+/**
+ * รายการ workflow ของชนิดเอกสารเดียว — `GET /config/{bu}/workflows/{slug}`
+ *
+ * รูปร่าง response เหมือน `useWorkflow` (paginate + data) จึงเสียบเข้า
+ * `useGridPagination` / DataGrid ตัวเดียวกันได้โดยไม่ต้องแปลงอะไร
+ *
+ * @param docType - slug ของชนิดเอกสาร ไม่ระบุ = ไม่ยิง
+ */
+export function useWorkflowsByDocType(
+  docType: WorkflowDocType | undefined,
+  params?: ParamsDto,
+  options?: { enabled?: boolean },
+) {
+  const buCode = useBuCode();
+
+  return useQuery<PaginatedResponse<WorkflowDto>>({
+    queryKey: [QUERY_KEYS.WORKFLOWS, buCode, "doc-type", docType, params],
+    queryFn: async () => {
+      const url = buildUrl(
+        API_ENDPOINTS.WORKFLOWS_BY_DOC_TYPE(buCode!, docType!),
+        params,
+      );
+      const res = await httpClient.get(url);
+      if (!res.ok) throw new Error("Failed to fetch workflows");
+      return res.json();
+    },
+    ...CACHE_STATIC,
+    enabled: !!buCode && !!docType && (options?.enabled ?? true),
+  });
+}
+
+/**
+ * hook รายชนิด — ผูก slug ไว้ตายตัวเพื่อให้ identity คงที่และเป็น "custom hook"
+ * ที่ rules-of-hooks ยอมรับ (ห่อ `useWorkflowsByDocType` ใน callback ไม่ได้)
+ *
+ * เสียบเข้า `useGridPagination` ได้ตรง ๆ เพราะ signature เท่ากับ `useWorkflow`
+ */
+const usePurchaseRequestWorkflows = (
+  params?: ParamsDto,
+  options?: { enabled?: boolean },
+) => useWorkflowsByDocType("purchase-request", params, options);
+
+const usePurchaseOrderWorkflows = (
+  params?: ParamsDto,
+  options?: { enabled?: boolean },
+) => useWorkflowsByDocType("purchase-order", params, options);
+
+const useStoreRequisitionWorkflows = (
+  params?: ParamsDto,
+  options?: { enabled?: boolean },
+) => useWorkflowsByDocType("store-requisition", params, options);
+
+/** slug → hook ของชนิดนั้น ใช้เลือก list hook ตามหน้าที่เปิดอยู่ */
+export const WORKFLOW_LIST_HOOKS: Record<
+  WorkflowDocType,
+  typeof usePurchaseRequestWorkflows
+> = {
+  "purchase-request": usePurchaseRequestWorkflows,
+  "purchase-order": usePurchaseOrderWorkflows,
+  "store-requisition": useStoreRequisitionWorkflows,
+};
+
 /**
  * Hook ดึงรายการ workflow ตามประเภท (PR, PO, GRN ฯลฯ)
  * ใช้สำหรับ lookup workflow ในฟอร์มตั้งค่า CACHE_STATIC

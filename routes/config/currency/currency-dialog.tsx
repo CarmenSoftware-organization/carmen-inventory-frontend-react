@@ -63,9 +63,11 @@ function CurrencyFields({
 
     form.setValue("name", selected.name);
     form.setValue("symbol", selected.symbol);
+    // เติมอัตราให้เฉพาะตอนได้ค่าจริงจากแหล่งอัตราเท่านั้น — ดึงไม่ได้ก็ปล่อยว่าง
+    // ให้กรอกเอง ห้ามยัดค่าหลอกที่หน้าตาเหมือนอัตราจริงแล้วหลุดลง DB เงียบ ๆ
+    // (ตอนนี้ดึงไม่ได้ทุกกรณี — /api/exchange-rate ยังไม่มีใครทำ ดู CLAUDE.md)
     const rate = exchangeRates?.[watchedCode];
-    const converted = rate && rate > 0 ? 1 / rate : 0.01;
-    form.setValue("exchange_rate", converted);
+    if (rate && rate > 0) form.setValue("exchange_rate", 1 / rate);
     form.setValue("description", `${selected.name} (${selected.country})`);
   }, [watchedCode, isEdit, exchangeRates, form]);
 

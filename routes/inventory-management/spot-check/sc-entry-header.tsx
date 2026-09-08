@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router";
-import { ArrowLeft, Calendar, ClipboardCheck, MapPin } from "lucide-react";
+import { Calendar, ClipboardCheck, MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getSpotCheckMethodLabel } from "@/constant/spot-check-method";
 import type { SpotCheckMethod, SpotCheckStatus } from "@/types/spot-check";
 import { METHOD_VISUAL, STATUS_VISUAL } from "./sc-status-visual";
+import { BackButton } from "@/components/share/back-button";
 
 interface ScEntryHeaderProps {
   readonly locationName: string;
@@ -33,7 +33,6 @@ export function ScEntryHeader({
   percent,
 }: ScEntryHeaderProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const tc = useTranslations("common");
   const ts = useTranslations("status");
   const navigate = useNavigate();
   const { dateFormat } = useProfile();
@@ -47,15 +46,11 @@ export function ScEntryHeader({
     <div className="border-border/60 bg-card mb-3 rounded-xl border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
+          {/* mt-0.5 ให้ปุ่มตรงกับบรรทัดแรกของ title ที่มีบรรทัดย่อยใต้ลงมา */}
+          <BackButton
             onClick={() => navigate("/inventory-management/spot-check")}
-            aria-label={tc("goBack")}
-            className="mt-0.5 rounded-full hover:bg-transparent dark:hover:bg-transparent"
-          >
-            <ArrowLeft />
-          </Button>
+            className="mt-0.5"
+          />
           <div className="min-w-0">
             <span className="bg-primary/10 text-primary text-micro-eyebrow inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold tracking-widest uppercase">
               <ClipboardCheck className="size-2.5" />

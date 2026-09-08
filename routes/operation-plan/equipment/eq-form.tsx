@@ -1,19 +1,17 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateEquipment,
   useUpdateEquipment,
   useDeleteEquipment,
-} from "./use-equipment";
+} from "./use-eq";
 import type { Equipment } from "@/types/equipment";
-import type { FormMode } from "@/types/form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   createEquipmentSchema,
@@ -35,17 +33,13 @@ interface EquipmentFormProps {
 /**
  * ฟอร์มสร้างและแก้ไขข้อมูลอุปกรณ์ รองรับโหมด view/edit/add
  */
+const LIST_PATH = "/operation-plan/equipment";
+
 export function EquipmentForm({ equipment }: EquipmentFormProps) {
   const t = useTranslations("operationPlan.equipment");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(equipment ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createEquipment = useCreateEquipment();
   const updateEquipment = useUpdateEquipment();
   const deleteEquipment = useDeleteEquipment();
@@ -53,7 +47,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageRemoved, setImageRemoved] = useState(false);
   const isPending = createEquipment.isPending || updateEquipment.isPending;
-  const isDisabled = isView || isPending;
 
   const resetImage = () => {
     setImageFile(null);
@@ -66,16 +59,17 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   };
 
   const equipmentSchema = createEquipmentSchema(tv, tfl);
-  const form = useForm<EquipmentFormValues>({
+  const f = useEntityForm<EquipmentFormValues>({
+    entity: equipment,
     resolver: zodResolver(equipmentSchema) as Resolver<EquipmentFormValues>,
     defaultValues: getDefaultValues(equipment),
-  });
-
-  const isImageDirty = imageFile !== null || imageRemoved;
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty || isImageDirty,
+    listPath: LIST_PATH,
     isPending,
+    // รูปที่เลือกไว้แต่ยังไม่อัปโหลดก็นับเป็นของที่จะหาย
+    extraDirty: imageFile !== null || imageRemoved,
+    onResetExtra: resetImage,
   });
+  const { form, isEdit, isDisabled } = f;
 
   const onSubmit = (values: EquipmentFormValues) => {
     const payload = {
@@ -121,7 +115,7 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             // reset baseline ให้ isDirty กลับเป็น false — ไม่งั้น discard dialog
             // จะเด้งตอน Cancel ทั้งที่ผู้ใช้ save ไปแล้ว
             form.reset(values);
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
@@ -135,7 +129,7 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             // navigate กลับ list เหมือน form อื่นใน operation-plan — ถ้าค้างที่หน้า
             // /new toolbar จะโชว์ Edit แล้วกด Save อีกครั้งจะ create ซ้ำ (equipment
             // prop ยัง undefined)
-            navigate("/operation-plan/equipment");
+            f.backToList();
           },
         },
       );
@@ -145,38 +139,12 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/equipment");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && equipment) {
-        form.reset(getDefaultValues(equipment));
-        resetImage();
-        setMode("view");
-      } else {
-        navigate("/operation-plan/equipment");
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!equipment) return;
     deleteEquipment.mutate(equipment.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/equipment");
+        f.backToList();
       },
     });
   };
@@ -185,12 +153,12 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <EqToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteEquipment.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={equipment ? () => setShowDelete(true) : undefined}
       />
 
@@ -214,7 +182,17 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
         <EqAdditionalSection form={form} isDisabled={isDisabled} />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
 
       {equipment && (
         <DeleteDialog

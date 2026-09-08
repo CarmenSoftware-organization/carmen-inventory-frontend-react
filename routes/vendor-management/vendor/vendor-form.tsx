@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  useFieldArray,
-  useForm,
-  useWatch,
-  type Resolver,
-} from "react-hook-form";
+import { useFieldArray, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -15,8 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
@@ -25,7 +19,6 @@ import {
   useUpdateVendor,
 } from "@/hooks/use-vendor";
 import type { CreateVendorDto, VendorDetail } from "@/types/vendor";
-import type { FormMode } from "@/types/form";
 import {
   buildNestedPayload,
   createVendorSchema,
@@ -47,6 +40,8 @@ interface VendorFormProps {
   readonly vendor?: VendorDetail;
 }
 
+const LIST_PATH = "/vendor-management/vendor";
+
 export function VendorForm({ vendor }: VendorFormProps) {
   "use no memo";
   const navigate = useNavigate();
@@ -58,37 +53,28 @@ export function VendorForm({ vendor }: VendorFormProps) {
   const tc = useTranslations("common");
   const tform = useTranslations("form");
 
-  const [mode, setMode] = useState<FormMode>(vendor ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createVendor = useCreateVendor();
   const updateVendor = useUpdateVendor();
   const deleteVendor = useDeleteVendor();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createVendor.isPending || updateVendor.isPending;
-  const isDisabled = isView || isPending;
 
   const defaultValues = getDefaultValues(vendor);
-  const form = useForm<VendorFormValues>({
+  const f = useEntityForm<VendorFormValues>({
+    entity: vendor,
     resolver: zodResolver(
       createVendorSchema(tv, tfl),
     ) as Resolver<VendorFormValues>,
     defaultValues,
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
+    // แถวที่อยู่/ผู้ติดต่อที่กดลบไว้ถือเป็น state นอก RHF — กด Cancel ต้องคืนด้วย
+    onResetExtra: () => {
+      setRemovedAddressIds([]);
+      setRemovedContactIds([]);
+    },
   });
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   const {
     fields: infoFields,
@@ -128,7 +114,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
     ...(vendor?.vendor_contact ?? []).map((c) => c.id ?? ""),
   ].join("|");
   useEffect(() => {
-    if (mode === "view" && vendor) {
+    if (f.mode === "view" && vendor) {
       form.reset(getDefaultValues(vendor));
       setRemovedAddressIds([]);
       setRemovedContactIds([]);
@@ -194,15 +180,12 @@ export function VendorForm({ vendor }: VendorFormProps) {
             form.reset(values);
             setRemovedAddressIds([]);
             setRemovedContactIds([]);
-            setMode("view");
+            f.setMode("view");
           },
         },
       );
     } else if (isAdd) {
-      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
       createVendor.mutate(payload, {
-        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const data = res as unknown as { data?: { id?: string } };
@@ -210,36 +193,10 @@ export function VendorForm({ vendor }: VendorFormProps) {
           if (id) {
             navigate(`/vendor-management/vendor/${id}`, { replace: true });
           } else {
-            navigate("/vendor-management/vendor");
+            f.backToList();
           }
         },
       });
-    }
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && vendor) {
-        form.reset(defaultValues);
-        setRemovedAddressIds([]);
-        setRemovedContactIds([]);
-        setMode("view");
-      } else {
-        navigate("/vendor-management/vendor");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => navigate("/vendor-management/vendor");
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
     }
   };
 
@@ -248,7 +205,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
     deleteVendor.mutate(vendor.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/vendor-management/vendor");
+        f.backToList();
       },
     });
   };
@@ -263,7 +220,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
           backLabel={tc("goBack")}
-          onBack={handleBack}
+          onBack={f.handleBack}
           badges={
             <>
               {watchedCode && (
@@ -277,11 +234,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
           actions={
             <>
               {isView ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setMode("edit")}
-                >
+                <Button size="sm" variant="outline" onClick={f.handleEdit}>
                   <Pencil />
                   {tc("edit")}
                 </Button>
@@ -291,7 +244,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleCancel}
+                    onClick={f.handleCancel}
                     disabled={isPending}
                   >
                     <X />
@@ -375,15 +328,15 @@ export function VendorForm({ vendor }: VendorFormProps) {
         <VendorCertificateSection vendorId={vendor.id} readOnly={isDisabled} />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

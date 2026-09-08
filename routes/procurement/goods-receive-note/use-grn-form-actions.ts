@@ -151,7 +151,6 @@ export function useGrnFormActions({
       currency_id: values.currency_id ?? undefined,
       exchange_rate: values.exchange_rate ?? undefined,
       exchange_rate_date: values.exchange_rate_date ?? undefined,
-      received_at: values.received_at ?? undefined,
       good_received_note_detail: detail,
       extra_cost: {
         allocate_extra_cost_type: values.allocate_extra_cost_type || undefined,
@@ -181,7 +180,6 @@ export function useGrnFormActions({
         "currency_id",
         "exchange_rate",
         "exchange_rate_date",
-        "received_at",
       ] as const;
 
       const patchPayload: Record<string, unknown> = {};

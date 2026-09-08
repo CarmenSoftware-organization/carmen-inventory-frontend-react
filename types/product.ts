@@ -6,7 +6,7 @@ import type { Audit } from "./audit";
 
 export type ProductStatusType = "active" | "inactive";
 
-export interface ProductInfoItem {
+interface ProductInfoItem {
   label: string;
   value: string;
   data_type: string;
@@ -23,7 +23,7 @@ export interface ProductUnitConversion {
   is_active: boolean;
 }
 
-export interface ProductLocationItem {
+interface ProductLocationItem {
   id?: string;
   location_id: string;
   shelf_id?: string | null;
@@ -53,6 +53,27 @@ export interface Product {
   product_category: { id?: string; name: string } | null;
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
+}
+
+/**
+ * สินค้าในรูปแบบที่ lookup ใช้ — `useProductsByLocation` ยิงได้สอง endpoint ที่คืน
+ * shape คนละแบบ (ดู hook นั้น) จึง normalize มาที่ตัวนี้ก่อนส่งออก
+ *
+ * แคบกว่า `Product` โดยตั้งใจ — เส้น products-location-workflow ไม่ได้ส่ง
+ * category/status มาด้วย จะ cast เป็น `Product` เต็มก็เท่ากับโกหกซ้ำรอบสอง
+ * (`Product` assign เข้าตัวนี้ได้อยู่แล้ว)
+ */
+export interface ProductLookupItem {
+  id: string;
+  code: string;
+  name: string;
+  /** เส้นที่ไม่มี workflow ไม่ส่งฟิลด์นี้มา */
+  local_name?: string;
+  /** เส้น workflow ส่งมาเป็น product_sku (เป็น null ได้) */
+  sku?: string;
+  inventory_unit?: { id: string; name: string };
+  /** list endpoint บางเส้นคืนหน่วยเป็น flat string */
+  inventory_unit_name?: string;
 }
 
 export interface ProductDetail extends Product {
@@ -225,7 +246,7 @@ export type ProductFormInstance = UseFormReturn<ProductFormValues>;
 
 type UnitPayload = Omit<ProductUnitConversion, "id">;
 
-export interface LocationPayload {
+interface LocationPayload {
   location_id: string;
   shelf_id: string | null;
   min_qty: number | null;

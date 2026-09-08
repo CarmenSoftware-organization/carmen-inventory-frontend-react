@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
   useFormState,
@@ -166,9 +166,23 @@ export function GrnItemTable({
   const [autoOpenLocationKey, setAutoOpenLocationKey] = useState<string | null>(
     null,
   );
+  // กลุ่มที่ต้องพาเคอร์เซอร์ไปลงช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ)
+  const [autoFocusPriceKey, setAutoFocusPriceKey] = useState<string | null>(
+    null,
+  );
   // กลุ่มที่ location lookup ต้องเปิดอยู่ตอนนี้ (คุมจากข้างนอก ไม่ใช่ defaultOpen
   // เพราะแถวถูก mount ไปแล้วตั้งแต่ตอนกดเพิ่มรายการ)
   const [openLocationKey, setOpenLocationKey] = useState<string | null>(null);
+
+  // สลับโหมดดู↔แก้ = เริ่มกรอกรอบใหม่ ล้างสถานะนำทางทั้งชุด — ตารางไม่ได้ unmount
+  // ตอนสลับโหมด ของค้างจากรอบก่อน (เช่นเลือกสินค้าไว้แล้วกด Cancel) จะกลับมาเด้ง
+  // lookup หรือดูดเคอร์เซอร์ทันทีที่กด Edit ทั้งที่ผู้ใช้ยังไม่ได้แตะอะไร
+  useEffect(() => {
+    setAutoOpenProductKey(null);
+    setAutoOpenLocationKey(null);
+    setOpenLocationKey(null);
+    setAutoFocusPriceKey(null);
+  }, [disabled]);
 
   const {
     fields: itemFields,
@@ -213,33 +227,58 @@ export function GrnItemTable({
   };
 
   // เพิ่ม location ในกลุ่ม → insert row ต่อท้าย indices ของกลุ่ม (product เดิม, location ว่าง)
-  const handleAddLocation = (group: GrnGroup) => {
-    const idx = group.indices[0];
-    const productId = form.getValues(`items.${idx}.product_id`);
-    const productName = form.getValues(`items.${idx}.product_name`);
-    const insertAt = group.indices[group.indices.length - 1] + 1;
-    insertItem(insertAt, {
-      ...EMPTY_DETAIL,
-      _group_key: group.key,
-      product_id: productId,
-      product_name: productName,
-    });
-    setAutoOpenLocationKey(group.key);
-    setAutoOpenProductKey(null);
-  };
+  //
+  // callback ทุกตัวที่ส่งเข้า useGrnItemTable ห่อ useCallback ไว้ เพราะมันเป็น dep
+  // ของ columns useMemo — ปล่อยให้เป็นฟังก์ชันใหม่ทุก render เท่ากับ columns
+  // recompute ทุก render แล้ว cell ที่มีช่องกรอกจะโดนสร้างใหม่จนโฟกัสหลุด
+  // (RHF ห่อ insert/remove ของ useFieldArray มาให้แล้ว จึงเสถียรพอเป็น dep)
+  const handleAddLocation = useCallback(
+    (group: GrnGroup) => {
+      const idx = group.indices[0];
+      const productId = form.getValues(`items.${idx}.product_id`);
+      const productName = form.getValues(`items.${idx}.product_name`);
+      const insertAt = group.indices[group.indices.length - 1] + 1;
+      insertItem(insertAt, {
+        ...EMPTY_DETAIL,
+        _group_key: group.key,
+        product_id: productId,
+        product_name: productName,
+        // ราคาเป็นของสินค้า ไม่ใช่ของคลัง — คลังที่เพิ่งเพิ่มต้องได้ราคาเดียวกับ
+        // พี่น้องในกลุ่มทันที ไม่งั้นแถวใหม่ราคาเป็น 0 ทั้งที่หัวกลุ่มโชว์ราคาอยู่
+        // แล้วยอดรวมจะขาดไปเงียบ ๆ จนกว่าจะไปแตะช่องราคาที่หัว
+        unit_price: form.getValues(`items.${idx}.unit_price`) ?? 0,
+      });
+      setAutoOpenLocationKey(group.key);
+      setAutoOpenProductKey(null);
+    },
+    [form, insertItem],
+  );
 
   /**
    * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
    *
    * Radix คืน focus ให้ปุ่มที่เพิ่งกดเป็นค่า default ซึ่งกลายเป็นทางตัน: ผู้ใช้พิมพ์
-   * จำนวนต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
-   * ที่นี่จึงเปิด location ต่อให้เลย (เพิ่งกดได้เพราะ lookup ปลดล็อกตาม product_id)
-   * แล้วพอเลือกคลังเสร็จ GrnLocationRow จะโฟกัสช่องจำนวนต่อเอง
+   * ต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
+   *
+   * เส้นทางคือ **สินค้า → ราคา → คลัง → จำนวน** ราคาแทรกกลางเพราะมันเป็นของ
+   * สินค้า กรอกทีเดียวจบทั้งกลุ่ม ส่วนคลังกับจำนวนต้องกรอกซ้ำทุกแถว — ถามของ
+   * ที่ถามครั้งเดียวให้จบก่อน แล้วค่อยเข้าลูป
    */
-  const handleProductPicked = (groupKey: string) => {
+  const handleProductPicked = useCallback((groupKey: string) => {
     setAutoOpenProductKey(null);
+    setAutoFocusPriceKey(groupKey);
+  }, []);
+
+  /** กรอกราคาเสร็จ (Enter) → เปิดตัวเลือกคลังของแถวแรกในกลุ่มต่อ */
+  const handlePriceCommitted = useCallback((groupKey: string) => {
+    setAutoFocusPriceKey(null);
     setOpenLocationKey(groupKey);
-  };
+  }, []);
+
+  const handleLocationOpenChange = useCallback(
+    (key: string, open: boolean) => setOpenLocationKey(open ? key : null),
+    [],
+  );
 
   // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
   // ผู้ใช้จะได้เห็นว่าต้องกรอกช่องไหน แทนที่จะได้แค่ toast แล้วหน้าว่าง (กติกา
@@ -263,10 +302,12 @@ export function GrnItemTable({
     plainText,
     isPo: !isManual,
     autoOpenProductKey,
+    autoFocusPriceKey,
     autoOpenLocationKey,
     openLocationKey,
-    onLocationOpenChange: (key, open) => setOpenLocationKey(open ? key : null),
+    onLocationOpenChange: handleLocationOpenChange,
     onProductPicked: handleProductPicked,
+    onPriceCommitted: handlePriceCommitted,
     onAddLocation: handleAddLocation,
     onDeleteGroup: setDeleteGroup,
     onDeleteItem: removeItem,
@@ -295,6 +336,7 @@ export function GrnItemTable({
     prependItem({ ...EMPTY_DETAIL, _group_key: key });
     setAutoOpenProductKey(key);
     setAutoOpenLocationKey(null);
+    setAutoFocusPriceKey(null);
     // auto-expand product ใหม่ (บนสุด) ให้กรอก location ได้เลย
     table.setExpanded((prev) => ({
       ...(typeof prev === "object" ? prev : {}),
@@ -358,8 +400,6 @@ export function GrnItemTable({
         table={table}
         recordCount={groups.length}
         tableLayout={{
-          // table กว้างเกิน container → scroll แนวนอน (เหมือน PO): width =
-          // getTotalSize(), column กว้างตาม size px ที่กำหนด
           columnsResizable: true,
         }}
         emptyMessage={
@@ -370,10 +410,6 @@ export function GrnItemTable({
           />
         }
       >
-        {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
-            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับเนื้อหา
-            โดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
         <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>

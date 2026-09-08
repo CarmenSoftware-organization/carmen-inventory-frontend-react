@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS, type Permission } from "@/constant/permissions";
 import {
+  Boxes,
   Link2,
   BookText,
   LayoutDashboard,
@@ -9,7 +10,6 @@ import {
   Building,
   ShoppingCart,
   FileText,
-  ClipboardList,
   PackageCheck,
   Package,
   Box,
@@ -30,7 +30,6 @@ import {
   Building2,
   BadgeDollarSign,
   Store,
-  ListChecks,
   PackagePlus,
   AlertTriangle,
   ArrowUpDown,
@@ -146,7 +145,7 @@ export const moduleList: ModuleDto[] = [
         name: "purchaseRequest",
         path: "/procurement/purchase-request",
         licenseFeature: "procurement.purchase_request", // app:purchase-requests
-        icon: FileText,
+        icon: ShoppingCart,
       },
       {
         name: "purchaseRequestTemplate",
@@ -158,7 +157,7 @@ export const moduleList: ModuleDto[] = [
         name: "purchaseOrder",
         path: "/procurement/purchase-order",
         licenseFeature: "procurement.purchase_order", // app:purchase-orders
-        icon: ClipboardList,
+        icon: Receipt,
         separatorBefore: false,
       },
       {
@@ -192,6 +191,16 @@ export const moduleList: ModuleDto[] = [
         path: "/product-management/product",
         icon: Box,
         permission: PERMISSIONS.product_management.product.view,
+      },
+      {
+        // licenseFeature ชี้ product_management มาตั้งแต่แรก — ย้ายมาให้ตรงกัน
+        // permission ย้ายตามด้วย (เดิม configuration.view)
+        name: "eco",
+        path: "/product-management/eco",
+        licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
+        icon: Leaf,
+        separatorBefore: true,
+        permission: PERMISSIONS.product_management.view,
       },
     ],
   },
@@ -227,18 +236,32 @@ export const moduleList: ModuleDto[] = [
         icon: FileSpreadsheet,
         permission: PERMISSIONS.vendor_management.view,
       },
+      {
+        // licenseFeature ชี้ vendor_management มาตั้งแต่แรก — ย้ายมาอยู่ใต้เมนูนี้
+        // ให้ตรงกับที่ backend จัดหมวดไว้ · permission ย้ายตามด้วย (เดิม
+        // configuration.view) คนที่มีสิทธิ์ config แต่ไม่มี vendor_management
+        // จะไม่เห็นเมนูนี้อีก — เป็นผลที่ตั้งใจ ไม่ใช่ผลข้างเคียง
+        name: "certification",
+        path: "/vendor-management/certification",
+        licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
+        icon: Award,
+        separatorBefore: true,
+        permission: PERMISSIONS.vendor_management.view,
+      },
     ],
   },
   {
     name: "storeOperations",
     path: "/store-operation",
-    icon: Store,
+    // ไม่ใช้ Store — เมนูลูก storeRequisition ใช้ไอคอนนั้นแล้ว และ ModuleLanding
+    // โชว์ไอคอนแม่เป็นหัวเพจโดยมีการ์ดลูกอยู่ข้างล่างหน้าเดียวกัน จะซ้ำกันเอง
+    icon: Boxes,
     subModules: [
       {
         name: "storeRequisition",
         path: "/store-operation/store-requisition",
         licenseFeature: "store_operations.store_requisition", // app:store-requisitions
-        icon: ListChecks,
+        icon: Store,
       },
       {
         name: "stockReplenishment",
@@ -449,12 +472,12 @@ export const moduleList: ModuleDto[] = [
         // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
         // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
         // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
-        name: "accountCode",
-        path: "/config/account-code",
+        name: "chartOfAccount",
+        path: "/config/chart-of-account",
         icon: BookText,
       },
       {
-        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ accountCode
+        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccount
         name: "accountMapping",
         path: "/config/account-mapping",
         icon: Link2,
@@ -543,21 +566,6 @@ export const moduleList: ModuleDto[] = [
         icon: Coins,
         permission: PERMISSIONS.configuration.extra_cost.view,
       },
-      {
-        name: "certification",
-        path: "/config/certification",
-        licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
-        icon: Award,
-        separatorBefore: true,
-        permission: PERMISSIONS.configuration.view,
-      },
-      {
-        name: "eco",
-        path: "/config/eco",
-        licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
-        icon: Leaf,
-        permission: PERMISSIONS.configuration.view,
-      },
     ],
   },
   {
@@ -598,6 +606,31 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
         permission: PERMISSIONS.system_configuration.view,
+        // เมนูย่อยเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
+        // (`GET /config/{bu}/workflows/{slug}`) ไม่ใช่กรองจากชุดเดียวกัน
+        subModules: [
+          {
+            name: "workflowPurchaseRequest",
+            path: "/system-admin/workflow/purchase-request",
+            licenseFeature: "system_admin.workflow",
+            icon: ShoppingCart,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+          {
+            name: "workflowPurchaseOrder",
+            path: "/system-admin/workflow/purchase-order",
+            licenseFeature: "system_admin.workflow",
+            icon: Receipt,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+          {
+            name: "workflowStoreRequisition",
+            path: "/system-admin/workflow/store-requisition",
+            licenseFeature: "system_admin.workflow",
+            icon: Store,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+        ],
       },
       {
         name: "interface",

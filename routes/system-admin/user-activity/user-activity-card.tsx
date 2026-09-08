@@ -1,15 +1,8 @@
 import { CalendarDays, User, Globe, Monitor } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/use-profile";
+import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
-
-const ACTION_VARIANT: Record<string, string> = {
-  login:
-    "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent",
-  logout:
-    "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent",
-};
 
 interface UserActivityCardProps {
   log: ActivityLog;
@@ -30,10 +23,6 @@ export function UserActivityCard({
   onClick,
 }: UserActivityCardProps) {
   const { dateFormat } = useProfile();
-
-  const actionClass =
-    ACTION_VARIANT[log.action?.toLowerCase()] ??
-    "bg-muted text-muted-foreground";
 
   const actorName =
     [log.actor_firstname, log.actor_middlename, log.actor_lastname]
@@ -63,9 +52,7 @@ export function UserActivityCard({
               {index + 1}
             </span>
           )}
-          <Badge size="sm" className={`${actionClass} text-xs`}>
-            {log.action}
-          </Badge>
+          <ActivityActionLabel action={log.action} />
         </div>
         <div className="text-muted-foreground flex items-center gap-1">
           <CalendarDays className="size-3 shrink-0" aria-hidden="true" />

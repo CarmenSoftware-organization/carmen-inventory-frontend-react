@@ -131,3 +131,20 @@ describe("getWorkflowFormDefaults", () => {
     ).toThrow(WorkflowDataParseError);
   });
 });
+
+describe("inherit_signature_from_pr", () => {
+  // ค่าที่ได้จากตัวนี้ถูก PUT กลับทั้งก้อน ถ้า zod ตัด key ทิ้ง การกดเซฟหน้า workflow
+  // (หรือปุ่ม toggle/duplicate ในหน้า list) จะปิดตัวเลือกที่ผู้ใช้เปิดไว้โดยไม่มีใครรู้
+  it("ค่าที่เปิดไว้รอดผ่าน defaults ที่จะถูกส่งกลับ", () => {
+    const defaults = getWorkflowFormDefaults(
+      workflowWith({ ...legacyData, inherit_signature_from_pr: true }),
+    );
+    expect(defaults.data.inherit_signature_from_pr).toBe(true);
+  });
+
+  it("workflow เก่าที่ไม่มี key นี้ยัง parse ผ่าน", () => {
+    const parsed = parseWorkflowData(legacyData);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data!.inherit_signature_from_pr).toBeUndefined();
+  });
+});

@@ -83,8 +83,9 @@ export const router = createBrowserRouter([
             children: [
               { index: true, lazy: () => import("./config/config.route") },
               {
-                path: "account-code",
-                lazy: () => import("./config/account-code/ac.route"),
+                path: "chart-of-account",
+                lazy: () =>
+                  import("./config/chart-of-account/chart-of-account.route"),
               },
               {
                 path: "account-mapping",
@@ -106,11 +107,6 @@ export const router = createBrowserRouter([
                   import("./config/business-type/business-type.route"),
               },
               {
-                path: "certification",
-                lazy: () =>
-                  import("./config/certification/certification.route"),
-              },
-              {
                 path: "credit-note-reason",
                 lazy: () =>
                   import("./config/credit-note-reason/credit-note-reason.route"),
@@ -124,7 +120,6 @@ export const router = createBrowserRouter([
                 lazy: () =>
                   import("./config/delivery-point/delivery-point.route"),
               },
-              { path: "eco", lazy: () => import("./config/eco/eco.route") },
               {
                 path: "exchange-rate",
                 lazy: () =>
@@ -358,6 +353,11 @@ export const router = createBrowserRouter([
                   import("./vendor-management/vendor-management.route"),
               },
               {
+                path: "certification",
+                lazy: () =>
+                  import("./vendor-management/certification/certification.route"),
+              },
+              {
                 path: "vendor",
                 lazy: () => import("./vendor-management/vendor/vendor.route"),
               },
@@ -538,6 +538,10 @@ export const router = createBrowserRouter([
                   import("./product-management/product-management.route"),
               },
               {
+                path: "eco",
+                lazy: () => import("./product-management/eco/eco.route"),
+              },
+              {
                 path: "category",
                 lazy: () =>
                   import("./product-management/category/category.route"),
@@ -623,6 +627,23 @@ export const router = createBrowserRouter([
               {
                 path: "workflow",
                 lazy: () => import("./system-admin/workflow/workflow.route"),
+              },
+              // สามเส้นนี้ต้องมาก่อน `workflow/:id` — react-router จัดลำดับ static
+              // เหนือ dynamic ให้อยู่แล้ว แต่เขียนติดกันไว้จะได้เห็นความสัมพันธ์
+              {
+                path: "workflow/purchase-request",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
+              },
+              {
+                path: "workflow/purchase-order",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
+              },
+              {
+                path: "workflow/store-requisition",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-doc-type.route"),
               },
               {
                 path: "workflow/new",

@@ -47,7 +47,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { ErrorState } from "@/components/ui/error-state";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import SearchInput from "@/components/search-input";
 import type { ExchangeRateItem, CurrencyWithDiff } from "@/types/exchange-rate";
 import EmptyComponent from "@/components/empty-component";
@@ -57,6 +56,7 @@ import { formatExchangeRate } from "@/lib/currency-utils";
 import { ExchangeRateDialog } from "./exchange-rate-dialog";
 import { useExchangeRateTable } from "./use-exchange-rate-table";
 import ExchangeRateCard from "./exchange-rate-card";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 
 /**
  * Component หลักของหน้ารายการ Exchange Rate รองรับ list/grid view, การอัปเดตแบบ bulk จาก external API
@@ -188,24 +188,11 @@ export default function ExchangeRateComponent() {
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm">
-              {t("desc", { base: baseCurrency })}
-            </p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc", { base: baseCurrency })}
+            count={totalRecords}
+          />
           <div className="flex w-full gap-2 *:flex-1 sm:w-auto sm:*:flex-initial">
             <Button
               size="sm"

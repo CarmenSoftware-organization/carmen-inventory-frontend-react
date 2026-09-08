@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   SendHorizontal,
   TrendingDown,
@@ -10,6 +9,7 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { ReviewStatTile } from "./review-stat-tile";
 import { VarianceGrid, type VarianceGridItem } from "./variance-grid";
+import { BackButton } from "@/components/share/back-button";
 
 interface ReviewComponentProps<T extends VarianceGridItem> {
   readonly translationNamespace: string;
@@ -51,7 +51,6 @@ export function ReviewComponent<T extends VarianceGridItem>({
   submittingLabel,
 }: ReviewComponentProps<T>) {
   const t = useTranslations(translationNamespace);
-  const tc = useTranslations("common");
 
   return (
     <div className="relative isolate -mx-3 -my-3">
@@ -62,15 +61,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
         }}
       >
         <div className="mb-4 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onBack}
-            aria-label={tc("goBack")}
-            className="rounded-full hover:bg-transparent dark:hover:bg-transparent"
-          >
-            <ArrowLeft />
-          </Button>
+          <BackButton onClick={onBack} />
           <div className="min-w-0">
             <h1 className="text-foreground text-lg leading-tight font-semibold tracking-tight md:text-xl">
               {t("reviewTitle")}

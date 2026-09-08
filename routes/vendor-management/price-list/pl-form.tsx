@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  useFieldArray,
-  useForm,
-  useWatch,
-  type Resolver,
-} from "react-hook-form";
+import { useFieldArray, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -16,8 +11,7 @@ import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
@@ -30,7 +24,6 @@ import {
 } from "@/hooks/use-price-list";
 import { useProfile } from "@/hooks/use-profile";
 import type { CreatePriceListDto, PriceList } from "@/types/price-list";
-import type { FormMode } from "@/types/form";
 import {
   createPriceListSchema,
   getDefaultValues,
@@ -48,6 +41,8 @@ interface PriceListFormProps {
   readonly priceList?: PriceList;
 }
 
+const LIST_PATH = "/vendor-management/price-list";
+
 export function PriceListForm({ priceList }: PriceListFormProps) {
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.priceList");
@@ -59,40 +54,26 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const tform = useTranslations("form");
   const ts = useTranslations("status");
 
-  const [mode, setMode] = useState<FormMode>(priceList ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createPriceList = useCreatePriceList();
   const updatePriceList = useUpdatePriceList();
   const deletePriceList = useDeletePriceList();
   const [showDelete, setShowDelete] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const isPending = createPriceList.isPending || updatePriceList.isPending;
-  const isDisabled = isView || isPending;
 
   const { defaultCurrencyId } = useProfile();
   const defaultValues = getDefaultValues(priceList, { defaultCurrencyId });
 
-  const form = useForm<PriceListFormValues>({
+  const f = useEntityForm<PriceListFormValues>({
+    entity: priceList,
     resolver: zodResolver(
       createPriceListSchema(tv, tfl),
     ) as Resolver<PriceListFormValues>,
     defaultValues,
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
   });
-  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
-  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
-  );
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   useEffect(() => {
     if (isAdd && defaultCurrencyId && !form.getValues("currency_id")) {
@@ -118,7 +99,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     .map((d) => d.id)
     .join(",");
   useEffect(() => {
-    if (mode === "view" && priceList) {
+    if (f.mode === "view" && priceList) {
       form.reset(getDefaultValues(priceList, { defaultCurrencyId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId read intentionally without retriggering
@@ -153,16 +134,16 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           form.reset(values);
-          setMode("view");
+          f.setMode("view");
         },
       });
     } else if (isAdd) {
       // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
-      setIsSubmitting(true);
+      f.setIsSubmitting(true);
       submitCreate({
         values,
         mutate: createPriceList.mutate,
-        onError: () => setIsSubmitting(false),
+        onError: () => f.setIsSubmitting(false),
         onSuccess: (id) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           // navigate ไป detail ของ record ที่เพิ่งสร้าง (edit route จะ mount ใหม่
@@ -175,36 +156,12 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     }
   };
 
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && priceList) {
-        form.reset(defaultValues);
-        setMode("view");
-      } else {
-        navigate("/vendor-management/price-list");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => navigate("/vendor-management/price-list");
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
   const handleConfirmDelete = () => {
     if (!priceList) return;
     deletePriceList.mutate(priceList.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/vendor-management/price-list");
+        f.backToList();
       },
     });
   };
@@ -225,7 +182,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
           backLabel={tc("goBack")}
-          onBack={handleBack}
+          onBack={f.handleBack}
           badges={
             <>
               {plNo && (
@@ -241,11 +198,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           actions={
             <>
               {isView ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setMode("edit")}
-                >
+                <Button size="sm" variant="outline" onClick={f.handleEdit}>
                   <Pencil />
                   {tc("edit")}
                 </Button>
@@ -255,7 +208,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleCancel}
+                    onClick={f.handleCancel}
                     disabled={isPending}
                   >
                     <X />
@@ -332,15 +285,15 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         />
       </form>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
       <DiscardDialog
-        open={navGuard.isOpen}
+        open={f.navGuard.isOpen}
         onOpenChange={(o) => {
-          if (!o) navGuard.cancel();
+          if (!o) f.navGuard.cancel();
         }}
-        onConfirm={navGuard.confirm}
-        onCancel={navGuard.cancel}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
         variant="warning"
       />
 

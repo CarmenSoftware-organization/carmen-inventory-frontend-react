@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import { toast } from "sonner";
 import {
   useCreateRecipe,
@@ -13,7 +12,6 @@ import {
   useDeleteRecipe,
 } from "./use-recipe";
 import type { Recipe } from "@/types/recipe";
-import type { FormMode } from "@/types/form";
 import {
   createRecipeSchema,
   type RecipeFormValues,
@@ -41,41 +39,39 @@ interface RecipeFormProps {
   readonly recipe?: Recipe;
 }
 
+const LIST_PATH = "/operation-plan/recipe";
+
 export function RecipeForm({ recipe }: RecipeFormProps) {
   "use no memo";
   const t = useTranslations("operationPlan.recipe");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(recipe ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createRecipe = useCreateRecipe();
   const updateRecipe = useUpdateRecipe();
   const deleteRecipe = useDeleteRecipe();
   const [showDelete, setShowDelete] = useState(false);
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const isPending = createRecipe.isPending || updateRecipe.isPending;
-  const isDisabled = isView || isPending;
 
   const defaultValues = getDefaultValues(recipe);
 
   const recipeSchema = createRecipeSchema(tv, tfl);
-  const form = useForm<RecipeFormValues>({
-    resolver: zodResolver(recipeSchema) as Resolver<RecipeFormValues>,
-    defaultValues,
-  });
-
-  const computed = useRecipeCostCalc(form);
   const gallery = useRecipeGallery(recipe?.images);
 
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty || gallery.isDirty,
+  const f = useEntityForm<RecipeFormValues>({
+    entity: recipe,
+    resolver: zodResolver(recipeSchema) as Resolver<RecipeFormValues>,
+    defaultValues,
+    listPath: LIST_PATH,
     isPending,
+    // รูปใน gallery ที่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย
+    extraDirty: gallery.isDirty,
+    onResetExtra: gallery.reset,
   });
+  const { form, isEdit, isDisabled } = f;
+
+  const computed = useRecipeCostCalc(form);
 
   const onSubmit = (values: RecipeFormValues) => {
     const payload = buildRecipePayload(values);
@@ -100,7 +96,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/recipe");
+            f.backToList();
           },
         },
       );
@@ -113,7 +109,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
-            navigate("/operation-plan/recipe");
+            f.backToList();
           },
         },
       );
@@ -123,38 +119,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
   // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
   // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/operation-plan/recipe");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
-    }
-  };
-
-  const handleEdit = () => setMode("edit");
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && recipe) {
-        form.reset(getDefaultValues(recipe));
-        gallery.reset();
-        setMode("view");
-      } else {
-        navigate("/operation-plan/recipe");
-      }
-    });
-  };
-
   const handleDelete = () => {
     if (!recipe) return;
     deleteRecipe.mutate(recipe.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/operation-plan/recipe");
+        f.backToList();
       },
     });
   };
@@ -163,12 +133,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeToolbar
         form={form}
-        mode={mode}
+        mode={f.mode}
         isPending={isPending}
         isDeleting={deleteRecipe.isPending}
-        onBack={handleBack}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
+        onBack={f.handleBack}
+        onEdit={f.handleEdit}
+        onCancel={f.handleCancel}
         onDelete={recipe ? () => setShowDelete(true) : undefined}
       />
 
@@ -213,7 +183,17 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         />
       )}
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

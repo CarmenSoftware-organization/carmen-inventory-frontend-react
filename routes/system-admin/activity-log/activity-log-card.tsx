@@ -1,20 +1,8 @@
 import { CalendarDays, User, FileText, Globe } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/use-profile";
+import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
-
-const ACTION_VARIANT: Record<string, string> = {
-  create:
-    "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent",
-  update:
-    "bg-[var(--status-pending)] text-[var(--status-pending-fg)] border-transparent",
-  delete: "bg-destructive text-destructive-foreground border-transparent",
-  login:
-    "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent",
-  logout:
-    "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent",
-};
 
 /**
  * แปลงข้อความ snake_case เป็น Title Case สำหรับการแสดงผลในการ์ด
@@ -47,10 +35,6 @@ interface ActivityLogCardProps {
 export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
   const { dateFormat } = useProfile();
 
-  const actionClass =
-    ACTION_VARIANT[log.action?.toLowerCase()] ??
-    "bg-muted text-muted-foreground";
-
   const actorName =
     [log.actor_firstname, log.actor_middlename, log.actor_lastname]
       .filter(Boolean)
@@ -79,9 +63,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
               {index + 1}
             </span>
           )}
-          <Badge size="sm" className={`${actionClass} text-xs`}>
-            {log.action}
-          </Badge>
+          <ActivityActionLabel action={log.action} />
         </div>
         <div className="text-muted-foreground flex items-center gap-1">
           <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
@@ -111,9 +93,9 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <Badge variant="outline" size="sm" className="text-xs font-normal">
-            {formatEntityType(log.entity_type)}
-          </Badge>
+          <span className="truncate text-xs">
+            {formatEntityType(log.entity_type) || "—"}
+          </span>
         </div>
 
         {log.description && (

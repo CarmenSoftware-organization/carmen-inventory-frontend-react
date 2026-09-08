@@ -8,18 +8,18 @@ interface CreateSpotCheckBase {
   note?: string;
 }
 
-export interface CreateRandomSpotCheckDto extends CreateSpotCheckBase {
+interface CreateRandomSpotCheckDto extends CreateSpotCheckBase {
   method: "random";
   items: number;
 }
 
-export interface CreateHighValueSpotCheckDto extends CreateSpotCheckBase {
+interface CreateHighValueSpotCheckDto extends CreateSpotCheckBase {
   method: "high_value";
   items: number;
   min_value: number;
 }
 
-export interface CreateManualSpotCheckDto extends CreateSpotCheckBase {
+interface CreateManualSpotCheckDto extends CreateSpotCheckBase {
   method: "manual";
   product_id: string[];
 }
@@ -29,7 +29,7 @@ export type CreateSpotCheckDto =
   | CreateHighValueSpotCheckDto
   | CreateManualSpotCheckDto;
 
-export interface SpotCheckSaveItem {
+interface SpotCheckSaveItem {
   id: string;
   actual_qty: number;
 }
@@ -72,7 +72,7 @@ export type SpotCheckStatus =
   | "voided"
   | "cancelled";
 
-export interface SpotCheckDetail {
+interface SpotCheckDetail {
   id: string;
   spot_check_id: string;
   sequence_no: number;

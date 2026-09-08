@@ -1,6 +1,6 @@
 import type { AuditInfo } from "@/types/workflows";
 
-export interface CreditNoteItem {
+interface CreditNoteItem {
   id: string;
   doc_version?: number;
   sequence_no?: number;
@@ -35,7 +35,7 @@ export interface CreditNoteItem {
   note?: string | null;
 }
 
-export type CreditNoteType = "quantity_return" | "amount_discount";
+type CreditNoteType = "quantity_return" | "amount_discount";
 
 export interface CnItemPayload {
   doc_version?: number;
@@ -134,7 +134,7 @@ export interface CreditNote {
   credit_note_detail: CreditNoteItem[];
 }
 
-export interface CreditNoteDetailItem {
+interface CreditNoteDetailItem {
   id: string;
   doc_version?: number;
   sequence_no?: number;

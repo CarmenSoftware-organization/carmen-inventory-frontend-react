@@ -25,7 +25,7 @@ export type WidgetType =
   | "sparkline";
 
 /** Dataset category */
-export type DatasetCategory =
+type DatasetCategory =
   | "inventory"
   | "workflow"
   | "movement"
@@ -64,11 +64,11 @@ export type WidgetParams = Record<string, string | number>;
 // -------------------------------------------------------------
 // Dataset data — discriminated by shape
 // -------------------------------------------------------------
-export interface ScalarData {
+interface ScalarData {
   readonly value: number;
 }
 
-export interface ScalarDeltaData {
+interface ScalarDeltaData {
   readonly value: number;
   readonly prev: number;
   readonly change?: string;
@@ -85,20 +85,20 @@ export interface CategoricalPoint {
   readonly color?: string;
 }
 
-export interface RankedPoint {
+interface RankedPoint {
   readonly rank: number;
   readonly label: string;
   readonly value: number;
   readonly extras?: Record<string, unknown>;
 }
 
-export interface MatrixData {
+interface MatrixData {
   readonly rows: readonly string[];
   readonly cols: readonly string[];
   readonly values: readonly (readonly number[])[];
 }
 
-export type TableColumnType = "text" | "number" | "currency" | "date" | "icon";
+type TableColumnType = "text" | "number" | "currency" | "date" | "icon";
 
 /** One column of a table-shaped dataset (header label + the row key it reads). */
 export interface TableColumn {
@@ -132,7 +132,7 @@ export type DatasetData<S extends DatasetShape> = S extends "scalar"
 // -------------------------------------------------------------
 // Response — GET /api/:bu/datasets/:id (single resolved dataset)
 // -------------------------------------------------------------
-export type DatasetResponse = {
+type DatasetResponse = {
   [S in DatasetShape]: {
     readonly meta: DatasetMeta & { readonly shape: S };
     readonly data: DatasetData<S>;
@@ -142,7 +142,7 @@ export type DatasetResponse = {
 // -------------------------------------------------------------
 // Personal saved widget — bound to dataset_id + widget_type
 // -------------------------------------------------------------
-export interface WidgetConfig {
+interface WidgetConfig {
   readonly id: string;
   readonly dataset_id: string;
   readonly widget_type: WidgetType;
@@ -151,7 +151,7 @@ export interface WidgetConfig {
   readonly params?: WidgetParams | null;
 }
 
-export interface CreateWidgetDto {
+interface CreateWidgetDto {
   readonly dataset_id: string;
   readonly widget_type: WidgetType;
   readonly title?: string;
@@ -159,13 +159,15 @@ export interface CreateWidgetDto {
   readonly params?: WidgetParams;
 }
 
-export interface UpdateWidgetDto {
+interface UpdateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
   readonly params?: WidgetParams;
+  /** สลับชนิดกราฟ — backend ปฏิเสธ (400) ถ้า shape ของ dataset วาดแบบนั้นไม่ได้ */
+  readonly widget_type?: WidgetType;
 }
 
-export interface WidgetConfigListResponse {
+interface WidgetConfigListResponse {
   readonly items: readonly WidgetConfig[];
   readonly count: number;
 }
@@ -181,39 +183,42 @@ export interface CompositeWidgetItem extends WidgetConfig {
   readonly error?: string;
 }
 
-export interface CompositeWidgetListResponse {
+interface CompositeWidgetListResponse {
   readonly items: readonly CompositeWidgetItem[];
   readonly count: number;
 }
 
 // -------------------------------------------------------------
-// Shape ↔ Widget type compatibility (picker filter)
+// System widget config (from /dashboard-widgets/{module}/config)
+// — config เปล่า ๆ ไม่มี data: หน้า module dashboard ยิงตัวนี้ก่อนเพื่อวาดกริด
+// แล้วค่อยให้แต่ละใบยิง dataset ของตัวเอง (ดู `useDashboardWidgetConfigs`)
+// ไม่มี `id` เพราะ system widget hardcode ที่ gateway ไม่มีแถวใน DB
 // -------------------------------------------------------------
-/** First entry of each list is the default widget type for that shape. */
-export const SUPPORTED_WIDGETS: Record<DatasetShape, readonly WidgetType[]> = {
-  scalar: ["kpi", "gauge"],
-  scalar_delta: ["kpi", "gauge"],
-  time_series: ["line", "area", "sparkline"],
-  categorical: ["pie", "bar"],
-  ranked: ["bar", "table"],
-  matrix: ["heatmap", "table"],
-  table: ["table"],
+export type SystemWidgetConfigItem = Omit<
+  CompositeWidgetItem,
+  "id" | "module"
+> & {
+  /** system widget ไม่มีแถวใน DB — ใบที่มาจาก personal/mock ถึงจะมี */
+  readonly id?: string;
+  readonly module?: string;
 };
 
-export function getWidgetsForShape(shape: DatasetShape): readonly WidgetType[] {
-  return SUPPORTED_WIDGETS[shape] ?? [];
+export interface SystemWidgetConfigListResponse {
+  readonly items: readonly SystemWidgetConfigItem[];
+  readonly count: number;
 }
+
+// -------------------------------------------------------------
+// Shape ↔ Widget type compatibility
+// -------------------------------------------------------------
+// เดิมตรงนี้มี `SUPPORTED_WIDGETS` ที่ hardcode ว่า shape ไหนวาดเป็นอะไรได้ —
+// เป็นสำเนาของสัญญาฝั่ง backend (`SupportedRenders` ใน micro-data) ที่ drift ไปแล้ว
+// (time_series ขาด bar, categorical ขาด table) ตอนนี้ backend ส่งชุดนั้นมาเป็น
+// `supported_renders` บน dataset แต่ละตัว ดู `components/dashboard-widget/render-support.ts`
 
 // -------------------------------------------------------------
 // Type guards
 // -------------------------------------------------------------
-export function isShape<S extends DatasetShape>(
-  resp: DatasetResponse,
-  shape: S,
-): resp is Extract<DatasetResponse, { meta: { shape: S } }> {
-  return resp.meta.shape === shape;
-}
-
 /** Legacy guard — data has `value` and is not an array (scalar / scalar_delta). */
 export function isScalarDeltaData(data: unknown): data is ScalarDeltaData {
   return (
@@ -261,12 +266,6 @@ export function isTableData(data: unknown): data is TableData {
 // =============================================================
 // Aliases for migration (deprecated names — keep until consumers refactor)
 // =============================================================
-/** @deprecated use {@link DatasetShape} */
-export type WidgetShape = DatasetShape;
-/** @deprecated use {@link DatasetMeta} */
-export type WidgetMeta = DatasetMeta;
-/** @deprecated use {@link CompositeWidgetItem} */
-export type DashboardWidget = CompositeWidgetItem;
 /** @deprecated use {@link CompositeWidgetListResponse} */
 export type DashboardWidgetListResponse = CompositeWidgetListResponse;
 /** @deprecated use {@link DatasetResponse} */
@@ -279,10 +278,3 @@ export type CreateMyDashboardWidgetDto = CreateWidgetDto;
 export type UpdateMyDashboardWidgetDto = UpdateWidgetDto;
 /** @deprecated use {@link WidgetConfigListResponse} */
 export type MyDashboardWidgetListResponse = WidgetConfigListResponse;
-/** @deprecated use element of {@link DatasetData}<"categorical"> */
-export type CategoricalDatum = CategoricalPoint;
-/** @deprecated use {@link DatasetData} discriminated by shape */
-export type WidgetData =
-  | ScalarDeltaData
-  | ScalarData
-  | readonly CategoricalPoint[];

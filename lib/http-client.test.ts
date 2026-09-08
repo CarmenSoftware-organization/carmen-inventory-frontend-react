@@ -332,6 +332,66 @@ describe("401 retry handling", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(tokenStore.get()).toBeNull();
   });
+
+  // 401 ที่ข้อความมีคำว่า "permission" เคยลัดไป dialog ทันทีโดยไม่ refresh —
+  // token ที่หมดอายุพอดีจึงกลายเป็น "ไม่มีสิทธิ์" ทั้งที่แค่ต้อง refresh
+  it("refreshes and retries first even when the 401 message mentions permission", async () => {
+    const { refreshTokens } = await import("@/lib/auth/auth-api");
+    // mock ระดับโมดูล — นับสะสมข้ามเทส ต้องล้างก่อนถึงจะเช็คจำนวนครั้งได้
+    (refreshTokens as ReturnType<typeof vi.fn>).mockClear();
+    (refreshTokens as ReturnType<typeof vi.fn>).mockResolvedValueOnce(true);
+    tokenStore.set("at-stale");
+    const body = {
+      message:
+        "Access denied. You do not have permission for the following BU code(s): BU01",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401, body))
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await httpClient.get("/api/proxy/secure");
+
+    expect(res.status).toBe(200);
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(tokenStore.get()).toBe("at-stale");
+  });
+
+  // gateway เก่าที่ยังตอบ 401 ให้เรื่องสิทธิ์ BU — หลัง retry แล้วยังโดน ต้องเป็น
+  // FORBIDDEN + เด้ง dialog ไม่ใช่เคลียร์ session แล้วเตะออกจากระบบ
+  it("keeps the session on a permission 401 that survives the retry", async () => {
+    const { refreshTokens } = await import("@/lib/auth/auth-api");
+    (refreshTokens as ReturnType<typeof vi.fn>).mockClear();
+    (refreshTokens as ReturnType<typeof vi.fn>).mockResolvedValueOnce(true);
+    tokenStore.set("at-fresh");
+    const body = {
+      message:
+        "Access denied. You do not have permission for the following BU code(s): BU01",
+    };
+    const events: CustomEvent[] = [];
+    const handler = (e: Event) => events.push(e as CustomEvent);
+    window.addEventListener("permission-denied", handler);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401, body))
+      .mockResolvedValueOnce(jsonResponse(401, body));
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      await httpClient.get("/api/proxy/secure");
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect((err as ApiError).code).toBe("FORBIDDEN");
+      expect((err as ApiError).statusCode).toBe(403);
+    } finally {
+      window.removeEventListener("permission-denied", handler);
+    }
+
+    expect(events).toHaveLength(1);
+    expect(tokenStore.get()).toBe("at-fresh");
+  });
 });
 
 // =========================================================================

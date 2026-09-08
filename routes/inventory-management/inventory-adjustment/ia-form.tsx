@@ -23,6 +23,7 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useErrorToast } from "@/hooks/use-error-toast";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { VoidDialog } from "@/components/share/void-dialog";
@@ -107,10 +108,23 @@ export function InventoryAdjustmentForm({
     defaultValues,
   });
 
+  // guard สองตัวต้องอ่าน dirty ค่าเดียวกัน ไม่งั้นปุ่ม Back ถามแต่เมนู sidebar เงียบ
+  const isFormDirty = form.formState.isDirty;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    isDirty: isFormDirty,
     isPending: isPending || deleteAdj.isPending || voidAdj.isPending,
   });
+
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ค้างอยู่ใน history stack หลัง navigate ออกไป กด back แล้วเจอ /new ซ้ำ
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // useDiscardConfirm ดักได้แค่ปุ่มในฟอร์มเอง (Cancel/Back) — ลิงก์ข้างนอกอย่าง
+  // เมนู sidebar ต้องใช้ตัวนี้ดัก ไม่งั้นกดแล้วหลุดออกไปพร้อมข้อมูลที่ยังไม่ได้เซฟ
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isFormDirty && !isSubmitting,
+  );
 
   // currentPeriod loads async after mount — sync the default date once it arrives.
   // reset baseline (ไม่ใช่ setValue) ให้ date เป็น default — กัน isDirty ค้างทำให้
@@ -141,6 +155,8 @@ export function InventoryAdjustmentForm({
       return;
     }
     errorToast(err);
+    // เปิด guard กลับทุกครั้งที่ยิงไม่ผ่าน ไม่งั้นฟอร์มที่ยัง dirty จะออกได้โดยไม่ถาม
+    setIsSubmitting(false);
   };
 
   // เซฟแล้วอยู่กับใบเดิม ไม่เด้งกลับหน้ารายการ — คนเพิ่งกรอกเสร็จมักอยากเห็นผล
@@ -209,6 +225,8 @@ export function InventoryAdjustmentForm({
   };
 
   const submitCreate = (values: AdjFormValues) => {
+    // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+    setIsSubmitting(true);
     createAdj.mutate(buildCreatePayload(values), {
       onSuccess: handleCreateSuccess,
       onError: handleMutationError,
@@ -242,6 +260,8 @@ export function InventoryAdjustmentForm({
     setShowCommit(false);
     form.handleSubmit(
       async (values) => {
+        // ทุกทางออกของ commit จบด้วย navigate — ปิด guard ตั้งแต่ต้น
+        setIsSubmitting(true);
         try {
           if (!inventoryAdjustment) {
             const created = await createAdj.mutateAsync(
@@ -379,6 +399,16 @@ export function InventoryAdjustmentForm({
       />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {inventoryAdjustment && (
         <DeleteDialog

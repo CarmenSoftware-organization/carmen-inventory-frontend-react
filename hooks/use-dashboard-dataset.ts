@@ -4,7 +4,7 @@ import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import { CACHE_DYNAMIC } from "@/lib/cache-config";
+import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   DashboardDatasetDetail,
@@ -23,6 +23,9 @@ interface DashboardDatasetListResponse {
  * มากับแต่ละ dataset — dataset ที่ไม่รับ param จะได้ `params: []` ทำให้ UI
  * ที่อ่าน descriptor ทำงานได้ทั้งชุดโดยไม่ต้อง hardcode ว่าตัวไหนมี param
  *
+ * ใช้ CACHE_STATIC เพราะ registry ของ dataset hardcode อยู่ใน micro-data —
+ * เปลี่ยนตอน deploy เท่านั้น ไม่ใช่ตามข้อมูลจริง
+ *
  * @param enabled - ส่ง false เพื่อเลื่อนการ fetch (lazy) จนกว่า caller จะพร้อม
  *   เช่น picker ที่จะโหลดต่อเมื่อผู้ใช้เปิด popover เท่านั้น
  */
@@ -40,7 +43,7 @@ export function useDashboardDatasets(enabled = true) {
       return json.data as DashboardDatasetListResponse;
     },
     enabled: enabled && !!buCode,
-    ...CACHE_DYNAMIC,
+    ...CACHE_STATIC,
   });
 }
 
@@ -74,4 +77,35 @@ export function useDashboardDatasetPreview(
     enabled: enabled && !!buCode && !!id,
     ...CACHE_DYNAMIC,
   });
+}
+
+/**
+ * Query options ของ dataset ตัวเดียวแบบไม่มี param — `GET /api/{bu}/datasets/{id}`
+ *
+ * แยกเป็น options (ไม่ใช่ hook) เพื่อให้การ์ดบน module dashboard ถือ query ของ
+ * ตัวเองได้ ใบไหนช้า/พังก็จบที่ใบนั้น ไม่ลากทั้งหน้าลงไปด้วย
+ *
+ * @param buCode - รหัส business unit ปัจจุบัน
+ * @param datasetId - ID ของ dataset ที่จะ execute
+ * @param enabled - ส่ง false เพื่อเลื่อนการยิงจนกว่าการ์ดจะเข้า viewport
+ * @returns useQuery options ของ dataset นั้น
+ */
+export function dashboardDatasetDataQueryOptions(
+  buCode: string | undefined,
+  datasetId: string,
+  enabled = true,
+) {
+  return {
+    queryKey: [QUERY_KEYS.DASHBOARD_DATASET_DATA, buCode, datasetId],
+    queryFn: async (): Promise<DashboardDatasetDetail> => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.DASHBOARD_DATASET_BY_ID(buCode!, datasetId),
+      );
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch dataset");
+      const json = await res.json();
+      return json.data as DashboardDatasetDetail;
+    },
+    enabled: enabled && !!buCode,
+    ...CACHE_DYNAMIC,
+  };
 }

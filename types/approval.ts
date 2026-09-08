@@ -1,9 +1,9 @@
 import type { LastAction } from "./last-action";
 
-export type ApprovalDocType = "pr" | "po" | "sr";
+type ApprovalDocType = "pr" | "po" | "sr";
 
 /** Summary of a purchase-request detail returned in the approval list */
-export interface ApprovalItemDetail {
+interface ApprovalItemDetail {
   price: number;
   total_price: number;
 }

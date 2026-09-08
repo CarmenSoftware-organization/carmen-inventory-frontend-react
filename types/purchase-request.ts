@@ -5,7 +5,7 @@ import { lastActionSchema } from "./last-action";
 import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
-export type PurchaseRequestStatus =
+type PurchaseRequestStatus =
   | "draft"
   | "submitted"
   | "approved"
@@ -32,7 +32,7 @@ export enum PR_ITEM_STAGE_STATUS {
   REVIEW = "review",
 }
 
-export interface PurchaseRequestDetail
+interface PurchaseRequestDetail
   extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   purchase_request_id: string;
@@ -84,7 +84,7 @@ export interface PurchaseRequestDetail
 }
 
 /** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบขอซื้อ */
-export interface PrItemHistoryEntry {
+interface PrItemHistoryEntry {
   at: string;
   seq: number;
   name: string;
@@ -93,7 +93,7 @@ export interface PrItemHistoryEntry {
   message?: string | null;
 }
 
-export interface PurchaseRequestTemplateDetail
+interface PurchaseRequestTemplateDetail
   extends TaxFields, DiscountFields {
   id: string;
   purchase_request_template_id: string;

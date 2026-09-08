@@ -1,12 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
-  getWidgetsForShape,
   isCategoricalData,
   isScalarDeltaData,
   isTableData,
   isTimeSeriesData,
-  SUPPORTED_WIDGETS,
-  type DatasetShape,
 } from "../dashboard-widget";
 
 describe("isCategoricalData", () => {
@@ -74,25 +71,5 @@ describe("isTableData", () => {
     expect(isTableData([{ label: "x", value: 1 }])).toBe(false);
     expect(isTableData({ value: 3 })).toBe(false);
     expect(isTableData(null)).toBe(false);
-  });
-});
-
-describe("SUPPORTED_WIDGETS", () => {
-  it("ตัวแรกของ categorical เป็น pie — เป็น default ที่ inferWidgetTypeFromShape ใช้", () => {
-    expect(SUPPORTED_WIDGETS.categorical[0]).toBe("pie");
-  });
-
-  it("ทุก shape มีอย่างน้อยหนึ่ง widget type", () => {
-    const shapes: DatasetShape[] = [
-      "scalar",
-      "scalar_delta",
-      "time_series",
-      "categorical",
-      "ranked",
-      "matrix",
-      "table",
-    ];
-    for (const s of shapes)
-      expect(getWidgetsForShape(s).length).toBeGreaterThan(0);
   });
 });

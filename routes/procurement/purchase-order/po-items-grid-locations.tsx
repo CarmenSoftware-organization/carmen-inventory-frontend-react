@@ -44,6 +44,9 @@ interface Props {
   readonly readOnly: boolean;
   /** main row มี action column (align delete ให้ตรง) */
   readonly showActionCol: boolean;
+  /** เพิ่งกรอกราคาเสร็จ — กางตัวเลือกคลังของแถวแรกต่อให้เลย */
+  readonly locationOpen?: boolean;
+  readonly onLocationOpenChange?: (open: boolean) => void;
 }
 
 type LocationPricingField =
@@ -288,13 +291,17 @@ export function LocationsEditor({
   fieldsDisabled,
   readOnly,
   showActionCol,
+  locationOpen,
+  onLocationOpenChange,
 }: Props) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
-  const tfl = useTranslations("field");
   const productId =
     useWatch({ control: form.control, name: `items.${index}.product_id` }) ??
     "";
+  // location ต้องมาจากรายการที่ workflow ของ PO ใบนี้อนุญาต ไม่ใช่ทุกคลังที่ user เห็น
+  const workflowId =
+    useWatch({ control: form.control, name: "workflow_id" }) ?? "";
   const unitName =
     useWatch({
       control: form.control,
@@ -370,24 +377,6 @@ export function LocationsEditor({
           <col style={{ width: pct(PO_COL.amt) }} />
           {showActionCol && <col style={{ width: pct(PO_COL.action) }} />}
         </colgroup>
-        <thead className="text-muted-foreground text-xs font-semibold">
-          {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
-              หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
-              เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี (เหมือน GRN) */}
-          <tr className="border-border/60 h-11 border-b">
-            <th className="px-3 py-1 text-left">{tfl("location")}</th>
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            <th className="px-3 py-1" />
-            {showActionCol && <th className="px-3 py-1" />}
-          </tr>
-        </thead>
         <tbody className="divide-border/60 divide-y">
           {fields.length === 0 && (
             <tr>
@@ -409,14 +398,18 @@ export function LocationsEditor({
                 key={loc.id}
                 className="hover:bg-muted/40 h-11 align-middle transition-colors"
               >
-                {/* location name (align ใต้ product) */}
-                <td className="px-3 py-1">
+                {/* Location — กิน 2 คอลัมน์ (product + unit) เพราะช่องเลือกคลัง
+                    ยาวกว่าชื่อสินค้า และคอลัมน์ unit ของแถวนี้ว่างอยู่แล้ว
+                    (หน่วยเป็นของรายการสินค้า ทุกคลังใช้ตัวเดียวกัน) — คอลัมน์ที่
+                    เหลือยังตรงกับตารางแถวสินค้าเหมือนเดิม */}
+                <td className="px-3 py-1" colSpan={2}>
                   <Controller
                     control={form.control}
                     name={`items.${index}.locations.${locIndex}.id`}
                     render={({ field, fieldState }) => (
                       <LookupProductLocation
                         productId={productId}
+                        workflowId={workflowId}
                         value={field.value}
                         onValueChange={field.onChange}
                         onItemChange={(loc) => {
@@ -431,6 +424,10 @@ export function LocationsEditor({
                         excludeIds={(watchedLocations ?? [])
                           .map((l, i) => (i === locIndex ? null : l?.id))
                           .filter((id): id is string => !!id)}
+                        // เปิดเฉพาะแถวแรก — กรอกราคาเสร็จครั้งเดียวไม่ควรกาง
+                        // ตัวเลือกของทุกคลังพร้อมกัน
+                        open={locIndex === 0 && locationOpen ? true : undefined}
+                        onOpenChange={onLocationOpenChange}
                         nextFocusRef={fieldFocusRef(
                           `items.${index}.locations.${locIndex}.order_qty`,
                         )}
@@ -440,10 +437,6 @@ export function LocationsEditor({
                     )}
                   />
                 </td>
-                {/* unit — เว้นไว้ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบน
-                    (หน่วยเป็นของรายการสินค้า ทุก location ใช้ตัวเดียวกัน) */}
-                <td className="px-3 py-1" />
-
                 {/* order qty */}
                 <td className="px-3 py-1 text-right">
                   {locEditable ? (

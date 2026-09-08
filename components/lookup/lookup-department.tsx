@@ -12,6 +12,8 @@ interface LookupDepartmentProps {
   /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
+  /** โหมดดู — แสดงชื่อแผนกเป็นข้อความเปล่า ไม่ใช่กล่องที่กดไม่ได้ */
+  readonly readOnly?: boolean;
 }
 
 /**
@@ -46,6 +48,7 @@ export function LookupDepartment({
   className,
   size,
   error,
+  readOnly,
 }: LookupDepartmentProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -73,6 +76,7 @@ export function LookupDepartment({
       className={className}
       isLoading={isLoading}
       error={error}
+      readOnly={readOnly}
     />
   );
 }

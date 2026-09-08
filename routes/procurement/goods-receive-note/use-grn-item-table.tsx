@@ -1,13 +1,9 @@
-import { memo, useMemo } from "react";
-import {
-  Controller,
-  useWatch,
-  type Control,
-  type UseFormReturn,
-} from "react-hook-form";
+import { useMemo } from "react";
+import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type Row,
   getCoreRowModel,
   getExpandedRowModel,
   useReactTable,
@@ -19,375 +15,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
-import { LookupProduct } from "@/components/lookup/lookup-product";
-import { NameWithSubtext } from "@/components/share/name-with-sub-text";
-import { useProductUnits } from "@/hooks/use-product-units";
-import { useProductById } from "@/hooks/use-product";
-import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
-import { GrnLocationRow } from "./grn-location-row";
 import { grnItemCols } from "./grn-item-columns";
+import {
+  GroupAmountSum,
+  GroupQtySum,
+  GroupTotalCell,
+  GroupUnitPrice,
+  GrnGroupLocations,
+  ProductGroupCell,
+  ProductUnitCell,
+  type GrnGroup,
+} from "./grn-item-cells";
 
-/** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
-export interface GrnGroup {
-  key: string;
-  productName: string;
-  isManual: boolean;
-  indices: number[];
-}
-
-/** Product lookup (manual) — set product ให้ทุก index ในกลุ่ม */
-const ManualProductCell = memo(function ManualProductCell({
-  form,
-  indices,
-  disabled,
-  defaultOpen,
-  onPicked,
-}: {
-  form: UseFormReturn<GrnFormValues>;
-  indices: number[];
-  disabled: boolean;
-  defaultOpen?: boolean;
-  onPicked?: () => void;
-}) {
-  "use no memo";
-  const primaryIndex = indices[0];
-  return (
-    <Controller
-      control={form.control}
-      name={`items.${primaryIndex}.product_id`}
-      render={({ field, fieldState }) => (
-        <LookupProduct
-          value={field.value ?? ""}
-          onValueChange={(value, product) => {
-            field.onChange(value);
-            if (product) {
-              form.setValue(
-                `items.${primaryIndex}.product_name`,
-                product.name,
-                {
-                  shouldDirty: true,
-                },
-              );
-            }
-            // sibling rows shouldDirty ด้วย — ไม่งั้น dirtyFields ไม่ครบตอนแก้ GRN เดิม
-            for (const idx of indices) {
-              if (idx === primaryIndex) continue;
-              form.setValue(`items.${idx}.product_id`, value, {
-                shouldDirty: true,
-              });
-              if (product) {
-                form.setValue(`items.${idx}.product_name`, product.name, {
-                  shouldDirty: true,
-                });
-              }
-            }
-            if (value) onPicked?.();
-          }}
-          disabled={disabled}
-          defaultOpen={defaultOpen}
-          className="h-8 w-full text-xs"
-          error={fieldState.error?.message}
-        />
-      )}
-    />
-  );
-});
-
-/** Product cell ของแถวกลุ่ม — manual: lookup; PO/linked: read-only name */
-function ProductGroupCell({
-  form,
-  group,
-  disabled,
-  autoOpen,
-  onPicked,
-}: {
-  form: UseFormReturn<GrnFormValues>;
-  group: GrnGroup;
-  disabled: boolean;
-  autoOpen: boolean;
-  onPicked: () => void;
-}) {
-  "use no memo";
-  const primaryIdx = group.indices[0];
-  const productName =
-    useWatch({
-      control: form.control,
-      name: `items.${primaryIdx}.product_name`,
-    }) ?? "";
-
-  const productLocalName =
-    useWatch({
-      control: form.control,
-      name: `items.${primaryIdx}.product_local_name`,
-    }) ?? "";
-
-  if (group.isManual && !disabled) {
-    return (
-      <ManualProductCell
-        form={form}
-        indices={group.indices}
-        disabled={disabled}
-        defaultOpen={autoOpen}
-        onPicked={onPicked}
-      />
-    );
-  }
-  return <NameWithSubtext primary={productName} secondary={productLocalName} />;
-}
-
-/**
- * หน่วยนับของสินค้า (inventory unit จาก product master) — โชว์อย่างเดียว
- *
- * ไม่ใช่หน่วยที่รับ (`received_unit_id` ซึ่งเลือกได้ต่อ location) แต่เป็นหน่วยที่
- * สินค้าตัวนี้ถือสต๊อกอยู่ ใช้เทียบตาว่าหน่วยที่กำลังรับเป็นคนละตัวกับหน่วยสต๊อกไหม
- * · API ของ GRN ไม่ได้ส่งมาด้วย จึงอ่านจาก product master (แคช 5 นาที ต่อ 1 สินค้า)
- */
-const ProductUnitCell = memo(function ProductUnitCell({
-  control,
-  index,
-}: {
-  control: Control<GrnFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const productId = useWatch({ control, name: `items.${index}.product_id` });
-  const { data: product } = useProductById(productId || undefined);
-  return (
-    <span className="text-muted-foreground text-xs">
-      {product?.inventory_unit?.name || "—"}
-    </span>
-  );
-});
-
-/** Total (net + tax) รวมของกลุ่ม (sum total_price ทุก location) — คอลัมน์ Amount */
-const GroupTotalCell = memo(function GroupTotalCell({
-  control,
-  indices,
-}: {
-  control: Control<GrnFormValues>;
-  indices: number[];
-}) {
-  "use no memo";
-  const totals = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.total_price` as const),
-  });
-  const total = (totals ?? []).reduce((a, n) => a + (Number(n) || 0), 0);
-  return (
-    <span className="text-foreground text-xs font-semibold tabular-nums">
-      {formatCurrency(total)}
-    </span>
-  );
-});
-
-type GrnQtyField = "approved_qty" | "received_qty" | "foc_qty";
-type GrnUnitField = "approved_unit_id" | "received_unit_id" | "foc_unit_id";
-
-/** ยอดรวม qty ของ group (sum ทุก location) + unit — โชว์ที่ product row เหมือน PO */
-const GroupQtySum = memo(function GroupQtySum({
-  control,
-  indices,
-  qtyField,
-  unitField,
-}: {
-  control: Control<GrnFormValues>;
-  indices: number[];
-  qtyField: GrnQtyField;
-  unitField: GrnUnitField;
-}) {
-  "use no memo";
-  const qtys = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.${qtyField}` as const),
-  });
-  const total = (qtys ?? []).reduce((a, n) => a + (Number(n) || 0), 0);
-  const primary = indices[0];
-  const productId =
-    useWatch({ control, name: `items.${primary}.product_id` }) ?? "";
-  const unitId =
-    useWatch({ control, name: `items.${primary}.${unitField}` }) ?? "";
-  const { data: units = [] } = useProductUnits(productId || undefined);
-  const unitName = units.find((u) => u.id === unitId)?.name ?? "";
-  return <InputSuffixPlain value={total} suffix={unitName} />;
-});
-
-/**
- * ราคาต่อหน่วยของ product row — ราคาอยู่ระดับ location จึงถัวเฉลี่ยตามจำนวนที่รับ
- * (ยอดก่อนส่วนลดรวม ÷ จำนวนรับรวม) ไม่ใช่เฉลี่ยเปล่า ๆ ไม่งั้นแถวที่รับ 1 หน่วย
- * จะถ่วงเท่าแถวที่รับ 100 · ยังไม่ได้กรอกจำนวน = ยังเฉลี่ยไม่ได้ → โชว์ราคาเดียว
- * ที่มี (ทุกแถวราคาเท่ากันอยู่แล้วในกรณีปกติ), ไม่มีอะไรเลย = 0.00
- */
-const GroupUnitPrice = memo(function GroupUnitPrice({
-  control,
-  indices,
-}: {
-  control: Control<GrnFormValues>;
-  indices: number[];
-}) {
-  "use no memo";
-  const prices = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.unit_price` as const),
-  });
-  const qtys = useWatch({
-    control,
-    name: indices.map((i) => `items.${i}.received_qty` as const),
-  });
-  const priceList = (prices ?? []).map((p) => Number(p) || 0);
-  const qtyList = (qtys ?? []).map((q) => Number(q) || 0);
-  const totalQty = qtyList.reduce((a, n) => a + n, 0);
-  const avg =
-    totalQty > 0
-      ? priceList.reduce((a, p, i) => a + p * (qtyList[i] ?? 0), 0) / totalQty
-      : (priceList.find((p) => p > 0) ?? 0);
-  return (
-    <span className="text-foreground text-xs font-medium tabular-nums">
-      {formatCurrency(avg)}
-    </span>
-  );
-});
-
-type GrnAmountField =
-  "net_amount" | "discount_amount" | "tax_amount" | "total_price";
-
-/** ยอดรวมเงินของ group (sum ทุก location, บวกหลาย field ได้) — โชว์ที่ product row เหมือน PO */
-const GroupAmountSum = memo(function GroupAmountSum({
-  control,
-  indices,
-  fields,
-}: {
-  control: Control<GrnFormValues>;
-  indices: number[];
-  fields: GrnAmountField[];
-}) {
-  "use no memo";
-  const vals = useWatch({
-    control,
-    name: indices.flatMap((i) => fields.map((f) => `items.${i}.${f}` as const)),
-  });
-  const total = (vals ?? []).reduce((a, n) => a + (Number(n) || 0), 0);
-  return (
-    <span className="text-foreground text-xs font-medium tabular-nums">
-      {formatCurrency(total)}
-    </span>
-  );
-});
-
-/**
- * เนื้อหา expand ของแถว product — location rows เป็น `<table table-fixed>` ที่ align
- * คอลัมน์กับ group row ผ่าน GRN_COL (mirror po-items-grid-locations) พร้อม thead labels
- */
-function GrnGroupLocations({
-  group,
-  form,
-  itemFields,
-  disabled,
-  plainText,
-  isPo,
-  autoOpenLocationKey,
-  openLocationKey,
-  onLocationOpenChange,
-  onDeleteItem,
-}: {
-  group: GrnGroup;
-  form: UseFormReturn<GrnFormValues>;
-  itemFields: { id: string }[];
-  disabled: boolean;
-  plainText: boolean;
-  isPo: boolean;
-  autoOpenLocationKey: string | null;
-  openLocationKey: string | null;
-  onLocationOpenChange: (groupKey: string, open: boolean) => void;
-  onDeleteItem: (index: number) => void;
-}) {
-  "use no memo";
-  const tfl = useTranslations("field");
-  const showActionCol = !disabled;
-
-  // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
-  // ความกว้าง combo (discount/tax) ย่อในโหมดอ่าน ใช้เกณฑ์เดียวกับ showActionCol
-  const { col: GRN_COL, dataTotal } = grnItemCols(isPo, showActionCol);
-  const denom = dataTotal + (showActionCol ? GRN_COL.action : 0);
-  const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount = 10 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
-
-  return (
-    <table className="w-full table-fixed border-separate border-spacing-0 text-xs">
-      <colgroup>
-        <col style={{ width: pct(GRN_COL.product) }} />
-        <col style={{ width: pct(GRN_COL.unit) }} />
-        {isPo && <col style={{ width: pct(GRN_COL.order) }} />}
-        <col style={{ width: pct(GRN_COL.received) }} />
-        <col style={{ width: pct(GRN_COL.foc) }} />
-        <col style={{ width: pct(GRN_COL.price) }} />
-        <col style={{ width: pct(GRN_COL.sub) }} />
-        <col style={{ width: pct(GRN_COL.discount) }} />
-        <col style={{ width: pct(GRN_COL.net) }} />
-        <col style={{ width: pct(GRN_COL.tax) }} />
-        <col style={{ width: pct(GRN_COL.amt) }} />
-        {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
-      </colgroup>
-      <thead className="text-muted-foreground text-xs font-semibold">
-        {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
-            หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
-            เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี */}
-        <tr className="border-border/60 h-11 border-b">
-          <th className="px-3 py-1 text-left">{tfl("location")}</th>
-          <th className="px-3 py-1" />
-          {isPo && <th className="px-3 py-1" />}
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          <th className="px-3 py-1" />
-          {showActionCol && <th className="px-3 py-1" />}
-        </tr>
-      </thead>
-      <tbody className="divide-border/60 divide-y">
-        {group.indices.length === 0 && (
-          <tr>
-            <td
-              colSpan={colCount}
-              className="text-muted-foreground py-3 text-center"
-            >
-              —
-            </td>
-          </tr>
-        )}
-        {group.indices.map((idx) => (
-          <GrnLocationRow
-            key={itemFields[idx]?.id ?? idx}
-            index={idx}
-            form={form}
-            disabled={disabled}
-            isManual={group.isManual}
-            isPo={isPo}
-            showDelete={showActionCol}
-            onDelete={() => onDeleteItem(idx)}
-            groupIndices={group.indices}
-            plainText={plainText}
-            autoOpenLocation={group.key === autoOpenLocationKey}
-            locationOpen={
-              // เปิดเฉพาะแถวแรกของกลุ่ม — เลือกสินค้าครั้งเดียวไม่ควรเปิดทุกคลัง
-              idx === group.indices[0] && group.key === openLocationKey
-                ? true
-                : undefined
-            }
-            onLocationOpenChange={(open) =>
-              onLocationOpenChange(group.key, open)
-            }
-          />
-        ))}
-      </tbody>
-    </table>
-  );
-}
+export type { GrnGroup };
 
 interface UseGrnItemTableOptions {
   form: UseFormReturn<GrnFormValues>;
@@ -397,12 +39,16 @@ interface UseGrnItemTableOptions {
   plainText: boolean;
   isPo: boolean;
   autoOpenProductKey: string | null;
+  /** กลุ่มที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
+  autoFocusPriceKey: string | null;
   autoOpenLocationKey: string | null;
   /** กลุ่มที่ location lookup ต้องเปิดอยู่ (คุมจากข้างนอก) */
   openLocationKey: string | null;
   onLocationOpenChange: (groupKey: string, open: boolean) => void;
   /** เลือกสินค้าของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
   onProductPicked: (groupKey: string) => void;
+  /** กรอกราคาของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onPriceCommitted: (groupKey: string) => void;
   onAddLocation: (group: GrnGroup) => void;
   onDeleteGroup: (group: GrnGroup) => void;
   onDeleteItem: (index: number) => void;
@@ -416,10 +62,12 @@ export function useGrnItemTable({
   plainText,
   isPo,
   autoOpenProductKey,
+  autoFocusPriceKey,
   autoOpenLocationKey,
   openLocationKey,
   onLocationOpenChange,
   onProductPicked,
+  onPriceCommitted,
   onAddLocation,
   onDeleteGroup,
   onDeleteItem,
@@ -455,6 +103,36 @@ export function useGrnItemTable({
         cellClassName: "text-center",
         // expanded content เริ่มที่ column Product (index 2 = expand, index, product)
         expandedColStart: 2,
+        // ปุ่มเพิ่มคลังอยู่ใน gutter ซ้ายนี้ ไม่ใช่ในคอลัมน์ action ของแถวสินค้า —
+        // มันสร้างของในตารางย่อย ปุ่มจึงควรอยู่กับตารางย่อย ไม่ใช่ไปปนกับปุ่มลบ
+        // ทั้งรายการที่ทำงานคนละระดับกัน · align-top ของ gutter ทำให้ปุ่มอยู่
+        // บรรทัดเดียวกับแถวคลังแถวแรกพอดี
+        expandedLeading: (row: Row<GrnGroup>) =>
+          row.original.isManual && !disabled ? (
+            <div className="flex justify-end pt-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-7.5"
+                    aria-label={t("addLocation")}
+                    onClick={() => onAddLocation(row.original)}
+                  >
+                    <MapPinPlus aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("addLocation")}</TooltipContent>
+              </Tooltip>
+            </div>
+          ) : (
+            // โหมดอ่าน/ใบอิง PO เพิ่มคลังเองไม่ได้ — ที่ว่างตรงนี้เลยใช้บอกว่า
+            // ตารางข้าง ๆ คือคลัง ใช้สี/น้ำหนักชุดเดียวกับหัวคอลัมน์ของตาราง
+            // (data-grid-table.tsx) มันจึงอ่านเป็นหัวคอลัมน์ ไม่ใช่ข้อมูลลอย
+            <div className="text-muted-foreground flex justify-end pt-3 text-xs font-semibold">
+              {tfl("location")}
+            </div>
+          ),
         expandedContent: (group: GrnGroup) => (
           <GrnGroupLocations
             group={group}
@@ -575,8 +253,11 @@ export function useGrnItemTable({
         meta: rightMeta,
         cell: ({ row }) => (
           <GroupUnitPrice
-            control={form.control}
+            form={form}
             indices={row.original.indices}
+            disabled={disabled}
+            autoFocus={row.original.key === autoFocusPriceKey}
+            onCommit={() => onPriceCommitted(row.original.key)}
           />
         ),
       },
@@ -650,29 +331,7 @@ export function useGrnItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
-        // ปุ่มไอคอนล้วนสองตัวติดกัน เดาจากรูปอย่างเดียวไม่ออกว่าอันไหนลบอะไร
-        // (ลบสินค้าทั้งบรรทัด vs ลบเฉพาะที่เก็บในแถวย่อย) — บอกด้วย tooltip
         <div className="flex items-center justify-center gap-0.5">
-          {row.original.isManual && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  className="text-primary hover:bg-primary/10 hover:text-primary"
-                  aria-label={t("addLocation")}
-                  onClick={() => {
-                    onAddLocation(row.original);
-                    if (!row.getIsExpanded()) row.toggleExpanded();
-                  }}
-                >
-                  <MapPinPlus className="size-3.5" aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t("addLocation")}</TooltipContent>
-            </Tooltip>
-          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -725,8 +384,13 @@ export function useGrnItemTable({
     plainText,
     isPo,
     autoOpenProductKey,
+    autoFocusPriceKey,
     autoOpenLocationKey,
+    openLocationKey,
+    onLocationOpenChange,
     onAddLocation,
+    onProductPicked,
+    onPriceCommitted,
     onDeleteGroup,
     onDeleteItem,
     tfl,

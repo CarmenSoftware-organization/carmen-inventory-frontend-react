@@ -1,105 +1,50 @@
-import { Building2, Crown } from "lucide-react";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { DepartmentRef } from "@/types/user";
-import { AssignSection, EmptyState } from "./user-assigned-ui";
+import { LookupDepartment } from "@/components/lookup/lookup-department";
+import { FieldPlainText } from "@/components/ui/field";
+import { AssignSection } from "./user-assigned-ui";
+import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 
 interface DepartmentsSectionProps {
-  readonly memberDepartment: DepartmentRef | null;
-  readonly hodDepartments: DepartmentRef[];
-  readonly isLoading: boolean;
-  readonly totalCount: number;
+  readonly form: UseFormReturn<UserAssignedFormValues>;
+  readonly isDisabled: boolean;
+  /** ชื่อแผนกที่สังกัดอยู่ตอนเปิดหน้า — มากับตัวผู้ใช้แล้ว */
+  readonly departmentName: string | undefined;
 }
 
+/**
+ * แผนกที่ผู้ใช้สังกัด — **เลือกได้ค่าเดียว** จึงเป็น lookup ไม่ใช่ชุด checkbox
+ *
+ * โหมดดูแสดงชื่อที่มากับตัวผู้ใช้ตรง ๆ ไม่ผ่าน `readOnly` ของ `LookupDepartment`
+ * เพราะตัวนั้นต้องลากทะเบียนแผนกทั้ง BU มาแปลง id เป็นชื่อ ทั้งที่ชื่ออยู่ในมือ
+ * แล้ว — ทะเบียนถูกยิงตอนกด Edit เท่านั้น
+ */
 export function DepartmentsSection({
-  memberDepartment,
-  hodDepartments,
-  isLoading,
-  totalCount,
+  form,
+  isDisabled,
+  departmentName,
 }: DepartmentsSectionProps) {
   const t = useTranslations("systemAdmin.user");
+
   return (
     <AssignSection
       title={t("departmentsTitle")}
       description={t("departmentsDesc")}
-      count={totalCount || undefined}
     >
-      {isLoading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-10 w-2/3 rounded-lg" />
-        </div>
-      ) : !memberDepartment && hodDepartments.length === 0 ? (
-        <EmptyState
-          icon={Building2}
-          title={t("notAssigned")}
-          desc={t("notAssignedDesc")}
-        />
+      {isDisabled ? (
+        <FieldPlainText>{departmentName}</FieldPlainText>
       ) : (
-        <div className="space-y-4">
-          {/* Member */}
-          <div>
-            <p className="text-muted-foreground text-micro-legal mb-1.5 font-semibold tracking-widest uppercase">
-              Member of
-            </p>
-            {memberDepartment ? (
-              <div className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs">
-                <Building2
-                  className="text-muted-foreground size-3.5 shrink-0"
-                  aria-hidden="true"
-                />
-                <span className="text-micro font-semibold">
-                  {memberDepartment.code}
-                </span>
-                <span className="text-muted-foreground/60">·</span>
-                <span>{memberDepartment.name}</span>
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-xs italic">
-                No primary department
-              </p>
-            )}
-          </div>
-
-          {/* HOD */}
-          <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-muted-foreground text-micro-legal font-semibold tracking-widest uppercase">
-                Head of Department
-              </p>
-              {hodDepartments.length > 0 && (
-                <Badge variant="info-light" size="xs">
-                  {hodDepartments.length} HOD
-                </Badge>
-              )}
-            </div>
-            {hodDepartments.length === 0 ? (
-              <p className="text-muted-foreground text-xs italic">
-                Not a head of any department
-              </p>
-            ) : (
-              <div className="space-y-1.5">
-                {hodDepartments.map((dept) => (
-                  <div
-                    key={dept.id}
-                    className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs"
-                  >
-                    <Crown
-                      className="text-warning-ink size-3.5 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span className="text-micro font-semibold">
-                      {dept.code}
-                    </span>
-                    <span className="text-muted-foreground/60">·</span>
-                    <span className="flex-1">{dept.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <Controller
+          control={form.control}
+          name="department_id"
+          render={({ field }) => (
+            <LookupDepartment
+              value={field.value}
+              onValueChange={field.onChange}
+              className="w-full"
+            />
+          )}
+        />
       )}
     </AssignSection>
   );

@@ -16,7 +16,7 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { ErrorState } from "@/components/ui/error-state";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import EmptyComponent from "@/components/empty-component";
-import { useSrStockMovements } from "./use-store-requisition";
+import { useSrStockMovements } from "./use-sr";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import type {

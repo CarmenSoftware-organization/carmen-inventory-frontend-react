@@ -114,6 +114,9 @@ export function CreateScheduleDialog({
             days_of_month: values.days_of_month,
           }),
         },
+        // ว่างไว้ = ไม่ส่งฟิลด์นี้เลย แปลว่าแจ้งทันทีที่รันเสร็จ
+        // ถ้าเวลาที่ใส่เร็วกว่า values.time gateway จะแปลงเป็น notify_day_offset: 1 (+1 วัน)
+        ...(values.notify_at && { notify_at: values.notify_at }),
         notifications: {
           web: values.notify_web,
           email: values.notify_email,

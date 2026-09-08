@@ -18,7 +18,7 @@ import {
   useReviewSpotCheck,
   useSaveSpotCheck,
   useSpotCheckById,
-} from "./use-spot-check";
+} from "./use-sc";
 import { useUnit } from "@/hooks/use-unit";
 import { cn } from "@/lib/utils";
 import { CalculatorDialog } from "../shared/calculator-dialog";

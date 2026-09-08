@@ -6,7 +6,7 @@
  */
 
 /** ข้อมูล connection ของฐานข้อมูลประจำ BU */
-export interface BusinessUnitDbConnection {
+interface BusinessUnitDbConnection {
   host: string;
   port: number;
   schema: string;
@@ -24,7 +24,7 @@ export interface BusinessUnitNumberFormat {
 }
 
 /** URL รูปภาพ pre-signed พร้อมเวลาหมดอายุ (logo/avatar) */
-export interface BusinessUnitImage {
+interface BusinessUnitImage {
   url: string;
   expires_at: string;
 }
@@ -38,13 +38,13 @@ export interface BusinessUnitConfigItem {
 }
 
 /** รายการ audit หนึ่งครั้ง (created/updated) */
-export interface BusinessUnitAuditEntry {
+interface BusinessUnitAuditEntry {
   at: string;
   id: string;
   name: string;
 }
 
-export interface BusinessUnitAudit {
+interface BusinessUnitAudit {
   created?: BusinessUnitAuditEntry;
   updated?: BusinessUnitAuditEntry;
 }
@@ -116,7 +116,7 @@ export interface BusinessUnitDetail {
 }
 
 /** field ที่แก้ไขได้ในหน้า Business Setting (ฐานของ PATCH payload) */
-export interface BusinessUnitEditable {
+interface BusinessUnitEditable {
   code: string;
   name: string;
   alias_name: string | null;

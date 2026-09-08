@@ -74,10 +74,13 @@ export function FilterRequester({
 }: FilterRequesterProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { data } = useUser({ perpage: -1 });
+  const inline = useContext(FilterInlineContext);
+  // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
+  // ทะเบียนผู้ใช้คือทั้ง BU ก้อนใหญ่ที่สุดในหน้า list เลยไม่ลากมาจนกว่าคนจะเปิดจริง
+  // (ปุ่มยังพูดค่าที่เลือกได้ด้วย fallback "<label> (N)" ข้างล่าง)
+  const { data } = useUser({ perpage: -1 }, { enabled: open || inline });
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const inline = useContext(FilterInlineContext);
 
   const users = data?.data ?? [];
 

@@ -18,7 +18,7 @@ export enum PO_TYPE {
   PR = "purchase_request",
 }
 
-export interface PoDetailLocation {
+interface PoDetailLocation {
   location_id: string | null;
   location_code: string | null;
   location_name: string | null;
@@ -42,7 +42,7 @@ export interface PoDetailLocation {
   total_price?: number;
 }
 
-export interface PurchaseOrderDetail extends ItemMoneyFields {
+interface PurchaseOrderDetail extends ItemMoneyFields {
   id: string;
   doc_version?: number;
   stage_status: string | null;
@@ -125,7 +125,7 @@ export interface PoDetailPayload {
   locations: PoDetailPayloadLocation[];
 }
 
-export interface PoDetailPayloadLocation {
+interface PoDetailPayloadLocation {
   location_id: string;
   location_code: string;
   location_name: string;
@@ -218,7 +218,7 @@ export interface PurchaseOrder {
 
 // --- PO for GRN (from /purchase-order/grn endpoint) ---
 
-export interface PoGrnDetailLocation {
+interface PoGrnDetailLocation {
   location_id: string;
   location_code?: string;
   location_name: string;

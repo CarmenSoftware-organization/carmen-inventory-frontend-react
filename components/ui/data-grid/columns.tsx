@@ -51,7 +51,7 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
       ((Number(params.page) || 1) - 1) * (Number(params.perpage) || 10),
     enableSorting: false,
     enableHiding: false,
-    size: 40,
+    size: 60,
     meta: {
       headerClassName: "text-center",
       cellClassName: "text-center",

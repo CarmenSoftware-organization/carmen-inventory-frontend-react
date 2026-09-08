@@ -1,5 +1,5 @@
 import { lazy, Suspense, useRef, useState } from "react";
-import { useForm, Controller, type Resolver } from "react-hook-form";
+import { Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -8,7 +8,7 @@ import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { Badge } from "@/components/ui/badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useEntityForm } from "@/hooks/use-entity-form";
 import {
   Field,
   FieldInput,
@@ -42,7 +42,6 @@ import {
   PHYSICAL_COUNT_TYPE_OPTIONS,
 } from "@/constant/location";
 import type { Location } from "@/types/location";
-import type { FormMode } from "@/types/form";
 import { transferHandler } from "@/lib/transfer-handler";
 import {
   createLocationSchema,
@@ -61,20 +60,16 @@ interface LocationFormProps {
   readonly location?: Location;
 }
 
+const LIST_PATH = "/config/location";
+
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
-  const isAdd = mode === "add";
-
   const createLocation = useCreateLocation();
   const updateLocation = useUpdateLocation();
   const deleteLocation = useDeleteLocation();
   const [showDelete, setShowDelete] = useState(false);
   const isPending = createLocation.isPending || updateLocation.isPending;
-  const isDisabled = isView || isPending;
   const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
@@ -143,15 +138,19 @@ export function LocationForm({ location }: LocationFormProps) {
   );
 
   const locationSchema = createLocationSchema(tv, tfl);
-  const form = useForm<LocationFormValues>({
+  const f = useEntityForm<LocationFormValues>({
+    entity: location,
     resolver: zodResolver(locationSchema) as Resolver<LocationFormValues>,
     defaultValues: getDefaultValues(location),
-  });
-
-  const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    listPath: LIST_PATH,
     isPending,
+    // transfer ผู้ใช้กับสินค้าถือ state นอก RHF — กด Cancel ต้องคืนค่าเดิมด้วย
+    onResetExtra: () => {
+      setUserTargetKeys(initialUserKeys);
+      setSelectedProductIds(new Set(initialProductIds));
+    },
   });
+  const { form, isView, isAdd, isEdit, isDisabled } = f;
 
   const handleUsersChange = (
     nextTargetKeys: string[],
@@ -196,21 +195,16 @@ export function LocationForm({ location }: LocationFormProps) {
 
     if (isEdit && location) {
       updateLocation.mutate(
-        // doc_version round-trips the loaded record's version — the backend
-        // requires it for optimistic-concurrency checks on update
         { id: location.id, doc_version: location.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            // เคลียร์ transfer deltas หลัง save — ไม่งั้น users.add/remove และ
-            // products.add/remove ยังค้าง ถ้าเข้า edit แล้ว save อีกครั้งจะ re-send
-            // การเพิ่ม/ลบเดิมซ้ำ
             form.reset({
               ...values,
               users: { add: [], remove: [] },
               products: { add: [], remove: [] },
             });
-            setMode("view");
+            f.setMode("view");
             requestAnimationFrame(() => {
               containerRef.current?.focus();
             });
@@ -223,37 +217,9 @@ export function LocationForm({ location }: LocationFormProps) {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate(`/config/location/${id}`, { replace: true });
-          setMode("view");
+          f.setMode("view");
         },
       });
-    }
-  };
-
-  const handleCancel = () => {
-    discard.confirm(() => {
-      if (isEdit && location) {
-        form.reset(getDefaultValues(location));
-        setUserTargetKeys(initialUserKeys);
-        setSelectedProductIds(new Set(initialProductIds));
-        setMode("view");
-      } else {
-        navigate("/config/location");
-      }
-    });
-  };
-
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
-  const goBack = () => {
-    navigate("/config/location");
-  };
-
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(goBack);
-    } else {
-      goBack();
     }
   };
 
@@ -279,13 +245,13 @@ export function LocationForm({ location }: LocationFormProps) {
       {/* ── Toolbar ─────────── */}
       <Reveal>
         <FormToolbar
-          entity={location && mode !== "add" ? location.name : t("entity")}
-          mode={mode}
+          entity={location && f.mode !== "add" ? location.name : t("entity")}
+          mode={f.mode}
           formId={FORM_ID}
           isPending={isPending}
-          onBack={handleBack}
-          onEdit={() => setMode("edit")}
-          onCancel={handleCancel}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
           onDelete={location ? () => setShowDelete(true) : undefined}
           deleteIsPending={deleteLocation.isPending}
           statusBadge={codeBadge}
@@ -349,8 +315,6 @@ export function LocationForm({ location }: LocationFormProps) {
                 {isView ? (
                   <FieldPlainText>
                     {location?.location_type ? (
-                      // ไอคอนชุดเดียวกับที่ list แสดง — สลับ list ↔ ฟอร์มแล้วเห็น
-                      // ประเภทคลังหน้าตาเดิม
                       <LocationTypeLabel type={location.location_type} />
                     ) : (
                       ""
@@ -437,8 +401,6 @@ export function LocationForm({ location }: LocationFormProps) {
                         onItemChange={(item) =>
                           form.setValue("delivery_point_name", item.name)
                         }
-                        // โชว์ชื่อ delivery point เดิมได้แม้ inactive (ไม่อยู่ใน
-                        // lookup list ที่กรองเฉพาะ active) แทนการตก placeholder
                         defaultLabel={location?.delivery_point?.name}
                         disabled={isDisabled}
                         error={form.formState.errors.delivery_point_id?.message}
@@ -538,7 +500,17 @@ export function LocationForm({ location }: LocationFormProps) {
         </Reveal>
       </div>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <DiscardDialog {...f.discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={f.navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) f.navGuard.cancel();
+        }}
+        onConfirm={f.navGuard.confirm}
+        onCancel={f.navGuard.cancel}
+        variant="warning"
+      />
 
       {location && (
         <DeleteDialog
@@ -553,7 +525,7 @@ export function LocationForm({ location }: LocationFormProps) {
             deleteLocation.mutate(location.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/config/location");
+                f.backToList();
               },
             });
           }}

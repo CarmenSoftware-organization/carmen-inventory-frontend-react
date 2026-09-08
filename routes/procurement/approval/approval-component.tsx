@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useApprovalPending, useApprovalPendingSummary } from "./use-approval";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
-import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import DisplayTemplate from "@/components/display-template";
 import type { ApprovalPendingSummary } from "@/types/approval";
@@ -19,8 +18,7 @@ import ApprovalQueueList from "./approve-queue-list";
 import { cn } from "@/lib/utils";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -106,27 +104,18 @@ export default function ApprovalComponent() {
       title={t("title")}
       description={t("desc")}
       toolbar={
-        <>
-          <SearchInput
-            defaultValue={search}
-            onSearch={(value) => {
-              if (value) setFilter("");
-              setSearch(value);
-            }}
-          />
-          <ViewSelector
-            view={lf.view}
-            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-          />
-          <ListFilter
-            fields={APPROVAL_FILTER_FIELDS}
-            values={lf.values}
-            setValue={lf.setValue}
-            onClearAll={lf.clearAll}
-            onSaveClick={() => setSaveViewDialogOpen(true)}
-            activeCount={lf.activeFilters.length}
-          />
-        </>
+        <ListToolbar
+          variant="bare"
+          search={search}
+          onSearch={(value) => {
+            // เลือกคำค้น = ล้าง filter สถานะที่ค้างไว้ ไม่งั้นค้นแล้วไม่เจออะไรเลย
+            if (value) setFilter("");
+            setSearch(value);
+          }}
+          lf={lf}
+          fields={APPROVAL_FILTER_FIELDS}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+        />
       }
       filterBar={
         <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
