@@ -1,12 +1,6 @@
-import {
-  Activity,
-  Clock,
-  Crown,
-  EyeOff,
-  PackageOpen,
-  Users,
-} from "lucide-react";
+import { Activity, Clock, EyeOff, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
+import { EyeBrow } from "@/components/ui/eye-brow";
 import type { Role, Stage } from "@/types/workflows";
 import { formatCycleTime } from "./wf-sla-utils";
 import {
@@ -92,12 +86,12 @@ function SectionCard({
   readonly empty?: boolean;
 }) {
   return (
-    <section className="bg-card rounded-xl border p-5 shadow-sm">
+    <section className="bg-card rounded-xl border p-4">
       <h3 className="text-foreground mb-4 flex items-center gap-2 text-sm font-semibold">
         <Icon className="text-muted-foreground size-4" aria-hidden="true" />
         {title}
       </h3>
-      {empty ? <p className="text-muted-foreground text-sm">—</p> : children}
+      {empty ? <p className="text-muted-foreground text-xs">—</p> : children}
     </section>
   );
 }
@@ -105,19 +99,14 @@ function SectionCard({
 function StatTile({
   label,
   value,
-  icon: Icon,
 }: {
   readonly label: string;
   readonly value: string | number;
-  readonly icon: typeof Clock;
 }) {
   return (
-    <div className="bg-card rounded-xl border p-4 shadow-sm">
-      <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-        <Icon className="size-4" aria-hidden="true" />
-        {label}
-      </div>
-      <p className="mt-1.5 text-lg font-semibold tabular-nums">{value}</p>
+    <div className="min-w-0">
+      <EyeBrow className="truncate">{label}</EyeBrow>
+      <p className="mt-0.5 text-lg font-semibold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -136,29 +125,13 @@ function QuickStats({
   const cycle = formatCycleTime(totalCycleMinutes) || "—";
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      <StatTile label={t("statCycleTime")} value={cycle} icon={Clock} />
-      <StatTile
-        label={t("statApprovers")}
-        value={stats.approverStages}
-        icon={Users}
-      />
-      <StatTile label={t("statHod")} value={stats.hodStages} icon={Crown} />
-      <StatTile
-        label={t("statTotalUsers")}
-        value={stats.totalUsers}
-        icon={Users}
-      />
-      <StatTile
-        label={t("statRoutingRules")}
-        value={routingCount}
-        icon={Activity}
-      />
-      <StatTile
-        label={t("statProducts")}
-        value={productCount}
-        icon={PackageOpen}
-      />
+    <div className="grid grid-cols-3 gap-x-4 gap-y-3 border-b pb-4 sm:grid-cols-6">
+      <StatTile label={t("statCycleTime")} value={cycle} />
+      <StatTile label={t("statApprovers")} value={stats.approverStages} />
+      <StatTile label={t("statHod")} value={stats.hodStages} />
+      <StatTile label={t("statTotalUsers")} value={stats.totalUsers} />
+      <StatTile label={t("statRoutingRules")} value={routingCount} />
+      <StatTile label={t("statProducts")} value={productCount} />
     </div>
   );
 }
@@ -182,11 +155,11 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
           const cycle = formatCycleTime(row.minutes) || "0";
           return (
             <li key={`sla-${row.index}-${row.name}`} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-sm font-medium">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="truncate" title={row.name}>
                   {row.name}
                 </span>
-                <span className="text-muted-foreground shrink-0 tabular-nums">
+                <span className="text-muted-foreground shrink-0 font-medium tabular-nums">
                   {cycle}
                 </span>
               </div>
@@ -228,9 +201,9 @@ function RoleDistribution({
           const pct = total ? Math.round((row.count / total) * 100) : 0;
           return (
             <li key={row.role} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-sm font-medium">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="capitalize">{t(ROLE_LABEL[row.role])}</span>
-                <span className="text-muted-foreground shrink-0 tabular-nums">
+                <span className="text-muted-foreground shrink-0 font-medium tabular-nums">
                   {row.count} ({pct}%)
                 </span>
               </div>
@@ -265,9 +238,9 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
             : 0;
           return (
             <li key={row.action} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-sm font-medium">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <span>{t(ACTION_LABEL[row.action])}</span>
-                <span className="text-muted-foreground shrink-0 tabular-nums">
+                <span className="text-muted-foreground shrink-0 font-medium tabular-nums">
                   {row.activeCount}/{row.totalStages}
                 </span>
               </div>
@@ -310,9 +283,9 @@ function RecipientCoverage({
             : 0;
           return (
             <li key={row.recipient} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-sm font-medium">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <span>{t(RECIPIENT_LABEL[row.recipient])}</span>
-                <span className="text-muted-foreground shrink-0 tabular-nums">
+                <span className="text-muted-foreground shrink-0 font-medium tabular-nums">
                   {row.count}/{row.totalActiveActions}
                 </span>
               </div>

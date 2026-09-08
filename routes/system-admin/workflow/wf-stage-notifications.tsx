@@ -75,7 +75,7 @@ export function WfStageNotifications({
 
       {isMiddle && (
         <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
-          <span className="text-foreground/80 text-sm font-semibold">
+          <span className="text-foreground text-sm font-semibold">
             {t("slaWarning")}
           </span>
           <div className="space-y-3">
@@ -146,7 +146,7 @@ function NotificationSection({
 
   return (
     <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
-      <span className="text-foreground/80 text-sm font-semibold">
+      <span className="text-foreground text-sm font-semibold">
         {t(actionKey)}
       </span>
       <div className="space-y-4">

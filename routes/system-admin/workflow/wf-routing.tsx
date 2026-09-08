@@ -124,7 +124,7 @@ export function WfRouting({
       {/* Left: Rule list */}
       <div className="w-full shrink-0 space-y-4 lg:w-72 xl:w-80">
         <div className="flex items-center justify-between px-1">
-          <span className="text-foreground/80 text-sm font-semibold">
+          <span className="text-foreground text-sm font-semibold">
             {t("rules")}
           </span>
           {!isDisabled && (
@@ -133,7 +133,7 @@ export function WfRouting({
               variant="outline"
               size="sm"
               onClick={handleAddRule}
-              className="hover:bg-muted/50 h-9 px-4 text-sm font-medium shadow-sm transition-all"
+              className="hover:bg-muted/50"
             >
               <Plus className="mr-1.5 size-3.5" />
               {tc("add")}
@@ -179,7 +179,7 @@ export function WfRouting({
                   className={cn(
                     "group animate-in fade-in slide-in-from-left-2 flex items-center justify-between gap-2 rounded-xl border p-1 pl-4 transition-all duration-200 duration-300",
                     safeIndex === idx
-                      ? "border-primary/30 bg-primary/5 ring-primary/20 shadow-sm ring-1"
+                      ? "border-primary bg-primary/5"
                       : "border-border hover:border-border/80 hover:bg-muted/40",
                   )}
                 >
@@ -218,7 +218,7 @@ export function WfRouting({
       </div>
 
       {/* Right: Rule detail */}
-      <div className="bg-card flex-1 rounded-xl border p-4 shadow-sm md:p-6">
+      <div className="bg-card flex-1 rounded-xl border p-4 md:p-6">
         {fields.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {t("selectOrAddRule")}
@@ -279,7 +279,7 @@ export function WfRouting({
 
             {/* Condition section */}
             <div className="space-y-4">
-              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+              <span className="text-foreground block border-b pb-3 text-sm font-semibold">
                 {t("condition")}
               </span>
 
@@ -415,7 +415,7 @@ export function WfRouting({
 
             {/* Action section */}
             <div className="space-y-4">
-              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+              <span className="text-foreground block border-b pb-3 text-sm font-semibold">
                 {t("actionLabel")}
               </span>
 

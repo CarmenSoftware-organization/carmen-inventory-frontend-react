@@ -299,7 +299,7 @@ export function WfProducts({
         </span>
       </div>
 
-      <div className="bg-card max-h-105 overflow-y-auto rounded-xl border p-3 shadow-sm">
+      <div className="bg-card max-h-105 overflow-y-auto rounded-xl border p-3">
         {filteredTree.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {search ? t("noProductsMatch") : t("noProductsAvailable")}
