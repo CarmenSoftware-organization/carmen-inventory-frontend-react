@@ -18,7 +18,7 @@ import {
   ACCOUNT_NATURE,
   ACCOUNT_NATURES,
   type ChartOfAccount,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 import { createCoaSchema, type CoaFormValues } from "./coa-form-schema";
 
 interface CoaDialogProps {
@@ -43,7 +43,7 @@ export function CoaDialog({
   chartOfAccount,
   readOnly,
 }: CoaDialogProps) {
-  const t = useTranslations("config.chartOfAccount");
+  const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
 
   return (
@@ -55,7 +55,7 @@ export function CoaDialog({
       icon={BookText}
       // สองคอลัมน์ต้องการที่ — กว้าง md เดิมบีบจนช่องแคบกว่าที่อ่านสบาย
       contentClassName="sm:max-w-2xl"
-      translationNamespace="config.chartOfAccount"
+      translationNamespace="config.chartOfAccounts"
       useCreate={useCreateChartOfAccount}
       useUpdate={useUpdateChartOfAccount}
       buildSchema={createCoaSchema}

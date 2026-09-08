@@ -1,6 +1,6 @@
 import { useTranslations } from "use-intl";
 import { useChartOfAccount, useDeleteChartOfAccount } from "./use-coa";
-import type { ChartOfAccount } from "@/types/chart-of-account";
+import type { ChartOfAccount } from "@/types/chart-of-accounts";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { CoaDialog } from "./coa-dialog";
@@ -13,17 +13,17 @@ import CoaCard from "./coa-card";
  *
  * @returns React element ของหน้ารายการรหัสบัญชี
  * @example
- * // route: /config/chart-of-account
+ * // route: /config/chart-of-accounts
  * <CoaComponent />
  */
 export default function CoaComponent() {
-  const t = useTranslations("config.chartOfAccount");
+  const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
   return (
     <ConfigListTemplate<ChartOfAccount>
-      translationNamespace="config.chartOfAccount"
+      translationNamespace="config.chartOfAccounts"
       entityNameField="code"
       useList={useChartOfAccount}
       useDelete={useDeleteChartOfAccount}

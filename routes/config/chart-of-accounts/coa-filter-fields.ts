@@ -2,7 +2,7 @@ import type { FilterFieldDef } from "@/types/list-filter";
 import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 /**
  * ตัวกรองของหน้ารหัสบัญชี — ทุกช่องเก็บ clause เต็มใน URL param ของตัวเอง
@@ -29,11 +29,11 @@ export const COA_FILTER_FIELDS: FilterFieldDef[] = [
     labelKey: "field.nature",
     options: [
       {
-        labelKey: "config.chartOfAccount.nature.debit",
+        labelKey: "config.chartOfAccounts.nature.debit",
         value: `nature|string:${ACCOUNT_NATURE.DEBIT}`,
       },
       {
-        labelKey: "config.chartOfAccount.nature.credit",
+        labelKey: "config.chartOfAccounts.nature.credit",
         value: `nature|string:${ACCOUNT_NATURE.CREDIT}`,
       },
     ],
@@ -44,19 +44,19 @@ export const COA_FILTER_FIELDS: FilterFieldDef[] = [
     labelKey: "field.type",
     options: [
       {
-        labelKey: "config.chartOfAccount.accountType.header",
+        labelKey: "config.chartOfAccounts.accountType.header",
         value: `type|string:${CHART_OF_ACCOUNT_TYPE.HEADER}`,
       },
       {
-        labelKey: "config.chartOfAccount.accountType.balance_sheet",
+        labelKey: "config.chartOfAccounts.accountType.balance_sheet",
         value: `type|string:${CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET}`,
       },
       {
-        labelKey: "config.chartOfAccount.accountType.income_statement",
+        labelKey: "config.chartOfAccounts.accountType.income_statement",
         value: `type|string:${CHART_OF_ACCOUNT_TYPE.INCOME_STATEMENT}`,
       },
       {
-        labelKey: "config.chartOfAccount.accountType.statistic",
+        labelKey: "config.chartOfAccounts.accountType.statistic",
         value: `type|string:${CHART_OF_ACCOUNT_TYPE.STATISTIC}`,
       },
     ],

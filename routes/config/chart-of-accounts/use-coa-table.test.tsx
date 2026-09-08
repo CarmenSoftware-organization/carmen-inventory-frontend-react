@@ -10,7 +10,7 @@ import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
   type ChartOfAccount,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 import { useCoaTable } from "./use-coa-table";
 
 // useConfigTable → useCan() → useLicense() อ่าน runtime config — ไม่มีอันนี้

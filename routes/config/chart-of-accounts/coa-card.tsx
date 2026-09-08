@@ -5,7 +5,7 @@ import {
   ListCardRow,
   ListCardActiveRow,
 } from "@/components/share/list-card";
-import type { ChartOfAccount } from "@/types/chart-of-account";
+import type { ChartOfAccount } from "@/types/chart-of-accounts";
 
 interface Props {
   readonly item: ChartOfAccount;
@@ -15,7 +15,7 @@ interface Props {
 
 /** การ์ดรหัสบัญชี สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function CoaCard({ item, onEdit, onDelete }: Props) {
-  const t = useTranslations("config.chartOfAccount");
+  const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
 
   return (
