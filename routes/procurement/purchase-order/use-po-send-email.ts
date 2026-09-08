@@ -25,6 +25,18 @@ export interface PoSendEmailResult {
 }
 
 /**
+ * สิ่งที่ HTTP คืนมาจริง — gateway ห่อผลลัพธ์ด้วย `StdResponse` และ `useApiMutation`
+ * คืน body ทั้งก้อนโดยไม่แกะ envelope ผู้เรียกจึงต้องอ่านผ่าน `data`
+ */
+export interface PoSendEmailResponse {
+  data: PoSendEmailResult | null;
+  status: number;
+  success: boolean;
+  message: string;
+  timestamp: string;
+}
+
+/**
  * ส่งใบสั่งซื้อให้ผู้ขายทางอีเมล พร้อมไฟล์ PDF (แนบได้ผ่าน `attach_pdf`)
  *
  * Endpoint นี้กำลังถูกสร้างคู่ขนานใน backend (Task B5) — ยังไม่มีจริงตอนเขียน hook
@@ -48,7 +60,7 @@ export interface PoSendEmailResult {
  * ```
  */
 export function usePoSendEmail(id: string) {
-  return useApiMutation<PoSendEmailPayload, PoSendEmailResult>({
+  return useApiMutation<PoSendEmailPayload, PoSendEmailResponse>({
     mutationFn: (data, buCode) =>
       httpClient.post(
         API_ENDPOINTS.PURCHASE_ORDER_SEND_EMAIL(buCode, id),

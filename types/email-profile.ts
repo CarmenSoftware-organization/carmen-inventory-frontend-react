@@ -17,6 +17,8 @@ export interface EmailProfile {
   default_cc: string[];
   subject_template: string;
   body_template: string;
+  /** บันทึกภายในของผู้ดูแลระบบ — ไม่เคยถูกส่งออกไปกับอีเมล */
+  note: string;
 }
 
 export interface EmailProfilesValue {

@@ -2116,7 +2116,7 @@
         "smtpSection": "เซิร์ฟเวอร์ SMTP",
         "host": "โฮสต์",
         "port": "พอร์ต",
-        "secure": "ใช้ TLS/SSL",
+        "secure": "Implicit TLS",
         "password": "รหัสผ่าน",
         "passwordHint": "เว้นไว้ = ใช้รหัสผ่านเดิม",
         "senderSection": "ผู้ส่ง",
@@ -2127,7 +2127,22 @@
         "defaultCcHint": "คั่นหลายที่อยู่ด้วยเครื่องหมายจุลภาค อัฒภาค หรือช่องว่าง",
         "templateSection": "เทมเพลต",
         "subjectTemplate": "เทมเพลตหัวเรื่อง",
-        "bodyTemplate": "เทมเพลตเนื้อหา"
+        "bodyTemplate": "เทมเพลตเนื้อหา",
+        "profileName": "ชื่อโปรไฟล์",
+        "secureHint": "เปิดเมื่อใช้ implicit TLS (มักเป็นพอร์ต 465) — พอร์ต 587 ปกติใช้ STARTTLS จึงปิดไว้",
+        "passwordIsSet": "ตั้งรหัสผ่านไว้แล้ว",
+        "changePassword": "เปลี่ยนรหัสผ่าน",
+        "keepPassword": "ใช้รหัสผ่านเดิม",
+        "note": "บันทึกภายใน",
+        "notePlaceholder": "บันทึกสำหรับผู้ดูแล ไม่ถูกส่งไปกับอีเมล",
+        "advancedSection": "ตั้งค่าขั้นสูง"
+      },
+      "test": {
+        "title": "ส่งอีเมลทดสอบ",
+        "description": "ส่งข้อความทดสอบผ่าน “{name}” เพื่อยืนยันว่าการตั้งค่า SMTP ใช้งานได้จริง",
+        "toLabel": "ส่งไปที่",
+        "send": "ส่งทดสอบ",
+        "invalidEmail": "กรอกอีเมลให้ถูกรูปแบบ"
       }
     }
   },

@@ -313,8 +313,11 @@ export function PoSendEmailDialog({
         attach_pdf: attachPdf,
       },
       {
-        onSuccess: (result) => {
-          if (!result.sent) {
+        onSuccess: (response) => {
+          // gateway ห่อผลลัพธ์ไว้ใต้ `data` เสมอ — อ่านระดับบนสุดจะได้ undefined
+          // แล้วขึ้น "ส่งไม่สำเร็จ" ทั้งที่ผู้ขายได้รับเมลไปแล้ว
+          const result = response.data;
+          if (!result?.sent) {
             toast.error(t("sendFailed"));
             return;
           }

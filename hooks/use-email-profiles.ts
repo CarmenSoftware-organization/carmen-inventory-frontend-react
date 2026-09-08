@@ -22,6 +22,19 @@ export interface TestEmailProfileResult {
 }
 
 /**
+ * สิ่งที่ HTTP คืนมาจริง — gateway ห่อผลลัพธ์ทุกอันด้วย `StdResponse` และ
+ * `useApiMutation` คืน body ทั้งก้อนโดยไม่แกะ envelope ให้ ผู้เรียกจึงต้องอ่านผ่าน `data`
+ * (อ่าน `result.sent` ตรง ๆ จะได้ undefined = ขึ้น "ส่งไม่สำเร็จ" ทั้งที่เมลถึงแล้ว)
+ */
+export interface TestEmailProfileResponse {
+  data: TestEmailProfileResult | null;
+  status: number;
+  success: boolean;
+  message: string;
+  timestamp: string;
+}
+
+/**
  * อ่าน/เขียนโปรไฟล์อีเมลผู้ส่งของหน่วยธุรกิจ (app-config key `email_profiles`)
  *
  * ย้ายมาจาก `routes/system-admin/email-profile/` (Task C1) มาไว้ที่นี่ตอน Task C3
@@ -33,7 +46,7 @@ export interface TestEmailProfileResult {
 export function useEmailProfiles() {
   const query = useAppConfigByKey(EMAIL_PROFILES_CONFIG_KEY);
   const upsert = useUpsertAppConfig();
-  const test = useApiMutation<{ profile_id: string }, TestEmailProfileResult>({
+  const test = useApiMutation<{ profile_id: string; to: string }, TestEmailProfileResponse>({
     mutationFn: (data, buCode) =>
       httpClient.post(
         API_ENDPOINTS.APP_CONFIG_TEST_EMAIL_PROFILE(buCode),

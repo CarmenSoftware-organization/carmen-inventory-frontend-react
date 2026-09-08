@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { EmailProfile } from "@/types/email-profile";
 import { EmailProfileDialog } from "./email-profile-dialog";
+import { EmailProfileTestDialog } from "./email-profile-test-dialog";
 import { useEmailProfiles } from "@/hooks/use-email-profiles";
 
 /**
@@ -39,6 +40,7 @@ export function Component() {
   );
   const [deleteTarget, setDeleteTarget] = useState<EmailProfile | null>(null);
   const [testingId, setTestingId] = useState<string | null>(null);
+  const [testTarget, setTestTarget] = useState<EmailProfile | null>(null);
 
   const openAdd = () => {
     setEditingProfile(null);
@@ -117,21 +119,30 @@ export function Component() {
     );
   };
 
+  /** เปิดกล่องถามอีเมลปลายทางก่อน — ไม่ยิงทันที เพราะผู้ตั้งค่ามักเปิดกล่องจดหมายของ from ไม่ได้ */
   const handleTest = (profile: EmailProfile) => {
+    setTestTarget(profile);
+  };
+
+  const handleTestSend = (to: string) => {
+    const profile = testTarget;
+    if (!profile) return;
     setTestingId(profile.id);
     testProfile(
-      { profile_id: profile.id },
+      { profile_id: profile.id, to },
       {
-        onSuccess: (result) => {
-          // HTTP 200 ไม่ได้แปลว่าส่งสำเร็จ — ต้องอ่าน `sent`/`error` เสมอ
-          if (result.sent) {
+        onSuccess: (response) => {
+          // gateway ห่อผลลัพธ์ไว้ใต้ `data` เสมอ — อ่านระดับบนสุดจะได้ undefined
+          // และ HTTP 200 เองก็ไม่ได้แปลว่าส่งสำเร็จ ต้องอ่าน `sent`/`error` ต่ออีกชั้น
+          const result = response.data;
+          if (result?.sent) {
             toast.success(
-              t("testSentSuccess", {
-                recipient: result.recipient ?? profile.from_email,
-              }),
+              t("testSentSuccess", { recipient: result.recipient ?? to }),
             );
+            setTestTarget(null);
           } else {
-            toast.error(result.error || t("testSentFailure"));
+            // ส่งไม่สำเร็จ → คงกล่องไว้ให้แก้ปลายทางแล้วลองใหม่ได้ทันที
+            toast.error(result?.error || t("testSentFailure"));
           }
         },
         onSettled: () => setTestingId(null),
@@ -303,6 +314,17 @@ export function Component() {
         onSave={handleSave}
         isSaving={isSaving}
       />
+
+      {/* mount เฉพาะตอนเปิด — ค่าตั้งต้นของช่องปลายทางจึงมาจาก initializer ไม่ต้องใช้ effect sync */}
+      {testTarget && (
+        <EmailProfileTestDialog
+          open
+          onOpenChange={(open) => !open && setTestTarget(null)}
+          profile={testTarget}
+          onSend={handleTestSend}
+          isSending={isTesting}
+        />
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}

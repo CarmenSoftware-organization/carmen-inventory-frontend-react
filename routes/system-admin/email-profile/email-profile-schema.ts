@@ -15,6 +15,7 @@ export const emailProfileSchema = z.object({
   default_cc: z.string(), // คั่นด้วย , ; หรือช่องว่าง แปลงตอนบันทึก
   subject_template: z.string(),
   body_template: z.string(),
+  note: z.string(),
 });
 
 export type EmailProfileFormValues = z.infer<typeof emailProfileSchema>;
@@ -33,6 +34,7 @@ export const EMPTY_EMAIL_PROFILE_FORM: EmailProfileFormValues = {
   default_cc: "",
   subject_template: "",
   body_template: "",
+  note: "",
 };
 
 /** ตัวแยกชุดเดียวกับ `config-email-component.tsx` เดิม — คั่นด้วย comma/semicolon/ช่องว่าง */
@@ -71,6 +73,7 @@ export function toEmailProfileFormValues(
     default_cc: profile.default_cc.join(", "),
     subject_template: profile.subject_template,
     body_template: profile.body_template,
+    note: profile.note ?? "",
   };
 }
 
@@ -106,5 +109,6 @@ export function fromEmailProfileFormValues(
     default_cc: splitEmailList(values.default_cc),
     subject_template: values.subject_template,
     body_template: values.body_template,
+    note: values.note,
   };
 }

@@ -2116,7 +2116,7 @@
         "smtpSection": "SMTP server",
         "host": "Host",
         "port": "Port",
-        "secure": "Use TLS/SSL",
+        "secure": "Implicit TLS",
         "password": "Password",
         "passwordHint": "Leave unchanged to keep the stored password.",
         "senderSection": "Sender",
@@ -2127,7 +2127,22 @@
         "defaultCcHint": "Separate multiple addresses with a comma, semicolon or space.",
         "templateSection": "Templates",
         "subjectTemplate": "Subject template",
-        "bodyTemplate": "Body template"
+        "bodyTemplate": "Body template",
+        "profileName": "Profile name",
+        "secureHint": "Turn on for implicit TLS (usually port 465) — port 587 normally uses STARTTLS, so leave it off.",
+        "passwordIsSet": "A password is set",
+        "changePassword": "Change password",
+        "keepPassword": "Keep the stored password",
+        "note": "Note",
+        "notePlaceholder": "Internal note — never sent with the email",
+        "advancedSection": "Advanced settings"
+      },
+      "test": {
+        "title": "Send test email",
+        "description": "Send a test message through “{name}” to confirm the SMTP settings work.",
+        "toLabel": "Send to",
+        "send": "Send test",
+        "invalidEmail": "Enter a valid email address"
       }
     }
   },
