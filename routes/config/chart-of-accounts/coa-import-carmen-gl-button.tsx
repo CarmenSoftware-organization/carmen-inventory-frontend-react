@@ -24,6 +24,15 @@ import {
 const MAX_SHOWN_ERRORS = 5;
 
 /**
+ * error code ที่ backend ใช้เมื่อเรียก Carmen 4 ไม่สำเร็จ — 502 ที่ message ปลอดภัยจะโชว์
+ *
+ * ปกติ `userFacingServerMessage` ปิด 5xx ทั้งหมดเพราะอาจหลุด internal detail แต่เคสนี้
+ * backend ประกอบข้อความเองจากสถานะที่ปลายทางตอบเท่านั้น (จงใจไม่แนบ response body)
+ * และมันคือข้อมูลชิ้นเดียวที่บอกผู้ใช้ได้ว่าต้องไปแก้ที่ token/การตั้งค่า interface
+ */
+const INTERFACE_REQUEST_FAILED = "CHART_OF_ACCOUNTS_INTERFACE_REQUEST_FAILED";
+
+/**
  * ปุ่มดึงผังบัญชีจาก Carmen GL — ขึ้นเฉพาะ BU ที่มีสิทธิ์ interface นั้นจริง
  *
  * ซ่อนทั้งปุ่มเมื่อ entitlement ไม่ใช่ `entitled` (รวมถึง `expired`) เพราะ BU ที่ไม่ได้ซื้อ
@@ -59,10 +68,15 @@ export function CoaImportCarmenGlButton() {
 
   const showError = (error: ApiError) => {
     const rows = rowErrorsOf(error);
+    // ข้อยกเว้นเฉพาะ error code เดียว — ไม่แตะ `userFacingServerMessage` ซึ่งเป็นของกลาง
+    const upstreamMessage =
+      error.appCode === INTERFACE_REQUEST_FAILED ? error.serverMessage : undefined;
     toast.error(t("failed"), {
-      description: rows.length
-        ? rows.join("\n")
-        : (error.userFacingServerMessage ?? t("failedDesc")),
+      description:
+        (rows.length ? rows.join("\n") : undefined) ??
+        upstreamMessage ??
+        error.userFacingServerMessage ??
+        t("failedDesc"),
     });
   };
 
