@@ -135,7 +135,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
         </span>
         {isHod && !isLast && (
           <Crown
-            className="text-muted-foreground size-3 shrink-0"
+            className="text-warning-ink size-3.5 shrink-0"
             aria-label={t("isHod")}
           />
         )}
