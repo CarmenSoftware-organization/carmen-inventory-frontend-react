@@ -2,17 +2,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import { auditColumns, statusColumn } from "@/components/ui/data-grid/columns";
 import type { Cuisine } from "@/types/cuisine";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
-import {
-  CUISINE_REGION_CONFIG,
-  CUISINE_REGION_LABEL_KEY,
-} from "@/constant/cuisine";
+import { CUISINE_REGION_LABEL_KEY } from "@/constant/cuisine";
 
 interface UseCuisineTableOptions {
   cuisines: Cuisine[];
@@ -59,25 +55,15 @@ export function useCuisineTable({
     {
       accessorKey: "region",
       header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={tfl("region")}
-          className="justify-center"
-        />
+        <DataGridColumnHeader column={column} title={tfl("region")} />
       ),
       cell: ({ row }) => {
         const region = row.getValue("region") as string;
-        const config = CUISINE_REGION_CONFIG[region];
-        return config ? (
-          <Badge size="sm" className={config.className}>
-            {t(CUISINE_REGION_LABEL_KEY[region])}
-          </Badge>
-        ) : (
-          region
-        );
+        const labelKey = CUISINE_REGION_LABEL_KEY[region];
+        return labelKey ? t(labelKey) : region;
       },
       size: 150,
-      meta: { headerTitle: tfl("region"), cellClassName: "text-center" },
+      meta: { headerTitle: tfl("region") },
     },
     // Status ก่อน created/updated (hideStatus:true กัน useConfigTable inject ซ้ำ)
     statusColumn<Cuisine>(),
