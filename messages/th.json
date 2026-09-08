@@ -1326,6 +1326,16 @@
         "balance_sheet": "งบแสดงฐานะการเงิน",
         "income_statement": "งบกำไรขาดทุน",
         "statistic": "สถิติ"
+      },
+      "importCarmenGl": {
+        "action": "นำเข้าจาก Carmen GL",
+        "importing": "กำลังนำเข้า…",
+        "confirmTitle": "นำเข้าผังบัญชีจาก Carmen GL?",
+        "confirmDesc": "ระบบจะดึงผังบัญชีจาก interface Carmen GL ที่ตั้งค่าไว้ของหน่วยธุรกิจนี้ แล้วเขียนในทรานแซกชันเดียวแบบทั้งหมดหรือไม่เขียนเลย การจัดการรหัสซ้ำและรหัสที่มีเฉพาะในระบบนี้ เป็นไปตามนโยบายการซิงก์ในหน้าตั้งค่า interface",
+        "success": "นำเข้าผังบัญชีแล้ว",
+        "summary": "เพิ่ม {created} · แก้ไข {updated} · ข้าม {skipped} · ลบ {deleted}",
+        "failed": "นำเข้าไม่สำเร็จ",
+        "failedDesc": "นำเข้าผังบัญชีไม่สำเร็จ ไม่มีการเปลี่ยนแปลงข้อมูล"
       }
     },
     "accountMapping": {
@@ -2049,7 +2059,21 @@
           "options": "ตัวเลือก",
           "optionsDesc": "การจับคู่บัญชีและการส่งข้อมูลไปยัง GL",
           "setAccountMappingAllItems": "ตั้งค่าการจับคู่บัญชีให้ทุกรายการ",
-          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL"
+          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL",
+          "syncPolicy": "การซิงก์ผังบัญชี",
+          "syncPolicyDesc": "กำหนดว่าการนำเข้าจะปรับข้อมูลของ Carmen 4 เข้ากับผังบัญชีที่นี่อย่างไร มีผลทั้งกับปุ่มนำเข้าในหน้าผังบัญชีและการรันตามกำหนดเวลา",
+          "onDuplicate": "เมื่อรหัสมีทั้งสองฝั่ง",
+          "onDuplicateOption": {
+            "skip": "คงของเดิมไว้",
+            "upsert": "เขียนทับด้วยค่าจาก Carmen 4",
+            "error": "ยกเลิกการนำเข้าทั้งชุด"
+          },
+          "onLocalOnly": "รหัสที่มีเฉพาะในระบบนี้",
+          "onLocalOnlyOption": {
+            "keep": "เก็บไว้",
+            "delete": "ลบออก"
+          },
+          "authorizeTokenHint": "ต้องใส่ scheme นำหน้าด้วย เช่น “direct <token>” — ค่านี้ถูกส่งเป็น Authorization header ตรง ๆ ทั้งก้อน — ไม่แตะช่องนี้ = ใช้ค่าเดิมที่บันทึกไว้"
         }
       },
       "pos": {
@@ -2086,7 +2110,9 @@
         "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
         "postCityLedger": "ดึงรายการ City Ledger",
         "postCreditCard": "ดึงรายการบัตรเครดิต"
-      }
+      },
+      "showSecret": "แสดง",
+      "hideSecret": "ซ่อน"
     },
     "emailProfile": {
       "title": "โปรไฟล์อีเมล",

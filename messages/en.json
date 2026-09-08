@@ -1326,6 +1326,16 @@
         "balance_sheet": "Balance sheet",
         "income_statement": "Income statement",
         "statistic": "Statistic"
+      },
+      "importCarmenGl": {
+        "action": "Import from Carmen GL",
+        "importing": "Importing…",
+        "confirmTitle": "Import chart of accounts from Carmen GL?",
+        "confirmDesc": "Accounts are pulled from the Carmen GL interface configured for this business unit and written in one all-or-nothing transaction. How duplicate codes and codes that exist only here are treated comes from the sync policy on the interface settings page.",
+        "success": "Chart of accounts imported",
+        "summary": "Created {created}, updated {updated}, skipped {skipped}, deleted {deleted}",
+        "failed": "Import failed",
+        "failedDesc": "Could not import the chart of accounts. Nothing was changed."
       }
     },
     "accountMapping": {
@@ -2049,7 +2059,21 @@
           "options": "Options",
           "optionsDesc": "Account mapping and GL posting behavior.",
           "setAccountMappingAllItems": "Set account mapping for all items",
-          "allowPostingTransferToGl": "Allow posting the transfer to GL"
+          "allowPostingTransferToGl": "Allow posting the transfer to GL",
+          "syncPolicy": "Chart of accounts sync",
+          "syncPolicyDesc": "How an import reconciles Carmen 4 with the accounts here. Applies both to the Import button on the chart of accounts page and to scheduled runs.",
+          "onDuplicate": "When a code exists on both sides",
+          "onDuplicateOption": {
+            "skip": "Keep ours",
+            "upsert": "Overwrite with Carmen 4",
+            "error": "Cancel the whole import"
+          },
+          "onLocalOnly": "Codes that exist only here",
+          "onLocalOnlyOption": {
+            "keep": "Keep them",
+            "delete": "Delete them"
+          },
+          "authorizeTokenHint": "Include the scheme prefix, e.g. “direct <token>” — the value is sent as the Authorization header verbatim. Leave untouched to keep the stored key."
         }
       },
       "pos": {
@@ -2086,7 +2110,9 @@
         "postingDesc": "Which postings Carmen pulls from the PMS.",
         "postCityLedger": "Post city ledger",
         "postCreditCard": "Post credit card"
-      }
+      },
+      "showSecret": "Show",
+      "hideSecret": "Hide"
     },
     "emailProfile": {
       "title": "Email Profiles",

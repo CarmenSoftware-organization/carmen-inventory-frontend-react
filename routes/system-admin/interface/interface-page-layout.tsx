@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useParams } from "react-router";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Pencil, Save, X } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
-import { useInterfaceEntitlement } from "./use-interface-entitlement";
+import { useInterfaceEntitlement } from "@/hooks/use-interface-entitlement";
 
 /**
  * โครงหน้าที่ทุก interface form ใช้ร่วมกัน — header, ปุ่ม Save, skeleton, ErrorState
@@ -16,9 +18,12 @@ import { useInterfaceEntitlement } from "./use-interface-entitlement";
  * layout ถือ form state เพราะจะต้องมี generic schema ซึ่งทำให้ interface ที่หน้าตา
  * ต่างกัน (เช่นมี mapping table) ใส่เพิ่มไม่ได้
  *
- * guard อยู่ที่นี่ไม่ใช่ในแต่ละ form เพื่อไม่ให้ก๊อปโค้ดเดียวกันสามรอบ ต่างจาก
- * `default-setting` ตรงที่หน้านี้ไม่มีปุ่ม Cancel (แก้ได้ตลอด ไม่มีโหมด view/edit)
- * จึงใช้แค่ `useNavigationGuard` ไม่ต้องใช้ `useDiscardConfirm`
+ * guard อยู่ที่นี่ไม่ใช่ในแต่ละ form เพื่อไม่ให้ก๊อปโค้ดเดียวกันสามรอบ
+ *
+ * **โหมด view/edit อยู่ที่นี่ที่เดียวเช่นกัน** — เปิดหน้ามาเป็นโหมดอ่าน กด Edit ถึงแก้ได้
+ * การปิดช่องกรอกใช้ `<fieldset disabled>` ครอบ children แทนที่จะเจาะ prop `readOnly`
+ * ทะลุลงไปทุก field (มีราว 25 ช่องกระจายใน 4 ฟอร์ม) — fieldset ปิด input/select/switch
+ * ที่อยู่ข้างในให้หมดในทีเดียว รวมถึง Radix Select/Switch ที่ render เป็น <button>
  *
  * resolve entitlement เองที่นี่แทนที่จะรับ prop เข้ามา — ทุก brand form (4 ไฟล์) mount
  * ผ่านตัวนี้ตัวเดียว จึงล็อกจุดเดียวครอบทุก brand ได้โดยไม่ต้องเจาะ prop `readOnly` ทะลุ
@@ -47,6 +52,7 @@ export function InterfacePageLayout({
   onRetry,
   errorMessage,
   saveLabel,
+  onCancel,
   children,
 }: {
   readonly title: string;
@@ -58,9 +64,16 @@ export function InterfacePageLayout({
   readonly isDirty: boolean;
   readonly onRetry: () => void;
   readonly errorMessage: string;
+  /** คืนค่าฟอร์มเป็นค่าที่บันทึกไว้ (ปกติ `form.reset(...)`) — เรียกเมื่อกด Cancel */
+  readonly onCancel: () => void;
   readonly saveLabel: string;
   readonly children: React.ReactNode;
 }) {
+  const tc = useTranslations("common");
+  // เปิดหน้ามาเป็นโหมดอ่านเสมอ — การตั้งค่า interface เป็นของที่คนเข้ามาดูบ่อยกว่าแก้
+  // และแก้พลาดแล้วทำให้การเชื่อมต่อล่มทั้ง BU
+  const [isEditing, setIsEditing] = useState(false);
+
   // แก้ค้างแล้วกดลิงก์/กด back → ถามก่อนทิ้ง
   // ไม่ต้องกัน `!isSaving`: ช่วงที่ save กำลังวิ่งคือช่วงที่เสี่ยงเสียงานที่สุด ต้องกันด้วย
   // และพอ save สำเร็จ form.reset ทำให้ isDirty เป็น false เองอยู่แล้ว (ตาม default-setting)
@@ -91,19 +104,49 @@ export function InterfacePageLayout({
         </div>
         {!isError && !isLoading && (
           <div className="flex shrink-0 items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              onClick={guardedSave}
-              disabled={isSaving || isExpired}
-            >
-              {isSaving ? (
-                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-              ) : (
-                <Save className="size-3.5" aria-hidden="true" />
-              )}
-              {saveLabel}
-            </Button>
+            {isEditing ? (
+              <>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    onCancel();
+                    setIsEditing(false);
+                  }}
+                  disabled={isSaving}
+                >
+                  <X className="size-3.5" aria-hidden="true" />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={guardedSave}
+                  disabled={isSaving || isExpired}
+                >
+                  {isSaving ? (
+                    <Loader2
+                      className="size-3.5 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Save className="size-3.5" aria-hidden="true" />
+                  )}
+                  {saveLabel}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                disabled={isExpired}
+              >
+                <Pencil className="size-3.5" aria-hidden="true" />
+                {tc("edit")}
+              </Button>
+            )}
           </div>
         )}
       </header>
@@ -121,7 +164,13 @@ export function InterfacePageLayout({
       )}
 
       {!isError && !isLoading && (
-        <form onSubmit={guardedSave}>{children}</form>
+        <form onSubmit={guardedSave}>
+          {/* `min-w-0` เพราะ fieldset ตั้ง min-width เป็น min-content เอง ซึ่งทำให้
+              grid ข้างในล้นออกนอกกรอบเมื่อจอแคบ */}
+          <fieldset disabled={!isEditing} className="min-w-0 border-0 p-0">
+            {children}
+          </fieldset>
+        </form>
       )}
 
       <DiscardDialog
