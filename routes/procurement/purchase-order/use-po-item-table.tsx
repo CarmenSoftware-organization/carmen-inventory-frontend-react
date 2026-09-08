@@ -465,6 +465,7 @@ export function usePoItemTable({
       },
     }));
   }, [
+    PO_COL,
     form,
     itemFields,
     disabled,
@@ -481,6 +482,7 @@ export function usePoItemTable({
     t,
     registry,
     showAction,
+    showActionCol,
   ]);
 
   return useReactTable({

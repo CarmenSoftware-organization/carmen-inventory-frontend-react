@@ -260,7 +260,7 @@ export default function PoComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [viewMode, stages, vendorOptions, vendorData, t, tc],
+    [viewMode, stages, vendorOptions, vendorData, handleViewModeChange, t, tc],
   );
 
   const lf = useListFilters({
