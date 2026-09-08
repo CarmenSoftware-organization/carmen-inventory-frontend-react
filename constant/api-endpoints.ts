@@ -57,6 +57,13 @@ export const API_ENDPOINTS = {
   /** ผังบัญชีของ BU — ชื่อ resource ฝั่ง backend คือ chart-of-accounts */
   CHART_OF_ACCOUNTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/chart-of-accounts`,
+  /**
+   * ดึงผังบัญชีจาก Carmen 4 ตามคอนฟิก `interface_accounting_carmen_gl`
+   * — backend เขียนแบบ all-or-nothing และตัดสินเรื่องรหัสซ้ำ/รหัสที่มีเฉพาะฝั่งเรา
+   * จาก `sync_policy` ในคอนฟิกนั้น ไม่ใช่จาก payload ของคำขอ
+   */
+  CHART_OF_ACCOUNTS_IMPORT_CARMEN_GL: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/chart-of-accounts/import-from-interface/carmen-gl`,
   CN_REASONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>

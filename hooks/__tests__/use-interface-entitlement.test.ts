@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interfaceEntitlement } from "./use-interface-entitlement";
+import { interfaceEntitlement } from "../use-interface-entitlement";
 
 const FULL_POS = ["interface", "interface.pos", "interface.pos.micros"];
 

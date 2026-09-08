@@ -5,7 +5,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
-import { useInterfaceEntitlement } from "./use-interface-entitlement";
+import { useInterfaceEntitlement } from "@/hooks/use-interface-entitlement";
 
 /**
  * โครงหน้าที่ทุก interface form ใช้ร่วมกัน — header, ปุ่ม Save, skeleton, ErrorState
