@@ -3,7 +3,7 @@ import type { TranslationFn } from "@/lib/i18n-schema";
 import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 /**
  * สร้าง Zod schema สำหรับฟอร์มรหัสบัญชี พร้อมข้อความแปลจาก i18n
@@ -11,7 +11,7 @@ import {
  * @param tf - ฟังก์ชันแปลชื่อ field
  * @returns Zod schema สำหรับตรวจสอบฟอร์มรหัสบัญชี
  * @example
- * // route: /config/chart-of-account (dialog)
+ * // route: /config/chart-of-accounts (dialog)
  * const schema = createCoaSchema(tv, tfl);
  */
 export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {

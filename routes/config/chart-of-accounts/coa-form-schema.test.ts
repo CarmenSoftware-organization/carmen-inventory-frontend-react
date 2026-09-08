@@ -3,7 +3,7 @@ import { createCoaSchema } from "./coa-form-schema";
 import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 const tv = ((k: string) => k) as never;
 const tf = ((k: string) => k) as never;

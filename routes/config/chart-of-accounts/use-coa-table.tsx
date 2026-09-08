@@ -8,7 +8,7 @@ import {
   columnSkeletons,
   statusColumn,
 } from "@/components/ui/data-grid/columns";
-import type { ChartOfAccount } from "@/types/chart-of-account";
+import type { ChartOfAccount } from "@/types/chart-of-accounts";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
@@ -28,7 +28,7 @@ interface UseCoaTableOptions {
  * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
  * @returns TanStack table instance
  * @example
- * // route: /config/chart-of-account
+ * // route: /config/chart-of-accounts
  * const { table } = useCoaTable({ data, ... });
  */
 export function useCoaTable({
@@ -39,7 +39,7 @@ export function useCoaTable({
   onEdit,
   onDelete,
 }: UseCoaTableOptions) {
-  const t = useTranslations("config.chartOfAccount");
+  const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 

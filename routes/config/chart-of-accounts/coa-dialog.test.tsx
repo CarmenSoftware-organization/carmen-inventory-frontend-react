@@ -9,7 +9,7 @@ import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
   type ChartOfAccount,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 const createMutate = vi.fn();
 const updateMutate = vi.fn();

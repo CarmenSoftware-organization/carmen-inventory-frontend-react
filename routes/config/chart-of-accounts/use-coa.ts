@@ -4,7 +4,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type {
   ChartOfAccount,
   CreateChartOfAccountDto,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 /**
  * ผังบัญชีของ BU — `GET/POST/PATCH/DELETE /api/config/{bu}/chart-of-accounts`
