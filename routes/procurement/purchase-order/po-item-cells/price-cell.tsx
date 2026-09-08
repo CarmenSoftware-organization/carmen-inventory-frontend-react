@@ -1,0 +1,72 @@
+import { memo } from "react";
+import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
+import { InputAmount } from "@/components/ui/input/input-amount";
+import { formatCurrency } from "@/lib/currency-utils";
+import { cn } from "@/lib/utils";
+import type { PoFormValues } from "../po-form-schema";
+
+interface CellProps {
+  readonly form: UseFormReturn<PoFormValues>;
+  readonly index: number;
+  readonly disabled: boolean;
+  readonly readOnly: boolean;
+}
+
+/** ราคาในโหมดอ่าน — แยกเป็นคอมโพเนนต์ของตัวเองเพื่อกัน `useWatch` ไปโผล่ในโหมดแก้ */
+const PricePlain = memo(function PricePlain({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PoFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const price =
+    useWatch({ control: form.control, name: `items.${index}.price` }) ?? 0;
+  return <span className="tabular-nums">{formatCurrency(price)}</span>;
+});
+
+export const PriceCell = memo(function PriceCell({
+  form,
+  index,
+  disabled,
+  readOnly,
+  onCommit,
+}: CellProps & {
+  /** กรอกราคาเสร็จ (Enter) — ไปเปิดตัวเลือกคลังต่อ */
+  readonly onCommit?: () => void;
+}) {
+  "use no memo";
+  if (disabled || readOnly) {
+    return <PricePlain form={form} index={index} />;
+  }
+  return (
+    <Controller
+      control={form.control}
+      name={`items.${index}.price`}
+      render={({ field, fieldState }) => (
+        <InputAmount
+          // name ให้ `fieldFocusRef` หาช่องนี้เจอ — lookup สินค้าเด้งโฟกัสมาที่นี่
+          // ต่อหลังเลือกสินค้าเสร็จ
+          name={field.name}
+          // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
+          className={cn(
+            "h-8 w-full text-right text-xs",
+            fieldState.error && "pl-7",
+          )}
+          error={fieldState.error?.message}
+          errorIconAlign="left"
+          // Enter = กรอกเสร็จแล้ว ไปเลือกคลังต่อ · preventDefault กัน Enter ใน
+          // ฟอร์มไปกด submit แทน (ทั้งใบยังกรอกไม่ครบด้วยซ้ำ)
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            onCommit?.();
+          }}
+          value={Number(field.value ?? 0)}
+          onValueChange={field.onChange}
+        />
+      )}
+    />
+  );
+});

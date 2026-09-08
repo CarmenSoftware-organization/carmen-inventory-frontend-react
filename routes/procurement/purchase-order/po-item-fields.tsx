@@ -31,7 +31,7 @@ import {
   AddLocationRegistryContext,
   type AddLocationRegistry,
 } from "./po-locations-add-context";
-import { PoItemComputedSync } from "./po-item-table";
+import { PoItemComputedSync } from "./po-item-cells";
 import { getDeleteDescription } from "@/lib/form-utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 

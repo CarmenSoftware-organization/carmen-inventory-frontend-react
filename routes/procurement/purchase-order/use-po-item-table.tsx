@@ -22,8 +22,8 @@ import {
   UnitCol,
   RecSummaryCell,
   ComputedPricingCell,
-} from "./po-item-table";
-import { PriceCell, ProductHeaderCell } from "./po-items-grid-cells";
+} from "./po-item-cells";
+import { PriceCell, ProductHeaderCell } from "./po-item-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
 import { useAddLocationRegistry } from "./po-locations-add-context";
 import { poItemCols } from "./po-item-columns";
