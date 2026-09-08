@@ -3,6 +3,8 @@ import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
 import { FieldInput } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import { EyeBrow } from "@/components/ui/eye-brow";
+import { formatCurrency } from "@/lib/currency-utils";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -34,29 +36,22 @@ export function RecipeCostMargins({
 
   return (
     <SettingSection plain title={t("margins")} description={t("marginsDesc")}>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <MarginTile
           label={t("grossMargin")}
-          value={`฿${grossMargin.toFixed(2)}`}
+          value={`฿${formatCurrency(grossMargin)}`}
           sub={`${grossMarginPct.toFixed(2)}%`}
-          tone={grossMargin >= 0 ? "success" : "destructive"}
+          isNegative={grossMargin < 0}
         />
         <MarginTile
           label={t("foodCost")}
           value={`${foodPct.toFixed(2)}%`}
           sub={`${t("targetFoodCost")} ${targetPct.toFixed(0)}%`}
-          tone={onTarget ? "success" : "destructive"}
+          isNegative={!onTarget}
         />
       </div>
 
-      <div
-        className={cn(
-          "mt-3 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold",
-          onTarget
-            ? "bg-muted text-foreground"
-            : "bg-destructive/10 text-destructive",
-        )}
-      >
+      <div className="bg-muted text-foreground mt-3 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold">
         <span
           className={cn(
             "size-1.5 rounded-full",
@@ -83,7 +78,8 @@ export function RecipeCostMargins({
             min={0}
             max={100}
             disabled={isDisabled}
-            className="h-7 pr-6 text-right text-xs"
+            size="sm"
+            className="pr-6 text-right text-xs"
             aria-label={t("targetFoodCost")}
             error={errors.target_food_cost_percentage?.message}
             errorIconAlign="left"
@@ -102,29 +98,25 @@ function MarginTile({
   label,
   value,
   sub,
-  tone,
+  isNegative,
 }: {
   readonly label: string;
   readonly value: string;
   readonly sub: string;
-  readonly tone: "success" | "destructive";
+  readonly isNegative: boolean;
 }) {
   return (
-    <div className="bg-muted/40 rounded-md border p-3">
-      <div className="text-muted-foreground text-micro-legal font-bold tracking-[0.14em] uppercase">
-        {label}
-      </div>
+    <div>
+      <EyeBrow>{label}</EyeBrow>
       <div
         className={cn(
-          "mt-1 text-xl font-semibold tracking-tight tabular-nums",
-          tone === "success" ? "text-foreground" : "text-destructive",
+          "mt-0.5 text-lg font-semibold tracking-tight tabular-nums",
+          isNegative ? "text-destructive" : "text-foreground",
         )}
       >
         {value}
       </div>
-      <div className="text-muted-foreground text-micro font-semibold">
-        {sub}
-      </div>
+      <div className="text-muted-foreground text-micro tabular-nums">{sub}</div>
     </div>
   );
 }

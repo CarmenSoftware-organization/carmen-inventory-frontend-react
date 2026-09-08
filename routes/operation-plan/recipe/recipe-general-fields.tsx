@@ -47,6 +47,7 @@ export function RecipeGeneralFields({
             </FieldLabel>
             <FieldInput
               id="recipe-code"
+              size="sm"
               placeholder={t("codePlaceholder")}
               disabled={isDisabled}
               maxLength={10}
@@ -199,7 +200,8 @@ function NumberField({
             type="number"
             inputMode="decimal"
             min={0}
-            className="h-8 text-right tabular-nums"
+            size="sm"
+            className="text-right tabular-nums"
             value={(field.value as number | undefined) ?? 0}
             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
             disabled={disabled}

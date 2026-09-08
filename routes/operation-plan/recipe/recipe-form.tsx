@@ -42,7 +42,6 @@ interface RecipeFormProps {
 const LIST_PATH = "/operation-plan/recipe";
 
 export function RecipeForm({ recipe }: RecipeFormProps) {
-  "use no memo";
   const t = useTranslations("operationPlan.recipe");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");

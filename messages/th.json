@@ -3015,6 +3015,7 @@
       "noIngredientsYet": "ยังไม่มีส่วนผสม",
       "noIngredientsDesc": "เพิ่มรายการเพื่อเริ่มคำนวณต้นทุน",
       "ingredientsPreviewNote": "พรีวิวเท่านั้น — ยังไม่ได้บันทึกส่วนผสมร่วมกับสูตร",
+      "ingredientLinesTotal": "รวมรายการส่วนผสม (พรีวิว)",
       "ingredientCount": "{count, plural, =0 {ไม่มีส่วนผสม} other {{count} รายการ}}",
       "ingredientName": "ส่วนผสม",
       "qty": "จำนวน",

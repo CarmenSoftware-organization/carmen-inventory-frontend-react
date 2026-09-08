@@ -3,6 +3,8 @@ import { useTranslations } from "use-intl";
 import { Sparkles } from "lucide-react";
 import { FieldInput } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import { EyeBrow } from "@/components/ui/eye-brow";
+import { formatCurrency } from "@/lib/currency-utils";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -37,22 +39,18 @@ export function RecipeCostHero({
       <div className="space-y-4">
         {/* Cost per portion — computed · accent อยู่ที่ตัวเลข */}
         <div>
-          <div className="text-muted-foreground text-micro-legal font-bold tracking-wider uppercase">
-            {t("costPerPortion")}
-          </div>
+          <EyeBrow>{t("costPerPortion")}</EyeBrow>
           <div className="mt-1 flex items-baseline gap-1">
             <span className="text-muted-foreground text-base">฿</span>
             <span className="text-foreground text-3xl font-semibold tracking-tight tabular-nums">
-              {portion.toFixed(2)}
+              {formatCurrency(portion)}
             </span>
           </div>
         </div>
 
         {/* Selling price — input */}
         <div>
-          <div className="text-muted-foreground text-micro-legal font-bold tracking-wider uppercase">
-            {t("sellingPrice")}
-          </div>
+          <EyeBrow>{t("sellingPrice")}</EyeBrow>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="text-muted-foreground text-sm">฿</span>
             <FieldInput
@@ -60,7 +58,8 @@ export function RecipeCostHero({
               inputMode="decimal"
               step="0.01"
               disabled={isDisabled}
-              className="h-9 w-32 text-lg font-semibold tabular-nums"
+              size="sm"
+              className="w-32 text-sm font-semibold tabular-nums"
               placeholder="0.00"
               aria-label={t("sellingPrice")}
               error={errors.selling_price?.message}
@@ -72,7 +71,7 @@ export function RecipeCostHero({
             <div className="bg-muted text-muted-foreground text-micro mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-semibold">
               <Sparkles className="size-2.5" aria-hidden="true" />
               {t("suggestedAtTarget", {
-                price: `฿${suggested.toFixed(2)}`,
+                price: `฿${formatCurrency(suggested)}`,
                 pct: targetPct.toFixed(0),
               })}
             </div>

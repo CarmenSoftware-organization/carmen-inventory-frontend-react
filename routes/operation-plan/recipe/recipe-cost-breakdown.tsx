@@ -3,6 +3,8 @@ import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
 import { FieldInput } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import { EyeBrow } from "@/components/ui/eye-brow";
+import { formatCurrency } from "@/lib/currency-utils";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeCostBreakdownProps {
@@ -72,7 +74,8 @@ export function RecipeCostBreakdown({
               inputMode="decimal"
               step="0.01"
               disabled={isDisabled}
-              className="h-7 w-24 text-right text-xs"
+              size="sm"
+              className="w-24 text-right text-xs"
               aria-label={t("ingredientCost")}
               error={errors.total_ingredient_cost?.message}
               errorIconAlign="left"
@@ -90,7 +93,8 @@ export function RecipeCostBreakdown({
               inputMode="decimal"
               step="0.01"
               disabled={isDisabled}
-              className="h-7 w-24 text-right text-xs"
+              size="sm"
+              className="w-24 text-right text-xs"
               aria-label={t("laborCost")}
               error={errors.labor_cost?.message}
               errorIconAlign="left"
@@ -108,7 +112,8 @@ export function RecipeCostBreakdown({
               inputMode="decimal"
               step="0.01"
               disabled={isDisabled}
-              className="h-7 w-24 text-right text-xs"
+              size="sm"
+              className="w-24 text-right text-xs"
               aria-label={t("overheadCost")}
               error={errors.overhead_cost?.message}
               errorIconAlign="left"
@@ -118,11 +123,11 @@ export function RecipeCostBreakdown({
         />
       </div>
 
-      <div className="border-foreground mt-3 flex items-baseline justify-between border-t-2 pt-3">
-        <span className="text-foreground/80 text-micro-legal font-bold tracking-[0.14em] uppercase">
-          {t("totalRecipeCost")}
+      <div className="mt-3 flex items-baseline justify-between border-t pt-3">
+        <EyeBrow>{t("totalRecipeCost")}</EyeBrow>
+        <span className="text-base font-semibold tabular-nums">
+          ฿{formatCurrency(total)}
         </span>
-        <span className="text-base font-bold">฿{total.toFixed(2)}</span>
       </div>
     </SettingSection>
   );
@@ -142,8 +147,8 @@ function CostRow({
   return (
     <div className="grid grid-cols-[0.5rem_1fr_2.5rem_auto] items-center gap-2">
       <span className={cn("size-2 rounded-sm", color)} aria-hidden="true" />
-      <span className="text-foreground/80 text-xs font-semibold">{label}</span>
-      <span className="text-muted-foreground text-micro text-right font-semibold">
+      <span className="text-foreground text-xs">{label}</span>
+      <span className="text-muted-foreground text-micro text-right tabular-nums">
         {pct.toFixed(0)}%
       </span>
       {input}

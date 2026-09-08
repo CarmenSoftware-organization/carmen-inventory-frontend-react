@@ -3020,6 +3020,7 @@
       "noIngredientsYet": "No ingredients yet",
       "noIngredientsDesc": "Add line items to start cost calculation.",
       "ingredientsPreviewNote": "Preview only — ingredients are not yet persisted with the recipe.",
+      "ingredientLinesTotal": "Ingredient lines (preview)",
       "ingredientCount": "{count, plural, =0 {no ingredients} =1 {1 ingredient} other {{count} ingredients}}",
       "ingredientName": "Ingredient",
       "qty": "Qty",
