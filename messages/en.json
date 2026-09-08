@@ -1710,6 +1710,7 @@
       "description": "Description",
       "ipAddress": "IP Address",
       "searchEntityType": "Search record type...",
+      "searchAction": "Search action...",
       "generalInfo": "General Information",
       "dataChanges": "Data Changes",
       "oldData": "Before",

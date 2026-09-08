@@ -1710,6 +1710,7 @@
       "description": "รายละเอียด",
       "ipAddress": "ที่อยู่ IP",
       "searchEntityType": "ค้นหาประเภทข้อมูล...",
+      "searchAction": "ค้นหาการกระทำ...",
       "generalInfo": "ข้อมูลทั่วไป",
       "dataChanges": "การเปลี่ยนแปลงข้อมูล",
       "oldData": "ก่อนเปลี่ยน",
