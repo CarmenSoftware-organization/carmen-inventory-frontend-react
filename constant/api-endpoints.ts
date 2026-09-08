@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/${key}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
+  APP_CONFIG_TEST_EMAIL_PROFILE: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/app-config/test-email-profile`,
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
@@ -315,6 +317,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_SEND_EMAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/${id}/send-email`,
   PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>
