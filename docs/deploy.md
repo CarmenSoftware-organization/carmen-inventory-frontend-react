@@ -8,8 +8,8 @@ Both share the same model: one immutable build artifact; the per-environment
 **ไม่กระทบการ deploy ทั้งสองทาง** — `deploy-s3.sh` / `deploy-gcs.sh` ตัด `dist/config.json`
 ออกจาก sync และ Docker image ลบทิ้งแล้ว render ใหม่จาก env ตอนรัน สคริปต์ชุดนี้มีไว้สำหรับ
 `bun run preview` ในเครื่องเท่านั้น — **Vercel ไม่ได้ใช้สคริปต์นี้**: `vercel.json` ไม่ได้ตั้ง
-`buildCommand` จึงรัน `bun run build` เปล่า ๆ (= `config.prod.json` เสมอ) ถ้าต้องการ config
-อื่นบน Vercel ต้องตั้ง env var `BUILD_CONFIG_FILE` เองใน Vercel project settings
+`buildCommand` จึงรัน `bun run build` เปล่า ๆ และ clone จาก git **ไม่มี `public/config*.json`
+ติดมาเลย** (gitignore) จึงต้องส่ง config ผ่าน env var `APP_CONFIG_JSON` — ดู §Vercel
 
 ---
 
@@ -136,6 +136,42 @@ Runtime env:
 Endpoints: `/healthz` (used by the image HEALTHCHECK), SPA fallback for all
 non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
 `config.json`.
+
+---
+
+## Vercel — git push to the `vercel` branch
+
+โมเดลเดียวกับ `carmen-platform`: **branch `vercel` เป็น mirror ของ `main`** และ Vercel
+ตั้ง Production Branch เป็น `vercel` — จะ deploy เมื่อสั่งเท่านั้น ไม่ใช่ทุกครั้งที่ merge เข้า main
+
+```bash
+git push origin main:vercel      # deploy production
+```
+
+### ตั้งค่าครั้งเดียวใน Vercel project settings
+
+| ที่ | ค่า |
+|---|---|
+| Settings → Git → Production Branch | `vercel` |
+| Settings → Environment Variables → `APP_CONFIG_JSON` (Production) | เนื้อ JSON ของ `public/config.<env>.json` ทั้งก้อน |
+
+Build/Output ไม่ต้องตั้ง — `vercel.json` ใช้ preset `vite` (`bun run build` → `dist/`)
+และ header/SPA rewrite อยู่ในไฟล์นั้นแล้ว
+
+**`APP_CONFIG_JSON` คือทางเดียวที่ config ไปถึง Vercel ได้** — `public/config*.json` ถูก
+gitignore ทั้งหมด clone ที่ Vercel จึงไม่มีไฟล์ และ `emitBuildConfig()` ใน `vite.config.ts`
+จะ fallback มาอ่าน env var นี้แทน (validate `BACKEND_URL`/`X_APP_ID` แล้ว fail build ทันที
+ถ้า JSON เสียหรือคีย์ขาด — ดีกว่าไปพังเป็นหน้า "Failed to load application configuration"
+ตอน boot) ค่าเป็น JSON ทั้งก้อน ไม่ใช่แยกทีละคีย์ คีย์ใหม่ของ `RuntimeConfig` จึงไม่ต้อง
+ตามเพิ่มตัวแปรใน dashboard:
+
+```json
+{ "BACKEND_URL": "https://backend.example.com", "X_APP_ID": "<app id>", "WS_URL": "wss://backend.example.com/ws", "LICENSE_ENFORCEMENT": true }
+```
+
+**Backend prerequisite** — Vercel ยิง backend ตรง ไม่มี proxy เหมือน Docker: backend ต้อง
+เปิด CORS ให้ origin `*.vercel.app` ที่ใช้ และ `X_APP_ID` ต้องอยู่ใน app-id allowlist ของ
+backend ไม่งั้นได้ 401 แล้วเด้งออกหน้า login
 
 ---
 
