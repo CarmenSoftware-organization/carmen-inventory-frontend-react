@@ -147,17 +147,18 @@ git -C <frontend repo> commit -m "docs: บันทึกสัญญาจร�
 
 - [ ] **Step 1: เพิ่ม `ExportPDF` ใน `service/render/viewer_client.go`**
 
-payload ของ Export/Pdf **ไม่เหมือน** `ViewerRequest` (ตัวพิมพ์เล็ก และ `data` เป็น string)
-จึงต้องมี struct ของตัวเอง ห้ามใช้ `ViewerRequest` ซ้ำ:
+payload ของ Export/Pdf ใช้คีย์ตัวพิมพ์เล็ก (`filename`/`file`/`data`) ต่างจาก `ViewerRequest`
+(`Title`/`Name`/`File`/`Data`) จึงต้องมี struct ของตัวเอง — แต่ **`data` เป็น object เดียวกัน
+ไม่ใช่ JSON string** (ยืนยันด้วยการยิงจริงใน Task A1: string → 500, object → 200 + PDF):
 
 ```go
 // ExportPdfRequest is the payload for the viewer's PDF export endpoint.
-// Field names differ from ViewerRequest on purpose: this endpoint takes
-// lower-case keys and wants `data` as a JSON *string*, not an object.
+// Lower-case keys, unlike ViewerRequest — but `data` is the same object the
+// viewer takes (verified against the live service and its Swagger schema).
 type ExportPdfRequest struct {
-	FileName string `json:"filename"`
-	File     string `json:"file"`
-	Data     string `json:"data"`
+	FileName string         `json:"filename"`
+	File     string         `json:"file"`
+	Data     map[string]any `json:"data"`
 }
 
 // ExportPDF sends template + data to the viewer and returns the rendered PDF bytes.
@@ -229,15 +230,10 @@ func (s *ReportService) ExportReportWithExternalData(
 		fileContent = base64.StdEncoding.EncodeToString([]byte(fileContent))
 	}
 
-	dataJSON, err := json.Marshal(data)
-	if err != nil {
-		return nil, "", fmt.Errorf("marshal export data: %w", err)
-	}
-
 	pdf, err := s.viewerClient.ExportPDF(ctx, &render.ExportPdfRequest{
 		FileName: tmpl.Name,
 		File:     fileContent,
-		Data:     string(dataJSON),
+		Data:     data,
 	})
 	if err != nil {
 		return nil, "", fmt.Errorf("viewer export: %w", err)
@@ -252,7 +248,6 @@ func (s *ReportService) ExportReportWithExternalData(
 }
 ```
 
-ถ้า `encoding/json` ยังไม่ถูก import ในไฟล์นี้ ให้เพิ่ม
 
 - [ ] **Step 3: เพิ่ม route + handler ใน `controller/report_controller.go`**
 

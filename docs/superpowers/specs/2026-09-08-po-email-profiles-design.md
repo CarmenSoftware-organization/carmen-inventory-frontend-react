@@ -188,21 +188,19 @@ manual checklist (ผู้ใช้ตรวจเอง):
   `ExportReportWithExternalData`) และ route ใหม่ใน `report_controller.go`
   เช่น `POST /api/:buCode/report/export-pdf` คืน `application/pdf`
 - gateway เรียกเส้นนี้แล้วเอา byte ไปเป็น attachment
-- **payload ของ Export/Pdf ไม่เหมือน viewer** — viewer ใช้ `{Title, Name, File, Data}`
-  (`Data` เป็น object) แต่ Export/Pdf ใช้ **ตัวพิมพ์เล็กและ `data` เป็น string**:
-
-  ```bash
-  curl -X POST 'https://report.blueledgers.cloud/api/Report/Export/Pdf' \
-    -H 'accept: text/plain' -H 'Content-Type: application/json' \
-    -d '{ "filename": "...", "file": "...", "data": "..." }'
-  ```
-
-  แปลว่าฝั่ง Go ต้อง marshal data เป็น JSON string ก่อนใส่ลงฟิลด์ `data`
-  ใช้ `ViewerRequest` เดิมซ้ำไม่ได้ ต้องมี struct ของตัวเอง
-- **ยังไม่รู้รูป response** — ยิงด้วยค่า `"string"` ปลอมได้ 500 หน้า HTML (ยืนยันว่า
-  route มีจริงและรับ payload รูปนี้ แต่ไม่บอกว่าตอบเป็น PDF byte, base64 หรือ url)
-  **ขั้นแรกของงานส่วนนี้คือ curl ด้วย template + data จริงแล้วดู content-type ที่ได้**
-  ก่อนเขียนโค้ด Go — ถ้าตอบเป็น base64 หรือ url ต้องแตกงานเพิ่ม
+- **สัญญาที่ยืนยันด้วยการยิงจริงแล้ว (2026-09-08)** — คีย์เป็นตัวพิมพ์เล็ก
+  `{ filename, file, data }` แต่ **`data` เป็น object ไม่ใช่ JSON string**
+  (สัญญาที่เคยบันทึกไว้ว่าเป็น string นั้นผิด — ทดสอบแล้ว string → 500, object → 200)
+  ยืนยันซ้ำด้วย Swagger ของ report.blueledgers.cloud เอง: `ReportExportModel.data`
+  มี schema เหมือน `ReportFileModel.data` ของ `/api/Report/Viewer` ทุกตัวอักษร
+  - `file` = **base64 ของ template XML** ค่าเดียวกับฟิลด์ `File` ที่ `ViewerClient.View()`
+    ส่งอยู่แล้ว (ผ่าน `rewriteFormTemplateWithData()` + base64) — ใช้ pipeline เดิมได้เลย
+  - `data` = `map[string]any` เดียวกับ viewer เช่น `{"POHeader": [...], "PODetail": [...]}`
+  - **response = PDF byte ดิบ** `Content-Type: application/pdf` ขึ้นต้น `%PDF-`
+    พร้อม `Content-Disposition` ที่ server เติม `.pdf` ต่อท้ายค่า `filename` ที่ส่งไป
+  - ทดสอบจริงได้ไฟล์ 141,775 bytes ที่เปิดได้ (template "Purchase Order Document")
+  - ข้อจำกัดของการทดสอบ: ยังไม่ได้ลอง template แนวนอนหรือใบที่มีลายเซ็นจริง
+    และ error ฝั่ง viewer ตอบ 500 เปล่า ๆ ไม่มีรายละเอียด (ASP.NET production)
 - **micro-report ต้องขึ้นก่อน gateway** — เป็นอีกรีโปหนึ่ง (Go, deploy แยก) และมีกับดัก
   พอร์ต: อาการ print 500 "fetch failed" คือ micro-report ไม่ได้อยู่ที่ 6015 ไม่ใช่บั๊ก FE
 
