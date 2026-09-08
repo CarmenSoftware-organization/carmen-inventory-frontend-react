@@ -15,7 +15,7 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
 bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/ (config.json = config.prod.json)
-bun run build:{local,dev,uat,prod}   # เหมือน build แต่เลือก public/config.<env>.json → dist/config.json — มีผลกับ `bun run preview` ในเครื่องเท่านั้น (S3/GCS/Docker ใช้ config.json ของ environment เอง; Vercel รัน `bun run build` เปล่า ๆ ไม่ผ่านสคริปต์นี้ — ต้องตั้ง env var `BUILD_CONFIG_FILE` เองถ้าไม่ต้องการ config.prod.json)
+bun run build:{local,dev,uat,prod}   # เหมือน build แต่เลือก public/config.<env>.json → dist/config.json — มีผลกับ `bun run preview` ในเครื่องเท่านั้น (S3/GCS/Docker ใช้ config.json ของ environment เอง; Vercel รัน `bun run build` เปล่า ๆ ไม่ผ่านสคริปต์นี้ และ clone ไม่มี public/config*.json ติดมา — ต้องตั้ง env var `APP_CONFIG_JSON` เป็น JSON ทั้งก้อน, deploy = `git push origin main:vercel`)
 bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
