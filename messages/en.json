@@ -2072,7 +2072,8 @@
           "onLocalOnlyOption": {
             "keep": "Keep them",
             "delete": "Delete them"
-          }
+          },
+          "authorizeTokenHint": "Paste the token only — do not include the “direct ” prefix, the server adds it. Leave untouched to keep the stored key."
         }
       },
       "pos": {
