@@ -15,7 +15,10 @@ export function useEmailProfiles() {
   const upsert = useUpsertAppConfig();
   const test = useApiMutation<{ profile_id: string }>({
     mutationFn: (data, buCode) =>
-      httpClient.post(API_ENDPOINTS.APP_CONFIG_TEST_EMAIL_PROFILE(buCode), data),
+      httpClient.post(
+        API_ENDPOINTS.APP_CONFIG_TEST_EMAIL_PROFILE(buCode),
+        data,
+      ),
     invalidateKeys: [],
     errorMessage: "Test email failed",
   });
