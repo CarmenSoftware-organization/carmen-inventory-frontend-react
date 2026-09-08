@@ -83,9 +83,9 @@ export const router = createBrowserRouter([
             children: [
               { index: true, lazy: () => import("./config/config.route") },
               {
-                path: "chart-of-account",
+                path: "chart-of-accounts",
                 lazy: () =>
-                  import("./config/chart-of-account/chart-of-account.route"),
+                  import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
                 path: "account-mapping",

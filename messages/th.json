@@ -1306,7 +1306,7 @@
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบเหตุผลใบลดหนี้ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "namePlaceholder": "เช่น สินค้าเสียหาย"
     },
-    "chartOfAccount": {
+    "chartOfAccounts": {
       "entity": "ผังบัญชี",
       "title": "ผังบัญชี",
       "desc": "ผังบัญชีที่ระบบบัญชีของคุณใช้ลงรายการ",
@@ -4439,7 +4439,7 @@
     "setting": "ตั้งค่า",
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
-    "chartOfAccount": "ผังบัญชี",
+    "chartOfAccounts": "ผังบัญชี",
     "accountMapping": "การผูกบัญชี"
   },
   "commentSheet": {

@@ -5,7 +5,7 @@ import { COA_FILTER_FIELDS } from "./coa-filter-fields";
 import {
   CHART_OF_ACCOUNT_TYPES,
   ACCOUNT_NATURES,
-} from "@/types/chart-of-account";
+} from "@/types/chart-of-accounts";
 
 const field = (key: string) => COA_FILTER_FIELDS.find((f) => f.key === key);
 const optionsOf = (key: string) => {

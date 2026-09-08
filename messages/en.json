@@ -1306,9 +1306,9 @@
       "deleteConfirm": "Are you sure you want to delete credit note reason \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Damaged Goods"
     },
-    "chartOfAccount": {
+    "chartOfAccounts": {
       "entity": "Chart of Account",
-      "title": "Chart of Account",
+      "title": "Chart of Accounts",
       "desc": "The accounts your accounting system posts to.",
       "add": "Add Account",
       "deleteTitle": "Delete Account",
@@ -4449,7 +4449,7 @@
     "setting": "Settings",
     "notifications": "Notifications",
     "fromPriceList": "From price list",
-    "chartOfAccount": "Chart of Account",
+    "chartOfAccounts": "Chart of Accounts",
     "accountMapping": "Account Mapping"
   },
   "commentSheet": {
