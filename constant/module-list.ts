@@ -57,6 +57,7 @@ import {
   Database,
   Award,
   Leaf,
+  Mail,
 } from "lucide-react";
 
 export interface ModuleDto {
@@ -632,6 +633,13 @@ export const moduleList: ModuleDto[] = [
         path: "/system-admin/interface",
         licenseFeature: "configuration.app_config", // config:app-config
         icon: Cable,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
+        name: "emailProfile",
+        path: "/system-admin/email-profile",
+        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        icon: Mail,
         permission: PERMISSIONS.system_configuration.view,
       },
       {

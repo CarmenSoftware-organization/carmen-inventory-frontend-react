@@ -1,0 +1,335 @@
+import { useEffect } from "react";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "use-intl";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import type { EmailProfile } from "@/types/email-profile";
+import {
+  emailProfileSchema,
+  fromEmailProfileFormValues,
+  toEmailProfileFormValues,
+  type EmailProfileFormValues,
+} from "./email-profile-schema";
+
+interface EmailProfileDialogProps {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  /** โปรไฟล์ที่กำลังแก้ไข — ไม่ใส่/null = โหมดสร้างใหม่ */
+  readonly profile?: EmailProfile | null;
+  /** คืนโปรไฟล์ที่แก้เสร็จแล้วหนึ่งรายการ — ตัวเรียกเป็นคนประกอบเข้ากับ `profiles[]` ทั้งชุด */
+  readonly onSave: (profile: EmailProfile) => void;
+  readonly isSaving: boolean;
+}
+
+/**
+ * Dialog สร้าง/แก้ไขโปรไฟล์อีเมลผู้ส่งหนึ่งรายการ
+ *
+ * รูปแบบฟอร์มลอกจาก `config-email-component.tsx` เดิม (react-hook-form + zodResolver +
+ * `Field`/`FieldLabel`/`FieldError` + `scrollToFirstInvalidField`) แต่เป็น dialog ต่อโปรไฟล์
+ *
+ * **ไม่ถือ array `profiles[]` ทั้งชุด** — คืนแค่โปรไฟล์เดียวที่แก้เสร็จผ่าน `onSave`
+ * ผู้เรียก (`email-profile.route.tsx`) เป็นคนประกอบเข้ากับ array เดิมก่อนบันทึกจริง
+ * เพราะต้องคุมลำดับให้ตรงกับของเดิมเป๊ะ (backend จับคู่รหัสผ่านเดิมตามตำแหน่งใน array
+ * ไม่ใช่ตาม id) — รวม logic นั้นไว้จุดเดียวกันความเสี่ยงเรียงผิดได้ดีกว่าแยกไว้สองที่
+ *
+ * @param props.profile - โปรไฟล์ที่จะแก้ไข (ไม่ใส่ = สร้างใหม่)
+ * @param props.onSave - callback รับโปรไฟล์ที่แก้เสร็จแล้ว
+ * @returns React element ของ Dialog
+ */
+export function EmailProfileDialog({
+  open,
+  onOpenChange,
+  profile,
+  onSave,
+  isSaving,
+}: EmailProfileDialogProps) {
+  const isEdit = !!profile;
+  const t = useTranslations("systemAdmin.emailProfile");
+  const tc = useTranslations("common");
+  const tf = useTranslations("form");
+  const tfl = useTranslations("field");
+
+  const form = useForm<EmailProfileFormValues>({
+    resolver: zodResolver(
+      emailProfileSchema,
+    ) as Resolver<EmailProfileFormValues>,
+    defaultValues: toEmailProfileFormValues(),
+  });
+
+  useEffect(() => {
+    if (open) {
+      form.reset(toEmailProfileFormValues(profile ?? undefined));
+    }
+  }, [open, profile, form]);
+
+  const submit = form.handleSubmit(
+    (values) => {
+      onSave(fromEmailProfileFormValues(values, profile ?? undefined));
+    },
+    () => scrollToFirstInvalidField(),
+  );
+
+  const enabled = form.watch("enabled");
+  const secure = form.watch("smtp_secure");
+
+  return (
+    <Dialog open={open} onOpenChange={isSaving ? undefined : onOpenChange}>
+      <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-2xl">
+        <DialogHeader className="gap-0 pb-1">
+          <DialogTitle className="text-sm">
+            {isEdit
+              ? tf("editTitle", { entity: t("entity") })
+              : tf("addTitle", { entity: t("entity") })}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={submit} className="space-y-5">
+          <FieldGroup className="gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field data-invalid={!!form.formState.errors.name}>
+                <FieldLabel htmlFor="ep-name" required>
+                  {tfl("name")}
+                </FieldLabel>
+                <Input
+                  id="ep-name"
+                  {...form.register("name")}
+                  placeholder={t("dialog.namePlaceholder")}
+                  disabled={isSaving}
+                />
+                <FieldError>{form.formState.errors.name?.message}</FieldError>
+              </Field>
+              <Field orientation="horizontal">
+                <FieldLabel htmlFor="ep-enabled">
+                  {t("dialog.enabled")}
+                </FieldLabel>
+                <Switch
+                  id="ep-enabled"
+                  checked={enabled}
+                  onCheckedChange={(v) =>
+                    form.setValue("enabled", v, { shouldDirty: true })
+                  }
+                  disabled={isSaving}
+                />
+              </Field>
+            </div>
+          </FieldGroup>
+
+          <div className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              {t("dialog.smtpSection")}
+            </h3>
+            <FieldGroup className="gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field data-invalid={!!form.formState.errors.smtp_host}>
+                  <FieldLabel htmlFor="ep-host" required>
+                    {t("dialog.host")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-host"
+                    {...form.register("smtp_host")}
+                    placeholder="smtp.gmail.com"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_host?.message}
+                  </FieldError>
+                </Field>
+                <Field data-invalid={!!form.formState.errors.smtp_port}>
+                  <FieldLabel htmlFor="ep-port" required>
+                    {t("dialog.port")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-port"
+                    {...form.register("smtp_port")}
+                    type="number"
+                    placeholder="587"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_port?.message}
+                  </FieldError>
+                </Field>
+                <Field data-invalid={!!form.formState.errors.smtp_username}>
+                  <FieldLabel htmlFor="ep-username" required>
+                    {tfl("username")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-username"
+                    {...form.register("smtp_username")}
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_username?.message}
+                  </FieldError>
+                </Field>
+                <Field data-invalid={!!form.formState.errors.smtp_password}>
+                  <FieldLabel htmlFor="ep-password" required>
+                    {t("dialog.password")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-password"
+                    {...form.register("smtp_password")}
+                    type="password"
+                    disabled={isSaving}
+                  />
+                  {isEdit && (
+                    <p className="text-muted-foreground text-micro">
+                      {t("dialog.passwordHint")}
+                    </p>
+                  )}
+                  <FieldError>
+                    {form.formState.errors.smtp_password?.message}
+                  </FieldError>
+                </Field>
+                <Field orientation="horizontal">
+                  <FieldLabel htmlFor="ep-secure">
+                    {t("dialog.secure")}
+                  </FieldLabel>
+                  <Switch
+                    id="ep-secure"
+                    checked={secure}
+                    onCheckedChange={(v) =>
+                      form.setValue("smtp_secure", v, { shouldDirty: true })
+                    }
+                    disabled={isSaving}
+                  />
+                </Field>
+              </div>
+            </FieldGroup>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              {t("dialog.senderSection")}
+            </h3>
+            <FieldGroup className="gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field data-invalid={!!form.formState.errors.from_email}>
+                  <FieldLabel htmlFor="ep-from-email" required>
+                    {t("dialog.fromEmail")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-from-email"
+                    {...form.register("from_email")}
+                    type="email"
+                    placeholder="purchasing@example.com"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.from_email?.message}
+                  </FieldError>
+                </Field>
+                <Field data-invalid={!!form.formState.errors.from_name}>
+                  <FieldLabel htmlFor="ep-from-name">
+                    {t("dialog.fromName")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-from-name"
+                    {...form.register("from_name")}
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.from_name?.message}
+                  </FieldError>
+                </Field>
+                <Field data-invalid={!!form.formState.errors.reply_to}>
+                  <FieldLabel htmlFor="ep-reply-to">
+                    {t("dialog.replyTo")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-reply-to"
+                    {...form.register("reply_to")}
+                    type="email"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.reply_to?.message}
+                  </FieldError>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="ep-default-cc">
+                    {t("dialog.defaultCc")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-default-cc"
+                    {...form.register("default_cc")}
+                    placeholder="finance@example.com"
+                    disabled={isSaving}
+                  />
+                  <p className="text-muted-foreground text-micro">
+                    {t("dialog.defaultCcHint")}
+                  </p>
+                </Field>
+              </div>
+            </FieldGroup>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              {t("dialog.templateSection")}
+            </h3>
+            <FieldGroup className="gap-3">
+              <Field>
+                <FieldLabel htmlFor="ep-subject-template">
+                  {t("dialog.subjectTemplate")}
+                </FieldLabel>
+                <Input
+                  id="ep-subject-template"
+                  {...form.register("subject_template")}
+                  disabled={isSaving}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="ep-body-template">
+                  {t("dialog.bodyTemplate")}
+                </FieldLabel>
+                <Textarea
+                  id="ep-body-template"
+                  {...form.register("body_template")}
+                  rows={4}
+                  className="min-h-24 text-xs"
+                  disabled={isSaving}
+                />
+              </Field>
+            </FieldGroup>
+          </div>
+
+          <DialogFooter className="pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              disabled={isSaving}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" size="sm" disabled={isSaving}>
+              {isSaving && isEdit && tf("saving")}
+              {isSaving && !isEdit && tf("creating")}
+              {!isSaving && isEdit && tc("save")}
+              {!isSaving && !isEdit && tc("create")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -2086,6 +2086,49 @@
         "postCityLedger": "Post city ledger",
         "postCreditCard": "Post credit card"
       }
+    },
+    "emailProfile": {
+      "title": "Email Profiles",
+      "desc": "Sender profiles used to email purchase orders and other documents to vendors.",
+      "entity": "Email profile",
+      "add": "Add profile",
+      "empty": "No email profiles yet. Add one to start sending documents by email.",
+      "loadError": "Could not load email profiles",
+      "table": {
+        "name": "Name",
+        "from": "From",
+        "status": "Status"
+      },
+      "defaultBadge": "Default",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "\"{name}\" is now the default profile",
+      "cannotDeleteDefaultTooltip": "This is the default profile — set another profile as default first",
+      "testSend": "Send test",
+      "testSentSuccess": "Test email sent to {recipient}",
+      "testSentFailure": "Test email failed",
+      "deleteTitle": "Delete email profile",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "dialog": {
+        "namePlaceholder": "e.g. Purchasing",
+        "enabled": "Enabled",
+        "smtpSection": "SMTP server",
+        "host": "Host",
+        "port": "Port",
+        "secure": "Use TLS/SSL",
+        "password": "Password",
+        "passwordHint": "Leave unchanged to keep the stored password.",
+        "senderSection": "Sender",
+        "fromEmail": "From email",
+        "fromName": "From name",
+        "replyTo": "Reply-to",
+        "defaultCc": "Default CC",
+        "defaultCcHint": "Separate multiple addresses with a comma, semicolon or space.",
+        "templateSection": "Templates",
+        "subjectTemplate": "Subject template",
+        "bodyTemplate": "Body template"
+      }
     }
   },
   "vendorManagement": {
@@ -4405,6 +4448,7 @@
     "workflowPurchaseOrder": "Purchase Order",
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
+    "emailProfile": "Email Profiles",
     "period": "Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",

@@ -2086,6 +2086,49 @@
         "postCityLedger": "ดึงรายการ City Ledger",
         "postCreditCard": "ดึงรายการบัตรเครดิต"
       }
+    },
+    "emailProfile": {
+      "title": "โปรไฟล์อีเมล",
+      "desc": "โปรไฟล์ผู้ส่งที่ใช้ส่งใบสั่งซื้อและเอกสารอื่น ๆ ให้ผู้ขายทางอีเมล",
+      "entity": "โปรไฟล์อีเมล",
+      "add": "เพิ่มโปรไฟล์",
+      "empty": "ยังไม่มีโปรไฟล์อีเมล เพิ่มโปรไฟล์เพื่อเริ่มส่งเอกสารทางอีเมล",
+      "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+      "table": {
+        "name": "ชื่อ",
+        "from": "จาก",
+        "status": "สถานะ"
+      },
+      "defaultBadge": "ค่าเริ่มต้น",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "setDefault": "ตั้งเป็นค่าเริ่มต้น",
+      "setDefaultSuccess": "ตั้ง \"{name}\" เป็นโปรไฟล์เริ่มต้นแล้ว",
+      "cannotDeleteDefaultTooltip": "นี่คือโปรไฟล์เริ่มต้น — ตั้งโปรไฟล์อื่นเป็นค่าเริ่มต้นก่อนจึงจะลบได้",
+      "testSend": "ทดสอบส่ง",
+      "testSentSuccess": "ส่งอีเมลทดสอบไปที่ {recipient} แล้ว",
+      "testSentFailure": "ส่งอีเมลทดสอบไม่สำเร็จ",
+      "deleteTitle": "ลบโปรไฟล์อีเมล",
+      "deleteConfirm": "ลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "dialog": {
+        "namePlaceholder": "เช่น ฝ่ายจัดซื้อ",
+        "enabled": "เปิดใช้งาน",
+        "smtpSection": "เซิร์ฟเวอร์ SMTP",
+        "host": "โฮสต์",
+        "port": "พอร์ต",
+        "secure": "ใช้ TLS/SSL",
+        "password": "รหัสผ่าน",
+        "passwordHint": "เว้นไว้ = ใช้รหัสผ่านเดิม",
+        "senderSection": "ผู้ส่ง",
+        "fromEmail": "อีเมลผู้ส่ง",
+        "fromName": "ชื่อผู้ส่ง",
+        "replyTo": "ตอบกลับไปที่",
+        "defaultCc": "สำเนาถึงเริ่มต้น",
+        "defaultCcHint": "คั่นหลายที่อยู่ด้วยเครื่องหมายจุลภาค อัฒภาค หรือช่องว่าง",
+        "templateSection": "เทมเพลต",
+        "subjectTemplate": "เทมเพลตหัวเรื่อง",
+        "bodyTemplate": "เทมเพลตเนื้อหา"
+      }
     }
   },
   "vendorManagement": {
@@ -4395,6 +4438,7 @@
     "workflowPurchaseOrder": "ใบสั่งซื้อ",
     "workflowStoreRequisition": "ใบเบิกของ",
     "interface": "การเชื่อมต่อระบบภายนอก",
+    "emailProfile": "โปรไฟล์อีเมล",
     "period": "รอบบัญชี",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",

@@ -685,6 +685,11 @@ export const router = createBrowserRouter([
                   import("./system-admin/interface/interface-detail.route"),
               },
               {
+                path: "email-profile",
+                lazy: () =>
+                  import("./system-admin/email-profile/email-profile.route"),
+              },
+              {
                 path: "business-setting",
                 element: (
                   <Navigate to="/system-admin/company-profile" replace />

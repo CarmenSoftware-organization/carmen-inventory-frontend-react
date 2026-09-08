@@ -10,10 +10,21 @@ import {
 
 const EMPTY: EmailProfilesValue = { default_profile_id: null, profiles: [] };
 
+/**
+ * ผลลัพธ์จริงของ `test-email-profile` — **HTTP 200 ไม่ได้แปลว่าส่งสำเร็จ** ต้องอ่าน
+ * `sent`/`error` เสมอ ไม่ใช่แค่เช็คว่า request ไม่ throw (แก้ Minor จากรีวิว C1: เดิม
+ * `testProfile` ไม่ได้ระบุ generic ของ response ทำให้ `.data` ไม่มี type)
+ */
+export interface TestEmailProfileResult {
+  sent: boolean;
+  recipient?: string;
+  error?: string;
+}
+
 export function useEmailProfiles() {
   const query = useAppConfigByKey(EMAIL_PROFILES_CONFIG_KEY);
   const upsert = useUpsertAppConfig();
-  const test = useApiMutation<{ profile_id: string }>({
+  const test = useApiMutation<{ profile_id: string }, TestEmailProfileResult>({
     mutationFn: (data, buCode) =>
       httpClient.post(
         API_ENDPOINTS.APP_CONFIG_TEST_EMAIL_PROFILE(buCode),
