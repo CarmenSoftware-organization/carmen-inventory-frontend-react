@@ -114,11 +114,28 @@ export function PrItemFields({
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — คนเบิกของมัก
+    // เบิกจากคลังเดิมติดกันหลายรายการ เติมคลัง + จุดส่งของให้ล่วงหน้าแล้วแก้เอง
+    // ได้ · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field array เก็บค่า
+    // ตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_code: prev.location_code,
+          location_name: prev.location_name,
+          location_type: prev.location_type,
+          delivery_point_id: prev.delivery_point_id,
+          delivery_point_name: prev.delivery_point_name,
+        }
+      : {};
+
     prependItem(
       {
         ...PR_ITEM,
         currency_id: defaultBu?.config?.default_currency_id ?? null,
         delivery_date: tomorrow.toISOString(),
+        ...carriedLocation,
       },
       { shouldFocus: false },
     );

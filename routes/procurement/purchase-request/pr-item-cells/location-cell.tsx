@@ -115,16 +115,17 @@ export const LocationCell = memo(function LocationCell({
                         `items.${index}.location_type`,
                         location.location_type,
                       );
-                      if (location.delivery_point) {
-                        form.setValue(
-                          `items.${index}.delivery_point_id`,
-                          location.delivery_point.id,
-                        );
-                        form.setValue(
-                          `items.${index}.delivery_point_name`,
-                          location.delivery_point.name,
-                        );
-                      }
+                      // คลังที่ไม่มี delivery point ต้องล้างของเดิมทิ้ง ไม่ใช่
+                      // ปล่อยค้าง — ไม่งั้นแถวนี้แบก delivery point ของคลังก่อน
+                      // หน้าไปกับใบโดยไม่มีใครเห็น
+                      form.setValue(
+                        `items.${index}.delivery_point_id`,
+                        location.delivery_point?.id ?? null,
+                      );
+                      form.setValue(
+                        `items.${index}.delivery_point_name`,
+                        location.delivery_point?.name ?? "",
+                      );
                     }}
                     nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
                     className="h-7 w-full text-xs"
