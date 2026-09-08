@@ -103,7 +103,17 @@ export function EnumField<T extends string>({
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Select value={value} onValueChange={(v) => onChange(v as T)}>
+      <Select
+        value={value}
+        // กรองค่าที่ไม่อยู่ใน `options` ทิ้ง — Radix ยิง onValueChange("") ใส่เอง เมื่อ
+        // `value` ถูกเปลี่ยนหลัง mount (เช่น form.reset ด้วยค่าที่โหลดมาจาก API) ผ่าน
+        // hidden native <select> ที่มันซ่อนไว้ให้ form ค่าว่างนั้นจะทับค่าจริงใน form state
+        // แล้ว field ค้างเป็น "" จน schema ไม่ผ่านและกด Save ไม่ติดโดยไม่มี error ให้เห็น
+        // ค่าว่างไม่ใช่ตัวเลือกที่ถูกต้องของ field ประเภทนี้อยู่แล้ว จึงกันตั้งแต่ตรงนี้
+        onValueChange={(v) => {
+          if (options.includes(v as T)) onChange(v as T);
+        }}
+      >
         <SelectTrigger id={id} size="sm" className="w-full text-sm">
           <SelectValue />
         </SelectTrigger>

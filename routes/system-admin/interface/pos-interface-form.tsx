@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -66,6 +66,7 @@ export default function PosInterfaceForm() {
   const t = useTranslations("systemAdmin.interface");
   const tp = useTranslations("systemAdmin.interface.pos");
   const { brand } = useParams<{ brand: string }>();
+  const navigate = useNavigate();
   const { value, isLoading, isError, refetch, save, isSaving } =
     useInterfaceConfig(`interface_pos_${brand}`);
 
@@ -80,7 +81,14 @@ export default function PosInterfaceForm() {
 
   const submit = form.handleSubmit(
     (values) =>
-      save(toApiValue(values), { onSuccess: () => toast.success(t("saved")) }),
+      save(toApiValue(values), {
+        onSuccess: () => {
+          toast.success(t("saved"));
+          // กลับหน้ารายการ interface — guard ของหน้านี้ดักเฉพาะคลิกลิงก์กับปุ่ม back
+          // ไม่ดัก navigate() จากโค้ด จึงไม่ต้อง reset form ก่อน
+          navigate("/system-admin/interface");
+        },
+      }),
     () => scrollToFirstInvalidField(),
   );
 
@@ -89,6 +97,8 @@ export default function PosInterfaceForm() {
       title={tp(`brand.${brand}`)}
       description={tp("desc")}
       onSave={submit}
+      // คืนค่าที่บันทึกไว้ ไม่ใช่ค่า default — ยกเลิกแล้วต้องได้ของเดิมกลับมา
+      onCancel={() => form.reset(value ? toFormValues(value) : EMPTY_POS)}
       isSaving={isSaving}
       isLoading={isLoading}
       isError={isError}

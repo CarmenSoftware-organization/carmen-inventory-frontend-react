@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -94,6 +94,7 @@ export default function CarmenGlInterfaceForm() {
   const ta = useTranslations("systemAdmin.interface.accounting");
   const tc = useTranslations("systemAdmin.interface.accounting.carmenGl");
   const { brand } = useParams<{ brand: string }>();
+  const navigate = useNavigate();
   const { value, isLoading, isError, refetch, save, isSaving } =
     useInterfaceConfig("interface_accounting_carmen_gl");
 
@@ -108,7 +109,14 @@ export default function CarmenGlInterfaceForm() {
 
   const submit = form.handleSubmit(
     (values) =>
-      save(toApiValue(values), { onSuccess: () => toast.success(t("saved")) }),
+      save(toApiValue(values), {
+        onSuccess: () => {
+          toast.success(t("saved"));
+          // กลับหน้ารายการ interface — guard ของหน้านี้ดักเฉพาะคลิกลิงก์กับปุ่ม back
+          // ไม่ดัก navigate() จากโค้ด จึงไม่ต้อง reset form ก่อน
+          navigate("/system-admin/interface");
+        },
+      }),
     () => scrollToFirstInvalidField(),
   );
 
@@ -117,6 +125,8 @@ export default function CarmenGlInterfaceForm() {
       title={ta(`brand.${brand}`)}
       description={tc("desc")}
       onSave={submit}
+      // คืนค่าที่บันทึกไว้ ไม่ใช่ค่า default — ยกเลิกแล้วต้องได้ของเดิมกลับมา
+      onCancel={() => form.reset(value ? toFormValues(value) : EMPTY_CARMEN_GL)}
       isSaving={isSaving}
       isLoading={isLoading}
       isError={isError}
