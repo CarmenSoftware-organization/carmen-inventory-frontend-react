@@ -178,6 +178,11 @@ export function usePoFormHandlers({
             syncDocVersions(res);
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
+            // ล้าง dirty ให้ baseline = ค่าที่เพิ่งบันทึก — ต้องมาหลัง
+            // syncDocVersions เพื่อเก็บ doc_version ใหม่เข้า baseline ไปด้วย
+            // ไม่งั้นฟอร์มยังนับว่ามีของค้าง กด Back หลังเซฟก็เจอ discard dialog
+            // และ nav guard ยังดักลิงก์อยู่ทั้งที่บันทึกไปแล้ว
+            form.reset(form.getValues());
           },
         },
       );
@@ -322,6 +327,8 @@ export function usePoFormHandlers({
         // ของ "บันทึกแล้ว" อยู่ในตัว สองใบซ้อนกันใบแรกก็โดนใบหลังทับอยู่ดี
         // (CN/PR เดินทางเดียวกันแต่ยิงใบเดียวมาตั้งแต่แรก)
         setMode("view");
+        // เหตุผลเดียวกับใน onSubmit — บันทึกแล้วต้องไม่เหลือของค้าง
+        form.reset(form.getValues());
         await runSubmitPo();
         return;
       } catch {
