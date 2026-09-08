@@ -147,6 +147,7 @@ export default function CarmenGlInterfaceForm() {
           field={form.register("authorize_token")}
           error={form.formState.errors.authorize_token?.message}
           type="password"
+          revealLabels={{ show: t("showSecret"), hide: t("hideSecret") }}
           hint={t("apiKeyHint")}
           className="sm:col-span-2"
         />

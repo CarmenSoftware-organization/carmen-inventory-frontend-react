@@ -2109,7 +2109,9 @@
         "postingDesc": "Which postings Carmen pulls from the PMS.",
         "postCityLedger": "Post city ledger",
         "postCreditCard": "Post credit card"
-      }
+      },
+      "showSecret": "Show",
+      "hideSecret": "Hide"
     },
     "emailProfile": {
       "title": "Email Profiles",

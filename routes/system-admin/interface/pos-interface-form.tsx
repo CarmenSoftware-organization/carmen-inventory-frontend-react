@@ -118,6 +118,7 @@ export default function PosInterfaceForm() {
           field={form.register("api_key")}
           error={form.formState.errors.api_key?.message}
           type="password"
+          revealLabels={{ show: t("showSecret"), hide: t("hideSecret") }}
           hint={t("apiKeyHint")}
           className="sm:col-span-2"
         />

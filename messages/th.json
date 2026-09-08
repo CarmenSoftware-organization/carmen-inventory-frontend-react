@@ -2109,7 +2109,9 @@
         "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
         "postCityLedger": "ดึงรายการ City Ledger",
         "postCreditCard": "ดึงรายการบัตรเครดิต"
-      }
+      },
+      "showSecret": "แสดง",
+      "hideSecret": "ซ่อน"
     },
     "emailProfile": {
       "title": "โปรไฟล์อีเมล",
