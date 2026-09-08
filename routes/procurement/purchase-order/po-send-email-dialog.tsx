@@ -198,6 +198,8 @@ export function PoSendEmailDialog({
   const [body, setBody] = useState("");
   const [attachPdf, setAttachPdf] = useState(true);
   const [toError, setToError] = useState(false);
+  const [subjectError, setSubjectError] = useState(false);
+  const [bodyError, setBodyError] = useState(false);
   const isSubjectDirtyRef = useRef(false);
   const isBodyDirtyRef = useRef(false);
   const initializedRef = useRef(false);
@@ -247,6 +249,8 @@ export function PoSendEmailDialog({
     );
     setAttachPdf(true);
     setToError(false);
+    setSubjectError(false);
+    setBodyError(false);
     isSubjectDirtyRef.current = false;
     isBodyDirtyRef.current = false;
     // placeholderValues ไม่ใส่ใน deps โดยตั้งใจ — เป็น object ใหม่ทุก render, ค่าจริงมาจาก
@@ -280,8 +284,23 @@ export function PoSendEmailDialog({
   };
 
   const handleSend = () => {
-    if (to.length === 0) {
-      setToError(true);
+    // Admin-created profiles can leave subject_template/body_template empty (schema doesn't
+    // require them — see email-profile-schema.ts) while the backend's send-email DTO requires
+    // both non-empty (purchase-order.send-email.dto.ts, subject/body: z.string().min(1)).
+    // Without this check the first admin to hit that gap sees a 400 with no explanation of
+    // which field is empty. Checked here, not just "to", for the same reason "to" is checked:
+    // a genuine send attempt should never reach the backend already known to fail.
+    // โปรไฟล์ที่ admin สร้างเองปล่อย subject_template/body_template ว่างได้ (schema ไม่บังคับ)
+    // แต่ backend บังคับทั้งคู่ห้ามว่าง ถ้าไม่เช็คตรงนี้ admin คนแรกที่เจอช่องว่างนี้จะได้ 400
+    // โดยไม่รู้ว่าช่องไหนว่าง จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
+    const trimmedSubject = subject.trim();
+    const trimmedBody = body.trim();
+    const hasSubjectError = trimmedSubject.length === 0;
+    const hasBodyError = trimmedBody.length === 0;
+    if (to.length === 0 || hasSubjectError || hasBodyError) {
+      setToError(to.length === 0);
+      setSubjectError(hasSubjectError);
+      setBodyError(hasBodyError);
       return;
     }
     sendEmail.mutate(
@@ -397,32 +416,42 @@ export function PoSendEmailDialog({
               />
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="pse-subject">{t("subject")}</FieldLabel>
+            <Field data-invalid={subjectError}>
+              <FieldLabel htmlFor="pse-subject" required>
+                {t("subject")}
+              </FieldLabel>
               <Input
                 id="pse-subject"
                 value={subject}
                 onChange={(e) => {
                   isSubjectDirtyRef.current = true;
                   setSubject(e.target.value);
+                  if (e.target.value.trim().length > 0) setSubjectError(false);
                 }}
+                aria-invalid={subjectError}
                 disabled={sendEmail.isPending}
               />
+              {subjectError && <FieldError>{t("subjectRequired")}</FieldError>}
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="pse-body">{t("body")}</FieldLabel>
+            <Field data-invalid={bodyError}>
+              <FieldLabel htmlFor="pse-body" required>
+                {t("body")}
+              </FieldLabel>
               <Textarea
                 id="pse-body"
                 value={body}
                 onChange={(e) => {
                   isBodyDirtyRef.current = true;
                   setBody(e.target.value);
+                  if (e.target.value.trim().length > 0) setBodyError(false);
                 }}
                 rows={6}
                 className="min-h-32 text-xs"
+                aria-invalid={bodyError}
                 disabled={sendEmail.isPending}
               />
+              {bodyError && <FieldError>{t("bodyRequired")}</FieldError>}
             </Field>
 
             <Field orientation="horizontal">
