@@ -9,10 +9,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useVisibleModules } from "@/hooks/use-visible-modules";
+import {
+  useVisibleModules,
+  type ModuleWithAccess,
+} from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { cn } from "@/lib/utils";
-import { AppTile } from "@/components/icons/tiles";
+import { AppTile, SubTile } from "@/components/icons/tiles";
 import { AppLauncherIcon } from "@/components/icons/app-launcher-icon";
 
 export default function ModuleApp() {
@@ -21,6 +24,20 @@ export default function ModuleApp() {
   const [open, setOpen] = useState(false);
 
   const visibleModules = useVisibleModules();
+  const launcherModules = visibleModules.flatMap(
+    (
+      mod,
+    ): Array<{
+      module: ModuleWithAccess;
+      tileParentName?: string;
+    }> =>
+      mod.name === "accounting"
+        ? (mod.subModules ?? []).map((section) => ({
+            module: section,
+            tileParentName: "accounting",
+          }))
+        : [{ module: mod }],
+  );
 
   // Modifier symbol for the shortcut hint (⌘ on macOS, Ctrl elsewhere).
   // Computed at render — the tooltip is client-only so the SSR fallback never shows.
@@ -57,10 +74,11 @@ export default function ModuleApp() {
       >
         {/* Tile grid — 3 cols, no header */}
         <div className="grid grid-cols-3 gap-0 px-1.5 pt-2 pb-3">
-          {visibleModules.map((mod) => (
+          {launcherModules.map(({ module: mod, tileParentName }) => (
             <LauncherTile
               key={mod.path}
               name={mod.name}
+              tileParentName={tileParentName}
               path={mod.path}
               label={t(mod.name)}
               denied={mod.denied}
@@ -95,6 +113,8 @@ function HintKey({ children }: { readonly children: React.ReactNode }) {
 
 interface LauncherTileProps {
   readonly name: string;
+  /** Render a submodule illustration while retaining the launcher tile shell. */
+  readonly tileParentName?: string;
   readonly path: string;
   readonly label: string;
   readonly denied: boolean;
@@ -106,6 +126,7 @@ interface LauncherTileProps {
 
 const LauncherTile = ({
   name,
+  tileParentName,
   path,
   label,
   denied,
@@ -123,7 +144,11 @@ const LauncherTile = ({
   const content = (
     <>
       <span className="relative transition-transform group-hover/tile:scale-105">
-        <AppTile name={name} size={44} />
+        {tileParentName ? (
+          <SubTile name={name} parentName={tileParentName} size={44} />
+        ) : (
+          <AppTile name={name} size={44} />
+        )}
         {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ — locked ชนะ
             denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) */}
         {locked && (

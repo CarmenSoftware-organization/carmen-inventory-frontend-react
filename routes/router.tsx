@@ -789,16 +789,16 @@ export const router = createBrowserRouter([
               },
               {
                 path: "accounts-payable/payment-approvals",
-                element: <Navigate to="/accounting/accounts-payable/payment?lifecycle=submitted" replace />,
-              },
-              {
-                path: "accounts-receivable",
                 element: (
                   <Navigate
-                    to="/accounting/accounts-receivable/invoice"
+                    to="/accounting/accounts-payable/payment?lifecycle=submitted"
                     replace
                   />
                 ),
+              },
+              {
+                path: "accounts-receivable",
+                lazy: () => import("./accounting/accounting.route"),
               },
               {
                 path: "accounts-receivable/invoice",
@@ -822,6 +822,26 @@ export const router = createBrowserRouter([
               },
               {
                 path: "financial-reports/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "asset",
+                lazy: () => import("./accounting/accounting.route"),
+              },
+              {
+                path: "asset/register",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "asset/register/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "asset/disposal",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "asset/disposal/:id",
                 lazy: () => import("./accounting/accounting-detail.route"),
               },
             ],

@@ -214,6 +214,20 @@
         "monthEndMeta": "Accrual setup requires review"
       }
     },
+    "sectionDashboards": {
+      "generalLedger": {
+        "title": "General Ledger Dashboard",
+        "description": "Financial position, posting health, and work requiring attention"
+      },
+      "accountsReceivable": {
+        "title": "Accounts Receivable Dashboard",
+        "description": "Receivables, customer settlements, and posting health"
+      },
+      "asset": {
+        "title": "Asset Dashboard",
+        "description": "Fixed asset values, registration, and disposal activity"
+      }
+    },
     "documents": {
       "journalVoucher": {
         "title": "Journal Voucher Directory",
@@ -259,6 +273,16 @@
         "title": "AR Receipt Directory",
         "description": "Customer receipts and allocations",
         "single": "AR Receipt"
+      },
+      "assetRegister": {
+        "title": "Asset Register",
+        "description": "Registered fixed assets and their current values",
+        "single": "Asset"
+      },
+      "assetDisposal": {
+        "title": "Asset Disposal",
+        "description": "Asset retirement, sale, and write-off records",
+        "single": "Asset Disposal"
       },
       "export": "Export",
       "new": "New",
@@ -4480,6 +4504,8 @@
     "reportSchedule": "Schedules",
     "reportHistory": "History",
     "accounting": "Accounting",
+    "generalLedger": "General Ledger",
+    "glDashboard": "Dashboard",
     "journalVoucher": "Journal Voucher",
     "templateVoucher": "Template Voucher",
     "recurringVoucher": "Recurring Voucher",
@@ -4490,8 +4516,13 @@
     "apPayment": "Payment",
     "apPaymentApproval": "Payment Approval",
     "accountsReceivable": "Accounts Receivable",
+    "arDashboard": "Dashboard",
     "arInvoice": "Invoice",
     "arReceipt": "Receipt",
+    "asset": "Asset",
+    "assetDashboard": "Dashboard",
+    "assetRegister": "Register",
+    "assetDisposal": "Disposal",
     "financialReports": "Financial Reports",
     "accountingDesc": "Journal entries, voucher automation, and financial analysis",
     "configDesc": "Master data and system-wide settings",

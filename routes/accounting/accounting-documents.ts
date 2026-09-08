@@ -5,7 +5,9 @@ export type AccountingDocumentKind =
   | "allocationVoucher"
   | "financialReports"
   | "arInvoice"
-  | "arReceipt";
+  | "arReceipt"
+  | "assetRegister"
+  | "assetDisposal";
 
 export interface AccountingDocument {
   id: string;
@@ -61,6 +63,16 @@ export const ACCOUNTING_DOCUMENTS: Record<
     kind: "arReceipt",
     path: "/accounting/accounts-receivable/receipt",
     prefix: "RC",
+  },
+  assetRegister: {
+    kind: "assetRegister",
+    path: "/accounting/asset/register",
+    prefix: "FA",
+  },
+  assetDisposal: {
+    kind: "assetDisposal",
+    path: "/accounting/asset/disposal",
+    prefix: "FD",
   },
 };
 

@@ -124,6 +124,119 @@ export function findRouteLeaf(pathname: string): ModuleDto | undefined {
   return best;
 }
 
+/**
+ * Accounting is split into four launcher modules. Their children are the
+ * contextual sidebar entries shown after a launcher module is selected.
+ */
+export const accountingModuleSections: ModuleDto[] = [
+  {
+    name: "generalLedger",
+    path: "/accounting",
+    icon: BookOpen,
+    subModules: [
+      { name: "glDashboard", path: "/accounting", icon: LayoutDashboard },
+      {
+        name: "journalVoucher",
+        path: "/accounting/journal-voucher",
+        icon: FileText,
+      },
+      {
+        name: "templateVoucher",
+        path: "/accounting/template-voucher",
+        icon: FileSpreadsheet,
+      },
+      {
+        name: "recurringVoucher",
+        path: "/accounting/recurring-voucher",
+        icon: Clock,
+      },
+      {
+        name: "allocationVoucher",
+        path: "/accounting/allocation-voucher",
+        icon: ArrowLeftRight,
+      },
+    ],
+  },
+  {
+    name: "accountsPayable",
+    path: "/accounting/accounts-payable",
+    icon: BadgeDollarSign,
+    subModules: [
+      {
+        name: "apDashboard",
+        path: "/accounting/accounts-payable",
+        icon: LayoutDashboard,
+      },
+      {
+        name: "apInvoice",
+        path: "/accounting/accounts-payable/invoice",
+        icon: FileInput,
+      },
+      {
+        name: "apPayment",
+        path: "/accounting/accounts-payable/payment",
+        icon: DollarSign,
+      },
+    ],
+  },
+  {
+    name: "accountsReceivable",
+    path: "/accounting/accounts-receivable",
+    icon: Receipt,
+    subModules: [
+      {
+        name: "arDashboard",
+        path: "/accounting/accounts-receivable",
+        icon: LayoutDashboard,
+      },
+      {
+        name: "arInvoice",
+        path: "/accounting/accounts-receivable/invoice",
+        icon: FileText,
+      },
+      {
+        name: "arReceipt",
+        path: "/accounting/accounts-receivable/receipt",
+        icon: BadgeDollarSign,
+      },
+    ],
+  },
+  {
+    name: "asset",
+    path: "/accounting/asset",
+    icon: Building2,
+    subModules: [
+      {
+        name: "assetDashboard",
+        path: "/accounting/asset",
+        icon: LayoutDashboard,
+      },
+      {
+        name: "assetRegister",
+        path: "/accounting/asset/register",
+        icon: Boxes,
+      },
+      {
+        name: "assetDisposal",
+        path: "/accounting/asset/disposal",
+        icon: FileInput,
+      },
+    ],
+  },
+];
+
+/** Specific accounting prefixes win; General Ledger handles the root routes. */
+export function findAccountingSection(pathname: string): ModuleDto {
+  return (
+    accountingModuleSections
+      .slice(1)
+      .find(
+        (section) =>
+          pathname === section.path || pathname.startsWith(section.path + "/"),
+      ) ?? accountingModuleSections[0]
+  );
+}
+
 export const moduleList: ModuleDto[] = [
   {
     name: "dashboard",
@@ -393,74 +506,7 @@ export const moduleList: ModuleDto[] = [
     name: "accounting",
     path: "/accounting",
     icon: BookOpen,
-    subModules: [
-      {
-        name: "journalVoucher",
-        path: "/accounting/journal-voucher",
-        icon: FileText,
-      },
-      {
-        name: "templateVoucher",
-        path: "/accounting/template-voucher",
-        icon: FileSpreadsheet,
-      },
-      {
-        name: "recurringVoucher",
-        path: "/accounting/recurring-voucher",
-        icon: Clock,
-      },
-      {
-        name: "allocationVoucher",
-        path: "/accounting/allocation-voucher",
-        icon: ArrowLeftRight,
-      },
-      {
-        name: "accountsPayable",
-        path: "/accounting/accounts-payable",
-        icon: BadgeDollarSign,
-        separatorBefore: true,
-        subModules: [
-          {
-            name: "apDashboard",
-            path: "/accounting/accounts-payable",
-            icon: LayoutDashboard,
-          },
-          {
-            name: "apInvoice",
-            path: "/accounting/accounts-payable/invoice",
-            icon: FileInput,
-          },
-          {
-            name: "apPayment",
-            path: "/accounting/accounts-payable/payment",
-            icon: DollarSign,
-          },
-        ],
-      },
-      {
-        name: "accountsReceivable",
-        path: "/accounting/accounts-receivable",
-        icon: Receipt,
-        subModules: [
-          {
-            name: "arInvoice",
-            path: "/accounting/accounts-receivable/invoice",
-            icon: FileText,
-          },
-          {
-            name: "arReceipt",
-            path: "/accounting/accounts-receivable/receipt",
-            icon: BadgeDollarSign,
-          },
-        ],
-      },
-      {
-        name: "financialReports",
-        path: "/accounting/financial-reports",
-        icon: Files,
-        separatorBefore: true,
-      },
-    ],
+    subModules: accountingModuleSections,
   },
   {
     name: "config",

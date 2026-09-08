@@ -1478,6 +1478,22 @@ export const SubTiles: Record<string, TileRenderer> = {
   // NOTE: ทุกรายละเอียดที่ต้อง "มองเห็น" ใช้ currentColor (= --tile-ink) หรือ
   // palette.accent เท่านั้น — palette.base คือ --tile-surface ซึ่งเป็น
   // `transparent` ทั้งแอป (styles/module-colors.css) วาดด้วยมันแล้วหายไปเงียบ ๆ
+  generalLedger: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <Paper palette={palette} x={9} y={7} w={22} h={26} />
+      <path
+        d="M 14 14 H 26 M 14 18 H 26 M 14 22 H 20"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <Glyph x={20} y={29.5} size={7.5} fill={palette.accent} anchor="middle">
+        GL
+      </Glyph>
+    </>
+  ),
   journalVoucher: ({ palette }) => (
     <>
       <TileBase palette={palette} />
@@ -1597,6 +1613,19 @@ export const SubTiles: Record<string, TileRenderer> = {
       <Glyph x={20} y={30.5} size={7.5} fill={palette.accent} anchor="middle">
         AR
       </Glyph>
+    </>
+  ),
+  asset: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <path d="M 9 17 L 20 10 L 31 17 Z" fill="currentColor" opacity="0.9" />
+      <path
+        d="M 12 18 V 29 M 17.3 18 V 29 M 22.7 18 V 29 M 28 18 V 29 M 9 31 H 31"
+        fill="none"
+        style={{ stroke: palette.accent }}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </>
   ),
   financialReports: ({ palette }) => (

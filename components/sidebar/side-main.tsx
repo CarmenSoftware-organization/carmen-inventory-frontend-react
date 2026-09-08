@@ -13,7 +13,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { moduleList } from "@/constant/module-list";
+import { findAccountingSection, moduleList } from "@/constant/module-list";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { AppTile } from "@/components/icons/tiles";
@@ -33,9 +33,13 @@ export function SideMain() {
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));
-  const visibleSubs = useVisibleModules(activeModule?.subModules ?? []);
+  const sidebarModule =
+    activeModule?.name === "accounting"
+      ? findAccountingSection(pathname)
+      : activeModule;
+  const visibleSubs = useVisibleModules(sidebarModule?.subModules ?? []);
 
-  if (!activeModule) {
+  if (!sidebarModule) {
     return null;
   }
 
@@ -43,8 +47,8 @@ export function SideMain() {
     <>
       {/* Module header — links to the module landing */}
       <Link
-        to={activeModule.path}
-        aria-label={t(activeModule.name)}
+        to={sidebarModule.path}
+        aria-label={t(sidebarModule.name)}
         className={cn(
           "relative mx-2 mt-2 mb-1 flex cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5",
           "focus-visible:ring-primary/40 transition-colors outline-none focus-visible:ring-2",
@@ -63,7 +67,14 @@ export function SideMain() {
 
         {/* Module icon — illustrated AppTile (module signature) */}
         <div className="shrink-0">
-          <AppTile name={activeModule.name} size={34} />
+          <AppTile
+            name={
+              activeModule?.name === "accounting"
+                ? "accounting"
+                : sidebarModule.name
+            }
+            size={34}
+          />
         </div>
 
         {/* Title (hidden when collapsed) */}
@@ -71,7 +82,7 @@ export function SideMain() {
           className="min-w-0 flex-1 truncate text-sm leading-tight font-semibold group-data-[collapsible=icon]:hidden"
           style={{ color: ACCENT }}
         >
-          {t(activeModule.name)}
+          {t(sidebarModule.name)}
         </p>
       </Link>
 

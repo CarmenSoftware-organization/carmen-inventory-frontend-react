@@ -10,7 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { moduleList } from "@/constant/module-list";
+import { findAccountingSection, moduleList } from "@/constant/module-list";
 
 /**
  * ตรวจสอบว่า segment ของ URL เป็น id หรือไม่
@@ -94,12 +94,39 @@ export default function PathBreadcrumb() {
   const rawSegments = pathname.split("/").filter(Boolean);
   // href ประกอบจาก segment ดิบ ไม่ใช่ segment ที่กรอง id ออกแล้ว — ไม่งั้นชั้นที่
   // อยู่หลัง id (เช่น .../physical-count/<id>/entry) จะได้ลิงก์ที่ไม่มีอยู่จริง
-  const crumbs = rawSegments
-    .map((segment, index) => ({
+  const accountingSection =
+    pathname === "/accounting" || pathname.startsWith("/accounting/")
+      ? findAccountingSection(pathname)
+      : undefined;
+  const crumbs: Array<{
+    segment: string;
+    href: string;
+    keyOverride?: string;
+  }> = [];
+  for (let index = 0; index < rawSegments.length; index += 1) {
+    const segment = rawSegments[index];
+    if (isIdSegment(segment)) continue;
+
+    const href = "/" + rawSegments.slice(0, index + 1).join("/");
+    // Accounting's parent is represented by four independent launcher modules.
+    // Start at the selected module instead of exposing the internal parent.
+    if (
+      accountingSection &&
+      href === "/accounting" &&
+      accountingSection.path !== "/accounting"
+    ) {
+      continue;
+    }
+
+    crumbs.push({
       segment,
-      href: "/" + rawSegments.slice(0, index + 1).join("/"),
-    }))
-    .filter(({ segment }) => !isIdSegment(segment));
+      href,
+      keyOverride:
+        accountingSection && href === accountingSection.path
+          ? accountingSection.name
+          : undefined,
+    });
+  }
 
   // กำลังเปิดใบใดใบหนึ่งอยู่ = segment ท้าย URL เป็น id ซึ่งโดนกรองทิ้งไปแล้ว
   // ชั้นสุดท้ายที่เหลือจึงไม่ใช่หน้าที่ยืนอยู่ ต้องกดกลับไปหน้ารายการได้
@@ -109,8 +136,11 @@ export default function PathBreadcrumb() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {crumbs.map(({ segment, href }, index) => {
-          const key = SEGMENT_TO_KEY[segment] ?? EXTRA_SEGMENT_KEY[segment];
+        {crumbs.map(({ segment, href, keyOverride }, index) => {
+          const key =
+            keyOverride ??
+            SEGMENT_TO_KEY[segment] ??
+            EXTRA_SEGMENT_KEY[segment];
           const label = key
             ? t(key)
             : segment

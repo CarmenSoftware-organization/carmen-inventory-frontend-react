@@ -68,13 +68,13 @@ settlement=open
 
 ### Controls
 
-| Control | Rule |
-| --- | --- |
-| Business Unit | required; ใช้ BU context ปัจจุบันและบังคับ permission ฝั่ง backend |
-| As-of Date | default วันนี้ใน BU timezone; ใช้กับ outstanding, deposit, aging และ tax snapshot |
-| Paid Date Range | default month-to-date; ใช้เฉพาะ flow metric เช่น Total Paid Out |
-| Currency Display | Phase 1 เป็น functional currency; transaction currency ดูใน drill-down |
-| Refresh | re-fetch snapshot และแสดง generated time; ไม่เปลี่ยน filter |
+| Control          | Rule                                                                              |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Business Unit    | required; ใช้ BU context ปัจจุบันและบังคับ permission ฝั่ง backend                |
+| As-of Date       | default วันนี้ใน BU timezone; ใช้กับ outstanding, deposit, aging และ tax snapshot |
+| Paid Date Range  | default month-to-date; ใช้เฉพาะ flow metric เช่น Total Paid Out                   |
+| Currency Display | Phase 1 เป็น functional currency; transaction currency ดูใน drill-down            |
+| Refresh          | re-fetch snapshot และแสดง generated time; ไม่เปลี่ยน filter                       |
 
 Header ต้องแสดง:
 
@@ -133,15 +133,15 @@ Drill-down: Payment directory ด้วย `execution=executed_or_posted&paid_fr
 
 ใช้ due date เทียบกับ as-of date และ bucket ต้องไม่ทับกัน:
 
-| Bucket | Definition |
-| --- | --- |
-| Not Yet Due | `due_date > as_of` |
-| Due Today | `due_date = as_of` |
-| 1–30 Days Overdue | `1 <= as_of - due_date <= 30` |
-| 31–60 Days Overdue | `31 <= days <= 60` |
-| 61–90 Days Overdue | `61 <= days <= 90` |
-| Over 90 Days | `days > 90` |
-| Missing Due Date | posted open item ที่ไม่มี valid due date; exception bucket |
+| Bucket             | Definition                                                 |
+| ------------------ | ---------------------------------------------------------- |
+| Not Yet Due        | `due_date > as_of`                                         |
+| Due Today          | `due_date = as_of`                                         |
+| 1–30 Days Overdue  | `1 <= as_of - due_date <= 30`                              |
+| 31–60 Days Overdue | `31 <= days <= 60`                                         |
+| 61–90 Days Overdue | `61 <= days <= 90`                                         |
+| Over 90 Days       | `days > 90`                                                |
+| Missing Due Date   | posted open item ที่ไม่มี valid due date; exception bucket |
 
 แต่ละ bucket แสดง:
 
@@ -192,10 +192,10 @@ Drill-down ต้องเปิด list ที่สามารถสร้า
 
 Dashboard รองรับ view scope:
 
-| Scope | Meaning |
-| --- | --- |
+| Scope          | Meaning                                     |
+| -------------- | ------------------------------------------- |
 | Assigned to Me | workflow tasks ที่ผู้ใช้ปัจจุบัน action ได้ |
-| All Pending | รายการ pending ใน BU ที่ผู้ใช้มีสิทธิ์ดู |
+| All Pending    | รายการ pending ใน BU ที่ผู้ใช้มีสิทธิ์ดู    |
 
 Rules:
 
@@ -210,14 +210,14 @@ Rules:
 
 ### Tax widgets
 
-| Widget | Definition |
-| --- | --- |
-| Pending Input VAT | ยอด tax detail สถานะ `pending` ณ as-of date |
+| Widget                                | Definition                                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| Pending Input VAT                     | ยอด tax detail สถานะ `pending` ณ as-of date                                   |
 | Tax Invoices Near/Over Claim Deadline | จำนวนเอกสารที่เหลือวันน้อยกว่าค่าเตือนหรือเกิน deadline ตาม jurisdiction rule |
-| Filed History | ยอด filed แยก filing period; read-only historical summary |
-| Missing Tax Invoices | posted invoices ที่ tax document required แต่ข้อมูล/attachment ไม่ครบ |
-| Pending Corrections | tax/match/posting exceptions ที่ยังไม่ resolve |
-| WHT Pending Filing | WHT events/certificates ที่ post แล้วแต่ยังไม่ filed เมื่อ capability พร้อม |
+| Filed History                         | ยอด filed แยก filing period; read-only historical summary                     |
+| Missing Tax Invoices                  | posted invoices ที่ tax document required แต่ข้อมูล/attachment ไม่ครบ         |
+| Pending Corrections                   | tax/match/posting exceptions ที่ยังไม่ resolve                                |
+| WHT Pending Filing                    | WHT events/certificates ที่ post แล้วแต่ยังไม่ filed เมื่อ capability พร้อม   |
 
 คำว่า `Tax Invoices > 6 Mos` จาก mockup ต้อง derive จาก configurable claim deadline/alert threshold ไม่ hardcode 6 เดือนสำหรับทุก BU/jurisdiction
 
@@ -300,13 +300,13 @@ Drill-down ใช้ Invoice/Payment directory endpoints เดิมพร้�
 
 ## 12. Permissions
 
-| Section | Permission |
-| --- | --- |
-| Dashboard summary | `ap.dashboard.view` |
-| Aging/open-item drill-down | `ap.report.aging` + invoice view scope |
-| Approval queue | invoice/payment approval permission และ workflow assignment |
-| Tax widgets | `ap.tax.view` |
-| Payment/bank detail | `ap.payment.view`; bank data mask ตาม sensitive-data permission |
+| Section                    | Permission                                                      |
+| -------------------------- | --------------------------------------------------------------- |
+| Dashboard summary          | `ap.dashboard.view`                                             |
+| Aging/open-item drill-down | `ap.report.aging` + invoice view scope                          |
+| Approval queue             | invoice/payment approval permission และ workflow assignment     |
+| Tax widgets                | `ap.tax.view`                                                   |
+| Payment/bank detail        | `ap.payment.view`; bank data mask ตาม sensitive-data permission |
 
 ตัวเลขที่ผู้ใช้ไม่มีสิทธิ์เปิด underlying record ต้องไม่แสดง หรือแสดง aggregated-only ตาม explicit policy ห้ามให้ count/amount รั่วจาก BU/role อื่น
 
@@ -345,7 +345,13 @@ Drill-down ใช้ Invoice/Payment directory endpoints เดิมพร้�
 - ผู้ใช้ไม่เห็นยอดหรือ record ข้าม BU/permission scope
 - loading/empty/no-result/error/stale/desktop/mobile states ผ่านการทดสอบ
 
-## 16. Open questions
+## 16. Operational and Management views
+
+Operational view คง Outstanding, Prepaid, Paid Out, Aging, Due Date, Approval, Tax และ Reconciliation โดยเพิ่ม aging visualization และ semantic emphasis ใน light mode Management view เพิ่ม overdue ratio, payment obligations, paid-out trend, vendor concentration และ AP outflow contribution ต่อ 13-week Cash Forecast
+
+ผู้ใช้ที่มีสิทธิ์ทั้งสองแบบสลับด้วย Tabs Development mock รองรับ role preview ตาม [Accounting Dashboard Framework](accounting-dashboard-framework.md) และ forecast ใช้นิยามร่วมจาก [Cash Forecast Design](cash-forecast-design.md)
+
+## 17. Open questions
 
 1. Aging report หลักใช้ due date ตามที่เสนอ หรือ business ต้องการ toggle document date
 2. Credit-balance vendor จะหักใน outstanding, แสดง bucket แยก หรือทั้งสองแบบ

@@ -51,4 +51,39 @@ describe("PathBreadcrumb", () => {
       screen.getByRole("link", { name: en.modules.physicalCount }),
     ).toHaveAttribute("href", "/inventory-management/physical-count");
   });
+
+  it("Accounting dashboard แสดงชื่อโมดูลครั้งเดียว ไม่ซ้ำ Dashboard > Dashboard", () => {
+    renderAt("/accounting/accounts-payable");
+
+    expect(screen.getByText(en.modules.accountsPayable)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.queryAllByText(en.modules.apDashboard)).toHaveLength(0);
+  });
+
+  it("หน้าภายใน Accounting เริ่ม breadcrumb จากโมดูลที่เลือก", () => {
+    renderAt("/accounting/accounts-receivable/invoice");
+
+    expect(
+      screen.getByRole("link", { name: en.modules.accountsReceivable }),
+    ).toHaveAttribute("href", "/accounting/accounts-receivable");
+    expect(screen.getByText(en.modules.arInvoice)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.queryByText(en.modules.accounting)).toBeNull();
+  });
+
+  it("General Ledger ใช้ชื่อโมดูลเป็น breadcrumb ระดับแรก", () => {
+    renderAt("/accounting/journal-voucher");
+
+    expect(
+      screen.getByRole("link", { name: en.modules.generalLedger }),
+    ).toHaveAttribute("href", "/accounting");
+    expect(screen.getByText(en.modules.journalVoucher)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
 });

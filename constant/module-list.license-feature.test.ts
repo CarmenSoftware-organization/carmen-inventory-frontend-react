@@ -49,6 +49,7 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
   },
   // /accounting/* ทั้งกลุ่ม: ยังเป็นหน้า mock ไม่เรียก API สักตัว และ catalog ของ
   // backend ไม่มี module `accounting` เลย → อยู่นอกขอบเขต license ทั้งหมด
+  { path: "/accounting", why: "accounting ยังไม่มีใน catalog" },
   { path: "/accounting/journal-voucher", why: "accounting ยังไม่มีใน catalog" },
   {
     path: "/accounting/template-voucher",
@@ -83,7 +84,16 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     why: "accounting ยังไม่มีใน catalog",
   },
   {
-    path: "/accounting/financial-reports",
+    path: "/accounting/accounts-receivable",
+    why: "accounting ยังไม่มีใน catalog",
+  },
+  { path: "/accounting/asset", why: "accounting ยังไม่มีใน catalog" },
+  {
+    path: "/accounting/asset/register",
+    why: "accounting ยังไม่มีใน catalog",
+  },
+  {
+    path: "/accounting/asset/disposal",
     why: "accounting ยังไม่มีใน catalog",
   },
 ];

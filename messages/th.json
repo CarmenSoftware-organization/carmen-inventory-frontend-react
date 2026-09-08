@@ -214,6 +214,20 @@
         "monthEndMeta": "ต้องตรวจสอบการตั้งค่ารายการ"
       }
     },
+    "sectionDashboards": {
+      "generalLedger": {
+        "title": "แดชบอร์ดบัญชีแยกประเภททั่วไป",
+        "description": "ฐานะการเงิน สถานะการผ่านรายการ และงานที่ต้องดำเนินการ"
+      },
+      "accountsReceivable": {
+        "title": "แดชบอร์ดลูกหนี้การค้า",
+        "description": "ลูกหนี้ การรับชำระจากลูกค้า และสถานะการผ่านรายการ"
+      },
+      "asset": {
+        "title": "แดชบอร์ดสินทรัพย์",
+        "description": "มูลค่าสินทรัพย์ถาวร การขึ้นทะเบียน และการจำหน่าย"
+      }
+    },
     "documents": {
       "journalVoucher": {
         "title": "รายการใบสำคัญรายวัน",
@@ -259,6 +273,16 @@
         "title": "รายการรับชำระลูกหนี้",
         "description": "การรับชำระและจัดสรรยอดลูกค้า",
         "single": "การรับชำระลูกหนี้"
+      },
+      "assetRegister": {
+        "title": "ทะเบียนสินทรัพย์",
+        "description": "รายการสินทรัพย์ถาวรและมูลค่าปัจจุบัน",
+        "single": "สินทรัพย์"
+      },
+      "assetDisposal": {
+        "title": "รายการจำหน่ายสินทรัพย์",
+        "description": "การเลิกใช้ ขาย และตัดจำหน่ายสินทรัพย์",
+        "single": "การจำหน่ายสินทรัพย์"
       },
       "export": "ส่งออก",
       "new": "สร้างใหม่",
@@ -4470,6 +4494,8 @@
     "reportSchedule": "กำหนดการ",
     "reportHistory": "ประวัติ",
     "accounting": "บัญชี",
+    "generalLedger": "บัญชีแยกประเภททั่วไป",
+    "glDashboard": "แดชบอร์ด",
     "journalVoucher": "ใบสำคัญรายวัน",
     "templateVoucher": "แม่แบบใบสำคัญ",
     "recurringVoucher": "ใบสำคัญประจำ",
@@ -4480,8 +4506,13 @@
     "apPayment": "การชำระเงิน",
     "apPaymentApproval": "อนุมัติการชำระเงิน",
     "accountsReceivable": "ลูกหนี้การค้า",
+    "arDashboard": "แดชบอร์ด",
     "arInvoice": "ใบแจ้งหนี้",
     "arReceipt": "ใบรับชำระ",
+    "asset": "สินทรัพย์",
+    "assetDashboard": "แดชบอร์ด",
+    "assetRegister": "ทะเบียนสินทรัพย์",
+    "assetDisposal": "จำหน่ายสินทรัพย์",
     "financialReports": "รายงานทางการเงิน",
     "accountingDesc": "รายการบัญชี ระบบใบสำคัญอัตโนมัติ และการวิเคราะห์ทางการเงิน",
     "configDesc": "ข้อมูลหลักและการตั้งค่าระบบ",
