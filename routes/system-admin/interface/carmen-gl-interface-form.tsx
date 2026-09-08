@@ -158,9 +158,9 @@ export default function CarmenGlInterfaceForm() {
           error={form.formState.errors.authorize_token?.message}
           type="password"
           revealLabels={{ show: t("showSecret"), hide: t("hideSecret") }}
-          // hint เฉพาะของ brand นี้ ไม่ใช่ `t("apiKeyHint")` ที่ POS/PMS ใช้ — backend ประกอบ
-          // header เป็น `Authorization: direct ${token}` เอง ค่าที่มี "direct " ติดมาด้วยจึงกลาย
-          // เป็น `direct direct ...` แล้ว Carmen 4 ตอบ 401 โดยที่ฝั่งเราดูเหมือนตั้งค่าครบทุกอย่าง
+          // hint เฉพาะของ brand นี้ ไม่ใช่ `t("apiKeyHint")` ที่ POS/PMS ใช้ — backend ส่งค่านี้
+          // เป็น Authorization header ตรง ๆ ทั้งก้อน (`Authorization: ${token}`) ค่าที่ไม่มี
+          // scheme นำหน้าจึงได้ 401 จาก Carmen 4 โดยที่ฝั่งเราดูเหมือนตั้งค่าครบทุกช่อง
           hint={tc("authorizeTokenHint")}
           className="sm:col-span-2"
         />
