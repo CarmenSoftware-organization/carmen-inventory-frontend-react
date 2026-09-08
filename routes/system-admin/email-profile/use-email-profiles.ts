@@ -42,8 +42,10 @@ export function useEmailProfiles() {
     value,
     isLoading: query.isPending && !isNotFound,
     isError: query.isError && !isNotFound,
-    // เขียนกลับทั้งก้อนเสมอ และคงลำดับ profiles ไว้ — backend คืนค่ารหัสผ่านเดิม
-    // โดยจับคู่ตามลำดับที่อ่านได้ ถ้าเรียงใหม่หรือกรองทิ้ง รหัสผ่านจะสลับโปรไฟล์
+    // เขียนกลับทั้งก้อนเสมอ (PUT ทับทั้ง value ไม่ใช่ partial update) — backend จับคู่
+    // รหัสผ่านที่เก็บไว้ด้วย `id` ของโปรไฟล์ (ไม่ใช่ตามตำแหน่งใน array อีกต่อไป หลัง Task B1
+    // แก้เป็น id-based ใน commit 49162675a) โปรไฟล์ที่ถือค่า mask แต่ `id` ไม่ตรงกับของที่
+    // เก็บไว้ backend จะ throw — โปรไฟล์ใหม่จึงต้องมีรหัสผ่านจริงเสมอ ห้ามส่ง mask
     save: (next: EmailProfilesValue, opts?: { onSuccess?: () => void }) =>
       upsert.mutate(
         {
