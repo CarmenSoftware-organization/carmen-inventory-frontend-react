@@ -169,18 +169,36 @@ manual checklist (ผู้ใช้ตรวจเอง):
 5. activity sheet ของ PO ขึ้นรายการส่ง พร้อมผู้รับและโปรไฟล์ที่ใช้
 6. เคส "ไม่มีโปรไฟล์" / "SMTP ผิด" / "PO ยัง draft" ต้องขึ้นข้อความที่อ่านออก
 
-## Open item ที่ต้องเคลียร์ก่อนลงมือขั้นที่ 3
+## การผลิต PDF ของ PO (เคลียร์แล้ว 2026-09-08)
 
-**micro-report มี endpoint คืน PDF binary ให้ server เรียกหรือยัง** — ของที่ใช้อยู่
-ตอนนี้คือ `print-viewer` ที่คืน URL สำหรับเบราว์เซอร์ ถ้ายังไม่มีเส้นคืน byte
-ขอบเขตงานจะบานไปอีกหนึ่งรีโป (micro-report) และต้องแยกเป็นงานก่อนหน้า
-ระหว่างนั้นทางเลี่ยงคือปล่อยฟีเจอร์โดยไม่มีไฟล์แนบก่อน (checkbox ปิดไว้) ซึ่ง
-ผู้ใช้ไม่ได้ต้องการ จึงถือว่าเป็นสิ่งที่ต้องยืนยันก่อน ไม่ใช่ความเสี่ยงที่รับได้
+เส้นทางที่เอกสารพิมพ์อยู่ทุกวันนี้ **ไม่คืนไฟล์** — `micro-report`
+(`ViewReportWithExternalData` → `render.ViewerClient.View()`) ยิง
+`POST {REPORT_VIEWER_URL}/api/Report/viewer` ด้วย payload `{Title, Name, File, Data}`
+แล้วได้ `{ url }` ซึ่งเป็นลิงก์หน้า viewer สำหรับเบราว์เซอร์ ส่วน
+`POST /api/reports/generate` ของ micro-report คืน byte ได้ก็จริงแต่เป็นเส้นของ
+รายงานที่ลงทะเบียนไว้ ไม่ใช่เอกสาร PO และ `report-render` (`POST /render`) ก็คืน byte
+แต่ payload เป็น columns/rows คนละแบบกับ viewer
+
+**ทางที่ใช้: `POST {REPORT_VIEWER_URL}/api/Report/Export/Pdf`** (ยืนยันแล้วว่า route
+มีจริงบน `https://report.blueledgers.cloud` — POST เปล่าตอบ 500 ไม่ใช่ 404)
+
+- เพิ่ม method ใน `service/render/viewer_client.go` เช่น `ExportPDF(ctx, req)` ที่ใช้
+  `ViewerRequest` ชุดเดิม แต่อ่าน response เป็น byte แทน JSON `{url}`
+- เพิ่ม service method คู่กับ `ViewReportWithExternalData` (เช่น
+  `ExportReportWithExternalData`) และ route ใหม่ใน `report_controller.go`
+  เช่น `POST /api/:buCode/report/export-pdf` คืน `application/pdf`
+- gateway เรียกเส้นนี้แล้วเอา byte ไปเป็น attachment
+- **ต้องยืนยันตอนลงมือ:** payload ของ `/api/Report/Export/Pdf` เหมือน `/api/Report/viewer`
+  จริงหรือไม่ และคืน PDF byte ตรง ๆ หรือคืน JSON ที่มี url/base64 — ทดสอบด้วย curl
+  พร้อม template จริงก่อนเขียนโค้ดฝั่ง Go เป็นขั้นแรกของงานส่วนนี้
+- **micro-report ต้องขึ้นก่อน gateway** — เป็นอีกรีโปหนึ่ง (Go, deploy แยก) และมีกับดัก
+  พอร์ต: อาการ print 500 "fetch failed" คือ micro-report ไม่ได้อยู่ที่ 6015 ไม่ใช่บั๊ก FE
 
 ## ลำดับ deploy
 
 backend ก่อนเสมอ — FE ที่ขึ้นก่อนจะเรียก endpoint ที่ยังไม่มี
 
-1. `carmen-turborepo-backend-v2` (wildcard secret path, send-with-config รองรับ
+1. `micro-report` (viewer client `ExportPDF` + route `export-pdf`)
+2. `carmen-turborepo-backend-v2` (wildcard secret path, send-with-config รองรับ
    cc/attachment, endpoint ส่ง PO, enum activity + migration, app-id allowlist)
-2. `carmen-inventory-frontend-react` (หน้าตั้งค่า + dialog ส่ง)
+3. `carmen-inventory-frontend-react` (หน้าตั้งค่า + dialog ส่ง)
