@@ -78,7 +78,10 @@ export const ProductCell = memo(function ProductCell({
   if (isDisabled || isRowLocked) {
     return (
       <div className="flex flex-col gap-0.5">
-        <div className="flex items-center">
+        {/* min-h-6 เท่ากับที่ LocationCell ตรึงไว้ — ตอนนี้ความสูงมาจากปุ่ม
+            icon-xs ของ InventoryTooltip อยู่แล้ว เขียนไว้ให้เป็นสัญญา ไม่ใช่
+            ผลพลอยได้ วันที่ไอคอนเปลี่ยนขนาดสองคอลัมน์จะได้ไม่หลุดจากกัน */}
+        <div className="flex min-h-6 items-center">
           {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
           <p
             className="min-w-0 flex-1 truncate text-left text-xs font-semibold"

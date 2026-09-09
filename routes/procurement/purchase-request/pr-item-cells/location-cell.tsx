@@ -63,7 +63,11 @@ export const LocationCell = memo(function LocationCell({
   if (isDisabled || isRowLocked) {
     return (
       <div className="flex flex-col gap-0.5">
-        <div className="flex min-w-0 items-center justify-between gap-1.5">
+        {/* min-h-6 = ความสูงปุ่ม icon-xs ของ InventoryTooltip ในคอลัมน์ Product
+            สองคอลัมน์นี้อยู่ติดกัน บรรทัดรอง (code / ชื่อรอง) ต้องอยู่ระดับเดียวกัน
+            ที่นี่มีแค่จุดสถานะ size-4 ถ้าไม่ตรึงไว้ แถวจะเตี้ยกว่า 8px — และเตี้ย
+            ๆ สูง ๆ สลับกันเองด้วยเมื่อแถวไหนไม่มีสถานะ (StatusCell คืน null) */}
+        <div className="flex min-h-6 min-w-0 items-center justify-between gap-1.5">
           {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
           <p
             className="min-w-0 truncate text-xs font-semibold"

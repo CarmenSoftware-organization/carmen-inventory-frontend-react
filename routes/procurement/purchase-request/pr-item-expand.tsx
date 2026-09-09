@@ -180,7 +180,10 @@ export function PrItemExpand({
           (ชื่อผู้ขายที่ยาวกว่านั้น lookup ตัดให้เอง) · ผลคือคอลัมน์ 3
           (Currency) ไม่ตรงกับคอลัมน์ Requested ของตารางข้างบนแล้ว แลกกับ
           การไม่ปล่อยให้ Vendor กินที่ฟรีทั้งแถว */}
-      <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
+      {/* ระยะ label→value = gap-0.5 เท่ากับชื่อ→ชื่อรองของเซลล์ Location/Product
+          ในตารางข้างบน (ค่า default ของ Field คือ 6px ซึ่งห่างกว่า) เขียนที่กริด
+          ที่เดียวไม่ไล่ใส่ราย Field — Field ที่เพิ่มทีหลังจะได้ระยะเดียวกันเอง */}
+      <div className="grid grid-cols-1 gap-x-2 gap-y-3 [&>[data-slot=field]]:gap-0.5 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
         {/* Pricelist */}
         <Field>
           <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
