@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { PERMISSION_DENIED_EVENT } from "@/components/permission-denied-dialog";
-import type { BusinessUnitLicense } from "@/types/profile";
+import type { BusinessUnitLicense } from "@/types/license";
 
 /**
  * `ConfigListTemplate` เป็น template ที่หน้า config **ทุกหน้า** ใช้ร่วมกัน
@@ -20,6 +20,13 @@ vi.mock("use-intl", () => ({
 
 const profile = vi.fn();
 vi.mock("@/hooks/use-profile", () => ({ useProfile: () => profile() }));
+
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
+const BU_ID = "bu-1";
 
 vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => true }));
 
@@ -121,8 +128,10 @@ function setup(buLicense: BusinessUnitLicense) {
   });
   // admin → RBAC ผ่านทุกอย่าง เหลือ license เป็นตัวเดียวที่ยังบล็อกได้
   profile.mockReturnValue({
-    defaultBu: { system_level: "admin", permissions: [] },
-    license: buLicense,
+    defaultBu: { id: BU_ID, system_level: "admin", permissions: [] },
+  });
+  licenseQuery.mockReturnValue({
+    data: { business_unit: { [BU_ID]: buLicense } },
   });
 
   render(
@@ -214,8 +223,10 @@ describe("ConfigListTemplate — license gate on writes", () => {
       LICENSE_ENFORCEMENT: false,
     });
     profile.mockReturnValue({
-      defaultBu: { system_level: "admin", permissions: [] },
-      license: license({ state: "expired" }),
+      defaultBu: { id: BU_ID, system_level: "admin", permissions: [] },
+    });
+    licenseQuery.mockReturnValue({
+      data: { business_unit: { [BU_ID]: license({ state: "expired" }) } },
     });
     render(
       <MemoryRouter>

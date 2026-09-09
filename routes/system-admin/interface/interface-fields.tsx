@@ -1,4 +1,5 @@
-import { useId } from "react";
+import { useId, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +17,7 @@ import {
  *
  * @param props.field - ผลของ `form.register("...")`
  * @param props.hint - ข้อความช่วยใต้ช่อง (เช่นบอกว่า api_key ที่เป็น mask ไม่ต้องพิมพ์ใหม่)
+ * @param props.revealLabels - ป้าย aria ของปุ่มแสดง/ซ่อน จำเป็นเมื่อ `type="password"`
  * @returns React element ของ text field
  */
 export function TextField({
@@ -26,6 +28,7 @@ export function TextField({
   type,
   hint,
   className,
+  revealLabels,
 }: {
   readonly label: string;
   readonly field: UseFormRegisterReturn;
@@ -34,12 +37,40 @@ export function TextField({
   readonly type?: "text" | "password";
   readonly hint?: string;
   readonly className?: string;
+  /** ป้าย aria ของปุ่มแสดง/ซ่อน — ต้องส่งเมื่อ `type="password"` */
+  readonly revealLabels?: { readonly show: string; readonly hide: string };
 }) {
   const id = useId();
+  const [revealed, setRevealed] = useState(false);
+  const isSecret = type === "password";
   return (
     <Field className={className}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input {...field} id={id} type={type} placeholder={placeholder} />
+      <div className="relative">
+        <Input
+          {...field}
+          id={id}
+          type={isSecret && !revealed ? "password" : "text"}
+          placeholder={placeholder}
+          className={isSecret ? "pr-8" : undefined}
+        />
+        {isSecret && (
+          <button
+            type="button"
+            // ไม่ใช่ปุ่มของฟอร์ม — กัน Enter/tab ไปโดนแทนปุ่ม Save
+            tabIndex={-1}
+            onClick={() => setRevealed((v) => !v)}
+            aria-label={revealed ? revealLabels?.hide : revealLabels?.show}
+            className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 flex w-8 items-center justify-center"
+          >
+            {revealed ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
+          </button>
+        )}
+      </div>
       {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
       <FieldError>{error}</FieldError>
     </Field>
@@ -72,7 +103,17 @@ export function EnumField<T extends string>({
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Select value={value} onValueChange={(v) => onChange(v as T)}>
+      <Select
+        value={value}
+        // กรองค่าที่ไม่อยู่ใน `options` ทิ้ง — Radix ยิง onValueChange("") ใส่เอง เมื่อ
+        // `value` ถูกเปลี่ยนหลัง mount (เช่น form.reset ด้วยค่าที่โหลดมาจาก API) ผ่าน
+        // hidden native <select> ที่มันซ่อนไว้ให้ form ค่าว่างนั้นจะทับค่าจริงใน form state
+        // แล้ว field ค้างเป็น "" จน schema ไม่ผ่านและกด Save ไม่ติดโดยไม่มี error ให้เห็น
+        // ค่าว่างไม่ใช่ตัวเลือกที่ถูกต้องของ field ประเภทนี้อยู่แล้ว จึงกันตั้งแต่ตรงนี้
+        onValueChange={(v) => {
+          if (options.includes(v as T)) onChange(v as T);
+        }}
+      >
         <SelectTrigger id={id} size="sm" className="w-full text-sm">
           <SelectValue />
         </SelectTrigger>

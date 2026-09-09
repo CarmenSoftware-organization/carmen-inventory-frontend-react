@@ -1326,6 +1326,16 @@
         "balance_sheet": "Balance sheet",
         "income_statement": "Income statement",
         "statistic": "Statistic"
+      },
+      "importCarmenGl": {
+        "action": "Import from Carmen GL",
+        "importing": "Importing…",
+        "confirmTitle": "Import chart of accounts from Carmen GL?",
+        "confirmDesc": "Accounts are pulled from the Carmen GL interface configured for this business unit and written in one all-or-nothing transaction. How duplicate codes and codes that exist only here are treated comes from the sync policy on the interface settings page.",
+        "success": "Chart of accounts imported",
+        "summary": "Created {created}, updated {updated}, skipped {skipped}, deleted {deleted}",
+        "failed": "Import failed",
+        "failedDesc": "Could not import the chart of accounts. Nothing was changed."
       }
     },
     "accountMapping": {
@@ -1710,6 +1720,7 @@
       "description": "Description",
       "ipAddress": "IP Address",
       "searchEntityType": "Search record type...",
+      "searchAction": "Search action...",
       "generalInfo": "General Information",
       "dataChanges": "Data Changes",
       "oldData": "Before",
@@ -2048,7 +2059,21 @@
           "options": "Options",
           "optionsDesc": "Account mapping and GL posting behavior.",
           "setAccountMappingAllItems": "Set account mapping for all items",
-          "allowPostingTransferToGl": "Allow posting the transfer to GL"
+          "allowPostingTransferToGl": "Allow posting the transfer to GL",
+          "syncPolicy": "Chart of accounts sync",
+          "syncPolicyDesc": "How an import reconciles Carmen 4 with the accounts here. Applies both to the Import button on the chart of accounts page and to scheduled runs.",
+          "onDuplicate": "When a code exists on both sides",
+          "onDuplicateOption": {
+            "skip": "Keep ours",
+            "upsert": "Overwrite with Carmen 4",
+            "error": "Cancel the whole import"
+          },
+          "onLocalOnly": "Codes that exist only here",
+          "onLocalOnlyOption": {
+            "keep": "Keep them",
+            "delete": "Delete them"
+          },
+          "authorizeTokenHint": "Include the scheme prefix, e.g. “direct <token>” — the value is sent as the Authorization header verbatim. Leave untouched to keep the stored key."
         }
       },
       "pos": {
@@ -2085,6 +2110,66 @@
         "postingDesc": "Which postings Carmen pulls from the PMS.",
         "postCityLedger": "Post city ledger",
         "postCreditCard": "Post credit card"
+      },
+      "showSecret": "Show",
+      "hideSecret": "Hide"
+    },
+    "emailProfile": {
+      "title": "Email Profiles",
+      "desc": "Sender profiles used to email purchase orders and other documents to vendors.",
+      "entity": "Email profile",
+      "add": "Add profile",
+      "empty": "No email profiles yet. Add one to start sending documents by email.",
+      "loadError": "Could not load email profiles",
+      "table": {
+        "name": "Name",
+        "from": "From",
+        "status": "Status"
+      },
+      "defaultBadge": "Default",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "\"{name}\" is now the default profile",
+      "cannotDeleteDefaultTooltip": "This is the default profile — set another profile as default first",
+      "testSend": "Send test",
+      "testSentSuccess": "Test email sent to {recipient}",
+      "testSentFailure": "Test email failed",
+      "deleteTitle": "Delete email profile",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "dialog": {
+        "namePlaceholder": "e.g. Purchasing",
+        "enabled": "Enabled",
+        "smtpSection": "SMTP server",
+        "host": "Host",
+        "port": "Port",
+        "secure": "Implicit TLS",
+        "password": "Password",
+        "passwordHint": "Leave unchanged to keep the stored password.",
+        "senderSection": "Sender",
+        "fromEmail": "From email",
+        "fromName": "From name",
+        "replyTo": "Reply-to",
+        "defaultCc": "Default CC",
+        "defaultCcHint": "Separate multiple addresses with a comma, semicolon or space.",
+        "templateSection": "Templates",
+        "subjectTemplate": "Subject template",
+        "bodyTemplate": "Body template",
+        "profileName": "Profile name",
+        "secureHint": "Turn on for implicit TLS (usually port 465) — port 587 normally uses STARTTLS, so leave it off.",
+        "passwordIsSet": "A password is set",
+        "changePassword": "Change password",
+        "keepPassword": "Keep the stored password",
+        "note": "Note",
+        "notePlaceholder": "Internal note — never sent with the email",
+        "advancedSection": "Advanced settings"
+      },
+      "test": {
+        "title": "Send test email",
+        "description": "Send a test message through “{name}” to confirm the SMTP settings work.",
+        "toLabel": "Send to",
+        "send": "Send test",
+        "invalidEmail": "Enter a valid email address"
       }
     }
   },
@@ -3686,7 +3771,36 @@
       "rejected": "Purchase order rejected",
       "sentBack": "Purchase order sent back",
       "closed": "Purchase order closed",
-      "deleteProductLine": "Remove this product and all its locations"
+      "deleteProductLine": "Remove this product and all its locations",
+      "sendEmail": {
+        "button": "Send to vendor",
+        "title": "Send purchase order to vendor",
+        "desc": "Email {poNo} to the vendor with the PO attached as a PDF.",
+        "profile": "Sender profile",
+        "profilePlaceholder": "Select a sender profile",
+        "noProfiles": "No enabled email profile is set up for this business unit yet.",
+        "goToSettings": "Go to email profile settings",
+        "loadError": "Could not load email profiles",
+        "to": "To",
+        "toPlaceholder": "vendor@example.com",
+        "toHint": "Press Enter to add",
+        "toRequired": "Add at least one recipient",
+        "cc": "CC",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "Subject",
+        "subjectRequired": "Enter a subject",
+        "body": "Message",
+        "bodyRequired": "Enter a message",
+        "attachPdf": "Attach purchase order (PDF)",
+        "add": "Add",
+        "remove": "Remove {email}",
+        "duplicateEmail": "Already added",
+        "sending": "Sending…",
+        "send": "Send",
+        "sendSuccess": "Purchase order sent to the vendor.",
+        "sendPartial": "Sent, but delivery failed for: {emails}",
+        "sendFailed": "The email could not be delivered to any recipient."
+      }
     },
     "creditNote": {
       "entity": "Credit Note",
@@ -4407,6 +4521,7 @@
     "workflowPurchaseOrder": "Purchase Order",
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
+    "emailProfile": "Email Profiles",
     "period": "Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",

@@ -7,6 +7,7 @@ import { CoaDialog } from "./coa-dialog";
 import { useCoaTable } from "./use-coa-table";
 import { COA_FILTER_FIELDS } from "./coa-filter-fields";
 import CoaCard from "./coa-card";
+import { CoaImportCarmenGlButton } from "./coa-import-carmen-gl-button";
 
 /**
  * หน้ารายการรหัสบัญชี — master data ของรหัสบัญชีที่ระบบบัญชีปลายทางใช้ลงรายการ
@@ -30,6 +31,7 @@ export default function CoaComponent() {
       useTable={useCoaTable}
       pageKey={LIST_PAGE_KEYS.CHART_OF_ACCOUNT}
       filterFields={COA_FILTER_FIELDS}
+      extraActions={<CoaImportCarmenGlButton />}
       // ยังไม่ส่ง defaultSort — backend เพิ่งเปิด endpoint ยังไม่รู้ว่ารับ sort
       // ฟิลด์ไหนบ้าง ส่งไปมั่วแล้วเจอ 400 ทั้งหน้า ให้มันเรียงตาม default ของ
       // ฝั่งหลังบ้านไปก่อน ยืนยันแล้วค่อยใส่ `defaultSort="code:asc"`

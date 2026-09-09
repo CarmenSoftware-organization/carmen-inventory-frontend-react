@@ -1326,6 +1326,16 @@
         "balance_sheet": "งบแสดงฐานะการเงิน",
         "income_statement": "งบกำไรขาดทุน",
         "statistic": "สถิติ"
+      },
+      "importCarmenGl": {
+        "action": "นำเข้าจาก Carmen GL",
+        "importing": "กำลังนำเข้า…",
+        "confirmTitle": "นำเข้าผังบัญชีจาก Carmen GL?",
+        "confirmDesc": "ระบบจะดึงผังบัญชีจาก interface Carmen GL ที่ตั้งค่าไว้ของหน่วยธุรกิจนี้ แล้วเขียนในทรานแซกชันเดียวแบบทั้งหมดหรือไม่เขียนเลย การจัดการรหัสซ้ำและรหัสที่มีเฉพาะในระบบนี้ เป็นไปตามนโยบายการซิงก์ในหน้าตั้งค่า interface",
+        "success": "นำเข้าผังบัญชีแล้ว",
+        "summary": "เพิ่ม {created} · แก้ไข {updated} · ข้าม {skipped} · ลบ {deleted}",
+        "failed": "นำเข้าไม่สำเร็จ",
+        "failedDesc": "นำเข้าผังบัญชีไม่สำเร็จ ไม่มีการเปลี่ยนแปลงข้อมูล"
       }
     },
     "accountMapping": {
@@ -1710,6 +1720,7 @@
       "description": "รายละเอียด",
       "ipAddress": "ที่อยู่ IP",
       "searchEntityType": "ค้นหาประเภทข้อมูล...",
+      "searchAction": "ค้นหาการกระทำ...",
       "generalInfo": "ข้อมูลทั่วไป",
       "dataChanges": "การเปลี่ยนแปลงข้อมูล",
       "oldData": "ก่อนเปลี่ยน",
@@ -2048,7 +2059,21 @@
           "options": "ตัวเลือก",
           "optionsDesc": "การจับคู่บัญชีและการส่งข้อมูลไปยัง GL",
           "setAccountMappingAllItems": "ตั้งค่าการจับคู่บัญชีให้ทุกรายการ",
-          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL"
+          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL",
+          "syncPolicy": "การซิงก์ผังบัญชี",
+          "syncPolicyDesc": "กำหนดว่าการนำเข้าจะปรับข้อมูลของ Carmen 4 เข้ากับผังบัญชีที่นี่อย่างไร มีผลทั้งกับปุ่มนำเข้าในหน้าผังบัญชีและการรันตามกำหนดเวลา",
+          "onDuplicate": "เมื่อรหัสมีทั้งสองฝั่ง",
+          "onDuplicateOption": {
+            "skip": "คงของเดิมไว้",
+            "upsert": "เขียนทับด้วยค่าจาก Carmen 4",
+            "error": "ยกเลิกการนำเข้าทั้งชุด"
+          },
+          "onLocalOnly": "รหัสที่มีเฉพาะในระบบนี้",
+          "onLocalOnlyOption": {
+            "keep": "เก็บไว้",
+            "delete": "ลบออก"
+          },
+          "authorizeTokenHint": "ต้องใส่ scheme นำหน้าด้วย เช่น “direct <token>” — ค่านี้ถูกส่งเป็น Authorization header ตรง ๆ ทั้งก้อน — ไม่แตะช่องนี้ = ใช้ค่าเดิมที่บันทึกไว้"
         }
       },
       "pos": {
@@ -2085,6 +2110,66 @@
         "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
         "postCityLedger": "ดึงรายการ City Ledger",
         "postCreditCard": "ดึงรายการบัตรเครดิต"
+      },
+      "showSecret": "แสดง",
+      "hideSecret": "ซ่อน"
+    },
+    "emailProfile": {
+      "title": "โปรไฟล์อีเมล",
+      "desc": "โปรไฟล์ผู้ส่งที่ใช้ส่งใบสั่งซื้อและเอกสารอื่น ๆ ให้ผู้ขายทางอีเมล",
+      "entity": "โปรไฟล์อีเมล",
+      "add": "เพิ่มโปรไฟล์",
+      "empty": "ยังไม่มีโปรไฟล์อีเมล เพิ่มโปรไฟล์เพื่อเริ่มส่งเอกสารทางอีเมล",
+      "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+      "table": {
+        "name": "ชื่อ",
+        "from": "จาก",
+        "status": "สถานะ"
+      },
+      "defaultBadge": "ค่าเริ่มต้น",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "setDefault": "ตั้งเป็นค่าเริ่มต้น",
+      "setDefaultSuccess": "ตั้ง \"{name}\" เป็นโปรไฟล์เริ่มต้นแล้ว",
+      "cannotDeleteDefaultTooltip": "นี่คือโปรไฟล์เริ่มต้น — ตั้งโปรไฟล์อื่นเป็นค่าเริ่มต้นก่อนจึงจะลบได้",
+      "testSend": "ทดสอบส่ง",
+      "testSentSuccess": "ส่งอีเมลทดสอบไปที่ {recipient} แล้ว",
+      "testSentFailure": "ส่งอีเมลทดสอบไม่สำเร็จ",
+      "deleteTitle": "ลบโปรไฟล์อีเมล",
+      "deleteConfirm": "ลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "dialog": {
+        "namePlaceholder": "เช่น ฝ่ายจัดซื้อ",
+        "enabled": "เปิดใช้งาน",
+        "smtpSection": "เซิร์ฟเวอร์ SMTP",
+        "host": "โฮสต์",
+        "port": "พอร์ต",
+        "secure": "Implicit TLS",
+        "password": "รหัสผ่าน",
+        "passwordHint": "เว้นไว้ = ใช้รหัสผ่านเดิม",
+        "senderSection": "ผู้ส่ง",
+        "fromEmail": "อีเมลผู้ส่ง",
+        "fromName": "ชื่อผู้ส่ง",
+        "replyTo": "ตอบกลับไปที่",
+        "defaultCc": "สำเนาถึงเริ่มต้น",
+        "defaultCcHint": "คั่นหลายที่อยู่ด้วยเครื่องหมายจุลภาค อัฒภาค หรือช่องว่าง",
+        "templateSection": "เทมเพลต",
+        "subjectTemplate": "เทมเพลตหัวเรื่อง",
+        "bodyTemplate": "เทมเพลตเนื้อหา",
+        "profileName": "ชื่อโปรไฟล์",
+        "secureHint": "เปิดเมื่อใช้ implicit TLS (มักเป็นพอร์ต 465) — พอร์ต 587 ปกติใช้ STARTTLS จึงปิดไว้",
+        "passwordIsSet": "ตั้งรหัสผ่านไว้แล้ว",
+        "changePassword": "เปลี่ยนรหัสผ่าน",
+        "keepPassword": "ใช้รหัสผ่านเดิม",
+        "note": "บันทึกภายใน",
+        "notePlaceholder": "บันทึกสำหรับผู้ดูแล ไม่ถูกส่งไปกับอีเมล",
+        "advancedSection": "ตั้งค่าขั้นสูง"
+      },
+      "test": {
+        "title": "ส่งอีเมลทดสอบ",
+        "description": "ส่งข้อความทดสอบผ่าน “{name}” เพื่อยืนยันว่าการตั้งค่า SMTP ใช้งานได้จริง",
+        "toLabel": "ส่งไปที่",
+        "send": "ส่งทดสอบ",
+        "invalidEmail": "กรอกอีเมลให้ถูกรูปแบบ"
       }
     }
   },
@@ -3681,7 +3766,36 @@
       "rejected": "ไม่อนุมัติใบสั่งซื้อแล้ว",
       "sentBack": "ส่งกลับใบสั่งซื้อแล้ว",
       "closed": "ปิดใบสั่งซื้อแล้ว",
-      "deleteProductLine": "ลบสินค้านี้พร้อมทุกที่เก็บของมัน"
+      "deleteProductLine": "ลบสินค้านี้พร้อมทุกที่เก็บของมัน",
+      "sendEmail": {
+        "button": "ส่งให้ผู้ขาย",
+        "title": "ส่งใบสั่งซื้อให้ผู้ขาย",
+        "desc": "ส่งอีเมล {poNo} ให้ผู้ขาย พร้อมแนบไฟล์ใบสั่งซื้อเป็น PDF",
+        "profile": "โปรไฟล์ผู้ส่ง",
+        "profilePlaceholder": "เลือกโปรไฟล์ผู้ส่ง",
+        "noProfiles": "หน่วยธุรกิจนี้ยังไม่มีโปรไฟล์อีเมลที่เปิดใช้งานอยู่",
+        "goToSettings": "ไปตั้งค่าโปรไฟล์อีเมล",
+        "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+        "to": "ถึง",
+        "toPlaceholder": "vendor@example.com",
+        "toHint": "กด Enter เพื่อเพิ่ม",
+        "toRequired": "ต้องมีผู้รับอย่างน้อยหนึ่งคน",
+        "cc": "สำเนาถึง",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "หัวเรื่อง",
+        "subjectRequired": "กรอกหัวเรื่อง",
+        "body": "ข้อความ",
+        "bodyRequired": "กรอกข้อความ",
+        "attachPdf": "แนบไฟล์ใบสั่งซื้อ (PDF)",
+        "add": "เพิ่ม",
+        "remove": "ลบ {email}",
+        "duplicateEmail": "เพิ่มไว้แล้ว",
+        "sending": "กำลังส่ง…",
+        "send": "ส่ง",
+        "sendSuccess": "ส่งใบสั่งซื้อให้ผู้ขายเรียบร้อยแล้ว",
+        "sendPartial": "ส่งแล้ว แต่ส่งไม่ถึง: {emails}",
+        "sendFailed": "ส่งอีเมลไม่สำเร็จ ไม่ถึงผู้รับรายใดเลย"
+      }
     },
     "creditNote": {
       "entity": "ใบลดหนี้",
@@ -4397,6 +4511,7 @@
     "workflowPurchaseOrder": "ใบสั่งซื้อ",
     "workflowStoreRequisition": "ใบเบิกของ",
     "interface": "การเชื่อมต่อระบบภายนอก",
+    "emailProfile": "โปรไฟล์อีเมล",
     "period": "รอบบัญชี",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",

@@ -2,6 +2,7 @@ import { AlertTriangle, Building2, RotateCw } from "lucide-react";
 import { CarmenLogo } from "@/components/icons/carmen-logo";
 import { useTranslations } from "use-intl";
 import { useLogout } from "@/hooks/use-logout";
+import { useLicenseQuery } from "@/hooks/use-license-query";
 import { useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
@@ -12,6 +13,14 @@ import { EyeBrow } from "@/components/ui/eye-brow";
  * รอจน useProfile โหลดเสร็จ (มี data หรือ error) ก่อน render children
  * ป้องกัน flash ของ "not found" / error UI ใน child components ที่ depend
  * บน profile/buCode
+ *
+ * รอ `useLicenseQuery()` ด้วย — license ย้ายออกจาก profile ไปเป็น endpoint ของตัวเองแล้ว
+ * ถ้าไม่รอ เมนู/แบนเนอร์จะวาดแบบ "ไม่จำกัด" ก่อนแล้วหดทีหลัง และ interface entitlement
+ * (ซึ่งบังคับใช้เสมอ ไม่ขึ้นกับสวิตช์ enforcement) จะโชว์ทุก brand ชั่วขณะ · ทั้งสองก้อน
+ * ยิงคู่ขนานกัน ไม่ต่อคิว จึงเสียแค่ RTT ที่ช้ากว่าของสองเส้น
+ *
+ * **license error ไม่ขึ้นหน้า error** — เป็นก้อนเสริม ผู้บริโภค fail-open อยู่แล้ว
+ * (เหมือน gateway รุ่นเก่าที่ยังไม่มี endpoint นี้) การบล็อกทั้งแอปเพราะมันล้มจะแย่กว่า
  *
  * และกันเคส "โปรไฟล์โหลดผ่าน แต่ไม่มี business unit สักอัน" ไว้ด้วย — เกิดกับ
  * คนที่เพิ่งสมัครแล้วยังไม่มีใคร assign เข้าโรงแรมไหน ปล่อยผ่านไปทุกหน้าจะขึ้น
@@ -24,8 +33,9 @@ export function ProfileGate({
   readonly children: React.ReactNode;
 }) {
   const { data, isPending, isError, refetch, fullName } = useProfile();
+  const license = useLicenseQuery();
 
-  if (isPending || (!data && !isError)) {
+  if (isPending || license.isPending || (!data && !isError)) {
     return <ProfileLoading />;
   }
 

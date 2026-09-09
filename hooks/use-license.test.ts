@@ -8,10 +8,17 @@ import {
 } from "./use-license";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import type { ModuleDto } from "@/constant/module-list";
-import type { BusinessUnitLicense } from "@/types/profile";
+import type { BusinessUnitLicense } from "@/types/license";
 
 const profile = vi.fn();
 vi.mock("@/hooks/use-profile", () => ({ useProfile: () => profile() }));
+
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
+const BU_ID = "bu-1";
 
 const makeLicense = (
   overrides: Partial<BusinessUnitLicense> = {},
@@ -258,8 +265,11 @@ describe("useLicense — สวิตช์ LICENSE_ENFORCEMENT", () => {
 
   function setup(config: Parameters<typeof setRuntimeConfigForTests>[0]) {
     setRuntimeConfigForTests(config);
-    profile.mockReturnValue({
-      license: makeLicense({ state: "none", features: [] }),
+    profile.mockReturnValue({ defaultBu: { id: BU_ID } });
+    licenseQuery.mockReturnValue({
+      data: {
+        business_unit: { [BU_ID]: makeLicense({ state: "none", features: [] }) },
+      },
     });
     return renderHook(() => useLicense()).result;
   }
@@ -293,8 +303,13 @@ describe("useLicense — สวิตช์ LICENSE_ENFORCEMENT", () => {
 
   it("ยังไม่ได้โหลด runtime config เลย → ไม่ throw และได้ enforced=false", () => {
     setRuntimeConfigForTests(null);
-    profile.mockReturnValue({
-      license: makeLicense({ state: "expired", features: [] }),
+    profile.mockReturnValue({ defaultBu: { id: BU_ID } });
+    licenseQuery.mockReturnValue({
+      data: {
+        business_unit: {
+          [BU_ID]: makeLicense({ state: "expired", features: [] }),
+        },
+      },
     });
     const { result } = renderHook(() => useLicense());
     expect(result.current.enforced).toBe(false);

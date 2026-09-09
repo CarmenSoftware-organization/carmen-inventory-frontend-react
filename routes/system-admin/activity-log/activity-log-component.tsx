@@ -41,12 +41,34 @@ import { DocumentListHeader } from "@/components/share/document-list-header";
 
 type DisplayMode = "list" | "grid";
 
+// ครบทุกค่าของ enum_activity_action ฝั่ง backend เรียงตามลำดับใน schema.prisma
+// เพื่อเทียบกันได้ตรง ๆ เวลา backend เพิ่มค่าใหม่
 const ACTION_OPTIONS = [
+  { label: "View", value: "view" },
   { label: "Create", value: "create" },
   { label: "Update", value: "update" },
   { label: "Delete", value: "delete" },
   { label: "Login", value: "login" },
   { label: "Logout", value: "logout" },
+  { label: "Approve", value: "approve" },
+  { label: "Reject", value: "reject" },
+  { label: "Cancel", value: "cancel" },
+  { label: "Void", value: "void" },
+  { label: "Print", value: "print" },
+  { label: "Email", value: "email" },
+  { label: "Other", value: "other" },
+  { label: "Upload", value: "upload" },
+  { label: "Download", value: "download" },
+  { label: "Export", value: "export" },
+  { label: "Import", value: "import" },
+  { label: "Copy", value: "copy" },
+  { label: "Move", value: "move" },
+  { label: "Rename", value: "rename" },
+  { label: "Save", value: "save" },
+  { label: "Comment", value: "comment" },
+  { label: "Submit", value: "submit" },
+  { label: "Review", value: "review" },
+  { label: "Email Sent", value: "email_sent" },
 ];
 
 const ENTITY_TYPE_OPTIONS = [
@@ -114,6 +136,8 @@ export default function ActivityLogComponent() {
             onChange={onChange}
             placeholder={t("action")}
             options={ACTION_OPTIONS}
+            searchable
+            searchPlaceholder={t("searchAction")}
             className="w-full"
           />
         ),
