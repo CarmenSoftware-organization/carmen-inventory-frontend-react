@@ -62,7 +62,7 @@ export const LocationCell = memo(function LocationCell({
 
   if (isDisabled || isRowLocked) {
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <div className="flex min-w-0 items-center justify-between gap-1.5">
           {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
           <p
@@ -128,7 +128,7 @@ export const LocationCell = memo(function LocationCell({
                       );
                     }}
                     nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
-                    className="h-7 w-full text-xs"
+                    className="h-8 w-full text-xs"
                     popoverWidth="w-[26.25rem]"
                     defaultLabel={locationName}
                   />

@@ -44,7 +44,7 @@ export const DeliveryPointCell = memo(function DeliveryPointCell({
             form.setValue(`items.${index}.delivery_point_name`, item.name);
           }}
           defaultLabel={dpName}
-          className="h-7 w-full text-xs"
+          className="h-8 w-full text-xs"
         />
       )}
     />

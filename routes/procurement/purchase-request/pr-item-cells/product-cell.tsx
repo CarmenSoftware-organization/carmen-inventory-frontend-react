@@ -99,7 +99,7 @@ export const ProductCell = memo(function ProductCell({
   }
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1.5">
       <Controller
         control={control}
         name={`items.${index}.product_id`}
@@ -136,7 +136,7 @@ export const ProductCell = memo(function ProductCell({
                       form.setValue(`items.${index}.foc_unit_id`, "");
                       form.setValue(`items.${index}.approved_unit_id`, "");
                     }}
-                    className="h-7 w-full text-xs"
+                    className="h-8 w-full text-xs"
                     defaultLabel={productName}
                   />
                 </div>
