@@ -83,9 +83,22 @@ export function usePrFormActions({
       const res = await httpClient.get(
         `${API_ENDPOINTS.PURCHASE_REQUEST(buCode)}/${id}`,
       );
-      if (res.ok) return (await res.json())?.data ?? null;
-    } catch {
-      // network/parse fail — fallback ค่าจาก form/prop
+      if (res.ok) {
+        const fresh = (await res.json())?.data ?? null;
+        // 200 แต่ไม่มี doc_version = backend ไม่ส่งมา ไม่ใช่ "ใบนี้ไม่มีเวอร์ชัน"
+        // ต้องเห็นตอน dev ไม่งั้นจะไปโผล่เป็น 409 ตอนบันทึกแล้วหาต้นตอไม่เจอ
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
+          console.warn("[PR] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+        }
+        return fresh;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[PR] ดึง doc_version สดไม่สำเร็จ", res.status, id);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้อง
+      // ไม่เงียบ ผลของการ fallback คือส่ง doc_version เก่า ซึ่งจบที่ 409 ปลายทาง
+      // แล้วสาวกลับมาถึงบรรทัดนี้ไม่ได้ถ้าไม่มีอะไรบอก
+      if (import.meta.env.DEV) console.warn("[PR] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
@@ -197,10 +210,17 @@ export function usePrFormActions({
       stage_message: "",
     }));
 
+  /**
+   * @param docVersion - เลขเวอร์ชันที่จะใส่ใน payload ไม่ส่ง = ใช้ค่าในฟอร์ม
+   *   (ใบใหม่ยังไม่มี id ให้ไป GET จึงไม่มีอะไรให้ resolve)
+   */
   const buildCreateDetails = (
     values: PrFormValues,
+    docVersion?: number,
   ): CreatePurchaseRequestDto["details"] => ({
-    ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+    ...((docVersion ?? values.doc_version) != null
+      ? { doc_version: docVersion ?? values.doc_version }
+      : {}),
     pr_date: new Date(values.pr_date).toISOString(),
     description: values.description,
     requestor_id: values.requestor_id,
@@ -218,6 +238,7 @@ export function usePrFormActions({
   // และ save-before-action ก่อนยิง workflow event
   const buildSaveDetails = (
     values: PrFormValues,
+    docVersion?: number,
   ): CreatePurchaseRequestDto["details"] => {
     if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
       return preparePurchaseDetails(
@@ -231,7 +252,7 @@ export function usePrFormActions({
         purchaseRequest.id,
       ) as unknown as CreatePurchaseRequestDto["details"];
     }
-    return buildCreateDetails(values);
+    return buildCreateDetails(values, docVersion);
   };
 
   // เรียก /save ก่อน workflow action ถ้าฟอร์มถูกแก้ (dirty) — กันค่าที่แก้ราย
@@ -240,10 +261,11 @@ export function usePrFormActions({
   const saveDirtyEdits = async (): Promise<boolean> => {
     if (!purchaseRequest || !form.formState.isDirty) return true;
     try {
+      const fresh = await fetchFreshPr(purchaseRequest.id);
       const data = await updatePr.mutateAsync({
         id: purchaseRequest.id,
         stage_role: purchaseRequest.role,
-        details: buildSaveDetails(form.getValues()),
+        details: buildSaveDetails(form.getValues(), resolveDocVersion(fresh)),
       });
       syncDocVersions(data);
       return true;
@@ -253,15 +275,16 @@ export function usePrFormActions({
     }
   };
 
-  const onSubmit = (values: PrFormValues) => {
+  const onSubmit = async (values: PrFormValues) => {
     const details = buildCreateDetails(values);
 
     if (isEdit && purchaseRequest) {
+      const fresh = await fetchFreshPr(purchaseRequest.id);
       updatePr.mutate(
         {
           id: purchaseRequest.id,
           stage_role: purchaseRequest.role,
-          details: buildSaveDetails(values),
+          details: buildSaveDetails(values, resolveDocVersion(fresh)),
         },
         {
           onSuccess: (data) => {
@@ -337,9 +360,13 @@ export function usePrFormActions({
     );
   };
 
-  const doSaveAndSubmitPr = (values: PrFormValues) => {
+  const doSaveAndSubmitPr = async (values: PrFormValues) => {
     if (!purchaseRequest) return;
-    const details = buildCreateDetails(values);
+    // /save ที่ปุ่ม Submit เรียก ต้องใช้เลขสดเหมือน action อื่น — ค่าในฟอร์มค้างเก่า
+    // ได้เสมอ (Save ครั้งก่อน bump ไปแล้วแต่ syncDocVersions อาศัย response ที่อาจ
+    // ไม่มี field นั้นมาให้)
+    const fresh = await fetchFreshPr(purchaseRequest.id);
+    const details = buildCreateDetails(values, resolveDocVersion(fresh));
     updatePr.mutate(
       { id: purchaseRequest.id, stage_role: purchaseRequest.role, details },
       {
