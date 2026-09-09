@@ -176,6 +176,7 @@ export function usePoFormHandlers({
       const payload = buildPoPayload(values, defaultValues.items, {
         ...poTypeOption,
         docVersion: resolveDocVersion(fresh),
+        freshDetails: fresh?.purchase_order_detail,
       });
       updatePo.mutate(
         { id: purchaseOrder.id, ...payload },
@@ -250,7 +251,9 @@ export function usePoFormHandlers({
   // (tb_purchase_order / tb_purchase_order_detail)
   const fetchFreshPo = async (): Promise<{
     doc_version?: number;
-    purchase_order_detail?: { id: string }[];
+    // doc_version ราย row ต้องมีด้วย — lock ของ backend เช็ค tb_purchase_order_detail
+    // แยกจากหัวเอกสาร ของเดิมประกาศแค่ `{ id }` เลยเอาเลขราย row มาใช้ไม่ได้
+    purchase_order_detail?: { id: string; doc_version?: number }[];
   } | null> => {
     if (!purchaseOrder || !buCode) return null;
     try {
@@ -339,6 +342,7 @@ export function usePoFormHandlers({
       const payload = buildPoPayload(values, defaultValues.items, {
         ...poTypeOption,
         docVersion: resolveDocVersion(fresh),
+        freshDetails: fresh?.purchase_order_detail,
       });
       try {
         const saved = await updatePo.mutateAsync({

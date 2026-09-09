@@ -23,10 +23,17 @@ const HANDLERS: Record<string, string> = {
   SR: "store-operation/store-requisition/use-sr-form-actions.ts",
 };
 
+/** ไฟล์ที่ประกอบ payload แยกจากไฟล์ handler — ตรวจรวมกันเป็นโมดูลเดียว */
+const EXTRA: Record<string, string[]> = {
+  PO: ["procurement/purchase-order/build-po-payload.ts"],
+};
+
 const sources = Object.fromEntries(
   Object.entries(HANDLERS).map(([name, rel]) => [
     name,
-    readFileSync(join(__dirname, rel), "utf8"),
+    [rel, ...(EXTRA[name] ?? [])]
+      .map((f) => readFileSync(join(__dirname, f), "utf8"))
+      .join("\n"),
   ]),
 );
 
@@ -67,6 +74,15 @@ describe("ของกลาง", () => {
     // และทำถูกมาแต่แรก ไม่มีเหตุให้ไปแก้ของที่ไม่พัง
     for (const name of ["PR", "PO", "CN", "GRN"]) {
       expect(code(sources[name]), name).toContain("pickDocVersion");
+    }
+  });
+
+  it("โมดูลที่ส่ง doc_version ราย item ต้องทับด้วยเลขสดของ row ด้วย", () => {
+    // 409 (model=tb_purchase_request_detail, expected doc_version=3) — lock ของ
+    // backend เช็คราย detail แยกจากหัวเอกสาร แก้แต่หัวไม่พอ ต้องทับ update ราย row
+    // ด้วย withFreshDetailVersions หลัง buildItemChanges
+    for (const name of ["PR", "PO", "CN", "GRN"]) {
+      expect(code(sources[name]), name).toContain("withFreshDetailVersions");
     }
   });
 

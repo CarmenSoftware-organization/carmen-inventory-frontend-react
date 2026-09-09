@@ -27,3 +27,30 @@ export function pickDocVersion(
 ): number {
   return fresh ?? formValue ?? recordValue ?? 0;
 }
+
+/**
+ * ทับ `doc_version` ของแถวที่กำลังจะ update ด้วยเลขสดจาก DB
+ *
+ * optimistic lock ของ backend เช็ค**ราย detail** ด้วย ไม่ใช่แค่หัวเอกสาร —
+ * `409 (model=tb_<doc>_detail, expected doc_version=N)` คือเคสนี้ตรง ๆ
+ * ทุกโมดูลส่ง `doc_version` ราย item ใน payload อยู่แล้ว แต่เลขนั้นสดได้ทางเดียว
+ * คือ sync กลับจาก response ของ /save ซึ่ง backend อาจไม่ส่ง detail กลับมา
+ *
+ * **ทับที่ผลลัพธ์ ไม่ใช่ที่ input ของ `buildItemChanges`** — ตัวนั้นตัดสินว่าแถวไหน
+ * "เปลี่ยน" ด้วยการ JSON.stringify payload เทียบกับ baseline ถ้าไปดัน doc_version
+ * เข้า input ทุกแถวจะกลายเป็น update หมดทั้งที่ผู้ใช้ไม่ได้แตะ
+ *
+ * @param update - `changes.update` ที่ `buildItemChanges` คืนมา
+ * @param fresh - `purchase_request_detail` จาก GET ล่าสุด
+ */
+export function withFreshDetailVersions<T extends { id: string }>(
+  update: T[] | undefined,
+  fresh: readonly { id: string; doc_version?: number }[] | undefined,
+): T[] | undefined {
+  if (!update?.length || !fresh?.length) return update;
+  const byId = new Map(fresh.map((d) => [d.id, d.doc_version]));
+  return update.map((row) => {
+    const version = byId.get(row.id);
+    return version == null ? row : { ...row, doc_version: version };
+  });
+}

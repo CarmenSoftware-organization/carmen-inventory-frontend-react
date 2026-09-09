@@ -19,7 +19,7 @@ import type {
 } from "@/types/goods-receive-note";
 import type { FormMode } from "@/types/form";
 import { buildItemChanges } from "@/lib/form-helpers";
-import { pickDocVersion } from "@/lib/doc-version";
+import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -68,20 +68,23 @@ export function useGrnFormActions({
    * ค่าที่เก่าที่สุดในบรรดาทั้งหมด บันทึกรอบก่อน bump แล้วรอบถัดไปชน 409 ทันที
    * (ทรงเดียวกับ fetchFreshPr / fetchFreshPo / fetchFreshSr)
    */
-  const fetchFreshDocVersion = async (id: string): Promise<number | null> => {
+  type FreshGrn = {
+    doc_version?: number;
+    good_received_note_detail?: { id: string; doc_version?: number }[];
+  };
+
+  const fetchFreshGrn = async (id: string): Promise<FreshGrn | null> => {
     if (!buCode) return null;
     try {
       const res = await httpClient.get(
         `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`,
       );
       if (res.ok) {
-        const v = ((await res.json())?.data?.doc_version ?? null) as
-          | number
-          | null;
-        if (import.meta.env.DEV && v == null) {
+        const fresh = ((await res.json())?.data ?? null) as FreshGrn | null;
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
           console.warn("[GRN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
         }
-        return v;
+        return fresh;
       }
       if (import.meta.env.DEV)
         console.warn("[GRN] ดึง doc_version สดไม่สำเร็จ", res.status, id);
@@ -272,11 +275,23 @@ export function useGrnFormActions({
 
       // backend ต้องการ doc_version ทุกครั้งตอน PATCH (optimistic lock) — เอาเลขสด
       // จาก DB ไม่ใช่ค่าในฟอร์ม ซึ่งค้างเก่าได้ถ้า response รอบก่อนไม่ได้ส่งกลับมา
+      const fresh = await fetchFreshGrn(goodsReceiveNote.id);
       patchPayload.doc_version = pickDocVersion(
-        await fetchFreshDocVersion(goodsReceiveNote.id),
+        fresh?.doc_version,
         values.doc_version,
         goodsReceiveNote.doc_version,
       );
+      // lock ของ backend เช็ค tb_good_received_note_detail แยกอีกชั้น — ส่งเลข
+      // ราย row เก่าไปก็ 409 เหมือนกัน (grn-form-schema.ts:273 เขียนเตือนไว้แล้ว)
+      if (patchPayload.good_received_note_detail) {
+        const detail = patchPayload.good_received_note_detail as {
+          update?: { id: string }[];
+        };
+        detail.update = withFreshDetailVersions(
+          detail.update,
+          fresh?.good_received_note_detail,
+        );
+      }
 
       updateGrn.mutate(
         {
@@ -392,12 +407,12 @@ export function useGrnFormActions({
     if (!goodsReceiveNote) return;
     // commit ตัดของเข้าสต๊อกจริงและย้อนไม่ได้ — ยิ่งต้องใช้เลขสด ของเดิมใช้ค่าจาก
     // prop ตอนโหลดหน้า ซึ่งเก่ากว่าค่าในฟอร์มเสียอีก
-    const fresh = await fetchFreshDocVersion(goodsReceiveNote.id);
+    const fresh = await fetchFreshGrn(goodsReceiveNote.id);
     commitGrn.mutate(
       {
         id: goodsReceiveNote.id,
         doc_version: pickDocVersion(
-          fresh,
+          fresh?.doc_version,
           form.getValues("doc_version"),
           goodsReceiveNote.doc_version,
         ),

@@ -1,4 +1,5 @@
 import { buildItemChanges } from "@/lib/form-helpers";
+import { withFreshDetailVersions } from "@/lib/doc-version";
 import { type CreatePoDto, PO_TYPE } from "@/types/purchase-order";
 import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
 
@@ -25,13 +26,23 @@ import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
 export function buildPoPayload(
   values: PoFormValues,
   defaultItems: PoFormValues["items"],
-  options?: { po_type?: PO_TYPE; docVersion?: number },
+  options?: {
+    po_type?: PO_TYPE;
+    docVersion?: number;
+    /** `purchase_order_detail` จาก GET ล่าสุด — ทับเลขราย row ที่จะ update */
+    freshDetails?: readonly { id: string; doc_version?: number }[];
+  },
 ): CreatePoDto {
   const docVersion = options?.docVersion ?? values.doc_version;
   const purchaseOrderDetail = buildItemChanges(
     values.items,
     defaultItems,
     mapItemToPayload,
+  );
+  // ทับหลัง buildItemChanges เสมอ — ดันเข้า input จะทำให้ทุกแถวกลายเป็น update
+  purchaseOrderDetail.update = withFreshDetailVersions(
+    purchaseOrderDetail.update,
+    options?.freshDetails,
   );
 
   return {

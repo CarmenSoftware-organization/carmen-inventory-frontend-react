@@ -17,7 +17,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
-import { pickDocVersion } from "@/lib/doc-version";
+import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import {
   useCreatePurchaseRequest,
@@ -219,21 +219,28 @@ export function usePrFormActions({
   const buildCreateDetails = (
     values: PrFormValues,
     docVersion?: number,
-  ): CreatePurchaseRequestDto["details"] => ({
-    ...((docVersion ?? values.doc_version) != null
-      ? { doc_version: docVersion ?? values.doc_version }
-      : {}),
-    pr_date: new Date(values.pr_date).toISOString(),
-    description: values.description,
-    requestor_id: values.requestor_id,
-    workflow_id: values.workflow_id,
-    department_id: values.department_id,
-    purchase_request_detail: buildItemChanges(
+    freshDetails?: readonly { id: string; doc_version?: number }[],
+  ): CreatePurchaseRequestDto["details"] => {
+    const detail = buildItemChanges(
       values.items,
       defaultValues.items,
       mapItemToPayload,
-    ),
-  });
+    );
+    // lock ของ backend เช็คราย detail ด้วย ไม่ใช่แค่หัวเอกสาร (ดู
+    // withFreshDetailVersions) ทับหลัง buildItemChanges เสมอ ไม่ใช่ก่อน
+    detail.update = withFreshDetailVersions(detail.update, freshDetails);
+    return {
+      ...((docVersion ?? values.doc_version) != null
+        ? { doc_version: docVersion ?? values.doc_version }
+        : {}),
+      pr_date: new Date(values.pr_date).toISOString(),
+      description: values.description,
+      requestor_id: values.requestor_id,
+      workflow_id: values.workflow_id,
+      department_id: values.department_id,
+      purchase_request_detail: detail,
+    };
+  };
 
   // สร้าง save payload ตาม stage role (purchase/approve ส่งรายละเอียดเต็ม,
   // role อื่นใช้ diff ของ buildCreateDetails) — ใช้ร่วมกันทั้งปุ่ม Save (onSubmit)
@@ -241,6 +248,7 @@ export function usePrFormActions({
   const buildSaveDetails = (
     values: PrFormValues,
     docVersion?: number,
+    freshDetails?: readonly { id: string; doc_version?: number }[],
   ): CreatePurchaseRequestDto["details"] => {
     if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
       return preparePurchaseDetails(
@@ -254,7 +262,7 @@ export function usePrFormActions({
         purchaseRequest.id,
       ) as unknown as CreatePurchaseRequestDto["details"];
     }
-    return buildCreateDetails(values, docVersion);
+    return buildCreateDetails(values, docVersion, freshDetails);
   };
 
   // เรียก /save ก่อน workflow action ถ้าฟอร์มถูกแก้ (dirty) — กันค่าที่แก้ราย
@@ -267,7 +275,11 @@ export function usePrFormActions({
       const data = await updatePr.mutateAsync({
         id: purchaseRequest.id,
         stage_role: purchaseRequest.role,
-        details: buildSaveDetails(form.getValues(), resolveDocVersion(fresh)),
+        details: buildSaveDetails(
+          form.getValues(),
+          resolveDocVersion(fresh),
+          fresh?.purchase_request_detail,
+        ),
       });
       syncDocVersions(data);
       return true;
@@ -286,7 +298,11 @@ export function usePrFormActions({
         {
           id: purchaseRequest.id,
           stage_role: purchaseRequest.role,
-          details: buildSaveDetails(values, resolveDocVersion(fresh)),
+          details: buildSaveDetails(
+            values,
+            resolveDocVersion(fresh),
+            fresh?.purchase_request_detail,
+          ),
         },
         {
           onSuccess: (data) => {
@@ -368,7 +384,11 @@ export function usePrFormActions({
     // ได้เสมอ (Save ครั้งก่อน bump ไปแล้วแต่ syncDocVersions อาศัย response ที่อาจ
     // ไม่มี field นั้นมาให้)
     const fresh = await fetchFreshPr(purchaseRequest.id);
-    const details = buildCreateDetails(values, resolveDocVersion(fresh));
+    const details = buildCreateDetails(
+      values,
+      resolveDocVersion(fresh),
+      fresh?.purchase_request_detail,
+    );
     updatePr.mutate(
       { id: purchaseRequest.id, stage_role: purchaseRequest.role, details },
       {

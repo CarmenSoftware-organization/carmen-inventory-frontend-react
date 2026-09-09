@@ -17,19 +17,26 @@ const SOURCE = readFileSync(
   "utf8",
 );
 
+/** ยุบช่องว่างให้เหลือช่องเดียว — prettier จัดบรรทัดใหม่ตอนอาร์กิวเมนต์เพิ่ม
+ *  แต่ invariant ที่เทสต์นี้ดูคือ "เรียกด้วยค่าอะไร" ไม่ใช่ "ขึ้นบรรทัดตรงไหน" */
+const FLAT = SOURCE.replace(/\s+/g, " ");
+
 describe("PR — ทุก mutation ต้องได้ doc_version สดก่อนยิง", () => {
   const savePayloadCalls = [
     // ปุ่ม Save ในโหมด edit
-    "details: buildSaveDetails(values, resolveDocVersion(fresh))",
+    "buildSaveDetails( values, resolveDocVersion(fresh), fresh?.purchase_request_detail, )",
     // /save ก่อน workflow action (approve/reject/send back)
-    "details: buildSaveDetails(form.getValues(), resolveDocVersion(fresh))",
+    "buildSaveDetails( form.getValues(), resolveDocVersion(fresh), fresh?.purchase_request_detail, )",
     // /save ที่ปุ่ม Submit เรียก
-    "buildCreateDetails(values, resolveDocVersion(fresh))",
+    "buildCreateDetails( values, resolveDocVersion(fresh), fresh?.purchase_request_detail, )",
   ];
 
-  it.each(savePayloadCalls)("/save ส่ง version ที่ resolve แล้ว: %s", (call) => {
-    expect(SOURCE).toContain(call);
-  });
+  it.each(savePayloadCalls)(
+    "/save ส่งทั้ง version ของหัวเอกสารและของราย row: %s",
+    (call) => {
+      expect(FLAT).toContain(call);
+    },
+  );
 
   it("ไม่มี /save จุดไหนอ่าน doc_version จากฟอร์มโดยตรงอีก", () => {
     // เหลือได้จุดเดียวคือ fallback ใน buildCreateDetails สำหรับใบใหม่ (ไม่มี id
