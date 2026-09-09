@@ -3389,6 +3389,8 @@
       "edit": "Edit Purchase Request",
       "deleteTitle": "Delete Purchase Request",
       "deleteConfirm": "Are you sure you want to delete \"{prNo}\"? This action cannot be undone.",
+      "deleteNotOwner": "Only the person who created this purchase request can delete it.",
+      "batchDeleteNotOwner": "Some of the purchase requests you picked were created by someone else. Only the person who created a request can delete it.",
       "approveTitle": "Approve Purchase Request",
       "approveConfirm": "This will approve the PR and send to the next stage. Are you sure?",
       "rejectTitle": "Reject Purchase Request",

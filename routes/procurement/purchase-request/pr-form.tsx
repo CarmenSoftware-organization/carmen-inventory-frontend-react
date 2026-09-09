@@ -23,7 +23,10 @@ import {
   getDefaultValues,
   getDuplicateValues,
 } from "./pr-form-schema";
+import { useCan } from "@/hooks/use-can";
 import { useProfile } from "@/hooks/use-profile";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { canDeletePr } from "./pr-ownership";
 import { usePrPreviousStages } from "./use-purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { PrHeader } from "./pr-header";
@@ -40,6 +43,7 @@ export function PurchaseRequestForm({
   template,
   duplicateFrom,
 }: PurchaseRequestFormProps) {
+  const t = useTranslations("procurement.purchaseRequest");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const {
@@ -48,7 +52,10 @@ export function PurchaseRequestForm({
     buCode,
     dateFormat,
     hasDepartment,
+    userId,
   } = useProfile();
+  const { isAdmin } = useCan();
+
 
   const [mode, setMode] = useState<FormMode>(purchaseRequest ? "view" : "add");
   const isView = mode === "view";
@@ -126,6 +133,16 @@ export function PurchaseRequestForm({
     setMode,
     role,
   });
+
+  // ใบของคนอื่น backend ลบให้ไม่ได้อยู่แล้ว — บอกตั้งแต่ตอนกดปุ่ม อย่าเพิ่งถามว่า
+  // "จะลบไหม" แล้วค่อยไปบอกว่าลบไม่ได้หลังกดยืนยัน (ดู pr-ownership.ts)
+  const handleDeleteClick = () => {
+    if (!canDeletePr(purchaseRequest, userId, isAdmin)) {
+      dispatchPermissionDenied(undefined, t("deleteNotOwner"));
+      return;
+    }
+    actions.setShowDelete(true);
+  };
 
   // draft/add เท่านั้นที่แสดง general fields — ไม่ draft แล้วซ่อน
   const isDraft =
@@ -265,7 +282,7 @@ export function PurchaseRequestForm({
             hasRecord={!!purchaseRequest}
             onEdit={() => setMode("edit")}
             onCancel={actions.handleCancel}
-            onDelete={() => actions.setShowDelete(true)}
+            onDelete={handleDeleteClick}
             onComment={() => actions.setShowComment(true)}
           />
         }
