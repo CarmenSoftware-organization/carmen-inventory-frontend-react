@@ -26,6 +26,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { PO_TYPE } from "@/types/purchase-order";
 import type { FormMode } from "@/types/form";
+import { pickDocVersion } from "@/lib/doc-version";
 import { buildPoPayload } from "./build-po-payload";
 import type { PoFormValues } from "./po-form-schema";
 
@@ -167,10 +168,15 @@ export function usePoFormHandlers({
     }
   };
 
-  const onSubmit = (values: PoFormValues) => {
-    const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
-
+  const onSubmit = async (values: PoFormValues) => {
     if (mode === "edit" && purchaseOrder) {
+      // /save ต้องใช้เลขสดเหมือน workflow action — ค่าในฟอร์มค้างเก่าได้เสมอ
+      // ถ้า response ของ save รอบก่อนไม่ได้ส่ง doc_version กลับมา
+      const fresh = await fetchFreshPo();
+      const payload = buildPoPayload(values, defaultValues.items, {
+        ...poTypeOption,
+        docVersion: resolveDocVersion(fresh),
+      });
       updatePo.mutate(
         { id: purchaseOrder.id, ...payload },
         {
@@ -191,7 +197,9 @@ export function usePoFormHandlers({
       // network → navigate(replace) ตอนสำเร็จเลยกิน /new จริง ไม่ใช่ sentinel →
       // stack เหลือ [list, /:id] → back ที่หน้า detail = กลับ list
       setIsSubmitting(true);
-      createPo.mutate(payload, {
+      // ใบใหม่ยังไม่มี id ให้ GET — doc_version ในฟอร์มเป็น undefined อยู่แล้ว
+      // และถูกตัดออกจาก payload เอง
+      createPo.mutate(buildPoPayload(values, defaultValues.items, poTypeOption), {
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const body = res as { data?: { id?: string } } | undefined;
@@ -249,18 +257,29 @@ export function usePoFormHandlers({
       const res = await httpClient.get(
         `${API_ENDPOINTS.PURCHASE_ORDER(buCode)}/${purchaseOrder.id}`,
       );
-      if (res.ok) return (await res.json())?.data ?? null;
-    } catch {
-      // network/parse fail — caller ใช้ค่า fallback จาก form/prop
+      if (res.ok) {
+        const fresh = (await res.json())?.data ?? null;
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
+          console.warn("[PO] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน");
+        }
+        return fresh;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[PO] ดึง doc_version สดไม่สำเร็จ", res.status);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้อง
+      // ไม่เงียบ ผลของ fallback คือส่งเลขเก่า ซึ่งจบที่ 409 ปลายทาง
+      if (import.meta.env.DEV) console.warn("[PO] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
 
   const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
-    fresh?.doc_version ??
-    form.getValues("doc_version") ??
-    purchaseOrder?.doc_version ??
-    0;
+    pickDocVersion(
+      fresh?.doc_version,
+      form.getValues("doc_version"),
+      purchaseOrder?.doc_version,
+    );
 
   /**
    * ส่ง/อนุมัติสำเร็จ → กลับหน้ารายการ (กติกาเดียวกับ PR)
@@ -316,7 +335,11 @@ export function usePoFormHandlers({
         return;
       }
       const values = form.getValues();
-      const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
+      const fresh = await fetchFreshPo();
+      const payload = buildPoPayload(values, defaultValues.items, {
+        ...poTypeOption,
+        docVersion: resolveDocVersion(fresh),
+      });
       try {
         const saved = await updatePo.mutateAsync({
           id: purchaseOrder.id,

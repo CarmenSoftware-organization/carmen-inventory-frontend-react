@@ -30,6 +30,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
+import { pickDocVersion } from "@/lib/doc-version";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
@@ -116,8 +117,17 @@ export function CnForm({ creditNote }: CnFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
   }, [cnSyncKey, creditNote?.id]);
 
-  const buildPayload = (values: CnFormValues): CreateCnDto => ({
-    ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+  /**
+   * @param docVersion - เลขที่ GET สดมาแล้ว ไม่ส่ง = ใช้ค่าในฟอร์ม ซึ่งถูกเฉพาะใบใหม่
+   *   ที่ยังไม่มี id ให้ GET (ดู lib/doc-version.ts)
+   */
+  const buildPayload = (
+    values: CnFormValues,
+    docVersion?: number,
+  ): CreateCnDto => ({
+    ...((docVersion ?? values.doc_version) != null
+      ? { doc_version: docVersion ?? values.doc_version }
+      : {}),
     credit_note_type: values.credit_note_type,
     grn_id: values.grn_id,
     grn_date: values.grn_date,
@@ -144,12 +154,17 @@ export function CnForm({ creditNote }: CnFormProps) {
     ),
   });
 
-  const onSubmit = (values: CnFormValues) => {
-    const payload = buildPayload(values);
-
+  const onSubmit = async (values: CnFormValues) => {
     if (isEdit && creditNote) {
+      const fresh = await fetchFreshDocVersion(creditNote.id);
       updateCn.mutate(
-        { id: creditNote.id, ...payload },
+        {
+          id: creditNote.id,
+          ...buildPayload(
+            values,
+            pickDocVersion(fresh, values.doc_version, creditNote.doc_version),
+          ),
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -161,7 +176,8 @@ export function CnForm({ creditNote }: CnFormProps) {
       // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
       // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
       setIsSubmitting(true);
-      createCn.mutate(payload, {
+      // ใบใหม่ยังไม่มี id ให้ GET — doc_version ในฟอร์มเป็น undefined อยู่แล้ว
+      createCn.mutate(buildPayload(values), {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = data?.data?.id;
@@ -241,10 +257,20 @@ export function CnForm({ creditNote }: CnFormProps) {
       const res = await httpClient.get(
         `${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}`,
       );
-      if (res.ok)
-        return ((await res.json())?.data?.doc_version ?? null) as number | null;
-    } catch {
-      // network/parse fail — ใช้ค่าที่มีในฟอร์มแทน
+      if (res.ok) {
+        const v = ((await res.json())?.data?.doc_version ?? null) as
+          | number
+          | null;
+        if (import.meta.env.DEV && v == null) {
+          console.warn("[CN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+        }
+        return v;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", res.status, id);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้องไม่เงียบ
+      if (import.meta.env.DEV) console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
@@ -289,12 +315,25 @@ export function CnForm({ creditNote }: CnFormProps) {
       return;
     }
 
+    // GET สด **ก่อน** /save ไม่ใช่หลัง — ของเดิมไปเอาเลขใน onSuccess เพื่อส่งต่อให้
+    // submit เท่านั้น ตัว /save เองยังส่งเลขจากฟอร์ม ถ้าเลขนั้นค้างเก่าก็ชน 409
+    // ตั้งแต่บันทึก แล้วบรรทัดที่ไป GET ไม่มีโอกาสได้ทำงานเลย
+    const beforeSave = await fetchFreshDocVersion(creditNote.id);
     updateCn.mutate(
-      { id: creditNote.id, ...buildPayload(values) },
+      {
+        id: creditNote.id,
+        ...buildPayload(
+          values,
+          pickDocVersion(beforeSave, values.doc_version, creditNote.doc_version),
+        ),
+      },
       {
         onSuccess: async () => {
           const fresh = await fetchFreshDocVersion(creditNote.id);
-          fireSubmit(creditNote.id, fresh ?? creditNote.doc_version ?? 0);
+          fireSubmit(
+            creditNote.id,
+            pickDocVersion(fresh, undefined, creditNote.doc_version),
+          );
         },
         onError: abortSubmit,
       },
