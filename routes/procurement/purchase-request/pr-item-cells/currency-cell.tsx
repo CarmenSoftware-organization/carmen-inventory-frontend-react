@@ -49,6 +49,9 @@ export const CurrencyCell = memo(function CurrencyCell({
           `items.${index}.currency_decimal_places`,
           currency.decimal_places ?? 2,
         );
+        // เรตของสกุลใหม่ต้องมาด้วย ไม่งั้นยอดสกุลหลักในแถบสรุปยังคูณเรตของสกุลเก่า
+        // (ตั้งค่าเริ่มให้เท่านั้น — แก้มือทีหลังได้ที่แถวขยาย) เหมือน PO/CN/GRN
+        form.setValue(`items.${index}.exchange_rate`, currency.exchange_rate);
       }}
       disableTooltip
       size="sm"
