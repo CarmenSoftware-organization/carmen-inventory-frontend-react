@@ -18,6 +18,7 @@ import {
   indexColumn,
   actionColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { DocumentFile } from "@/types/document";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -121,6 +122,7 @@ export function useDocumentTable({
   const { dateFormat } = useProfile();
   const t = useTranslations("systemAdmin.document");
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
 
   const columns: ColumnDef<DocumentFile>[] = [
     selectColumn<DocumentFile>(),
@@ -177,7 +179,7 @@ export function useDocumentTable({
       cell: ({ row }) => formatDate(row.getValue("lastModified"), dateFormat),
       size: 120,
     },
-    actionColumn<DocumentFile>(onDelete),
+    actionColumn<DocumentFile>(onDelete, deleteGate),
   ];
 
   return useReactTable({

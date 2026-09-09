@@ -9,6 +9,7 @@ import {
   actionColumn,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { Role } from "@/types/role";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -39,6 +40,7 @@ export function useRoleTable({
 }: UseRoleTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
   const dataColumns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
@@ -71,7 +73,7 @@ export function useRoleTable({
     selectColumn<Role>(),
     indexColumn<Role>(params),
     ...dataColumns,
-    actionColumn<Role>(onDelete),
+    actionColumn<Role>(onDelete, deleteGate),
   ];
 
   return useReactTable({

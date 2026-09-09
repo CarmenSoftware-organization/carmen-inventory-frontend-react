@@ -10,10 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { isSentBack } from "@/constant/last-action";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { AuditEntry } from "@/types/audit";
@@ -69,7 +71,12 @@ interface ListCardProps {
   readonly badge?: ReactNode;
   /** คลิกการ์ด/กด Enter — เข้าหน้ารายละเอียด */
   readonly onOpen: () => void;
-  /** ส่งมาแล้วได้ปุ่มลบมาตรฐานท้าย footer; ไม่ส่ง = ลบไม่ได้ */
+  /**
+   * ส่งมาแล้วได้ปุ่มลบมาตรฐานท้าย footer; ไม่ส่ง = ลบไม่ได้
+   *
+   * สิทธิ์ถูกเช็คให้ในนี้แล้วด้วย `useDeleteGate()` — ผู้เรียกส่ง handler ดิบมาได้เลย
+   * ไม่ต้องห่อ guard เอง (ไม่มีสิทธิ์ = ไม่ถูกเรียก เด้ง dialog แทน)
+   */
   readonly onDelete?: () => void;
   /** ปุ่มอื่นใน footer (วางก่อนปุ่มลบ) เช่น approve/reject ของ PR */
   readonly actions?: ReactNode;
@@ -262,6 +269,8 @@ export function ListCard({
   children,
 }: ListCardProps) {
   const tc = useTranslations("common");
+  const { deleteDenied, deletePermission, writeDisabled, writeDisabledTitle } =
+    useDeleteGate();
 
   const handleClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -317,12 +326,25 @@ export function ListCard({
           <CardFooter className="justify-end gap-1.5 px-2 py-1.5">
             {actions}
             {onDelete && (
+              /* license มาก่อน permission เสมอ — สัญญาหมดอายุปิดปุ่มจริง ส่วนไม่มีสิทธิ์
+                 ยังกดได้แต่ไปจบที่ dialog ไม่ใช่กล่องยืนยันลบ (กติกาเดียวกับ
+                 DataGridRowActions ของแถวในตาราง จะได้ไม่คุมคนละแบบในหน้าเดียวกัน) */
               <Button
                 type="button"
                 variant="destructive"
                 size="xs"
+                disabled={writeDisabled}
+                title={writeDisabled ? writeDisabledTitle : undefined}
+                aria-disabled={
+                  !writeDisabled && deleteDenied ? true : undefined
+                }
+                className={deleteDenied ? "opacity-50" : undefined}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (deleteDenied) {
+                    dispatchPermissionDenied(deletePermission);
+                    return;
+                  }
                   onDelete();
                 }}
               >

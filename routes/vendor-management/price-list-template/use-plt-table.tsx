@@ -12,6 +12,7 @@ import {
   indexColumn,
   selectColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -46,6 +47,7 @@ export function usePriceListTemplateTable({
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const deleteGate = useDeleteGate();
 
   const dataColumns: ColumnDef<PriceListTemplate>[] = [
     {
@@ -123,6 +125,7 @@ export function usePriceListTemplateTable({
     indexColumn<PriceListTemplate>(params),
     ...dataColumns,
     actionColumn<PriceListTemplate>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.name },
     }),
   ];

@@ -12,6 +12,7 @@ import {
   indexColumn,
   selectColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
@@ -46,6 +47,7 @@ export function usePriceListTable({
   const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const deleteGate = useDeleteGate();
 
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
@@ -136,6 +138,7 @@ export function usePriceListTable({
     indexColumn<PriceList>(params),
     ...dataColumns,
     actionColumn<PriceList>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.no },
     }),
   ];
