@@ -174,18 +174,26 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   });
 
   const isDisabled = (isView && role !== STAGE_ROLE.APPROVE) || isPending;
-  const isPriceListLocked =
-    purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
-  const fieldsDisabled = isDisabled || isPriceListLocked;
 
   // พ้น draft แล้ว workflow ล็อกถาวร — PoGeneralFields ใช้ค่านี้สั่ง disabled
   // ไม่ได้ใช้ซ่อน ฟิลด์จึงอยู่ที่เดิมทุกโหมด
   const isPoDraft =
     !purchaseOrder?.po_status || purchaseOrder.po_status === PO_STATUS.DRAFT;
-  // PO ที่มาจาก PR (!isManual): เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items,
-  // locations, notes) — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields
-  // (gate ที่ fieldsDisabled ไม่ใช่ contentLocked) ให้ override เรตได้
-  const isFromPr = !isManual;
+
+  // ใบที่มาจาก price list ล็อกเนื้อหา **เฉพาะเมื่อพ้น draft แล้ว** — ตอนยังเป็นร่าง
+  // คนทำใบต้องแก้ได้ ไม่งั้นกด Edit แล้วทั้งแถวกรอกไม่ได้สักช่อง ซึ่งเป็นทางตัน
+  // (ของเดิมล็อกทันทีที่ po_type = pricelist โดยไม่ดูสถานะเลย)
+  const isPriceListLocked =
+    purchaseOrder?.po_type === PO_TYPE.PL &&
+    !isPoDraft &&
+    !isReadOnly &&
+    !isViewOnly;
+  const fieldsDisabled = isDisabled || isPriceListLocked;
+  // PO ที่มาจาก PR: เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items, คลัง, notes)
+  // — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields (gate ที่ fieldsDisabled
+  // ไม่ใช่ contentLocked) ให้ override เรตได้ · **ล็อกเมื่อพ้น draft แล้วเท่านั้น**
+  // เหตุผลเดียวกับ price list ข้างบน
+  const isFromPr = !isManual && !isPoDraft;
   const contentLocked = fieldsDisabled || isFromPr;
   const locationsDisabled = isDisabled || isFromPr;
   const departmentName = defaultBu?.department?.name ?? "";

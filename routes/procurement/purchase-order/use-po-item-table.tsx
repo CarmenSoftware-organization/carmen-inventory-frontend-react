@@ -68,11 +68,6 @@ const ProductCol = memo(function ProductCol({
   );
 });
 
-/**
- * Action column ของ product row — ปุ่มลบ item + (เมื่อ expand) ปุ่ม "+" เพิ่ม
- * location ที่ prepend เข้า items.N.locations (ใช้ field array ชื่อเดียวกับ
- * LocationsEditor จึง sync กัน)
- */
 const PoItemActionCell = memo(function PoItemActionCell({
   index,
   canDelete,
@@ -140,6 +135,23 @@ interface UsePoItemTableOptions {
 /** ความกว้างของช่องเล็กหัวแถว (expand · # · checkbox) — ต้องเท่ากันทั้งสาม */
 const PO_LEADING_COL = 33;
 
+function poColSize(viewMode: boolean) {
+  return {
+    location: viewMode ? 150 : 180,
+    product: 160,
+    unit: viewMode ? 72 : 100,
+    order: viewMode ? 85 : 140,
+    received: 104,
+    price: viewMode ? 104 : 140,
+    subtotal: 100,
+    discount: viewMode ? 80 : 180,
+    net: 120,
+    tax: viewMode ? 80 : 220,
+    amount: 120,
+    action: viewMode ? 48 : 80,
+  } as const;
+}
+
 export function usePoItemTable({
   form,
   itemFields,
@@ -153,13 +165,15 @@ export function usePoItemTable({
 }: UsePoItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
-  const t = useTranslations("procurement.purchaseOrder");
   const showAction = !disabled && !readOnly;
 
   const hasAnyHistory = itemFields.some(
     (item) => (item.history?.length ?? 0) > 0,
   );
   const showActionCol = showAction || hasAnyHistory;
+  // แถวแก้ไม่ได้ = ทุกเซลล์เป็นตัวหนังสือ ไม่มี control ให้เผื่อที่
+  const viewMode = !showAction;
+  const COL = useMemo(() => poColSize(viewMode), [viewMode]);
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
     const indexColumn: ColumnDef<PoItemField> = {
@@ -175,18 +189,16 @@ export function usePoItemTable({
       },
     };
 
-    // product row = summary รวมทุก location (read-only) ยกเว้น price (input)
-    // Discount/Tax = คอลัมน์ combo เดียว (product row โชว์ยอดรวม, location โชว์
-    // rate/amount override) — ไม่มี rate/amount แยกซ้ำ
     const rightMeta = {
       headerClassName: "text-right",
       cellClassName: "text-right",
     };
+
     const dataColumns: ColumnDef<PoItemField>[] = [
       {
         accessorKey: "location_id",
         header: tfl("location"),
-        size: 180,
+        size: COL.location,
         cell: ({ row }) => (
           <LocationCell
             form={form}
@@ -198,7 +210,7 @@ export function usePoItemTable({
       {
         accessorKey: "product_id",
         header: tfl("product"),
-        size: 160,
+        size: COL.product,
         cell: ({ row }) => (
           <ProductCol
             form={form}
@@ -213,7 +225,7 @@ export function usePoItemTable({
       {
         id: "unit",
         header: tfl("unit"),
-        size: 50,
+        size: COL.unit,
         cell: ({ row }) => (
           <UnitCol
             control={form.control}
@@ -227,7 +239,7 @@ export function usePoItemTable({
       {
         id: "order",
         header: tfl("order"),
-        size: 100,
+        size: COL.order,
         meta: rightMeta,
         cell: ({ row }) => (
           <QtyUnitCell
@@ -242,7 +254,7 @@ export function usePoItemTable({
       {
         id: "received",
         header: tfl("received"),
-        size: 100,
+        size: COL.received,
         meta: rightMeta,
         cell: ({ row }) => (
           <RecSummaryCell control={form.control} index={row.index} />
@@ -251,7 +263,7 @@ export function usePoItemTable({
       {
         accessorKey: "price",
         header: tfl("unitPrice"),
-        size: 100,
+        size: COL.price,
         meta: rightMeta,
         cell: ({ row }) => (
           <PriceCell
@@ -265,7 +277,7 @@ export function usePoItemTable({
       {
         id: "subtotal",
         header: tfl("subtotal"),
-        size: 80,
+        size: COL.subtotal,
         meta: rightMeta,
         cell: ({ row }) => (
           <ComputedPricingCell
@@ -278,7 +290,7 @@ export function usePoItemTable({
       {
         id: "discount",
         header: tfl("discount"),
-        size: 140,
+        size: COL.discount,
         meta: rightMeta,
         cell: ({ row }) => (
           <ItemDiscountCell
@@ -291,7 +303,7 @@ export function usePoItemTable({
       {
         id: "net",
         header: tfl("net"),
-        size: 100,
+        size: COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
           <ComputedPricingCell
@@ -304,7 +316,7 @@ export function usePoItemTable({
       {
         id: "tax",
         header: tfl("tax"),
-        size: 140,
+        size: COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
           <ItemTaxCell
@@ -317,7 +329,7 @@ export function usePoItemTable({
       {
         id: "amount",
         header: tfl("amount"),
-        size: 100,
+        size: COL.amount,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right font-semibold tabular-nums",
@@ -346,7 +358,7 @@ export function usePoItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 80,
+      size: COL.action,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -379,6 +391,7 @@ export function usePoItemTable({
       },
     }));
   }, [
+    COL,
     form,
     disabled,
     locationsDisabled,

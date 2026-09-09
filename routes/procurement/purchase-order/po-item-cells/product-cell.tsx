@@ -50,6 +50,11 @@ const ProductCellEditable = memo(function ProductCellEditable({
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const workflowId = useWatch({ control, name: "workflow_id" }) ?? "";
+  // ชื่อที่บันทึกไว้กับใบ — ใช้แสดงเมื่อหา id ในลิสต์ที่โหลดมาไม่เจอ ซึ่งเกิดเป็น
+  // ปกติตอนเปิดใบเดิม (ลิสต์ paginate 30 ตัว/หน้า สินค้าที่เลือกไว้อาจอยู่หน้าอื่น)
+  // ไม่ส่งไป = ช่องว่างเปล่าทั้งที่ใบมีสินค้าอยู่
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
 
   return (
     <Controller
@@ -97,6 +102,7 @@ const ProductCellEditable = memo(function ProductCellEditable({
           // กำหนดว่าเลือกสินค้าอะไรได้บ้าง — LookupProductInLocation ไม่มี
           // nextFocusRef (ต่างจาก LookupProduct เดิม) การเด้งไปช่องราคาจึงหายไป
           // ตรงนี้ ไม่ได้ตั้งใจตัด
+          defaultLabel={productName}
           className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />

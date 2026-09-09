@@ -10,19 +10,6 @@ interface UsePoProfileSyncOptions {
   purchaseOrder: PurchaseOrder | undefined;
 }
 
-/**
- * Hook sync ข้อมูล buyer จาก profile ของผู้ใช้ลงในฟอร์ม PO
- * ทำงานเฉพาะโหมดสร้างใหม่ (purchaseOrder = undefined)
- * ตั้งค่า buyer_id, buyer_name, email ถ้ายังว่างอยู่
- *
- * @param options - ตัวเลือกของ hook
- * @param options.form - UseFormReturn ของ PoFormValues
- * @param options.profileData - UserProfile จาก useProfile
- * @param options.purchaseOrder - PO ปัจจุบัน (ถ้ามีจะข้าม sync)
- * @returns void
- * @example
- * usePoProfileSync({ form, profileData: profile, purchaseOrder });
- */
 export function usePoProfileSync({
   form,
   profileData,
