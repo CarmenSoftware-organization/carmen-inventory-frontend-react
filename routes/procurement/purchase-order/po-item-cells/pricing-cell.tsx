@@ -38,7 +38,7 @@ export const ComputedPricingCell = function ComputedPricingCell({
 };
 
 /**
- * เขียน derived fields (order_qty mirror + pricing + base_qty) กลับเข้า form
+ * เขียน derived fields (pricing + base_qty) กลับเข้า form
  * เพื่อให้ payload (mapItemToPayload) และ summary อ่านได้
  *
  * Render-null — ติดตั้ง 1 ตัวต่อ item ที่ระดับ grid (ไม่ซ้ำ desktop/mobile)
@@ -46,7 +46,7 @@ export const ComputedPricingCell = function ComputedPricingCell({
  */
 
 /**
- * เขียน derived fields (order_qty mirror + pricing + base_qty) กลับเข้า form
+ * เขียน derived fields (pricing + base_qty) กลับเข้า form
  * เพื่อให้ payload (mapItemToPayload) และ summary อ่านได้
  *
  * Render-null — ติดตั้ง 1 ตัวต่อ item ที่ระดับ grid (ไม่ซ้ำ desktop/mobile)
@@ -64,7 +64,6 @@ export const PoItemComputedSync = memo(function PoItemComputedSync({
   "use no memo";
   const item = useWatch({ control, name: `items.${index}` });
   const {
-    orderQty,
     subtotal,
     discountAmount,
     netAmount,
@@ -74,7 +73,9 @@ export const PoItemComputedSync = memo(function PoItemComputedSync({
   } = computeItemPricing(item);
 
   useEffect(() => {
-    form.setValue(`items.${index}.order_qty`, orderQty);
+    // ห้ามเขียน order_qty กลับ — ตั้งแต่แถวหนึ่ง = คลังเดียว มันเป็น **ช่องที่ผู้ใช้
+    // กรอก** ไม่ใช่ค่า derived จากผลรวม locations เหมือนเดิม เขียนทับทุก keystroke
+    // = สู้กับ input ที่ register ไว้ที่ field เดียวกัน (โฟกัส/เคอร์เซอร์หลุด)
     form.setValue(`items.${index}.sub_total_price`, subtotal);
     form.setValue(`items.${index}.discount_amount`, discountAmount);
     form.setValue(`items.${index}.net_amount`, netAmount);
@@ -84,7 +85,6 @@ export const PoItemComputedSync = memo(function PoItemComputedSync({
   }, [
     form,
     index,
-    orderQty,
     subtotal,
     discountAmount,
     netAmount,

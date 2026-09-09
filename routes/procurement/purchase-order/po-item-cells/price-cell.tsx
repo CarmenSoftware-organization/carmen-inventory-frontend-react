@@ -31,11 +31,7 @@ export const PriceCell = memo(function PriceCell({
   index,
   disabled,
   readOnly,
-  onCommit,
-}: CellProps & {
-  /** กรอกราคาเสร็จ (Enter) — ไปเปิดตัวเลือกคลังต่อ */
-  readonly onCommit?: () => void;
-}) {
+}: CellProps) {
   "use no memo";
   if (disabled || readOnly) {
     return <PricePlain form={form} index={index} />;
@@ -56,12 +52,12 @@ export const PriceCell = memo(function PriceCell({
           )}
           error={fieldState.error?.message}
           errorIconAlign="left"
-          // Enter = กรอกเสร็จแล้ว ไปเลือกคลังต่อ · preventDefault กัน Enter ใน
-          // ฟอร์มไปกด submit แทน (ทั้งใบยังกรอกไม่ครบด้วยซ้ำ)
+          // preventDefault กัน Enter ในฟอร์มไปกด submit แทน (ทั้งใบยังกรอกไม่ครบ
+          // ด้วยซ้ำ) · ของเดิม Enter พาไปเปิดตัวเลือกคลังต่อ — ตอนนี้คลังกรอกก่อน
+          // สินค้าแล้ว การเด้งกลับไปหาคลังคือย้อนทาง
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
             e.preventDefault();
-            onCommit?.();
           }}
           value={Number(field.value ?? 0)}
           onValueChange={field.onChange}

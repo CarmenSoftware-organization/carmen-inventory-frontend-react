@@ -87,14 +87,6 @@ export function PoItemFields({
   // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
   const showStatusBadge = isPoInWorkflow;
 
-  // แถวที่เพิ่งกรอกราคาเสร็จ (Enter) — กางตัวเลือกคลังของแถวนั้นต่อให้เลย
-  // เส้นทางกรอกคือ สินค้า → ราคา → คลัง → จำนวน (ท่าเดียวกับ GRN) สองท่อนแรก
-  // กับท่อนสุดท้ายใช้ nextFocusRef ของ lookup เอง ท่อนนี้ต้องสั่งเปิด popover
-  // จึงต้องมี state
-  const [openLocationIndex, setOpenLocationIndex] = useState<number | null>(
-    null,
-  );
-
   const table = usePoItemTable({
     form,
     itemFields,
@@ -105,15 +97,26 @@ export function PoItemFields({
     showStatusBadge,
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
-    openLocationIndex,
-    onPriceCommitted: setOpenLocationIndex,
-    onLocationOpenChange: (index, open) =>
-      setOpenLocationIndex(open ? index : null),
     onDelete: setDeleteIndex,
   });
 
   const handleAddItem = () => {
-    prependItem({ ...PO_ITEM });
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — คนสั่งซื้อมักสั่ง
+    // เข้าคลังเดิมติดกันหลายรายการ เติมคลัง + จุดส่งของให้ล่วงหน้าแล้วแก้เองได้
+    // (ทรงเดียวกับ PR) · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field array
+    // เก็บค่าตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_code: prev.location_code,
+          location_name: prev.location_name,
+          delivery_point_id: prev.delivery_point_id,
+          delivery_point_name: prev.delivery_point_name,
+        }
+      : {};
+
+    prependItem({ ...PO_ITEM, ...carriedLocation });
     setAddSignal((c) => c + 1);
   };
 

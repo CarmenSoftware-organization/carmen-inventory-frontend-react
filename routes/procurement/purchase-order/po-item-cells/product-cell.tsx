@@ -1,13 +1,12 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import {
   Controller,
   useWatch,
   type Control,
   type UseFormReturn,
 } from "react-hook-form";
-import { LookupProduct } from "@/components/lookup/lookup-product";
+import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
-import { fieldFocusRef } from "@/lib/field-focus";
 import type { PoFormValues } from "../po-form-schema";
 
 /**
@@ -30,13 +29,13 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
 });
 
 /**
- * Editable product lookup — watch `items` ทั้งก้อนเพื่อสร้าง excludeIds
- * (กันเลือกสินค้าซ้ำ) เฉพาะตอนแก้ไขเท่านั้น
- */
-
-/**
- * Editable product lookup — watch `items` ทั้งก้อนเพื่อสร้าง excludeIds
- * (กันเลือกสินค้าซ้ำ) เฉพาะตอนแก้ไขเท่านั้น
+ * Editable product lookup — รายการสินค้ากรองตาม **คลังของแถวนี้**
+ * (`useProductsByLocation`) ต้องเลือกคลังก่อนถึงจะเลือกสินค้าได้ ทรงเดียวกับ PR
+ * ของเดิมใช้ `LookupProduct` ที่ดึงสินค้าทั้งระบบ แล้วค่อยไปเลือกคลังที่สินค้านั้นมี
+ *
+ * **ไม่มี excludeIds** — สินค้าตัวเดียวกันซ้ำได้ (คนละราคา คนละกำหนดส่ง คนละแถว
+ * ของ PR ที่อ้างถึง) ของเดิมกันซ้ำทั้งใบ ซึ่งไปปิดเคสที่ถูกต้อง · ผลพลอยได้คือ
+ * เลิก watch `items` ทั้งก้อน ซึ่งเดิมทำให้ทุกแถว re-render ตอนพิมพ์ช่องใดช่องหนึ่ง
  */
 const ProductCellEditable = memo(function ProductCellEditable({
   control,
@@ -48,21 +47,18 @@ const ProductCellEditable = memo(function ProductCellEditable({
   index: number;
 }) {
   "use no memo";
-  const allItems = useWatch({ control, name: "items" });
-  const excludeIds = useMemo(
-    () =>
-      (allItems ?? [])
-        .map((it, i) => (i === index ? null : it?.product_id))
-        .filter((id): id is string => !!id),
-    [allItems, index],
-  );
+  const locationId =
+    useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const workflowId = useWatch({ control, name: "workflow_id" }) ?? "";
 
   return (
     <Controller
       control={control}
       name={`items.${index}.product_id`}
       render={({ field, fieldState }) => (
-        <LookupProduct
+        <LookupProductInLocation
+          locationId={locationId}
+          workflowId={workflowId}
           value={field.value ?? ""}
           onValueChange={(value, product) => {
             field.onChange(value);
@@ -97,11 +93,10 @@ const ProductCellEditable = memo(function ProductCellEditable({
               form.setValue(`items.${index}.order_unit_conversion_factor`, 1);
             }
           }}
-          excludeIds={excludeIds}
-          // เลือกสินค้าเสร็จ → ไปช่องราคาต่อ (สินค้า → ราคา → คลัง → จำนวน)
-          // ราคาแทรกกลางเพราะเป็นของสินค้า กรอกทีเดียวจบ ส่วนคลังกับจำนวนต้อง
-          // กรอกซ้ำทุกแถว — ถามของที่ถามครั้งเดียวให้จบก่อนแล้วค่อยเข้าลูป
-          nextFocusRef={fieldFocusRef(`items.${index}.price`)}
+          // ลำดับกรอกคือ คลัง → สินค้า → ราคา → จำนวน · คลังมาก่อนเพราะมันเป็นตัว
+          // กำหนดว่าเลือกสินค้าอะไรได้บ้าง — LookupProductInLocation ไม่มี
+          // nextFocusRef (ต่างจาก LookupProduct เดิม) การเด้งไปช่องราคาจึงหายไป
+          // ตรงนี้ ไม่ได้ตั้งใจตัด
           className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />
