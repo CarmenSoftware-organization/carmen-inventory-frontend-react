@@ -464,7 +464,11 @@ export function usePrItemTable({
 
     const isDraft = !prStatus || prStatus === PR_STATUS.DRAFT;
     const isCreateRole = role === STAGE_ROLE.CREATE;
-    const hiddenInDraft = new Set(["foc", "approved"]);
+    // FOC ไม่อยู่ในนี้แล้ว — ของแถมเป็นสิ่งที่ "คนขอ" ขอมาตั้งแต่ต้น ไม่ใช่
+    // ผลการตัดสินของผู้อนุมัติแบบ Approved จึงต้องเห็นและกรอกได้ตั้งแต่ draft
+    // เหมือนคอลัมน์ Requested (FocCell ปิดตามโหมด view ของฟอร์ม ไม่ผูกกับ role
+    // อยู่แล้ว โชว์ออกมาแล้วพิมพ์ได้จริง)
+    const hiddenInDraft = new Set(["approved"]);
     // ในโหมด view (isDisabled) ยังต้องโชว์คอลัมน์ action ถ้ามีรายการที่มีประวัติ
     // เพื่อให้ปุ่ม history แสดงได้ (ปุ่ม delete จะถูกซ่อนเองภายใน cell)
     const hasAnyHistory = itemFields.some(

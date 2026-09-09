@@ -344,6 +344,7 @@ export function PurchaseRequestForm({
         previousStages={previousStages}
         stagesLoading={stagesLoading}
         onSubmitPr={actions.handleSubmitPr}
+        onValidateSubmit={actions.validateSubmitPr}
         onApprove={actions.handleApprove}
         onReject={actions.handleReject}
         onReview={actions.handleReview}

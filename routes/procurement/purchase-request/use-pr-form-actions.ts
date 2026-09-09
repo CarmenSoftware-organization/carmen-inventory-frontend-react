@@ -34,6 +34,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
 import {
   type PrFormValues,
+  findRowsMissingQty,
   mapItemToPayload,
   prepareStageDetails,
   prepareApproveDetails,
@@ -456,8 +457,53 @@ export function usePrFormActions({
     );
   };
 
+  /**
+   * ด่าน "ส่งใบ" เท่านั้น — ร่างที่ยังไม่ได้ใส่จำนวนต้องเซฟได้ กฎนี้จึงไม่อยู่ใน
+   * zod (resolver ตัวเดียวกันถูกใช้ทั้ง Save และ Submit แยกกันไม่ได้)
+   *
+   * @returns true = มีแถวที่ไม่ผ่าน (ผู้เรียกต้องหยุด)
+   */
+  const blockOnMissingQty = (): boolean => {
+    const rows = findRowsMissingQty(form.getValues("items") ?? []);
+    if (rows.length === 0) return false;
+    for (const index of rows) {
+      form.setError(`items.${index}.requested_qty`, {
+        type: "manual",
+        message: tv("qtyOrFoc"),
+      });
+    }
+    scrollToFirstInvalidField();
+    toast.warning(tv("incompleteItems", { count: rows.length }));
+    return true;
+  };
+
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยันส่งใบ — ติดตรงไหนต้องรู้**ก่อน**ตอบว่า "ส่ง"
+   *
+   * ของเดิมเปิดกล่องยืนยันทันที แล้วค่อยไป validate ข้างใน `handleSubmitPr`
+   * ผู้ใช้จึงต้องกดยืนยันเสร็จก่อนถึงจะรู้ว่ากรอกไม่ครบ — ถามแล้วตอบแล้วค่อยบอกว่า
+   * ทำไม่ได้ (ทรงเดียวกับ `onValidatePurchase` ของปุ่ม Purchase Approve)
+   *
+   * toast/scroll ทำในนี้ที่เดียว ผู้เรียกแค่ return เฉย ๆ เมื่อได้ false
+   * — อย่าไปเติม toast ซ้ำที่ปุ่ม ไม่งั้นเด้งสองใบ
+   */
+  const validateSubmitPr = async (): Promise<boolean> => {
+    fillKnownItemDefaults();
+    if (blockOnMissingQty()) return false;
+    return new Promise<boolean>((resolve) => {
+      form.handleSubmit(
+        () => resolve(true),
+        (errors) => {
+          revealInvalid(errors);
+          resolve(false);
+        },
+      )();
+    });
+  };
+
   const handleSubmitPr = () => {
     fillKnownItemDefaults();
+    if (blockOnMissingQty()) return;
     if (purchaseRequest) {
       form.handleSubmit(doSaveAndSubmitPr, revealInvalid)();
       return;
@@ -654,6 +700,7 @@ export function usePrFormActions({
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPr,
     handleSubmitPr,
     revealInvalid,
     fillKnownItemDefaults,
