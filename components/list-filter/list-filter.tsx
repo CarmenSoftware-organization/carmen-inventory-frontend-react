@@ -26,7 +26,13 @@ interface ListFilterProps {
   readonly setValue: (key: string, value: string) => void;
   /** ล้าง filter ทั้งชุด (จัดการ linked/hidden key ให้ครบ) — ไม่ส่ง = ไล่ล้างรายตัว */
   readonly onClearAll?: () => void;
-  readonly onSaveClick: () => void;
+  /**
+   * เปิด SaveViewDialog — ไม่ส่ง = ไม่มีปุ่ม "Save Current View"
+   *
+   * saved view ผูกกับหน้า list (เก็บลง app config ราย pageKey) ตัวกรองที่ยืม UI
+   * ชุดนี้ไปใช้ที่อื่น เช่น ตารางรายการสินค้าในฟอร์ม PR ไม่มีอะไรให้เซฟ
+   */
+  readonly onSaveClick?: () => void;
   readonly activeCount: number;
 }
 
@@ -44,7 +50,7 @@ interface ListFilterProps {
  * @param props.values - object ค่า filter ปัจจุบัน (key => filter string)
  * @param props.setValue - callback เขียนค่า filter ตามกุญแจ
  * @param props.onClearAll - callback ล้าง filter ทั้งชุด
- * @param props.onSaveClick - callback เปิด SaveViewDialog
+ * @param props.onSaveClick - callback เปิด SaveViewDialog (ไม่ส่ง = ซ่อนปุ่ม)
  * @param props.activeCount - จำนวน filter ที่ใช้งานอยู่
  * @returns JSX element ของ sheet filter
  * @example
@@ -190,15 +196,17 @@ export function ListFilter({
           >
             {tc("clearAll")}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-              onSaveClick();
-            }}
-          >
-            {tv("saveCurrent")}
-          </Button>
+          {onSaveClick && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                onSaveClick();
+              }}
+            >
+              {tv("saveCurrent")}
+            </Button>
+          )}
           <Button onClick={() => setOpen(false)}>{tc("done")}</Button>
         </SheetFooter>
       </SheetContent>

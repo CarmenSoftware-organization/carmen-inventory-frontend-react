@@ -8,8 +8,10 @@ import {
 import {
   Activity,
   Banknote,
+  Box,
   Boxes,
   Briefcase,
+  Building,
   Building2,
   Calendar,
   ChefHat,
@@ -92,10 +94,16 @@ const FIELD_ICONS: Record<string, LucideIcon> = {
   "field.subCategory": Folder,
   "field.itemGroup": Boxes,
   // สถานที่ / ขอบเขต
-  "field.location": MapPin,
-  "field.fromLocation": MapPin,
-  "field.toLocation": MapPin,
+  // location ในแอปนี้คือ "คลัง/สถานที่เก็บของ" ไม่ใช่พิกัดบนแผนที่ — ใช้ Building
+  // ตรงกับไอคอนของ /config/location ใน sidebar ส่วนหมุดปักแผนที่สงวนไว้ให้
+  // delivery point ซึ่งเป็นจุดส่งของจริง ๆ (และเป็นไอคอนของมันใน sidebar เช่นกัน)
+  "field.location": Building,
+  "field.fromLocation": Building,
+  "field.toLocation": Building,
+  "field.deliveryPoint": MapPin,
   "field.region": Globe,
+  // สินค้า — ตรงกับ /product-management/product ใน sidebar
+  "field.product": Box,
   // คน
   "field.receivedBy": UserRound,
   "field.createdBy": UserRound,
@@ -146,7 +154,8 @@ interface ListFilterMenuProps {
   readonly values: Record<string, string>;
   readonly setValue: (key: string, value: string) => void;
   readonly onClearAll?: () => void;
-  readonly onSaveClick: () => void;
+  /** ไม่ส่ง = ไม่มีเมนู "Save Current View" (ดู ListFilter) */
+  readonly onSaveClick?: () => void;
   readonly activeCount: number;
 }
 
@@ -396,14 +405,16 @@ export function ListFilterMenu({
             else for (const f of fields) setValue(f.key, "");
           }}
         />
-        <MenuRow
-          icon={Bookmark}
-          label={tv("saveCurrent")}
-          onClick={() => {
-            setOpen(false);
-            onSaveClick();
-          }}
-        />
+        {onSaveClick && (
+          <MenuRow
+            icon={Bookmark}
+            label={tv("saveCurrent")}
+            onClick={() => {
+              setOpen(false);
+              onSaveClick();
+            }}
+          />
+        )}
       </PopoverContent>
     </Popover>
   );
