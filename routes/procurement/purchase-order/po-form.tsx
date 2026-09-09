@@ -132,12 +132,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     form.clearErrors();
   }, [form, purchaseOrder, profileData]);
 
-  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand row ที่
-  // location ติด error (location field อยู่ใน expanded row เท่านั้น) + scroll
-  // bump จากทั้ง 2 path: Save (handleSubmit onInvalid) และ Submit (handleSubmitPo trigger)
-  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  // เดิมต้อง bump signal ให้ items grid กางแถวที่ location ติด error ก่อน เพราะช่อง
+  // คลังอยู่ในแถวขยายเท่านั้น — ตอนนี้คลังเป็นคอลัมน์ปกติของตาราง ไม่มีอะไรให้กาง
+  // scrollToFirstInvalidField หา field เจอเองตั้งแต่เฟรมแรก
   const revealErrors = (errors?: Record<string, unknown>) => {
-    setRevealErrorSignal((c) => c + 1);
     const count = countInvalidItems(errors);
     toast.warning(
       count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
@@ -234,7 +232,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
         <PoItemFields
           form={form}
-          revealErrorSignal={revealErrorSignal}
           disabled={contentLocked}
           locationsDisabled={locationsDisabled}
           role={role}

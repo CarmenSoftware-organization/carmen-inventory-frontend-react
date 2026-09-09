@@ -3,12 +3,10 @@ import { useTranslations } from "use-intl";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import {
   type ColumnDef,
-  type Row,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -18,21 +16,50 @@ import {
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
-  OrderSummaryCell,
+  ItemDiscountCell,
+  ItemTaxCell,
+  LocationCell,
+  QtyUnitCell,
   UnitCol,
   RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-cells";
 import { PriceCell, ProductHeaderCell } from "./po-item-cells";
-import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
-import { useAddLocationRegistry } from "./po-locations-add-context";
 import { poItemCols } from "./po-item-columns";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
 import type { PoItemHistoryEntry } from "@/types/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
+import type { FieldArrayWithId } from "react-hook-form";
 
-export type { PoItemField };
+/** แถวหนึ่งของตารางสินค้า — เดิม type นี้อยู่ใน po-item-expanded ที่ถูกลบไปแล้ว */
+export type PoItemField = FieldArrayWithId<PoFormValues, "items", "id">;
+
+/** คลังของแถว — ตัวเลือกขึ้นกับสินค้าและ workflow ของใบ จึง watch เองในนี้ */
+const LocationCol = memo(function LocationCol({
+  form,
+  index,
+  disabled,
+}: {
+  form: UseFormReturn<PoFormValues>;
+  index: number;
+  disabled: boolean;
+}) {
+  "use no memo";
+  const productId =
+    useWatch({ control: form.control, name: `items.${index}.product_id` }) ?? "";
+  const workflowId =
+    useWatch({ control: form.control, name: "workflow_id" }) ?? "";
+  return (
+    <LocationCell
+      form={form}
+      index={index}
+      productId={productId}
+      workflowId={workflowId}
+      disabled={disabled}
+    />
+  );
+});
 
 /** Product cell — watch is_foc + คุม status badge แล้ว render ProductHeaderCell */
 const ProductCol = memo(function ProductCol({
@@ -160,9 +187,6 @@ export function usePoItemTable({
   "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.purchaseOrder");
-  // ปุ่มเพิ่มคลังใน gutter สั่งงานผ่าน registry เดียวกับที่ LocationsEditor ลงทะเบียนไว้
-  const registry = useAddLocationRegistry();
-
   const showAction = !disabled && !readOnly; // action column (ลบ item)
   // โหมดอ่านก็ยังต้องมีคอลัมน์ action ถ้ามีประวัติรายบรรทัดให้กด (เงื่อนไขเดียวกับ PR)
   // — ประวัติมีก็ต่อเมื่อใบผ่าน workflow มาแล้ว ซึ่งตอนนั้นฟอร์มมักอยู่โหมดอ่าน
@@ -179,84 +203,6 @@ export function usePoItemTable({
   const { col: PO_COL } = poItemCols(showAction && itemFields.length > 0);
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
-    const expandColumn: ColumnDef<PoItemField> = {
-      id: "expand",
-      header: "",
-      cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={row.getIsExpanded() ? "Collapse" : "Expand"}
-          onClick={() => row.toggleExpanded()}
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </Button>
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: PO_LEADING_COL,
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-        // เนื้อหา expand เริ่มที่คอลัมน์ Product — เว้นช่องเล็กหัวแถวไว้เป็น gutter
-        // (checkbox ถ้ามี + expand + index) แทนการ indent ด้วย paddingLeft %
-        expandedColStart: showApproveCheckbox ? 3 : 2,
-        // ปุ่มเพิ่มคลังอยู่ใน gutter ซ้ายนี้ ไม่ใช่ในคอลัมน์ action ของแถวสินค้า —
-        // มันสร้างของในตารางย่อย ปุ่มจึงควรอยู่กับตารางย่อย ไม่ใช่ไปปนกับปุ่มลบ
-        // ทั้งรายการที่ทำงานคนละระดับกัน (ท่าเดียวกับ GRN) · แก้ไม่ได้ก็ใช้ที่ว่าง
-        // ตรงนี้บอกว่าตารางข้าง ๆ คือคลัง ด้วยสี/น้ำหนักชุดเดียวกับหัวคอลัมน์
-        expandedLeading: (row: Row<PoItemField>) =>
-          locationsDisabled ? (
-            <div className="text-muted-foreground flex justify-end pt-3 text-xs font-semibold">
-              {tfl("location")}
-            </div>
-          ) : (
-            <div className="flex justify-end pt-2.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="h-7.5"
-                    aria-label={t("addLocation")}
-                    onClick={() => registry?.get(row.index)?.()}
-                  >
-                    <MapPinPlus aria-hidden="true" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t("addLocation")}</TooltipContent>
-              </Tooltip>
-            </div>
-          ),
-        expandedContent: (item: PoItemField) => {
-          const rowIndex = Math.max(
-            itemFields.findIndex((f) => f.id === item.id),
-            0,
-          );
-          return (
-            <PoItemExpanded
-              item={item}
-              form={form}
-              itemFields={itemFields}
-              disabled={disabled}
-              locationsDisabled={locationsDisabled}
-              readOnly={readOnly}
-              showActionCol={showActionCol}
-              locationOpen={rowIndex === openLocationIndex}
-              onLocationOpenChange={(open) =>
-                onLocationOpenChange(rowIndex, open)
-              }
-            />
-          );
-        },
-      },
-    };
-
     const indexColumn: ColumnDef<PoItemField> = {
       id: "index",
       header: "#",
@@ -278,6 +224,18 @@ export function usePoItemTable({
       cellClassName: "text-right",
     };
     const dataColumns: ColumnDef<PoItemField>[] = [
+      {
+        accessorKey: "location_id",
+        header: tfl("location"),
+        size: PO_COL.location,
+        cell: ({ row }) => (
+          <LocationCol
+            form={form}
+            index={row.index}
+            disabled={locationsDisabled}
+          />
+        ),
+      },
       {
         accessorKey: "product_id",
         header: tfl("product"),
@@ -313,7 +271,13 @@ export function usePoItemTable({
         size: PO_COL.order,
         meta: rightMeta,
         cell: ({ row }) => (
-          <OrderSummaryCell control={form.control} index={row.index} />
+          <QtyUnitCell
+            control={form.control}
+            form={form}
+            index={row.index}
+            disabled={disabled}
+            readOnly={readOnly}
+          />
         ),
       },
       {
@@ -359,10 +323,10 @@ export function usePoItemTable({
         size: PO_COL.discount,
         meta: rightMeta,
         cell: ({ row }) => (
-          <ComputedPricingCell
-            control={form.control}
-            index={row.index}
-            field="discount_amount"
+          <ItemDiscountCell
+            form={form}
+            itemIndex={row.index}
+            editable={!disabled && !readOnly}
           />
         ),
       },
@@ -385,10 +349,10 @@ export function usePoItemTable({
         size: PO_COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
-          <ComputedPricingCell
-            control={form.control}
-            index={row.index}
-            field="tax_amount"
+          <ItemTaxCell
+            form={form}
+            itemIndex={row.index}
+            editable={!disabled && !readOnly}
           />
         ),
       },
@@ -444,7 +408,6 @@ export function usePoItemTable({
             } as ColumnDef<PoItemField>,
           ]
         : []),
-      expandColumn,
       indexColumn,
       ...dataColumns,
       ...(showActionCol ? [actionColumn] : []),
@@ -480,7 +443,6 @@ export function usePoItemTable({
     onLocationOpenChange,
     tfl,
     t,
-    registry,
     showAction,
     showActionCol,
   ]);
@@ -489,7 +451,6 @@ export function usePoItemTable({
     data: itemFields,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: showApproveCheckbox,
   });

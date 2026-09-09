@@ -3,6 +3,8 @@ const MONEY_COL = 96;
 
 export function poItemCols(editable: boolean) {
   const col = {
+    // แถวหนึ่ง = คลังเดียว — คลังเลยขึ้นมาเป็นคอลัมน์ของแถว ไม่ได้อยู่ในตารางย่อย
+    location: 180,
     product: 200,
     unit: 100,
     order: 100,
@@ -16,6 +18,7 @@ export function poItemCols(editable: boolean) {
     action: 48,
   } as const;
   const dataTotal =
+    col.location +
     col.product +
     col.unit +
     col.order +

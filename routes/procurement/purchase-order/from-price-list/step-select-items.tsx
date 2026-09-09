@@ -26,8 +26,27 @@ interface StepSelectItemsProps {
 const EMPTY_LOCATION: FromPriceListItemLocation = {
   id: "",
   order_qty: 1,
-  received_qty: 0,
 };
+
+/**
+ * ให้ `location_id/code/name` ระดับ item ตรงกับคลังแรกที่เลือกไว้เสมอ
+ *
+ * schema ของ PO บังคับให้ทุกแถวมีคลัง (แถวหนึ่ง = คลังเดียว) แต่ wizard ยังให้
+ * เลือกหลายคลังในการ์ดใบเดียว แล้วค่อยกางเป็นแถวละคลังตอนสร้าง payload —
+ * ระหว่างนั้นการ์ดต้องผ่าน validate ให้ได้ จึงถือคลังแรกไว้เป็นตัวแทน
+ * (`expandItemPerLocation` เขียนทับให้ถูกรายแถวอยู่แล้ว)
+ */
+function syncPrimaryLocation(
+  item: FromPriceListSelectedItem,
+): FromPriceListSelectedItem {
+  const first = item.locations?.find((l) => !!l.id);
+  return {
+    ...item,
+    location_id: first?.id ?? null,
+    location_code: first?.location_code ?? "",
+    location_name: first?.location_name ?? "",
+  };
+}
 
 function detailToItem(detail: PriceListDetailItem): FromPriceListSelectedItem {
   const qty = detail.moq_qty || 1;
@@ -156,10 +175,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const idx = current.findIndex((i) => (i.product_id ?? "") === productId);
     if (idx < 0) return;
     const next = [...current];
-    next[idx] = {
+    next[idx] = syncPrimaryLocation({
       ...next[idx],
       locations: [...next[idx].locations, { ...EMPTY_LOCATION }],
-    };
+    });
     setItems(next);
   };
 
@@ -171,10 +190,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const item = current[idx];
     if (item.locations.length <= 1) return;
     const next = [...current];
-    next[idx] = {
+    next[idx] = syncPrimaryLocation({
       ...item,
       locations: item.locations.filter((_, i) => i !== locIndex),
-    };
+    });
     setItems(next);
   };
 
@@ -191,7 +210,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const nextLocations = [...item.locations];
     nextLocations[locIndex] = { ...nextLocations[locIndex], ...patch };
     const next = [...current];
-    next[idx] = { ...item, locations: nextLocations };
+    next[idx] = syncPrimaryLocation({ ...item, locations: nextLocations });
     setItems(next);
   };
 

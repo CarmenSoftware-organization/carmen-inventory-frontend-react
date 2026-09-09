@@ -1,3 +1,4 @@
+export { LocationCell } from "./location-cell";
 export { ProductCell } from "./product-cell";
 export { ProductHeaderCell } from "./product-header-cell";
 export { WatchedProductUnit, UnitCol } from "./unit-cell";
@@ -7,9 +8,9 @@ export { QtyUnitCell, OrderSummaryCell, RecSummaryCell } from "./qty-cell";
 export { PriceCell } from "./price-cell";
 export { ComputedPricingCell, PoItemComputedSync } from "./pricing-cell";
 export {
-  LocationAmountCell,
-  LocationDiscountCell,
-  LocationPriceText,
-  LocationQtyInput,
-  LocationTaxCell,
-} from "./location-cells";
+  ItemAmountCell,
+  ItemDiscountCell,
+  ItemPriceText,
+  ItemQtyInput,
+  ItemTaxCell,
+} from "./row-pricing-cells";

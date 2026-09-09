@@ -259,12 +259,12 @@ export function PoHeader({
 
   const workflowStepEl = purchaseOrder?.workflow_current_stage ? (
     <WorkflowTrack
-      previousStage={purchaseOrder.workflow_previous_stage}
+      previousStage={purchaseOrder.workflow_previous_stage ?? undefined}
       currentStage={purchaseOrder.workflow_current_stage}
       nextStage={
         purchaseOrder.po_status === "completed"
           ? undefined
-          : purchaseOrder.workflow_next_stage
+          : (purchaseOrder.workflow_next_stage ?? undefined)
       }
     />
   ) : undefined;

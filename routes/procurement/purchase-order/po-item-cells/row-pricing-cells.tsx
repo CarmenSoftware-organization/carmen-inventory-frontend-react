@@ -14,24 +14,23 @@ import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { PoFormValues } from "../po-form-schema";
 
-type LocationPricingField =
+type ItemPricingField =
   | "sub_total_price"
   | "discount_amount"
   | "net_amount"
   | "tax_amount"
   | "total_price";
 
-/** อ่านค่าที่ต้องใช้คำนวณของ location เดียว → computeLineAmounts (honor override) */
+/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
 
-/** อ่านค่าที่ต้องใช้คำนวณของ location เดียว → computeLineAmounts (honor override) */
-function useLocationLine(
+/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
+function useItemLine(
   form: UseFormReturn<PoFormValues>,
   itemIndex: number,
-  locIndex: number,
 ) {
   "use no memo";
   const control = form.control;
-  const base = `items.${itemIndex}.locations.${locIndex}` as const;
+  const base = `items.${itemIndex}` as const;
   const price = Number(
     useWatch({ control, name: `items.${itemIndex}.price` }) ?? 0,
   );
@@ -60,22 +59,20 @@ function useLocationLine(
   });
 }
 
-/** ยอดเงินของ location เดียว (plain text) — honor override */
+/** ยอดเงินของแถว (plain text) — honor override */
 
-/** ยอดเงินของ location เดียว (plain text) — honor override */
-export function LocationAmountCell({
+/** ยอดเงินของแถว (plain text) — honor override */
+export function ItemAmountCell({
   form,
   itemIndex,
-  locIndex,
   field,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
-  readonly locIndex: number;
-  readonly field: LocationPricingField;
+  readonly field: ItemPricingField;
 }) {
   "use no memo";
-  const line = useLocationLine(form, itemIndex, locIndex);
+  const line = useItemLine(form, itemIndex);
   const values = {
     sub_total_price: line.subtotal,
     discount_amount: line.discountAmount,
@@ -93,7 +90,7 @@ export function LocationAmountCell({
 /** Unit price ของ location = ราคาระดับ item (read-only text) */
 
 /** Unit price ของ location = ราคาระดับ item (read-only text) */
-export function LocationPriceText({
+export function ItemPriceText({
   form,
   itemIndex,
 }: {
@@ -110,23 +107,21 @@ export function LocationPriceText({
   );
 }
 
-/** Discount cell ต่อ location — override toggle + rate/amount combo (shared) */
+/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
 
-/** Discount cell ต่อ location — override toggle + rate/amount combo (shared) */
-export function LocationDiscountCell({
+/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
+export function ItemDiscountCell({
   form,
   itemIndex,
-  locIndex,
   editable,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
-  readonly locIndex: number;
   readonly editable: boolean;
 }) {
   "use no memo";
   const tfl = useTranslations("field");
-  const base = `items.${itemIndex}.locations.${locIndex}` as const;
+  const base = `items.${itemIndex}` as const;
   const rate =
     useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
   const isAdj =
@@ -134,7 +129,7 @@ export function LocationDiscountCell({
       control: form.control,
       name: `${base}.is_discount_adjustment`,
     }) ?? false;
-  const line = useLocationLine(form, itemIndex, locIndex);
+  const line = useItemLine(form, itemIndex);
   const amount = line.discountAmount;
 
   if (!editable) {
@@ -181,23 +176,21 @@ export function LocationDiscountCell({
   );
 }
 
-/** Tax cell ต่อ location — override toggle + tax-profile/amount combo (shared) */
+/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
 
-/** Tax cell ต่อ location — override toggle + tax-profile/amount combo (shared) */
-export function LocationTaxCell({
+/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
+export function ItemTaxCell({
   form,
   itemIndex,
-  locIndex,
   editable,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
-  readonly locIndex: number;
   readonly editable: boolean;
 }) {
   "use no memo";
   const tfl = useTranslations("field");
-  const base = `items.${itemIndex}.locations.${locIndex}` as const;
+  const base = `items.${itemIndex}` as const;
   const taxProfileId =
     useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
   const rate =
@@ -205,7 +198,7 @@ export function LocationTaxCell({
   const isAdj =
     useWatch({ control: form.control, name: `${base}.is_tax_adjustment` }) ??
     false;
-  const line = useLocationLine(form, itemIndex, locIndex);
+  const line = useItemLine(form, itemIndex);
   const amount = line.taxAmount;
 
   if (!editable) {
@@ -259,23 +252,21 @@ export function LocationTaxCell({
   );
 }
 
-export function LocationQtyInput({
+export function ItemQtyInput({
   form,
   itemIndex,
-  locIndex,
   error,
   unitName,
   decimals,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
-  readonly locIndex: number;
   readonly error?: string;
   readonly unitName: string;
   readonly decimals: number;
 }) {
   "use no memo";
-  const name = `items.${itemIndex}.locations.${locIndex}.order_qty` as const;
+  const name = `items.${itemIndex}.order_qty` as const;
   const value = useWatch({ control: form.control, name }) ?? 0;
   return (
     <InputSuffixField className="w-full" error={!!error}>

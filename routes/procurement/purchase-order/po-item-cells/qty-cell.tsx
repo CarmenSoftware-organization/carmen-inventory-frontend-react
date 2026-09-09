@@ -8,18 +8,14 @@ import {
   InputSuffixAddon,
   InputSuffixField,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { useUnitDecimals } from "@/hooks/use-product-units";
-import { cn } from "@/lib/utils";
 import type { PoFormValues } from "../po-form-schema";
 import { WatchedProductUnit } from "./unit-cell";
 
-/**
- * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
- * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
- */
-/** decimal_place ของหน่วยสั่งซื้อในแถวนั้น — สามเซลล์ในไฟล์นี้ต้องการชุดเดียวกัน */
+/** decimal_place ของหน่วยสั่งซื้อในแถวนั้น — เซลล์ในไฟล์นี้ต้องการชุดเดียวกัน */
 function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
@@ -28,6 +24,13 @@ function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
   return useUnitDecimals(productId, unitId);
 }
 
+/**
+ * จำนวนสั่ง + หน่วย ในกล่องเดียว
+ *
+ * แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location — `order_qty` จึงเป็น
+ * ค่าของแถวตรง ๆ **แก้ได้ที่นี่** ของเดิมเป็นผลรวม read-only ของ `locations[]`
+ * แล้วต้องกางแถวออกไปแก้ในตารางย่อย
+ */
 export const QtyUnitCell = function QtyUnitCell({
   control,
   form,
@@ -42,30 +45,22 @@ export const QtyUnitCell = function QtyUnitCell({
   readOnly?: boolean;
 }) {
   "use no memo";
-  const locations =
-    useWatch({ control, name: `items.${index}.locations` }) ?? [];
-  const sum = locations.reduce(
-    (acc, l) => acc + (Number(l?.order_qty) || 0),
-    0,
-  );
-  // order_qty ระดับ item = ยอดรวมจาก locations (read-only) — ถ้ายอดรวมไม่ผ่าน
-  // min qty จะไม่มี input ให้ scroll หา → mark data-invalid + สีแดงที่เซลล์นี้
-  // ให้ scrollToFirstInvalidField เจอ + user เห็น field ที่ผิด
+  const qty = useWatch({ control, name: `items.${index}.order_qty` }) ?? 0;
   const { errors } = useFormState({
     control,
     name: `items.${index}.order_qty`,
   });
   const invalid = !!errors.items?.[index]?.order_qty;
-  // sum ของ float ต้อง format ก่อนออกจอ — 0.1 + 0.2 = 0.30000000000000004
-  // ทศนิยมตาม decimal_place ของหน่วย ตัวเดียวกับที่คุมช่องกรอก
-  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
+  const decimals = useOrderUnitDecimals(control, index);
+  const formatQty = useQuantityFormatter(decimals);
+  const name = `items.${index}.order_qty` as const;
 
   if (disabled || readOnly) {
     const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
     return (
       <InputSuffixPlain
         className="w-full"
-        value={formatQty(sum)}
+        value={formatQty(Number(qty))}
         suffix={unitName}
       />
     );
@@ -73,15 +68,19 @@ export const QtyUnitCell = function QtyUnitCell({
 
   return (
     <InputSuffixField className="w-full" error={invalid}>
-      <span
-        data-invalid={invalid ? "true" : undefined}
-        className={cn(
-          "min-w-0 flex-1 px-2 text-right text-xs tabular-nums",
-          invalid && "text-destructive font-semibold",
-        )}
-      >
-        {sum}
-      </span>
+      <InputSuffixQty
+        decimals={decimals}
+        placeholder="0"
+        defaultValue={Number(qty)}
+        {...form.register(name)}
+        onChange={(e) => {
+          const n = e.target.valueAsNumber;
+          form.setValue(name, Number.isNaN(n) ? 0 : n, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+      />
       <InputSuffixAddon>
         <WatchedProductUnit
           control={control}
@@ -94,9 +93,7 @@ export const QtyUnitCell = function QtyUnitCell({
   );
 };
 
-/** Product-row summary: ผลรวม order_qty ของทุก location + unit (read-only) */
-
-/** Product-row summary: ผลรวม order_qty ของทุก location + unit (read-only) */
+/** จำนวนสั่งของแถว (อ่านอย่างเดียว) + หน่วย */
 export const OrderSummaryCell = function OrderSummaryCell({
   control,
   index,
@@ -105,24 +102,25 @@ export const OrderSummaryCell = function OrderSummaryCell({
   index: number;
 }) {
   "use no memo";
-  const locations =
-    useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const qty = useWatch({ control, name: `items.${index}.order_qty` }) ?? 0;
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
-  const sum = locations.reduce((a, l) => a + (Number(l?.order_qty) || 0), 0);
   const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
   return (
     <InputSuffixPlain
       className="block w-full text-right"
-      value={formatQty(sum)}
+      value={formatQty(Number(qty))}
       suffix={unitName}
     />
   );
 };
 
-/** Product-row summary: ผลรวม received_qty ของทุก location + unit (read-only) */
-
-/** Product-row summary: ผลรวม received_qty ของทุก location + unit (read-only) */
+/**
+ * จำนวนที่รับแล้ว (อ่านอย่างเดียว)
+ *
+ * response ไม่มี `received_qty` บนแถว — มันอยู่ใน `pr_details[]` ราย PR ที่แถวนี้
+ * อ้างถึง `getDefaultValues` รวมให้แล้วตอนโหลด (ดู po-form-schema)
+ */
 export const RecSummaryCell = function RecSummaryCell({
   control,
   index,
@@ -131,19 +129,16 @@ export const RecSummaryCell = function RecSummaryCell({
   index: number;
 }) {
   "use no memo";
-  const locations =
-    useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const received =
+    useWatch({ control, name: `items.${index}.received_qty` }) ?? 0;
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
-  const sum = locations.reduce((a, l) => a + (Number(l?.received_qty) || 0), 0);
   const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
   return (
     <InputSuffixPlain
       className="block w-full text-right"
-      value={formatQty(sum)}
+      value={formatQty(Number(received))}
       suffix={unitName}
     />
   );
 };
-
-/** Read-only display ของ sub/disc/net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */

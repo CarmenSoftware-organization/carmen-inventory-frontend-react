@@ -42,7 +42,7 @@ import {
 import { StepOrderDetails } from "./step-order-details";
 import { StepSelectVendors } from "./step-select-vendors";
 import { StepSelectItems } from "./step-select-items";
-import { recomputeItemFromLocations } from "./recompute-item-pricing";
+import { expandItemPerLocation } from "./expand-item-per-location";
 import { StepSummary } from "./step-summary";
 
 type Step = 1 | 2 | 3 | 4;
@@ -107,7 +107,9 @@ export function FromPriceListContent() {
   const poSchema = createPoSchema(tv, tf, true);
 
   const form = useForm<FromPriceListFormValues>({
-    resolver: zodResolver(poSchema) as Resolver<FromPriceListFormValues>,
+    resolver: zodResolver(
+      poSchema,
+    ) as unknown as Resolver<FromPriceListFormValues>,
     defaultValues: getDefaultValues({
       userId: profile.userId,
       fullName: profile.fullName,
@@ -242,12 +244,12 @@ export function FromPriceListContent() {
       toast.warning(tv("incompleteDocument"));
       return;
     }
-    // Sync ค่าระดับ item จาก locations ก่อนสร้าง payload — wizard ไม่มี
-    // PoItemComputedSync คอย sync ให้ ค่า qty/amount ระดับ item จึงอาจค้างค่าเดิม
+    // การ์ดหนึ่งใบใน wizard เลือกได้หลายคลัง แต่ PO นับแถวละคลัง — กางออกตรงนี้
+    // ที่เดียว (ดู expandItemPerLocation) wizard จึงไม่ต้องรู้เรื่องโครงของ PO
     const values = form.getValues();
     const syncedValues = {
       ...values,
-      items: (values.items ?? []).map(recomputeItemFromLocations),
+      items: (values.items ?? []).flatMap(expandItemPerLocation),
     };
     const payload = buildPoPayload(syncedValues, [], { po_type: PO_TYPE.PL });
     createPo.mutate(payload, {
