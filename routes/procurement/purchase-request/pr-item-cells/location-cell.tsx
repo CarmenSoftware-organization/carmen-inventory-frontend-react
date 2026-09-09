@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { fieldFocusRef } from "@/lib/field-focus";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { inventoryTypeLabelKey } from "@/constant/location";
@@ -62,27 +63,17 @@ export const LocationCell = memo(function LocationCell({
 
   if (isDisabled || isRowLocked) {
     return (
-      <div className="flex flex-col gap-0.5">
-        {/* min-h-6 = ความสูงปุ่ม icon-xs ของ InventoryTooltip ในคอลัมน์ Product
-            สองคอลัมน์นี้อยู่ติดกัน บรรทัดรอง (code / ชื่อรอง) ต้องอยู่ระดับเดียวกัน
-            ที่นี่มีแค่จุดสถานะ size-4 ถ้าไม่ตรึงไว้ แถวจะเตี้ยกว่า 8px — และเตี้ย
-            ๆ สูง ๆ สลับกันเองด้วยเมื่อแถวไหนไม่มีสถานะ (StatusCell คืน null) */}
-        <div className="flex min-h-6 min-w-0 items-center justify-between gap-1.5">
-          {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
-          <p
-            className="min-w-0 truncate text-xs font-semibold"
-            title={locationName || undefined}
-          >
-            {locationName || <span className="text-muted-foreground">—</span>}
-          </p>
-          {statusSlot}
+      // จุดสถานะอยู่ **นอก** stack สองบรรทัด จัดกลางเทียบทั้งก้อน — โครงเดียวกับ
+      // คอลัมน์ Product ข้าง ๆ เป๊ะ ระยะชื่อ→code จึงมาจาก NameWithSubtext ตัวเดียว
+      // ไม่ต้องตรึง min-h ให้เท่ากันด้วยมืออีกต่อไป
+      <div className="flex items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <NameWithSubtext
+            primary={locationName || "—"}
+            secondary={locationCode}
+          />
         </div>
-        <span
-          className="text-muted-foreground text-micro-legal truncate"
-          title={locationCode || undefined}
-        >
-          {locationCode}
-        </span>
+        {statusSlot}
       </div>
     );
   }
