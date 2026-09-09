@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldPlainText } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { InventoryTooltip } from "@/components/share/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
@@ -310,6 +311,10 @@ export function useSrItemTable({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
+  // ไม่ส่ง decimals — SR ไม่มี unit_id ราย item (มีแต่ unit_name) จึงหา decimal_place
+  // ของหน่วยไม่ได้ และ `InputQty` ข้างล่างก็ไม่ได้ส่ง decimals เหมือนกัน ทั้งสองฝั่ง
+  // จึงตกที่ DEFAULT_QTY_DECIMALS ตัวเดียวกัน = แสดงเท่าที่พิมพ์ได้พอดี
+  const formatQty = useQuantityFormatter();
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
   const allCount = itemFields.length;
@@ -395,7 +400,7 @@ export function useSrItemTable({
               <FieldPlainText className="justify-end tabular-nums">
                 {row.original.requested_qty == null
                   ? ""
-                  : row.original.requested_qty}
+                  : formatQty(row.original.requested_qty)}
               </FieldPlainText>
             );
           }
@@ -428,7 +433,7 @@ export function useSrItemTable({
                     <FieldPlainText className="justify-end tabular-nums">
                       {row.original.approved_qty == null
                         ? ""
-                        : row.original.approved_qty}
+                        : formatQty(row.original.approved_qty)}
                     </FieldPlainText>
                   );
                 }
@@ -467,7 +472,7 @@ export function useSrItemTable({
                     <FieldPlainText className="justify-end tabular-nums">
                       {row.original.issued_qty == null
                         ? ""
-                        : row.original.issued_qty}
+                        : formatQty(row.original.issued_qty)}
                     </FieldPlainText>
                   );
                 }
@@ -625,6 +630,7 @@ export function useSrItemTable({
     t,
     tfl,
     tc,
+    formatQty,
     translateStageStatus,
     itemFields,
   ]);

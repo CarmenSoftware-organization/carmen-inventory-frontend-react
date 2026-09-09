@@ -17,6 +17,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import { useUnitDecimals } from "@/hooks/use-product-units";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { fieldFocusRef } from "@/lib/field-focus";
 import { useAddLocationRegistry } from "./po-locations-add-context";
 import { poItemCols } from "./po-item-columns";
@@ -74,6 +75,8 @@ export function LocationsEditor({
     }) ?? "";
   // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
   const decimals = useUnitDecimals(productId, unitId);
+  // ทศนิยมชุดเดียวกับที่ LocationQtyInput ใช้คุมการพิมพ์ — โหมดอ่านต้องตรงกัน
+  const formatQty = useQuantityFormatter(decimals);
 
   const { fields, prepend, remove } = useFieldArray({
     control: form.control,
@@ -211,7 +214,7 @@ export function LocationsEditor({
                   ) : (
                     <InputSuffixPlain
                       className="block w-full text-right"
-                      value={watchedLocations?.[locIndex]?.order_qty ?? 0}
+                      value={formatQty(watchedLocations?.[locIndex]?.order_qty ?? 0)}
                       suffix={unitName}
                     />
                   )}
@@ -220,7 +223,7 @@ export function LocationsEditor({
                 <td className="px-3 py-1 text-right">
                   <InputSuffixPlain
                     className="block w-full text-right"
-                    value={watchedLocations?.[locIndex]?.received_qty ?? 0}
+                    value={formatQty(watchedLocations?.[locIndex]?.received_qty ?? 0)}
                     suffix={unitName}
                   />
                 </td>

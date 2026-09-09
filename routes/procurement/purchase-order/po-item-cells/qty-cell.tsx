@@ -9,6 +9,8 @@ import {
   InputSuffixField,
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { cn } from "@/lib/utils";
 import type { PoFormValues } from "../po-form-schema";
 import { WatchedProductUnit } from "./unit-cell";
@@ -17,6 +19,15 @@ import { WatchedProductUnit } from "./unit-cell";
  * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
  * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
  */
+/** decimal_place ของหน่วยสั่งซื้อในแถวนั้น — สามเซลล์ในไฟล์นี้ต้องการชุดเดียวกัน */
+function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const unitId =
+    useWatch({ control, name: `items.${index}.order_unit_id` }) ?? "";
+  return useUnitDecimals(productId, unitId);
+}
+
 export const QtyUnitCell = function QtyUnitCell({
   control,
   form,
@@ -45,11 +56,18 @@ export const QtyUnitCell = function QtyUnitCell({
     name: `items.${index}.order_qty`,
   });
   const invalid = !!errors.items?.[index]?.order_qty;
+  // sum ของ float ต้อง format ก่อนออกจอ — 0.1 + 0.2 = 0.30000000000000004
+  // ทศนิยมตาม decimal_place ของหน่วย ตัวเดียวกับที่คุมช่องกรอก
+  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
 
   if (disabled || readOnly) {
     const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
     return (
-      <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />
+      <InputSuffixPlain
+        className="w-full"
+        value={formatQty(sum)}
+        suffix={unitName}
+      />
     );
   }
 
@@ -92,10 +110,11 @@ export const OrderSummaryCell = function OrderSummaryCell({
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
   const sum = locations.reduce((a, l) => a + (Number(l?.order_qty) || 0), 0);
+  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
   return (
     <InputSuffixPlain
       className="block w-full text-right"
-      value={sum}
+      value={formatQty(sum)}
       suffix={unitName}
     />
   );
@@ -117,10 +136,11 @@ export const RecSummaryCell = function RecSummaryCell({
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
   const sum = locations.reduce((a, l) => a + (Number(l?.received_qty) || 0), 0);
+  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
   return (
     <InputSuffixPlain
       className="block w-full text-right"
-      value={sum}
+      value={formatQty(sum)}
       suffix={unitName}
     />
   );

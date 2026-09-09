@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { useWatch, type Control } from "react-hook-form";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
-import { useProductUnits } from "@/hooks/use-product-units";
+import { useProductUnits, useUnitDecimals } from "@/hooks/use-product-units";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import type { GrnFormValues } from "../grn-form-schema";
 import type { GrnQtyField, GrnUnitField } from "./types";
 
@@ -30,5 +31,8 @@ export const GroupQtySum = memo(function GroupQtySum({
     useWatch({ control, name: `items.${primary}.${unitField}` }) ?? "";
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
-  return <InputSuffixPlain value={total} suffix={unitName} />;
+  // ผลรวมของ float ต้อง format ก่อนออกจอเสมอ — 0.1 + 0.2 = 0.30000000000000004
+  // ทศนิยมตาม decimal_place ของหน่วย ตัวเดียวกับที่คุมช่องกรอก
+  const formatQty = useQuantityFormatter(useUnitDecimals(productId, unitId));
+  return <InputSuffixPlain value={formatQty(total)} suffix={unitName} />;
 });
