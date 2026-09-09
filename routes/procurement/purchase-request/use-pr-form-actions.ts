@@ -17,6 +17,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
+import { pickDocVersion } from "@/lib/doc-version";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import {
   useCreatePurchaseRequest,
@@ -104,10 +105,11 @@ export function usePrFormActions({
   };
 
   const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
-    fresh?.doc_version ??
-    form.getValues("doc_version") ??
-    purchaseRequest?.doc_version ??
-    0;
+    pickDocVersion(
+      fresh?.doc_version,
+      form.getValues("doc_version"),
+      purchaseRequest?.doc_version,
+    );
 
   // re-sync doc_version จาก response /save กลับเข้า form (header + ราย detail
   // ตาม id) — กัน save ซ้ำส่ง version เก่า
