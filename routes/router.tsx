@@ -232,6 +232,11 @@ export const router = createBrowserRouter([
                   import("./procurement/purchase-order/from-price-list/from-price-list.route"),
               },
               {
+                path: "purchase-order/from-pr",
+                lazy: () =>
+                  import("./procurement/purchase-order/from-pr/from-pr.route"),
+              },
+              {
                 path: "purchase-order/:id",
                 lazy: () =>
                   import("./procurement/purchase-order/purchase-order-edit.route"),

@@ -297,8 +297,7 @@ export function PoHeader({
           จะทำให้ useEmailProfiles/useVendorById ยิงทุกครั้งที่เปิดหน้า PO เหล่านี้
           ทั้งที่ยังไม่ได้กดปุ่ม — unmount/remount ทุกรอบตั้งใจ: EmailChipField กับ
           state ในตัว dialog reset เองผ่าน lifecycle ของ component (initializedRef
-          ออกแบบมารองรับ mount ใหม่ทุกครั้งที่เปิดอยู่แล้ว) เหมือน pattern ของ
-          PoFromPrDialog ใน po-create-dialog.tsx */}
+          ออกแบบมารองรับ mount ใหม่ทุกครั้งที่เปิดอยู่แล้ว) */}
       {canSendEmail && showSendEmail && purchaseOrder && (
         <PoSendEmailDialog
           open={showSendEmail}
