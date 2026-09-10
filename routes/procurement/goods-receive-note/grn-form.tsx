@@ -106,16 +106,13 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     reValidateMode: "onChange",
   });
 
-  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand group ที่
-  // location/qty/discount/tax ติด error (field อยู่ใน group expand เท่านั้น) + scroll
-  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  // validation ไม่ผ่าน → บอกว่าติดกี่รายการ แล้วพาไปที่ช่องแรกที่ผิด · ไม่ต้อง
+  // กางอะไรก่อนแล้ว ทุกช่องอยู่บนแถวเดียวกันตั้งแต่ตารางเลิกจัดกลุ่มสินค้า
   const revealErrors = (errors?: Record<string, unknown>) => {
-    setRevealErrorSignal((c) => c + 1);
     const count = countInvalidItems(errors);
     toast.warning(
       count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
     );
-    // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน group ที่ auto-expand mount field เสร็จ
     scrollToFirstInvalidField();
   };
 
@@ -236,12 +233,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GrnItemTable
-              form={form}
-              disabled={isDisabled}
-              plainText={isView}
-              revealErrorSignal={revealErrorSignal}
-            />
+            <GrnItemTable form={form} disabled={isDisabled} />
           </TabsContent>
           <TabsContent value="extra-cost">
             <GrnExtraCostFields form={form} disabled={isDisabled} />
