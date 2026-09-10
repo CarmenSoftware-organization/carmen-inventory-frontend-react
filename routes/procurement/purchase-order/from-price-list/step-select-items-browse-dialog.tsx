@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { AlertTriangle, ChevronRight, PackagePlus, Search } from "lucide-react";
+import { AlertTriangle, ChevronRight, PackagePlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import EmptyComponent from "@/components/empty-component";
+import SearchInput from "@/components/search-input";
 import { cn } from "@/lib/utils";
 import { useActivePriceListsByVendor } from "@/hooks/use-price-list";
 import type { PriceList, PriceListDetailItem } from "@/types/price-list";
@@ -207,18 +207,16 @@ export function BrowseDialog({
         </DialogHeader>
 
         <div className="space-y-3 px-6 py-3">
-          <div className="relative">
-            <Search
-              aria-hidden="true"
-              className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2"
-            />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchProduct")}
-              className="h-8 pl-8 text-xs"
-            />
-          </div>
+          {/* กรองในฝั่ง client จากรายการที่โหลดมาแล้ว — onInputChange กรองทันทีที่
+              พิมพ์ (ไม่ใช่รอ Enter) เหมือนช่องค้นผู้ขายใน step ก่อนหน้า */}
+          <SearchInput
+            defaultValue={search}
+            onSearch={setSearch}
+            onInputChange={setSearch}
+            placeholder={t("searchProduct")}
+            containerClassName="w-full"
+            inputClassName="h-8 text-xs placeholder:text-xs"
+          />
           {activeCurrency && (
             <div
               className="border-warning/30 bg-warning/5 text-warning-foreground text-micro flex items-start gap-2 rounded-md border px-3 py-2"

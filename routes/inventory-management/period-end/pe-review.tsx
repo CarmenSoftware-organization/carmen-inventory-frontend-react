@@ -47,11 +47,11 @@ interface ModuleConfig {
 }
 
 const MODULE_CONFIG: Record<ReviewTransactionKey, ModuleConfig> = {
-  pr: { icon: FileText, color: "var(--sub-pr)" },
-  po: { icon: ShoppingCart, color: "var(--sub-po)" },
-  grn: { icon: PackageCheck, color: "var(--sub-grn)" },
-  cn: { icon: Receipt, color: "var(--sub-cn)" },
-  sr: { icon: ClipboardList, color: "var(--sub-store-requisition)" },
+  pr: { icon: FileText, color: "var(--primary)" },
+  po: { icon: ShoppingCart, color: "var(--primary)" },
+  grn: { icon: PackageCheck, color: "var(--primary)" },
+  cn: { icon: Receipt, color: "var(--primary)" },
+  sr: { icon: ClipboardList, color: "var(--primary)" },
   si: { icon: PackagePlus, color: "var(--status-stock-in)" },
   so: { icon: PackageMinus, color: "var(--status-stock-out)" },
 };
@@ -121,8 +121,8 @@ export default function PeReview() {
             className="inline-flex size-9 items-center justify-center rounded-xl"
             style={{
               background:
-                "color-mix(in oklch, var(--module-inventory), transparent 88%)",
-              color: "var(--module-inventory)",
+                "color-mix(in oklch, var(--primary), transparent 88%)",
+              color: "var(--primary)",
             }}
           >
             <CalendarRange className="size-5" />
@@ -174,7 +174,7 @@ export default function PeReview() {
         <>
           <Card
             className="border-l-4"
-            style={{ borderLeftColor: "var(--module-inventory)" }}
+            style={{ borderLeftColor: "var(--primary)" }}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -376,7 +376,7 @@ export default function PeReview() {
         stat={docsKey && data ? data.details.transaction[docsKey] : null}
         icon={docsKey ? MODULE_CONFIG[docsKey].icon : ClipboardList}
         color={
-          docsKey ? MODULE_CONFIG[docsKey].color : "var(--module-inventory)"
+          docsKey ? MODULE_CONFIG[docsKey].color : "var(--primary)"
         }
       />
     </div>

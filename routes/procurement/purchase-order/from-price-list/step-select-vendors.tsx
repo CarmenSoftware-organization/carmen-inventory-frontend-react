@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { CalendarDays, Check, Search } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import EmptyComponent from "@/components/empty-component";
+import SearchInput from "@/components/search-input";
 import { cn } from "@/lib/utils";
 import { usePriceListActiveVendors } from "@/hooks/use-price-list";
 import { useProfile } from "@/hooks/use-profile";
@@ -18,16 +20,6 @@ interface StepSelectVendorsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;
 }
 
-/**
- * Step 2 ของ PO from-price-list wizard — เลือก vendor 1 ราย
- *
- * อ่าน `delivery_date` จาก form, แปลงเป็น `yyyy-MM-dd` แล้ว fetch active
- * vendors ของวันนั้นผ่าน `usePriceListActiveVendors`. แสดงเป็น list ของ
- * row-button (single-select) — กดเลือก row ใด row นั้นถูก highlight + check
- *
- * @param props.form - RHF instance ของ wizard
- * @returns JSX
- */
 export function StepSelectVendors({ form }: StepSelectVendorsProps) {
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
@@ -38,6 +30,7 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
     control: form.control,
     name: "delivery_date",
   });
+
   const apiDate = deliveryDate
     ? formatDate(deliveryDate, "yyyy-MM-dd")
     : undefined;
@@ -63,7 +56,6 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
       name="vendor_id"
       render={({ field, fieldState }) => {
         const selectedId = field.value;
-        const selectedVendor = vendors.find((v) => v.id === selectedId);
 
         return (
           <Field>
@@ -74,43 +66,18 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                 {deliveryDate ? formatDate(deliveryDate, dateFormat) : "—"}
               </div>
             </div>
-
-            <div className="relative">
-              <Search
-                aria-hidden="true"
-                className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2"
-              />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("searchVendor")}
-                className="h-8 pl-8 text-xs"
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">
-                {selectedVendor ? (
-                  <Badge variant="secondary" size="xs">
-                    {selectedVendor.code} · {selectedVendor.name}
-                  </Badge>
-                ) : (
-                  t("noVendorSelected")
-                )}
-              </span>
-              {selectedId && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    field.onChange("");
-                    form.setValue("vendor_name", "");
-                  }}
-                  className="text-muted-foreground hover:text-foreground text-micro font-semibold"
-                >
-                  {tc("clear")}
-                </button>
-              )}
-            </div>
+            {/* กรองในฝั่ง client จากรายชื่อที่โหลดมาแล้ว — ใช้ onInputChange ให้กรอง
+                ทันทีที่พิมพ์ ไม่ใช่ onSearch ที่รอ Enter (กติกา Enter-to-search มีไว้
+                กันการยิง API รัว ๆ ซึ่งไม่เกี่ยวกับที่นี่) · onSearch ต่อไว้ด้วยเพื่อให้
+                ปุ่มล้างในช่องทำงาน */}
+            <SearchInput
+              defaultValue={search}
+              onSearch={setSearch}
+              onInputChange={setSearch}
+              placeholder={t("searchVendor")}
+              containerClassName="w-full"
+              inputClassName="h-8 text-xs placeholder:text-xs"
+            />
 
             <ScrollArea className="h-72 rounded-md border">
               {error && (
@@ -136,55 +103,41 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                 </div>
               )}
               {!isLoading && !error && filteredVendors.length > 0 && (
-                <div className="divide-y">
-                  {filteredVendors.map((vendor) => {
-                    const isSelected = vendor.id === selectedId;
-                    return (
-                      <button
-                        key={vendor.id}
-                        type="button"
-                        aria-pressed={isSelected}
-                        onClick={() => {
-                          field.onChange(vendor.id);
-                          form.setValue("vendor_name", vendor.name);
-                          // clear error ทันทีเมื่อเลือก (wizard ไม่ผ่าน
-                          // handleSubmit → reValidateMode ไม่ทำงานเอง)
-                          if (fieldState.error) form.trigger("vendor_id");
-                        }}
-                        className={cn(
-                          "flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors",
-                          "focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none",
-                          isSelected
-                            ? "bg-primary/5 hover:bg-primary/10"
-                            : "hover:bg-accent",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "flex size-4 shrink-0 items-center justify-center rounded-full border",
-                            isSelected
-                              ? "bg-primary border-primary text-primary-foreground"
-                              : "border-muted-foreground/30",
-                          )}
-                          aria-hidden="true"
-                        >
-                          {isSelected && <Check className="size-3" />}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {vendor.code}
-                        </span>
-                        <span className="flex-1 font-semibold">
-                          {vendor.name}
-                        </span>
-                        {!vendor.is_active && (
-                          <Badge variant="secondary" size="xs">
-                            {tc("inactive")}
-                          </Badge>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                <RadioGroup
+                  value={selectedId ?? ""}
+                  onValueChange={(id) => {
+                    const vendor = vendors.find((v) => v.id === id);
+                    field.onChange(id);
+                    form.setValue("vendor_name", vendor?.name ?? "");
+                    if (fieldState.error) form.trigger("vendor_id");
+                  }}
+                  className="gap-0 divide-y"
+                >
+                  {filteredVendors.map((vendor) => (
+                    <Label
+                      key={vendor.id}
+                      htmlFor={`vendor-${vendor.id}`}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-normal transition-colors",
+                        vendor.id === selectedId
+                          ? "bg-primary/5 hover:bg-primary/10"
+                          : "hover:bg-accent",
+                      )}
+                    >
+                      <RadioGroupItem
+                        value={vendor.id}
+                        id={`vendor-${vendor.id}`}
+                      />
+                      <Badge variant={"outline"}>{vendor.code}</Badge>
+                      <span className="font-semibold">{vendor.name}</span>
+                      {!vendor.is_active && (
+                        <Badge variant="secondary" size="xs">
+                          {tc("inactive")}
+                        </Badge>
+                      )}
+                    </Label>
+                  ))}
+                </RadioGroup>
               )}
             </ScrollArea>
 

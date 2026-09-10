@@ -170,7 +170,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
               {selectedCount > 0 && (
                 <Badge
                   size="sm"
-                  className="bg-module-procurement mt-0.5 shrink-0 tabular-nums"
+                  className="bg-primary mt-0.5 shrink-0 tabular-nums"
                 >
                   {t("nSelected", { count: selectedCount })}
                 </Badge>
@@ -257,7 +257,6 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                 size="sm"
                 disabled={selectedCount === 0 || !workflowId || isGrouping}
                 onClick={handleNext}
-                className="bg-module-procurement! text-primary-foreground hover:bg-module-procurement/90!"
               >
                 {isGrouping ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
@@ -273,7 +272,6 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                 variant="success"
                 onClick={handleConfirm}
                 disabled={isConfirming}
-                className="bg-module-procurement! text-primary-foreground hover:bg-module-procurement/90!"
               >
                 {isConfirming ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
@@ -308,11 +306,10 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               <div
                 className={cn(
                   "text-micro flex size-7 shrink-0 items-center justify-center rounded-full font-semibold transition-colors",
-                  // module-procurement accent ให้ตรงกับ Stepper ของ from-price-list
-                  isCompleted &&
-                    "bg-module-procurement text-primary-foreground",
+                  // accent เดียวของแอป — ตรงกับ Stepper ของ from-price-list
+                  isCompleted && "bg-primary text-primary-foreground",
                   isCurrent &&
-                    "bg-module-procurement ring-module-procurement/20 text-primary-foreground ring-4",
+                    "bg-primary ring-primary/20 text-primary-foreground ring-4",
                   !isCompleted &&
                     !isCurrent &&
                     "bg-muted text-muted-foreground",
@@ -334,7 +331,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               <div
                 className={cn(
                   "mb-4 h-px flex-1",
-                  isCompleted ? "bg-module-procurement" : "bg-border",
+                  isCompleted ? "bg-primary" : "bg-border",
                 )}
                 aria-hidden="true"
               />

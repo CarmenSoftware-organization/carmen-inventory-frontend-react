@@ -330,7 +330,7 @@ export function FromPriceListContent() {
         onValueChange={handleStepChange}
         orientation="vertical"
         indicators={{ completed: COMPLETED_INDICATOR }}
-        className="hidden lg:grid lg:grid-cols-[16rem_1fr] lg:items-start lg:gap-8"
+        className="hidden px-10 lg:grid lg:grid-cols-[16rem_1fr] lg:items-start lg:gap-8"
       >
         <StepperNav>
           {STEPS.map(({ step: s, labelKey, descKey }, i, arr) => (
@@ -370,7 +370,7 @@ export function FromPriceListContent() {
         </StepperPanel>
       </Stepper>
 
-      <footer className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky bottom-0 -mx-3 -mb-3 flex items-center justify-between border-t px-3 py-3 backdrop-blur">
+      <footer className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky bottom-0 flex items-center justify-between px-8 py-3 backdrop-blur">
         <Button
           variant="outline"
           size="sm"

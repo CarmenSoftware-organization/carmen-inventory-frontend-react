@@ -88,7 +88,7 @@ export default function PeComponent() {
         <span
           aria-hidden="true"
           className="bg-primary/10 text-primary inline-flex size-9 items-center justify-center rounded-xl"
-          style={{ color: "var(--module-inventory)" }}
+          style={{ color: "var(--primary)" }}
         >
           <CalendarRange className="size-5" />
         </span>
@@ -119,7 +119,7 @@ export default function PeComponent() {
       {!isLoading && data && (
         <Card
           className="border-l-4"
-          style={{ borderLeftColor: "var(--module-inventory)" }}
+          style={{ borderLeftColor: "var(--primary)" }}
         >
           <CardHeader>
             <CardDescription className="text-micro font-semibold tracking-[0.18em] uppercase">
