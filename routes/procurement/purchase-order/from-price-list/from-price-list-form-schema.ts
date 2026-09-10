@@ -28,30 +28,27 @@ export type FromPriceListFormValues = Omit<PoFormValues, "items"> & {
   items: FromPriceListSelectedItem[];
 };
 
-/** คลังที่เลือกไว้ในการ์ดหนึ่งใบ — เป็นโครงของ **wizard เท่านั้น** */
-export interface FromPriceListItemLocation {
-  id: string;
-  location_code?: string;
-  location_name?: string;
-  order_qty: number;
-}
-
 /**
- * item ของ wizard = item ของ PO + รายการคลังที่เลือกไว้
+ * item ของ wizard = item ของ PO + ที่มาของราคา
  *
- * PO นับ **แถวละคลัง** ตั้งแต่ backend เลิก group location แต่การให้ผู้ใช้เลือก
- * หลายคลังในการ์ดใบเดียวยังสะดวกกว่าให้กดเพิ่มสินค้าซ้ำ ๆ — `locations` จึงอยู่
- * เฉพาะในโลกของ wizard แล้วกางเป็นแถวละคลังตอนสร้าง payload
- * (`expandItemPerLocation`) โครงของ PO ไม่ต้องรู้เรื่องนี้เลย
+ * **ตัวตนของแถวใน step 3 คือบรรทัดของ price list ไม่ใช่สินค้า** — สินค้าตัวเดียวกัน
+ * อาจอยู่ในหลาย price list คนละราคา ติ๊กแยกกันได้ ถ้าจับคู่ด้วย product_id จะติ๊กได้
+ * ใบเดียวและสลับไปมาไม่ได้ · `pricelist_detail_id` คือ id ของบรรทัดนั้น
+ *
+ * สองฟิลด์นี้อยู่**เฉพาะในโลกของ wizard** ไม่ได้อยู่ในสคีมาของ PO (ต่างจาก PR ที่มี
+ * `pricelist_detail_id`/`pricelist_no` ในไอเทมจริง) — `mapItemToPayload` หยิบฟิลด์
+ * ทีละตัว ของที่ไม่ได้ประกาศจึงไม่หลุดไปถึง API
  */
 export type FromPriceListSelectedItem = PoFormValues["items"][number] & {
-  locations: FromPriceListItemLocation[];
+  pricelist_detail_id: string;
+  pricelist_no: string;
 };
 
 /** Re-export ของ PO_ITEM ให้ wizard ใช้เป็น template เริ่มต้นของ item */
 export const WIZARD_ITEM_TEMPLATE: FromPriceListSelectedItem = {
   ...PO_ITEM,
-  locations: [],
+  pricelist_detail_id: "",
+  pricelist_no: "",
 };
 
 /**
@@ -69,8 +66,6 @@ export function getDefaultValues(
 ): FromPriceListFormValues {
   return {
     ...PO_EMPTY_FORM,
-    // items ของ wizard มี `locations` เพิ่มมา — EMPTY_FORM ของ PO เป็น [] อยู่แล้ว
-    // แค่ narrow type ให้ตรง
     items: [] as FromPriceListSelectedItem[],
     order_date: new Date().toISOString(),
     buyer_id: profile.userId ?? "",

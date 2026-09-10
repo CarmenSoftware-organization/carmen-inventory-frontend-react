@@ -108,11 +108,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
     let tax = 0;
     let grand = 0;
     for (const item of items) {
-      const itemQty = item.locations.reduce(
-        (sum, l) => sum + (Number(l.order_qty) || 0),
-        0,
-      );
-      const itemSubTotal = round2(itemQty * item.price);
+      const itemSubTotal = round2((Number(item.order_qty) || 0) * item.price);
       const itemTax = round2((itemSubTotal * (item.tax_rate ?? 0)) / 100);
       subTotal += itemSubTotal;
       tax += itemTax;
@@ -235,112 +231,108 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
           </p>
         ) : (
           <div className="space-y-3">
-            {items.map((item, index) => {
-              const itemQty = item.locations.reduce(
-                (sum, l) => sum + (Number(l.order_qty) || 0),
-                0,
-              );
-              const lineTotal = round2(itemQty * item.price);
-              return (
-                <div
-                  key={item.product_id ?? `item-${index}`}
-                  className="border-border/40 overflow-hidden rounded-md border"
-                >
-                  <div className="bg-muted/20 flex items-center gap-3 border-b px-3 py-2">
-                    <span className="text-muted-foreground text-micro w-6 text-center tabular-nums">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-micro">
-                          {item.product_code}
-                        </span>
-                        <span className="truncate text-xs font-semibold">
-                          {item.product_name}
-                        </span>
-                      </div>
-                      {item.product_local_name && (
-                        <p className="text-muted-foreground text-micro-legal">
-                          {item.product_local_name}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-semibold tabular-nums">
-                        {item.price.toLocaleString()}
-                      </p>
-                      <p className="text-muted-foreground text-micro-legal">
-                        / {item.order_unit_name || "—"}
-                      </p>
-                    </div>
-                  </div>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-muted-foreground bg-muted/5 border-b">
-                        <th
-                          scope="col"
-                          className="text-micro-legal px-3 py-1 text-left font-semibold tracking-wide uppercase"
-                        >
-                          {tfl("location")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-micro-legal w-20 px-3 py-1 text-right font-semibold tracking-wide uppercase"
-                        >
-                          {tfl("qty")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-micro-legal w-24 px-3 py-1 text-right font-semibold tracking-wide uppercase"
-                        >
-                          {tfl("total")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-border/40 divide-y">
-                      {item.locations.map((loc, locIdx) => {
-                        const name = loc.id
-                          ? (locationMap.get(loc.id) ?? loc.id)
-                          : "—";
-                        const rowTotal = round2(
-                          (Number(loc.order_qty) || 0) * item.price,
-                        );
-                        return (
-                          <tr key={locIdx}>
-                            <td className="px-3 py-1.5">
-                              {locLoading && loc.id ? (
-                                <Skeleton className="h-3 w-24" />
-                              ) : (
-                                name
-                              )}
-                            </td>
-                            <td className="px-3 py-1.5 text-right tabular-nums">
-                              {Number(loc.order_qty).toLocaleString()}
-                            </td>
-                            <td className="px-3 py-1.5 text-right tabular-nums">
-                              {rowTotal.toLocaleString()}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-muted/10 border-t">
-                        <td className="text-muted-foreground text-micro px-3 py-1.5">
-                          {t("totalQty")}
+            {/* แถวละสินค้า = แถวละคลัง ตั้งแต่ step เลือกสินค้าเป็นตาราง — ของเดิม
+                เป็นการ์ดต่อสินค้าที่ซ้อนตารางคลังไว้ข้างใน เพราะสินค้าหนึ่งตัวมีได้
+                หลายคลัง ตอนนี้เหลือคลังเดียวต่อแถว การ์ดซ้อนตารางจึงเป็นชั้นที่ไม่มี
+                อะไรให้ซ้อนแล้ว */}
+            <div className="overflow-hidden rounded-md border">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-muted-foreground bg-muted/20 border-b">
+                    <th
+                      scope="col"
+                      className="text-micro-legal w-32 px-3 py-1.5 text-left font-semibold tracking-wide uppercase"
+                    >
+                      {t("priceListNo")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-micro-legal px-3 py-1.5 text-left font-semibold tracking-wide uppercase"
+                    >
+                      {tfl("product")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-micro-legal px-3 py-1.5 text-left font-semibold tracking-wide uppercase"
+                    >
+                      {tfl("location")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-micro-legal w-24 px-3 py-1.5 text-right font-semibold tracking-wide uppercase"
+                    >
+                      {tfl("qty")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-micro-legal w-32 px-3 py-1.5 text-right font-semibold tracking-wide uppercase"
+                    >
+                      {tfl("unitPrice")}
+                    </th>
+                    <th
+                      scope="col"
+                      className="text-micro-legal w-28 px-3 py-1.5 text-right font-semibold tracking-wide uppercase"
+                    >
+                      {tfl("total")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-border/40 divide-y">
+                  {items.map((item, index) => {
+                    const qty = Number(item.order_qty) || 0;
+                    const lineTotal = round2(qty * item.price);
+                    const locationId = item.location_id ?? "";
+                    const locationName = locationId
+                      ? (locationMap.get(locationId) ?? locationId)
+                      : "—";
+                    return (
+                      <tr key={item.pricelist_detail_id || `item-${index}`}>
+                        <td className="text-muted-foreground px-3 py-1.5">
+                          {item.pricelist_no || "—"}
                         </td>
-                        <td className="px-3 py-1.5 text-right text-xs font-semibold tabular-nums">
-                          {itemQty.toLocaleString()}
+                        <td className="px-3 py-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground text-micro">
+                              {item.product_code}
+                            </span>
+                            <span className="font-semibold">
+                              {item.product_name}
+                            </span>
+                          </div>
+                          {item.product_local_name && (
+                            <p className="text-muted-foreground text-micro-legal">
+                              {item.product_local_name}
+                            </p>
+                          )}
                         </td>
-                        <td className="px-3 py-1.5 text-right text-xs font-semibold tabular-nums">
+                        <td className="px-3 py-1.5">
+                          {locLoading && locationId ? (
+                            <Skeleton className="h-3 w-24" />
+                          ) : (
+                            locationName
+                          )}
+                        </td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">
+                          {qty.toLocaleString()}{" "}
+                          <span className="text-muted-foreground text-micro">
+                            {item.order_unit_name || "—"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">
+                          {item.price.toLocaleString()}{" "}
+                          <span className="text-muted-foreground text-micro">
+                            {values.currency_code || "—"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-1.5 text-right font-semibold tabular-nums">
                           {lineTotal.toLocaleString()}
                         </td>
                       </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              );
-            })}
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
             {/* Grand totals */}
             <div className="border-border/60 mt-2 rounded-md border border-dashed p-3">

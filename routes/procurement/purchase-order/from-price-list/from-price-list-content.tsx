@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import {
   Stepper,
   StepperContent,
-  StepperDescription,
   StepperIndicator,
   StepperItem,
   StepperNav,
@@ -42,7 +41,6 @@ import {
 import { StepOrderDetails } from "./step-order-details";
 import { StepSelectVendors } from "./step-select-vendors";
 import { StepSelectItems } from "./step-select-items";
-import { expandItemPerLocation } from "./expand-item-per-location";
 import { StepSummary } from "./step-summary";
 
 type Step = 1 | 2 | 3 | 4;
@@ -183,9 +181,7 @@ export function FromPriceListContent() {
   // (location id เป็น required ใน schema — ถ้าปล่อยว่างจะ fail ตอน confirm)
   const allItemsHaveLocation =
     (watchedItems?.length ?? 0) > 0 &&
-    (watchedItems ?? []).every(
-      (it) => it.locations.length > 0 && it.locations.every((loc) => !!loc.id),
-    );
+    (watchedItems ?? []).every((it) => !!it.location_id);
 
   const stepValidity: Record<Step, boolean> = {
     1:
@@ -242,14 +238,11 @@ export function FromPriceListContent() {
       toast.warning(tv("incompleteDocument"));
       return;
     }
-    // การ์ดหนึ่งใบใน wizard เลือกได้หลายคลัง แต่ PO นับแถวละคลัง — กางออกตรงนี้
-    // ที่เดียว (ดู expandItemPerLocation) wizard จึงไม่ต้องรู้เรื่องโครงของ PO
-    const values = form.getValues();
-    const syncedValues = {
-      ...values,
-      items: (values.items ?? []).flatMap(expandItemPerLocation),
-    };
-    const payload = buildPoPayload(syncedValues, [], { po_type: PO_TYPE.PL });
+    // ตารางเลือกสินค้าเป็น 1 แถว = 1 สินค้า 1 คลัง อยู่แล้ว ตรงกับที่ PO นับ —
+    // ไม่ต้องกาง/รวมอะไรก่อนสร้าง payload เหมือนตอนที่ยังเป็นการ์ดหลายคลัง
+    const payload = buildPoPayload(form.getValues(), [], {
+      po_type: PO_TYPE.PL,
+    });
     createPo.mutate(payload, {
       onSuccess: (res) => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -291,7 +284,7 @@ export function FromPriceListContent() {
         value={step}
         onValueChange={handleStepChange}
         indicators={{ completed: COMPLETED_INDICATOR }}
-        className="lg:hidden"
+        className="px-10"
       >
         <StepperNav>
           {STEPS.map(({ step: s, labelKey }, i, arr) => (
@@ -309,52 +302,6 @@ export function FromPriceListContent() {
           ))}
         </StepperNav>
         <StepperPanel className="mt-4">
-          <StepperContent value={1}>
-            <StepOrderDetails form={form} />
-          </StepperContent>
-          <StepperContent value={2}>
-            <StepSelectVendors form={form} />
-          </StepperContent>
-          <StepperContent value={3}>
-            <StepSelectItems form={form} />
-          </StepperContent>
-          <StepperContent value={4}>
-            <StepSummary form={form} onEditStep={handleEditStep} />
-          </StepperContent>
-        </StepperPanel>
-      </Stepper>
-
-      {/* Desktop (≥ lg / 1024px): vertical stepper on left, content on right */}
-      <Stepper
-        value={step}
-        onValueChange={handleStepChange}
-        orientation="vertical"
-        indicators={{ completed: COMPLETED_INDICATOR }}
-        className="hidden px-10 lg:grid lg:grid-cols-[16rem_1fr] lg:items-start lg:gap-8"
-      >
-        <StepperNav>
-          {STEPS.map(({ step: s, labelKey, descKey }, i, arr) => (
-            <StepperItem
-              key={s}
-              step={s}
-              className="relative items-start not-last:flex-1"
-            >
-              <StepperTrigger className="items-start gap-3 pb-10 last:pb-0">
-                <StepperIndicator>{s}</StepperIndicator>
-                <div className="mt-0.5 space-y-1 text-left">
-                  <StepperTitle>{t(labelKey)}</StepperTitle>
-                  <StepperDescription className="text-xs">
-                    {t(descKey)}
-                  </StepperDescription>
-                </div>
-              </StepperTrigger>
-              {i < arr.length - 1 && (
-                <StepperSeparator className="group-data-[state=completed]/step:bg-primary absolute inset-y-0 top-7 left-3 -order-1 m-0 -translate-x-1/2 group-data-[orientation=vertical]/stepper-nav:h-[calc(100%-2rem)]" />
-              )}
-            </StepperItem>
-          ))}
-        </StepperNav>
-        <StepperPanel>
           <StepperContent value={1}>
             <StepOrderDetails form={form} />
           </StepperContent>

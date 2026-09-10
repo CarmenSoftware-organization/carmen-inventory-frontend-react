@@ -53,7 +53,6 @@ function makeValid(
         tax_rate: 7,
         tax_amount: 35,
         location_id: "loc-1",
-        locations: [{ id: "loc-1", order_qty: 5 }],
       },
     ],
     ...overrides,
