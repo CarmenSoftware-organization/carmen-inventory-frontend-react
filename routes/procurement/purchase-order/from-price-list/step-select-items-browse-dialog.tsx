@@ -402,7 +402,6 @@ export function BrowseDialog({
               size="sm"
               disabled={pickedCount === 0}
               onClick={handleAdd}
-              className="bg-module-procurement"
             >
               {t("addNItems", { count: pickedCount })}
             </Button>

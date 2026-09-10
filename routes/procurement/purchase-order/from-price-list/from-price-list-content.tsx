@@ -84,8 +84,6 @@ const STEPS: ReadonlyArray<{
 
 const PO_LIST_PATH = "/procurement/purchase-order";
 const COMPLETED_INDICATOR = <Check className="size-3" aria-hidden="true" />;
-const INDICATOR_ACCENT =
-  "data-[state=active]:bg-[var(--module-procurement)] data-[state=active]:text-primary-foreground data-[state=completed]:bg-[var(--module-procurement)] data-[state=completed]:text-primary-foreground";
 
 // Only fields the user can edit on Step 1 — order_date, buyer_*, department_* are
 // read-only seeds from useProfile() and never need validation.
@@ -299,15 +297,13 @@ export function FromPriceListContent() {
           {STEPS.map(({ step: s, labelKey }, i, arr) => (
             <StepperItem key={s} step={s}>
               <StepperTrigger className="flex-col gap-1">
-                <StepperIndicator className={INDICATOR_ACCENT}>
-                  {s}
-                </StepperIndicator>
+                <StepperIndicator>{s}</StepperIndicator>
                 <StepperTitle className="text-micro-legal font-semibold">
                   {t(labelKey)}
                 </StepperTitle>
               </StepperTrigger>
               {i < arr.length - 1 && (
-                <StepperSeparator className="group-data-[state=completed]/step:bg-module-procurement" />
+                <StepperSeparator className="group-data-[state=completed]/step:bg-primary" />
               )}
             </StepperItem>
           ))}
@@ -344,9 +340,7 @@ export function FromPriceListContent() {
               className="relative items-start not-last:flex-1"
             >
               <StepperTrigger className="items-start gap-3 pb-10 last:pb-0">
-                <StepperIndicator className={INDICATOR_ACCENT}>
-                  {s}
-                </StepperIndicator>
+                <StepperIndicator>{s}</StepperIndicator>
                 <div className="mt-0.5 space-y-1 text-left">
                   <StepperTitle>{t(labelKey)}</StepperTitle>
                   <StepperDescription className="text-xs">
@@ -355,7 +349,7 @@ export function FromPriceListContent() {
                 </div>
               </StepperTrigger>
               {i < arr.length - 1 && (
-                <StepperSeparator className="group-data-[state=completed]/step:bg-module-procurement absolute inset-y-0 top-7 left-3 -order-1 m-0 -translate-x-1/2 group-data-[orientation=vertical]/stepper-nav:h-[calc(100%-2rem)]" />
+                <StepperSeparator className="group-data-[state=completed]/step:bg-primary absolute inset-y-0 top-7 left-3 -order-1 m-0 -translate-x-1/2 group-data-[orientation=vertical]/stepper-nav:h-[calc(100%-2rem)]" />
               )}
             </StepperItem>
           ))}
@@ -401,7 +395,6 @@ export function FromPriceListContent() {
               size="sm"
               onClick={handleNext}
               disabled={createPo.isPending || !isCurrentStepValid}
-              className="bg-module-procurement"
             >
               {tc("next")}
               <ArrowRight aria-hidden="true" />
@@ -412,7 +405,6 @@ export function FromPriceListContent() {
               size="sm"
               onClick={handleConfirm}
               disabled={createPo.isPending}
-              className="bg-module-procurement"
             >
               {createPo.isPending ? (
                 <Loader2 className="animate-spin" aria-hidden="true" />

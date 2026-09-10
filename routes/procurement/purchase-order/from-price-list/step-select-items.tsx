@@ -230,7 +230,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
           <Button
             type="button"
             size="sm"
-            className="bg-module-procurement"
             onClick={() => setBrowseOpen(true)}
             disabled={!vendorId || !apiDate}
           >
