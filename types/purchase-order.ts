@@ -223,6 +223,11 @@ interface PoGrnDetailLocation {
   request_base_unit_id?: string | null;
   request_base_unit_name?: string | null;
   received_qty?: number;
+  /**
+   * คลังนี้เอาไปตั้งเป็นรายการรับของได้ไหม — หลังบ้านตัดสินให้ `false` = ใช้ไม่ได้
+   * · **ไม่ส่งมา = ถือว่าใช้ได้** (หลังบ้านรุ่นเก่ายังไม่มีฟิลด์นี้)
+   */
+  can_use?: boolean;
 }
 
 export interface PoGrnDetail {
@@ -245,6 +250,8 @@ export interface PoGrnDetail {
   net_amount: number;
   is_foc: boolean;
   locations: PoGrnDetailLocation[];
+  /** รายการนี้รับของได้ไหม — `false` = ทุกคลังใต้รายการนี้ใช้ไม่ได้ */
+  can_use?: boolean;
 }
 
 export interface PoForGrn {
@@ -260,6 +267,8 @@ export interface PoForGrn {
   currency_code: string;
   exchange_rate: number;
   po_detail: PoGrnDetail[];
+  /** ทั้งใบรับของได้ไหม — `false` = ทุกรายการในใบนี้ใช้ไม่ได้ */
+  can_use?: boolean;
 }
 
 // --- Vendor for GRN (from /purchase-order/grn/vendor) ---

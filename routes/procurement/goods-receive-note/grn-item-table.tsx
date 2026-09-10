@@ -56,31 +56,35 @@ export const mapPoDetailToItems = (
     ];
   }
 
-  // PO หนึ่งบรรทัดที่กระจายหลายคลัง = GRN หลายบรรทัด บรรทัดละคลัง
-  return d.locations.map((loc) => ({
-    ...EMPTY_DETAIL,
-    purchase_order_id: poId,
-    purchase_order_no: poNo,
-    purchase_order_detail_id: d.id,
-    product_id: d.product_id,
-    product_name: d.product_name ?? "",
-    location_id: loc.location_id,
-    location_name: loc.location_name,
-    location_code: loc.location_code ?? "",
-    location_type: loc.location_type ?? "",
-    received_qty: loc.remain_qty ?? loc.order_qty,
-    received_unit_id: loc.request_unit_id || d.order_unit_id,
-    received_base_qty: loc.request_base_qty ?? 0,
-    received_base_unit_id: loc.request_base_unit_id || d.base_unit_id,
-    approved_qty: loc.requested_qty ?? loc.order_qty,
-    approved_unit_id: loc.request_unit_id || d.order_unit_id,
-    foc_qty: loc.foc_qty ?? 0,
-    // ราคาต่อหน่วยมาจาก PO ใบเดียวกัน ทุกบรรทัดที่แตกมาจากรายการเดียวจึงเริ่มที่
-    // ราคาเดียวกัน — แก้รายบรรทัดทีหลังได้ (ของที่รับจริงอาจต่อรองราคาใหม่)
-    unit_price: d.price,
-    net_amount: 0,
-    total_price: 0,
-  }));
+  // PO หนึ่งบรรทัดที่กระจายหลายคลัง = GRN หลายบรรทัด บรรทัดละคลัง — ข้ามคลังที่
+  // หลังบ้านบอกว่าใช้ไม่ได้ (`can_use: false`) ไม่ใช่ดึงมาทุกคลังแล้วให้ผู้ใช้ไป
+  // เจอเอาตอนบันทึกว่ารับเข้าคลังนั้นไม่ได้
+  return d.locations
+    .filter((loc) => loc.can_use !== false)
+    .map((loc) => ({
+      ...EMPTY_DETAIL,
+      purchase_order_id: poId,
+      purchase_order_no: poNo,
+      purchase_order_detail_id: d.id,
+      product_id: d.product_id,
+      product_name: d.product_name ?? "",
+      location_id: loc.location_id,
+      location_name: loc.location_name,
+      location_code: loc.location_code ?? "",
+      location_type: loc.location_type ?? "",
+      received_qty: loc.remain_qty ?? loc.order_qty,
+      received_unit_id: loc.request_unit_id || d.order_unit_id,
+      received_base_qty: loc.request_base_qty ?? 0,
+      received_base_unit_id: loc.request_base_unit_id || d.base_unit_id,
+      approved_qty: loc.requested_qty ?? loc.order_qty,
+      approved_unit_id: loc.request_unit_id || d.order_unit_id,
+      foc_qty: loc.foc_qty ?? 0,
+      // ราคาต่อหน่วยมาจาก PO ใบเดียวกัน ทุกบรรทัดที่แตกมาจากรายการเดียวจึงเริ่มที่
+      // ราคาเดียวกัน — แก้รายบรรทัดทีหลังได้ (ของที่รับจริงอาจต่อรองราคาใหม่)
+      unit_price: d.price,
+      net_amount: 0,
+      total_price: 0,
+    }));
 };
 
 const PoAddButton = memo(function PoAddButton({
