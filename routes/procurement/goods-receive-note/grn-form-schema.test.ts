@@ -213,3 +213,155 @@ describe("สินค้าตัวเดียวกันเข้าสอ�
     expect(values.items.map((i) => i.unit_price)).toEqual([56, 56]);
   });
 });
+
+/**
+ * แถวเดียวจาก response จริงของ `GET /{bu}/good-received-notes/{id}` (GRN260900005)
+ * — ครบทุกฟิลด์ที่ `getDefaultValues` อ่าน เพื่อปักการต่อสายระหว่าง detail กับ
+ * item ข้างใน ซึ่งอยู่คนละชั้นและใช้ชื่อฟิลด์คนละแบบกับฟอร์ม
+ */
+const detailFromResponse = {
+  id: "ec38f32c",
+  good_received_note_id: "grn-1",
+  sequence_no: 1,
+  // หลังบ้านส่ง null มาทั้งที่แถวนี้อ้าง PO อยู่ — ตัวที่บอกว่าอ้าง PO คือ
+  // purchase_order_detail_id ไม่ใช่ purchase_order_id
+  purchase_order_id: null,
+  purchase_order_detail_id: "po-detail-1",
+  po_no: "PO20260300042",
+  location_id: "loc-direct",
+  location_code: "2FO03",
+  location_name: "Rooms-Front Office - Direct",
+  location_type: "direct",
+  product_id: "prod-roselle",
+  product_code: "11140012",
+  product_name: "Dried Roselle 1 kg",
+  product_local_name: "กระเจี๊ยบแห้ง 1กก.",
+  product_sku: null,
+  doc_version: 4,
+  items: [
+    {
+      id: "item-1",
+      good_received_note_detail_id: "ec38f32c",
+      order_qty: 25,
+      order_unit_id: "unit-kg",
+      received_qty: 23,
+      received_unit_id: "unit-kg",
+      received_unit_conversion_factor: 1,
+      received_base_qty: 23,
+      received_price: 56,
+      foc_qty: 2,
+      foc_unit_id: "unit-kg",
+      foc_unit_conversion_factor: 1,
+      tax_profile_id: "tax-1",
+      tax_rate: 7,
+      tax_amount: 90.16,
+      is_tax_adjustment: false,
+      discount_rate: 5,
+      discount_amount: 64.4,
+      is_discount_adjustment: true,
+      sub_total_price: 1288,
+      net_amount: 1223.6,
+      total_price: 1313.76,
+      note: "ของครบ",
+      // doc_version ของ item เดินคนละเลขกับของ detail — ห้ามหยิบตัวนี้ไปส่ง
+      doc_version: 9,
+    },
+  ],
+} as const;
+
+const grnFromResponse = {
+  doc_status: "saved",
+  doc_type: "purchase_order",
+  good_received_note_detail: [detailFromResponse],
+} as unknown as Parameters<typeof getDefaultValues>[0];
+
+describe("getDefaultValues ตาม response ใหม่", () => {
+  const row = () => getDefaultValues(grnFromResponse).items[0];
+
+  it("ค่าระดับ detail อ่านจาก detail ค่าระดับ item อ่านจาก items[0]", () => {
+    const r = row();
+    expect(r.location_id).toBe("loc-direct");
+    expect(r.location_type).toBe("direct");
+    expect(r.product_local_name).toBe("กระเจี๊ยบแห้ง 1กก.");
+    expect(r.received_qty).toBe(23);
+    expect(r.foc_qty).toBe(2);
+    expect(r.note).toBe("ของครบ");
+  });
+
+  it("จำนวนที่สั่งของฟอร์มคือ order_qty ของ item — ฟอร์มเรียกว่า approved_qty", () => {
+    expect(row().approved_qty).toBe(25);
+    expect(row().approved_unit_id).toBe("unit-kg");
+  });
+
+  it("ราคาต่อหน่วยคำนวณจากยอดก่อนลดหารจำนวนที่รับ ไม่ได้อ่าน received_price", () => {
+    // 1288 / 23 = 56 — response มี received_price ให้อยู่แล้วแต่โค้ดไม่ได้ใช้
+    expect(row().unit_price).toBe(56);
+  });
+
+  it("doc_version ของแถวคือของ detail ไม่ใช่ของ item ข้างใน", () => {
+    // ส่งเลขของ item ไปจะ 409 ทุกครั้งที่แก้ เพราะ backend ล็อกด้วยเลขของ detail
+    expect(row().doc_version).toBe(4);
+  });
+
+  it("เลขที่ใบสั่งซื้ออ่านจาก po_no ส่วน purchase_order_id ที่เป็น null ไม่ทำให้พัง", () => {
+    expect(row().purchase_order_no).toBe("PO20260300042");
+    expect(row().purchase_order_id).toBeNull();
+    // ตัวที่ตัดสินว่าแถวนี้อ้าง PO (แก้สินค้า/คลังไม่ได้) คือฟิลด์นี้
+    expect(row().purchase_order_detail_id).toBe("po-detail-1");
+  });
+
+  it("ส่วนลด/ภาษีที่ override ไว้ขนธง is_*_adjustment กลับมาด้วย", () => {
+    const r = row();
+    expect(r.is_discount_adjustment).toBe(true);
+    expect(r.discount_amount).toBe(64.4);
+    expect(r.is_tax_adjustment).toBe(false);
+    expect(r.tax_rate).toBe(7);
+  });
+
+  it("detail ที่ item ถูกลบไปแล้วยังเป็นแถว ค่าเป็น 0 ไม่ใช่หายไปเงียบ ๆ", () => {
+    // แถวที่หายไปจะกลายเป็น remove ตอนบันทึกครั้งถัดไป ทั้งที่ผู้ใช้ไม่ได้ลบ
+    const empty = {
+      ...grnFromResponse,
+      good_received_note_detail: [{ ...detailFromResponse, items: [] }],
+    } as unknown as Parameters<typeof getDefaultValues>[0];
+    const values = getDefaultValues(empty);
+    expect(values.items).toHaveLength(1);
+    expect(values.items[0].received_qty).toBe(0);
+    expect(values.items[0].unit_price).toBe(0);
+  });
+});
+
+describe("mapDetailToPayload ตาม payload ใหม่", () => {
+  const payload = () =>
+    mapDetailToPayload(getDefaultValues(grnFromResponse).items[0]);
+
+  it("ส่ง doc_version ของ detail กลับไปเพื่อ optimistic lock", () => {
+    expect(payload().doc_version).toBe(4);
+  });
+
+  it("ราคาที่รับส่งชื่อ received_price ไม่ใช่ unit_price ของฟอร์ม", () => {
+    expect(payload().received_price).toBe(56);
+    expect(payload()).not.toHaveProperty("unit_price");
+  });
+
+  it("ไม่ส่งฟิลด์ที่เป็นของฝั่งแสดงผลอย่างเดียว", () => {
+    const p = payload() as unknown as Record<string, unknown>;
+    for (const key of [
+      "product_name",
+      "product_local_name",
+      "location_name",
+      "location_code",
+      "purchase_order_no",
+      "id",
+    ]) {
+      expect(p).not.toHaveProperty(key);
+    }
+  });
+
+  it("ธง override กับยอดที่ผู้ใช้กรอกเองถูกส่งตามนั้น", () => {
+    const p = payload();
+    expect(p.is_discount_adjustment).toBe(true);
+    expect(p.discount_amount).toBe(64.4);
+    expect(p.tax_profile_id).toBe("tax-1");
+  });
+});
