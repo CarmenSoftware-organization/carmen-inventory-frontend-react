@@ -249,16 +249,23 @@ export function usePoFormHandlers({
   // GET PO สดจาก DB ก่อนยิง workflow event ทุกตัว — /save bump doc_version
   // ระหว่างทาง ทำให้ค่าใน form/prop ค้างเก่า → 409 optimistic lock
   // (tb_purchase_order / tb_purchase_order_detail)
-  const fetchFreshPo = async (): Promise<{
+  /**
+   * @param id - ใบที่จะดึง ไม่ส่ง = ใบที่เปิดอยู่ · ส่งมาเมื่อเพิ่งสร้างใบใหม่
+   *   ซึ่ง `purchaseOrder` prop ยังเป็น undefined อยู่
+   */
+  const fetchFreshPo = async (
+    id?: string,
+  ): Promise<{
     doc_version?: number;
     // doc_version ราย row ต้องมีด้วย — lock ของ backend เช็ค tb_purchase_order_detail
     // แยกจากหัวเอกสาร ของเดิมประกาศแค่ `{ id }` เลยเอาเลขราย row มาใช้ไม่ได้
     purchase_order_detail?: { id: string; doc_version?: number }[];
   } | null> => {
-    if (!purchaseOrder || !buCode) return null;
+    const poId = id ?? purchaseOrder?.id;
+    if (!poId || !buCode) return null;
     try {
       const res = await httpClient.get(
-        `${API_ENDPOINTS.PURCHASE_ORDER(buCode)}/${purchaseOrder.id}`,
+        `${API_ENDPOINTS.PURCHASE_ORDER(buCode)}/${poId}`,
       );
       if (res.ok) {
         const fresh = (await res.json())?.data ?? null;
@@ -328,8 +335,79 @@ export function usePoFormHandlers({
     );
   };
 
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยันส่งใบ — ติดตรงไหนต้องรู้**ก่อน**ตอบว่า "ส่ง"
+   *
+   * ของเดิมเปิดกล่องยืนยันทันที แล้วค่อย validate ข้างใน `handleSubmitPo` ผู้ใช้จึง
+   * ต้องกดยืนยันเสร็จก่อนถึงจะรู้ว่ากรอกไม่ครบ — ถามแล้วตอบแล้วค่อยบอกว่าทำไม่ได้
+   * (ทรงเดียวกับ PR: `validateSubmitPr`)
+   *
+   * toast/scroll ทำในนี้ที่เดียว ผู้เรียกแค่ return เฉย ๆ เมื่อได้ false
+   * — อย่าไปเติม toast ซ้ำที่ปุ่ม ไม่งั้นเด้งสองใบ
+   */
+  const validateSubmitPo = async (): Promise<boolean> => {
+    const valid = await form.trigger();
+    if (!valid) {
+      revealErrors(form.formState.errors as Record<string, unknown>);
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * ใบที่ยังไม่เคยเซฟ — สร้างแล้วส่งต่อในคลิกเดียว (ทรงเดียวกับ `doCreateAndSubmitPr`)
+   *
+   * ของเดิมปุ่มส่งไม่โผล่เลยจนกว่าจะกด Save ก่อน ซึ่งเป็นสองสเต็ปที่ไม่มีเหตุผล —
+   * คนกดส่งย่อมตั้งใจให้ใบถูกบันทึกอยู่แล้ว
+   */
+  const createThenSubmitPo = async () => {
+    setIsSubmitting(true);
+    const values = form.getValues();
+    try {
+      const res = await createPo.mutateAsync(
+        buildPoPayload(values, defaultValues.items, poTypeOption),
+      );
+      const body = res as {
+        data?: { id?: string; doc_version?: number };
+      } | null;
+      const newId = body?.data?.id;
+      if (!newId) {
+        setIsSubmitting(false);
+        return;
+      }
+      // ต้อง GET ใบสดหลังสร้าง — id ของ detail แต่ละแถวเพิ่งเกิดตอนนี้ ฟอร์มยัง
+      // ไม่รู้จัก และ submit ต้องอ้าง id พวกนั้น
+      const fresh = await fetchFreshPo(newId);
+      submitPo.mutate(
+        {
+          id: newId,
+          stage_role: "create",
+          doc_version: pickDocVersion(
+            fresh?.doc_version,
+            body?.data?.doc_version,
+          ),
+          details: (fresh?.purchase_order_detail ?? []).map((d) => ({
+            id: d.id,
+            stage_status: "submit",
+            stage_message: null,
+          })),
+        },
+        {
+          onSuccess: onSuccessList(t("submitted")),
+          onError: () => setIsSubmitting(false),
+        },
+      );
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmitPo = async () => {
-    if (!purchaseOrder) return;
+    if (!purchaseOrder) {
+      await createThenSubmitPo();
+      return;
+    }
     if (form.formState.isDirty) {
       const valid = await form.trigger();
       if (!valid) {
@@ -471,6 +549,7 @@ export function usePoFormHandlers({
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPo,
     handleSubmitPo,
     handleApprovePo,
     handleRejectConfirm,

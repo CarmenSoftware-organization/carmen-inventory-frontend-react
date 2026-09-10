@@ -26,6 +26,11 @@ interface PoFooterActionProps {
   readonly stagesLoading?: boolean;
   readonly isEditMode?: boolean;
   readonly onSubmit?: () => void;
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยัน "ส่งใบ" — คืน false = ไม่ต้องเปิดกล่อง
+   * ตัว validator เป็นคนขึ้น toast/เลื่อนไปหาช่องที่ผิดเอง (ดู validateSubmitPo)
+   */
+  readonly onValidateSubmit?: () => Promise<boolean>;
   readonly onApprove?: () => void;
   readonly onReject?: () => void;
   readonly onReview?: (
@@ -51,6 +56,7 @@ export function PoFooterAction({
   stagesLoading,
   isEditMode = false,
   onSubmit,
+  onValidateSubmit,
   onApprove,
   onReject,
   onReview,
@@ -104,7 +110,17 @@ export function PoFooterAction({
       productName: item?.product_name ?? "",
     }));
 
-  const canSubmit = !!onSubmit && role === STAGE_ROLE.CREATE;
+  // ไม่เช็ค `!!onSubmit` แล้ว — ใบใหม่ที่ยังไม่เคยเซฟก็กดส่งได้ handleSubmitPo
+  // สร้างใบให้ก่อนแล้วค่อยส่ง (เหมือน PR) ของเดิมกันไว้เพราะยังไม่มีทางนั้น
+  const canSubmit = role === STAGE_ROLE.CREATE;
+  // ใบที่จบเส้นทางแล้วไม่มีอะไรให้ส่งอีก — PR กันด้วย `!isVoided` ตรงนี้ใช้สถานะ
+  // ปลายทางของ PO แทน (PO ไม่มี voided) ของเดิมไม่ได้กันเลย ปุ่มจึงโผล่ได้ถ้า
+  // backend ยังคืน role = create บนใบที่ส่งไปแล้ว
+  const isTerminal =
+    poStatus === PO_STATUS.SENT ||
+    poStatus === PO_STATUS.CLOSED ||
+    poStatus === PO_STATUS.COMPLETED;
+  const showSubmit = canSubmit && !isTerminal;
 
   const isApprover =
     role === STAGE_ROLE.APPROVE && poStatus === PO_STATUS.IN_PROGRESS;
@@ -113,7 +129,7 @@ export function PoFooterAction({
   const canReject = !!onReject && isApprover && poAction === "rejected";
   const canReview = !!onReview && isApprover && poAction === "review";
 
-  const showActions = canSubmit || canApprove || canReject || canReview;
+  const showActions = showSubmit || canApprove || canReject || canReview;
   const hasItems = (items?.length ?? 0) > 0;
   const showBar = isEditMode || showActions || hasItems;
 
@@ -160,20 +176,22 @@ export function PoFooterAction({
       >
         {showActions && (
           <div className="flex shrink-0 items-center gap-2">
-            {canSubmit && (
+            {showSubmit && (
               <Button
                 type="button"
                 size="sm"
                 disabled={isPending}
-                onClick={() =>
+                onClick={async () => {
+                  // กรอกไม่ครบ = ไม่เปิดกล่องยืนยันเลย (validator เตือนเอง)
+                  if (onValidateSubmit && !(await onValidateSubmit())) return;
                   openConfirm({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
                     confirmVariant: "default",
                     onConfirm: () => onSubmit?.(),
-                  })
-                }
+                  });
+                }}
               >
                 <SendHorizontal aria-hidden="true" />
                 {tc("submit")}

@@ -67,7 +67,11 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const isView = mode === "view";
   const isEditMode = mode === "edit";
 
-  const role = purchaseOrder?.role;
+  // ใบใหม่ยังไม่มี role จาก backend — คนที่กำลังทำใบอยู่คือคนสร้าง (ทรงเดียวกับ
+  // PR: pr-form.tsx:81) ไม่ตั้ง default ปุ่มส่งจะไม่โผล่บนใบใหม่เพราะ canSubmit
+  // เทียบ role === CREATE · ค่าอื่นที่อ่าน role ไม่กระทบ (undefined กับ "create"
+  // ต่างก็ไม่เท่ากับ APPROVE/VIEW_ONLY อยู่แล้ว)
+  const role = purchaseOrder?.role ?? STAGE_ROLE.CREATE;
   const terminalStatus =
     purchaseOrder?.po_status === PO_STATUS.SENT ||
     purchaseOrder?.po_status === PO_STATUS.CLOSED ||
@@ -153,6 +157,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPo,
     handleSubmitPo,
     handleApprovePo,
     handleRejectConfirm,
@@ -263,7 +268,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         poStatus={purchaseOrder?.po_status}
         previousStages={previousStages}
         stagesLoading={stagesLoading}
-        onSubmit={purchaseOrder ? handleSubmitPo : undefined}
+        // ใบใหม่ที่ยังไม่เคยเซฟก็กดส่งได้ — handleSubmitPo สร้างใบให้ก่อนแล้วค่อยส่ง
+        // (ทรงเดียวกับ PR) ของเดิมส่ง undefined ทำให้ปุ่มหายจนกว่าจะกด Save ก่อน
+        onSubmit={handleSubmitPo}
+        onValidateSubmit={validateSubmitPo}
         onApprove={purchaseOrder ? handleApprovePo : undefined}
         onReject={purchaseOrder ? () => dialogs.setShowReject(true) : undefined}
         onReview={purchaseOrder ? handleReviewConfirm : undefined}
