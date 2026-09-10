@@ -374,7 +374,13 @@
     "sectionKpi": "Metrics",
     "sectionDistribution": "Distribution",
     "sectionComparison": "Comparison",
-    "sectionTrends": "Trends"
+    "sectionTrends": "Trends",
+    "gaugeEstimated": "(auto)",
+    "tableCol": {
+      "label": "Name",
+      "value": "Value",
+      "rank": "#"
+    }
   },
   "profileGate": {
     "loadingTitle": "Loading your workspace",
@@ -4042,11 +4048,29 @@
       "chartType": {
         "label": "Chart type",
         "kpi": "Number",
+        "gauge": "Gauge",
         "pie": "Pie",
         "bar": "Bar",
         "line": "Line",
         "area": "Area",
         "table": "Table"
+      },
+      "display": {
+        "section": "Appearance",
+        "size": "Size (columns × rows)",
+        "sizeOption": "{width} × {height}",
+        "decimals": "Decimals",
+        "min": "Scale from",
+        "max": "Scale to",
+        "maxPlaceholder": "auto",
+        "threshold": "Warn above",
+        "thresholdColor": "Warning colour",
+        "color": {
+          "chart-4": "Amber",
+          "chart-2": "Teal",
+          "chart-1": "Blue",
+          "destructive": "Red"
+        }
       }
     },
     "greeting": {
