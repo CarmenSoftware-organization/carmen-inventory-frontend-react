@@ -154,3 +154,62 @@ describe("mapDetailToPayload", () => {
     ).toBe("tax-1");
   });
 });
+
+/**
+ * ใบรับสินค้าที่รับสินค้าตัวเดียวกันเข้าสองคลัง — หลังบ้านคืนมาเป็น **สอง detail**
+ * ที่ `purchase_order_detail_id` กับ `product_id` ซ้ำกัน ต่างกันแค่คลัง
+ *
+ * เคยหายไปแถวหนึ่งเพราะตารางจัดกลุ่มด้วย product_id แล้วยุบสองแถวเป็นแถวเดียว
+ * (ต้องกางถึงจะเห็นว่ามีสองคลัง) — ตัดมาจาก response จริงของ GRN260900005
+ */
+const twoLocationsOneProduct = {
+  doc_status: "saved",
+  doc_type: "purchase_order",
+  good_received_note_detail: [
+    {
+      id: "detail-a",
+      sequence_no: 1,
+      purchase_order_detail_id: "po-detail-1",
+      location_id: "loc-direct",
+      location_name: "Rooms-Front Office - Direct",
+      product_id: "prod-roselle",
+      product_name: "Dried Roselle 1 kg",
+      doc_version: 0,
+      items: [{ received_qty: 23, sub_total_price: 1288 }],
+    },
+    {
+      id: "detail-b",
+      sequence_no: 2,
+      purchase_order_detail_id: "po-detail-1",
+      location_id: "loc-it",
+      location_name: "IT",
+      product_id: "prod-roselle",
+      product_name: "Dried Roselle 1 kg",
+      doc_version: 0,
+      items: [{ received_qty: 24, sub_total_price: 1344 }],
+    },
+  ],
+} as unknown as Parameters<typeof getDefaultValues>[0];
+
+describe("สินค้าตัวเดียวกันเข้าสองคลัง", () => {
+  it("ได้สองแถว ไม่ยุบเป็นแถวเดียว", () => {
+    const values = getDefaultValues(twoLocationsOneProduct);
+    expect(values.items).toHaveLength(2);
+    expect(values.items.map((i) => i.location_id)).toEqual([
+      "loc-direct",
+      "loc-it",
+    ]);
+    expect(values.items.map((i) => i.received_qty)).toEqual([23, 24]);
+  });
+
+  it("แต่ละแถวถือ id ของ detail ไม่ใช่ id ของ item ข้างใน", () => {
+    const values = getDefaultValues(twoLocationsOneProduct);
+    expect(values.items.map((i) => i.id)).toEqual(["detail-a", "detail-b"]);
+  });
+
+  it("ราคาต่อหน่วยคิดจากยอดของแถวนั้น ไม่ใช่ของแถวแรก", () => {
+    const values = getDefaultValues(twoLocationsOneProduct);
+    // 1288/23 = 56 · 1344/24 = 56 — เท่ากันในเคสนี้ แต่ต้องคิดแยกแถว
+    expect(values.items.map((i) => i.unit_price)).toEqual([56, 56]);
+  });
+});
