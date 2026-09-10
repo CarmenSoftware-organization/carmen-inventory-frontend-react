@@ -25,7 +25,8 @@ import type {
   FromPriceListSelectedItem,
 } from "./from-price-list-form-schema";
 
-type SummaryStep = 1 | 2 | 3;
+/** ปลายทางของปุ่ม "แก้ไข" — ผู้ขายอยู่ step เดียวกับรายละเอียดใบสั่งซื้อแล้ว */
+type SummaryStep = 1 | 2;
 
 interface StepSummaryProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;
@@ -188,7 +189,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
         icon={<Truck className="size-4" />}
         title={t("summaryVendor")}
         editLabel={tc("edit")}
-        onEdit={() => onEditStep(2)}
+        onEdit={() => onEditStep(1)}
       >
         {values.vendor_id ? (
           <dl>
@@ -223,7 +224,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
         icon={<Package className="size-4" />}
         title={`${t("summaryItems")} (${items.length})`}
         editLabel={tc("edit")}
-        onEdit={() => onEditStep(3)}
+        onEdit={() => onEditStep(2)}
       >
         {items.length === 0 ? (
           <p className="text-muted-foreground text-sm">

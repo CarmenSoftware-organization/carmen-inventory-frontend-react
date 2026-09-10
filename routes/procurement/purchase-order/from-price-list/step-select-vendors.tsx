@@ -12,7 +12,6 @@ import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import { cn } from "@/lib/utils";
 import { usePriceListActiveVendors } from "@/hooks/use-price-list";
-import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { FromPriceListFormValues } from "./from-price-list-form-schema";
 
@@ -24,8 +23,6 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
-  const { dateFormat } = useProfile();
-
   const deliveryDate = useWatch({
     control: form.control,
     name: "delivery_date",
@@ -59,27 +56,16 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
 
         return (
           <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel required>{tfl("vendor")}</FieldLabel>
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <CalendarDays className="size-3" aria-hidden="true" />
-                {deliveryDate ? formatDate(deliveryDate, dateFormat) : "—"}
-              </div>
-            </div>
-            {/* กรองในฝั่ง client จากรายชื่อที่โหลดมาแล้ว — ใช้ onInputChange ให้กรอง
-                ทันทีที่พิมพ์ ไม่ใช่ onSearch ที่รอ Enter (กติกา Enter-to-search มีไว้
-                กันการยิง API รัว ๆ ซึ่งไม่เกี่ยวกับที่นี่) · onSearch ต่อไว้ด้วยเพื่อให้
-                ปุ่มล้างในช่องทำงาน */}
+            <FieldLabel required>{tfl("vendor")}</FieldLabel>
             <SearchInput
               defaultValue={search}
               onSearch={setSearch}
               onInputChange={setSearch}
               placeholder={t("searchVendor")}
-              containerClassName="w-full"
-              inputClassName="h-8 text-xs placeholder:text-xs"
+              containerClassName="w-96 mb-2"
             />
 
-            <ScrollArea className="h-72 rounded-md border">
+            <ScrollArea className="h-52 max-h-52 rounded-md border">
               {error && (
                 <p className="text-destructive p-3 text-xs">
                   {error instanceof Error ? error.message : String(error)}
@@ -94,14 +80,26 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                   <Skeleton className="h-8 w-full" />
                 </div>
               )}
-              {!isLoading && !error && filteredVendors.length === 0 && (
+              {!apiDate && (
                 <div className="py-6">
                   <EmptyComponent
-                    title={t("noVendorsAvailable")}
-                    description={t("noVendorsAvailableDesc")}
+                    icon={CalendarDays}
+                    title={t("pickDeliveryDateFirst")}
+                    description={t("pickDeliveryDateFirstDesc")}
                   />
                 </div>
               )}
+              {!!apiDate &&
+                !isLoading &&
+                !error &&
+                filteredVendors.length === 0 && (
+                  <div className="py-6">
+                    <EmptyComponent
+                      title={t("noVendorsAvailable")}
+                      description={t("noVendorsAvailableDesc")}
+                    />
+                  </div>
+                )}
               {!isLoading && !error && filteredVendors.length > 0 && (
                 <RadioGroup
                   value={selectedId ?? ""}
