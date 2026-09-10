@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import {
   Controller,
+  useFormState,
   useWatch,
   type FieldArrayWithId,
   type UseFormReturn,
@@ -47,6 +48,25 @@ function computePriceMinMax(
   };
 }
 
+/**
+ * error ของแถวนี้ — **ต้อง subscribe เอง** ไม่ใช่อ่าน `form.formState.errors` ตรง ๆ
+ *
+ * อ่านตรง ๆ ได้ค่าถูกก็จริง แต่ตัวที่ re-render คือคอมโพเนนต์ที่เรียก `useForm`
+ * (หน้าฟอร์ม) ส่วนกลางทางระหว่างนั้นถูก React Compiler memo ไว้เพราะ props ไม่
+ * เปลี่ยน — เซลล์จึงไม่ถูก render ใหม่ แล้วกรอบแดงไม่ขึ้นทั้งที่ error มีอยู่จริง
+ * (เจอตอนกดบันทึกใบที่แถวสินค้ายังไม่ได้เลือกสินค้า: ไม่บันทึกให้ แต่หน้าก็ไม่ขยับ)
+ *
+ * เรียกก่อน `if (isView) return` เสมอ — hook หลัง early return ผิดกติกา
+ */
+function useRowErrors(form: UseFormReturn<PriceListFormValues>, index: number) {
+  "use no memo";
+  const { errors } = useFormState({
+    control: form.control,
+    name: `pricelist_detail.${index}`,
+  });
+  return errors.pricelist_detail?.[index];
+}
+
 export function ProductCell({
   form,
   index,
@@ -58,6 +78,7 @@ export function ProductCell({
   readonly confirmDuplicate: (action: () => void, productName?: string) => void;
 }) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   if (isView)
     return (
       <NameWithSubtext
@@ -65,7 +86,6 @@ export function ProductCell({
         secondary={detailRef?.product_local_name}
       />
     );
-  const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
       control={form.control}
@@ -98,13 +118,13 @@ export function UnitCell({
   detailRef,
 }: CellProps) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   const productId =
     useWatch({
       control: form.control,
       name: `pricelist_detail.${index}.product_id`,
     }) ?? "";
   if (isView) return <FieldPlainText>{detailRef?.unit_name}</FieldPlainText>;
-  const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
       control={form.control}
@@ -131,13 +151,13 @@ export function MoqCell({
   detailRef,
 }: CellProps) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   if (isView)
     return (
       <span className="text-foreground text-xs font-semibold tabular-nums">
         {Number(detailRef?.moq_qty) || 0}+
       </span>
     );
-  const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
       type="number"
@@ -162,13 +182,13 @@ export function LeadCell({
   detailRef,
 }: CellProps) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   if (isView)
     return (
       <span className="text-muted-foreground text-xs tabular-nums">
         {Number(detailRef?.lead_time_days) || 0}d
       </span>
     );
-  const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
       type="number"
@@ -193,6 +213,7 @@ export function PriceCell({
   detailRef,
 }: CellProps) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   // Price = ราคารวมภาษี (gross) ที่ vendor กรอกเอง — PWT/Tax/Amount derive จากตัวนี้
   const price = useWatch({
     control: form.control,
@@ -230,7 +251,7 @@ export function PriceCell({
         min={0}
         disabled={isDisabled}
         placeholder="0.00"
-        error={form.formState.errors.pricelist_detail?.[index]?.price?.message}
+        error={errors?.price?.message}
         className={cn(
           "border-border/60 h-8 w-full rounded-md pr-2 pl-6 text-right text-xs font-semibold tabular-nums",
           isHigh && "border-warning/60",
@@ -343,9 +364,9 @@ export function TaxCell({
   detailRef,
 }: CellProps) {
   "use no memo";
+  const errors = useRowErrors(form, index);
   if (isView)
     return <FieldPlainText>{detailRef?.tax_profile_name}</FieldPlainText>;
-  const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
       control={form.control}
