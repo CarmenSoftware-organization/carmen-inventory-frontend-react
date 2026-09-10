@@ -160,6 +160,7 @@ export function MoqCell({
     );
   return (
     <FieldInput
+      errorIconAlign="left"
       type="number"
       inputMode="decimal"
       min={0}
@@ -191,6 +192,7 @@ export function LeadCell({
     );
   return (
     <FieldInput
+      errorIconAlign="left"
       type="number"
       inputMode="decimal"
       min={0}
@@ -245,6 +247,7 @@ export function PriceCell({
   return (
     <div className="text-right">
       <FieldInput
+        errorIconAlign="left"
         type="number"
         step="0.01"
         inputMode="decimal"

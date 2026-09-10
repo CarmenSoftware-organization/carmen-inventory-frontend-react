@@ -382,6 +382,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
           // กรอกได้เฉพาะแถวที่ติ๊กแล้ว — ยังไม่ติ๊กก็ยังไม่มี item ให้แก้
           return (
             <InputQty
+              errorIconAlign="left"
               className="h-8 text-right"
               disabled={!selected}
               error={errorOf(detail.id)?.order_qty?.message}

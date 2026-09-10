@@ -101,6 +101,7 @@ export function QtyCell({ form, index, isView, isDisabled }: CellProps) {
   const reg = form.register(`details.${index}.qty`, { valueAsNumber: true });
   return (
     <FieldInput
+      errorIconAlign="left"
       type="number"
       inputMode="decimal"
       min={0}

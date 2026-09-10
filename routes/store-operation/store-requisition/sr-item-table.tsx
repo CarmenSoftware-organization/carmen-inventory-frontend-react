@@ -408,6 +408,7 @@ export function useSrItemTable({
             form.formState.errors.items?.[row.index]?.requested_qty?.message;
           return (
             <InputQty
+              errorIconAlign="left"
               placeholder={tfl("qty")}
               className="text-right"
               disabled={disabled}
@@ -439,6 +440,7 @@ export function useSrItemTable({
                 }
                 return (
                   <InputQty
+                    errorIconAlign="left"
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -478,6 +480,7 @@ export function useSrItemTable({
                 }
                 return (
                   <InputQty
+                    errorIconAlign="left"
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
