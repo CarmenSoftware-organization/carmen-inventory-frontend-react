@@ -297,23 +297,27 @@ export function FromPriceListContent() {
         value={step}
         onValueChange={handleStepChange}
         indicators={{ completed: COMPLETED_INDICATOR }}
-        className="px-10"
       >
-        <StepperNav>
-          {STEPS.map(({ step: s, labelKey }, i, arr) => (
-            <StepperItem key={s} step={s}>
-              <StepperTrigger className="flex-col gap-1">
-                <StepperIndicator>{s}</StepperIndicator>
-                <StepperTitle className="text-micro-legal font-semibold">
-                  {t(labelKey)}
-                </StepperTitle>
-              </StepperTrigger>
-              {i < arr.length - 1 && (
-                <StepperSeparator className="group-data-[state=completed]/step:bg-primary" />
-              )}
-            </StepperItem>
-          ))}
-        </StepperNav>
+        {/* แถบขั้นตอนกว้างเท่าที่มันต้องใช้ ไม่กางเต็มจอ — StepperNav บังคับ
+            w-full ของตัวเองไว้ด้วย data-variant ซึ่งชนะ class ที่ส่งเข้าไป
+            เลยต้องคุมความกว้างจากกล่องข้างนอกแทน · max-w-full กันจอแคบล้น */}
+        <div className="mx-auto w-96 max-w-full">
+          <StepperNav>
+            {STEPS.map(({ step: s, labelKey }, i, arr) => (
+              <StepperItem key={s} step={s}>
+                <StepperTrigger className="flex-col gap-1">
+                  <StepperIndicator>{s}</StepperIndicator>
+                  <StepperTitle className="text-micro-legal font-semibold">
+                    {t(labelKey)}
+                  </StepperTitle>
+                </StepperTrigger>
+                {i < arr.length - 1 && (
+                  <StepperSeparator className="group-data-[state=completed]/step:bg-primary" />
+                )}
+              </StepperItem>
+            ))}
+          </StepperNav>
+        </div>
         <StepperPanel className="mt-4">
           <StepperContent value={1} className="space-y-4">
             <StepOrderDetails form={form} />

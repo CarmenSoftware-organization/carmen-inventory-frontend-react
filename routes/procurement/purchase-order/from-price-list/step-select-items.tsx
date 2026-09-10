@@ -34,7 +34,7 @@ import { round2 } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
 import { useActivePriceListsByVendor } from "@/hooks/use-price-list";
 import type { PriceList, PriceListDetailItem } from "@/types/price-list";
-import { usePlRowFilter } from "./use-pl-row-filter";
+import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
 import {
   WIZARD_ITEM_TEMPLATE,
   type FromPriceListFormValues,
@@ -53,6 +53,20 @@ interface PlRow {
   /** หลังบ้านอนุญาตให้เอาบรรทัดนี้ไปตั้งเป็นรายการสั่งซื้อไหม */
   readonly canUse: boolean;
 }
+
+/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
+const FILTER_FIELDS: PoFilterField<PlRow>[] = [
+  {
+    key: "product_id",
+    labelKey: "field.product",
+    of: (r) => [r.detail.product_id, r.detail.product_name],
+  },
+  {
+    key: "currency_id",
+    labelKey: "field.currency",
+    of: (r) => [r.currency.id, r.currency.code],
+  },
+];
 
 function toRows(priceLists: PriceList[]): PlRow[] {
   return priceLists.flatMap((pl) =>
@@ -162,7 +176,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   // ใหม่ทุกรอบจะไปปลุก autoReset ของ table ให้ setState แล้ววนไม่จบ (จอค้าง กดติ๊ก
   // ไม่ติด) ด้วยเหตุผลเดียวกันจึงต้อง default `?? []` **ในนี้** ไม่ใช่ตอน destructure
   const allRows = useMemo(() => toRows(priceLists ?? []), [priceLists]);
-  const filter = usePlRowFilter(allRows);
+  const filter = usePoRowFilter(allRows, FILTER_FIELDS);
   const rows = useMemo(
     () => filterRows(allRows, search.trim()).filter(filter.matches),
     [allRows, search, filter.matches],

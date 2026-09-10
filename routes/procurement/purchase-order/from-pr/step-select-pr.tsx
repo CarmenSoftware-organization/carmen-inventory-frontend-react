@@ -7,7 +7,13 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { FileText, Loader2, Workflow } from "lucide-react";
+import {
+  FileText,
+  FilterX,
+  ListFilterPlus,
+  Loader2,
+  Workflow,
+} from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -16,6 +22,8 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import { Field, FieldLabel } from "@/components/ui/field";
 import EmptyComponent from "@/components/empty-component";
+import { ListFilter } from "@/components/list-filter/list-filter";
+import { Button } from "@/components/ui/button";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
@@ -27,6 +35,26 @@ import { CACHE_DYNAMIC } from "@/lib/cache-config";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import type { PaginatedResponse } from "@/types/params";
+import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
+
+/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
+const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
+  {
+    key: "requestor_id",
+    labelKey: "field.requester",
+    of: (r) => [r.requestor_id, r.requestor_name],
+  },
+  {
+    key: "department_id",
+    labelKey: "field.department",
+    of: (r) => [r.department_id, r.department_name],
+  },
+  {
+    key: "workflow_id",
+    labelKey: "procurement.purchaseOrder.prWorkflow",
+    of: (r) => [r.workflow_id, r.workflow_name],
+  },
+];
 
 interface StepSelectPrProps {
   readonly workflowId: string;
@@ -52,6 +80,8 @@ export function StepSelectPr({
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
+  const tl = useTranslations("lookup");
   const { dateFormat } = useProfile();
   const buCode = useBuCode();
 
@@ -71,7 +101,18 @@ export function StepSelectPr({
   // TanStack ต้องได้ reference ที่นิ่ง — `data?.data ?? []` สร้าง array ใหม่ทุก
   // render แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section
   // หลังเซฟ vendor สำเร็จ วนไป 245,156 รอบ)
-  const purchaseRequests = useMemo(() => data?.data ?? [], [data]);
+  const allRows = useMemo(() => data?.data ?? [], [data]);
+  const filter = usePoRowFilter(allRows, FILTER_FIELDS);
+  // กรองที่ `data` ได้เลย ไม่ต้องผ่าน globalFilter — ตารางนี้ผูก selection กับ
+  // `row.id` ไม่ใช่ index ตัดแถวออกแล้วใบที่ติ๊กไว้ก่อนหน้าไม่หลุด (ต่างจาก
+  // ตารางสินค้าใน PR ที่ทุก cell ผูกกับ index ของ field array)
+  const purchaseRequests = useMemo(
+    () => allRows.filter(filter.matches),
+    [allRows, filter.matches],
+  );
+
+  /** มีของให้กรองจริงหรือยัง — ยังไม่เลือก workflow / กำลังโหลด / ไม่มีใบเลย */
+  const canFilter = !!workflowId && !isLoading && allRows.length > 0;
 
   const columns = useMemo<ColumnDef<PurchaseRequest>[]>(
     () => [
@@ -113,16 +154,42 @@ export function StepSelectPr({
 
   return (
     <div className="space-y-3">
-      <Field className="sm:max-w-sm">
+      <Field className="sm:max-w-md">
         <FieldLabel required>{t("workflowLabel")}</FieldLabel>
-        <LookupWorkflow
-          value={workflowId}
-          onValueChange={onWorkflowChange}
-          workflowType={WORKFLOW_TYPE.PO}
-          creatableOnly
-          disabled={disabled}
-          className="w-full text-xs"
-        />
+        <div className="flex items-center gap-2">
+          <LookupWorkflow
+            value={workflowId}
+            onValueChange={onWorkflowChange}
+            workflowType={WORKFLOW_TYPE.PO}
+            creatableOnly
+            disabled={disabled}
+            className="w-full text-xs"
+          />
+          {/* กรองแถวฝั่ง client จากใบที่โหลดมาแล้ว — ไม่มี onSaveClick เพราะ
+              saved view ผูกกับหน้า list ไม่ใช่ตารางในหน้านี้ · ปิดไว้จนกว่าจะมี
+              ของให้กรองจริง ไม่ซ่อน ปุ่มที่โผล่มาทีหลังจะดันของข้าง ๆ ขยับ */}
+          {/* shrink-0 — ช่องเลือกเป็น w-full ปุ่มข้าง ๆ จะโดนบีบจนตัวหนังสือหาย */}
+          <div className="shrink-0">
+            {/* ยังไม่มีของให้กรอง = ปุ่มหลอกที่กดไม่ได้ ไม่ใช่ไม่มีปุ่ม — ปุ่มที่
+                โผล่มาทีหลังจะดันของข้าง ๆ ขยับ และคนที่เคยเห็นก็จะหาไม่เจอ
+                (ListFilter ของกลางไม่มีสถานะปิด และไม่ควรไปเพิ่มให้ทุกหน้า list
+                แบกเพราะหน้านี้หน้าเดียว) */}
+            {canFilter ? (
+              <ListFilter
+                fields={filter.fields}
+                values={filter.values}
+                setValue={filter.setValue}
+                onClearAll={filter.clearAll}
+                activeCount={filter.activeCount}
+              />
+            ) : (
+              <Button size="sm" variant="outline" disabled>
+                <ListFilterPlus aria-hidden="true" />
+                {tc("filter")}
+              </Button>
+            )}
+          </div>
+        </div>
         <p className="text-muted-foreground text-micro">{t("workflowHint")}</p>
       </Field>
 
@@ -145,11 +212,21 @@ export function StepSelectPr({
           tableLayout={{ checkbox: true, headerSticky: true, rowBorder: true }}
           tableClassNames={{ headerRow: "h-11", bodyRow: "h-11" }}
           emptyMessage={
-            <EmptyComponent
-              icon={FileText}
-              title={t("noPr")}
-              description={t("noPrDesc")}
-            />
+            // กรองจนไม่เหลือแถว ≠ ไม่มีใบขอซื้อรอทำใบสั่งซื้อ — ข้อความเดียวกัน
+            // จะหลอกให้ถอยออกไปทั้งที่ของอยู่ครบ แค่ถูกซ่อน
+            filter.activeCount > 0 ? (
+              <EmptyComponent
+                icon={FilterX}
+                title={tc("noSearchResult")}
+                description={tl("noFoundDesc")}
+              />
+            ) : (
+              <EmptyComponent
+                icon={FileText}
+                title={t("noPr")}
+                description={t("noPrDesc")}
+              />
+            )
           }
         >
           <DataGridContainer scroll className="max-h-[28rem]">
