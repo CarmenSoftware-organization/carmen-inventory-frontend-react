@@ -433,6 +433,17 @@ export function RequestPriceListForm({
           </Field>
         </SettingSection>
 
+        <RfpVendorTable
+          isDisabled={isDisabled}
+          rfpName={requestPriceList?.name ?? ""}
+          isAdding={isAdding}
+          setIsAdding={setIsAdding}
+          displayVendors={displayVendors}
+          selectedVendorIds={selectedVendorIds}
+          onAddVendor={handleAddVendors}
+          onRemoveVendor={handleRemoveVendor}
+        />
+
         {/* Custom message */}
         <SettingSection
           title={t("customMessageTitle")}
@@ -455,16 +466,6 @@ export function RequestPriceListForm({
             )}
           </Field>
         </SettingSection>
-
-        <RfpVendorTable
-          isDisabled={isDisabled}
-          isAdding={isAdding}
-          setIsAdding={setIsAdding}
-          displayVendors={displayVendors}
-          selectedVendorIds={selectedVendorIds}
-          onAddVendor={handleAddVendors}
-          onRemoveVendor={handleRemoveVendor}
-        />
       </form>
 
       <DiscardDialog {...f.discard.dialogProps} variant="warning" />

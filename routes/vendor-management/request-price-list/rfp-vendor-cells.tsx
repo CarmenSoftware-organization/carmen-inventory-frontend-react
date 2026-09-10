@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Mail,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { cn } from "@/lib/utils";
+import { RfpSendEmailDialog } from "./rfp-send-email-dialog";
 
 const EMPTY = (
   <span className="text-muted-foreground text-micro italic">—</span>
@@ -130,19 +138,27 @@ export function PricelistCell({
   );
 }
 
-/** Row actions — copy/open the vendor URL + remove (with confirm) */
+/** Row actions — copy/open/email the vendor URL + remove (with confirm) */
 export function VendorActionsCell({
   urlToken,
+  email,
+  vendorName,
+  rfpName,
   isDisabled,
   onRemove,
   labels,
 }: {
   readonly urlToken?: string;
+  /** อีเมลผู้ติดต่อของผู้ขาย — เติมเป็นผู้รับตั้งต้นใน dialog */
+  readonly email?: string | null;
+  readonly vendorName: string;
+  readonly rfpName: string;
   readonly isDisabled: boolean;
   readonly onRemove: () => void;
   readonly labels: {
     readonly copyUrl: string;
     readonly openUrl: string;
+    readonly emailUrl: string;
     readonly removeVendor: string;
     readonly confirmDesc: string;
   };
@@ -150,10 +166,13 @@ export function VendorActionsCell({
   "use no memo";
   const [copied, setCopied] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+
+  const vendorUrl = urlToken ? `${window.location.origin}/pl/${urlToken}` : "";
 
   const handleCopyUrl = () => {
-    if (!urlToken) return;
-    navigator.clipboard.writeText(`${window.location.origin}/pl/${urlToken}`);
+    if (!vendorUrl) return;
+    navigator.clipboard.writeText(vendorUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -191,6 +210,20 @@ export function VendorActionsCell({
           </Button>
         </>
       )}
+
+      {/* ขึ้นทุกแถวและกดได้เสมอ — ที่อยู่ผู้รับกับลิงก์เติมให้เท่าที่มี ที่เหลือ
+          ผู้ใช้พิมพ์เองในโปรแกรมอีเมลได้ */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        onClick={() => setShowEmail(true)}
+        title={labels.emailUrl}
+        aria-label={labels.emailUrl}
+        className="text-muted-foreground hover:text-foreground rounded-lg"
+      >
+        <Mail />
+      </Button>
       {!isDisabled && (
         <Button
           type="button"
@@ -202,6 +235,19 @@ export function VendorActionsCell({
         >
           <Trash2 />
         </Button>
+      )}
+
+      {/* mount เฉพาะตอนเปิดจริง — dialog ยิง useEmailProfiles ทันทีที่ mount
+          ไม่งั้นทุกแถวในตารางจะยิงตามจำนวนผู้ขายตั้งแต่เปิดหน้า */}
+      {showEmail && (
+        <RfpSendEmailDialog
+          open={showEmail}
+          onOpenChange={setShowEmail}
+          vendorName={vendorName}
+          vendorEmail={email}
+          rfpName={rfpName}
+          vendorUrl={vendorUrl}
+        />
       )}
 
       <DeleteDialog

@@ -36,6 +36,8 @@ const EMPTY = (
 
 interface RfpVendorTableProps {
   readonly isDisabled: boolean;
+  /** ชื่อใบขอราคา — ใช้เป็นหัวเรื่องอีเมลที่ส่งลิงก์ให้ผู้ขาย */
+  readonly rfpName: string;
   /** dialog เลือกผู้ขายเปิดอยู่ไหม */
   readonly isAdding: boolean;
   readonly setIsAdding: (v: boolean) => void;
@@ -52,6 +54,7 @@ interface RfpVendorTableProps {
  */
 export default function RfpVendorTable({
   isDisabled,
+  rfpName,
   isAdding,
   setIsAdding,
   displayVendors,
@@ -142,18 +145,23 @@ export default function RfpVendorTable({
       },
       {
         id: "actions",
-        size: 108,
+        // สี่ปุ่ม (คัดลอก เปิด ส่งอีเมล ลบ) — 108 พอดีสามปุ่ม ปุ่มที่สี่จะโดนเบียด
+        size: 132,
         header: () => null,
         cell: ({ row }) => {
           const v = row.original;
           return (
             <VendorActionsCell
               urlToken={"url_token" in v ? v.url_token : ""}
+              email={v.contact_email}
+              vendorName={v.vendor_name ?? ""}
+              rfpName={rfpName}
               isDisabled={isDisabled}
               onRemove={() => onRemoveVendor(v.vendor_id)}
               labels={{
                 copyUrl: t("vendors.copyUrl"),
                 openUrl: t("vendors.openUrl"),
+                emailUrl: t("vendors.emailUrl"),
                 removeVendor: t("vendors.removeVendor"),
                 confirmDesc: td("confirmNamed", { name: v.vendor_name }),
               }}
@@ -163,7 +171,7 @@ export default function RfpVendorTable({
         meta: { headerClassName: "text-center", cellClassName: "text-right" },
       },
     ];
-  }, [t, tfl, td, isDisabled, onRemoveVendor]);
+  }, [t, tfl, td, isDisabled, onRemoveVendor, rfpName]);
 
   const table = useReactTable({
     data: displayVendors,

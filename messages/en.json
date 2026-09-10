@@ -2460,6 +2460,7 @@
         "noVendorsDesc": "Add vendors to this request.",
         "copyUrl": "Copy vendor URL",
         "openUrl": "Open vendor URL",
+        "emailUrl": "Email the link to this vendor",
         "selectVendorsTitle": "Add vendors",
         "selectVendorsDesc": "Tick every vendor you want to ask for a quote — you can pick more than one at a time.",
         "noVendorsFound": "No vendors match your search",
@@ -2467,7 +2468,29 @@
         "nVendorsSelected": "{count, plural, =0 {None selected} =1 {# selected} other {# selected}}",
         "addNVendors": "Add {count, plural, =1 {# vendor} other {# vendors}}"
       },
-      "notFound": "Price list request not found"
+      "notFound": "Price list request not found",
+      "sendEmail": {
+        "title": "Send price list request to vendor",
+        "desc": "Email {vendor} the link to submit their price list for {name}.",
+        "profile": "Sender profile",
+        "profilePlaceholder": "Select a sender profile",
+        "noProfiles": "No enabled email profile is set up for this business unit yet.",
+        "goToSettings": "Go to email profile settings",
+        "loadError": "Could not load email profiles",
+        "to": "To",
+        "toPlaceholder": "vendor@example.com",
+        "cc": "CC",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "Subject",
+        "body": "Message",
+        "defaultSubject": "Request for price list: {name}",
+        "defaultBody": "Dear {vendor},\n\nWe would like to invite you to submit your price list for {name}.\n\nPlease use the link below to enter your prices:\n{url}\n\nShould you have any questions, please reply to this email.\n\nThank you for your continued partnership.",
+        "add": "Add",
+        "remove": "Remove {email}",
+        "duplicateEmail": "Already added",
+        "send": "Send",
+        "unavailable": "Not available yet"
+      }
     }
   },
   "inventoryManagement": {

@@ -2455,6 +2455,7 @@
         "noVendorsDesc": "เพิ่มผู้ขายในคำขอนี้",
         "copyUrl": "คัดลอก URL ผู้ขาย",
         "openUrl": "เปิด URL ผู้ขาย",
+        "emailUrl": "ส่งลิงก์ให้ผู้ขายทางอีเมล",
         "selectVendorsTitle": "เพิ่มผู้ขาย",
         "selectVendorsDesc": "ติ๊กผู้ขายที่จะขอราคา เลือกทีเดียวหลายรายได้",
         "noVendorsFound": "ไม่พบผู้ขายที่ค้น",
@@ -2462,7 +2463,29 @@
         "nVendorsSelected": "เลือกไว้ {count} ราย",
         "addNVendors": "เพิ่ม {count} ราย"
       },
-      "notFound": "ไม่พบใบขอรายการราคา"
+      "notFound": "ไม่พบใบขอรายการราคา",
+      "sendEmail": {
+        "title": "ส่งคำขอรายการราคาให้ผู้ขาย",
+        "desc": "ส่งลิงก์สำหรับกรอกรายการราคาของ {name} ให้ {vendor} ทางอีเมล",
+        "profile": "โปรไฟล์ผู้ส่ง",
+        "profilePlaceholder": "เลือกโปรไฟล์ผู้ส่ง",
+        "noProfiles": "หน่วยธุรกิจนี้ยังไม่มีโปรไฟล์อีเมลที่เปิดใช้งาน",
+        "goToSettings": "ไปหน้าตั้งค่าโปรไฟล์อีเมล",
+        "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+        "to": "ถึง",
+        "toPlaceholder": "vendor@example.com",
+        "cc": "สำเนาถึง",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "หัวเรื่อง",
+        "body": "ข้อความ",
+        "defaultSubject": "ขอเชิญเสนอรายการราคา: {name}",
+        "defaultBody": "เรียน {vendor}\n\nทางเราขอเชิญท่านเสนอรายการราคาสำหรับ {name}\n\nกรุณากรอกราคาผ่านลิงก์ด้านล่างนี้\n{url}\n\nหากมีข้อสงสัยประการใด กรุณาตอบกลับอีเมลฉบับนี้\n\nขอแสดงความนับถือ",
+        "add": "เพิ่ม",
+        "remove": "ลบ {email}",
+        "duplicateEmail": "เพิ่มไว้แล้ว",
+        "send": "ส่ง",
+        "unavailable": "ยังใช้งานไม่ได้"
+      }
     }
   },
   "inventoryManagement": {
