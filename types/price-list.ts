@@ -39,6 +39,11 @@ export interface PriceListDetailItem {
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  /**
+   * บรรทัดนี้เอาไปตั้งเป็นรายการสั่งซื้อได้ไหม — หลังบ้านตัดสินให้ (เช่นสิทธิ์ของ
+   * workflow ที่ส่งไปด้วย) `false` = เลือกไม่ได้ · ไม่ส่งมา = ถือว่าเลือกได้
+   */
+  can_use?: boolean;
   doc_version?: number;
 }
 
@@ -56,6 +61,8 @@ export interface PriceList {
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];
+  /** ทั้งใบเอาไปใช้ได้ไหม — `false` = ทุกบรรทัดในใบนี้เลือกไม่ได้ */
+  can_use?: boolean;
   doc_version?: number;
   audit?: PriceListAudit;
 }

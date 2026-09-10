@@ -50,6 +50,8 @@ interface PlRow {
   readonly detail: PriceListDetailItem;
   readonly pricelistNo: string;
   readonly currency: { id: string; code: string; name?: string };
+  /** หลังบ้านอนุญาตให้เอาบรรทัดนี้ไปตั้งเป็นรายการสั่งซื้อไหม */
+  readonly canUse: boolean;
 }
 
 function toRows(priceLists: PriceList[]): PlRow[] {
@@ -58,6 +60,10 @@ function toRows(priceLists: PriceList[]): PlRow[] {
       detail,
       pricelistNo: pl.no,
       currency: pl.currency,
+      // ทั้งใบต้องใช้ได้ **และ** บรรทัดนั้นต้องใช้ได้ · เทียบกับ false ตรง ๆ ไม่ใช่
+      // ตีเป็น boolean — หลังบ้านรุ่นที่ยังไม่ส่งฟิลด์นี้มาต้องถือว่าใช้ได้ ไม่ใช่
+      // ล็อกทั้งตารางเงียบ ๆ
+      canUse: pl.can_use !== false && detail.can_use !== false,
     })),
   );
 }
@@ -149,7 +155,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     data: priceLists,
     isLoading,
     error,
-  } = useActivePriceListsByVendor(vendorId, apiDate);
+  } = useActivePriceListsByVendor(vendorId, apiDate, workflowId);
 
   const [search, setSearch] = useState("");
   // `data` ของ TanStack ต้องคงตัวตนไว้ระหว่าง render ที่ไม่มีอะไรเปลี่ยน — ส่ง array
@@ -176,6 +182,22 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   // จนกว่าจะติ๊กออกหมด (กติกาเดิมของ dialog ที่ถูกยกมา)
   const activeCurrency =
     allRows.find((r) => selectedByDetail.has(r.detail.id))?.currency ?? null;
+
+  /**
+   * ติ๊กแถวนี้ได้ไหม — หลังบ้านห้าม หรือคนละสกุลกับที่ล็อกไว้แล้ว
+   *
+   * ต้องคงตัวตนข้าม render เพราะเป็น dep ของ columns — ฟังก์ชันใหม่ทุกรอบเท่ากับ
+   * สร้างคอลัมน์ใหม่ทุกรอบ แล้วช่องกรอกจำนวนในแถวจะโดน remount จนโฟกัสหลุด
+   */
+  const canSelectRow = useCallback(
+    (row: PlRow) =>
+      row.canUse &&
+      (activeCurrency == null || row.currency.id === activeCurrency.id),
+    [activeCurrency],
+  );
+
+  /** มีแถวที่หลังบ้านห้ามใช้อยู่ไหม — ใช้ตัดสินว่าต้องอธิบายเหนือตารางไหม */
+  const hasUnusableRow = rows.some((r) => !r.canUse);
 
   const totalAmount = items.reduce(
     (sum, item) => sum + round2((Number(item.order_qty) || 0) * item.price),
@@ -218,7 +240,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const kept = current.filter((i) => wanted.has(i.pricelist_detail_id));
     const keptIds = new Set(kept.map((i) => i.pricelist_detail_id));
     const added = allRows.filter(
-      (r) => wanted.has(r.detail.id) && !keptIds.has(r.detail.id),
+      (r) => wanted.has(r.detail.id) && !keptIds.has(r.detail.id) && r.canUse,
     );
 
     // "เลือกทั้งหมด" กวาดได้ทุกแถวตอนที่ยังไม่มีสกุลตั้งต้น (ยังไม่มีแถวไหนถูกล็อก)
@@ -261,11 +283,8 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   );
 
   const columns = useMemo<ColumnDef<PlRow>[]>(() => {
-    /** แถวสกุลอื่น = เลือกไม่ได้ ทำให้จางไว้ให้เห็นว่าตอนนี้ใช้ไม่ได้ */
-    const dim = (row: PlRow) =>
-      activeCurrency != null && row.currency.id !== activeCurrency.id
-        ? "opacity-50"
-        : undefined;
+    /** แถวที่เลือกไม่ได้ = จางไว้ให้เห็นตั้งแต่กวาดตา ไม่ต้องไปกดถึงจะรู้ */
+    const dim = (row: PlRow) => (canSelectRow(row) ? undefined : "opacity-50");
 
     return [
       {
@@ -393,7 +412,9 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
       },
     ];
   }, [
-    activeCurrency,
+    // ไม่ต้องมี activeCurrency — canSelectRow ห่อมันไว้แล้ว ใส่ซ้ำเท่ากับสร้าง
+    // คอลัมน์ใหม่โดยไม่จำเป็น
+    canSelectRow,
     selectedByDetail,
     errorOf,
     patchItem,
@@ -402,7 +423,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     tfl,
   ]);
 
-  const disabled = !vendorId || !apiDate;
+  const disabled = !vendorId || !apiDate || !workflowId;
 
   const table = useReactTable({
     data: rows,
@@ -414,8 +435,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     getRowId: (row) => row.detail.id,
     state: { rowSelection },
     onRowSelectionChange: handleRowSelectionChange,
-    enableRowSelection: (row) =>
-      activeCurrency == null || row.original.currency.id === activeCurrency.id,
+    enableRowSelection: (row) => canSelectRow(row.original),
   });
 
   return (
@@ -470,6 +490,14 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
             {t("singleCurrencyHint", { currency: activeCurrency.code })}
           </span>
         </div>
+      )}
+
+      {/* บอกครั้งเดียวเหนือตาราง ไม่ติดป้ายซ้ำทุกแถว — ตัวอย่างจริงมีแถวที่ใช้
+          ไม่ได้เกือบทั้งตาราง ป้ายรายแถวจะกลายเป็นเสียงรบกวนแทนที่จะเป็นข้อมูล */}
+      {hasUnusableRow && (
+        <p className="text-muted-foreground text-micro">
+          {t("notSelectableHint")}
+        </p>
       )}
 
       {error ? (

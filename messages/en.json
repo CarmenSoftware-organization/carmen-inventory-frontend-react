@@ -3731,6 +3731,7 @@
       "noPriceListAvailable": "No Price List",
       "noPriceListAvailableDesc": "Selected vendors have no active price list.",
       "priceListNo": "Price List No",
+      "notSelectableHint": "Items shown in grey cannot be selected because they are not available for this purchase order.",
       "plRef": "PL Ref",
       "effective": "Effective",
       "workflowLabel": "Target workflow",
