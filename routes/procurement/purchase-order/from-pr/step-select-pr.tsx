@@ -8,10 +8,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
+  Building2,
   FileText,
   FilterX,
   ListFilterPlus,
   Loader2,
+  UserRound,
   Workflow,
 } from "lucide-react";
 import {
@@ -42,16 +44,22 @@ const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
   {
     key: "requestor_id",
     labelKey: "field.requester",
+    // ใช้ไอคอนชุดเดียวกับที่ ListFilterMenu ให้ช่องคน/แผนก/ลำดับขั้นอยู่แล้ว
+    // สามคีย์นี้ยังไม่มีในตารางของมัน เลยต้องบอกเอง ไม่งั้นได้ไอคอนกลางของ
+    // ช่อง custom เหมือนกันหมดทั้งสามช่อง
+    icon: UserRound,
     of: (r) => [r.requestor_id, r.requestor_name],
   },
   {
     key: "department_id",
     labelKey: "field.department",
+    icon: Building2,
     of: (r) => [r.department_id, r.department_name],
   },
   {
     key: "workflow_id",
     labelKey: "procurement.purchaseOrder.prWorkflow",
+    icon: Workflow,
     of: (r) => [r.workflow_id, r.workflow_name],
   },
 ];

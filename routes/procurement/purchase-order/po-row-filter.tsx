@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { FilterFieldDef } from "@/types/list-filter";
+import type { LucideIcon } from "lucide-react";
 
 /** ช่องกรองหนึ่งช่อง — บอกว่าจะดึง "ค่าที่ใช้กรอง" กับ "ชื่อที่โชว์" มาจากไหน */
 export interface PoFilterField<TRow> {
@@ -9,6 +10,12 @@ export interface PoFilterField<TRow> {
   readonly key: string;
   /** i18n key ของป้ายกำกับ (คีย์เต็มจาก root เช่น `field.product`) */
   readonly labelKey: string;
+  /**
+   * ไอคอนหน้าแถวในเมนูตัวกรอง — ไม่ระบุแล้ว ListFilterMenu จะหาให้จาก labelKey
+   * ก่อน แล้วค่อยตกไปใช้ไอคอนกลางของ control ซึ่งช่อง custom ได้ตัวเดียวกันหมด
+   * ระบุเมื่อ labelKey ของช่องนั้นยังไม่มีในตารางของ ListFilterMenu
+   */
+  readonly icon?: LucideIcon;
   /** ค่าของแถวนี้ในช่องนี้ — `[ค่าที่ใช้กรอง, ชื่อที่โชว์]` */
   readonly of: (row: TRow) => readonly [string, string];
 }
@@ -80,10 +87,11 @@ export function usePoRowFilter<TRow>(
       // control "custom" ไม่ใช่ "multi-select" เพราะ FilterFieldControl แปล
       // labelKey ของตัวเลือกผ่าน t() ส่วนตัวเลือกที่นี่เป็นชื่อจริงจากข้อมูล
       // ไม่ใช่คีย์ i18n
-      fields.map(({ key, labelKey }) => ({
+      fields.map(({ key, labelKey, icon }) => ({
         key,
         control: "custom" as const,
         labelKey,
+        icon,
         // ไม่มี clause ลง URL — ตัวกรองนี้อยู่ใน state ของหน้า ไม่ใช่ query ของ list
         toClause: () => "",
         render: (value: string, onChange: (next: string) => void) => (
