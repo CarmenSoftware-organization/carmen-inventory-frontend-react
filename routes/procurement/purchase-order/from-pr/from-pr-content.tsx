@@ -86,9 +86,9 @@ export function FromPrContent() {
   );
   const selectedCount = selectedPrIds.length;
 
-  // "มีของค้าง" ของหน้านี้ = เลือกใบขอซื้อไว้แล้ว — ยังไม่ได้สร้างอะไร แต่ออกไป
-  // แล้วต้องมาไล่ติ๊กใหม่ทั้งหมด
-  const isDirty = selectedCount > 0 && !isConfirming;
+  // "มีของค้าง" = เลือกอะไรไปแล้วก็นับ ตั้งแต่ลำดับขั้นอนุมัติ ไม่ใช่รอจนติ๊กใบ —
+  // ยังไม่ได้สร้างอะไร แต่ออกไปแล้วต้องมาไล่เลือกใหม่ทั้งหมด
+  const isDirty = (!!workflowId || selectedCount > 0) && !isConfirming;
 
   const discard = useDiscardConfirm({ isDirty, isPending });
   // ปุ่มยกเลิกกับลูกศรย้อนกลับเรียก navigate() ตรง ๆ ซึ่ง useNavigationGuard

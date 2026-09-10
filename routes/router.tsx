@@ -212,6 +212,11 @@ export const router = createBrowserRouter([
                   import("./procurement/goods-receive-note/goods-receive-note-new.route"),
               },
               {
+                path: "goods-receive-note/from-po",
+                lazy: () =>
+                  import("./procurement/goods-receive-note/from-po/from-po.route"),
+              },
+              {
                 path: "goods-receive-note/:id",
                 lazy: () =>
                   import("./procurement/goods-receive-note/goods-receive-note-edit.route"),

@@ -26,16 +26,12 @@ import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { cn } from "@/lib/utils";
-import { setSessionItem } from "@/lib/safe-storage";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { GrnPoWizardDialog } from "./grn-po-wizard-dialog";
 import { GrnCreateDialog } from "./grn-create-dialog";
-import { mapPoDetailToItems } from "./grn-item-table";
-import type { PoForGrn } from "@/types/purchase-order";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -51,7 +47,6 @@ export default function GrnComponent() {
   const tt = useTranslations("toast");
   const navigate = useNavigate();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showWizard, setShowWizard] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<GoodsReceiveNote | null>(
     null,
   );
@@ -281,35 +276,10 @@ export default function GrnComponent() {
   const handleSelectDocType = (docType: string) => {
     setShowCreateDialog(false);
     if (docType === "purchase_order") {
-      setShowWizard(true);
+      navigate("/procurement/goods-receive-note/from-po");
     } else {
       navigate(`/procurement/goods-receive-note/new?doc_type=${docType}`);
     }
-  };
-
-  const handleWizardComplete = (data: {
-    vendorId: string;
-    vendorName: string;
-    currencyId: string;
-    currencyCode: string;
-    exchangeRate: number;
-    poList: PoForGrn[];
-  }) => {
-    const items = data.poList.flatMap(
-      (po) =>
-        po.po_detail?.flatMap((d) => mapPoDetailToItems(d, po.id, po.po_no)) ??
-        [],
-    );
-    setSessionItem("grn-wizard-data", {
-      vendorId: data.vendorId,
-      vendorName: data.vendorName,
-      currencyId: data.currencyId,
-      currencyCode: data.currencyCode,
-      exchangeRate: data.exchangeRate,
-      items,
-    });
-    setShowWizard(false);
-    navigate("/procurement/goods-receive-note/new?doc_type=purchase_order");
   };
 
   const table = useGrnTable({
@@ -433,14 +403,6 @@ export default function GrnComponent() {
         onOpenChange={setShowCreateDialog}
         onSelect={handleSelectDocType}
       />
-
-      {showWizard && (
-        <GrnPoWizardDialog
-          open={showWizard}
-          onOpenChange={setShowWizard}
-          onComplete={handleWizardComplete}
-        />
-      )}
 
       <DeleteDialog
         open={!!deleteTarget}

@@ -3982,6 +3982,8 @@
       "wizardVendorDesc": "Choose a vendor to receive goods from.",
       "wizardPoTitle": "Select Purchase Orders",
       "wizardPoDesc": "Select one or more purchase orders to receive.",
+      "fromPo": "From Purchase Order",
+      "fromPoDesc": "Receive goods against purchase orders that are still open.",
       "noVendor": "No Vendors",
       "noVendorDesc": "No vendors with available purchase orders.",
       "poCount": "{count} PO(s)",
