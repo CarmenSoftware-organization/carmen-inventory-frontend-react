@@ -47,3 +47,21 @@ export function selectableDetailIds(poList: readonly PoForGrn[]): string[] {
       .map((d) => d.id),
   );
 }
+
+/**
+ * ใบสั่งซื้อเฉพาะที่มีรายการถูกติ๊ก — แต่ละใบเหลือ `po_detail` แค่รายการที่เลือก
+ *
+ * ทั้ง wizard และ dialog ต่างก็ต้องแปลงชุด id ที่ติ๊กกลับเป็นใบสั่งซื้อก่อนส่งต่อ
+ * ให้ฟอร์ม ปล่อยให้ต่างคนต่างวนเองแล้ววันหนึ่งจะกรองคนละเกณฑ์
+ */
+export function pickSelectedPos(
+  poList: readonly PoForGrn[],
+  selected: ReadonlySet<string>,
+): PoForGrn[] {
+  const result: PoForGrn[] = [];
+  for (const po of poList) {
+    const details = po.po_detail.filter((d) => selected.has(d.id));
+    if (details.length > 0) result.push({ ...po, po_detail: details });
+  }
+  return result;
+}

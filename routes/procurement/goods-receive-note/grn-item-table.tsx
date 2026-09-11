@@ -153,6 +153,13 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isManual = docType === "manual";
+  // สกุลเงินของใบ — ส่งให้ dialog กันหยิบ PO คนละสกุลเข้ามา (watch ไม่ใช่
+  // getValues เพราะผู้ใช้เปลี่ยนสกุลเงินที่หัวใบได้ระหว่างกรอก)
+  const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const currencyName = useWatch({
+    control: form.control,
+    name: "currency_name",
+  });
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [poDialogOpen, setPoDialogOpen] = useState(false);
   // แถว (row id) ที่ต้องเปิดตัวเลือกสินค้า/โฟกัสราคา/เปิดตัวเลือกคลังอยู่ตอนนี้
@@ -331,6 +338,8 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
           open={poDialogOpen}
           onOpenChange={setPoDialogOpen}
           vendorId={form.getValues("vendor_id") ?? ""}
+          currencyId={currencyId ?? ""}
+          currencyName={currencyName ?? ""}
           excludeIds={excludePoIds}
           onSelect={handleSelectPoList}
         />

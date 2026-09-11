@@ -12,9 +12,9 @@ import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { PoForGrn } from "@/types/purchase-order";
 import type { INVENTORY_TYPE } from "@/constant/location";
-import { selectableDetailIds, usableLocations } from "./po-usable";
+import { selectableDetailIds, usableLocations } from "./grn-po-usable";
 
-interface StepSelectPoProps {
+interface GrnPoSelectListProps {
   /** ใบสั่งซื้อของผู้ขายที่เลือก — หน้าแม่เป็นคนโหลด เพราะต้องใช้ตอนกดยืนยันด้วย */
   readonly poList: readonly PoForGrn[];
   readonly isLoading: boolean;
@@ -25,16 +25,19 @@ interface StepSelectPoProps {
 /**
  * เลือกใบสั่งซื้อและรายการที่จะรับ — ติ๊กได้สองระดับ (ทั้งใบ / รายบรรทัด)
  *
+ * ใช้ทั้งขั้นที่ 2 ของ wizard สร้างจากใบสั่งซื้อ และ dialog เพิ่มใบสั่งซื้อในฟอร์ม —
+ * สองทางนั้นเลือกของชุดเดียวกัน จะให้หน้าตาคนละอย่างไม่ได้
+ *
  * ยังเป็นลิสต์ซ้อนลิสต์ ไม่ใช่ DataGrid เพราะการติ๊กสองระดับที่หัวใบคุมลูกทั้งก้อน
  * ไม่ใช่สิ่งที่ตารางแบนทำได้ — ตารางต้องกางแถวย่อยซึ่งกลับไปเป็นของเดิมที่เพิ่ง
  * เลิกใช้ในตารางสินค้า
  */
-export function StepSelectPo({
+export function GrnPoSelectList({
   poList,
   isLoading,
   selected,
   onChange,
-}: StepSelectPoProps) {
+}: GrnPoSelectListProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();
@@ -231,12 +234,15 @@ export function StepSelectPo({
                         className="size-3.5 shrink-0"
                         aria-label={tfl("location")}
                       />
-                      <span className="text-micro shrink-0 tabular-nums">
-                        {loc.location_code}
-                      </span>
-                      <span className="text-foreground min-w-0 flex-1 truncate text-xs">
-                        {loc.location_name}
-                      </span>
+                      {/* รหัสคลังลงไปเป็นบรรทัดล่างของชื่อ ทรงเดียวกับชื่อสินค้า —
+                          ขึ้นต้นแถวด้วยรหัสแล้วชื่อคลังของทุกแถวจะเยื้องไม่ตรงกัน
+                          ทั้งที่ชื่อคือของที่คนกวาดตาหา */}
+                      <div className="text-foreground min-w-0 flex-1 text-xs">
+                        <NameWithSubtext
+                          primary={loc.location_name ?? ""}
+                          secondary={loc.location_code ?? ""}
+                        />
+                      </div>
                       <LocationTypeLabel
                         type={loc.location_type as INVENTORY_TYPE}
                         className="text-micro shrink-0"

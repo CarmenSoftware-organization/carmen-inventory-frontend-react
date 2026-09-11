@@ -3890,6 +3890,7 @@
       "title": "Goods Receive Note",
       "desc": "What actually arrived from the vendor, checked against the order.",
       "mixedCurrencyError": "Selected POs use different currencies. Please select POs with the same currency.",
+      "poCurrencyMismatch": "Selected POs use a different currency from this goods receive note ({currency}). Please select POs in {currency}.",
       "overReceiptWarning": "Received exceeds ordered ({ordered})",
       "documentInfo": "Document Info",
       "add": "New Goods Receive Note",

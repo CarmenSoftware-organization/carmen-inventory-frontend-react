@@ -5,8 +5,8 @@ import {
   isPoUsable,
   selectableDetailIds,
   usableLocations,
-} from "./po-usable";
-import { mapPoDetailToItems } from "../grn-item-table";
+} from "./grn-po-usable";
+import { mapPoDetailToItems } from "./grn-item-table";
 
 /**
  * ตัดตามรูปร่างจริงของ `GET .../purchase-order/grn/vendor/{id}` — `can_use` มา

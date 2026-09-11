@@ -21,10 +21,11 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { setSessionItem } from "@/lib/safe-storage";
 import { usePurchaseOrderForGrnByVendor } from "../../shared/use-purchase-order";
-import type { PoForGrn, VendorForGrn } from "@/types/purchase-order";
+import type { VendorForGrn } from "@/types/purchase-order";
 import { mapPoDetailToItems } from "../grn-item-table";
+import { GrnPoSelectList } from "../grn-po-select-list";
+import { pickSelectedPos } from "../grn-po-usable";
 import { StepSelectVendor } from "./step-select-vendor";
-import { StepSelectPo } from "./step-select-po";
 
 type Step = 1 | 2;
 
@@ -84,11 +85,7 @@ export function FromPoContent() {
   };
 
   const handleConfirm = () => {
-    const result: PoForGrn[] = [];
-    for (const po of poList) {
-      const details = po.po_detail.filter((d) => selected.has(d.id));
-      if (details.length > 0) result.push({ ...po, po_detail: details });
-    }
+    const result = pickSelectedPos(poList, selected);
     if (result.length === 0 || !vendor) return;
 
     const first = result[0];
@@ -177,7 +174,7 @@ export function FromPoContent() {
             />
           </StepperContent>
           <StepperContent value={2}>
-            <StepSelectPo
+            <GrnPoSelectList
               poList={poList}
               isLoading={isLoading}
               selected={selected}
