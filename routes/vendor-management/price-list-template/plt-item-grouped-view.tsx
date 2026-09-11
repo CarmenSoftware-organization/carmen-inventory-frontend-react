@@ -1,13 +1,12 @@
+import { useTranslations } from "use-intl";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { cn } from "@/lib/utils";
 import type { PriceListTemplate } from "@/types/price-list-template";
-import type { ProductLabels } from "./plt-form-labels";
 
 type ProductRef = NonNullable<PriceListTemplate["products"]>[number];
 
-interface PltProductGroupedViewProps {
+interface PltItemGroupedViewProps {
   readonly products: readonly ProductRef[];
-  readonly labels: ProductLabels;
 }
 
 /**
@@ -16,20 +15,19 @@ interface PltProductGroupedViewProps {
  * ขับด้วย `priceListTemplate.products` ที่ group มาให้แล้ว (product → moq[])
  * product ที่ไม่มี moq โชว์ 1 แถวด้วยหน่วยสั่งซื้อ (default_order)
  */
-export function PltProductGroupedView({
-  products,
-  labels,
-}: PltProductGroupedViewProps) {
+export function PltItemGroupedView({ products }: PltItemGroupedViewProps) {
+  const t = useTranslations("vendorManagement.priceListTemplate");
+  const tf = useTranslations("field");
   return (
     <div className="border-border/60 bg-card w-full overflow-x-auto rounded-lg border">
       <table className="text-foreground w-full border-collapse text-xs">
         <thead>
           <tr className="bg-muted/60 text-muted-foreground border-border/60 border-b">
             <Th className="w-14 text-center">#</Th>
-            <Th className="text-left">{labels.product}</Th>
-            <Th className="w-24 text-right">{labels.qty}</Th>
-            <Th className="w-28 text-left">{labels.unit}</Th>
-            <Th className="text-left">{labels.note}</Th>
+            <Th className="text-left">{t("product")}</Th>
+            <Th className="w-24 text-right">{t("moq")}</Th>
+            <Th className="w-28 text-left">{t("unit")}</Th>
+            <Th className="text-left">{tf("note")}</Th>
           </tr>
         </thead>
         <tbody>
@@ -96,7 +94,7 @@ export function PltProductGroupedView({
                       {tier.unit_name || "—"}
                       {orderUnitId && tier.unit_id === orderUnitId && (
                         <span className="text-muted-foreground text-micro-legal">
-                          · {labels.orderUnit}
+                          · {tf("orderUnit")}
                         </span>
                       )}
                     </span>
