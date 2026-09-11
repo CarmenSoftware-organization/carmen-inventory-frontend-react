@@ -6,6 +6,7 @@ interface UseNavigationGuardReturn {
   readonly confirm: () => void;
   readonly cancel: () => void;
   readonly back: () => void;
+  readonly leave: (href: string) => void;
 }
 
 /**
@@ -133,10 +134,23 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     navigate(onSentinel ? -2 : -1);
   };
 
+  // Programmatic forward navigation for a caller that meant to leave with work
+  // still "dirty" (e.g. a wizard handing its selection off to the real form).
+  // A plain push would stack on top of the sentinel, and the sentinel is still
+  // owed a `history.back()` by this hook's teardown — the browser runs that
+  // traversal *after* the push lands, so the user is bounced straight back to
+  // the page they just left. Overwriting the sentinel leaves nothing to undo.
+  // (jsdom drops the queued traversal once a pushState intervenes, so a test
+  // can only observe the leftover entry, not the bounce.)
+  const leave = (href: string) => {
+    navigate(href, { replace: window.history.state?.__navGuard === true });
+  };
+
   return {
     isOpen: pendingHref !== null || pendingBack,
     confirm,
     cancel,
     back,
+    leave,
   };
 }

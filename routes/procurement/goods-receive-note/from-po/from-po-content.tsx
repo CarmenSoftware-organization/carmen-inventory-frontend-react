@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -57,7 +57,6 @@ export function FromPoContent() {
   const [step, setStep] = useState<Step>(1);
   const [vendor, setVendor] = useState<VendorForGrn | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [handoffReady, setHandoffReady] = useState(false);
 
   const { data, isLoading } = usePurchaseOrderForGrnByVendor(
     vendor?.vendor_id ?? "",
@@ -65,19 +64,12 @@ export function FromPoContent() {
   const poList = data?.data ?? [];
 
   // "ของค้าง" = เลือกอะไรไปแล้วก็นับ ตั้งแต่ผู้ขาย — ไม่ใช่รอจนติ๊กรายการ
-  const isDirty = (!!vendor || selected.size > 0) && !handoffReady;
+  const isDirty = !!vendor || selected.size > 0;
   const discard = useDiscardConfirm({ isDirty });
   // ปุ่มยกเลิกกับลูกศรย้อนกลับเรียก navigate() ตรง ๆ ซึ่ง useNavigationGuard
   // ดักไม่ได้ (ดักแค่คลิกลิงก์กับปุ่ม Back ของเบราว์เซอร์)
   const handleCancel = () => discard.confirm(() => navigate(GRN_LIST_PATH));
   const navGuard = useNavigationGuard(isDirty);
-
-  // ย้ายหน้าหลัง guard ถูกปิดแล้วเท่านั้น — cleanup ของ guard (คืน sentinel ที่ดัน
-  // ไว้ใน history) รันก่อน effect นี้ในคอมมิตเดียวกัน ถ้า navigate ทันทีตอนกดปุ่ม
-  // sentinel จะค้าง แล้วปุ่ม Back จากหน้าฟอร์มจะเด้งกลับมาที่นี่แทนที่จะไปหน้ารายการ
-  useEffect(() => {
-    if (handoffReady) navigate(GRN_NEW_PATH);
-  }, [handoffReady, navigate]);
 
   const handleSelectVendor = (next: VendorForGrn) => {
     // เปลี่ยนผู้ขาย = รายการที่ติ๊กไว้เป็นของผู้ขายเดิมทั้งหมด ล้างทิ้ง
@@ -120,7 +112,10 @@ export function FromPoContent() {
           ) ?? [],
       ),
     });
-    setHandoffReady(true);
+    // ไปหน้าฟอร์มด้วย leave() ไม่ใช่ navigate() — guard ยังถืออยู่และ sentinel
+    // ของมันอยู่บนสุด push ทับแล้วจะโดน history.back() ของ teardown ดึงกลับมา
+    // ที่ wizard ทันที (= กด confirm แล้วหน้าไม่ไปไหน)
+    navGuard.leave(GRN_NEW_PATH);
   };
 
   return (
