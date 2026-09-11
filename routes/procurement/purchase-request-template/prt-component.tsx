@@ -299,6 +299,10 @@ export default function PrtComponent() {
             tableLayout={{ headerSticky: true }}
           >
             <DataGridContainer
+              // โหมดการ์ด: กล่องนอกไม่ใช่การ์ด เป็นแค่ตัวคุมพื้นที่เลื่อนกับแถบ
+              // แบ่งหน้า — ทา `bg-card` ทับการ์ดที่เป็น `bg-card` อยู่แล้วเมื่อไร
+              // ก็กลายเป็นการ์ดซ้อนการ์ดที่แยกกันไม่ออก
+              border={false}
               className={cn(
                 "flex flex-col",
                 lf.activeFilters.length > 0
@@ -306,7 +310,7 @@ export default function PrtComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              <div className="flex-1 overflow-auto p-3">
+              <div className="flex-1 overflow-auto">
                 {isLoading ? (
                   <CardSkeletonGrid />
                 ) : templates.length === 0 ? (
