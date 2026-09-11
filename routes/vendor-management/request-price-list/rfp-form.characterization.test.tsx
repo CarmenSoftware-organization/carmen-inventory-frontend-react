@@ -33,6 +33,15 @@ vi.mock("@/hooks/use-profile", () => ({
     buCode: "BU-1",
   }),
 }));
+vi.mock("@/hooks/use-vendor", () => ({
+  useVendor: () => ({
+    data: {
+      data: [{ id: "ven-1", code: "V001", name: "Acme Foods", contacts: [] }],
+      paginate: { total: 1 },
+    },
+    isLoading: false,
+  }),
+}));
 // FormToolbar ปิดปุ่ม Edit เมื่อไม่มีสิทธิ์ — เทสต์นี้สนใจเส้นทางหลัง save
 // ไม่ใช่ permission ให้ผ่านหมดไปเลย
 vi.mock("@/hooks/use-can", () => ({
@@ -104,4 +113,82 @@ describe("RequestPriceListForm — characterization", () => {
 
   /** โหมด add ต้องเลือก template/vendor ผ่าน lookup ซึ่งขับใน jsdom ไม่คุ้ม */
   it.todo("[create] พฤติกรรมหลังสร้าง");
+});
+
+const rv = en.vendorManagement.requestPriceList.vendors;
+
+/** ใบที่มีผู้ขายเดิมอยู่แล้วหนึ่งราย พร้อม url_token ที่ส่งให้ผู้ขายไปแล้ว */
+const RFP_WITH_VENDOR = {
+  ...RFP,
+  vendor_count: 1,
+  vendors: [
+    {
+      id: "rv-1",
+      vendor_id: "ven-1",
+      vendor_name: "Acme Foods",
+      vendor_code: "V001",
+      contact_person: "Som",
+      contact_phone: "02-000",
+      contact_email: "som@acme.test",
+      url_token: "tok-1",
+      has_submitted: false,
+      pricelist: null,
+    },
+  ],
+} as unknown as RequestPriceList;
+
+async function enterEdit() {
+  await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+}
+
+async function removeFirstVendor() {
+  await userEvent.click(screen.getByRole("button", { name: rv.removeVendor }));
+  await userEvent.click(screen.getByRole("button", { name: en.common.delete }));
+}
+
+async function addAcmeBack() {
+  await userEvent.click(screen.getByRole("button", { name: rv.addVendor }));
+  const boxes = screen.getAllByRole("checkbox");
+  await userEvent.click(boxes[boxes.length - 1]);
+  await userEvent.click(screen.getByRole("button", { name: /Add 1 vendor/i }));
+}
+
+type VendorsPayload = {
+  vendors?: {
+    add?: { vendor_id: string }[];
+    remove?: { vendor_id: string }[];
+  };
+};
+
+describe("RequestPriceListForm — เพิ่ม/ลบผู้ขาย", () => {
+  it("ลบผู้ขายเดิมแล้วบันทึก ส่ง remove ไปรายการเดียว", async () => {
+    renderForm(<RequestPriceListForm requestPriceList={RFP_WITH_VENDOR} />);
+    await enterEdit();
+    await removeFirstVendor();
+    await act(async () => submitForm("rfp-form"));
+
+    const { vendors } = firstPayload(updateMut) as VendorsPayload;
+    expect(vendors?.remove?.map((v) => v.vendor_id)).toEqual(["ven-1"]);
+    expect(vendors?.add).toBeUndefined();
+  });
+
+  /**
+   * ลบแล้วเปลี่ยนใจเพิ่มกลับในการแก้ไขรอบเดียวกัน = ไม่มีอะไรเปลี่ยน ต้องไม่ส่ง
+   * ทั้ง add และ remove — ถ้าส่งทั้งคู่ backend จะลบแถวเดิมแล้วสร้างใหม่
+   * `url_token` เปลี่ยน ลิงก์ที่ส่งให้ผู้ขายไปแล้วใช้ไม่ได้
+   */
+  it("ลบแล้วเพิ่มคนเดิมกลับ ต้องไม่ส่งทั้ง add และ remove", async () => {
+    renderForm(<RequestPriceListForm requestPriceList={RFP_WITH_VENDOR} />);
+    await enterEdit();
+    await removeFirstVendor();
+    expect(screen.queryByText("Acme Foods")).toBeNull();
+
+    await addAcmeBack();
+    expect(screen.getByText("Acme Foods")).toBeTruthy();
+
+    await act(async () => submitForm("rfp-form"));
+    const { vendors } = firstPayload(updateMut) as VendorsPayload;
+    expect(vendors?.remove).toBeUndefined();
+    expect(vendors?.add).toBeUndefined();
+  });
 });

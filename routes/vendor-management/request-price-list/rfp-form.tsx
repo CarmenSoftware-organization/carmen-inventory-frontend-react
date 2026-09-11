@@ -131,10 +131,31 @@ export function RequestPriceListForm({
       setIsAdding(false);
       return;
     }
+    // คนที่เพิ่งกดลบไปในการแก้ไขรอบนี้ = ถอนคำสั่งลบ ไม่ใช่เพิ่มเป็นรายใหม่
+    // ไม่งั้น vendor_id เดียวไปโผล่ทั้ง vendors.add และ vendors.remove แล้ว
+    // backend ลบแถวเดิมทิ้งสร้างใหม่ — url_token เปลี่ยน ลิงก์ที่ส่งให้ผู้ขาย
+    // ไปแล้วใช้ไม่ได้ ทั้งที่ผู้ใช้แค่กดลบแล้วเปลี่ยนใจ
+    const currentRemove = form.getValues("vendors.remove") ?? [];
+    const undoIds = new Set(
+      fresh.map((v) => v.id).filter((id) => currentRemove.includes(id)),
+    );
+    if (undoIds.size > 0) {
+      form.setValue(
+        "vendors.remove",
+        currentRemove.filter((id) => !undoIds.has(id)),
+      );
+    }
+
+    const brandNew = fresh.filter((v) => !undoIds.has(v.id));
+    if (brandNew.length === 0) {
+      setIsAdding(false);
+      return;
+    }
+
     const currentAdd = form.getValues("vendors.add") ?? [];
     form.setValue("vendors.add", [
       ...currentAdd,
-      ...fresh.map((vendor) => {
+      ...brandNew.map((vendor) => {
         const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
         const primaryContact = contacts.find((c) => c.is_primary);
         return {
