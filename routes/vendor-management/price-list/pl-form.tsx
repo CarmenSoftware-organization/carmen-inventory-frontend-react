@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useFieldArray, useWatch, type Resolver } from "react-hook-form";
+import { useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -12,6 +12,7 @@ import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
+import { getSubmitLabel } from "@/lib/form-utils";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
@@ -28,11 +29,10 @@ import {
   createPriceListSchema,
   getDefaultValues,
   mapDetailToPayload,
-  PRICE_LIST_DETAIL_EMPTY,
   type PriceListFormValues,
 } from "./pl-form-schema";
 import { PLGeneralCard } from "./pl-general-card";
-import { PLProductsSection } from "./pl-products-section";
+import { PlItemFields } from "./pl-item-fields";
 import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "pl-form";
@@ -58,7 +58,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const updatePriceList = useUpdatePriceList();
   const deletePriceList = useDeletePriceList();
   const [showDelete, setShowDelete] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const isPending = createPriceList.isPending || updatePriceList.isPending;
 
   const { defaultCurrencyId } = useProfile();
@@ -105,12 +104,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId read intentionally without retriggering
   }, [detailIdsKey, priceList?.id]);
 
-  const {
-    fields: detailFields,
-    prepend: prependDetail,
-    remove: removeDetail,
-  } = useFieldArray({ control: form.control, name: "pricelist_detail" });
-
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedFrom = useWatch({
     control: form.control,
@@ -121,8 +114,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     name: "effective_to_date",
   });
   const watchedStatus = useWatch({ control: form.control, name: "status" });
-
-  const handleAddDetail = () => prependDetail({ ...PRICE_LIST_DETAIL_EMPTY });
 
   const handleSubmit = (values: PriceListFormValues) => {
     if (isEdit && priceList) {
@@ -167,8 +158,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   };
 
   const plNo = priceList?.no ?? null;
-  const productsHeaderLabels = useProductsHeaderLabels(t, tc);
-  const removeItemLabel = t("detail.removeItem");
   const tsStatus = ts as (
     key: "draft" | "submitted" | "active" | "inactive",
   ) => string;
@@ -271,17 +260,11 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           t={t}
           ts={tsStatus}
         />
-        <PLProductsSection
+        <PlItemFields
           form={form}
-          detailFields={detailFields}
           priceList={priceList}
           isView={isView}
           isDisabled={isDisabled}
-          onAdd={handleAddDetail}
-          onRemove={setDeleteIndex}
-          tfl={tfl}
-          removeLabel={removeItemLabel}
-          headerLabels={productsHeaderLabels}
         />
       </form>
 
@@ -309,51 +292,11 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           onConfirm={handleConfirmDelete}
         />
       )}
-
-      <DeleteDialog
-        open={deleteIndex !== null}
-        onOpenChange={(o) => {
-          if (!o) setDeleteIndex(null);
-        }}
-        title={t("detail.removeItemTitle")}
-        description={t("detail.removeItemConfirm")}
-        onConfirm={() => {
-          if (deleteIndex === null) return;
-          removeDetail(deleteIndex);
-          setDeleteIndex(null);
-        }}
-      />
     </div>
   );
 }
 
 /* ── label hooks ─────────────────────────────────────────────── */
-
-function getSubmitLabel(
-  isPending: boolean,
-  isAdd: boolean,
-  tc: (key: string) => string,
-  tform: (key: string) => string,
-): string {
-  if (isPending) return isAdd ? tform("creating") : tform("saving");
-  return isAdd ? tc("create") : tc("save");
-}
-
-function useProductsHeaderLabels(
-  t: ReturnType<typeof useTranslations>,
-  tc: ReturnType<typeof useTranslations>,
-) {
-  return {
-    title: t("detail.title"),
-    noItems: t("detail.noItems"),
-    noItemsDesc: t("detail.noItemsDesc"),
-    // "เพิ่มรายการ" ตัวกลางเหมือนทุกโมดูลที่มีตารางรายการ — เดิมเป็น "เพิ่มสินค้า"
-    // เฉพาะของสองโมดูลนี้ ทั้งที่ปุ่มทำงานเดียวกันเป๊ะ
-    addLabel: tc("addItem"),
-    itemSingular: t("itemSingular"),
-    itemPlural: t("itemPlural"),
-  };
-}
 
 /* ── submit helpers ──────────────────────────────────────────── */
 

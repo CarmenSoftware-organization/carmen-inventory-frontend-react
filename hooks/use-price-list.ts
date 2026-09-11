@@ -134,28 +134,42 @@ export function useExportPriceList() {
  */
 /**
  * Hook ดึง price list ที่ active ของ vendor หนึ่งราย ในวันที่ระบุ ผ่าน
- * `GET /{buCode}/pricelists/active/{vendorId}/{date}`
+ * `GET /{buCode}/pricelists/active/{vendorId}/{date}?workflow_id={workflowId}`
  *
  * Response อาจคืน `data: PriceList[]` ตรงๆ หรือ `PaginatedResponse<PriceList>`
  * ตามสไตล์ของ BE — hook handle ทั้งสองรูปแบบ
  *
  * @param vendorId - vendor id (ถ้าว่างจะปิด query)
  * @param date - วันที่ในรูป `yyyy-MM-dd` (ถ้าว่างจะปิด query)
+ * @param workflowId - workflow ที่ใช้กรองรายการ (ถ้าว่างจะปิด query)
  * @returns UseQueryResult ของ `PriceList[]`
  * @example
- * const { data: priceLists = [] } = useActivePriceListsByVendor(vendorId, "2026-06-01");
+ * const { data: priceLists = [] } = useActivePriceListsByVendor(
+ *   vendorId,
+ *   "2026-06-01",
+ *   workflowId,
+ * );
  */
 export function useActivePriceListsByVendor(
   vendorId: string | null | undefined,
   date: string | undefined,
+  workflowId: string | null | undefined,
 ) {
   const buCode = useBuCode();
   return useQuery<PriceList[], ApiError>({
-    queryKey: [QUERY_KEYS.PRICE_LIST_ACTIVE_BY_VENDOR, buCode, vendorId, date],
+    queryKey: [
+      QUERY_KEYS.PRICE_LIST_ACTIVE_BY_VENDOR,
+      buCode,
+      vendorId,
+      date,
+      workflowId,
+    ],
     queryFn: async () => {
-      const res = await httpClient.get(
+      const url = buildUrl(
         API_ENDPOINTS.PRICE_LIST_ACTIVE_BY_VENDOR(buCode!, vendorId!, date!),
+        { workflow_id: workflowId },
       );
+      const res = await httpClient.get(url);
       if (!res.ok) {
         throw await ApiError.from(
           res,
@@ -163,11 +177,10 @@ export function useActivePriceListsByVendor(
         );
       }
       const json = (await res.json()) as
-        | PaginatedResponse<PriceList>
-        | { data?: PriceList[] };
+        PaginatedResponse<PriceList> | { data?: PriceList[] };
       return json.data ?? [];
     },
-    enabled: !!buCode && !!vendorId && !!date,
+    enabled: !!buCode && !!vendorId && !!date && !!workflowId,
     ...CACHE_DYNAMIC,
   });
 }

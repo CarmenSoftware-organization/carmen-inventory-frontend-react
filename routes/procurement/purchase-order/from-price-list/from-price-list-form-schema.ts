@@ -24,14 +24,32 @@ export interface FromPriceListProfileSeed {
  *
  * Validation ใช้ `createPoSchema(tv, tf, true)` จาก `po-form-schema.ts` ตรง ๆ
  */
-export type FromPriceListFormValues = PoFormValues;
+export type FromPriceListFormValues = Omit<PoFormValues, "items"> & {
+  items: FromPriceListSelectedItem[];
+};
 
-export type FromPriceListSelectedItem = PoFormValues["items"][number];
-export type FromPriceListItemLocation =
-  FromPriceListSelectedItem["locations"][number];
+/**
+ * item ของ wizard = item ของ PO + ที่มาของราคา
+ *
+ * **ตัวตนของแถวใน step 3 คือบรรทัดของ price list ไม่ใช่สินค้า** — สินค้าตัวเดียวกัน
+ * อาจอยู่ในหลาย price list คนละราคา ติ๊กแยกกันได้ ถ้าจับคู่ด้วย product_id จะติ๊กได้
+ * ใบเดียวและสลับไปมาไม่ได้ · `pricelist_detail_id` คือ id ของบรรทัดนั้น
+ *
+ * สองฟิลด์นี้อยู่**เฉพาะในโลกของ wizard** ไม่ได้อยู่ในสคีมาของ PO (ต่างจาก PR ที่มี
+ * `pricelist_detail_id`/`pricelist_no` ในไอเทมจริง) — `mapItemToPayload` หยิบฟิลด์
+ * ทีละตัว ของที่ไม่ได้ประกาศจึงไม่หลุดไปถึง API
+ */
+export type FromPriceListSelectedItem = PoFormValues["items"][number] & {
+  pricelist_detail_id: string;
+  pricelist_no: string;
+};
 
 /** Re-export ของ PO_ITEM ให้ wizard ใช้เป็น template เริ่มต้นของ item */
-export const WIZARD_ITEM_TEMPLATE = PO_ITEM;
+export const WIZARD_ITEM_TEMPLATE: FromPriceListSelectedItem = {
+  ...PO_ITEM,
+  pricelist_detail_id: "",
+  pricelist_no: "",
+};
 
 /**
  * คืน default values ของ form โดย seed:
@@ -48,6 +66,7 @@ export function getDefaultValues(
 ): FromPriceListFormValues {
   return {
     ...PO_EMPTY_FORM,
+    items: [] as FromPriceListSelectedItem[],
     order_date: new Date().toISOString(),
     buyer_id: profile.userId ?? "",
     buyer_name: profile.fullName ?? "",

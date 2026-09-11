@@ -13,6 +13,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Eye,
+  FilterX,
   Loader2,
   Plus,
   RefreshCcw,
@@ -26,6 +27,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   AlertDialog,
@@ -40,6 +42,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrFormValues } from "./pr-form-schema";
 import { usePrItemTable } from "./pr-item-table";
+import { usePrItemFilter } from "./use-pr-item-filter";
 import {
   PrActionDialog,
   type StageOption,
@@ -94,12 +97,15 @@ export function PrItemFields({
 }: PrItemFieldsProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
+  const tl = useTranslations("lookup");
   const [isAllocating, setIsAllocating] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<
     PR_ITEM_STAGE_STATUS.REVIEW | PR_ITEM_STAGE_STATUS.REJECTED | null
   >(null);
   const [showOverQtyWarning, setShowOverQtyWarning] = useState(false);
+
+  const filter = usePrItemFilter(form);
 
   const {
     fields: itemFields,
@@ -114,11 +120,28 @@ export function PrItemFields({
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — คนเบิกของมัก
+    // เบิกจากคลังเดิมติดกันหลายรายการ เติมคลัง + จุดส่งของให้ล่วงหน้าแล้วแก้เอง
+    // ได้ · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field array เก็บค่า
+    // ตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_code: prev.location_code,
+          location_name: prev.location_name,
+          location_type: prev.location_type,
+          delivery_point_id: prev.delivery_point_id,
+          delivery_point_name: prev.delivery_point_name,
+        }
+      : {};
+
     prependItem(
       {
         ...PR_ITEM,
         currency_id: defaultBu?.config?.default_currency_id ?? null,
         delivery_date: tomorrow.toISOString(),
+        ...carriedLocation,
       },
       { shouldFocus: false },
     );
@@ -159,6 +182,7 @@ export function PrItemFields({
   } = usePrItemTable({
     form,
     itemFields,
+    filter,
     isDisabled,
     prStatus,
     role,
@@ -399,6 +423,15 @@ export function PrItemFields({
           )}
 
           <div className="ms-auto flex flex-wrap items-center gap-1.5">
+            {/* กรองแถวฝั่ง client — ไม่มี onSaveClick เพราะ saved view ผูกกับหน้า
+                list ไม่ใช่ตารางในฟอร์ม (ดู use-pr-item-filter.tsx) */}
+            <ListFilter
+              fields={filter.fields}
+              values={filter.values}
+              setValue={filter.setValue}
+              onClearAll={filter.clearAll}
+              activeCount={filter.activeCount}
+            />
             {selectedRows.length > 0 && (
               <PrAskAiMenu
                 items={selectedRows.map((row) => {
@@ -472,11 +505,21 @@ export function PrItemFields({
             columnsResizable: true,
           }}
           emptyMessage={
-            <EmptyComponent
-              icon={BoxIcon}
-              title={t("noItems")}
-              description={t("noItemsDesc")}
-            />
+            // กรองจนไม่เหลือแถว ≠ ใบนี้ไม่มีของ — ข้อความ "ยังไม่มีรายการ" ตรงนั้น
+            // จะหลอกให้คนไปกด Add Item ทั้งที่ของอยู่ครบ แค่ถูกซ่อน
+            filter.activeCount > 0 ? (
+              <EmptyComponent
+                icon={FilterX}
+                title={tc("noSearchResult")}
+                description={tl("noFoundDesc")}
+              />
+            ) : (
+              <EmptyComponent
+                icon={BoxIcon}
+                title={t("noItems")}
+                description={t("noItemsDesc")}
+              />
+            )
           }
         >
           <DataGridContainer scroll>

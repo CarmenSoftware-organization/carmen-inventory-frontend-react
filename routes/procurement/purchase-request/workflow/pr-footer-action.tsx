@@ -34,6 +34,11 @@ interface PrFooterActionProps {
     desStage: string,
   ) => void;
   readonly onPurchaseApprove?: () => void;
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยัน "ส่งใบ" — คืน false = ไม่ต้องเปิดกล่อง
+   * ตัว validator เป็นคนขึ้น toast/เลื่อนไปหาช่องที่ผิดเอง (ดู validateSubmitPr)
+   */
+  readonly onValidateSubmit?: () => Promise<boolean>;
   readonly onValidatePurchase?: () => Promise<boolean>;
 }
 
@@ -60,7 +65,8 @@ type ConfirmConfig = {
  * @param props.currencyCode - สกุลเงินหลักของเอกสารสำหรับแสดงผลรวม
  * @param props.previousStages - รายการ stage ก่อนหน้าสำหรับส่งกลับ (send back)
  * @param props.stagesLoading - สถานะกำลังโหลด previousStages
- * @param props.onSubmitPr - callback เมื่อกดส่งใบ PR
+ * @param props.onSubmitPr - callback เมื่อกดส่งใบ PR (หลังยืนยันแล้ว)
+ * @param props.onValidateSubmit - ตรวจก่อนเปิดกล่องยืนยัน false = ไม่เปิด
  * @param props.onApprove - callback เมื่อกดอนุมัติ
  * @param props.onReject - callback เมื่อกดปฏิเสธ
  * @param props.onReview - callback เมื่อกดส่งกลับ (send back) รับ messages และ destination stage
@@ -93,6 +99,7 @@ export function PrFooterAction({
   onReject,
   onReview,
   onPurchaseApprove,
+  onValidateSubmit,
   onValidatePurchase,
 }: PrFooterActionProps) {
   const t = useTranslations("procurement.purchaseRequest");
@@ -189,15 +196,17 @@ export function PrFooterAction({
                 type="button"
                 size="sm"
                 disabled={isPending}
-                onClick={() =>
+                onClick={async () => {
+                  // กรอกไม่ครบ = ไม่เปิดกล่องยืนยันเลย (validator เตือนเอง)
+                  if (onValidateSubmit && !(await onValidateSubmit())) return;
                   openConfirm({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
                     confirmVariant: "default",
                     onConfirm: () => onSubmitPr?.(),
-                  })
-                }
+                  });
+                }}
               >
                 <SendHorizontal />
                 {tc("submit")}

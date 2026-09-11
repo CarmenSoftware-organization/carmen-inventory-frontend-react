@@ -1,15 +1,21 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import type { RequestPriceList } from "@/types/request-price-list";
+import type {
+  CreateRequestPriceListDto,
+  RequestPriceList,
+  RequestPriceListVendor,
+} from "@/types/request-price-list";
 
 /**
- * สร้าง zod schema สำหรับรายการ vendor หนึ่งรายการใน RFP
+ * สร้าง zod schema สำหรับผู้ขายหนึ่งรายในตารางของ RFP
  * @param tv - ฟังก์ชัน translation สำหรับ validation
  * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ vendor item
+ * @returns zod schema ของแถวผู้ขาย
  */
-function createVendorItemSchema(tv: TranslationFn, tf: TranslationFn) {
+function createVendorRowSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
+    /** id ของแถวฝั่ง server — ว่าง = ผู้ขายที่เพิ่งเพิ่ม ยังไม่เคยถูกบันทึก */
+    id: z.string(),
     vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
     vendor_name: z.string(),
     vendor_code: z.string(),
@@ -39,12 +45,7 @@ export function createRfpSchema(tv: TranslationFn, tf: TranslationFn) {
       dimension: z.any(),
       info: z.string().optional(),
       email_template_id: z.string().optional(),
-      vendors: z
-        .object({
-          add: z.array(createVendorItemSchema(tv, tf)).default([]),
-          remove: z.array(z.string()).default([]),
-        })
-        .default({ add: [], remove: [] }),
+      vendors: z.array(createVendorRowSchema(tv, tf)).default([]),
     })
     .refine(
       (data) => {
@@ -66,7 +67,7 @@ export const EMPTY_FORM: RfpFormValues = {
   dimension: "",
   info: "",
   email_template_id: "",
-  vendors: { add: [], remove: [] },
+  vendors: [],
 };
 
 /**
@@ -86,6 +87,62 @@ export function getDefaultValues(rfp?: RequestPriceList): RfpFormValues {
     info:
       typeof rfp.info === "string" ? rfp.info : JSON.stringify(rfp.info ?? {}),
     email_template_id: rfp.email_template_id ?? "",
-    vendors: { add: [], remove: [] },
+    vendors: (rfp.vendors ?? []).map(toVendorRow),
+  };
+}
+
+/** แถวผู้ขายที่ backend ส่งมา -> แถวบนฟอร์ม (ตัดข้อมูลอ่านอย่างเดียวออก) */
+export function toVendorRow(
+  vendor: RequestPriceListVendor,
+): RfpFormValues["vendors"][number] {
+  return {
+    id: vendor.id,
+    vendor_id: vendor.vendor_id,
+    vendor_name: vendor.vendor_name,
+    vendor_code: vendor.vendor_code,
+    contact_person: vendor.contact_person,
+    contact_phone: vendor.contact_phone,
+    contact_email: vendor.contact_email,
+    dimension: vendor.dimension ?? "",
+  };
+}
+
+/**
+ * รายชื่อผู้ขายบนฟอร์ม -> delta ที่ backend ต้องการ
+ *
+ * แถวที่ยังไม่มี `id` = เพิ่งเพิ่ม -> `add` · แถวเดิมที่หายไปจากฟอร์ม -> `remove`
+ * ไม่มี `update` เพราะข้อมูลผู้ขายในตารางแก้ไม่ได้ ดึงจาก master มาแสดงอย่างเดียว
+ *
+ * กดลบแล้วเพิ่มคนเดิมกลับในรอบแก้ไขเดียวกันจะไม่ส่งอะไรเลย เพราะตอนเพิ่มกลับ
+ * ฟอร์มคืนแถวเดิม (id เดิม) ไม่ได้สร้างแถวใหม่ — ดู `rfp-vendor-fields.tsx`
+ */
+export function buildVendorChanges(
+  current: RfpFormValues["vendors"],
+  original: RfpFormValues["vendors"],
+): CreateRequestPriceListDto["vendors"] {
+  // ผู้ขายที่บันทึกไว้แล้วและยังอยู่ — ผู้ขายใหม่ต่อ sequence จากตรงนี้
+  const keptCount = current.filter((v) => v.id).length;
+  const add = current
+    .filter((v) => !v.id)
+    .map((v, i) => ({
+      vendor_id: v.vendor_id,
+      vendor_name: v.vendor_name,
+      vendor_code: v.vendor_code,
+      contact_person: v.contact_person,
+      contact_phone: v.contact_phone,
+      contact_email: v.contact_email,
+      sequence_no: keptCount + i + 1,
+      dimension: v.dimension,
+      id: "",
+    }));
+
+  const currentVendorIds = new Set(current.map((v) => v.vendor_id));
+  const remove = original
+    .filter((v) => !currentVendorIds.has(v.vendor_id))
+    .map((v) => ({ vendor_id: v.vendor_id }));
+
+  return {
+    add: add.length > 0 ? add : undefined,
+    remove: remove.length > 0 ? remove : undefined,
   };
 }

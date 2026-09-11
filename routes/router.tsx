@@ -83,9 +83,9 @@ export const router = createBrowserRouter([
             children: [
               { index: true, lazy: () => import("./config/config.route") },
               {
-                path: "chart-of-account",
+                path: "chart-of-accounts",
                 lazy: () =>
-                  import("./config/chart-of-account/chart-of-account.route"),
+                  import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
                 path: "account-mapping",
@@ -212,6 +212,11 @@ export const router = createBrowserRouter([
                   import("./procurement/goods-receive-note/goods-receive-note-new.route"),
               },
               {
+                path: "goods-receive-note/from-po",
+                lazy: () =>
+                  import("./procurement/goods-receive-note/from-po/from-po.route"),
+              },
+              {
                 path: "goods-receive-note/:id",
                 lazy: () =>
                   import("./procurement/goods-receive-note/goods-receive-note-edit.route"),
@@ -230,6 +235,11 @@ export const router = createBrowserRouter([
                 path: "purchase-order/from-price-list",
                 lazy: () =>
                   import("./procurement/purchase-order/from-price-list/from-price-list.route"),
+              },
+              {
+                path: "purchase-order/from-pr",
+                lazy: () =>
+                  import("./procurement/purchase-order/from-pr/from-pr.route"),
               },
               {
                 path: "purchase-order/:id",
@@ -683,6 +693,11 @@ export const router = createBrowserRouter([
                 path: "interface/:category/:brand",
                 lazy: () =>
                   import("./system-admin/interface/interface-detail.route"),
+              },
+              {
+                path: "email-profile",
+                lazy: () =>
+                  import("./system-admin/email-profile/email-profile.route"),
               },
               {
                 path: "business-setting",

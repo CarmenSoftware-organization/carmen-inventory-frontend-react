@@ -94,3 +94,108 @@ describe("PriceListForm — characterization", () => {
   /** โหมด add ต้องเลือก vendor/currency/ช่วงวันที่ผ่าน lookup+datepicker */
   it.todo("[create] พฤติกรรมหลังสร้าง");
 });
+
+/** ใบที่มีแถวสินค้าซึ่งยังไม่ได้เลือกสินค้า — ติด required ของ product_id */
+const WITH_INVALID_ROW = {
+  ...PRICE_LIST,
+  pricelist_detail: [
+    {
+      id: "d1",
+      sequence_no: 1,
+      product_id: "",
+      product_name: "",
+      product_local_name: "",
+      unit_id: "unit-1",
+      unit_name: "KG",
+      moq_qty: 0,
+      price: 10,
+      price_without_tax: 10,
+      tax_profile_id: "tax-1",
+      tax_profile_name: "None",
+      tax_rate: 0,
+      tax_amt: 0,
+      lead_time_days: 0,
+      is_preferred: false,
+      is_active: true,
+      description: null,
+      note: null,
+      info: {},
+      dimension: [],
+    },
+  ],
+} as unknown as PriceList;
+
+describe("PriceListForm — แถวสินค้าที่ติด validate ต้องขึ้นแดง", () => {
+  it("กดบันทึกแล้วช่องสินค้าของแถวนั้นถูกทำเครื่องหมายว่าไม่ถูกต้อง", async () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+    await act(async () => submitForm("pl-form"));
+
+    // ยังไม่บันทึก เพราะติด validate
+    expect(updateMut.mutate).not.toHaveBeenCalled();
+    // และช่องที่ผิดต้องบอกผู้ใช้ด้วยตัวมันเอง ไม่ใช่เงียบแล้วหน้าไม่ขยับ
+    expect(
+      document.querySelectorAll('[aria-invalid="true"]').length,
+    ).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * UX ของส่วนรายการสินค้า — เขียนไว้ตอนย้าย field array จาก pl-form ไป
+ * pl-item-fields เพื่อพิสูจน์ว่าหน้าตา/การกดใช้งานไม่เปลี่ยน (เทสต์ชุดนี้ผ่าน
+ * ทั้งก่อนและหลังการย้าย)
+ */
+describe("PriceListForm — ส่วนรายการสินค้า", () => {
+  const rows = () =>
+    screen.queryAllByLabelText(en.vendorManagement.priceList.detail.removeItem);
+
+  it("[view] เห็นหัวข้อ Products แต่ยังไม่มีปุ่มเพิ่ม/ปุ่มลบรายการ", () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.title),
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: en.common.addItem }),
+    ).toBeNull();
+    expect(rows()).toHaveLength(0);
+  });
+
+  it("[edit] กดเพิ่มรายการแล้วได้แถวใหม่เพิ่มมาหนึ่งแถว", async () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    expect(rows()).toHaveLength(1);
+    await userEvent.click(
+      screen.getByRole("button", { name: en.common.addItem }),
+    );
+    expect(rows()).toHaveLength(2);
+  });
+
+  it("[edit] กดลบแถวต้องถามยืนยันก่อน ยืนยันแล้วแถวหาย", async () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    await userEvent.click(rows()[0]);
+    // ถามก่อน ยังไม่ลบ
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.removeItemTitle),
+    ).toBeTruthy();
+    expect(rows()).toHaveLength(1);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: en.common.delete }),
+    );
+    expect(rows()).toHaveLength(0);
+  });
+
+  it("[edit] ไม่มีรายการเลย → ขึ้นกล่องว่าง ไม่ใช่ตารางเปล่า", async () => {
+    renderForm(<PriceListForm priceList={PRICE_LIST} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.noItems),
+    ).toBeTruthy();
+    expect(rows()).toHaveLength(0);
+  });
+});

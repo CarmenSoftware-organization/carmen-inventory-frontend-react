@@ -16,6 +16,7 @@ import {
   indexColumn,
   selectColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { Product } from "@/types/product";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -71,6 +72,7 @@ export function useProductTable({
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const { dateTimeFormat } = useProfile();
+  const deleteGate = useDeleteGate();
 
   const dataColumns: ColumnDef<Product>[] = [
     {
@@ -193,6 +195,7 @@ export function useProductTable({
     indexColumn<Product>(params),
     ...dataColumns,
     actionColumn<Product>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.code },
     }),
   ];

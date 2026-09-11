@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { IntlProvider } from "use-intl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router";
 import en from "@/messages/en.json";
 import type { ParamsDto } from "@/types/params";
 import { useProductTable } from "./use-product-table";
@@ -9,7 +10,7 @@ import { useProductTable } from "./use-product-table";
 const params: ParamsDto = { page: 1, perpage: 10 };
 
 // Minimal tableConfig matching the shape useDataGridState().tableConfig produces,
-// so the test does not need a Router context.
+// so the test does not need the full data-grid state machine.
 const tableConfig = {
   manualPagination: true as const,
   manualSorting: true as const,
@@ -22,15 +23,18 @@ const tableConfig = {
   onSortingChange: () => {},
 };
 
-// useProductTable uses useProfile (needs a QueryClientProvider) besides intl.
+// useProductTable uses useProfile (QueryClientProvider) and, through
+// useDeleteGate -> usePermissionPrefix, useLocation (Router) besides intl.
 const queryClient = new QueryClient();
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en" messages={en}>
-        {children}
-      </IntlProvider>
+      <MemoryRouter initialEntries={["/product-management/product"]}>
+        <IntlProvider locale="en" messages={en}>
+          {children}
+        </IntlProvider>
+      </MemoryRouter>
     </QueryClientProvider>
   );
 }

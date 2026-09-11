@@ -1,26 +1,15 @@
-/* ── Module Color Palette ──
-   Dedicated colors for each ERP module and sub-module.
-   Separated from globals.css for modularity.
-   All values use oklch color space.
+/* ── Tile Palette ──
+   แยกจาก globals.css เพื่อความเป็นระเบียบ
 
-   Sub-modules use MAXIMUM hue separation (360°/N spacing)
-   so each sub-module is visually distinct.
-   Parent–child grouping is expressed through UI structure, not color proximity. */
+   **ไม่มีสีประจำ module และ sub-module แล้ว** (ถอดออก 2026-09-10) —
+   `--module-*` 6 ตัวและ `--sub-*` 6 ตัวเคยถูกเอาไปทาปุ่ม / stepper / จุดใน badge
+   ซึ่งกลายเป็น accent ที่สอง สาม สี่ ในหน้าเดียว ขัดกับ DESIGN.md ที่ให้มี accent
+   เดียว · ทุกจุดที่เคยใช้ย้ายไป `var(--primary)` แล้ว
+   การแยก module / ชนิดเอกสาร ใช้ไอคอน ป้ายข้อความ และโครงหน้า ไม่ใช่สี
 
-/* ═══════════════════════════════════
-   LIGHT MODE
-   ═══════════════════════════════════ */
+   เหลือแต่ tile palette ข้างล่าง ซึ่ง derive จาก `--primary` อยู่แล้วตั้งแต่ต้น */
 
 :root {
-  /* ── Main Modules ──
-     Hex จาก Carmen Icon System (APP_TILE_PALETTE) — tone ตรงกับ tile */
-  --module-dashboard: #1F6FEB;       /* Blue */
-  --module-procurement: #5B5BF6;     /* Purple */
-  --module-product: #E08821;         /* Orange */
-  --module-vendor: #0FA76B;          /* Green */
-  --module-inventory: #EF6A1A;       /* Orange-red */
-  --module-config: #3D3D3D;          /* Dark gray */
-
   /* ── App/Sub tile system (single-accent, monochrome primary) ──
      ไทล์ทุก module ใช้โทนเดียวกัน: พื้น primary-tint อ่อน + ภาพสี primary.
      Derive จาก var(--primary)/var(--card) → auto-adapt dark mode (ไม่ต้องนิยามซ้ำใน .dark).
@@ -33,60 +22,4 @@
   --tile-ink: var(--primary);
   --tile-accent: color-mix(in srgb, var(--primary), white 50%);
   --tile-shadow: color-mix(in srgb, var(--primary), white 25%);
-
-  /* ── Procurement subs ── */
-  --sub-pr: oklch(0.62 0.14 155);                    /* Green bridge */
-  --sub-po: oklch(0.69 0.18 45);                     /* Orange bridge (red↔amber) */
-  --sub-grn: oklch(0.58 0.20 165);                   /* Teal-green bridge */
-  --sub-cn: oklch(0.52 0.16 229.05);                 /* Brand Light Blue */
-
-  /* ── Vendor Management subs ── */
-  --sub-price-list: oklch(0.62 0.16 75);             /* Brand Amber */
-
-  /* ── Store Operations subs ── */
-  --sub-store-requisition: oklch(0.55 0.12 253.27);  /* Brand Blue */
-
-}
-
-/* ═══════════════════════════════════
-   DARK MODE  (lightness +0.18)
-   ═══════════════════════════════════ */
-
-.dark {
-  /* ── Main Modules ──
-     Lightened tile palette เพื่อ legibility บนพื้นเข้ม — hue เดียวกับ light */
-  --module-dashboard: color-mix(in oklch, #1F6FEB, white 22%);
-  --module-procurement: color-mix(in oklch, #5B5BF6, white 22%);
-  --module-product: color-mix(in oklch, #E08821, white 22%);
-  --module-vendor: color-mix(in oklch, #0FA76B, white 22%);
-  --module-inventory: color-mix(in oklch, #EF6A1A, white 22%);
-  --module-config: color-mix(in oklch, #3D3D3D, white 40%);
-
-  /* ── Procurement subs ── */
-  --sub-pr: oklch(0.75 0.12 155);
-  --sub-po: oklch(0.78 0.16 45);
-  --sub-grn: oklch(0.76 0.18 165);
-  --sub-cn: oklch(0.70 0.14 229.05);
-
-  /* ── Vendor Management subs ── */
-  --sub-price-list: oklch(0.78 0.14 75);
-
-  /* ── Store Operations subs ── */
-  --sub-store-requisition: oklch(0.68 0.11 253.27);
-
-}
-
-/* ═══════════════════════════════════
-   TAILWIND THEME REGISTRATION
-   ═══════════════════════════════════ */
-
-@theme inline {
-  /* Main modules */
-  --color-module-dashboard: var(--module-dashboard);
-  --color-module-procurement: var(--module-procurement);
-  --color-module-product: var(--module-product);
-  --color-module-vendor: var(--module-vendor);
-  --color-module-inventory: var(--module-inventory);
-  --color-module-config: var(--module-config);
-
 }

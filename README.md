@@ -78,16 +78,18 @@ the app): **CLAUDE.md**. Design history: `docs/superpowers/specs/` + `docs/super
 
 ## Deploying
 
-Three supported targets — step-by-step in [docs/deploy.md](docs/deploy.md):
+Four supported targets — step-by-step in [docs/deploy.md](docs/deploy.md):
 
 | Target | Model | Backend CORS needed? |
 |---|---|---|
 | **AWS S3 + CloudFront** | private bucket + OAC, 403/404 → `/index.html` fallback | yes |
 | **GCS (+ Cloud CDN)** | bucket website fallback or LB backend bucket | yes |
 | **Docker** | nginx serves `dist/` and **proxies `/api/*` to the backend itself** | **no** |
+| **Vercel** | `git push origin main:vercel` builds the `vercel` branch | yes |
 
 For the static-CDN targets the per-environment `config.json` lives on the bucket; the
-Docker image renders it from env (`BACKEND_URL`, `X_APP_ID`, `WS_URL`) at container start.
+Docker image renders it from env (`BACKEND_URL`, `X_APP_ID`, `WS_URL`) at container start;
+Vercel bakes it into the build from the `APP_CONFIG_JSON` env var.
 
 > CORS (S3/GCS only): allow the CDN origin, headers `Authorization`, `Content-Type`,
 > `x-app-id`. Dev never needs CORS thanks to the Vite proxy.

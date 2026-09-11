@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/${key}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
+  APP_CONFIG_TEST_EMAIL_PROFILE: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/app-config/test-email-profile`,
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
@@ -55,6 +57,13 @@ export const API_ENDPOINTS = {
   /** ผังบัญชีของ BU — ชื่อ resource ฝั่ง backend คือ chart-of-accounts */
   CHART_OF_ACCOUNTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/chart-of-accounts`,
+  /**
+   * ดึงผังบัญชีจาก Carmen 4 ตามคอนฟิก `interface_accounting_carmen_gl`
+   * — backend เขียนแบบ all-or-nothing และตัดสินเรื่องรหัสซ้ำ/รหัสที่มีเฉพาะฝั่งเรา
+   * จาก `sync_policy` ในคอนฟิกนั้น ไม่ใช่จาก payload ของคำขอ
+   */
+  CHART_OF_ACCOUNTS_IMPORT_CARMEN_GL: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/chart-of-accounts/import-from-interface/carmen-gl`,
   CN_REASONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>
@@ -138,6 +147,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/product/${productId}/location`,
   INVENTORY_ADJUSTMENTS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-adjustments`,
+  LICENSE: "/api/proxy/api/license",
   LOCATIONS: (buCode: string) => `/api/proxy/api/config/${buCode}/locations`,
   LOCATIONS_BY_PRODUCT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/user-locations/product/${productId}`,
@@ -223,6 +233,7 @@ export const API_ENDPOINTS = {
   PHYSICAL_COUNT_SUBMIT: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/physical-counts/${id}/submit`,
   PRICE_LISTS: (buCode: string) => `/api/proxy/api/config/${buCode}/pricelists`,
+  /** workflow_id ต่อท้ายเป็น query string — ประกอบด้วย `buildUrl` ที่ตัวเรียก */
   PRICE_LIST_ACTIVE_BY_VENDOR: (
     buCode: string,
     vendorId: string,
@@ -321,6 +332,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_SEND_EMAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/${id}/send-email`,
   PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>

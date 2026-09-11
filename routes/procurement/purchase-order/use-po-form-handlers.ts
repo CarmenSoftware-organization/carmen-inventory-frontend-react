@@ -26,6 +26,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { PO_TYPE } from "@/types/purchase-order";
 import type { FormMode } from "@/types/form";
+import { pickDocVersion } from "@/lib/doc-version";
 import { buildPoPayload } from "./build-po-payload";
 import type { PoFormValues } from "./po-form-schema";
 
@@ -167,10 +168,16 @@ export function usePoFormHandlers({
     }
   };
 
-  const onSubmit = (values: PoFormValues) => {
-    const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
-
+  const onSubmit = async (values: PoFormValues) => {
     if (mode === "edit" && purchaseOrder) {
+      // /save ต้องใช้เลขสดเหมือน workflow action — ค่าในฟอร์มค้างเก่าได้เสมอ
+      // ถ้า response ของ save รอบก่อนไม่ได้ส่ง doc_version กลับมา
+      const fresh = await fetchFreshPo();
+      const payload = buildPoPayload(values, defaultValues.items, {
+        ...poTypeOption,
+        docVersion: resolveDocVersion(fresh),
+        freshDetails: fresh?.purchase_order_detail,
+      });
       updatePo.mutate(
         { id: purchaseOrder.id, ...payload },
         {
@@ -191,7 +198,9 @@ export function usePoFormHandlers({
       // network → navigate(replace) ตอนสำเร็จเลยกิน /new จริง ไม่ใช่ sentinel →
       // stack เหลือ [list, /:id] → back ที่หน้า detail = กลับ list
       setIsSubmitting(true);
-      createPo.mutate(payload, {
+      // ใบใหม่ยังไม่มี id ให้ GET — doc_version ในฟอร์มเป็น undefined อยู่แล้ว
+      // และถูกตัดออกจาก payload เอง
+      createPo.mutate(buildPoPayload(values, defaultValues.items, poTypeOption), {
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const body = res as { data?: { id?: string } } | undefined;
@@ -240,27 +249,47 @@ export function usePoFormHandlers({
   // GET PO สดจาก DB ก่อนยิง workflow event ทุกตัว — /save bump doc_version
   // ระหว่างทาง ทำให้ค่าใน form/prop ค้างเก่า → 409 optimistic lock
   // (tb_purchase_order / tb_purchase_order_detail)
-  const fetchFreshPo = async (): Promise<{
+  /**
+   * @param id - ใบที่จะดึง ไม่ส่ง = ใบที่เปิดอยู่ · ส่งมาเมื่อเพิ่งสร้างใบใหม่
+   *   ซึ่ง `purchaseOrder` prop ยังเป็น undefined อยู่
+   */
+  const fetchFreshPo = async (
+    id?: string,
+  ): Promise<{
     doc_version?: number;
-    purchase_order_detail?: { id: string }[];
+    // doc_version ราย row ต้องมีด้วย — lock ของ backend เช็ค tb_purchase_order_detail
+    // แยกจากหัวเอกสาร ของเดิมประกาศแค่ `{ id }` เลยเอาเลขราย row มาใช้ไม่ได้
+    purchase_order_detail?: { id: string; doc_version?: number }[];
   } | null> => {
-    if (!purchaseOrder || !buCode) return null;
+    const poId = id ?? purchaseOrder?.id;
+    if (!poId || !buCode) return null;
     try {
       const res = await httpClient.get(
-        `${API_ENDPOINTS.PURCHASE_ORDER(buCode)}/${purchaseOrder.id}`,
+        `${API_ENDPOINTS.PURCHASE_ORDER(buCode)}/${poId}`,
       );
-      if (res.ok) return (await res.json())?.data ?? null;
-    } catch {
-      // network/parse fail — caller ใช้ค่า fallback จาก form/prop
+      if (res.ok) {
+        const fresh = (await res.json())?.data ?? null;
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
+          console.warn("[PO] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน");
+        }
+        return fresh;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[PO] ดึง doc_version สดไม่สำเร็จ", res.status);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้อง
+      // ไม่เงียบ ผลของ fallback คือส่งเลขเก่า ซึ่งจบที่ 409 ปลายทาง
+      if (import.meta.env.DEV) console.warn("[PO] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
 
   const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
-    fresh?.doc_version ??
-    form.getValues("doc_version") ??
-    purchaseOrder?.doc_version ??
-    0;
+    pickDocVersion(
+      fresh?.doc_version,
+      form.getValues("doc_version"),
+      purchaseOrder?.doc_version,
+    );
 
   /**
    * ส่ง/อนุมัติสำเร็จ → กลับหน้ารายการ (กติกาเดียวกับ PR)
@@ -306,8 +335,79 @@ export function usePoFormHandlers({
     );
   };
 
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยันส่งใบ — ติดตรงไหนต้องรู้**ก่อน**ตอบว่า "ส่ง"
+   *
+   * ของเดิมเปิดกล่องยืนยันทันที แล้วค่อย validate ข้างใน `handleSubmitPo` ผู้ใช้จึง
+   * ต้องกดยืนยันเสร็จก่อนถึงจะรู้ว่ากรอกไม่ครบ — ถามแล้วตอบแล้วค่อยบอกว่าทำไม่ได้
+   * (ทรงเดียวกับ PR: `validateSubmitPr`)
+   *
+   * toast/scroll ทำในนี้ที่เดียว ผู้เรียกแค่ return เฉย ๆ เมื่อได้ false
+   * — อย่าไปเติม toast ซ้ำที่ปุ่ม ไม่งั้นเด้งสองใบ
+   */
+  const validateSubmitPo = async (): Promise<boolean> => {
+    const valid = await form.trigger();
+    if (!valid) {
+      revealErrors(form.formState.errors as Record<string, unknown>);
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * ใบที่ยังไม่เคยเซฟ — สร้างแล้วส่งต่อในคลิกเดียว (ทรงเดียวกับ `doCreateAndSubmitPr`)
+   *
+   * ของเดิมปุ่มส่งไม่โผล่เลยจนกว่าจะกด Save ก่อน ซึ่งเป็นสองสเต็ปที่ไม่มีเหตุผล —
+   * คนกดส่งย่อมตั้งใจให้ใบถูกบันทึกอยู่แล้ว
+   */
+  const createThenSubmitPo = async () => {
+    setIsSubmitting(true);
+    const values = form.getValues();
+    try {
+      const res = await createPo.mutateAsync(
+        buildPoPayload(values, defaultValues.items, poTypeOption),
+      );
+      const body = res as {
+        data?: { id?: string; doc_version?: number };
+      } | null;
+      const newId = body?.data?.id;
+      if (!newId) {
+        setIsSubmitting(false);
+        return;
+      }
+      // ต้อง GET ใบสดหลังสร้าง — id ของ detail แต่ละแถวเพิ่งเกิดตอนนี้ ฟอร์มยัง
+      // ไม่รู้จัก และ submit ต้องอ้าง id พวกนั้น
+      const fresh = await fetchFreshPo(newId);
+      submitPo.mutate(
+        {
+          id: newId,
+          stage_role: "create",
+          doc_version: pickDocVersion(
+            fresh?.doc_version,
+            body?.data?.doc_version,
+          ),
+          details: (fresh?.purchase_order_detail ?? []).map((d) => ({
+            id: d.id,
+            stage_status: "submit",
+            stage_message: null,
+          })),
+        },
+        {
+          onSuccess: onSuccessList(t("submitted")),
+          onError: () => setIsSubmitting(false),
+        },
+      );
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmitPo = async () => {
-    if (!purchaseOrder) return;
+    if (!purchaseOrder) {
+      await createThenSubmitPo();
+      return;
+    }
     if (form.formState.isDirty) {
       const valid = await form.trigger();
       if (!valid) {
@@ -316,7 +416,12 @@ export function usePoFormHandlers({
         return;
       }
       const values = form.getValues();
-      const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
+      const fresh = await fetchFreshPo();
+      const payload = buildPoPayload(values, defaultValues.items, {
+        ...poTypeOption,
+        docVersion: resolveDocVersion(fresh),
+        freshDetails: fresh?.purchase_order_detail,
+      });
       try {
         const saved = await updatePo.mutateAsync({
           id: purchaseOrder.id,
@@ -444,6 +549,7 @@ export function usePoFormHandlers({
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPo,
     handleSubmitPo,
     handleApprovePo,
     handleRejectConfirm,

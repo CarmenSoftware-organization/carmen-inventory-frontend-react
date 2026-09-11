@@ -1,7 +1,8 @@
 import { useProfile } from "@/hooks/use-profile";
 import { getRuntimeConfig } from "@/lib/runtime-config";
 import type { ModuleDto } from "@/constant/module-list";
-import type { BusinessUnitLicense, BusinessUnitSeat } from "@/types/profile";
+import { useLicenseQuery } from "@/hooks/use-license-query";
+import type { BusinessUnitLicense, BusinessUnitSeat } from "@/types/license";
 
 /**
  * แปลง permission key เป็น license feature key โดยตัด action ท้ายออก
@@ -118,7 +119,7 @@ export interface SeatExpiringSoon {
 
 /**
  * ตรรกะบริสุทธิ์ของ `useLicense` — แยกออกมาเพื่อ unit test ตรง ๆ โดยไม่ต้อง mock
- * `useProfile`/`runtime-config` (ตามแบบ `interfaceEntitled` ใน use-interface-entitlement.ts)
+ * `useProfile`/`useLicenseQuery`/`runtime-config` (ตามแบบ `interfaceEntitled` ใน use-interface-entitlement.ts)
  *
  * กติกาสำคัญ (อ้างอิง phase-c-backend-contract.md):
  * - `license` เป็น `undefined` (gateway รุ่นเก่ายังไม่ส่ง field) → ไม่จำกัด เสมอ ไม่ว่า `enforced`
@@ -183,7 +184,13 @@ export function resolveLicense(
  * if (enforced && !isLicensed("procurement.purchase_request")) { ... }
  */
 export function useLicense(): LicenseInfo {
-  const { license } = useProfile();
+  const { defaultBu } = useProfile();
+  const { data } = useLicenseQuery();
+  // license มาแยก endpoint แล้ว จึงต้องประกอบเองว่า BU ปัจจุบันคือใบไหน — ระหว่างที่
+  // ก้อนใดก้อนหนึ่งยังไม่มา `license` เป็น undefined ซึ่ง `resolveLicense` แปลว่า
+  // "ไม่จำกัด" (fail-open) เหมือนกรณี gateway รุ่นเก่าทุกประการ · ProfileGate รอทั้งสอง
+  // ก้อนก่อน render อยู่แล้ว ช่วงนั้นจึงไม่ถูกวาดออกจอ
+  const license = defaultBu ? data?.business_unit[defaultBu.id] : undefined;
   return resolveLicense(license, isEnforcementEnabled());
 }
 

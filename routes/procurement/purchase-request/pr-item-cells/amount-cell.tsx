@@ -53,7 +53,7 @@ export const AmountCell = memo(function AmountCell({
   // เลือกไม่ได้ → plain text ทั้งแถว
   if (!currencySelectable) {
     return (
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-col items-end gap-0.5">
         <div className="flex items-center justify-end gap-1.5">
           <span className="font-semibold tabular-nums">{amountText}</span>
           <span className="text-muted-foreground">{currencySlot}</span>
@@ -65,7 +65,7 @@ export const AmountCell = memo(function AmountCell({
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="flex flex-col items-end gap-0.5">
       <InputSuffixField className="w-full">
         <InputSuffixInput
           readOnly

@@ -1,14 +1,12 @@
-import { useMemo } from "react";
-import { type UseFormReturn } from "react-hook-form";
+import { useCallback, useMemo, useRef } from "react";
+import { type FieldArrayWithId, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
-  type Row,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -19,144 +17,85 @@ import { cn } from "@/lib/utils";
 import type { GrnFormValues } from "./grn-form-schema";
 import { grnItemCols } from "./grn-item-columns";
 import {
-  GroupAmountSum,
-  GroupQtySum,
-  GroupTotalCell,
-  GroupUnitPrice,
-  GrnGroupLocations,
-  ProductGroupCell,
+  GrnAmountCell,
+  GrnItemDiscountCell,
+  GrnItemTaxCell,
+  LocationCell,
+  ProductCell,
   ProductUnitCell,
-  type GrnGroup,
+  QtyUnitCell,
+  ReceivedQtyCell,
+  UnitPriceCell,
 } from "./grn-item-cells";
 
-export type { GrnGroup };
+/** แถวหนึ่งของตาราง = หนึ่งบรรทัดของเอกสาร (สินค้า + คลัง) */
+export type GrnItemField = FieldArrayWithId<GrnFormValues, "items", "id">;
 
 interface UseGrnItemTableOptions {
   form: UseFormReturn<GrnFormValues>;
-  groups: GrnGroup[];
-  itemFields: { id: string }[];
+  itemFields: GrnItemField[];
+  /**
+   * ทั้งใบแก้ไม่ได้ (โหมดอ่าน หรือกำลังบันทึกอยู่) — เกณฑ์เดียวจบเหมือน PO:
+   * แก้ไม่ได้เมื่อไร ทุกเซลล์เป็นตัวหนังสือ ไม่มีช่องกรอกสีเทาให้กดไม่ติด
+   */
   disabled: boolean;
-  plainText: boolean;
   isPo: boolean;
-  autoOpenProductKey: string | null;
-  /** กลุ่มที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
-  autoFocusPriceKey: string | null;
-  autoOpenLocationKey: string | null;
-  /** กลุ่มที่ location lookup ต้องเปิดอยู่ (คุมจากข้างนอก) */
-  openLocationKey: string | null;
-  onLocationOpenChange: (groupKey: string, open: boolean) => void;
-  /** เลือกสินค้าของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
-  onProductPicked: (groupKey: string) => void;
-  /** กรอกราคาของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
-  onPriceCommitted: (groupKey: string) => void;
-  onAddLocation: (group: GrnGroup) => void;
-  onDeleteGroup: (group: GrnGroup) => void;
+  /** แถวที่ต้องเปิดตัวเลือกสินค้าอยู่ตอนนี้ (เพิ่งกดเพิ่มรายการ) */
+  autoOpenProductId: string | null;
+  /** แถวที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
+  autoFocusPriceId: string | null;
+  /** แถวที่ต้องเปิดตัวเลือกคลังอยู่ตอนนี้ (คุมจากข้างนอก) */
+  openLocationId: string | null;
+  onLocationOpenChange: (rowId: string, open: boolean) => void;
+  /** เลือกสินค้าของแถวเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onProductPicked: (rowId: string) => void;
+  /** กรอกราคาของแถวเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onPriceCommitted: (rowId: string) => void;
   onDeleteItem: (index: number) => void;
 }
 
 export function useGrnItemTable({
   form,
-  groups,
   itemFields,
   disabled,
-  plainText,
   isPo,
-  autoOpenProductKey,
-  autoFocusPriceKey,
-  autoOpenLocationKey,
-  openLocationKey,
+  autoOpenProductId,
+  autoFocusPriceId,
+  openLocationId,
   onLocationOpenChange,
   onProductPicked,
   onPriceCommitted,
-  onAddLocation,
-  onDeleteGroup,
   onDeleteItem,
 }: UseGrnItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.goodsReceiveNote");
 
-  const columns = useMemo<ColumnDef<GrnGroup>[]>(() => {
-    const expandColumn: ColumnDef<GrnGroup> = {
-      id: "expand",
-      header: "",
-      cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={row.getIsExpanded() ? "Collapse" : "Expand"}
-          onClick={() => row.toggleExpanded()}
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </Button>
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: 40,
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-        // expanded content เริ่มที่ column Product (index 2 = expand, index, product)
-        expandedColStart: 2,
-        // ปุ่มเพิ่มคลังอยู่ใน gutter ซ้ายนี้ ไม่ใช่ในคอลัมน์ action ของแถวสินค้า —
-        // มันสร้างของในตารางย่อย ปุ่มจึงควรอยู่กับตารางย่อย ไม่ใช่ไปปนกับปุ่มลบ
-        // ทั้งรายการที่ทำงานคนละระดับกัน · align-top ของ gutter ทำให้ปุ่มอยู่
-        // บรรทัดเดียวกับแถวคลังแถวแรกพอดี
-        expandedLeading: (row: Row<GrnGroup>) =>
-          row.original.isManual && !disabled ? (
-            <div className="flex justify-end pt-1.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="h-7.5"
-                    aria-label={t("addLocation")}
-                    onClick={() => onAddLocation(row.original)}
-                  >
-                    <MapPinPlus aria-hidden="true" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t("addLocation")}</TooltipContent>
-              </Tooltip>
-            </div>
-          ) : (
-            // โหมดอ่าน/ใบอิง PO เพิ่มคลังเองไม่ได้ — ที่ว่างตรงนี้เลยใช้บอกว่า
-            // ตารางข้าง ๆ คือคลัง ใช้สี/น้ำหนักชุดเดียวกับหัวคอลัมน์ของตาราง
-            // (data-grid-table.tsx) มันจึงอ่านเป็นหัวคอลัมน์ ไม่ใช่ข้อมูลลอย
-            <div className="text-muted-foreground flex justify-end pt-3 text-xs font-semibold">
-              {tfl("location")}
-            </div>
-          ),
-        expandedContent: (group: GrnGroup) => (
-          <GrnGroupLocations
-            group={group}
-            form={form}
-            itemFields={itemFields}
-            disabled={disabled}
-            plainText={plainText}
-            isPo={isPo}
-            autoOpenLocationKey={autoOpenLocationKey}
-            openLocationKey={openLocationKey}
-            onLocationOpenChange={onLocationOpenChange}
-            onDeleteItem={onDeleteItem}
-          />
-        ),
-      },
-    };
+  // แถวแก้ไม่ได้ = ทุกเซลล์เป็นตัวหนังสือ ไม่มี control ให้เผื่อที่
+  const editable = !disabled;
 
-    const indexColumn: ColumnDef<GrnGroup> = {
+  // เลือกคลังเสร็จ → โฟกัสช่องจำนวนของ**แถวเดียวกัน** ต่อ (Radix คืนโฟกัสให้ปุ่ม
+  // ที่เพิ่งกดเป็นค่า default ซึ่งเป็นทางตัน — พิมพ์ต่อแล้วตัวเลขหายเฉย ๆ)
+  // สองช่องนี้อยู่คนละเซลล์แล้ว จึงต้องมี ref กลางรายแถวให้ทั้งคู่ถือร่วมกัน
+  const qtyRefs = useRef(
+    new Map<string, React.RefObject<HTMLInputElement | null>>(),
+  );
+  const qtyRefFor = useCallback((rowId: string) => {
+    const map = qtyRefs.current;
+    if (!map.has(rowId)) map.set(rowId, { current: null });
+    return map.get(rowId)!;
+  }, []);
+
+  const columns = useMemo<ColumnDef<GrnItemField>[]>(() => {
+    const COL = grnItemCols(editable);
+
+    const indexColumn: ColumnDef<GrnItemField> = {
       id: "index",
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
       enableResizing: false,
-      size: 40,
+      size: COL.leading,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -167,37 +106,48 @@ export function useGrnItemTable({
       headerClassName: "text-right",
       cellClassName: "text-right",
     };
-    // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน
-    // พอมีรายการแรกค่อยขยาย · ตาราง location ด้านล่างใช้แค่ !disabled ได้
-    // เพราะมันจะ render ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
-    const { col: GRN_COL } = grnItemCols(
-      isPo,
-      !disabled && itemFields.length > 0,
-    );
-    const dataColumns: ColumnDef<GrnGroup>[] = [
+
+    const dataColumns: ColumnDef<GrnItemField>[] = [
+      {
+        id: "location",
+        header: tfl("location"),
+        size: COL.location,
+        cell: ({ row }) => (
+          <LocationCell
+            form={form}
+            index={row.index}
+            disabled={
+              disabled ||
+              (!!row.original.purchase_order_detail_id &&
+                !!row.original.location_id)
+            }
+            open={row.id === openLocationId ? true : undefined}
+            onOpenChange={(open) => onLocationOpenChange(row.id, open)}
+            nextFocusRef={qtyRefFor(row.id)}
+          />
+        ),
+      },
       {
         id: "product",
         header: tfl("product"),
-        size: GRN_COL.product,
+        size: COL.product,
         cell: ({ row }) => (
-          <ProductGroupCell
+          <ProductCell
             form={form}
-            group={row.original}
+            index={row.index}
+            isManual={!row.original.purchase_order_detail_id}
             disabled={disabled}
-            autoOpen={row.original.key === autoOpenProductKey}
-            onPicked={() => onProductPicked(row.original.key)}
+            autoOpen={row.id === autoOpenProductId}
+            onPicked={() => onProductPicked(row.id)}
           />
         ),
       },
       {
         id: "unit",
         header: tfl("unit"),
-        size: GRN_COL.unit,
+        size: COL.unit,
         cell: ({ row }) => (
-          <ProductUnitCell
-            control={form.control}
-            index={row.original.indices[0]}
-          />
+          <ProductUnitCell control={form.control} index={row.index} />
         ),
       },
       ...(isPo
@@ -205,133 +155,132 @@ export function useGrnItemTable({
             {
               id: "order",
               header: tfl("order"),
-              size: GRN_COL.order,
+              size: COL.order,
               meta: rightMeta,
               cell: ({ row }) => (
-                <GroupQtySum
-                  control={form.control}
-                  indices={row.original.indices}
+                <QtyUnitCell
+                  form={form}
+                  index={row.index}
                   qtyField="approved_qty"
                   unitField="approved_unit_id"
+                  // จำนวนที่สั่งมาจาก PO เสมอ — เป็นตัวเลขให้เทียบ ไม่ใช่ช่องกรอก
+                  disabled
                 />
               ),
-            } as ColumnDef<GrnGroup>,
+            } as ColumnDef<GrnItemField>,
           ]
         : []),
       {
         id: "received",
         header: tfl("received"),
-        size: GRN_COL.received,
+        size: COL.received,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupQtySum
-            control={form.control}
-            indices={row.original.indices}
-            qtyField="received_qty"
-            unitField="received_unit_id"
+          <ReceivedQtyCell
+            form={form}
+            index={row.index}
+            disabled={disabled}
+            inputRef={qtyRefFor(row.id)}
           />
         ),
       },
       {
         id: "foc",
         header: tfl("foc"),
-        size: GRN_COL.foc,
+        size: COL.foc,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupQtySum
-            control={form.control}
-            indices={row.original.indices}
+          <QtyUnitCell
+            form={form}
+            index={row.index}
             qtyField="foc_qty"
             unitField="foc_unit_id"
+            disabled={disabled}
           />
         ),
       },
       {
         id: "price",
         header: tfl("unitPrice"),
-        size: GRN_COL.price,
+        size: COL.price,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupUnitPrice
+          <UnitPriceCell
             form={form}
-            indices={row.original.indices}
+            index={row.index}
             disabled={disabled}
-            autoFocus={row.original.key === autoFocusPriceKey}
-            onCommit={() => onPriceCommitted(row.original.key)}
+            autoFocus={row.id === autoFocusPriceId}
+            onCommit={() => onPriceCommitted(row.id)}
           />
         ),
       },
       {
         id: "subtotal",
         header: tfl("subtotal"),
-        size: GRN_COL.sub,
+        size: COL.sub,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupAmountSum
-            control={form.control}
-            indices={row.original.indices}
-            fields={["net_amount", "discount_amount"]}
-          />
+          <GrnAmountCell form={form} index={row.index} field="subtotal" />
         ),
       },
       {
         id: "discount",
         header: tfl("discount"),
-        size: GRN_COL.discount,
+        size: COL.discount,
         meta: rightMeta,
+        // โหมดดูเป็น "10% · 320.00" ซึ่งยาวกว่าคอลัมน์เมื่อหักระยะขอบออก
+        // ปล่อยไว้จะตัดขึ้นบรรทัดใหม่แล้วแถวสูงกว่าแถวอื่น
         cell: ({ row }) => (
-          <GroupAmountSum
-            control={form.control}
-            indices={row.original.indices}
-            fields={["discount_amount"]}
-          />
+          <div className="whitespace-nowrap">
+            <GrnItemDiscountCell
+              form={form}
+              index={row.index}
+              editable={editable}
+            />
+          </div>
         ),
       },
       {
         id: "net",
         header: tfl("net"),
-        size: GRN_COL.net,
+        size: COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupAmountSum
-            control={form.control}
-            indices={row.original.indices}
-            fields={["net_amount"]}
-          />
+          <GrnAmountCell form={form} index={row.index} field="netAmount" />
         ),
       },
       {
         id: "tax",
         header: tfl("tax"),
-        size: GRN_COL.tax,
+        size: COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupAmountSum
-            control={form.control}
-            indices={row.original.indices}
-            fields={["tax_amount"]}
-          />
+          <div className="whitespace-nowrap">
+            <GrnItemTaxCell form={form} index={row.index} editable={editable} />
+          </div>
         ),
       },
       {
         id: "amount",
         header: tfl("amount"),
-        size: GRN_COL.amt,
+        size: COL.amt,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GroupTotalCell
-            control={form.control}
-            indices={row.original.indices}
+          <GrnAmountCell
+            form={form}
+            index={row.index}
+            field="totalPrice"
+            bold
           />
         ),
       },
     ];
 
-    const actionColumn: ColumnDef<GrnGroup> = {
+    const actionColumn: ColumnDef<GrnItemField> = {
       id: "action",
       header: () => "",
       cell: ({ row }) => (
-        <div className="flex items-center justify-center gap-0.5">
+        <div className="flex items-center justify-center">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -340,7 +289,7 @@ export function useGrnItemTable({
                 size="icon-xs"
                 className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 aria-label={t("deleteProductLine")}
-                onClick={() => onDeleteGroup(row.original)}
+                onClick={() => onDeleteItem(row.index)}
               >
                 <Trash2 className="size-3.5" aria-hidden="true" />
               </Button>
@@ -351,7 +300,7 @@ export function useGrnItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: GRN_COL.action,
+      size: COL.action,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -359,7 +308,6 @@ export function useGrnItemTable({
     };
 
     const baseCols = [
-      expandColumn,
       indexColumn,
       ...dataColumns,
       ...(disabled ? [] : [actionColumn]),
@@ -369,39 +317,32 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // h-11 ตายตัวทั้งแถวหลักและแถวย่อย — ปล่อยให้สูงตามเนื้อหา แถวหลักจะ 39px
-        // เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวย่อยได้ 41px จากช่องกรอก สองแถบเลย
-        // ไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่ 40 เพราะช่องสินค้ากิน
-        // สองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px ดูอัดแน่นกว่าแถวย่อย
-        // ที่มีบรรทัดเดียว (เหลือ 12px)
+        // h-11 ตายตัวทุกแถว — ปล่อยให้สูงตามเนื้อหาแล้วแถวที่ชื่อสินค้ากินสอง
+        // บรรทัดจะสูงกว่าแถวอื่น ทั้งที่เป็นข้อมูลชนิดเดียวกัน
         cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [
     form,
-    itemFields,
     disabled,
-    plainText,
+    editable,
     isPo,
-    autoOpenProductKey,
-    autoFocusPriceKey,
-    autoOpenLocationKey,
-    openLocationKey,
+    autoOpenProductId,
+    autoFocusPriceId,
+    openLocationId,
     onLocationOpenChange,
-    onAddLocation,
     onProductPicked,
     onPriceCommitted,
-    onDeleteGroup,
     onDeleteItem,
+    qtyRefFor,
     tfl,
     t,
   ]);
 
   return useReactTable({
-    data: groups,
+    data: itemFields,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getRowId: (row) => row.key,
+    getRowId: (row) => row.id,
   });
 }

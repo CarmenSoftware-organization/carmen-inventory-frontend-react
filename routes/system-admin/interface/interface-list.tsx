@@ -7,7 +7,7 @@ import { useAppConfigs } from "@/hooks/use-app-config";
 import {
   useInterfaceEntitlement,
   type InterfaceEntitlement,
-} from "./use-interface-entitlement";
+} from "@/hooks/use-interface-entitlement";
 import type { AppConfig } from "@/types/app-config";
 import {
   INTERFACE_CATEGORIES,

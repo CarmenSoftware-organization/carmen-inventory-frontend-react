@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Controller,
-  useFieldArray,
-  useForm,
-  useWatch,
-  type Resolver,
-} from "react-hook-form";
+import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { History, Pencil, Save, Trash2, X } from "lucide-react";
@@ -24,9 +18,9 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
-import { useAllProducts } from "@/hooks/use-all-products";
 import { PRICE_LIST_TEMPLATE_STATUS_OPTIONS } from "@/constant/price-list-template";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { getSubmitLabel } from "@/lib/form-utils";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useProfile } from "@/hooks/use-profile";
 import type { PriceListTemplate } from "@/types/price-list-template";
@@ -37,17 +31,17 @@ import { SettingSection } from "@/components/ui/setting-section";
 import {
   createPltSchema,
   getDefaultValues,
-  PLT_DETAIL_EMPTY,
   type PltFormValues,
 } from "./plt-form-schema";
 import { PltValidityStepper } from "./plt-validity-stepper";
-import { PltFormProductsSection } from "./plt-form-products-section";
-import { PltFormDialogs } from "./plt-form-dialogs";
+import { PltItemFields } from "./plt-item-fields";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { usePltFormActions } from "./use-plt-form-actions";
-import { FORM_ID } from "./plt-form-helpers";
-import { useProductLabels, useStepperLabels } from "./plt-form-labels";
+import { useStepperLabels } from "./plt-form-labels";
 import { openActivity } from "@/components/share/activity-sheet-host";
+
+const FORM_ID = "plt-form";
 
 interface PriceListTemplateFormProps {
   readonly priceListTemplate?: PriceListTemplate;
@@ -69,11 +63,6 @@ export function PriceListTemplateForm({
   );
   const isView = mode === "view";
   const isAdd = mode === "add";
-
-  const [removeDetailIndex, setRemoveDetailIndex] = useState<number | null>(
-    null,
-  );
-  const [removeProductId, setRemoveProductId] = useState<string | null>(null);
 
   const { defaultCurrencyId } = useProfile();
   const defaultValues = getDefaultValues(priceListTemplate, {
@@ -100,16 +89,6 @@ export function PriceListTemplateForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId อ่านโดยไม่ retrigger
   }, [productIdsKey, priceListTemplate?.id]);
 
-  const {
-    fields: detailFields,
-    append: appendDetail,
-    prepend: prependDetail,
-    remove: removeDetail,
-  } = useFieldArray({
-    control: form.control,
-    name: "details",
-  });
-
   const actions = usePltFormActions({
     form,
     priceListTemplate,
@@ -129,82 +108,10 @@ export function PriceListTemplateForm({
   const watchedStatus = useWatch({ control: form.control, name: "status" });
   const watchedName = useWatch({ control: form.control, name: "name" });
 
-  const { data: allProducts = [], isLoading: productsLoading } =
-    useAllProducts();
-  const watchedDetails = useWatch({ control: form.control, name: "details" });
-  const selectedProductIds = new Set(
-    (watchedDetails ?? []).map((d) => d.product_id).filter(Boolean),
-  );
-
-  const handleAddProduct = () => {
-    prependDetail({ ...PLT_DETAIL_EMPTY });
-  };
-
-  // ติ๊ก tree → sync กับ details: product ที่ติ๊กใหม่ = เพิ่มแถวเปล่า (unit
-  // auto-select เองใน UnitCell), product ที่เอาติ๊กออก = ลบทุกแถวของ product นั้น
-  // (รวม moq tier หลายแถว) · group toggle ยิงทิศเดียวเสมอ เพิ่ม/ลบ ไม่ปนกัน
-  const handleTreeSelectionChange = (ids: string[]) => {
-    const next = new Set(ids);
-    const rows = form.getValues("details");
-    const removeIdx = rows.reduce<number[]>((acc, d, i) => {
-      if (d.product_id && !next.has(d.product_id)) acc.push(i);
-      return acc;
-    }, []);
-    const current = new Set(rows.map((d) => d.product_id).filter(Boolean));
-    const added = ids.filter((id) => !current.has(id));
-    if (removeIdx.length) removeDetail(removeIdx);
-    if (added.length)
-      prependDetail(
-        added.map((id) => ({ ...PLT_DETAIL_EMPTY, product_id: id })),
-      );
-  };
-
-  // เพิ่ม MOQ tier อีกหน่วยให้ product เดิม (แถวใหม่ product_id เดียวกัน)
-  // default qty = max ของ tier เดิม +1 กันชนกับ qty ที่มีอยู่แล้วตั้งแต่แรก
-  const handleAddTier = (productId: string) => {
-    const qtys = form
-      .getValues("details")
-      .filter((r) => r.product_id === productId)
-      .map((r) => Number(r.qty) || 0);
-    const nextQty = qtys.length ? Math.max(...qtys) + 1 : 1;
-    appendDetail({ ...PLT_DETAIL_EMPTY, product_id: productId, qty: nextQty });
-  };
-
-  const handleConfirmRemoveTier = () => {
-    if (removeDetailIndex === null) return;
-    removeDetail(removeDetailIndex);
-    setRemoveDetailIndex(null);
-  };
-
-  // ลบทั้ง product (ทุก tier) — เท่ากับเอาติ๊กออกจาก tree · confirm ก่อนลบ
-  const handleConfirmRemoveProduct = () => {
-    if (removeProductId === null) return;
-    const idx = form.getValues("details").reduce<number[]>((acc, d, i) => {
-      if (d.product_id === removeProductId) acc.push(i);
-      return acc;
-    }, []);
-    if (idx.length) removeDetail(idx);
-    setRemoveProductId(null);
-  };
-
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t, tfl, tc);
 
-  // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
-  const removeProductName = removeProductId
-    ? (allProducts.find((p) => p.id === removeProductId)?.name ??
-      priceListTemplate?.products?.find((p) => p.product_id === removeProductId)
-        ?.product_name ??
-      "")
-    : "";
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
-  const submitLabel = actions.isPending
-    ? isAdd
-      ? tform("creating")
-      : tform("saving")
-    : isAdd
-      ? tc("create")
-      : tc("save");
+  const submitLabel = getSubmitLabel(actions.isPending, isAdd, tc, tform);
 
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
@@ -456,21 +363,11 @@ export function PriceListTemplateForm({
           </Field>
         </SettingSection>
 
-        <PltFormProductsSection
+        <PltItemFields
           form={form}
-          detailFields={detailFields}
           priceListTemplate={priceListTemplate}
           isView={isView}
           isDisabled={isDisabled}
-          onAddProduct={handleAddProduct}
-          onRemoveTier={setRemoveDetailIndex}
-          labels={productLabels}
-          allProducts={allProducts}
-          productsLoading={productsLoading}
-          selectedProductIds={selectedProductIds}
-          onTreeSelectionChange={handleTreeSelectionChange}
-          onAddTier={handleAddTier}
-          onRemoveProduct={setRemoveProductId}
         />
       </form>
 
@@ -486,20 +383,18 @@ export function PriceListTemplateForm({
         variant="warning"
       />
 
-      <PltFormDialogs
-        priceListTemplate={priceListTemplate}
-        showDelete={actions.showDelete}
-        setShowDelete={actions.setShowDelete}
-        isDeletePending={actions.isDeletePending}
-        onConfirmDelete={actions.handleConfirmDelete}
-        removeDetailIndex={removeDetailIndex}
-        setRemoveDetailIndex={setRemoveDetailIndex}
-        onConfirmRemoveTier={handleConfirmRemoveTier}
-        removeProductId={removeProductId}
-        removeProductName={removeProductName}
-        setRemoveProductId={setRemoveProductId}
-        onConfirmRemoveProduct={handleConfirmRemoveProduct}
-      />
+      {priceListTemplate && (
+        <DeleteDialog
+          open={actions.showDelete}
+          onOpenChange={(open) =>
+            !open && !actions.isDeletePending && actions.setShowDelete(false)
+          }
+          title={t("deleteTitle")}
+          description={t("deleteConfirm", { name: priceListTemplate.name })}
+          isPending={actions.isDeletePending}
+          onConfirm={actions.handleConfirmDelete}
+        />
+      )}
     </div>
   );
 }

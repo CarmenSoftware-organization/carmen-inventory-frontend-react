@@ -122,3 +122,47 @@ describe("useNavigationGuard — teardown แล้ว arm ใหม่ทัน
     expect(screen.getByText("detail page")).toBeTruthy();
   });
 });
+
+/** Mirrors the GRN wizard: still dirty, but the user chose to move on. */
+function HandoffPage() {
+  const guard = useNavigationGuard(true);
+  return (
+    <>
+      <p>detail page</p>
+      <button type="button" onClick={() => guard.leave("/target")}>
+        hand off
+      </button>
+    </>
+  );
+}
+
+describe("useNavigationGuard — leave()", () => {
+  beforeEach(() => {
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("ทับ sentinel แทนที่จะ push ทับมัน", async () => {
+    const user = userEvent.setup();
+    render(
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<ListPage />} />
+          <Route path="/detail" element={<HandoffPage />} />
+          <Route path="/target" element={<p>target page</p>} />
+        </Routes>
+      </BrowserRouter>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "open detail" }));
+    await screen.findByText("detail page");
+    // / → /detail → sentinel
+    const lengthOnSentinel = window.history.length;
+
+    await user.click(screen.getByRole("button", { name: "hand off" }));
+
+    expect(await screen.findByText("target page")).toBeInTheDocument();
+    // entry ไม่งอก = sentinel ถูกทับ ไม่มีอะไรค้างให้ teardown ต้อง back() ตาม
+    expect(window.history.length).toBe(lengthOnSentinel);
+    expect(window.history.state?.__navGuard).toBeUndefined();
+  });
+});

@@ -11,6 +11,7 @@ import {
   indexColumn,
   actionColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { User } from "@/types/workflows";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -41,6 +42,7 @@ export function useUserTable({
 }: UseUserTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
 
   const columns: ColumnDef<User>[] = [
     selectColumn<User>(),
@@ -72,7 +74,7 @@ export function useUserTable({
         <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
     },
-    actionColumn<User>(onDelete),
+    actionColumn<User>(onDelete, deleteGate),
   ];
 
   return useReactTable({

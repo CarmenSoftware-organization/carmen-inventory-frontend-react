@@ -180,6 +180,7 @@ function EditForm({
               </span>
             </FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               type="number"
               inputMode="decimal"
               min={0}
@@ -350,6 +351,7 @@ function CreateForm({
           <Field>
             <FieldLabel required>{tfl("exchangeRate")}</FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               type="number"
               inputMode="decimal"
               min={0}

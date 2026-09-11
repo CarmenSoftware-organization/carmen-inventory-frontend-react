@@ -69,7 +69,7 @@ export default function SortableStageItem({
       className={cn(
         "group focus-within:ring-ring relative flex items-center gap-2 rounded-xl border p-1 text-sm transition-all duration-200 ease-out focus-within:ring-2",
         isSelected
-          ? "border-primary/30 bg-primary/5 ring-primary/20 text-primary-foreground shadow-sm ring-1"
+          ? "border-primary bg-primary/5"
           : "border-border hover:bg-muted/50 hover:border-border/80 text-muted-foreground hover:text-foreground",
         isDragging &&
           "bg-background ring-border z-50 scale-[0.98] cursor-grabbing opacity-80 shadow-lg ring-1",
@@ -118,7 +118,7 @@ export default function SortableStageItem({
               "text-micro-legal flex size-5 shrink-0 items-center justify-center rounded-full font-semibold transition-colors",
               isSelected
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:ring-border group-hover:shadow-sm group-hover:ring-1",
+                : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground",
             )}
           >
             {index + 1}
@@ -149,7 +149,7 @@ export default function SortableStageItem({
                     className="text-warning-ink inline-flex items-center transition-transform hover:scale-110"
                     aria-label={t("isHod")}
                   >
-                    <Crown className="size-3.5 drop-shadow-sm" />
+                    <Crown className="size-3.5" />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="text-sm">
@@ -162,8 +162,8 @@ export default function SortableStageItem({
                   className={cn(
                     "text-micro-legal inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium tabular-nums transition-colors",
                     isSelected
-                      ? "bg-primary/20 text-primary-foreground"
-                      : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm",
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground",
                   )}
                 >
                   <Users className="size-3" aria-hidden="true" />

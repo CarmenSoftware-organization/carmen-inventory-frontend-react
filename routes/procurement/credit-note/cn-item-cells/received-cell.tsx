@@ -1,5 +1,7 @@
 import { useWatch, type Control } from "react-hook-form";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { CnFormValues } from "../cn-form-schema";
 
 /**
@@ -20,11 +22,15 @@ export function ReceivedCell({
   });
   const unitName =
     useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  const productId =
+    useWatch({ control, name: `items.${index}.item_id` }) ?? "";
+  const unitId = useWatch({ control, name: `items.${index}.unit_id` }) ?? "";
+  const formatQty = useQuantityFormatter(useUnitDecimals(productId, unitId));
   return (
     <InputSuffixPlain
       className="w-full"
       // null = ยังไม่ได้ค่าจาก GRN — ขีดไว้ ไม่โชว์ 0 ให้เข้าใจผิดว่ารับมา 0
-      value={received == null ? "—" : String(received)}
+      value={received == null ? "—" : formatQty(received)}
       suffix={unitName}
     />
   );

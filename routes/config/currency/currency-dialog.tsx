@@ -125,6 +125,7 @@ function CurrencyFields({
             {tfl("exchangeRate")}
           </FieldLabel>
           <FieldInput
+            errorIconAlign="left"
             id="currency-exchange-rate"
             type="number"
             inputMode="decimal"

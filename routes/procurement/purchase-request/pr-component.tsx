@@ -36,6 +36,8 @@ import PrCardList from "./pr-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
+import { useCan } from "@/hooks/use-can";
+import { canDeletePr } from "./pr-ownership";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -66,10 +68,24 @@ export default function PurchaseRequestComponent() {
   const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const { defaultCurrencyCode, dateTimeFormat } = useProfile();
+  const { defaultCurrencyCode, dateTimeFormat, userId } = useProfile();
+  const { isAdmin } = useCan();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
     null,
   );
+
+  /**
+   * ใบของคนอื่น backend ลบไม่ให้อยู่แล้ว — บอกตั้งแต่ตอนกด อย่าเปิดกล่องยืนยันก่อน
+   * แล้วค่อยเด้ง 403 หลังกดยืนยัน (ดู pr-ownership.ts) · จุดเดียวคุมทั้งแถวในตาราง
+   * และการ์ดในโหมด grid
+   */
+  const requestDelete = (item: PurchaseRequest) => {
+    if (!canDeletePr(item, userId, isAdmin)) {
+      dispatchPermissionDenied(undefined, t("deleteNotOwner"));
+      return;
+    }
+    setDeleteTarget(item);
+  };
   const [approveTarget, setApproveTarget] = useState<PurchaseRequest | null>(
     null,
   );
@@ -194,13 +210,22 @@ export default function PurchaseRequestComponent() {
   const selection = usePrSelection(items);
   const { selectedItems, hasSelection, selectedGroup } = selection;
 
+  /** ลบหลายใบ — มีใบของคนอื่นปนแม้ใบเดียวก็ไม่เปิดกล่องยืนยัน */
+  const requestBatchDelete = () => {
+    if (!selectedItems.every((item) => canDeletePr(item, userId, isAdmin))) {
+      dispatchPermissionDenied(undefined, t("batchDeleteNotOwner"));
+      return;
+    }
+    setBatchDeleteOpen(true);
+  };
+
   const table = usePurchaseRequestTable({
     items,
     totalRecords,
     params,
     tableConfig,
     onEdit: (item) => navigate(`/procurement/purchase-request/${item.id}`),
-    onDelete: setDeleteTarget,
+    onDelete: requestDelete,
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
     isMyPending: viewMode === "my-pending",
@@ -273,7 +298,7 @@ export default function PurchaseRequestComponent() {
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => setBatchDeleteOpen(true)}
+                onClick={requestBatchDelete}
               >
                 <Trash2 aria-hidden="true" />
                 {tc("delete")}
@@ -342,7 +367,7 @@ export default function PurchaseRequestComponent() {
               }
               onApprove={setApproveTarget}
               onReject={setRejectTarget}
-              onDelete={setDeleteTarget}
+              onDelete={requestDelete}
               isMyPending={viewMode === "my-pending"}
             />
             {useInfiniteScroll && grid.hasMore && (

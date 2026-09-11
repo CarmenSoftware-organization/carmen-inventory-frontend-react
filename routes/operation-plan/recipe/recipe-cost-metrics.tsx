@@ -71,7 +71,8 @@ export function RecipeCostMetrics({
             inputMode="decimal"
             step="0.01"
             disabled={isDisabled}
-            className="h-7 pr-12 text-right text-xs"
+            size="sm"
+            className="pr-12 text-right text-xs"
             error={errors.carbon_footprint?.message}
             errorIconAlign="left"
             {...form.register("carbon_footprint")}

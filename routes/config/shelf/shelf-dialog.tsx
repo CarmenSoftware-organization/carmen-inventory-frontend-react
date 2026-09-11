@@ -100,6 +100,7 @@ export function ShelfDialog({
           <Field>
             <FieldLabel htmlFor="shelf-sequence">{tfl("sequence")}</FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               id="shelf-sequence"
               type="number"
               inputMode="numeric"

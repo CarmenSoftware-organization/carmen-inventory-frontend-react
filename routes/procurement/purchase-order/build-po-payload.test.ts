@@ -9,20 +9,16 @@ import { PO_TYPE } from "@/types/purchase-order";
  * คือแก้แล้วไม่เข้า ทั้งคู่ไม่มี typecheck ตัวไหนจับได้เพราะรูปร่าง payload ถูกเสมอ
  */
 
-const location = (over: Partial<PoFormValues["items"][number]["locations"][number]> = {}) => ({
-  ...PO_ITEM.locations[0],
-  id: "loc-1",
-  order_qty: 10,
-  ...over,
-});
-
+// แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location — เดิมมี helper
+// `location()` แยกต่างหากเพราะยอดคิดราย location แล้วบวกขึ้นมาเป็นของแถว
 const item = (over: Partial<PoFormValues["items"][number]> = {}) =>
   ({
     ...PO_ITEM,
     product_id: "prod-1",
     order_unit_id: "unit-1",
     price: 25,
-    locations: [location()],
+    order_qty: 10,
+    location_id: "loc-1",
     ...over,
   }) as PoFormValues["items"][number];
 
@@ -46,54 +42,50 @@ const values = (items: PoFormValues["items"]): PoFormValues =>
   }) as unknown as PoFormValues;
 
 describe("mapItemToPayload", () => {
-  it("ยอดต่อ location คิดจาก ราคา × จำนวน แล้วหักส่วนลดก่อนคิดภาษี", () => {
+  it("ยอดของแถวคิดจาก ราคา × จำนวน แล้วหักส่วนลดก่อนคิดภาษี", () => {
     const payload = mapItemToPayload(
-      item({
-        price: 100,
-        locations: [location({ order_qty: 2, discount_rate: 10, tax_rate: 7 })],
-      }),
+      item({ price: 100, order_qty: 2, discount_rate: 10, tax_rate: 7 }),
       0,
     );
-    const loc = payload.locations[0];
-    expect(loc.sub_total_price).toBe(200);
-    expect(loc.discount_amount).toBe(20);
-    expect(loc.net_amount).toBe(180);
-    expect(loc.tax_amount).toBe(12.6);
-    expect(loc.total_price).toBe(192.6);
+    expect(payload.sub_total_price).toBe(200);
+    expect(payload.discount_amount).toBe(20);
+    expect(payload.net_amount).toBe(180);
+    expect(payload.tax_amount).toBe(12.6);
+    expect(payload.total_price).toBe(192.6);
   });
 
-  it("ยอดระดับรายการ = ผลรวมทุก location ไม่ใช่คิดใหม่จากราคา", () => {
+  it("คลังของแถวถูกส่งไปแบน ๆ ไม่ใช่ array ซ้อนใน locations", () => {
     const payload = mapItemToPayload(
       item({
-        price: 100,
-        locations: [
-          location({ id: "loc-1", order_qty: 2 }),
-          location({ id: "loc-2", order_qty: 3 }),
-        ],
+        location_id: "loc-9",
+        location_code: "A1",
+        location_name: "คลัง A",
+        delivery_point_id: "dp-1",
+        delivery_point_name: "จุดส่ง 1",
       }),
       0,
     );
-    expect(payload.net_amount).toBe(500);
-    expect(payload.total_price).toBe(500);
+    expect(payload.location_id).toBe("loc-9");
+    expect(payload.location_code).toBe("A1");
+    expect(payload.location_name).toBe("คลัง A");
+    expect(payload.delivery_point_id).toBe("dp-1");
+    expect(payload.delivery_point_name).toBe("จุดส่ง 1");
+    expect("locations" in payload).toBe(false);
   });
 
   it("override ส่วนลด = ใช้ยอดที่กรอกเอง ไม่คิดจาก rate", () => {
     const payload = mapItemToPayload(
       item({
         price: 100,
-        locations: [
-          location({
-            order_qty: 2,
-            discount_rate: 10,
-            discount_amount: 50,
-            is_discount_adjustment: true,
-          }),
-        ],
+        order_qty: 2,
+        discount_rate: 10,
+        discount_amount: 50,
+        is_discount_adjustment: true,
       }),
       0,
     );
-    expect(payload.locations[0].discount_amount).toBe(50);
-    expect(payload.locations[0].net_amount).toBe(150);
+    expect(payload.discount_amount).toBe(50);
+    expect(payload.net_amount).toBe(150);
   });
 
   it("sequence เริ่มที่ 1 ไม่ใช่ 0 — backend เรียงตามเลขนี้", () => {
@@ -101,16 +93,9 @@ describe("mapItemToPayload", () => {
     expect(mapItemToPayload(item(), 4).sequence).toBe(5);
   });
 
-  it("order_base_qty แปลงด้วย conversion factor ของหน่วยสั่งซื้อ", () => {
-    const payload = mapItemToPayload(
-      item({
-        order_unit_conversion_factor: 12,
-        locations: [location({ order_qty: 2 })],
-      }),
-      0,
-    );
-    expect(payload.locations[0].order_qty).toBe(2);
-    expect(payload.locations[0].order_base_qty).toBe(24);
+  it("order_qty ของแถวส่งตรง ไม่ต้องรวมข้ามคลัง", () => {
+    const payload = mapItemToPayload(item({ order_qty: 2 }), 0);
+    expect(payload.order_qty).toBe(2);
   });
 });
 

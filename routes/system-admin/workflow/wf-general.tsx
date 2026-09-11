@@ -37,13 +37,14 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
   const isPurchaseOrder = form.watch("workflow_type") === WORKFLOW_TYPE.PO;
 
   return (
-    <div className="w-full pt-4">
-      <FieldGroup className="gap-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="@container w-full pt-4">
+      <FieldGroup className="gap-4">
+        <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
           <Field data-invalid={!!form.formState.errors.name}>
             <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
             <Input
               id="wf-name"
+              size="sm"
               placeholder={t("workflowNamePlaceholder")}
               disabled={isDisabled}
               maxLength={100}
@@ -108,7 +109,7 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
               )}
             />
             <FieldContent>
-              <FieldLabel htmlFor="wf-inherit-signature" className="text-base">
+              <FieldLabel htmlFor="wf-inherit-signature">
                 {t("inheritSignatureFromPr")}
               </FieldLabel>
               <FieldDescription>

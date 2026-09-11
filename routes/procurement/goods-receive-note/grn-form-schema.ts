@@ -11,7 +11,6 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   const base = z.object({
     id: z.string().optional(),
     doc_version: z.coerce.number().optional(),
-    _group_key: z.string(),
     purchase_order_id: z.string().nullable(),
     purchase_order_no: z.string(),
     purchase_order_detail_id: z.string().nullable(),
@@ -138,7 +137,6 @@ export function createGrnSchema(tv: TranslationFn, tf: TranslationFn) {
 export type GrnFormValues = z.infer<ReturnType<typeof createGrnSchema>>;
 
 export const EMPTY_DETAIL: GrnFormValues["items"][number] = {
-  _group_key: "",
   purchase_order_id: null,
   purchase_order_no: "",
   purchase_order_detail_id: null,
@@ -273,7 +271,6 @@ export function getDefaultValues(
           // doc_version ของ detail ไม่ใช่ของ item — หลังบ้านล็อกด้วยเลขของ
           // tb_good_received_note_detail ส่งเลขของ item ไปจะ 409 ทุกครั้ง
           doc_version: detail.doc_version,
-          _group_key: detail.product_id,
           purchase_order_id: detail.purchase_order_id,
           purchase_order_no: detail.po_no ?? "",
           purchase_order_detail_id: detail.purchase_order_detail_id,

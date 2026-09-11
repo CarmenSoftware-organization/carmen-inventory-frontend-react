@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { round2 } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type {
@@ -8,33 +7,13 @@ import type {
   PrDetailRef,
 } from "@/types/purchase-order";
 
-const createLocationSchema = (tv: TranslationFn, tf: TranslationFn) =>
-  z.object({
-    id: z.string().min(1),
-    // meta ของ location (capture ตอนเลือก) — ส่งใน payload ให้ backend
-    location_code: z.string().optional(),
-    location_name: z.string().optional(),
-    order_qty: z.coerce
-      .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
-    received_qty: z.coerce.number().min(0),
-    // per-location Disc%/Tax (input) — pricing คำนวณต่อ location + override
-    discount_rate: z.coerce.number().optional(),
-    discount_amount: z.coerce.number().optional(),
-    is_discount_adjustment: z.boolean().optional(),
-    tax_profile_id: z.string().nullable().optional(),
-    tax_profile_name: z.string().optional(),
-    tax_rate: z.coerce.number().optional(),
-    tax_amount: z.coerce.number().optional(),
-    is_tax_adjustment: z.boolean().optional(),
-  });
-
 const prDetailSchema = z.object({
-  pr_detail_id: z.string(),
+  // null ได้ — แถวที่ไม่ได้มาจาก PR (สร้างเองหรือมาจาก price list)
+  pr_detail_id: z.string().nullable(),
   order_qty: z.coerce.number(),
-  order_unit_id: z.string(),
-  order_unit_name: z.string(),
   order_base_qty: z.coerce.number(),
+  received_qty: z.coerce.number(),
+  foc_qty: z.coerce.number(),
 });
 
 export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
@@ -63,18 +42,31 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     sub_total_price: z.coerce.number(),
     net_amount: z.coerce.number(),
     total_price: z.coerce.number(),
-    // item-level tax เป็น derived จาก location (mirror location แรก) — ไม่ required แล้ว
     tax_profile_id: z.string().nullable().optional(),
     tax_profile_name: z.string().optional(),
     tax_rate: z.coerce.number().optional(),
     tax_amount: z.coerce.number().optional(),
+    is_tax_adjustment: z.boolean().optional(),
     discount_rate: z.coerce.number().optional(),
     discount_amount: z.coerce.number().optional(),
+    is_discount_adjustment: z.boolean().optional(),
     is_foc: z.boolean(),
+    foc_qty: z.coerce.number(),
+    // แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location — ของเดิมเป็น
+    // `locations[]` ซ้อนในแถว แล้ว qty/ภาษี/ส่วนลดของแถวเป็นผลรวมของทุก location
+    location_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("location") })),
+    location_code: z.string(),
+    location_name: z.string(),
+    delivery_point_id: z.string().nullable(),
+    delivery_point_name: z.string(),
+    received_qty: z.coerce.number(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
     stage_message: z.string().optional(),
-    pr_detail: z.array(prDetailSchema),
+    pr_details: z.array(prDetailSchema),
     // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
     // user.name ไม่บังคับ — บาง entry หลังบ้านส่งมาแค่ id
     history: z
@@ -89,7 +81,6 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
         }),
       )
       .optional(),
-    locations: z.array(createLocationSchema(tv, tf)),
   });
 }
 
@@ -157,41 +148,18 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   current_stage_status: "pending",
   stage_status: "",
   stage_message: "",
-  pr_detail: [] as PrDetailRef[],
-  // item ใหม่เริ่มด้วย location ว่าง 1 แถวเสมอ — qty ของ item มาจาก locations
-  // ทุก item จึงต้องมีอย่างน้อย 1 location; ทำให้ user เห็นแถวให้กรอกทันที และ
-  // ตอน save แถวนี้ validate แดงเอง (order_qty 0 < min 1) ไม่ใช่แค่ border แดงลอย ๆ
-  locations: [
-    {
-      id: "",
-      location_code: "",
-      location_name: "",
-      order_qty: 0,
-      received_qty: 0,
-      discount_rate: 0,
-      discount_amount: 0,
-      is_discount_adjustment: false,
-      tax_profile_id: null,
-      tax_profile_name: "",
-      tax_rate: 0,
-      tax_amount: 0,
-      is_tax_adjustment: false,
-    },
-  ] as {
-    id: string;
-    location_code: string;
-    location_name: string;
-    order_qty: number;
-    received_qty: number;
-    discount_rate: number;
-    discount_amount: number;
-    is_discount_adjustment: boolean;
-    tax_profile_id: string | null;
-    tax_profile_name: string;
-    tax_rate: number;
-    tax_amount: number;
-    is_tax_adjustment: boolean;
-  }[],
+  pr_details: [] as PrDetailRef[],
+  // แถวหนึ่ง = คลังเดียว — แถวใหม่เริ่มด้วยคลังว่าง ให้ validate แดงเองตอน save
+  // (location_id ว่าง = required) ไม่ใช่ปล่อยผ่านแล้วไปตายที่ backend
+  location_id: null as string | null,
+  location_code: "",
+  location_name: "",
+  delivery_point_id: null as string | null,
+  delivery_point_name: "",
+  received_qty: 0,
+  foc_qty: 0,
+  is_tax_adjustment: false,
+  is_discount_adjustment: false,
 };
 
 export const EMPTY_FORM: PoFormValues = {
@@ -243,7 +211,9 @@ export function getDefaultValues(
       buyer_name: po.buyer_name ?? "",
       email: po.email ?? "",
       remarks: po.remarks ?? "",
-      note: po.note ?? "",
+      // response ใหม่ไม่มี `note` ที่หัวเอกสารแล้ว — ฟอร์มยังมีช่องนี้อยู่
+      // (ส่งใน payload ได้) แต่โหลดกลับมาไม่ได้ ตั้งว่างไว้ก่อน
+      note: "",
       items:
         po.purchase_order_detail?.map((d) => ({
           id: d.id,
@@ -279,28 +249,22 @@ export function getDefaultValues(
           current_stage_status: d.current_stage_status ?? "pending",
           stage_status: "",
           stage_message: "",
-          pr_detail: d.pr_detail ?? [],
+          pr_details: d.pr_details ?? [],
           history: d.history,
-          locations:
-            d.locations
-              ?.filter((loc) => loc.location_id)
-              ?.map((loc) => ({
-                id: loc.location_id ?? "",
-                location_code: loc.location_code ?? "",
-                location_name: loc.location_name ?? "",
-                order_qty: loc.order_qty ?? 0,
-                received_qty: loc.received_qty ?? 0,
-                // PO เก่าไม่มี Disc%/Tax ต่อ location → fallback ค่า item-level
-                discount_rate: loc.discount_rate ?? d.discount_rate ?? 0,
-                discount_amount: loc.discount_amount ?? d.discount_amount ?? 0,
-                is_discount_adjustment: loc.is_discount_adjustment ?? false,
-                tax_profile_id: loc.tax_profile_id ?? d.tax_profile_id ?? null,
-                tax_profile_name:
-                  loc.tax_profile_name ?? d.tax_profile_name ?? "",
-                tax_rate: loc.tax_rate ?? d.tax_rate ?? 0,
-                tax_amount: loc.tax_amount ?? d.tax_amount ?? 0,
-                is_tax_adjustment: loc.is_tax_adjustment ?? false,
-              })) ?? [],
+          // แถวหนึ่ง = คลังเดียว — ค่าพวกนี้เคยอยู่ใน locations[0] ตอน backend ยัง group
+          location_id: d.location_id ?? null,
+          location_code: d.location_code ?? "",
+          location_name: d.location_name ?? "",
+          delivery_point_id: d.delivery_point_id ?? null,
+          delivery_point_name: d.delivery_point_name ?? "",
+          foc_qty: d.foc_qty ?? 0,
+          // ยอดที่รับแล้วอยู่ใน pr_details ไม่ได้อยู่บนแถว — รวมทุกใบ PR ที่อ้างถึง
+          received_qty: (d.pr_details ?? []).reduce(
+            (sum, pr) => sum + (pr.received_qty ?? 0),
+            0,
+          ),
+          is_tax_adjustment: d.is_tax_adjustment ?? false,
+          is_discount_adjustment: d.is_discount_adjustment ?? false,
         })) ?? [],
     };
   }
@@ -321,51 +285,18 @@ export function mapItemToPayload(
   const price = item.price ?? 0;
   const conversion = item.order_unit_conversion_factor ?? 1;
 
-  // pricing ต่อ location — honor override (isAdj → ใช้ amount ที่กรอกเอง)
-  const locations = (item.locations ?? []).map((loc) => {
-    const qty = loc.order_qty ?? 0;
-    const discRate = loc.discount_rate ?? 0;
-    const taxRate = loc.tax_rate ?? 0;
-    const isDiscAdj = loc.is_discount_adjustment ?? false;
-    const isTaxAdj = loc.is_tax_adjustment ?? false;
-    const { subtotal, discountAmount, netAmount, taxAmount, totalPrice } =
-      computeLineAmounts({
-        price,
-        qty,
-        discRate,
-        isDiscAdj,
-        discAmt: loc.discount_amount ?? 0,
-        taxRate,
-        isTaxAdj,
-        taxAmt: loc.tax_amount ?? 0,
-      });
-    return {
-      location_id: loc.id,
-      location_code: loc.location_code ?? "",
-      location_name: loc.location_name ?? "",
-      // backend contract: order_qty (order unit) + order_base_qty (base unit)
-      order_qty: qty,
-      order_base_qty: qty * conversion,
+  // ยอดของแถว = ยอดของคลังเดียว ไม่ต้องรวมข้าม location อีกแล้ว
+  const { subtotal, discountAmount, netAmount, taxAmount, totalPrice } =
+    computeLineAmounts({
       price,
-      discount_rate: discRate,
-      discount_amount: discountAmount,
-      is_discount_adjustment: isDiscAdj,
-      tax_profile_id: loc.tax_profile_id ?? null,
-      tax_profile_name: loc.tax_profile_name ?? "",
-      tax_rate: taxRate,
-      tax_amount: taxAmount,
-      is_tax_adjustment: isTaxAdj,
-      sub_total_price: subtotal,
-      net_amount: netAmount,
-      total_price: totalPrice,
-    };
-  });
-
-  // item-level = ผลรวมทุก location; tax/discount rate mirror จาก location แรกที่มีค่า
-  const sum = (pick: (l: (typeof locations)[number]) => number) =>
-    round2(locations.reduce((acc, l) => acc + pick(l), 0));
-  const firstTax = locations.find((l) => l.tax_profile_id);
-  const firstLoc = locations[0];
+      qty: item.order_qty ?? 0,
+      discRate: item.discount_rate ?? 0,
+      isDiscAdj: item.is_discount_adjustment ?? false,
+      discAmt: item.discount_amount ?? 0,
+      taxRate: item.tax_rate ?? 0,
+      isTaxAdj: item.is_tax_adjustment ?? false,
+      taxAmt: item.tax_amount ?? 0,
+    });
 
   return {
     ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
@@ -383,20 +314,25 @@ export function mapItemToPayload(
     base_unit_name: item.base_unit_name ?? "",
     base_qty: item.base_qty ?? item.order_qty,
     price,
-    sub_total_price: sum((l) => l.sub_total_price),
-    net_amount: sum((l) => l.net_amount),
-    total_price: sum((l) => l.total_price),
-    tax_profile_id: firstTax?.tax_profile_id ?? null,
-    tax_profile_name: firstTax?.tax_profile_name ?? "",
-    tax_rate: firstTax?.tax_rate ?? 0,
-    tax_amount: sum((l) => l.tax_amount),
-    is_tax_adjustment: firstLoc?.is_tax_adjustment ?? false,
+    sub_total_price: subtotal,
+    net_amount: netAmount,
+    total_price: totalPrice,
+    tax_profile_id: item.tax_profile_id ?? null,
+    tax_profile_name: item.tax_profile_name ?? "",
+    tax_rate: item.tax_rate ?? 0,
+    tax_amount: taxAmount,
+    is_tax_adjustment: item.is_tax_adjustment ?? false,
     is_foc: item.is_foc ?? false,
-    discount_rate: firstLoc?.discount_rate ?? 0,
-    discount_amount: sum((l) => l.discount_amount),
-    is_discount_adjustment: firstLoc?.is_discount_adjustment ?? false,
-    pr_detail: item.pr_detail ?? [],
+    foc_qty: item.foc_qty ?? 0,
+    discount_rate: item.discount_rate ?? 0,
+    discount_amount: discountAmount,
+    is_discount_adjustment: item.is_discount_adjustment ?? false,
+    pr_details: item.pr_details ?? [],
     description: item.description ?? "",
-    locations,
+    location_id: item.location_id || null,
+    location_code: item.location_code ?? "",
+    location_name: item.location_name ?? "",
+    delivery_point_id: item.delivery_point_id || null,
+    delivery_point_name: item.delivery_point_name ?? "",
   };
 }

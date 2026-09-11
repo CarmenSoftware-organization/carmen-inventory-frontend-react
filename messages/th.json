@@ -871,6 +871,7 @@
     "minNumber": "{field}ต้องมีค่าอย่างน้อย {min}",
     "minZero": "{field}ต้องมีค่า 0 ขึ้นไป",
     "positive": "{field}ต้องมีค่ามากกว่า 0",
+    "qtyOrFoc": "ใส่จำนวนที่ขอ ถ้าของชิ้นนี้ได้ฟรีให้ใส่จำนวน FOC แทน",
     "maxReturnQty": "คืนได้ไม่เกินจำนวนที่รับ",
     "minLength": "{field}ต้องมีอย่างน้อย {min} ตัวอักษร",
     "maxLength": "{field}ต้องมีไม่เกิน {max} ตัวอักษร",
@@ -1386,7 +1387,7 @@
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบเหตุผลใบลดหนี้ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "namePlaceholder": "เช่น สินค้าเสียหาย"
     },
-    "chartOfAccount": {
+    "chartOfAccounts": {
       "entity": "ผังบัญชี",
       "title": "ผังบัญชี",
       "desc": "ผังบัญชีที่ระบบบัญชีของคุณใช้ลงรายการ",
@@ -1406,6 +1407,16 @@
         "balance_sheet": "งบแสดงฐานะการเงิน",
         "income_statement": "งบกำไรขาดทุน",
         "statistic": "สถิติ"
+      },
+      "importCarmenGl": {
+        "action": "นำเข้าจาก Carmen GL",
+        "importing": "กำลังนำเข้า…",
+        "confirmTitle": "นำเข้าผังบัญชีจาก Carmen GL?",
+        "confirmDesc": "ระบบจะดึงผังบัญชีจาก interface Carmen GL ที่ตั้งค่าไว้ของหน่วยธุรกิจนี้ แล้วเขียนในทรานแซกชันเดียวแบบทั้งหมดหรือไม่เขียนเลย การจัดการรหัสซ้ำและรหัสที่มีเฉพาะในระบบนี้ เป็นไปตามนโยบายการซิงก์ในหน้าตั้งค่า interface",
+        "success": "นำเข้าผังบัญชีแล้ว",
+        "summary": "เพิ่ม {created} · แก้ไข {updated} · ข้าม {skipped} · ลบ {deleted}",
+        "failed": "นำเข้าไม่สำเร็จ",
+        "failedDesc": "นำเข้าผังบัญชีไม่สำเร็จ ไม่มีการเปลี่ยนแปลงข้อมูล"
       }
     },
     "accountMapping": {
@@ -1790,6 +1801,7 @@
       "description": "รายละเอียด",
       "ipAddress": "ที่อยู่ IP",
       "searchEntityType": "ค้นหาประเภทข้อมูล...",
+      "searchAction": "ค้นหาการกระทำ...",
       "generalInfo": "ข้อมูลทั่วไป",
       "dataChanges": "การเปลี่ยนแปลงข้อมูล",
       "oldData": "ก่อนเปลี่ยน",
@@ -2128,7 +2140,21 @@
           "options": "ตัวเลือก",
           "optionsDesc": "การจับคู่บัญชีและการส่งข้อมูลไปยัง GL",
           "setAccountMappingAllItems": "ตั้งค่าการจับคู่บัญชีให้ทุกรายการ",
-          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL"
+          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL",
+          "syncPolicy": "การซิงก์ผังบัญชี",
+          "syncPolicyDesc": "กำหนดว่าการนำเข้าจะปรับข้อมูลของ Carmen 4 เข้ากับผังบัญชีที่นี่อย่างไร มีผลทั้งกับปุ่มนำเข้าในหน้าผังบัญชีและการรันตามกำหนดเวลา",
+          "onDuplicate": "เมื่อรหัสมีทั้งสองฝั่ง",
+          "onDuplicateOption": {
+            "skip": "คงของเดิมไว้",
+            "upsert": "เขียนทับด้วยค่าจาก Carmen 4",
+            "error": "ยกเลิกการนำเข้าทั้งชุด"
+          },
+          "onLocalOnly": "รหัสที่มีเฉพาะในระบบนี้",
+          "onLocalOnlyOption": {
+            "keep": "เก็บไว้",
+            "delete": "ลบออก"
+          },
+          "authorizeTokenHint": "ต้องใส่ scheme นำหน้าด้วย เช่น “direct <token>” — ค่านี้ถูกส่งเป็น Authorization header ตรง ๆ ทั้งก้อน — ไม่แตะช่องนี้ = ใช้ค่าเดิมที่บันทึกไว้"
         }
       },
       "pos": {
@@ -2165,6 +2191,66 @@
         "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
         "postCityLedger": "ดึงรายการ City Ledger",
         "postCreditCard": "ดึงรายการบัตรเครดิต"
+      },
+      "showSecret": "แสดง",
+      "hideSecret": "ซ่อน"
+    },
+    "emailProfile": {
+      "title": "โปรไฟล์อีเมล",
+      "desc": "โปรไฟล์ผู้ส่งที่ใช้ส่งใบสั่งซื้อและเอกสารอื่น ๆ ให้ผู้ขายทางอีเมล",
+      "entity": "โปรไฟล์อีเมล",
+      "add": "เพิ่มโปรไฟล์",
+      "empty": "ยังไม่มีโปรไฟล์อีเมล เพิ่มโปรไฟล์เพื่อเริ่มส่งเอกสารทางอีเมล",
+      "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+      "table": {
+        "name": "ชื่อ",
+        "from": "จาก",
+        "status": "สถานะ"
+      },
+      "defaultBadge": "ค่าเริ่มต้น",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "setDefault": "ตั้งเป็นค่าเริ่มต้น",
+      "setDefaultSuccess": "ตั้ง \"{name}\" เป็นโปรไฟล์เริ่มต้นแล้ว",
+      "cannotDeleteDefaultTooltip": "นี่คือโปรไฟล์เริ่มต้น — ตั้งโปรไฟล์อื่นเป็นค่าเริ่มต้นก่อนจึงจะลบได้",
+      "testSend": "ทดสอบส่ง",
+      "testSentSuccess": "ส่งอีเมลทดสอบไปที่ {recipient} แล้ว",
+      "testSentFailure": "ส่งอีเมลทดสอบไม่สำเร็จ",
+      "deleteTitle": "ลบโปรไฟล์อีเมล",
+      "deleteConfirm": "ลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "dialog": {
+        "namePlaceholder": "เช่น ฝ่ายจัดซื้อ",
+        "enabled": "เปิดใช้งาน",
+        "smtpSection": "เซิร์ฟเวอร์ SMTP",
+        "host": "โฮสต์",
+        "port": "พอร์ต",
+        "secure": "Implicit TLS",
+        "password": "รหัสผ่าน",
+        "passwordHint": "เว้นไว้ = ใช้รหัสผ่านเดิม",
+        "senderSection": "ผู้ส่ง",
+        "fromEmail": "อีเมลผู้ส่ง",
+        "fromName": "ชื่อผู้ส่ง",
+        "replyTo": "ตอบกลับไปที่",
+        "defaultCc": "สำเนาถึงเริ่มต้น",
+        "defaultCcHint": "คั่นหลายที่อยู่ด้วยเครื่องหมายจุลภาค อัฒภาค หรือช่องว่าง",
+        "templateSection": "เทมเพลต",
+        "subjectTemplate": "เทมเพลตหัวเรื่อง",
+        "bodyTemplate": "เทมเพลตเนื้อหา",
+        "profileName": "ชื่อโปรไฟล์",
+        "secureHint": "เปิดเมื่อใช้ implicit TLS (มักเป็นพอร์ต 465) — พอร์ต 587 ปกติใช้ STARTTLS จึงปิดไว้",
+        "passwordIsSet": "ตั้งรหัสผ่านไว้แล้ว",
+        "changePassword": "เปลี่ยนรหัสผ่าน",
+        "keepPassword": "ใช้รหัสผ่านเดิม",
+        "note": "บันทึกภายใน",
+        "notePlaceholder": "บันทึกสำหรับผู้ดูแล ไม่ถูกส่งไปกับอีเมล",
+        "advancedSection": "ตั้งค่าขั้นสูง"
+      },
+      "test": {
+        "title": "ส่งอีเมลทดสอบ",
+        "description": "ส่งข้อความทดสอบผ่าน “{name}” เพื่อยืนยันว่าการตั้งค่า SMTP ใช้งานได้จริง",
+        "toLabel": "ส่งไปที่",
+        "send": "ส่งทดสอบ",
+        "invalidEmail": "กรอกอีเมลให้ถูกรูปแบบ"
       }
     }
   },
@@ -2449,6 +2535,7 @@
         "noVendorsDesc": "เพิ่มผู้ขายในคำขอนี้",
         "copyUrl": "คัดลอก URL ผู้ขาย",
         "openUrl": "เปิด URL ผู้ขาย",
+        "emailUrl": "ส่งลิงก์ให้ผู้ขายทางอีเมล",
         "selectVendorsTitle": "เพิ่มผู้ขาย",
         "selectVendorsDesc": "ติ๊กผู้ขายที่จะขอราคา เลือกทีเดียวหลายรายได้",
         "noVendorsFound": "ไม่พบผู้ขายที่ค้น",
@@ -2456,7 +2543,29 @@
         "nVendorsSelected": "เลือกไว้ {count} ราย",
         "addNVendors": "เพิ่ม {count} ราย"
       },
-      "notFound": "ไม่พบใบขอรายการราคา"
+      "notFound": "ไม่พบใบขอรายการราคา",
+      "sendEmail": {
+        "title": "ส่งคำขอรายการราคาให้ผู้ขาย",
+        "desc": "ส่งลิงก์สำหรับกรอกรายการราคาของ {name} ให้ {vendor} ทางอีเมล",
+        "profile": "โปรไฟล์ผู้ส่ง",
+        "profilePlaceholder": "เลือกโปรไฟล์ผู้ส่ง",
+        "noProfiles": "หน่วยธุรกิจนี้ยังไม่มีโปรไฟล์อีเมลที่เปิดใช้งาน",
+        "goToSettings": "ไปหน้าตั้งค่าโปรไฟล์อีเมล",
+        "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+        "to": "ถึง",
+        "toPlaceholder": "vendor@example.com",
+        "cc": "สำเนาถึง",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "หัวเรื่อง",
+        "body": "ข้อความ",
+        "defaultSubject": "ขอเชิญเสนอรายการราคา: {name}",
+        "defaultBody": "เรียน {vendor}\n\nทางเราขอเชิญท่านเสนอรายการราคาสำหรับ {name}\n\nกรุณากรอกราคาผ่านลิงก์ด้านล่างนี้\n{url}\n\nหากมีข้อสงสัยประการใด กรุณาตอบกลับอีเมลฉบับนี้\n\nขอแสดงความนับถือ",
+        "add": "เพิ่ม",
+        "remove": "ลบ {email}",
+        "duplicateEmail": "เพิ่มไว้แล้ว",
+        "send": "ส่ง",
+        "unavailable": "ยังใช้งานไม่ได้"
+      }
     }
   },
   "inventoryManagement": {
@@ -3095,6 +3204,7 @@
       "noIngredientsYet": "ยังไม่มีส่วนผสม",
       "noIngredientsDesc": "เพิ่มรายการเพื่อเริ่มคำนวณต้นทุน",
       "ingredientsPreviewNote": "พรีวิวเท่านั้น — ยังไม่ได้บันทึกส่วนผสมร่วมกับสูตร",
+      "ingredientLinesTotal": "รวมรายการส่วนผสม (พรีวิว)",
       "ingredientCount": "{count, plural, =0 {ไม่มีส่วนผสม} other {{count} รายการ}}",
       "ingredientName": "ส่วนผสม",
       "qty": "จำนวน",
@@ -3463,6 +3573,8 @@
       "edit": "แก้ไขใบขอซื้อ",
       "deleteTitle": "ลบใบขอซื้อ",
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ \"{prNo}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "deleteNotOwner": "ใบขอซื้อใบนี้ลบได้เฉพาะคนที่เปิดใบเท่านั้น",
+      "batchDeleteNotOwner": "ใบที่เลือกไว้มีของคนอื่นปนอยู่ ลบได้เฉพาะใบที่ตัวเองเปิด",
       "approveTitle": "อนุมัติใบขอซื้อ",
       "approveConfirm": "จะอนุมัติ PR และส่งไปขั้นตอนถัดไป คุณแน่ใจหรือไม่?",
       "rejectTitle": "ไม่อนุมัติใบขอซื้อ",
@@ -3660,14 +3772,12 @@
       "fromPriceList": "จากใบขอซื้อ",
       "fromPriceListSubtitle": "ใช้ราคาอ้างอิง",
       "fromPriceListDesc": "สร้างจากใบขอซื้อ ที่มีราคาเจรจาไว้แล้วกับผู้ขาย",
-      "fromPriceListStep1": "รายละเอียดใบสั่งซื้อ",
-      "fromPriceListStep1Desc": "วันที่ ผู้ซื้อ แผนก และลำดับขั้นอนุมัติ",
-      "fromPriceListStep2": "เลือกผู้ขาย",
-      "fromPriceListStep2Desc": "เลือกผู้ขายที่จะสั่งซื้อ",
-      "fromPriceListStep3": "เลือกสินค้า",
-      "fromPriceListStep3Desc": "เลือกสินค้าและจำนวน",
-      "fromPriceListStep4": "ตรวจสอบและยืนยัน",
-      "fromPriceListStep4Desc": "ตรวจสอบก่อนสร้างใบสั่งซื้อ",
+      "fromPriceListStep1": "ใบสั่งซื้อและผู้ขาย",
+      "fromPriceListStep1Desc": "ลำดับขั้นอนุมัติ วันส่งมอบ และผู้ขายที่จะสั่งซื้อ",
+      "fromPriceListStep2": "เลือกสินค้า",
+      "fromPriceListStep2Desc": "เลือกสินค้าและจำนวน",
+      "fromPriceListStep3": "ตรวจสอบและยืนยัน",
+      "fromPriceListStep3Desc": "ตรวจสอบก่อนสร้างใบสั่งซื้อ",
       "fromPriceListStepPlaceholder": "เนื้อหา {label}",
       "selectPr": "เลือกใบขอซื้อ",
       "selectPrDesc": "เลือกใบขอซื้อเพื่อสร้างใบสั่งซื้อ",
@@ -3680,6 +3790,8 @@
       "noVendorSelected": "ยังไม่ได้เลือกผู้ขาย",
       "noVendorsAvailable": "ไม่มีผู้ขายที่พร้อม",
       "noVendorsAvailableDesc": "ไม่มีผู้ขายที่มีรายการราคาที่ใช้งานอยู่ในวันส่งมอบที่เลือก",
+      "pickDeliveryDateFirst": "เลือกวันส่งมอบก่อน",
+      "pickDeliveryDateFirstDesc": "รายชื่อผู้ขายมาจากรายการราคาที่ใช้งานอยู่ ณ วันที่เลือก",
       "searchProduct": "ค้นหาสินค้าจากรหัสหรือชื่อ…",
       "noItemsAvailable": "ไม่มีสินค้าในรายการราคา",
       "noItemsAvailableDesc": "ผู้ขายไม่มีสินค้าในรายการราคาที่ใช้งานอยู่สำหรับวันส่งมอบที่เลือก",
@@ -3717,6 +3829,7 @@
       "noPriceListAvailable": "ไม่มีรายการราคา",
       "noPriceListAvailableDesc": "ผู้ขายที่เลือกไม่มีรายการราคาที่ยังใช้งาน",
       "priceListNo": "เลขที่รายการราคา",
+      "notSelectableHint": "รายการที่แสดงเป็นสีจางไม่สามารถเลือกได้ เนื่องจากไม่สามารถใช้กับใบสั่งซื้อนี้ได้",
       "plRef": "อ้างอิงรายการราคา",
       "effective": "มีผล",
       "workflowLabel": "ลำดับขั้นอนุมัติปลายทาง",
@@ -3758,7 +3871,36 @@
       "rejected": "ไม่อนุมัติใบสั่งซื้อแล้ว",
       "sentBack": "ส่งกลับใบสั่งซื้อแล้ว",
       "closed": "ปิดใบสั่งซื้อแล้ว",
-      "deleteProductLine": "ลบสินค้านี้พร้อมทุกที่เก็บของมัน"
+      "deleteProductLine": "ลบสินค้านี้พร้อมทุกที่เก็บของมัน",
+      "sendEmail": {
+        "button": "ส่งให้ผู้ขาย",
+        "title": "ส่งใบสั่งซื้อให้ผู้ขาย",
+        "desc": "ส่งอีเมล {poNo} ให้ผู้ขาย พร้อมแนบไฟล์ใบสั่งซื้อเป็น PDF",
+        "profile": "โปรไฟล์ผู้ส่ง",
+        "profilePlaceholder": "เลือกโปรไฟล์ผู้ส่ง",
+        "noProfiles": "หน่วยธุรกิจนี้ยังไม่มีโปรไฟล์อีเมลที่เปิดใช้งานอยู่",
+        "goToSettings": "ไปตั้งค่าโปรไฟล์อีเมล",
+        "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
+        "to": "ถึง",
+        "toPlaceholder": "vendor@example.com",
+        "toHint": "กด Enter เพื่อเพิ่ม",
+        "toRequired": "ต้องมีผู้รับอย่างน้อยหนึ่งคน",
+        "cc": "สำเนาถึง",
+        "ccPlaceholder": "cc@example.com",
+        "subject": "หัวเรื่อง",
+        "subjectRequired": "กรอกหัวเรื่อง",
+        "body": "ข้อความ",
+        "bodyRequired": "กรอกข้อความ",
+        "attachPdf": "แนบไฟล์ใบสั่งซื้อ (PDF)",
+        "add": "เพิ่ม",
+        "remove": "ลบ {email}",
+        "duplicateEmail": "เพิ่มไว้แล้ว",
+        "sending": "กำลังส่ง…",
+        "send": "ส่ง",
+        "sendSuccess": "ส่งใบสั่งซื้อให้ผู้ขายเรียบร้อยแล้ว",
+        "sendPartial": "ส่งแล้ว แต่ส่งไม่ถึง: {emails}",
+        "sendFailed": "ส่งอีเมลไม่สำเร็จ ไม่ถึงผู้รับรายใดเลย"
+      }
     },
     "creditNote": {
       "entity": "ใบลดหนี้",
@@ -3823,6 +3965,7 @@
       "title": "ใบรับสินค้า",
       "desc": "ของที่มาถึงจริงจากผู้ขาย ตรวจเทียบกับใบสั่งซื้อ",
       "mixedCurrencyError": "PO ที่เลือกใช้สกุลเงินต่างกัน กรุณาเลือก PO ที่ใช้สกุลเงินเดียวกัน",
+      "poCurrencyMismatch": "PO ที่เลือกใช้สกุลเงินคนละตัวกับใบรับสินค้านี้ ({currency}) กรุณาเลือก PO ที่เป็น {currency}",
       "overReceiptWarning": "รับเกินจำนวนสั่ง (สั่ง {ordered})",
       "documentInfo": "ข้อมูลเอกสาร",
       "add": "ทำใบรับของ",
@@ -3938,6 +4081,8 @@
       "wizardVendorDesc": "เลือกผู้จำหน่ายที่ต้องการรับสินค้า",
       "wizardPoTitle": "เลือกใบสั่งซื้อ",
       "wizardPoDesc": "เลือกใบสั่งซื้อหนึ่งรายการหรือมากกว่าเพื่อรับสินค้า",
+      "fromPo": "รับสินค้าจากใบสั่งซื้อ",
+      "fromPoDesc": "รับสินค้าตามใบสั่งซื้อที่ยังรับไม่ครบ",
       "noVendor": "ไม่มีผู้จำหน่าย",
       "noVendorDesc": "ไม่มีผู้จำหน่ายที่มีใบสั่งซื้อพร้อมรับสินค้า",
       "poCount": "{count} ใบสั่งซื้อ",
@@ -4474,6 +4619,7 @@
     "workflowPurchaseOrder": "ใบสั่งซื้อ",
     "workflowStoreRequisition": "ใบเบิกของ",
     "interface": "การเชื่อมต่อระบบภายนอก",
+    "emailProfile": "โปรไฟล์อีเมล",
     "period": "รอบบัญชี",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",
@@ -4528,7 +4674,7 @@
     "setting": "ตั้งค่า",
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
-    "chartOfAccount": "ผังบัญชี",
+    "chartOfAccounts": "ผังบัญชี",
     "accountMapping": "การผูกบัญชี"
   },
   "commentSheet": {

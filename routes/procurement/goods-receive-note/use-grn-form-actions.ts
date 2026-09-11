@@ -19,6 +19,10 @@ import type {
 } from "@/types/goods-receive-note";
 import type { FormMode } from "@/types/form";
 import { buildItemChanges } from "@/lib/form-helpers";
+import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
+import { httpClient } from "@/lib/http-client";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { useBuCode } from "@/hooks/use-bu-code";
 import { removeSessionItem } from "@/lib/safe-storage";
 import {
   mapDetailToPayload,
@@ -55,7 +59,41 @@ export function useGrnFormActions({
   const updateGrn = useUpdateGoodsReceiveNote();
   const deleteGrn = useDeleteGoodsReceiveNote();
   const saveGrn = useSaveGoodsReceiveNote();
+  const buCode = useBuCode();
   const commitGrn = useCommitGoodsReceiveNote();
+
+  /**
+   * GET ใบสดจาก DB ก่อนยิง PATCH/commit — GRN เป็นโมดูลเดียวที่ไม่เคยมีตัวนี้เลย
+   * PATCH ใช้ `values.doc_version` และ commit ใช้ค่าจาก prop ตอนโหลดหน้า ซึ่งเป็น
+   * ค่าที่เก่าที่สุดในบรรดาทั้งหมด บันทึกรอบก่อน bump แล้วรอบถัดไปชน 409 ทันที
+   * (ทรงเดียวกับ fetchFreshPr / fetchFreshPo / fetchFreshSr)
+   */
+  type FreshGrn = {
+    doc_version?: number;
+    good_received_note_detail?: { id: string; doc_version?: number }[];
+  };
+
+  const fetchFreshGrn = async (id: string): Promise<FreshGrn | null> => {
+    if (!buCode) return null;
+    try {
+      const res = await httpClient.get(
+        `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`,
+      );
+      if (res.ok) {
+        const fresh = ((await res.json())?.data ?? null) as FreshGrn | null;
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
+          console.warn("[GRN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+        }
+        return fresh;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[GRN] ดึง doc_version สดไม่สำเร็จ", res.status, id);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้องไม่เงียบ
+      if (import.meta.env.DEV) console.warn("[GRN] ดึง doc_version สดไม่สำเร็จ", err);
+    }
+    return null;
+  };
   const voidGrn = useVoidGoodsReceiveNote();
 
   const [showDelete, setShowDelete] = useState(false);
@@ -102,7 +140,7 @@ export function useGrnFormActions({
     navigate("/procurement/goods-receive-note");
   };
 
-  const onSubmit = (values: GrnFormValues) => {
+  const onSubmit = async (values: GrnFormValues) => {
     const isManual = values.doc_type === "manual";
 
     const detail = buildItemChanges(
@@ -134,7 +172,9 @@ export function useGrnFormActions({
     );
 
     const raw: Record<string, unknown> = {
-      doc_version: values.doc_version ?? undefined,
+      // doc_version ไม่ได้อยู่ตรงนี้ — สาขา PATCH เซ็ตทับด้วยเลขสดข้างล่างอยู่แล้ว
+      // ส่วนใบใหม่ (create) ไม่มีเวอร์ชันให้ส่ง วางไว้ตรงนี้มีแต่จะทำให้คนอ่านคิดว่า
+      // ค่าในฟอร์มคือค่าที่ถูกส่งจริง
       note: values.note || undefined,
       grn_date: values.grn_date || undefined,
       invoice_no: values.invoice_no || undefined,
@@ -233,8 +273,25 @@ export function useGrnFormActions({
         return;
       }
 
-      // backend ต้องการ doc_version ทุกครั้งตอน PATCH (optimistic lock)
-      patchPayload.doc_version = values.doc_version;
+      // backend ต้องการ doc_version ทุกครั้งตอน PATCH (optimistic lock) — เอาเลขสด
+      // จาก DB ไม่ใช่ค่าในฟอร์ม ซึ่งค้างเก่าได้ถ้า response รอบก่อนไม่ได้ส่งกลับมา
+      const fresh = await fetchFreshGrn(goodsReceiveNote.id);
+      patchPayload.doc_version = pickDocVersion(
+        fresh?.doc_version,
+        values.doc_version,
+        goodsReceiveNote.doc_version,
+      );
+      // lock ของ backend เช็ค tb_good_received_note_detail แยกอีกชั้น — ส่งเลข
+      // ราย row เก่าไปก็ 409 เหมือนกัน (grn-form-schema.ts:273 เขียนเตือนไว้แล้ว)
+      if (patchPayload.good_received_note_detail) {
+        const detail = patchPayload.good_received_note_detail as {
+          update?: { id: string }[];
+        };
+        detail.update = withFreshDetailVersions(
+          detail.update,
+          fresh?.good_received_note_detail,
+        );
+      }
 
       updateGrn.mutate(
         {
@@ -346,12 +403,19 @@ export function useGrnFormActions({
     });
   };
 
-  const handleConfirmCommit = () => {
+  const handleConfirmCommit = async () => {
     if (!goodsReceiveNote) return;
+    // commit ตัดของเข้าสต๊อกจริงและย้อนไม่ได้ — ยิ่งต้องใช้เลขสด ของเดิมใช้ค่าจาก
+    // prop ตอนโหลดหน้า ซึ่งเก่ากว่าค่าในฟอร์มเสียอีก
+    const fresh = await fetchFreshGrn(goodsReceiveNote.id);
     commitGrn.mutate(
       {
         id: goodsReceiveNote.id,
-        doc_version: goodsReceiveNote.doc_version ?? 0,
+        doc_version: pickDocVersion(
+          fresh?.doc_version,
+          form.getValues("doc_version"),
+          goodsReceiveNote.doc_version,
+        ),
       },
       {
         onSuccess: () => {

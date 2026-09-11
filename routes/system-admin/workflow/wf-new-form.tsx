@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -17,6 +18,9 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import { DiscardDialog } from "@/components/ui/discard-dialog";
+import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { toast } from "sonner";
 import { useCreateWorkflow } from "./use-wf-mutations";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -45,10 +49,24 @@ export default function WorkflowNewForm() {
     defaultValues: EMPTY_FORM,
   });
 
+  const discard = useDiscardConfirm({
+    isDirty: form.formState.isDirty,
+    isPending,
+  });
+  // ระหว่าง submit ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new ค้างอยู่ใน
+  // history stack หลัง navigate ออกไป กด back แล้วเด้งกลับ /new (ดู use-entity-form)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navGuard = useNavigationGuard(form.formState.isDirty && !isSubmitting);
+
+  const backToList = () => navigate("/system-admin/workflow");
+  const handleLeave = () => discard.confirm(backToList);
+
   const onSubmit = (values: WorkflowFormValues) => {
     const payload = mapToPayload(values);
 
+    setIsSubmitting(true);
     createWorkflow.mutate(payload, {
+      onError: () => setIsSubmitting(false),
       onSuccess: (res) => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
         const data = res as unknown as { data?: { id?: string } };
@@ -65,14 +83,14 @@ export default function WorkflowNewForm() {
           flush
           title={tf("addTitle", { entity: t("entity") })}
           backLabel={tc("goBack")}
-          onBack={() => navigate("/system-admin/workflow")}
+          onBack={handleLeave}
           actions={
             <>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/system-admin/workflow")}
+                onClick={handleLeave}
                 disabled={isPending}
                 className="text-sm"
               >
@@ -132,7 +150,7 @@ export default function WorkflowNewForm() {
                   onValueChange={field.onChange}
                   disabled={isPending}
                 >
-                  <SelectTrigger id="wf-type" className="h-9">
+                  <SelectTrigger id="wf-type">
                     <SelectValue placeholder={t("selectType")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -203,6 +221,18 @@ export default function WorkflowNewForm() {
           </div>
         </SettingSection>
       </form>
+
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(open) => {
+          if (!open) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

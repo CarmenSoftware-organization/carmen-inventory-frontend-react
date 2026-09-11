@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -9,7 +9,17 @@ import { SettingSection } from "@/components/ui/setting-section";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
-import { TextField, ToggleField } from "./interface-fields";
+import { EnumField, TextField, ToggleField } from "./interface-fields";
+
+/** รหัสซ้ำ (มีทั้งสองฝั่ง) จะถูกทำอย่างไรตอนดึงผังบัญชี */
+export const COA_ON_DUPLICATE = ["skip", "upsert", "error"] as const;
+/** รหัสที่มีเฉพาะฝั่ง Carmen Blue (ต้นทางไม่มีแล้ว) จะถูกทำอย่างไร */
+export const COA_ON_LOCAL_ONLY = ["keep", "delete"] as const;
+
+export const syncPolicySchema = z.object({
+  on_duplicate: z.enum(COA_ON_DUPLICATE),
+  on_local_only: z.enum(COA_ON_LOCAL_ONLY),
+});
 
 export const carmenGlSchema = z.object({
   enabled: z.boolean(),
@@ -20,6 +30,11 @@ export const carmenGlSchema = z.object({
   vendor_path: z.string(),
   set_account_mapping_all_items: z.boolean(),
   allow_posting_transfer_to_gl: z.boolean(),
+  /**
+   * ฝั่ง backend เป็น `.optional()` โดยตั้งใจ (คอนฟิกเก่ายังไม่มีคีย์นี้) แต่ฝั่งฟอร์ม
+   * บังคับให้มีเสมอ — schema ที่ไม่มีคีย์นี้จะ strip ค่าที่ผู้ใช้ตั้งไว้ทิ้งตอน Save
+   */
+  sync_policy: syncPolicySchema,
 });
 
 export type CarmenGlFormValues = z.infer<typeof carmenGlSchema>;
@@ -33,6 +48,9 @@ export const EMPTY_CARMEN_GL: CarmenGlFormValues = {
   vendor_path: "api/interface/vendor",
   set_account_mapping_all_items: true,
   allow_posting_transfer_to_gl: false,
+  // ตรงกับ fallback ของ backend ตอน import (`?? "skip"` / `?? "keep"`) — คอนฟิกที่ยังไม่เคย
+  // ตั้งค่านี้จึงถูกบันทึกด้วยค่าที่ให้พฤติกรรมเดิมทุกประการ ไม่ใช่ค่าที่เปลี่ยนผลลัพธ์เงียบ ๆ
+  sync_policy: { on_duplicate: "skip", on_local_only: "keep" },
 };
 
 /** แปลงค่าจาก app_config เป็นค่า form — row shape เก่า (generic accounting) parse เป็น default */
@@ -40,7 +58,16 @@ export function toFormValues(
   value: Record<string, unknown> | undefined,
 ): CarmenGlFormValues {
   if (!value) return EMPTY_CARMEN_GL;
-  const parsed = carmenGlSchema.safeParse({ ...EMPTY_CARMEN_GL, ...value });
+  // `sync_policy` ต้อง merge ลึกอีกชั้น — คอนฟิกเก่าไม่มีคีย์นี้เลย และถ้ามีมาแค่ครึ่งเดียว
+  // การ merge ตื้นจะทำให้ทั้งฟอร์ม parse ไม่ผ่านแล้วตกไปเป็น EMPTY ทั้งก้อน
+  const parsed = carmenGlSchema.safeParse({
+    ...EMPTY_CARMEN_GL,
+    ...value,
+    sync_policy: {
+      ...EMPTY_CARMEN_GL.sync_policy,
+      ...(value.sync_policy as Record<string, unknown> | undefined),
+    },
+  });
   return parsed.success ? parsed.data : EMPTY_CARMEN_GL;
 }
 
@@ -67,6 +94,7 @@ export default function CarmenGlInterfaceForm() {
   const ta = useTranslations("systemAdmin.interface.accounting");
   const tc = useTranslations("systemAdmin.interface.accounting.carmenGl");
   const { brand } = useParams<{ brand: string }>();
+  const navigate = useNavigate();
   const { value, isLoading, isError, refetch, save, isSaving } =
     useInterfaceConfig("interface_accounting_carmen_gl");
 
@@ -81,7 +109,14 @@ export default function CarmenGlInterfaceForm() {
 
   const submit = form.handleSubmit(
     (values) =>
-      save(toApiValue(values), { onSuccess: () => toast.success(t("saved")) }),
+      save(toApiValue(values), {
+        onSuccess: () => {
+          toast.success(t("saved"));
+          // กลับหน้ารายการ interface — guard ของหน้านี้ดักเฉพาะคลิกลิงก์กับปุ่ม back
+          // ไม่ดัก navigate() จากโค้ด จึงไม่ต้อง reset form ก่อน
+          navigate("/system-admin/interface");
+        },
+      }),
     () => scrollToFirstInvalidField(),
   );
 
@@ -90,6 +125,8 @@ export default function CarmenGlInterfaceForm() {
       title={ta(`brand.${brand}`)}
       description={tc("desc")}
       onSave={submit}
+      // คืนค่าที่บันทึกไว้ ไม่ใช่ค่า default — ยกเลิกแล้วต้องได้ของเดิมกลับมา
+      onCancel={() => form.reset(value ? toFormValues(value) : EMPTY_CARMEN_GL)}
       isSaving={isSaving}
       isLoading={isLoading}
       isError={isError}
@@ -120,7 +157,11 @@ export default function CarmenGlInterfaceForm() {
           field={form.register("authorize_token")}
           error={form.formState.errors.authorize_token?.message}
           type="password"
-          hint={t("apiKeyHint")}
+          revealLabels={{ show: t("showSecret"), hide: t("hideSecret") }}
+          // hint เฉพาะของ brand นี้ ไม่ใช่ `t("apiKeyHint")` ที่ POS/PMS ใช้ — backend ส่งค่านี้
+          // เป็น Authorization header ตรง ๆ ทั้งก้อน (`Authorization: ${token}`) ค่าที่ไม่มี
+          // scheme นำหน้าจึงได้ 401 จาก Carmen 4 โดยที่ฝั่งเราดูเหมือนตั้งค่าครบทุกช่อง
+          hint={tc("authorizeTokenHint")}
           className="sm:col-span-2"
         />
       </SettingSection>
@@ -160,6 +201,27 @@ export default function CarmenGlInterfaceForm() {
             form.setValue("allow_posting_transfer_to_gl", v, {
               shouldDirty: true,
             })
+          }
+        />
+      </SettingSection>
+
+      <SettingSection title={tc("syncPolicy")} description={tc("syncPolicyDesc")}>
+        <EnumField
+          label={tc("onDuplicate")}
+          value={form.watch("sync_policy.on_duplicate")}
+          options={COA_ON_DUPLICATE}
+          optionLabel={(o) => tc(`onDuplicateOption.${o}`)}
+          onChange={(v) =>
+            form.setValue("sync_policy.on_duplicate", v, { shouldDirty: true })
+          }
+        />
+        <EnumField
+          label={tc("onLocalOnly")}
+          value={form.watch("sync_policy.on_local_only")}
+          options={COA_ON_LOCAL_ONLY}
+          optionLabel={(o) => tc(`onLocalOnlyOption.${o}`)}
+          onChange={(v) =>
+            form.setValue("sync_policy.on_local_only", v, { shouldDirty: true })
           }
         />
       </SettingSection>

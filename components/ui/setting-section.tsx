@@ -103,7 +103,7 @@ export function SettingSection({
     <section
       className={cn(
         "grid items-start gap-x-10 md:grid-cols-3",
-        plain ? "gap-y-3" : "gap-y-6",
+        plain ? "gap-y-1" : "gap-y-6",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >

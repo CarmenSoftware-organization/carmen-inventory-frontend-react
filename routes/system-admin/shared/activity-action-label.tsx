@@ -1,10 +1,29 @@
 import {
+  Ban,
+  CircleSlash,
+  ClipboardCheck,
+  Copy,
+  Download,
+  Eye,
+  FileDown,
+  FileUp,
   LogIn,
   LogOut,
+  Mail,
+  MailCheck,
+  MessageSquare,
   Minus,
+  MoveRight,
   PenLine,
   Plus,
+  Printer,
+  Save,
+  Send,
+  TextCursorInput,
   Trash2,
+  Upload,
+  X,
+  Check,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,13 +36,34 @@ import { cn } from "@/lib/utils";
  * ("avoid neon") ป้ายเป็นสีกลางเสมอ
  */
 const ACTION_ICON: Record<string, { icon: LucideIcon; color: string }> = {
+  view: { icon: Eye, color: "var(--status-draft)" },
   create: { icon: Plus, color: "var(--status-approved)" },
   update: { icon: PenLine, color: "var(--status-pending)" },
   delete: { icon: Trash2, color: "var(--destructive)" },
   login: { icon: LogIn, color: "var(--status-in-progress)" },
   logout: { icon: LogOut, color: "var(--status-draft)" },
+  approve: { icon: Check, color: "var(--status-approved)" },
+  reject: { icon: X, color: "var(--destructive)" },
+  cancel: { icon: Ban, color: "var(--destructive)" },
+  void: { icon: CircleSlash, color: "var(--status-draft)" },
+  print: { icon: Printer, color: "var(--status-draft)" },
+  email: { icon: Mail, color: "var(--status-in-progress)" },
+  upload: { icon: Upload, color: "var(--status-in-progress)" },
+  download: { icon: Download, color: "var(--status-in-progress)" },
+  export: { icon: FileUp, color: "var(--status-draft)" },
+  import: { icon: FileDown, color: "var(--status-draft)" },
+  copy: { icon: Copy, color: "var(--status-draft)" },
+  move: { icon: MoveRight, color: "var(--status-draft)" },
+  rename: { icon: TextCursorInput, color: "var(--status-pending)" },
+  save: { icon: Save, color: "var(--status-pending)" },
+  comment: { icon: MessageSquare, color: "var(--status-draft)" },
+  submit: { icon: Send, color: "var(--status-in-progress)" },
+  review: { icon: ClipboardCheck, color: "var(--status-pending)" },
+  email_sent: { icon: MailCheck, color: "var(--status-approved)" },
 };
 
+// `other` ของ enum ฝั่ง backend ตั้งใจปล่อยให้ตกมาที่นี่ — ไม่มีความหมายเฉพาะ
+// ให้วาดเป็นไอคอน
 const FALLBACK = { icon: Minus, color: "var(--muted-foreground)" };
 
 /**

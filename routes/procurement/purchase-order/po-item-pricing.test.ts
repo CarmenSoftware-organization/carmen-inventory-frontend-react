@@ -3,10 +3,14 @@ import { computeItemPricing } from "./po-item-pricing";
 import type { PoFormValues } from "./po-form-schema";
 
 type PoItem = PoFormValues["items"][number];
-type PoLocation = PoItem["locations"][number];
 
-const loc = (l: Partial<PoLocation>) =>
+/**
+ * แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location — เทสต์ชุดเดิมทดสอบ
+ * การรวมยอดข้าม `locations[]` ซึ่งไม่มีอยู่แล้ว จึงเขียนใหม่ตามพฤติกรรมจริง
+ */
+const item = (v: Partial<PoItem>) =>
   ({
+    price: 0,
     order_qty: 0,
     discount_rate: 0,
     is_discount_adjustment: false,
@@ -14,74 +18,64 @@ const loc = (l: Partial<PoLocation>) =>
     tax_rate: 0,
     is_tax_adjustment: false,
     tax_amount: 0,
-    ...l,
-  }) as PoLocation;
-
-const item = (price: number, locations: PoLocation[]) =>
-  ({ price, locations }) as PoItem;
+    order_unit_conversion_factor: 1,
+    ...v,
+  }) as PoItem;
 
 describe("computeItemPricing", () => {
-  it("รวมทุก location — คนละเรตส่วนลด/ภาษีก็ต้องคิดแยกกัน", () => {
-    const result = computeItemPricing(
-      item(100, [
-        loc({ order_qty: 10, discount_rate: 10, tax_rate: 7 }),
-        loc({ order_qty: 5, discount_rate: 0, tax_rate: 7 }),
-      ]),
+  it("คิดจาก qty ของแถวเดียว ไม่ต้องรวมข้ามคลังอีก", () => {
+    const r = computeItemPricing(
+      item({ price: 100, order_qty: 10, discount_rate: 10, tax_rate: 7 }),
     );
-
-    // 1,000 - 100 = 900 + 63 · 500 - 0 = 500 + 35
-    expect(result.orderQty).toBe(15);
-    expect(result.subtotal).toBe(1500);
-    expect(result.discountAmount).toBe(100);
-    expect(result.netAmount).toBe(1400);
-    expect(result.taxAmount).toBe(98);
-    expect(result.totalPrice).toBe(1498);
-  });
-
-  it("เรตอยู่ที่ location ไม่ใช่ที่ item — คิดจากเรตรวมของ item จะได้เลขคนละตัว", () => {
-    const perLocation = computeItemPricing(
-      item(100, [
-        loc({ order_qty: 10, discount_rate: 50 }),
-        loc({ order_qty: 10, discount_rate: 0 }),
-      ]),
-    );
-    // ถ้าเผลอเอา qty มารวมก่อนแล้วค่อยคูณเรตเดียว จะได้ 2000-1000=1000
-    expect(perLocation.netAmount).toBe(1500);
+    // 1,000 - 100 = 900 → ภาษี 7% ของ 900 = 63
+    expect(r.orderQty).toBe(10);
+    expect(r.subtotal).toBe(1000);
+    expect(r.discountAmount).toBe(100);
+    expect(r.netAmount).toBe(900);
+    expect(r.taxAmount).toBe(63);
+    expect(r.totalPrice).toBe(963);
   });
 
   it("override เป็นจำนวนเงิน ชนะเรตที่กรอกไว้", () => {
-    const result = computeItemPricing(
-      item(100, [
-        loc({
-          order_qty: 10,
-          discount_rate: 10,
-          is_discount_adjustment: true,
-          discount_amount: 250,
-          tax_rate: 7,
-          is_tax_adjustment: true,
-          tax_amount: 10,
-        }),
-      ]),
+    const r = computeItemPricing(
+      item({
+        price: 100,
+        order_qty: 10,
+        discount_rate: 10,
+        is_discount_adjustment: true,
+        discount_amount: 250,
+        tax_rate: 7,
+      }),
     );
-
-    expect(result.discountAmount).toBe(250);
-    expect(result.netAmount).toBe(750);
-    expect(result.taxAmount).toBe(10);
-    expect(result.totalPrice).toBe(760);
+    expect(r.discountAmount).toBe(250);
+    expect(r.netAmount).toBe(750);
   });
 
-  it("ไม่มี location = ศูนย์หมด ไม่ใช่ NaN", () => {
-    const result = computeItemPricing(item(100, []));
-    expect(result.subtotal).toBe(0);
-    expect(result.totalPrice).toBe(0);
-    expect(result.orderQty).toBe(0);
+  it("override ภาษีเป็นจำนวนเงินก็เหมือนกัน", () => {
+    const r = computeItemPricing(
+      item({
+        price: 100,
+        order_qty: 10,
+        tax_rate: 7,
+        is_tax_adjustment: true,
+        tax_amount: 5,
+      }),
+    );
+    expect(r.taxAmount).toBe(5);
+    expect(r.totalPrice).toBe(1005);
   });
 
-  it("base qty คูณตัวแปลงหน่วยของ item", () => {
-    const result = computeItemPricing({
-      ...item(50, [loc({ order_qty: 3 })]),
-      order_unit_conversion_factor: 12,
-    } as PoItem);
-    expect(result.baseQty).toBe(36);
+  it("base qty คิดจาก conversion factor ของหน่วยสั่งซื้อ", () => {
+    const r = computeItemPricing(
+      item({ price: 1, order_qty: 3, order_unit_conversion_factor: 12 }),
+    );
+    expect(r.baseQty).toBe(36);
+  });
+
+  it("ไม่มี item เลย → ศูนย์ทั้งชุด ไม่ใช่ NaN", () => {
+    const r = computeItemPricing(undefined);
+    expect(r.orderQty).toBe(0);
+    expect(r.totalPrice).toBe(0);
+    expect(r.baseQty).toBe(0);
   });
 });

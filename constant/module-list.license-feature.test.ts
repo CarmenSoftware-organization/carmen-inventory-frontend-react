@@ -40,7 +40,7 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-approve ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
   },
   {
-    path: "/config/chart-of-account",
+    path: "/config/chart-of-accounts",
     why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — backend ยังไม่มี endpoint ของตัวเอง (ผังบัญชีเป็น sub-resource ของสินค้า/หมวดสินค้า) และ catalog ยังไม่มีคีย์ให้ผูก",
   },
   {

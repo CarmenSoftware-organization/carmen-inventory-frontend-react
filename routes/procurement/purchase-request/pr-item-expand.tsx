@@ -174,288 +174,285 @@ export function PrItemExpand({
     <div className="w-full p-3">
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
-      <div className="space-y-4">
-        {/* คอลัมน์ 1 (Pricelist) = 9.375rem (150px) เท่าคอลัมน์ Delivery Date ของ
-            ตารางข้างบน — เลขที่ price list ยาวกว่า 5rem เดิมจนโดนตัด
-            คอลัมน์ 2 (Vendor) 19.5rem เดิมกว้างเกินความจำเป็น หดเหลือ 12rem
-            (ชื่อผู้ขายที่ยาวกว่านั้น lookup ตัดให้เอง) · ผลคือคอลัมน์ 3
-            (Currency) ไม่ตรงกับคอลัมน์ Requested ของตารางข้างบนแล้ว แลกกับ
-            การไม่ปล่อยให้ Vendor กินที่ฟรีทั้งแถว */}
-        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
-          {/* Pricelist */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
-              {tfl("pricelist")}
-            </FieldLabel>
-            <p
-              className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {pricelistNo || "—"}
+      {/* คอลัมน์ 1 (Pricelist) = 9.375rem (150px) เท่าคอลัมน์ Delivery Date ของ
+          ตารางข้างบน — เลขที่ price list ยาวกว่า 5rem เดิมจนโดนตัด
+          คอลัมน์ 2 (Vendor) 19.5rem เดิมกว้างเกินความจำเป็น หดเหลือ 12rem
+          (ชื่อผู้ขายที่ยาวกว่านั้น lookup ตัดให้เอง) · ผลคือคอลัมน์ 3
+          (Currency) ไม่ตรงกับคอลัมน์ Requested ของตารางข้างบนแล้ว แลกกับ
+          การไม่ปล่อยให้ Vendor กินที่ฟรีทั้งแถว */}
+      {/* ระยะ label→value = gap-0.5 เท่ากับชื่อ→ชื่อรองของเซลล์ Location/Product
+          ในตารางข้างบน (ค่า default ของ Field คือ 6px ซึ่งห่างกว่า) เขียนที่กริด
+          ที่เดียวไม่ไล่ใส่ราย Field — Field ที่เพิ่มทีหลังจะได้ระยะเดียวกันเอง */}
+      <div className="grid grid-cols-1 gap-x-2 gap-y-3 [&>[data-slot=field]]:gap-0.5 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
+        {/* Pricelist */}
+        <Field>
+          <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+            {tfl("pricelist")}
+          </FieldLabel>
+          <p
+            className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+          >
+            {pricelistNo || "—"}
+          </p>
+        </Field>
+
+        {/* Vendor */}
+        <Field>
+          <FieldLabel
+            htmlFor={`items-${index}-vendor`}
+            className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+          >
+            {tfl("vendor")}
+          </FieldLabel>
+          {isFieldDisabled ? (
+            <p className="flex min-h-6 items-center truncate text-xs font-medium">
+              {vendorName || "—"}
             </p>
-          </Field>
+          ) : (
+            <Controller
+              control={form.control}
+              name={`items.${index}.vendor_id`}
+              render={({ field }) => (
+                <LookupVendor
+                  value={field.value ?? ""}
+                  onValueChange={(value) => {
+                    // shouldValidate: ล้างกรอบแดง vendor ทันทีที่เลือก
+                    // (mode=onSubmit จึงต้อง validate เองไม่งั้น error ค้าง)
+                    form.setValue(`items.${index}.vendor_id`, value, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                    if (value) {
+                      form.setValue(`items.${index}.stage_status`, "approve");
+                      form.setValue(
+                        `items.${index}.current_stage_status`,
+                        "approve",
+                      );
+                    }
+                  }}
+                  className="w-full text-xs"
+                  error={vendorError}
+                />
+              )}
+            />
+          )}
+        </Field>
 
-          {/* Vendor */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor={`items-${index}-vendor`}
-              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
-            >
-              {tfl("vendor")}
-            </FieldLabel>
-            {isFieldDisabled ? (
-              <p
-                className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-              >
-                {vendorName || "—"}
-              </p>
-            ) : (
-              <Controller
-                control={form.control}
-                name={`items.${index}.vendor_id`}
-                render={({ field }) => (
-                  <LookupVendor
-                    value={field.value ?? ""}
-                    onValueChange={(value) => {
-                      // shouldValidate: ล้างกรอบแดง vendor ทันทีที่เลือก
-                      // (mode=onSubmit จึงต้อง validate เองไม่งั้น error ค้าง)
-                      form.setValue(`items.${index}.vendor_id`, value, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                      if (value) {
-                        form.setValue(`items.${index}.stage_status`, "approve");
-                        form.setValue(
-                          `items.${index}.current_stage_status`,
-                          "approve",
-                        );
-                      }
-                    }}
-                    className="w-full text-xs"
-                    error={vendorError}
-                  />
-                )}
-              />
-            )}
-          </Field>
+        {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 คือหลัง Pricelist·Vendor)
+            คอลัมน์นี้ 5rem ไม่ใช่ 3rem: ป้ายเต็ม "Currency"/"สกุลเงิน" ไม่พอใน 3rem
+            แล้วหักบรรทัด ทำให้แถวสูงไม่เท่ากันแล้วแต่ใบ */}
+        <Field className="lg:col-start-3">
+          <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+            {tfl("currency")}
+          </FieldLabel>
+          <p
+            className={`flex items-center justify-end text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+          >
+            {currencyCode || "—"}
+          </p>
+        </Field>
 
-          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 คือหลัง Pricelist·Vendor)
-              คอลัมน์นี้ 5rem ไม่ใช่ 3rem: ป้ายเต็ม "Currency"/"สกุลเงิน" ไม่พอใน 3rem
-              แล้วหักบรรทัด ทำให้แถวสูงไม่เท่ากันแล้วแต่ใบ */}
-          <Field className={`lg:col-start-3 ${isFieldDisabled ? "gap-1" : ""}`}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              {tfl("currency")}
-            </FieldLabel>
-            <p
-              className={`flex items-center justify-end text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {currencyCode || "—"}
-            </p>
-          </Field>
-
-          {/* Unit price */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor={`items-${index}-pricelist-price`}
-              className="text-muted-foreground flex min-h-6 items-center justify-end gap-1 text-xs tracking-wide"
-            >
-              {tfl("unitPrice")}
-              <PrLastReceivingInfo
-                control={form.control}
-                index={index}
-                buCode={buCode}
-              />
-            </FieldLabel>
-            {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center justify-end text-xs font-semibold tabular-nums">
-                {formatCurrency(price)}
-              </p>
-            ) : (
-              <InputAmount
-                id={`items-${index}-pricelist-price`}
-                decimals={watchCurrencyDecimals}
-                className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
-                error={priceError}
-                errorIconAlign="left"
-                value={price}
-                onValueChange={(n) => {
-                  form.setValue(`items.${index}.pricelist_price`, n, {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  });
-                  form.setValue(
-                    `items.${index}.pricelist_type`,
-                    PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
-                  );
-                }}
-              />
-            )}
-          </Field>
-
-          {/* Exchange rate — แก้ไขได้ (มีผลจริงเมื่อเป็นสกุลต่างประเทศ) */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor={`items-${index}-exchange-rate`}
-              className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
-            >
-              {tfl("exchangeRate")}
-            </FieldLabel>
-            {isFieldDisabled ? (
-              <p
-                className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-              >
-                {exchangeRate.toFixed(EXCHANGE_RATE_DECIMALS)}
-              </p>
-            ) : (
-              // exchange rate: fix 5 ทศนิยมตายตัว (เช่น 32.09500) ต่างจาก amount ที่
-              // อิงทศนิยมของสกุลเงิน — base/default currency → disabled (rate = 1)
-              <InputAmount
-                id={`items-${index}-exchange-rate`}
-                decimals={EXCHANGE_RATE_DECIMALS}
-                disabled={!isForeignCurrency}
-                className="disabled:bg-muted disabled:text-muted-foreground h-8 text-right text-xs disabled:cursor-default disabled:opacity-100"
-                value={exchangeRate}
-                onValueChange={(n) =>
-                  form.setValue(`items.${index}.exchange_rate`, n || 1, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-            )}
-          </Field>
-
-          {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              {tfl("subtotal")}
-            </FieldLabel>
-            <p
-              className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {formatCurrency(subtotal)}
-            </p>
-          </Field>
-
-          {/* Discount */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div
-              className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
-            >
-              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                {tfl("discount")}
-              </FieldLabel>
-              {!isFieldDisabled &&
-                overrideToggle(`items.${index}.is_discount_adjustment`)}
-            </div>
-            {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
-                <span className="text-muted-foreground tabular-nums">
-                  {discRate}%
-                </span>
-                <span className="text-muted-foreground">·</span>
-                <span className="tabular-nums">
-                  {formatCurrency(discountAmount)}
-                </span>
-              </p>
-            ) : (
-              <PrDiscountInput
-                form={form}
-                index={index}
-                decimals={watchCurrencyDecimals}
-              />
-            )}
-          </Field>
-
-          {/* Net — plaintext */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              {tfl("net")}
-            </FieldLabel>
-            <p
-              className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {formatCurrency(netAmount)}
-            </p>
-          </Field>
-
-          {/* Tax */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div
-              className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
-            >
-              <div className="flex items-center gap-1.5">
-                <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                  {tfl("tax")}
-                </FieldLabel>
-                {/* tax rate เป็น plain text (มาจาก profile — override ไม่ได้) */}
-                {taxRate > 0 && (
-                  <span className="text-muted-foreground text-micro-legal font-semibold tabular-nums">
-                    {taxRate}%
-                  </span>
-                )}
-              </div>
-              {!isFieldDisabled &&
-                overrideToggle(`items.${index}.is_tax_adjustment`)}
-            </div>
-            {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
-                {taxProfileName ? (
-                  <>
-                    <span className="truncate">{taxProfileName}</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="tabular-nums">
-                      {formatCurrency(taxAmount)}
-                    </span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </p>
-            ) : (
-              <PrTaxInput
-                form={form}
-                index={index}
-                decimals={watchCurrencyDecimals}
-              />
-            )}
-          </Field>
-
-          {/* Total — plaintext (สกุลที่เลือก) */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              {tfl("total")}
-            </FieldLabel>
-            <p
-              className={`flex items-center justify-end text-xs font-semibold tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {formatCurrency(totalPrice)}
-            </p>
-          </Field>
-
-          {/* Inventory — กินเต็มแถว ไม่แชร์แถวกับ base summary เหมือนเดิม: 4 ค่า
-              ยัดใน 2 คอลัมน์ (24.5rem) ไม่พอ ใบที่ตัวเลขยาวหน่อยก็ตกบรรทัด กลาย
-              เป็นบางใบสูง 1 บรรทัด บางใบ 2 · เต็มแถวแล้วได้ 1 บรรทัดเสมอ และมีแต่
-              ใบสกุลต่างประเทศที่เสียความสูงเพิ่ม (PrItemSummary คืน null ถ้าไม่ใช่) */}
-          <div className="lg:col-span-full lg:col-start-1">
-            <PrInventoryRow
+        {/* Unit price */}
+        <Field>
+          <FieldLabel
+            htmlFor={`items-${index}-pricelist-price`}
+            className="text-muted-foreground flex min-h-6 items-center justify-end gap-1 text-xs tracking-wide"
+          >
+            {tfl("unitPrice")}
+            <PrLastReceivingInfo
               control={form.control}
               index={index}
-              buCode={buCode ?? ""}
+              buCode={buCode}
             />
-          </div>
+          </FieldLabel>
+          {isFieldDisabled ? (
+            <p className="flex min-h-6 items-center justify-end text-xs font-semibold tabular-nums">
+              {formatCurrency(price)}
+            </p>
+          ) : (
+            <InputAmount
+              id={`items-${index}-pricelist-price`}
+              decimals={watchCurrencyDecimals}
+              className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
+              error={priceError}
+              errorIconAlign="left"
+              value={price}
+              onValueChange={(n) => {
+                form.setValue(`items.${index}.pricelist_price`, n, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+                form.setValue(
+                  `items.${index}.pricelist_type`,
+                  PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
+                );
+              }}
+            />
+          )}
+        </Field>
 
-          {/* แถว base currency (summary) — เรียงใต้ Subtotal·Discount·Net·Tax·
-              Total ของ grid นี้ (เฉพาะสกุลต่างประเทศ) */}
-          <PrItemSummary
-            subtotal={subtotal}
-            discountAmount={discountAmount}
-            netAmount={netAmount}
-            taxAmount={taxAmount}
-            totalPrice={totalPrice}
-            exchangeRate={exchangeRate}
-            isForeignCurrency={isForeignCurrency}
-            baseCurrencyCode={baseCurrencyCode}
+        {/* Exchange rate — แก้ไขได้ (มีผลจริงเมื่อเป็นสกุลต่างประเทศ) */}
+        <Field>
+          <FieldLabel
+            htmlFor={`items-${index}-exchange-rate`}
+            className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
+          >
+            {tfl("exchangeRate")}
+          </FieldLabel>
+          {isFieldDisabled ? (
+            <p className="flex min-h-6 items-center justify-end text-xs font-medium tabular-nums">
+              {exchangeRate.toFixed(EXCHANGE_RATE_DECIMALS)}
+            </p>
+          ) : (
+            // exchange rate: fix 5 ทศนิยมตายตัว (เช่น 32.09500) ต่างจาก amount ที่
+            // อิงทศนิยมของสกุลเงิน — base/default currency → disabled (rate = 1)
+            <InputAmount
+              id={`items-${index}-exchange-rate`}
+              decimals={EXCHANGE_RATE_DECIMALS}
+              disabled={!isForeignCurrency}
+              className="disabled:bg-muted disabled:text-muted-foreground h-8 text-right text-xs disabled:cursor-default disabled:opacity-100"
+              value={exchangeRate}
+              onValueChange={(n) =>
+                form.setValue(`items.${index}.exchange_rate`, n || 1, {
+                  shouldDirty: true,
+                })
+              }
+            />
+          )}
+        </Field>
+
+        {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
+        <Field>
+          <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+            {tfl("subtotal")}
+          </FieldLabel>
+          <p
+            className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+          >
+            {formatCurrency(subtotal)}
+          </p>
+        </Field>
+
+        {/* Discount */}
+        <Field>
+          <div
+            className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
+          >
+            <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+              {tfl("discount")}
+            </FieldLabel>
+            {!isFieldDisabled &&
+              overrideToggle(`items.${index}.is_discount_adjustment`)}
+          </div>
+          {isFieldDisabled ? (
+            <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
+              <span className="text-muted-foreground tabular-nums">
+                {discRate}%
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <span className="tabular-nums">
+                {formatCurrency(discountAmount)}
+              </span>
+            </p>
+          ) : (
+            <PrDiscountInput
+              form={form}
+              index={index}
+              decimals={watchCurrencyDecimals}
+            />
+          )}
+        </Field>
+
+        {/* Net — plaintext */}
+        <Field>
+          <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+            {tfl("net")}
+          </FieldLabel>
+          <p
+            className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+          >
+            {formatCurrency(netAmount)}
+          </p>
+        </Field>
+
+        {/* Tax */}
+        <Field>
+          <div
+            className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
+          >
+            <div className="flex items-center gap-1.5">
+              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                {tfl("tax")}
+              </FieldLabel>
+              {/* tax rate เป็น plain text (มาจาก profile — override ไม่ได้) */}
+              {taxRate > 0 && (
+                <span className="text-muted-foreground text-micro-legal font-semibold tabular-nums">
+                  {taxRate}%
+                </span>
+              )}
+            </div>
+            {!isFieldDisabled &&
+              overrideToggle(`items.${index}.is_tax_adjustment`)}
+          </div>
+          {isFieldDisabled ? (
+            <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
+              {taxProfileName ? (
+                <>
+                  <span className="truncate">{taxProfileName}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="tabular-nums">
+                    {formatCurrency(taxAmount)}
+                  </span>
+                </>
+              ) : (
+                "—"
+              )}
+            </p>
+          ) : (
+            <PrTaxInput
+              form={form}
+              index={index}
+              decimals={watchCurrencyDecimals}
+            />
+          )}
+        </Field>
+
+        {/* Total — plaintext (สกุลที่เลือก) */}
+        <Field>
+          <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+            {tfl("total")}
+          </FieldLabel>
+          <p
+            className={`flex items-center justify-end text-xs font-semibold tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+          >
+            {formatCurrency(totalPrice)}
+          </p>
+        </Field>
+
+        {/* Inventory — กินเต็มแถว ไม่แชร์แถวกับ base summary เหมือนเดิม: 4 ค่า
+            ยัดใน 2 คอลัมน์ (24.5rem) ไม่พอ ใบที่ตัวเลขยาวหน่อยก็ตกบรรทัด กลาย
+            เป็นบางใบสูง 1 บรรทัด บางใบ 2 · เต็มแถวแล้วได้ 1 บรรทัดเสมอ และมีแต่
+            ใบสกุลต่างประเทศที่เสียความสูงเพิ่ม (PrItemSummary คืน null ถ้าไม่ใช่) */}
+        <div className="lg:col-span-full lg:col-start-1">
+          <PrInventoryRow
+            control={form.control}
+            index={index}
+            buCode={buCode ?? ""}
           />
         </div>
+
+        {/* แถว base currency (summary) — เรียงใต้ Subtotal·Discount·Net·Tax·
+            Total ของ grid นี้ (เฉพาะสกุลต่างประเทศ) */}
+        <PrItemSummary
+          subtotal={subtotal}
+          discountAmount={discountAmount}
+          netAmount={netAmount}
+          taxAmount={taxAmount}
+          totalPrice={totalPrice}
+          exchangeRate={exchangeRate}
+          isForeignCurrency={isForeignCurrency}
+          baseCurrencyCode={baseCurrencyCode}
+        />
       </div>
     </div>
   );

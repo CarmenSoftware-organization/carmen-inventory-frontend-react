@@ -49,6 +49,7 @@ export const QUERY_KEYS = {
   GOODS_RECEIVE_NOTE_COMMENTS: "goods-receive-note-comments",
   INVENTORY_ADJUSTMENTS: "inventory-adjustments",
   TRANSACTIONS: "transactions",
+  LICENSE: "license",
   LOCATIONS: "locations",
   LOCATIONS_BY_PRODUCT: "locations-by-product",
   LOCATIONS_BY_WORKFLOW_PRODUCT: "locations-by-workflow-product",

@@ -1,40 +1,108 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useWatch, useFormState, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { PackagePlus } from "lucide-react";
+import {
+  getCoreRowModel,
+  useReactTable,
+  type ColumnDef,
+  type RowSelectionState,
+  type Updater,
+} from "@tanstack/react-table";
+import { AlertTriangle, FilterX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import {
+  DataGridTable,
+  DataGridTableRowSelect,
+} from "@/components/ui/data-grid/data-grid-table";
+import {
+  columnSkeletons,
+  selectColumn,
+} from "@/components/ui/data-grid/columns";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { InputQty } from "@/components/ui/input/input-qty";
+import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import EmptyComponent from "@/components/empty-component";
+import SearchInput from "@/components/search-input";
+import { ListFilter } from "@/components/list-filter/list-filter";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
-import type { PriceListDetailItem } from "@/types/price-list";
+import { useActivePriceListsByVendor } from "@/hooks/use-price-list";
+import type { PriceList, PriceListDetailItem } from "@/types/price-list";
+import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
 import {
   WIZARD_ITEM_TEMPLATE,
   type FromPriceListFormValues,
-  type FromPriceListItemLocation,
   type FromPriceListSelectedItem,
 } from "./from-price-list-form-schema";
-import { BrowseDialog } from "./step-select-items-browse-dialog";
-import { ProductCard } from "./step-select-items-product-card";
 
 interface StepSelectItemsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;
 }
 
-const EMPTY_LOCATION: FromPriceListItemLocation = {
-  id: "",
-  order_qty: 1,
-  received_qty: 0,
-};
+/** แถวหนึ่งในตาราง = สินค้าหนึ่งบรรทัดของ price list หนึ่งใบ */
+interface PlRow {
+  readonly detail: PriceListDetailItem;
+  readonly pricelistNo: string;
+  readonly currency: { id: string; code: string; name?: string };
+  /** หลังบ้านอนุญาตให้เอาบรรทัดนี้ไปตั้งเป็นรายการสั่งซื้อไหม */
+  readonly canUse: boolean;
+}
 
-function detailToItem(detail: PriceListDetailItem): FromPriceListSelectedItem {
+/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
+const FILTER_FIELDS: PoFilterField<PlRow>[] = [
+  {
+    key: "product_id",
+    labelKey: "field.product",
+    of: (r) => [r.detail.product_id, r.detail.product_name],
+  },
+  {
+    key: "currency_id",
+    labelKey: "field.currency",
+    of: (r) => [r.currency.id, r.currency.code],
+  },
+];
+
+function toRows(priceLists: PriceList[]): PlRow[] {
+  return priceLists.flatMap((pl) =>
+    pl.pricelist_detail.map((detail) => ({
+      detail,
+      pricelistNo: pl.no,
+      currency: pl.currency,
+      // ทั้งใบต้องใช้ได้ **และ** บรรทัดนั้นต้องใช้ได้ · เทียบกับ false ตรง ๆ ไม่ใช่
+      // ตีเป็น boolean — หลังบ้านรุ่นที่ยังไม่ส่งฟิลด์นี้มาต้องถือว่าใช้ได้ ไม่ใช่
+      // ล็อกทั้งตารางเงียบ ๆ
+      canUse: pl.can_use !== false && detail.can_use !== false,
+    })),
+  );
+}
+
+function filterRows(rows: PlRow[], q: string): PlRow[] {
+  if (!q) return rows;
+  const needle = q.toLowerCase();
+  return rows.filter(
+    ({ detail, pricelistNo }) =>
+      (detail.product_code ?? "").toLowerCase().includes(needle) ||
+      detail.product_name.toLowerCase().includes(needle) ||
+      detail.product_local_name.toLowerCase().includes(needle) ||
+      pricelistNo.toLowerCase().includes(needle),
+  );
+}
+
+function detailToItem(row: PlRow): FromPriceListSelectedItem {
+  const { detail } = row;
   const qty = detail.moq_qty || 1;
   const subTotal = round2(qty * detail.price);
   const taxAmt = round2((subTotal * (detail.tax_rate ?? 0)) / 100);
   return {
     ...WIZARD_ITEM_TEMPLATE,
+    pricelist_detail_id: detail.id,
+    pricelist_no: row.pricelistNo,
     product_id: detail.product_id,
     product_code: detail.product_code ?? "",
     product_name: detail.product_name,
@@ -55,13 +123,23 @@ function detailToItem(detail: PriceListDetailItem): FromPriceListSelectedItem {
     tax_profile_name: detail.tax_profile_name ?? "",
     tax_rate: detail.tax_rate ?? 0,
     tax_amount: taxAmt,
-    locations: [{ ...EMPTY_LOCATION, order_qty: qty }],
   };
 }
 
+/** error ของ item รายแถว — RHF เก็บเป็น array ตาม index ของ `items` */
+type RowError =
+  | {
+      location_id?: { message?: string };
+      order_qty?: { message?: string };
+    }
+  | undefined;
+
 export function StepSelectItems({ form }: StepSelectItemsProps) {
+  "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
+  const tl = useTranslations("lookup");
 
   const vendorId = useWatch({ control: form.control, name: "vendor_id" });
   const deliveryDate = useWatch({
@@ -71,9 +149,13 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   const workflowId =
     useWatch({ control: form.control, name: "workflow_id" }) ?? "";
   const itemsRaw = useWatch({ control: form.control, name: "items" });
-  const items = (itemsRaw ?? []) as FromPriceListSelectedItem[];
+  const items = useMemo(
+    () => (itemsRaw ?? []) as FromPriceListSelectedItem[],
+    [itemsRaw],
+  );
+
   // ต้อง subscribe ผ่าน useFormState — อ่าน form.formState.errors ตรง ๆ จะได้ค่า
-  // เก่า (stale) ทำให้ error ของ location แสดงช้าไป 1 จังหวะ (เลือกแล้วเพิ่งแดง)
+  // เก่า (stale) ทำให้ error ของคลังแสดงช้าไป 1 จังหวะ (เลือกแล้วเพิ่งแดง)
   const { errors: formErrors } = useFormState({ control: form.control });
   const itemsError = formErrors.items;
   const itemsErrorMessage =
@@ -83,49 +165,118 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     ? formatDate(deliveryDate, "yyyy-MM-dd")
     : undefined;
 
-  const [browseOpen, setBrowseOpen] = useState(false);
+  const {
+    data: priceLists,
+    isLoading,
+    error,
+  } = useActivePriceListsByVendor(vendorId, apiDate, workflowId);
 
-  // Resolve the picked price-list currency's exchange_rate the same way the
-  // manual PO form does (LookupCurrency uses perpage: 30). The BrowseDialog
-  // currency object only carries {id, code}, so without this lookup a
-  // foreign-currency PO would submit with the EMPTY_FORM default exchange_rate 1.
+  const [search, setSearch] = useState("");
+  // `data` ของ TanStack ต้องคงตัวตนไว้ระหว่าง render ที่ไม่มีอะไรเปลี่ยน — ส่ง array
+  // ใหม่ทุกรอบจะไปปลุก autoReset ของ table ให้ setState แล้ววนไม่จบ (จอค้าง กดติ๊ก
+  // ไม่ติด) ด้วยเหตุผลเดียวกันจึงต้อง default `?? []` **ในนี้** ไม่ใช่ตอน destructure
+  const allRows = useMemo(() => toRows(priceLists ?? []), [priceLists]);
+  const filter = usePoRowFilter(allRows, FILTER_FIELDS);
+  const rows = useMemo(
+    () => filterRows(allRows, search.trim()).filter(filter.matches),
+    [allRows, search, filter.matches],
+  );
+
+  // เรตของสกุลเงินที่เลือก — LookupCurrency ใช้ perpage 30 เหมือนฟอร์ม PO ปกติ
+  // ไม่ดึงมาเทียบ ใบสกุลต่างประเทศจะถูกส่งด้วย exchange_rate 1 ของ EMPTY_FORM
   const { data: currencyData } = useCurrency({ perpage: 30 });
   const currencies = currencyData?.data ?? [];
 
-  const existingProductIds = new Set(
-    items.map((i) => i.product_id ?? "").filter((id): id is string => !!id),
+  const selectedByDetail = useMemo(
+    () => new Map(items.map((i) => [i.pricelist_detail_id, i] as const)),
+    [items],
   );
 
-  const totalProducts = items.length;
-  const totalAmount = items.reduce((sum, item) => {
-    const qty = item.locations.reduce(
-      (q, l) => q + (Number(l.order_qty) || 0),
-      0,
-    );
-    return sum + round2(qty * item.price);
-  }, 0);
+  // ล็อก 1 ใบ = 1 สกุลเงิน — สกุลของแถวที่ติ๊กไว้ตัวแรกเป็นตัวตั้ง แถวสกุลอื่นถูกปิด
+  // จนกว่าจะติ๊กออกหมด (กติกาเดิมของ dialog ที่ถูกยกมา)
+  const activeCurrency =
+    allRows.find((r) => selectedByDetail.has(r.detail.id))?.currency ?? null;
 
-  const setItems = (next: FromPriceListSelectedItem[]) => {
-    form.setValue("items", next, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
+  /**
+   * ติ๊กแถวนี้ได้ไหม — หลังบ้านห้าม หรือคนละสกุลกับที่ล็อกไว้แล้ว
+   *
+   * ต้องคงตัวตนข้าม render เพราะเป็น dep ของ columns — ฟังก์ชันใหม่ทุกรอบเท่ากับ
+   * สร้างคอลัมน์ใหม่ทุกรอบ แล้วช่องกรอกจำนวนในแถวจะโดน remount จนโฟกัสหลุด
+   */
+  const canSelectRow = useCallback(
+    (row: PlRow) =>
+      row.canUse &&
+      (activeCurrency == null || row.currency.id === activeCurrency.id),
+    [activeCurrency],
+  );
 
-  const handleAddPicks = (
-    details: PriceListDetailItem[],
-    currency: { id: string; code: string; name?: string } | null,
-  ) => {
+  /** มีแถวที่หลังบ้านห้ามใช้อยู่ไหม — ใช้ตัดสินว่าต้องอธิบายเหนือตารางไหม */
+  const hasUnusableRow = rows.some((r) => !r.canUse);
+
+  const totalAmount = items.reduce(
+    (sum, item) => sum + round2((Number(item.order_qty) || 0) * item.price),
+    0,
+  );
+
+  const setItems = useCallback(
+    (next: FromPriceListSelectedItem[]) => {
+      form.setValue("items", next, { shouldDirty: true, shouldValidate: true });
+    },
+    [form],
+  );
+
+  const patchItem = useCallback(
+    (detailId: string, patch: Partial<FromPriceListSelectedItem>) => {
+      const current = (form.getValues("items") ??
+        []) as FromPriceListSelectedItem[];
+      setItems(
+        current.map((i) =>
+          i.pricelist_detail_id === detailId ? { ...i, ...patch } : i,
+        ),
+      );
+    },
+    [form, setItems],
+  );
+
+  /** มุมมองของ `items` ในภาษาของ TanStack — ไม่ใช่ state ที่ถือคู่ขนาน */
+  const rowSelection = useMemo<RowSelectionState>(
+    () => Object.fromEntries(items.map((i) => [i.pricelist_detail_id, true])),
+    [items],
+  );
+
+  const handleRowSelectionChange = (updater: Updater<RowSelectionState>) => {
+    const next =
+      typeof updater === "function" ? updater(rowSelection) : updater;
+    const wanted = new Set(Object.keys(next).filter((key) => next[key]));
+
     const current = (form.getValues("items") ??
       []) as FromPriceListSelectedItem[];
-    const existing = new Set(current.map((i) => i.product_id ?? ""));
-    const toAdd = details
-      .filter((d) => !existing.has(d.product_id))
-      .map(detailToItem);
-    if (toAdd.length === 0) return;
-    setItems([...current, ...toAdd]);
-    // Set currency จาก PL ที่ pick (ถ้ายังไม่เคย set) — PL ของ vendor
-    // เดียวกันปกติใช้ currency เดียวกัน ใช้ตัวแรกที่เจอ
+    const kept = current.filter((i) => wanted.has(i.pricelist_detail_id));
+    const keptIds = new Set(kept.map((i) => i.pricelist_detail_id));
+    const added = allRows.filter(
+      (r) => wanted.has(r.detail.id) && !keptIds.has(r.detail.id) && r.canUse,
+    );
+
+    // "เลือกทั้งหมด" กวาดได้ทุกแถวตอนที่ยังไม่มีสกุลตั้งต้น (ยังไม่มีแถวไหนถูกล็อก)
+    // กติกา 1 ใบ 1 สกุลจึงต้องบังคับซ้ำตรงนี้ ไม่ใช่พึ่ง enableRowSelection อย่างเดียว
+    // — ยึดสกุลของแถวแรกที่เพิ่มเข้ามา แล้วทิ้งแถวสกุลอื่น
+    const currency =
+      kept.length > 0 ? activeCurrency : (added[0]?.currency ?? null);
+    const accepted = currency
+      ? added.filter((r) => r.currency.id === currency.id)
+      : added;
+
+    const nextItems = [...kept, ...accepted.map(detailToItem)];
+    setItems(nextItems);
+
+    if (nextItems.length === 0) {
+      // ไม่เหลือของแล้ว = ปลดล็อกสกุลเงิน รอบหน้าติ๊ก PL ใบไหนก็ได้
+      form.setValue("currency_id", "", { shouldDirty: true });
+      form.setValue("currency_code", "", { shouldDirty: true });
+      form.setValue("exchange_rate", 1, { shouldDirty: true });
+      return;
+    }
+
     if (currency && !form.getValues("currency_id")) {
       form.setValue("currency_id", currency.id, { shouldDirty: true });
       form.setValue("currency_code", currency.code, { shouldDirty: true });
@@ -136,141 +287,273 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     }
   };
 
-  const handleRemoveItem = (productId: string) => {
-    const current = (form.getValues("items") ??
-      []) as FromPriceListSelectedItem[];
-    const next = current.filter((i) => (i.product_id ?? "") !== productId);
-    setItems(next);
-    // Reset currency เมื่อไม่เหลือ item เพื่อให้รอบหน้า pick ใหม่ get
-    // currency จาก PL ที่ใหม่
-    if (next.length === 0) {
-      form.setValue("currency_id", "", { shouldDirty: true });
-      form.setValue("currency_code", "", { shouldDirty: true });
-      form.setValue("exchange_rate", 1, { shouldDirty: true });
-    }
-  };
+  const errorOf = useCallback(
+    (detailId: string): RowError => {
+      if (!Array.isArray(itemsError)) return undefined;
+      const index = items.findIndex((i) => i.pricelist_detail_id === detailId);
+      return index < 0 ? undefined : (itemsError[index] as RowError);
+    },
+    [items, itemsError],
+  );
 
-  const handleAddLocation = (productId: string) => {
-    const current = (form.getValues("items") ??
-      []) as FromPriceListSelectedItem[];
-    const idx = current.findIndex((i) => (i.product_id ?? "") === productId);
-    if (idx < 0) return;
-    const next = [...current];
-    next[idx] = {
-      ...next[idx],
-      locations: [...next[idx].locations, { ...EMPTY_LOCATION }],
-    };
-    setItems(next);
-  };
+  const columns = useMemo<ColumnDef<PlRow>[]>(() => {
+    /** แถวที่เลือกไม่ได้ = จางไว้ให้เห็นตั้งแต่กวาดตา ไม่ต้องไปกดถึงจะรู้ */
+    const dim = (row: PlRow) => (canSelectRow(row) ? undefined : "opacity-50");
 
-  const handleRemoveLocation = (productId: string, locIndex: number) => {
-    const current = (form.getValues("items") ??
-      []) as FromPriceListSelectedItem[];
-    const idx = current.findIndex((i) => (i.product_id ?? "") === productId);
-    if (idx < 0) return;
-    const item = current[idx];
-    if (item.locations.length <= 1) return;
-    const next = [...current];
-    next[idx] = {
-      ...item,
-      locations: item.locations.filter((_, i) => i !== locIndex),
-    };
-    setItems(next);
-  };
+    return [
+      {
+        ...selectColumn<PlRow>(),
+        size: 44,
+        // ของกลางไม่ส่ง disabled ให้ checkbox — แถวที่เลือกไม่ได้จะกดแล้วเงียบ
+        cell: ({ row }) => (
+          <DataGridTableRowSelect row={row} disabled={!row.getCanSelect()} />
+        ),
+      },
+      {
+        id: "pricelist_no",
+        header: t("priceListNo"),
+        size: 130,
+        meta: { skeleton: columnSkeletons.textShort },
+        cell: ({ row }) => (
+          <span className={cn("font-semibold", dim(row.original))}>
+            {row.original.pricelistNo}
+          </span>
+        ),
+      },
+      {
+        id: "product",
+        header: tfl("product"),
+        size: 240,
+        meta: { skeleton: columnSkeletons.text },
+        cell: ({ row }) => (
+          <div className={cn("flex flex-col", dim(row.original))}>
+            <span className="font-semibold">
+              {row.original.detail.product_name}
+            </span>
+            <span className="text-muted-foreground text-micro-legal">
+              {row.original.detail.product_local_name}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: 90,
+        meta: {
+          cellClassName: "text-muted-foreground",
+          skeleton: columnSkeletons.textShort,
+        },
+        cell: ({ row }) => (
+          <span className={dim(row.original)}>
+            {row.original.detail.unit_name ?? "—"}
+          </span>
+        ),
+      },
+      {
+        id: "price",
+        header: tfl("unitPrice"),
+        size: 130,
+        meta: {
+          headerClassName: "text-right",
+          cellClassName: "text-right tabular-nums",
+          skeleton: columnSkeletons.textShort,
+        },
+        cell: ({ row }) => (
+          <span className={dim(row.original)}>
+            {row.original.detail.price.toLocaleString()}{" "}
+            <span className="text-muted-foreground text-micro">
+              {row.original.currency.code}
+            </span>
+          </span>
+        ),
+      },
+      {
+        id: "qty",
+        header: tfl("qty"),
+        size: 110,
+        meta: {
+          headerClassName: "text-right",
+          skeleton: columnSkeletons.textShort,
+        },
+        cell: ({ row }) => {
+          const { detail } = row.original;
+          const selected = selectedByDetail.get(detail.id);
+          // กรอกได้เฉพาะแถวที่ติ๊กแล้ว — ยังไม่ติ๊กก็ยังไม่มี item ให้แก้
+          return (
+            <InputQty
+              errorIconAlign="left"
+              className="h-8 text-right"
+              disabled={!selected}
+              error={errorOf(detail.id)?.order_qty?.message}
+              value={Number(selected?.order_qty ?? detail.moq_qty)}
+              onChange={(e) => {
+                const n = e.target.valueAsNumber;
+                patchItem(detail.id, {
+                  order_qty: Number.isNaN(n) ? 0 : n,
+                  base_qty: Number.isNaN(n) ? 0 : n,
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "location",
+        header: tfl("location"),
+        size: 200,
+        meta: { skeleton: columnSkeletons.text },
+        cell: ({ row }) => {
+          const { detail } = row.original;
+          const selected = selectedByDetail.get(detail.id);
+          return (
+            <LookupProductLocation
+              productId={detail.product_id}
+              workflowId={workflowId}
+              value={selected?.location_id ?? ""}
+              onValueChange={(v) => patchItem(detail.id, { location_id: v })}
+              onItemChange={(loc) =>
+                patchItem(detail.id, {
+                  location_code: loc.code ?? "",
+                  location_name: loc.name ?? "",
+                })
+              }
+              disabled={!selected}
+              error={errorOf(detail.id)?.location_id?.message}
+              className="h-8 w-full text-xs"
+            />
+          );
+        },
+      },
+    ];
+  }, [
+    // ไม่ต้องมี activeCurrency — canSelectRow ห่อมันไว้แล้ว ใส่ซ้ำเท่ากับสร้าง
+    // คอลัมน์ใหม่โดยไม่จำเป็น
+    canSelectRow,
+    selectedByDetail,
+    errorOf,
+    patchItem,
+    workflowId,
+    t,
+    tfl,
+  ]);
 
-  const handleLocationChange = (
-    productId: string,
-    locIndex: number,
-    patch: Partial<FromPriceListItemLocation>,
-  ) => {
-    const current = (form.getValues("items") ??
-      []) as FromPriceListSelectedItem[];
-    const idx = current.findIndex((i) => (i.product_id ?? "") === productId);
-    if (idx < 0) return;
-    const item = current[idx];
-    const nextLocations = [...item.locations];
-    nextLocations[locIndex] = { ...nextLocations[locIndex], ...patch };
-    const next = [...current];
-    next[idx] = { ...item, locations: nextLocations };
-    setItems(next);
-  };
+  const disabled = !vendorId || !apiDate || !workflowId;
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    // ตารางนี้ไม่มีหน้า — ปิด autoReset ไว้ไม่ให้ data ที่เปลี่ยนไปสั่ง setPageIndex
+    autoResetPageIndex: false,
+    // id ของแถว = id ของบรรทัด price list ตัวเดียวกับที่ item ใช้จับคู่
+    getRowId: (row) => row.detail.id,
+    state: { rowSelection },
+    onRowSelectionChange: handleRowSelectionChange,
+    enableRowSelection: (row) => canSelectRow(row.original),
+  });
 
   return (
     <Field>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <FieldLabel required>{tfl("product")}</FieldLabel>
         <div className="flex items-center gap-2">
-          <Badge variant={totalProducts > 0 ? "default" : "secondary"}>
-            {t("nProductsSelected", { count: totalProducts })}
+          <Badge variant={items.length > 0 ? "default" : "secondary"}>
+            {t("nProductsSelected", { count: items.length })}
           </Badge>
           {totalAmount > 0 && (
             <Badge variant="secondary">
               {tfl("total")}: {totalAmount.toLocaleString()}
             </Badge>
           )}
-          <Button
-            type="button"
-            size="sm"
-            className="bg-module-procurement"
-            onClick={() => setBrowseOpen(true)}
-            disabled={!vendorId || !apiDate}
-          >
-            <PackagePlus className="size-3.5" aria-hidden="true" />
-            {t("browseFromPriceList")}
-          </Button>
         </div>
       </div>
 
-      {items.length === 0 ? (
-        <div className="rounded-md border border-dashed py-10">
-          <EmptyComponent
-            title={t("noProductsSelected")}
-            description={t("noProductsSelectedDesc")}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {/* กรองในฝั่ง client จากรายการที่โหลดมาแล้ว — onInputChange กรองทันทีที่พิมพ์
+            (ไม่ใช่รอ Enter) เหมือนช่องค้นผู้ขายใน step ก่อนหน้า */}
+        <SearchInput
+          defaultValue={search}
+          onSearch={setSearch}
+          onInputChange={setSearch}
+          placeholder={t("searchProduct")}
+          containerClassName="w-96"
+          inputClassName="h-8 text-xs placeholder:text-xs"
+        />
+        {/* ไม่มี onSaveClick เพราะ saved view ผูกกับหน้า list ไม่ใช่ตารางใน wizard
+            (เหตุผลเดียวกับตัวกรองรายการสินค้าของ PR) */}
+        <ListFilter
+          fields={filter.fields}
+          values={filter.values}
+          setValue={filter.setValue}
+          onClearAll={filter.clearAll}
+          activeCount={filter.activeCount}
+        />
+      </div>
+
+      {activeCurrency && (
+        <div
+          className="border-warning/30 bg-warning/5 text-warning-foreground text-micro flex items-start gap-2 rounded-md border px-3 py-2"
+          role="status"
+          aria-live="polite"
+        >
+          <AlertTriangle
+            aria-hidden="true"
+            className="text-warning-ink mt-px size-3.5 shrink-0"
           />
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {items.map((item, index) => (
-            <ProductCard
-              key={item.product_id ?? `item-${index}`}
-              item={item}
-              workflowId={workflowId}
-              errors={
-                Array.isArray(itemsError)
-                  ? (itemsError[index] as ProductCardError)
-                  : undefined
-              }
-              onRemoveItem={handleRemoveItem}
-              onAddLocation={handleAddLocation}
-              onRemoveLocation={handleRemoveLocation}
-              onLocationChange={handleLocationChange}
-            />
-          ))}
+          <span>
+            {t("singleCurrencyHint", { currency: activeCurrency.code })}
+          </span>
         </div>
       )}
 
-      {itemsErrorMessage && <FieldError>{itemsErrorMessage}</FieldError>}
+      {/* บอกครั้งเดียวเหนือตาราง ไม่ติดป้ายซ้ำทุกแถว — ตัวอย่างจริงมีแถวที่ใช้
+          ไม่ได้เกือบทั้งตาราง ป้ายรายแถวจะกลายเป็นเสียงรบกวนแทนที่จะเป็นข้อมูล */}
+      {hasUnusableRow && (
+        <p className="text-muted-foreground text-micro">
+          {t("notSelectableHint")}
+        </p>
+      )}
 
-      <BrowseDialog
-        open={browseOpen}
-        onOpenChange={setBrowseOpen}
-        vendorId={vendorId}
-        apiDate={apiDate}
-        existingProductIds={existingProductIds}
-        onAdd={handleAddPicks}
-      />
+      {error ? (
+        <p className="text-destructive p-3 text-xs">
+          {error instanceof Error ? error.message : String(error)}
+        </p>
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={rows.length}
+          isLoading={!disabled && isLoading}
+          loadingMode="skeleton"
+          tableLayout={{
+            rowClamp: false,
+            checkbox: true,
+            headerSticky: true,
+          }}
+          emptyMessage={
+            // กรอง/ค้นจนไม่เหลือแถว ≠ ผู้ขายรายนี้ไม่มีของ — ข้อความเดียวกันจะหลอก
+            // ให้ถอยไปเปลี่ยนผู้ขายทั้งที่ของอยู่ครบ แค่ถูกซ่อน
+            !disabled && (filter.activeCount > 0 || search.trim()) ? (
+              <EmptyComponent
+                icon={FilterX}
+                title={tc("noSearchResult")}
+                description={tl("noFoundDesc")}
+              />
+            ) : (
+              <EmptyComponent
+                title={t("noItemsAvailable")}
+                description={t("noItemsAvailableDesc")}
+              />
+            )
+          }
+        >
+          <DataGridContainer scroll className="max-h-96">
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
+      )}
+
+      {itemsErrorMessage && <FieldError>{itemsErrorMessage}</FieldError>}
     </Field>
   );
 }
-
-type ProductCardError = {
-  locations?:
-    | Array<
-        | {
-            id?: { message?: string };
-            order_qty?: { message?: string };
-          }
-        | undefined
-      >
-    | { message?: string };
-};

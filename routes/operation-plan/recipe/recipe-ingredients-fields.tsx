@@ -1,8 +1,11 @@
 import { useTranslations } from "use-intl";
 import { Plus, X, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import EmptyComponent from "@/components/empty-component";
+import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 
 export interface RecipeIngredient {
@@ -71,32 +74,41 @@ export function RecipeIngredientsFields({
           {ingredients.length > 0 && (
             <>
               {" · "}
-              <span className="text-foreground font-semibold">
-                ฿{total.toFixed(2)}
+              <span className="text-foreground font-semibold tabular-nums">
+                ฿{formatCurrency(total)}
               </span>{" "}
               {tfl("total")}
             </>
           )}
         </p>
-        <span className="border-warning/30 bg-warning/10 text-warning-foreground text-micro-legal inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold">
+        <Badge variant="warning-light" className="text-micro-legal gap-1">
           <Info className="size-2.5" aria-hidden="true" />
           {t("ingredientsPreviewNote")}
-        </span>
+        </Badge>
       </div>
 
       {ingredients.length === 0 ? (
-        <EmptyState
-          isDisabled={isDisabled}
-          onAdd={handleAdd}
+        <EmptyComponent
           title={t("noIngredientsYet")}
           description={t("noIngredientsDesc")}
-          actionLabel={t("addFirstIngredient")}
+          content={
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleAdd}
+              disabled={isDisabled}
+              className="gap-1"
+            >
+              <Plus className="size-3" aria-hidden="true" />
+              {t("addFirstIngredient")}
+            </Button>
+          }
         />
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <table className="w-full min-w-160 text-xs">
             <thead className="bg-muted/60">
-              <tr className="text-foreground/70 text-micro-legal text-left font-bold tracking-[0.12em] uppercase">
+              <tr className="text-muted-foreground text-micro-legal text-left font-semibold tracking-wider uppercase">
                 <th scope="col" className="w-8 px-2 py-2">
                   #
                 </th>
@@ -136,15 +148,15 @@ export function RecipeIngredientsFields({
                   isDisabled={isDisabled}
                 />
               ))}
-              <tr className="border-foreground bg-muted/40 border-t-2 font-semibold">
+              <tr className="bg-muted/40 border-t font-semibold">
                 <td
                   colSpan={4}
-                  className="text-foreground/80 text-micro-legal px-2 py-2 tracking-[0.12em] uppercase"
+                  className="text-muted-foreground text-micro-legal px-2 py-2 tracking-wider uppercase"
                 >
-                  {t("totalRecipeCost")}
+                  {t("ingredientLinesTotal")}
                 </td>
-                <td className="px-2 py-2 text-right text-sm">
-                  ฿{total.toFixed(2)}
+                <td className="px-2 py-2 text-right text-sm tabular-nums">
+                  ฿{formatCurrency(total)}
                 </td>
                 <td colSpan={3} />
               </tr>
@@ -181,7 +193,8 @@ function IngredientRow({
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder="—"
           disabled={isDisabled}
-          className="h-7 text-xs"
+          size="sm"
+          className="text-xs"
         />
       </td>
       <td className="px-2 py-1.5 text-right">
@@ -191,7 +204,8 @@ function IngredientRow({
           value={ingredient.qty}
           onChange={(e) => onUpdate({ qty: parseFloat(e.target.value) || 0 })}
           disabled={isDisabled}
-          className="h-7 text-right text-xs"
+          size="sm"
+          className="text-right text-xs"
           errorIconAlign="left"
         />
       </td>
@@ -201,7 +215,8 @@ function IngredientRow({
           onChange={(e) => onUpdate({ unit: e.target.value })}
           placeholder="g"
           disabled={isDisabled}
-          className="h-7 text-xs"
+          size="sm"
+          className="text-xs"
         />
       </td>
       <td className="px-2 py-1.5">
@@ -218,7 +233,8 @@ function IngredientRow({
               onUpdate({ cost: parseFloat(e.target.value) || 0 })
             }
             disabled={isDisabled}
-            className="h-7 pl-5 text-right text-xs"
+            size="sm"
+            className="pl-5 text-right text-xs"
             errorIconAlign="left"
           />
         </div>
@@ -234,10 +250,8 @@ function IngredientRow({
             onUpdate({ yieldPct: parseFloat(e.target.value) || 0 })
           }
           disabled={isDisabled}
-          className={cn(
-            "h-7 text-right text-xs",
-            lowYield && "text-warning-foreground",
-          )}
+          size="sm"
+          className={cn("text-right text-xs", lowYield && "text-warning-ink")}
           errorIconAlign="left"
         />
       </td>
@@ -246,7 +260,8 @@ function IngredientRow({
           value={ingredient.prep}
           onChange={(e) => onUpdate({ prep: e.target.value })}
           disabled={isDisabled}
-          className="h-7 text-xs"
+          size="sm"
+          className="text-xs"
           lang="th"
         />
       </td>
@@ -263,39 +278,5 @@ function IngredientRow({
         </Button>
       </td>
     </tr>
-  );
-}
-
-function EmptyState({
-  isDisabled,
-  onAdd,
-  title,
-  description,
-  actionLabel,
-}: {
-  readonly isDisabled: boolean;
-  readonly onAdd: () => void;
-  readonly title: string;
-  readonly description: string;
-  readonly actionLabel: string;
-}) {
-  return (
-    <div className="border-primary/40 bg-primary/5 rounded-md border border-dashed px-4 py-6 text-center">
-      <div className="border-primary/30 bg-card mx-auto mb-2 flex size-10 items-center justify-center rounded-md border">
-        <Plus className="text-primary size-4" aria-hidden="true" />
-      </div>
-      <p className="text-sm font-semibold">{title}</p>
-      <p className="text-muted-foreground mb-3 text-xs">{description}</p>
-      <Button
-        type="button"
-        size="sm"
-        onClick={onAdd}
-        disabled={isDisabled}
-        className="gap-1"
-      >
-        <Plus className="size-3" aria-hidden="true" />
-        {actionLabel}
-      </Button>
-    </div>
   );
 }

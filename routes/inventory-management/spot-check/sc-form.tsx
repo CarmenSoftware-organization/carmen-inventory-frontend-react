@@ -31,7 +31,8 @@ import {
 
 import { ScGeneralFields } from "./sc-general-fields";
 import { ScHeroStat } from "./sc-hero-stat";
-import { getMethodConfig, getSubmitLabel } from "./sc-method-config";
+import { getSubmitLabel } from "@/lib/form-utils";
+import { getMethodConfig } from "./sc-method-config";
 import { ScProductTransfer } from "./sc-product-transfer";
 import {
   createSpotCheckSchema,

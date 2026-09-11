@@ -59,7 +59,7 @@ export function WfHeader({
         <span
           className={
             docCounts.in_progress > 0
-              ? "text-amber-600 dark:text-amber-500"
+              ? "text-warning-ink"
               : ""
           }
           title={

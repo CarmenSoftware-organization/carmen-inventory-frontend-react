@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -27,18 +27,13 @@ import { PO_ITEM } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
 import { PoWorkflowRequiredDialog } from "./po-workflow-required-dialog";
 import { usePoItemTable } from "./use-po-item-table";
-import {
-  AddLocationRegistryContext,
-  type AddLocationRegistry,
-} from "./po-locations-add-context";
-import { PoItemComputedSync } from "./po-item-table";
+import { PoItemComputedSync } from "./po-item-cells";
 import { getDeleteDescription } from "@/lib/form-utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
 interface PoItemFieldsProps {
   form: UseFormReturn<PoFormValues>;
   /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand row ที่ location error */
-  revealErrorSignal: number;
   disabled: boolean;
   /** disabled แยกสำหรับ location editor — ปกติเท่ากับ `disabled` แต่ PO
    *  จาก price list จะล็อก field อื่นหมดแล้วปล่อยให้แก้ location ได้ */
@@ -55,7 +50,6 @@ interface PoItemFieldsProps {
 
 export function PoItemFields({
   form,
-  revealErrorSignal,
   disabled,
   locationsDisabled = disabled,
   role,
@@ -93,14 +87,6 @@ export function PoItemFields({
   // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
   const showStatusBadge = isPoInWorkflow;
 
-  // แถวที่เพิ่งกรอกราคาเสร็จ (Enter) — กางตัวเลือกคลังของแถวนั้นต่อให้เลย
-  // เส้นทางกรอกคือ สินค้า → ราคา → คลัง → จำนวน (ท่าเดียวกับ GRN) สองท่อนแรก
-  // กับท่อนสุดท้ายใช้ nextFocusRef ของ lookup เอง ท่อนนี้ต้องสั่งเปิด popover
-  // จึงต้องมี state
-  const [openLocationIndex, setOpenLocationIndex] = useState<number | null>(
-    null,
-  );
-
   const table = usePoItemTable({
     form,
     itemFields,
@@ -111,18 +97,26 @@ export function PoItemFields({
     showStatusBadge,
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
-    openLocationIndex,
-    onPriceCommitted: setOpenLocationIndex,
-    onLocationOpenChange: (index, open) =>
-      setOpenLocationIndex(open ? index : null),
     onDelete: setDeleteIndex,
   });
 
-  // registry ให้ปุ่ม "+" (action column) เรียก prepend location ของ LocationsEditor
-  const addLocationRegistry = useRef<AddLocationRegistry>(new Map()).current;
-
   const handleAddItem = () => {
-    prependItem({ ...PO_ITEM });
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — คนสั่งซื้อมักสั่ง
+    // เข้าคลังเดิมติดกันหลายรายการ เติมคลัง + จุดส่งของให้ล่วงหน้าแล้วแก้เองได้
+    // (ทรงเดียวกับ PR) · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field array
+    // เก็บค่าตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_code: prev.location_code,
+          location_name: prev.location_name,
+          delivery_point_id: prev.delivery_point_id,
+          delivery_point_name: prev.delivery_point_name,
+        }
+      : {};
+
+    prependItem({ ...PO_ITEM, ...carriedLocation });
     setAddSignal((c) => c + 1);
   };
 
@@ -162,25 +156,6 @@ export function PoItemFields({
   }, [submitCount]);
 
   // validation ไม่ผ่าน: field location/order_qty อยู่ในส่วน expand → auto-expand
-  // แถวที่ติด error ให้ scrollToFirstInvalidField เจอ field
-  useEffect(() => {
-    if (!revealErrorSignal) return;
-    const itemErrors = form.formState.errors.items;
-    if (!itemErrors) return;
-    const next: Record<string, boolean> = {};
-    itemFields.forEach((f, i) => {
-      if (itemErrors[i]?.locations || itemErrors[i]?.order_qty) {
-        next[f.id] = true;
-      }
-    });
-    if (Object.keys(next).length === 0) return;
-    table.setExpanded((prev) => ({
-      ...(typeof prev === "object" ? prev : {}),
-      ...next,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealErrorSignal]);
-
   const items = useWatch({ control: form.control, name: "items" });
 
   const itemStatuses = useMemo(
@@ -396,7 +371,6 @@ export function PoItemFields({
         />
       ))}
 
-      <AddLocationRegistryContext.Provider value={addLocationRegistry}>
         <DataGrid
           table={table}
           recordCount={itemFields.length}
@@ -423,7 +397,6 @@ export function PoItemFields({
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>
-      </AddLocationRegistryContext.Provider>
 
       <DeleteDialog
         open={deleteIndex !== null}

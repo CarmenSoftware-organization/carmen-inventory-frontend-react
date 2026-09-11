@@ -53,9 +53,12 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     location_name: z.string(),
     location_type: z.string(),
     delivery_point_name: z.string(),
+    // 0 ได้ — ตั้งใจ ให้ตรงกับ foc_qty/approved_qty ที่เป็น min(0) อยู่แล้ว
+    // (ขั้นต่ำ 1 ไปบังคับให้ต้องพิมพ์ตัวเลขก่อนถึงจะบันทึกร่างได้ ทั้งที่ยอดจริง
+    // มาทีหลังในหลายเคส) ที่ยังกันอยู่คือค่าติดลบ ซึ่งพิมพ์เข้ามาได้จริง
     requested_qty: z.coerce
       .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     requested_unit_id: z
       .string()
       .nullable()
@@ -187,6 +190,33 @@ export function createPrSchema(
 }
 
 export type PrFormValues = z.infer<ReturnType<typeof createPrSchema>>;
+
+/**
+ * แถวที่ "ไม่ได้ขออะไรเลย" — ทั้งจำนวนที่ขอและของแถมเป็น 0 ทั้งคู่
+ *
+ * **ไม่ได้อยู่ใน zod โดยตั้งใจ** — resolver ตัวเดียวถูกใช้ทั้งตอนกด Save และตอนกด
+ * Submit แยกกันไม่ได้ ถ้าใส่ไว้ในนั้นร่างที่ยังกรอกไม่เสร็จจะเซฟไม่ได้ ซึ่งขัดกับ
+ * ความหมายของคำว่าร่าง กฎนี้จึงเป็นด่านของ "ส่งใบ" อย่างเดียว (ดู handleSubmitPr)
+ *
+ * 0 ที่จำนวนที่ขออนุญาตได้เมื่อ FOC > 0 — ของที่ได้ฟรีล้วน ไม่ได้ซื้อ · เทียบด้วย
+ * `> 0` บนค่าทศนิยมตาม decimal_place ของหน่วย 0.5 kg จึงผ่าน ไม่ได้บังคับจำนวนเต็ม
+ *
+ * @returns index ของแถวที่ไม่ผ่าน (ว่าง = ผ่านหมด)
+ */
+export function findRowsMissingQty(
+  items: readonly Pick<
+    PrFormValues["items"][number],
+    "requested_qty" | "foc_qty"
+  >[],
+): number[] {
+  const out: number[] = [];
+  items.forEach((item, i) => {
+    if (Number(item.requested_qty) <= 0 && Number(item.foc_qty) <= 0) {
+      out.push(i);
+    }
+  });
+  return out;
+}
 
 // --- Defaults ---
 

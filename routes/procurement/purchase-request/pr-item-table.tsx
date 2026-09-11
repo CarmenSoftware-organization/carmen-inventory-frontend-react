@@ -1,12 +1,14 @@
 import { type UseFormReturn, type FieldArrayWithId } from "react-hook-form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
+import type { PrItemFilter } from "./use-pr-item-filter";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
   type SortingState,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -94,6 +96,8 @@ interface UsePrItemTableOptions {
   buCode?: string;
   baseCurrencyCode?: string;
   onDelete: (index: number) => void;
+  /** ตัวกรองฝั่ง client — ดู use-pr-item-filter.tsx */
+  filter: PrItemFilter;
 }
 
 export function usePrItemTable({
@@ -106,6 +110,7 @@ export function usePrItemTable({
   baseCurrencyCode,
   dateFormat,
   onDelete,
+  filter,
 }: UsePrItemTableOptions) {
   "use no memo";
   const t = useTranslations("procurement.purchaseRequest");
@@ -459,7 +464,11 @@ export function usePrItemTable({
 
     const isDraft = !prStatus || prStatus === PR_STATUS.DRAFT;
     const isCreateRole = role === STAGE_ROLE.CREATE;
-    const hiddenInDraft = new Set(["foc", "approved"]);
+    // FOC ไม่อยู่ในนี้แล้ว — ของแถมเป็นสิ่งที่ "คนขอ" ขอมาตั้งแต่ต้น ไม่ใช่
+    // ผลการตัดสินของผู้อนุมัติแบบ Approved จึงต้องเห็นและกรอกได้ตั้งแต่ draft
+    // เหมือนคอลัมน์ Requested (FocCell ปิดตามโหมด view ของฟอร์ม ไม่ผูกกับ role
+    // อยู่แล้ว โชว์ออกมาแล้วพิมพ์ได้จริง)
+    const hiddenInDraft = new Set(["approved"]);
     // ในโหมด view (isDisabled) ยังต้องโชว์คอลัมน์ action ถ้ามีรายการที่มีประวัติ
     // เพื่อให้ปุ่ม history แสดงได้ (ปุ่ม delete จะถูกซ่อนเองภายใน cell)
     const hasAnyHistory = itemFields.some(
@@ -533,7 +542,13 @@ export function usePrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
-    state: { sorting },
+    // กรองที่ table ด้วยเหตุผลเดียวกับ sorting — ตัดแถวออกจาก `data` แล้ว `row.index`
+    // จะไม่ตรงกับ index ใน form array อีก · `globalFilter` เป็นแค่ลายเซ็นของค่าที่
+    // เลือกไว้ (ว่าง = TanStack ข้าม filter model ทั้งก้อน) ตัวตัดสินจริงคือ
+    // `filter.matches(row.index)` ซึ่งอ่านค่าสด ๆ จากฟอร์ม ไม่ใช่จาก accessor
+    state: { sorting, globalFilter: filter.signature },
+    globalFilterFn: (row) => filter.matches(row.index),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     // เรียงที่ table ไม่ใช่ที่ `data` เพราะ `row.index` ต้องคงเป็น index ใน form
     // array (ทุก cell ผูก `items.${index}` ไว้)

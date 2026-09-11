@@ -67,7 +67,11 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const isView = mode === "view";
   const isEditMode = mode === "edit";
 
-  const role = purchaseOrder?.role;
+  // ใบใหม่ยังไม่มี role จาก backend — คนที่กำลังทำใบอยู่คือคนสร้าง (ทรงเดียวกับ
+  // PR: pr-form.tsx:81) ไม่ตั้ง default ปุ่มส่งจะไม่โผล่บนใบใหม่เพราะ canSubmit
+  // เทียบ role === CREATE · ค่าอื่นที่อ่าน role ไม่กระทบ (undefined กับ "create"
+  // ต่างก็ไม่เท่ากับ APPROVE/VIEW_ONLY อยู่แล้ว)
+  const role = purchaseOrder?.role ?? STAGE_ROLE.CREATE;
   const terminalStatus =
     purchaseOrder?.po_status === PO_STATUS.SENT ||
     purchaseOrder?.po_status === PO_STATUS.CLOSED ||
@@ -132,12 +136,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     form.clearErrors();
   }, [form, purchaseOrder, profileData]);
 
-  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand row ที่
-  // location ติด error (location field อยู่ใน expanded row เท่านั้น) + scroll
-  // bump จากทั้ง 2 path: Save (handleSubmit onInvalid) และ Submit (handleSubmitPo trigger)
-  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  // เดิมต้อง bump signal ให้ items grid กางแถวที่ location ติด error ก่อน เพราะช่อง
+  // คลังอยู่ในแถวขยายเท่านั้น — ตอนนี้คลังเป็นคอลัมน์ปกติของตาราง ไม่มีอะไรให้กาง
+  // scrollToFirstInvalidField หา field เจอเองตั้งแต่เฟรมแรก
   const revealErrors = (errors?: Record<string, unknown>) => {
-    setRevealErrorSignal((c) => c + 1);
     const count = countInvalidItems(errors);
     toast.warning(
       count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
@@ -155,6 +157,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPo,
     handleSubmitPo,
     handleApprovePo,
     handleRejectConfirm,
@@ -176,18 +179,26 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   });
 
   const isDisabled = (isView && role !== STAGE_ROLE.APPROVE) || isPending;
-  const isPriceListLocked =
-    purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
-  const fieldsDisabled = isDisabled || isPriceListLocked;
 
   // พ้น draft แล้ว workflow ล็อกถาวร — PoGeneralFields ใช้ค่านี้สั่ง disabled
   // ไม่ได้ใช้ซ่อน ฟิลด์จึงอยู่ที่เดิมทุกโหมด
   const isPoDraft =
     !purchaseOrder?.po_status || purchaseOrder.po_status === PO_STATUS.DRAFT;
-  // PO ที่มาจาก PR (!isManual): เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items,
-  // locations, notes) — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields
-  // (gate ที่ fieldsDisabled ไม่ใช่ contentLocked) ให้ override เรตได้
-  const isFromPr = !isManual;
+
+  // ใบที่มาจาก price list ล็อกเนื้อหา **เฉพาะเมื่อพ้น draft แล้ว** — ตอนยังเป็นร่าง
+  // คนทำใบต้องแก้ได้ ไม่งั้นกด Edit แล้วทั้งแถวกรอกไม่ได้สักช่อง ซึ่งเป็นทางตัน
+  // (ของเดิมล็อกทันทีที่ po_type = pricelist โดยไม่ดูสถานะเลย)
+  const isPriceListLocked =
+    purchaseOrder?.po_type === PO_TYPE.PL &&
+    !isPoDraft &&
+    !isReadOnly &&
+    !isViewOnly;
+  const fieldsDisabled = isDisabled || isPriceListLocked;
+  // PO ที่มาจาก PR: เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items, คลัง, notes)
+  // — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields (gate ที่ fieldsDisabled
+  // ไม่ใช่ contentLocked) ให้ override เรตได้ · **ล็อกเมื่อพ้น draft แล้วเท่านั้น**
+  // เหตุผลเดียวกับ price list ข้างบน
+  const isFromPr = !isManual && !isPoDraft;
   const contentLocked = fieldsDisabled || isFromPr;
   const locationsDisabled = isDisabled || isFromPr;
   const departmentName = defaultBu?.department?.name ?? "";
@@ -234,7 +245,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
         <PoItemFields
           form={form}
-          revealErrorSignal={revealErrorSignal}
           disabled={contentLocked}
           locationsDisabled={locationsDisabled}
           role={role}
@@ -258,7 +268,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         poStatus={purchaseOrder?.po_status}
         previousStages={previousStages}
         stagesLoading={stagesLoading}
-        onSubmit={purchaseOrder ? handleSubmitPo : undefined}
+        // ใบใหม่ที่ยังไม่เคยเซฟก็กดส่งได้ — handleSubmitPo สร้างใบให้ก่อนแล้วค่อยส่ง
+        // (ทรงเดียวกับ PR) ของเดิมส่ง undefined ทำให้ปุ่มหายจนกว่าจะกด Save ก่อน
+        onSubmit={handleSubmitPo}
+        onValidateSubmit={validateSubmitPo}
         onApprove={purchaseOrder ? handleApprovePo : undefined}
         onReject={purchaseOrder ? () => dialogs.setShowReject(true) : undefined}
         onReview={purchaseOrder ? handleReviewConfirm : undefined}

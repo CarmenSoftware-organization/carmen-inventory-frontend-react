@@ -71,20 +71,21 @@ const STATUS_CLASSNAMES: Record<string, string> = {
   /* Type badges (Inventory Adjustment) */
   "stock-in": `${DOT} before:bg-[var(--status-stock-in)]`,
   "stock-out": `${DOT} before:bg-[var(--status-stock-out)]`,
-  /* Workflow type badges — uses sub-module colors from module-colors.css */
-  purchase_request_workflow: `${DOT} before:bg-[var(--sub-pr)]`,
-  purchase_order_workflow: `${DOT} before:bg-[var(--sub-po)]`,
-  store_requisition_workflow: `${DOT} before:bg-[var(--sub-store-requisition)]`,
+  /* Workflow type badges — ชนิดเอกสารไม่ใช่สถานะ ไม่มีความหมายดี/ร้ายให้สื่อด้วยสี
+     จุดจึงเป็น primary เหมือนกันหมด ตัวแยกคือ label (เดิมใช้ --sub-* คนละ hue) */
+  purchase_request_workflow: `${DOT} before:bg-primary`,
+  purchase_order_workflow: `${DOT} before:bg-primary`,
+  store_requisition_workflow: `${DOT} before:bg-primary`,
   /* CN type badges */
   quantity_return: `${DOT} before:bg-[var(--status-quantity-return)]`,
   amount_discount: `${DOT} before:bg-[var(--status-amount-discount)]`,
   /* GRN type badges */
   grn_purchase_order: `${DOT} before:bg-[var(--status-grn-po)]`,
   grn_manual: `${DOT} before:bg-[var(--status-grn-manual)]`,
-  /* PO type badges — uses sub-module colors */
-  purchase_request: `${DOT} before:bg-[var(--sub-pr)]`,
-  manual: `${DOT} before:bg-[var(--sub-po)]`,
-  pricelist: `${DOT} before:bg-[var(--sub-price-list)]`,
+  /* PO type badges — เหตุผลเดียวกับ workflow type ข้างบน */
+  purchase_request: `${DOT} before:bg-primary`,
+  manual: `${DOT} before:bg-primary`,
+  pricelist: `${DOT} before:bg-primary`,
   /* Cuisine region badges */
   ASIA: `${DOT} before:bg-[var(--status-cuisine-asia)]`,
   EUROPE: `${DOT} before:bg-[var(--status-cuisine-europe)]`,

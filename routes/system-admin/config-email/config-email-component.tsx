@@ -20,6 +20,9 @@ import {
   useTestEmail,
 } from "@/hooks/use-app-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { DiscardDialog } from "@/components/ui/discard-dialog";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 
 const schema = z.object({
   smtp_host: z.string().min(1, "SMTP host is required"),
@@ -84,7 +87,11 @@ function toApiValue(values: FormValues): Record<string, unknown> {
   };
 }
 
+// React Compiler memo คอมโพเนนต์นี้แล้ว effect ที่ reset ฟอร์มจาก config ที่โหลดมา
+// ไม่ทำงาน (ช่องทั้งหมดขึ้นว่างทุกครั้งที่เปิดหน้า ทั้งที่เคยตั้งค่าไว้แล้ว) และ
+// subscription ของ formState.isDirty ก็ไม่อัปเดตตาม ทำให้ guard ไม่รู้ว่ามีการแก้
 export default function ConfigEmailComponent() {
+  "use no memo";
   const t = useTranslations("systemAdmin.configEmail");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
@@ -107,7 +114,11 @@ export default function ConfigEmailComponent() {
     upsert.mutate(
       { key: "report_email", value: toApiValue(values) },
       {
-        onSuccess: () => toast.success(t("saved")),
+        onSuccess: () => {
+          toast.success(t("saved"));
+          // ล้าง dirty หลังบันทึก ไม่งั้น guard เตือนค้างทั้งที่เซฟไปแล้ว
+          form.reset(values);
+        },
       },
     );
   };
@@ -120,6 +131,12 @@ export default function ConfigEmailComponent() {
 
   const smtpEnabled = useWatch({ control: form.control, name: "smtp_enabled" });
   const submit = form.handleSubmit(onSubmit, () => scrollToFirstInvalidField());
+
+  // หน้านี้ไม่มีปุ่มย้อนกลับ ทางออกคือเมนู sidebar กับปิดแท็บ — ดักทั้งสองทาง
+  // (hook ต้องอยู่เหนือ early return ของ isLoading ไม่งั้นลำดับ hook เพี้ยน)
+  const isDirty = form.formState.isDirty;
+  const navGuard = useNavigationGuard(isDirty);
+  useUnsavedChanges(isDirty);
 
   if (isLoading) {
     return (
@@ -260,6 +277,16 @@ export default function ConfigEmailComponent() {
           </Field>
         </SettingSection>
       </form>
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(open) => {
+          if (!open) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

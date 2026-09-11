@@ -36,8 +36,6 @@ export function RecipeNameField({
   const [focus, setFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const labelTone = focus ? "text-primary" : "text-muted-foreground";
-  const dotTone = focus ? "bg-primary" : "bg-muted-foreground";
   const underline = getUnderline(focus, hover, !!error);
   const pencilTone = getPencilTone(focus, hover);
   const helperText = getHelperText(error, focus, value, labels);
@@ -51,13 +49,10 @@ export function RecipeNameField({
     >
       <div
         className={cn(
-          "text-micro-eyebrow mb-0.5 flex items-center gap-1 font-semibold tracking-[0.16em] uppercase transition-colors",
-          labelTone,
+          "text-muted-foreground text-micro-eyebrow mb-0.5 flex items-center gap-1 font-semibold tracking-wider uppercase",
         )}
       >
-        <span
-          className={cn("size-0.5 rounded-sm transition-colors", dotTone)}
-        />
+        <span className="bg-muted-foreground size-0.5 rounded-sm" />
         {labels.nameLabel}
         <span className="text-muted-foreground/60 font-semibold">·</span>
         <span className="text-muted-foreground text-micro-legal font-semibold tracking-normal normal-case">
@@ -101,12 +96,7 @@ export function RecipeNameField({
       </div>
 
       <div className="text-micro-legal mt-1 flex items-center justify-between">
-        <span
-          className={cn(
-            "font-semibold",
-            focus ? "text-primary" : "text-muted-foreground",
-          )}
-        >
+        <span className="text-muted-foreground font-semibold">
           {helperText}
         </span>
         <span className="text-muted-foreground/70 text-micro-eyebrow">
@@ -125,8 +115,7 @@ function getUnderline(focus: boolean, hover: boolean, hasError: boolean) {
 }
 
 function getPencilTone(focus: boolean, hover: boolean) {
-  if (focus) return "bg-primary text-primary-foreground";
-  if (hover) return "bg-foreground text-background";
+  if (focus || hover) return "bg-muted text-foreground";
   return "border border-border bg-transparent text-muted-foreground";
 }
 

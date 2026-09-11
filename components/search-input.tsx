@@ -14,6 +14,8 @@ interface Props {
   readonly buttonClassName?: string;
   readonly inputClassName?: string;
   readonly onInputChange?: (value: string) => void;
+  /** ข้อความในช่องว่าง — ไม่ส่ง = "ค้นหา" กลาง ๆ ของ common */
+  readonly placeholder?: string;
 }
 
 const SearchInput = memo(function SearchInput({
@@ -23,6 +25,7 @@ const SearchInput = memo(function SearchInput({
   buttonClassName = "absolute right-0 top-0 h-full px-2 text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80",
   inputClassName = "h-8 placeholder:text-xs",
   onInputChange,
+  placeholder,
 }: Props) {
   const t = useTranslations("common");
   const [inputValue, setInputValue] = useState(defaultValue);
@@ -62,7 +65,7 @@ const SearchInput = memo(function SearchInput({
       <div className={`relative ${containerClassName}`}>
         <Input
           name="search"
-          placeholder={t("search")}
+          placeholder={placeholder ?? t("search")}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

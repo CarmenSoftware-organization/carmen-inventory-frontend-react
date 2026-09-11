@@ -1,4 +1,5 @@
 import { buildItemChanges } from "@/lib/form-helpers";
+import { withFreshDetailVersions } from "@/lib/doc-version";
 import { type CreatePoDto, PO_TYPE } from "@/types/purchase-order";
 import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
 
@@ -17,23 +18,37 @@ import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
  * );
  * await createPo(buCode, payload);
  */
+/**
+ * @param options.docVersion - เลขเวอร์ชันที่ resolve มาแล้ว (GET สดจาก DB) ไม่ส่ง =
+ *   ใช้ค่าในฟอร์ม ซึ่งถูกเฉพาะใบใหม่ที่ยังไม่มี id ให้ไป GET · ใบที่มีอยู่แล้วต้อง
+ *   ส่งมาเสมอ ไม่งั้น /save รอบถัดไปชน 409 (ดู lib/doc-version.ts)
+ */
 export function buildPoPayload(
   values: PoFormValues,
   defaultItems: PoFormValues["items"],
-  options?: { po_type?: PO_TYPE },
+  options?: {
+    po_type?: PO_TYPE;
+    docVersion?: number;
+    /** `purchase_order_detail` จาก GET ล่าสุด — ทับเลขราย row ที่จะ update */
+    freshDetails?: readonly { id: string; doc_version?: number }[];
+  },
 ): CreatePoDto {
+  const docVersion = options?.docVersion ?? values.doc_version;
   const purchaseOrderDetail = buildItemChanges(
     values.items,
     defaultItems,
     mapItemToPayload,
   );
+  // ทับหลัง buildItemChanges เสมอ — ดันเข้า input จะทำให้ทุกแถวกลายเป็น update
+  purchaseOrderDetail.update = withFreshDetailVersions(
+    purchaseOrderDetail.update,
+    options?.freshDetails,
+  );
 
   return {
     stage_role: "create",
     details: {
-      ...(values.doc_version != null
-        ? { doc_version: values.doc_version }
-        : {}),
+      ...(docVersion != null ? { doc_version: docVersion } : {}),
       ...(options?.po_type ? { po_type: options.po_type } : {}),
       workflow_id: values.workflow_id,
       vendor_id: values.vendor_id,
