@@ -1,13 +1,8 @@
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import type { GrnFormValues } from "../grn-form-schema";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
-/**
- * คลังที่รับของของแถวนี้
- *
- * ตัวเลือกกรองตามสินค้าของแถว (`LookupProductLocation`) จึงกดไม่ได้จนกว่าจะเลือก
- * สินค้าก่อน — ทิศทางตรงข้ามกับ PO ที่เลือกคลังก่อนแล้วค่อยได้รายการสินค้า
- */
 export function LocationCell({
   form,
   index,
@@ -19,15 +14,10 @@ export function LocationCell({
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
-  /**
-   * แก้คลังไม่ได้ — รวมทั้งกรณีทั้งใบล็อก และกรณีแถวนี้อ้าง PO (คลังมาจาก PO)
-   * แยก gate ของคลังออกจากเนื้อหาอื่นแบบเดียวกับ `locationsDisabled` ของ PO
-   */
   disabled: boolean;
   autoOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** เลือกคลังเสร็จแล้วพาเคอร์เซอร์ไปช่องนี้ต่อ */
   nextFocusRef?: React.RefObject<HTMLInputElement | null>;
 }) {
   "use no memo";
@@ -41,14 +31,7 @@ export function LocationCell({
   });
 
   if (disabled) {
-    return (
-      <p className="truncate text-xs font-medium">
-        {locationName || "—"}
-        {locationCode ? (
-          <span className="text-muted-foreground"> · {locationCode}</span>
-        ) : null}
-      </p>
-    );
+    return <NameWithSubtext primary={locationName} secondary={locationCode} />;
   }
 
   return (

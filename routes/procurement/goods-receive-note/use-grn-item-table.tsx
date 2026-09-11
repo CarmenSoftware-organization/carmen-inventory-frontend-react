@@ -116,13 +116,6 @@ export function useGrnItemTable({
           <LocationCell
             form={form}
             index={row.index}
-            // คลังของแถวที่อ้าง PO ถูกกำหนดมาจากใบสั่งซื้อแล้ว แก้ไม่ได้แม้อยู่
-            // โหมดแก้ไข — ท่าเดียวกับ locationsDisabled ของ PO ที่แยก gate ของ
-            // คลังออกจากเนื้อหาอื่น
-            //
-            // **ยกเว้นแถวที่ยังไม่มีคลัง** — PO บางรายการไม่ได้ระบุคลังมาด้วย
-            // (`d.locations` ว่าง) ล็อกไว้ทั้งที่ schema บังคับต้องมีคลัง = ฟอร์ม
-            // ที่บันทึกไม่ได้ตลอดกาลและไม่มีทางแก้จากหน้าจอ
             disabled={
               disabled ||
               (!!row.original.purchase_order_detail_id &&
