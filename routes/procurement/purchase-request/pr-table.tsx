@@ -316,7 +316,9 @@ export function usePurchaseRequestTable({
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 60,
+    // เท่า selectColumn() ของกลาง — คอลัมน์ติ๊กของ PR เขียนเองเพราะกติกาการเลือก
+    // ต่างจากชาวบ้าน ไม่ใช่เพราะอยากได้ความกว้างต่างจากชาวบ้าน
+    size: 55,
     meta: {
       headerClassName: "text-center print:hidden",
       cellClassName: "text-center print:hidden",
