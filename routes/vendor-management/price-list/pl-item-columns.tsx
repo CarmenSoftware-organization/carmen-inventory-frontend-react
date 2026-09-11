@@ -86,7 +86,7 @@ export function buildPlItemColumns({
     },
     {
       id: "moq",
-      size: 96,
+      size: 128,
       header: () => tfl("moq"),
       cell: ({ row }) => (
         <MoqCell

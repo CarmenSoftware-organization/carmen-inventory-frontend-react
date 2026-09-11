@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Controller,
   useFormState,
@@ -13,7 +12,6 @@ import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { round2 } from "@/lib/currency-utils";
-import { cn } from "@/lib/utils";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
@@ -33,31 +31,6 @@ interface CellProps {
   readonly detailRef?: DetailRef;
 }
 
-/* ── Cells (view = plain text · edit = inputs/lookups) ─────────── */
-
-/** count/min/max ของราคา (incl. tax = `price`) ทุก row — ใช้ highlight border สูง/ต่ำ */
-function computePriceMinMax(
-  details: PriceListFormValues["pricelist_detail"] | undefined,
-) {
-  const prices = (details ?? []).map((d) => Number(d?.price) || 0);
-  const count = prices.length;
-  return {
-    count,
-    min: count > 0 ? Math.min(...prices) : 0,
-    max: count > 0 ? Math.max(...prices) : 0,
-  };
-}
-
-/**
- * error ของแถวนี้ — **ต้อง subscribe เอง** ไม่ใช่อ่าน `form.formState.errors` ตรง ๆ
- *
- * อ่านตรง ๆ ได้ค่าถูกก็จริง แต่ตัวที่ re-render คือคอมโพเนนต์ที่เรียก `useForm`
- * (หน้าฟอร์ม) ส่วนกลางทางระหว่างนั้นถูก React Compiler memo ไว้เพราะ props ไม่
- * เปลี่ยน — เซลล์จึงไม่ถูก render ใหม่ แล้วกรอบแดงไม่ขึ้นทั้งที่ error มีอยู่จริง
- * (เจอตอนกดบันทึกใบที่แถวสินค้ายังไม่ได้เลือกสินค้า: ไม่บันทึกให้ แต่หน้าก็ไม่ขยับ)
- *
- * เรียกก่อน `if (isView) return` เสมอ — hook หลัง early return ผิดกติกา
- */
 function useRowErrors(form: UseFormReturn<PriceListFormValues>, index: number) {
   "use no memo";
   const { errors } = useFormState({
@@ -216,26 +189,6 @@ export function PriceCell({
 }: CellProps) {
   "use no memo";
   const errors = useRowErrors(form, index);
-  // Price = ราคารวมภาษี (gross) ที่ vendor กรอกเอง — PWT/Tax/Amount derive จากตัวนี้
-  const price = useWatch({
-    control: form.control,
-    name: `pricelist_detail.${index}.price`,
-  });
-  // watch ทุก row เพื่อหา min/max ของราคา (incl. tax) สำหรับ highlight border
-  // — คำนวณใน cell เอง แทนรับ `stats` ผ่าน column closure ที่ทำให้ columns
-  // ถูกสร้างใหม่ทุก keystroke → cell remount → input หลุด focus
-  const allDetails = useWatch({
-    control: form.control,
-    name: "pricelist_detail",
-  });
-
-  const numericPrice = Number(price) || 0;
-  const { count, min, max } = useMemo(
-    () => computePriceMinMax(allDetails),
-    [allDetails],
-  );
-  const isHigh = count > 1 && numericPrice === max && min !== max;
-  const isLow = count > 1 && numericPrice === min && min !== max;
 
   if (isView)
     return (
@@ -255,11 +208,7 @@ export function PriceCell({
         disabled={isDisabled}
         placeholder="0.00"
         error={errors?.price?.message}
-        className={cn(
-          "border-border/60 h-8 w-full rounded-md pr-2 pl-6 text-right text-xs font-semibold tabular-nums",
-          isHigh && "border-warning/60",
-          isLow && "border-success/60",
-        )}
+        className="text-right"
         {...form.register(`pricelist_detail.${index}.price`, {
           valueAsNumber: true,
         })}

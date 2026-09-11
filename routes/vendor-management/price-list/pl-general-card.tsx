@@ -125,7 +125,7 @@ export function PLGeneralCard({
 
       {/* Effective from */}
       <Field>
-        <FieldLabel>{tfl("effectiveFrom")}</FieldLabel>
+        <FieldLabel required>{tfl("effectiveFrom")}</FieldLabel>
         {isView ? (
           <FieldPlainText>
             {watchedFrom ? formatDate(watchedFrom, dateFormat) : ""}
@@ -150,7 +150,7 @@ export function PLGeneralCard({
 
       {/* Effective to */}
       <Field>
-        <FieldLabel>{tfl("effectiveTo")}</FieldLabel>
+        <FieldLabel required>{tfl("effectiveTo")}</FieldLabel>
         {isView ? (
           <FieldPlainText>
             {watchedTo ? formatDate(watchedTo, dateFormat) : ""}
