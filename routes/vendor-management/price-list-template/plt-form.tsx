@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { PRICE_LIST_TEMPLATE_STATUS_OPTIONS } from "@/constant/price-list-template";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { getSubmitLabel } from "@/lib/form-utils";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useProfile } from "@/hooks/use-profile";
 import type { PriceListTemplate } from "@/types/price-list-template";
@@ -110,13 +111,7 @@ export function PriceListTemplateForm({
   const stepperLabels = useStepperLabels(t);
 
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
-  const submitLabel = actions.isPending
-    ? isAdd
-      ? tform("creating")
-      : tform("saving")
-    : isAdd
-      ? tc("create")
-      : tc("save");
+  const submitLabel = getSubmitLabel(actions.isPending, isAdd, tc, tform);
 
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">

@@ -11,16 +11,6 @@ export interface MethodConfig {
 
 type TFn = (key: string) => string;
 
-export function getSubmitLabel(
-  isPending: boolean,
-  isAdd: boolean,
-  tc: TFn,
-  tform: TFn,
-): string {
-  if (isPending) return isAdd ? tform("creating") : tform("saving");
-  return isAdd ? tc("create") : tc("save");
-}
-
 export function getMethodConfig(method: SpotCheckMethod, t: TFn): MethodConfig {
   switch (method) {
     case "random":

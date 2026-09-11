@@ -12,6 +12,7 @@ import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
+import { getSubmitLabel } from "@/lib/form-utils";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
@@ -296,16 +297,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
 }
 
 /* ── label hooks ─────────────────────────────────────────────── */
-
-function getSubmitLabel(
-  isPending: boolean,
-  isAdd: boolean,
-  tc: (key: string) => string,
-  tform: (key: string) => string,
-): string {
-  if (isPending) return isAdd ? tform("creating") : tform("saving");
-  return isAdd ? tc("create") : tc("save");
-}
 
 /* ── submit helpers ──────────────────────────────────────────── */
 

@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
+import { getSubmitLabel } from "@/lib/form-utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
@@ -354,14 +355,4 @@ export function VendorForm({ vendor }: VendorFormProps) {
       )}
     </div>
   );
-}
-
-function getSubmitLabel(
-  isPending: boolean,
-  isAdd: boolean,
-  tc: (key: string) => string,
-  tform: (key: string) => string,
-): string {
-  if (isPending) return isAdd ? tform("creating") : tform("saving");
-  return isAdd ? tc("create") : tc("save");
 }

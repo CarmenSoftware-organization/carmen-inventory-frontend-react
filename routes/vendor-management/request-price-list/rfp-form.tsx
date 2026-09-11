@@ -11,6 +11,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
+import { getSubmitLabel } from "@/lib/form-utils";
 import {
   Field,
   FieldDatePicker,
@@ -410,14 +411,4 @@ export function RequestPriceListForm({
       )}
     </div>
   );
-}
-
-function getSubmitLabel(
-  isPending: boolean,
-  isAdd: boolean,
-  tc: (key: string) => string,
-  tform: (key: string) => string,
-): string {
-  if (isPending) return isAdd ? tform("creating") : tform("saving");
-  return isAdd ? tc("create") : tc("save");
 }
