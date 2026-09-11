@@ -1,15 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm, type Resolver } from "react-hook-form";
+import { DiscardDialog } from "@/components/ui/discard-dialog";
+import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Camera,
-  KeyRound,
-  Loader2,
-  Mail,
-  Trash2,
-  IdCard,
-} from "lucide-react";
+import { Camera, KeyRound, Loader2, Mail, Trash2, IdCard } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -186,7 +182,14 @@ export default function UserProfileSetting() {
     values: defaultValues,
   });
 
-  const handleBack = () => navigate("/profile");
+  const discard = useDiscardConfirm({
+    isDirty: form.formState.isDirty,
+    isPending: updateProfile.isPending,
+  });
+  // useDiscardConfirm ดักได้แค่ปุ่มย้อนกลับในหน้านี้ — เมนู sidebar ต้องใช้ตัวนี้
+  const navGuard = useNavigationGuard(form.formState.isDirty);
+
+  const handleBack = () => discard.confirm(() => navigate("/profile"));
 
   const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(values, {
@@ -613,6 +616,18 @@ export default function UserProfileSetting() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(open) => {
+          if (!open) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }

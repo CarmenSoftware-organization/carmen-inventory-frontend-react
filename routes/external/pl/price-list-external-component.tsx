@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { DiscardDialog } from "@/components/ui/discard-dialog";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import {
   usePriceListExternal,
   useExternalTaxProfiles,
@@ -186,6 +189,13 @@ export default function PriceListExternalComponent({
     }
   };
 
+  // คนกรอกคือแอดมินของผู้ขายที่เพิ่งได้ลิงก์ทางอีเมล ปิดแท็บทีเดียวราคาทั้งใบหาย
+  // และกู้เองไม่ได้ — ดักทั้งปิด/รีเฟรชแท็บ และกด back
+  // (hook ต้องอยู่เหนือ early return ทุกตัว ไม่งั้นลำดับ hook เพี้ยน)
+  const isDirty = form.formState.isDirty;
+  const navGuard = useNavigationGuard(isDirty);
+  useUnsavedChanges(isDirty);
+
   if (isLoading) {
     return <PriceListExternalSkeleton />;
   }
@@ -322,6 +332,16 @@ export default function PriceListExternalComponent({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(open) => {
+          if (!open) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }
