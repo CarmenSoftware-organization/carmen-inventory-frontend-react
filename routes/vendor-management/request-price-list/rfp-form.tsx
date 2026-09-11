@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -29,25 +29,22 @@ import {
   useDeleteRequestPriceList,
   useUpdateRequestPriceList,
 } from "./use-rfp";
-import type { Vendor } from "@/types/vendor";
 import type {
   CreateRequestPriceListDto,
   RequestPriceList,
-  RequestPriceListVendor,
 } from "@/types/request-price-list";
 
 import { SettingSection } from "@/components/ui/setting-section";
 import {
+  buildVendorChanges,
   createRfpSchema,
   getDefaultValues,
   type RfpFormValues,
 } from "./rfp-form-schema";
-import RfpVendorTable from "./rfp-vendor-table";
+import { RfpVendorFields } from "./rfp-vendor-fields";
 import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "rfp-form";
-
-type VendorAddItem = RfpFormValues["vendors"]["add"][number];
 
 interface RequestPriceListFormProps {
   readonly requestPriceList?: RequestPriceList;
@@ -72,7 +69,6 @@ export function RequestPriceListForm({
   const updateRfp = useUpdateRequestPriceList();
   const deleteRfp = useDeleteRequestPriceList();
   const [showDelete, setShowDelete] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
   const isPending = createRfp.isPending || updateRfp.isPending;
 
   const defaultValues = getDefaultValues(requestPriceList);
@@ -83,8 +79,6 @@ export function RequestPriceListForm({
     defaultValues,
     listPath: LIST_PATH,
     isPending,
-    // แถวเพิ่ม vendor ที่ค้างอยู่ต้องปิดตอนกด Cancel ด้วย
-    onResetExtra: () => setIsAdding(false),
   });
   const { form, isView, isAdd, isEdit, isDisabled } = f;
 
@@ -98,109 +92,7 @@ export function RequestPriceListForm({
   const endDate = useWatch({ control: form.control, name: "end_date" });
   const watchedName = useWatch({ control: form.control, name: "name" });
 
-  const watchedAdd = useWatch({ control: form.control, name: "vendors.add" });
-  const addedVendors: VendorAddItem[] = watchedAdd ?? [];
-
-  const removedIds = useWatch({
-    control: form.control,
-    name: "vendors.remove",
-  });
-  const removedVendorIds = new Set(removedIds ?? []);
-
-  const existingVendors = (requestPriceList?.vendors ?? []).filter(
-    (v) => !removedVendorIds.has(v.vendor_id),
-  );
-
-  const displayVendors: (RequestPriceListVendor | VendorAddItem)[] = [
-    ...existingVendors,
-    ...addedVendors,
-  ];
-
-  const selectedVendorIds = new Set([
-    ...existingVendors.map((v) => v.vendor_id),
-    ...addedVendors.map((v) => v.vendor_id),
-  ]);
-
-  /**
-   * รับผู้ขายทีเดียวหลายรายจาก dialog — กันซ้ำในนี้อีกชั้น (dialog ปิดตัวที่มี
-   * อยู่แล้วไว้ แต่รายการอาจถูกเพิ่มจากหน้าต่างอื่นระหว่างที่ dialog เปิดค้าง)
-   */
-  const handleAddVendors = (vendors: Vendor[]) => {
-    const fresh = vendors.filter((v) => !selectedVendorIds.has(v.id));
-    if (fresh.length === 0) {
-      setIsAdding(false);
-      return;
-    }
-    // คนที่เพิ่งกดลบไปในการแก้ไขรอบนี้ = ถอนคำสั่งลบ ไม่ใช่เพิ่มเป็นรายใหม่
-    // ไม่งั้น vendor_id เดียวไปโผล่ทั้ง vendors.add และ vendors.remove แล้ว
-    // backend ลบแถวเดิมทิ้งสร้างใหม่ — url_token เปลี่ยน ลิงก์ที่ส่งให้ผู้ขาย
-    // ไปแล้วใช้ไม่ได้ ทั้งที่ผู้ใช้แค่กดลบแล้วเปลี่ยนใจ
-    const currentRemove = form.getValues("vendors.remove") ?? [];
-    const undoIds = new Set(
-      fresh.map((v) => v.id).filter((id) => currentRemove.includes(id)),
-    );
-    if (undoIds.size > 0) {
-      form.setValue(
-        "vendors.remove",
-        currentRemove.filter((id) => !undoIds.has(id)),
-      );
-    }
-
-    const brandNew = fresh.filter((v) => !undoIds.has(v.id));
-    if (brandNew.length === 0) {
-      setIsAdding(false);
-      return;
-    }
-
-    const currentAdd = form.getValues("vendors.add") ?? [];
-    form.setValue("vendors.add", [
-      ...currentAdd,
-      ...brandNew.map((vendor) => {
-        const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
-        const primaryContact = contacts.find((c) => c.is_primary);
-        return {
-          vendor_id: vendor.id,
-          vendor_name: vendor.name,
-          vendor_code: vendor.code,
-          contact_person: primaryContact?.name ?? "",
-          contact_phone: primaryContact?.phone ?? "",
-          contact_email: primaryContact?.email ?? "",
-          dimension: "",
-        };
-      }),
-    ]);
-    setIsAdding(false);
-  };
-
-  const handleRemoveVendor = (vendorId: string) => {
-    const currentAdd = form.getValues("vendors.add") ?? [];
-    const addIndex = currentAdd.findIndex((v) => v.vendor_id === vendorId);
-    if (addIndex >= 0) {
-      const updated = [...currentAdd];
-      updated.splice(addIndex, 1);
-      form.setValue("vendors.add", updated);
-    } else {
-      const currentRemove = form.getValues("vendors.remove") ?? [];
-      form.setValue("vendors.remove", [...currentRemove, vendorId]);
-    }
-  };
-
   const onSubmit = (values: RfpFormValues) => {
-    const vendorsAdd = (values.vendors?.add ?? []).map((v, i) => ({
-      vendor_id: v.vendor_id,
-      vendor_name: v.vendor_name,
-      vendor_code: v.vendor_code,
-      contact_person: v.contact_person,
-      contact_phone: v.contact_phone,
-      contact_email: v.contact_email,
-      sequence_no: existingVendors.length + i + 1,
-      dimension: v.dimension,
-      id: "",
-    }));
-    const vendorsRemove = (values.vendors?.remove ?? []).map((v) => ({
-      vendor_id: v,
-    }));
-
     const payload: CreateRequestPriceListDto = {
       name: values.name,
       pricelist_template_id: values.pricelist_template_id || undefined,
@@ -210,10 +102,7 @@ export function RequestPriceListForm({
       email_template_id: values.email_template_id || undefined,
       info: values.info || undefined,
       dimension: values.dimension || undefined,
-      vendors: {
-        add: vendorsAdd.length > 0 ? vendorsAdd : undefined,
-        remove: vendorsRemove.length > 0 ? vendorsRemove : undefined,
-      },
+      vendors: buildVendorChanges(values.vendors, defaultValues.vendors),
     };
 
     if (isEdit && requestPriceList) {
@@ -226,10 +115,7 @@ export function RequestPriceListForm({
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            // เคลียร์ delta vendors.add/remove หลัง save สำเร็จ — refetch ทำให้
-            // existingVendors มี vendor ที่เพิ่งเพิ่มแล้ว ถ้ายังค้าง add ไว้ใน form
-            // จะ render ซ้ำใน view mode และ Save รอบถัดไปจะ re-send สร้าง vendor ซ้ำ
-            form.reset({ ...values, vendors: { add: [], remove: [] } });
+            form.reset(values);
             f.setMode("view");
           },
         },
@@ -256,6 +142,20 @@ export function RequestPriceListForm({
       },
     });
   };
+
+  // หลัง save สำเร็จ query ถูก invalidate แล้ว refetch — ผู้ขายที่เพิ่งเพิ่มจะได้
+  // id จริงจาก server กลับมา ต้อง re-sync ฟอร์มในโหมด view ไม่งั้นแถวพวกนั้นยัง
+  // id ว่างอยู่ แล้ว Save รอบถัดไปจะส่ง add ซ้ำ สร้างผู้ขายซ้ำฝั่ง backend
+  // key ด้วยชุด id ของผู้ขาย ซึ่งเปลี่ยนพอดีตอนมีการเพิ่ม/ลบ (ดู pl-form)
+  const vendorIdsKey = (requestPriceList?.vendors ?? [])
+    .map((v) => v.id)
+    .join(",");
+  useEffect(() => {
+    if (f.mode === "view" && requestPriceList) {
+      form.reset(getDefaultValues(requestPriceList));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode อ่านโดยไม่ retrigger
+  }, [vendorIdsKey, requestPriceList?.id]);
 
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
@@ -454,15 +354,10 @@ export function RequestPriceListForm({
           </Field>
         </SettingSection>
 
-        <RfpVendorTable
+        <RfpVendorFields
+          form={form}
+          requestPriceList={requestPriceList}
           isDisabled={isDisabled}
-          rfpName={requestPriceList?.name ?? ""}
-          isAdding={isAdding}
-          setIsAdding={setIsAdding}
-          displayVendors={displayVendors}
-          selectedVendorIds={selectedVendorIds}
-          onAddVendor={handleAddVendors}
-          onRemoveVendor={handleRemoveVendor}
         />
 
         {/* Custom message */}
