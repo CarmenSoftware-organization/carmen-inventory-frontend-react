@@ -37,9 +37,10 @@ import { PltItemFields } from "./plt-item-fields";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { usePltFormActions } from "./use-plt-form-actions";
-import { FORM_ID } from "./plt-form-helpers";
 import { useStepperLabels } from "./plt-form-labels";
 import { openActivity } from "@/components/share/activity-sheet-host";
+
+const FORM_ID = "plt-form";
 
 interface PriceListTemplateFormProps {
   readonly priceListTemplate?: PriceListTemplate;

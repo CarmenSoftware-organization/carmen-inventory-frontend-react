@@ -141,3 +141,23 @@ describe("PriceListTemplateForm — ส่วนสินค้าในเท�
     expect(productBtns()).toHaveLength(0);
   });
 });
+
+/**
+ * ปุ่มบันทึกต้องบอกสถานะที่กำลังเกิดขึ้นจริง ไม่ใช่คำเดียวทุกกรณี
+ * — เดิมเทสต์ข้อนี้จับ getSubmitLabel() ใน plt-form-helpers ซึ่งฟอร์มไม่ได้เรียก
+ * (คำนวณ label เองแบบ inline) เทสต์เลยเขียวทั้งที่ของจริงไม่มีใครใช้ ย้ายมาจับ
+ * ปุ่มบนจอแทน ตอนลบฟังก์ชันตายนั้นทิ้ง
+ */
+describe("PriceListTemplateForm — ป้ายบนปุ่มบันทึก", () => {
+  it("ใบใหม่ขึ้น Create · ใบเดิมที่กดแก้ไขขึ้น Save", async () => {
+    const { unmount } = renderForm(<PriceListTemplateForm />);
+    expect(screen.getByRole("button", { name: en.common.create })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: en.common.save })).toBeNull();
+    unmount();
+
+    renderForm(<PriceListTemplateForm priceListTemplate={TEMPLATE} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+    expect(screen.getByRole("button", { name: en.common.save })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: en.common.create })).toBeNull();
+  });
+});

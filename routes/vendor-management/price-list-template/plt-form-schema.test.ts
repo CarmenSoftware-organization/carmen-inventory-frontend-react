@@ -6,7 +6,6 @@ import {
   groupDetailsToProducts,
   type PltFormValues,
 } from "./plt-form-schema";
-import { getSubmitLabel } from "./plt-form-helpers";
 import type { PriceListTemplate } from "@/types/price-list-template";
 
 const tv = ((k: string) => k) as never;
@@ -144,21 +143,5 @@ describe("groupDetailsToProducts", () => {
 
   it("ไม่มีแถวเลย = ไม่มีสินค้า ไม่ใช่ระเบิด", () => {
     expect(groupDetailsToProducts([])).toEqual([]);
-  });
-});
-
-describe("getSubmitLabel", () => {
-  const labels = {
-    create: "สร้าง",
-    creating: "กำลังสร้าง",
-    save: "บันทึก",
-    saving: "กำลังบันทึก",
-  } as never;
-
-  it("บอกสถานะที่กำลังเกิดขึ้นจริง ไม่ใช่คำเดียวทุกกรณี", () => {
-    expect(getSubmitLabel(false, true, labels)).toBe("สร้าง");
-    expect(getSubmitLabel(true, true, labels)).toBe("กำลังสร้าง");
-    expect(getSubmitLabel(false, false, labels)).toBe("บันทึก");
-    expect(getSubmitLabel(true, false, labels)).toBe("กำลังบันทึก");
   });
 });
