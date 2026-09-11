@@ -16,13 +16,6 @@ import { dispatchPermissionDenied } from "@/components/permission-denied-dialog"
 import { AppTile } from "@/components/icons/tiles";
 import { cn } from "@/lib/utils";
 
-/**
- * สีเดียวของทั้งแอป — จุด ไอคอน และพื้นอ่อนของทุกโมดูลใช้ตัวนี้
- *
- * Single-accent design (docs/DESIGN.md): ไม่มีสีประจำโมดูลรายตัวแล้ว เดิมมีตาราง
- * route→สี กับฟังก์ชันอ่านค่าครอบไว้อีกชั้น ทั้งที่ฟังก์ชันคืนค่านี้ตายตัวโดยไม่
- * สนใจ path ที่ส่งเข้าไป — ลบทิ้งทั้งชุดแล้ว
- */
 const ACCENT = "var(--primary)";
 
 export function SideMain() {
