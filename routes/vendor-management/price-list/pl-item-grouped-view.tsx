@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslations } from "use-intl";
 import { Crown } from "lucide-react";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { round2 } from "@/lib/currency-utils";
@@ -8,9 +9,8 @@ import {
   type GroupableDetail,
 } from "./pl-product-grouping";
 
-interface PLProductGroupedViewProps {
+interface PLItemGroupedViewProps {
   readonly detailRefs: readonly GroupableDetail[];
-  readonly tfl: (key: string) => string;
   /** โชว์คอลัมน์ note ต่อ tier — เปิดเฉพาะ price-list ภายใน (ไม่ใช่ portal) */
   readonly showNote?: boolean;
 }
@@ -21,11 +21,11 @@ interface PLProductGroupedViewProps {
  * จัดกึ่งกลางแนวตั้ง, ไม่มีเส้นคั่นระหว่าง tier ในกลุ่ม (เส้นคั่นเฉพาะระหว่างกลุ่ม)
  * tier เรียงตาม MOQ น้อย→มาก (read-only, ขับด้วย detailRefs ล้วน)
  */
-export function PLProductGroupedView({
+export function PLItemGroupedView({
   detailRefs,
-  tfl,
   showNote = false,
-}: PLProductGroupedViewProps) {
+}: PLItemGroupedViewProps) {
+  const tfl = useTranslations("field");
   const groups = useMemo(() => buildProductGroups(detailRefs), [detailRefs]);
 
   return (

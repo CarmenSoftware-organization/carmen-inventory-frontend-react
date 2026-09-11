@@ -139,3 +139,63 @@ describe("PriceListForm — แถวสินค้าที่ติด valida
     ).toBeGreaterThan(0);
   });
 });
+
+/**
+ * UX ของส่วนรายการสินค้า — เขียนไว้ตอนย้าย field array จาก pl-form ไป
+ * pl-item-fields เพื่อพิสูจน์ว่าหน้าตา/การกดใช้งานไม่เปลี่ยน (เทสต์ชุดนี้ผ่าน
+ * ทั้งก่อนและหลังการย้าย)
+ */
+describe("PriceListForm — ส่วนรายการสินค้า", () => {
+  const rows = () =>
+    screen.queryAllByLabelText(en.vendorManagement.priceList.detail.removeItem);
+
+  it("[view] เห็นหัวข้อ Products แต่ยังไม่มีปุ่มเพิ่ม/ปุ่มลบรายการ", () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.title),
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole("button", { name: en.common.addItem }),
+    ).toBeNull();
+    expect(rows()).toHaveLength(0);
+  });
+
+  it("[edit] กดเพิ่มรายการแล้วได้แถวใหม่เพิ่มมาหนึ่งแถว", async () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    expect(rows()).toHaveLength(1);
+    await userEvent.click(
+      screen.getByRole("button", { name: en.common.addItem }),
+    );
+    expect(rows()).toHaveLength(2);
+  });
+
+  it("[edit] กดลบแถวต้องถามยืนยันก่อน ยืนยันแล้วแถวหาย", async () => {
+    renderForm(<PriceListForm priceList={WITH_INVALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    await userEvent.click(rows()[0]);
+    // ถามก่อน ยังไม่ลบ
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.removeItemTitle),
+    ).toBeTruthy();
+    expect(rows()).toHaveLength(1);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: en.common.delete }),
+    );
+    expect(rows()).toHaveLength(0);
+  });
+
+  it("[edit] ไม่มีรายการเลย → ขึ้นกล่องว่าง ไม่ใช่ตารางเปล่า", async () => {
+    renderForm(<PriceListForm priceList={PRICE_LIST} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+
+    expect(
+      screen.getByText(en.vendorManagement.priceList.detail.noItems),
+    ).toBeTruthy();
+    expect(rows()).toHaveLength(0);
+  });
+});

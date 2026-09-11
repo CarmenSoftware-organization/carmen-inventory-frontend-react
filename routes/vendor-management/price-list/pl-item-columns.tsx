@@ -15,14 +15,14 @@ import {
   TaxCell,
   UnitCell,
   type DetailField,
-} from "./pl-product-cells";
+} from "./pl-item-cells";
 
 interface BuildColumnsOptions {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly detailRefs?: PriceList["pricelist_detail"];
   readonly isView: boolean;
   readonly isDisabled: boolean;
-  readonly onRemove: (idx: number) => void;
+  readonly onRequestRemove: (idx: number) => void;
   readonly tfl: (key: string) => string;
   readonly removeLabel: string;
   readonly confirmDuplicate: (action: () => void, productName?: string) => void;
@@ -33,12 +33,12 @@ interface BuildColumnsOptions {
  * แต่ละ cell branch `isView` เอง (plain text vs inputs/lookups) ส่วน actions
  * column แสดงเฉพาะตอน edit
  */
-export function buildPlProductColumns({
+export function buildPlItemColumns({
   form,
   detailRefs,
   isView,
   isDisabled,
-  onRemove,
+  onRequestRemove,
   tfl,
   removeLabel,
   confirmDuplicate,
@@ -201,7 +201,7 @@ export function buildPlProductColumns({
             size="icon-xs"
             variant="ghost"
             aria-label={removeLabel}
-            onClick={() => onRemove(row.index)}
+            onClick={() => onRequestRemove(row.index)}
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
           >
             <Trash2 />

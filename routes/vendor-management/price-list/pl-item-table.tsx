@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import {
   getCoreRowModel,
   useReactTable,
@@ -14,19 +15,18 @@ import { DuplicateProductDialog } from "@/components/share/duplicate-product-dia
 import { useDuplicateProductConfirm } from "@/hooks/use-duplicate-product-confirm";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
-import { buildPlProductColumns } from "./pl-product-columns";
-import type { DetailField } from "./pl-product-cells";
-import { PLProductGroupedView } from "./pl-product-grouped-view";
+import { buildPlItemColumns } from "./pl-item-columns";
+import type { DetailField } from "./pl-item-cells";
+import { PLItemGroupedView } from "./pl-item-grouped-view";
 
-interface PLProductTableProps {
+interface PLItemTableProps {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly detailFields: DetailField[];
   readonly detailRefs?: PriceList["pricelist_detail"];
   readonly isView: boolean;
   readonly isDisabled: boolean;
-  readonly onRemove: (idx: number) => void;
-  readonly tfl: (key: string) => string;
-  readonly removeLabel: string;
+  /** เปิด dialog ยืนยันลบของแถวนั้น — ไม่ได้ลบเอง (เจ้าของ field array ลบให้) */
+  readonly onRequestRemove: (idx: number) => void;
 }
 
 /**
@@ -34,44 +34,39 @@ interface PLProductTableProps {
  * edit/add → editable DataGrid เดิม แยกเป็นคนละ component เพื่อให้ hooks ของแต่ละ
  * ฝั่งเรียกแบบ unconditional (ไม่ชน rules-of-hooks) และ edit path ไม่เปลี่ยน
  */
-export function PLProductTable(props: PLProductTableProps) {
+export function PLItemTable(props: PLItemTableProps) {
   if (props.isView)
-    return (
-      <PLProductGroupedView
-        detailRefs={props.detailRefs ?? []}
-        tfl={props.tfl}
-        showNote
-      />
-    );
-  return <PLProductEditTable {...props} />;
+    return <PLItemGroupedView detailRefs={props.detailRefs ?? []} showNote />;
+  return <PLItemEditTable {...props} />;
 }
 
-function PLProductEditTable({
+function PLItemEditTable({
   form,
   detailFields,
   detailRefs,
   isView,
   isDisabled,
-  onRemove,
-  tfl,
-  removeLabel,
-}: PLProductTableProps) {
+  onRequestRemove,
+}: PLItemTableProps) {
   "use no memo";
+  const tfl = useTranslations("field");
+  const t = useTranslations("vendorManagement.priceList");
+  const removeLabel = t("detail.removeItem");
   const dupConfirm = useDuplicateProductConfirm();
   const columns = useMemo<ColumnDef<DetailField>[]>(
     () =>
-      buildPlProductColumns({
+      buildPlItemColumns({
         form,
         detailRefs,
         isView,
         isDisabled,
-        onRemove,
+        onRequestRemove,
         tfl,
         removeLabel,
         confirmDuplicate: dupConfirm.confirm,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- dupConfirm.confirm is stable
-    [form, isView, isDisabled, tfl, onRemove, removeLabel, detailRefs],
+    [form, isView, isDisabled, tfl, onRequestRemove, removeLabel, detailRefs],
   );
 
   const table = useReactTable({
