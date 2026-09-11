@@ -49,6 +49,8 @@ export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
       <ListCardStatusRow
         status={status}
         label={statusConfig?.label ?? status}
+        // สีเดียวกับแถวชนิดใบ ทรงเดียวกับคอลัมน์สถานะในตาราง (ดู use-grn-table)
+        className="text-muted-foreground [&_svg]:text-current!"
       />
       <ListCardRow label={tfl("grnDate")}>
         <span className="tabular-nums">

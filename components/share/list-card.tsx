@@ -14,6 +14,7 @@ import { dispatchPermissionDenied } from "@/components/permission-denied-dialog"
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { cn } from "@/lib/utils";
 import { isSentBack } from "@/constant/last-action";
 import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useProfile } from "@/hooks/use-profile";
@@ -158,13 +159,16 @@ export function ListCardAuditRows({
  *
  * @param status - ค่า status ดิบ (ไม่มี = ไม่ render เช่น PO ที่ยังไม่มีสถานะ)
  * @param label - ป้ายสถานะที่แสดง (มาจาก config ของโมดูลเอง)
+ * @param className - class เสริมของโมดูลที่ตกลงกันแล้วว่าสถานะไม่ต้องมีสี
  */
 export function ListCardStatusRow({
   status,
   label,
+  className,
 }: {
   readonly status?: string | null;
   readonly label?: string | null;
+  readonly className?: string;
 }) {
   const tfl = useTranslations("field");
 
@@ -177,7 +181,7 @@ export function ListCardStatusRow({
         label={label}
         // ป้ายของบางโมดูลมาจาก i18n ตรง ๆ ไม่ได้ผ่าน createStatusConfig ที่
         // uppercase ให้ — บังคับที่นี่ทีเดียวจะได้ไม่ต้องจำเป็นราย ๆ ไป
-        className="uppercase"
+        className={cn("uppercase", className)}
       />
     </ListCardRow>
   );
