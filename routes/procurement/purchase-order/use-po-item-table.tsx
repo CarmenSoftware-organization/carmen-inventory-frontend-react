@@ -140,7 +140,8 @@ const PO_LEADING_COL = 33;
 function poColSize(viewMode: boolean) {
   return {
     location: viewMode ? 150 : 180,
-    product: 160,
+    // +ไอคอนสต็อกท้ายช่อง — ความกว้างเดิม (160) เหลือให้ชื่อสินค้าไม่ถึงร้อยกว่า px
+    product: viewMode ? 170 : 200,
     unit: viewMode ? 72 : 100,
     order: viewMode ? 85 : 140,
     foc: viewMode ? 85 : 130,
