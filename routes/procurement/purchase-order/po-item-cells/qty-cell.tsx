@@ -142,3 +142,79 @@ export const RecSummaryCell = function RecSummaryCell({
     />
   );
 };
+
+/**
+ * จำนวนแถม (FOC) + หน่วยของแถม
+ *
+ * หน่วยแยกจากหน่วยสั่งซื้อ (สั่งเป็นลัง แถมเป็นชิ้นได้) เหมือน PR/GRN · ยังไม่ได้
+ * เลือกไว้ก็ยืมหน่วยสั่งซื้อมาโชว์ไปก่อน และ `mapItemToPayload` ก็ส่งหน่วยสั่งซื้อ
+ * ขึ้นไปแทน — จำนวนแถมที่ไม่รู้ว่านับเป็นหน่วยอะไรคือข้อมูลที่ใช้ต่อไม่ได้
+ */
+export const FocQtyCell = function FocQtyCell({
+  control,
+  form,
+  index,
+  disabled,
+  readOnly = false,
+}: {
+  control: Control<PoFormValues>;
+  form: UseFormReturn<PoFormValues>;
+  index: number;
+  disabled: boolean;
+  readOnly?: boolean;
+}) {
+  "use no memo";
+  const qty = useWatch({ control, name: `items.${index}.foc_qty` }) ?? 0;
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const focUnitId =
+    useWatch({ control, name: `items.${index}.foc_unit_id` }) ?? "";
+  const focUnitName =
+    useWatch({ control, name: `items.${index}.foc_unit_name` }) ?? "";
+  const orderUnitId =
+    useWatch({ control, name: `items.${index}.order_unit_id` }) ?? "";
+  const orderUnitName =
+    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
+  const unitName = focUnitName || orderUnitName;
+  // ทศนิยมตามหน่วยที่ของแถมใช้จริง ไม่ใช่หน่วยสั่งซื้อ — คนละหน่วยคนละความละเอียด
+  const decimals = useUnitDecimals(productId, focUnitId || orderUnitId);
+  const formatQty = useQuantityFormatter(decimals);
+  const name = `items.${index}.foc_qty` as const;
+
+  if (disabled || readOnly) {
+    return (
+      <InputSuffixPlain
+        className="block w-full text-right"
+        value={formatQty(Number(qty))}
+        suffix={unitName}
+      />
+    );
+  }
+
+  return (
+    <InputSuffixField className="w-full">
+      <InputSuffixQty
+        decimals={decimals}
+        placeholder="0"
+        defaultValue={Number(qty)}
+        {...form.register(name)}
+        onChange={(e) => {
+          const n = e.target.valueAsNumber;
+          form.setValue(name, Number.isNaN(n) ? 0 : n, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+      />
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={control}
+          form={form}
+          index={index}
+          disabled={disabled}
+          unitField="foc"
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
+  );
+};

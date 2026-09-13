@@ -58,7 +58,15 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
   location_name: string | null;
   delivery_point_id: string | null;
   delivery_point_name: string | null;
+  /**
+   * ฟิลด์ที่ frontend ส่งขึ้นแล้วแต่ response ยังไม่ส่งกลับมา — ประกาศเป็น optional
+   * ตามความจริง ไม่ใช่ตามที่อยากให้เป็น (`getDefaultValues` เติมค่าว่างให้อยู่แล้ว)
+   */
+  comment?: string | null;
   foc_qty: number;
+  /** หน่วยของของแถม — แยกจากหน่วยสั่งซื้อ เหมือน PR/GRN */
+  foc_unit_id?: string | null;
+  foc_unit_name?: string | null;
   /** ยอดสกุลฐาน — คู่กับ sub_total_price / net_amount / total_price ของสกุลใบ */
   base_sub_total_price?: number;
   base_net_amount?: number;
@@ -127,6 +135,9 @@ export interface PoDetailPayload {
   location_name: string;
   delivery_point_id: string | null;
   delivery_point_name: string;
+  comment: string;
+  foc_unit_id: string | null;
+  foc_unit_name: string;
 }
 
 export interface CreatePoDto {
@@ -141,6 +152,8 @@ export interface CreatePoDto {
     currency_id: string;
     currency_code: string;
     exchange_rate: number;
+    delivery_point_id: string | null;
+    delivery_point_name: string;
     description: string;
     order_date: string;
     credit_term_id?: string;
@@ -182,6 +195,12 @@ export interface PurchaseOrder {
   currency_id: string;
   currency_code: string;
   exchange_rate: number;
+  /**
+   * จุดส่งของระดับหัวใบ — รายการแต่ละแถวมีของตัวเองแยกต่างหาก (`PurchaseOrderDetail`)
+   * optional ด้วยเหตุผลเดียวกับ `comment` ราย detail: ส่งขึ้นได้ แต่ยังไม่ได้กลับมา
+   */
+  delivery_point_id?: string | null;
+  delivery_point_name?: string | null;
   description: string;
   order_date: string;
   credit_term_id: string | null;

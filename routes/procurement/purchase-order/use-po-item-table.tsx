@@ -16,6 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
+  CommentFooterRow,
+  FocQtyCell,
   ItemDiscountCell,
   ItemTaxCell,
   LocationCell,
@@ -141,6 +143,7 @@ function poColSize(viewMode: boolean) {
     product: 160,
     unit: viewMode ? 72 : 100,
     order: viewMode ? 85 : 140,
+    foc: viewMode ? 85 : 130,
     received: 104,
     price: viewMode ? 104 : 140,
     subtotal: 100,
@@ -206,6 +209,21 @@ export function usePoItemTable({
             disabled={locationsDisabled}
           />
         ),
+        meta: {
+          // หมายเหตุรายแถวเกาะคอลัมน์คลังแล้วกินยาวถึงคอลัมน์หน่วย — บล็อกซ้าย
+          // ที่เป็นข้อมูลของสินค้า ส่วนคอลัมน์ตัวเลขทางขวาปล่อยว่างไว้
+          // (ตำแหน่งเดียวกับ PR ซึ่งเกาะคลังแล้วกินถึงจุดส่งของ)
+          footerContent: (item: PoItemField) => (
+            <CommentFooterRow
+              form={form}
+              itemFields={itemFields}
+              item={item}
+              isDisabled={viewMode}
+              placeholder={tfl("comment")}
+            />
+          ),
+          footerColSpan: 3,
+        },
       },
       {
         accessorKey: "product_id",
@@ -243,6 +261,21 @@ export function usePoItemTable({
         meta: rightMeta,
         cell: ({ row }) => (
           <QtyUnitCell
+            control={form.control}
+            form={form}
+            index={row.index}
+            disabled={disabled}
+            readOnly={readOnly}
+          />
+        ),
+      },
+      {
+        id: "foc",
+        header: tfl("foc"),
+        size: COL.foc,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <FocQtyCell
             control={form.control}
             form={form}
             index={row.index}
@@ -393,6 +426,8 @@ export function usePoItemTable({
   }, [
     COL,
     form,
+    itemFields,
+    viewMode,
     disabled,
     locationsDisabled,
     readOnly,

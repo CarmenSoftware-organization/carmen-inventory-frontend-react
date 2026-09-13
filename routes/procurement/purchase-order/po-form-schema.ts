@@ -52,6 +52,8 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     is_discount_adjustment: z.boolean().optional(),
     is_foc: z.boolean(),
     foc_qty: z.coerce.number(),
+    foc_unit_id: z.string().nullable(),
+    foc_unit_name: z.string(),
     // แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location — ของเดิมเป็น
     // `locations[]` ซ้อนในแถว แล้ว qty/ภาษี/ส่วนลดของแถวเป็นผลรวมของทุก location
     location_id: z
@@ -62,6 +64,7 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     location_name: z.string(),
     delivery_point_id: z.string().nullable(),
     delivery_point_name: z.string(),
+    comment: z.string(),
     received_qty: z.coerce.number(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
@@ -102,6 +105,11 @@ export function createPoSchema(
     currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
     currency_code: z.string().optional(),
     exchange_rate: z.coerce.number().min(0),
+    // จุดส่งของระดับหัวใบ — คู่ id/name แบบเดียวกับ PR (lookup คืน id ฟอร์มเก็บชื่อ
+    // ไว้โชว์เอง) แต่ไม่บังคับกรอก ใบเก่าทั้งระบบไม่มีค่านี้ บังคับเมื่อไหร่ใบเดิม
+    // กด Save ไม่ผ่านสักใบจนกว่าจะไล่เลือกให้ครบ
+    delivery_point_id: z.string().nullable(),
+    delivery_point_name: z.string(),
     description: z.string(),
     order_date: z.string().min(1, tv("required", { field: tf("orderDate") })),
     credit_term_id: z.string(),
@@ -156,8 +164,11 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   location_name: "",
   delivery_point_id: null as string | null,
   delivery_point_name: "",
+  comment: "",
   received_qty: 0,
   foc_qty: 0,
+  foc_unit_id: null as string | null,
+  foc_unit_name: "",
   is_tax_adjustment: false,
   is_discount_adjustment: false,
 };
@@ -170,6 +181,8 @@ export const EMPTY_FORM: PoFormValues = {
   currency_id: "",
   currency_code: "",
   exchange_rate: 1,
+  delivery_point_id: null,
+  delivery_point_name: "",
   description: "",
   order_date: "",
   credit_term_id: "",
@@ -202,6 +215,8 @@ export function getDefaultValues(
       currency_id: po.currency_id ?? "",
       currency_code: po.currency_code ?? "",
       exchange_rate: po.exchange_rate ?? 1,
+      delivery_point_id: po.delivery_point_id ?? null,
+      delivery_point_name: po.delivery_point_name ?? "",
       description: po.description ?? "",
       order_date: po.order_date ?? "",
       credit_term_id: po.credit_term_id ?? "",
@@ -257,7 +272,10 @@ export function getDefaultValues(
           location_name: d.location_name ?? "",
           delivery_point_id: d.delivery_point_id ?? null,
           delivery_point_name: d.delivery_point_name ?? "",
+          comment: d.comment ?? "",
           foc_qty: d.foc_qty ?? 0,
+          foc_unit_id: d.foc_unit_id ?? null,
+          foc_unit_name: d.foc_unit_name ?? "",
           // ยอดที่รับแล้วอยู่ใน pr_details ไม่ได้อยู่บนแถว — รวมทุกใบ PR ที่อ้างถึง
           received_qty: (d.pr_details ?? []).reduce(
             (sum, pr) => sum + (pr.received_qty ?? 0),
@@ -324,6 +342,10 @@ export function mapItemToPayload(
     is_tax_adjustment: item.is_tax_adjustment ?? false,
     is_foc: item.is_foc ?? false,
     foc_qty: item.foc_qty ?? 0,
+    // ไม่ได้เลือกหน่วยแถมไว้ = ใช้หน่วยสั่งซื้อของแถว ปลายทางจะได้ไม่ได้จำนวนลอย ๆ
+    // ที่ไม่รู้ว่านับเป็นหน่วยอะไร
+    foc_unit_id: item.foc_unit_id || item.order_unit_id || null,
+    foc_unit_name: item.foc_unit_name || item.order_unit_name || "",
     discount_rate: item.discount_rate ?? 0,
     discount_amount: discountAmount,
     is_discount_adjustment: item.is_discount_adjustment ?? false,
@@ -334,5 +356,6 @@ export function mapItemToPayload(
     location_name: item.location_name ?? "",
     delivery_point_id: item.delivery_point_id || null,
     delivery_point_name: item.delivery_point_name ?? "",
+    comment: item.comment || "",
   };
 }
