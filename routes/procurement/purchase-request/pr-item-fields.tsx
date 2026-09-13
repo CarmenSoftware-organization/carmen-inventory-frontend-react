@@ -136,11 +136,15 @@ export function PrItemFields({
         }
       : {};
 
+    // วันที่ต้องการของก็ตามมาจากแถวก่อนหน้าเหมือนคลัง — ของที่เบิกพร้อมกันมัก
+    // ต้องการวันเดียวกัน · แถวแรกของใบยังไม่มีอะไรให้ตาม ใช้พรุ่งนี้เหมือนเดิม
+    const carriedDeliveryDate = prev?.delivery_date || tomorrow.toISOString();
+
     prependItem(
       {
         ...PR_ITEM,
         currency_id: defaultBu?.config?.default_currency_id ?? null,
-        delivery_date: tomorrow.toISOString(),
+        delivery_date: carriedDeliveryDate,
         ...carriedLocation,
       },
       { shouldFocus: false },
