@@ -29,24 +29,6 @@ interface LookupProductInLocationProps {
   readonly defaultOpen?: boolean;
 }
 
-/**
- * Lookup Popover สำหรับเลือกสินค้าที่มีอยู่ใน location ที่กำหนด (cascading)
- *
- * ใช้ `useProductsByLocation(locationId)` ดึงเฉพาะสินค้าที่ผูกกับ location นั้น ๆ
- * พร้อม server-side search และ infinite scroll (perpage 30) disabled เมื่อไม่มี `locationId`
- * รองรับ `excludeIds` กัน duplicate ใน item list
- *
- * @param value - product_id ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object Product
- * @returns JSX popover element ของ product-in-location lookup
- * @example
- * ```tsx
- * const locationId = useWatch({ control, name: "location_id" });
- * <Controller name="product_id" control={control} render={({ field }) => (
- *   <LookupProductInLocation locationId={locationId} value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupProductInLocation({
   locationId,
   workflowId,
