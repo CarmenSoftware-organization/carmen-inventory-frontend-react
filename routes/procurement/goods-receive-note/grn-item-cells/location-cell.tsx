@@ -1,30 +1,39 @@
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
-import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
+import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import type { GrnFormValues } from "../grn-form-schema";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
+/**
+ * คลังของแถว
+ *
+ * **เลือกคลังก่อน แล้วรายการสินค้าค่อยกรองตามคลังนั้น** (ทรงเดียวกับ PR/PO)
+ * ของเดิมกลับทาง: ใช้ `LookupProductLocation` ที่ต้องรู้สินค้าก่อน ช่องคลังจึงกด
+ * ไม่ได้จนกว่าจะเลือกสินค้า ทั้งที่คลังเป็นคอลัมน์แรกของตาราง — คนกรอกเจอช่องแรก
+ * เป็นสีเทาแล้วไม่รู้ว่าต้องไปทำอะไรก่อน
+ *
+ * เปลี่ยนคลังแล้วล้างสินค้าทิ้ง **เฉพาะแถวที่กรอกเอง** — สินค้าที่เลือกไว้อาจไม่มี
+ * ในคลังใหม่ · แถวที่มาจากใบสั่งซื้อห้ามล้าง สินค้าถูกกำหนดมาจากใบนั้นแล้ว คนรับของ
+ * แค่ระบุว่าจะรับเข้าคลังไหน
+ */
 export function LocationCell({
   form,
   index,
   disabled,
-  autoOpen,
-  open,
-  onOpenChange,
-  nextFocusRef,
+  isManual,
+  onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
   disabled: boolean;
-  autoOpen?: boolean;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  nextFocusRef?: React.RefObject<HTMLInputElement | null>;
+  /** แถวนี้ไม่ได้อ้างใบสั่งซื้อ — สินค้าเลือกเองได้ จึงล้างได้เมื่อเปลี่ยนคลัง */
+  isManual: boolean;
+  /** เลือกคลังเสร็จแล้ว — ใช้พาไปเปิดตัวเลือกสินค้าต่อ */
+  onPicked?: () => void;
 }) {
   "use no memo";
-  const [productId, locationName, locationCode] = useWatch({
+  const [locationName, locationCode] = useWatch({
     control: form.control,
     name: [
-      `items.${index}.product_id`,
       `items.${index}.location_name`,
       `items.${index}.location_code`,
     ] as const,
@@ -39,29 +48,30 @@ export function LocationCell({
       control={form.control}
       name={`items.${index}.location_id`}
       render={({ field, fieldState }) => (
-        <LookupProductLocation
-          productId={productId ?? ""}
+        <LookupUserLocation
           value={field.value ?? ""}
           onValueChange={(value) => {
+            if (isManual && value !== field.value) {
+              form.setValue(`items.${index}.product_id`, null, {
+                shouldDirty: true,
+              });
+              form.setValue(`items.${index}.product_name`, "");
+              form.setValue(`items.${index}.product_local_name`, "");
+            }
             field.onChange(value);
-            if (value) onOpenChange?.(false);
+            if (value) onPicked?.();
           }}
           onItemChange={(location) => {
             form.setValue(`items.${index}.location_name`, location.name);
-            form.setValue(`items.${index}.location_code`, location.code);
+            form.setValue(`items.${index}.location_code`, location.code ?? "");
             form.setValue(
               `items.${index}.location_type`,
-              location.location_type,
+              location.location_type ?? "",
             );
           }}
           defaultLabel={locationName || undefined}
-          disabled={!productId}
-          defaultOpen={autoOpen}
-          open={open}
-          onOpenChange={onOpenChange}
-          nextFocusRef={nextFocusRef}
+          popoverWidth="w-[26.25rem]"
           className="h-8 w-full text-xs"
-          modal
           error={fieldState.error?.message}
         />
       )}

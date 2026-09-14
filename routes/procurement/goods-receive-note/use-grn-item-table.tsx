@@ -1,9 +1,11 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { type FieldArrayWithId, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type SortingState,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { Trash2 } from "lucide-react";
@@ -14,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import type { GrnFormValues } from "./grn-form-schema";
 import { grnItemCols } from "./grn-item-columns";
 import {
@@ -31,6 +34,14 @@ import {
 /** แถวหนึ่งของตาราง = หนึ่งบรรทัดของเอกสาร (สินค้า + คลัง) */
 export type GrnItemField = FieldArrayWithId<GrnFormValues, "items", "id">;
 
+/**
+ * ค่าสดของแถวจากฟอร์ม — `itemFields` ที่ table ถือไว้เป็น snapshot ตอน mount
+ * เรียงจากค่านั้นแปลว่าเรียงตามชื่อที่ผู้ใช้เพิ่งเปลี่ยนไม่ได้ (ทรงเดียวกับ PR)
+ */
+function liveItem(form: UseFormReturn<GrnFormValues>, index: number) {
+  return form.getValues(`items.${index}`);
+}
+
 interface UseGrnItemTableOptions {
   form: UseFormReturn<GrnFormValues>;
   itemFields: GrnItemField[];
@@ -40,17 +51,15 @@ interface UseGrnItemTableOptions {
    */
   disabled: boolean;
   isPo: boolean;
-  /** แถวที่ต้องเปิดตัวเลือกสินค้าอยู่ตอนนี้ (เพิ่งกดเพิ่มรายการ) */
-  autoOpenProductId: string | null;
+  /** แถวที่ต้องเปิดตัวเลือกสินค้าอยู่ตอนนี้ (เพิ่งเลือกคลังเสร็จ) */
+  openProductId: string | null;
+  onProductOpenChange: (rowId: string, open: boolean) => void;
   /** แถวที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
   autoFocusPriceId: string | null;
-  /** แถวที่ต้องเปิดตัวเลือกคลังอยู่ตอนนี้ (คุมจากข้างนอก) */
-  openLocationId: string | null;
-  onLocationOpenChange: (rowId: string, open: boolean) => void;
+  /** เลือกคลังของแถวเสร็จแล้ว — ใช้พาไปเปิดตัวเลือกสินค้าต่อ */
+  onLocationPicked: (rowId: string) => void;
   /** เลือกสินค้าของแถวเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
   onProductPicked: (rowId: string) => void;
-  /** กรอกราคาของแถวเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
-  onPriceCommitted: (rowId: string) => void;
   onDeleteItem: (index: number) => void;
 }
 
@@ -59,24 +68,25 @@ export function useGrnItemTable({
   itemFields,
   disabled,
   isPo,
-  autoOpenProductId,
+  openProductId,
+  onProductOpenChange,
   autoFocusPriceId,
-  openLocationId,
-  onLocationOpenChange,
+  onLocationPicked,
   onProductPicked,
-  onPriceCommitted,
   onDeleteItem,
 }: UseGrnItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.goodsReceiveNote");
+  // เรียงฝั่ง client ล้วน — รายการทั้งหมดอยู่ในฟอร์มอยู่แล้ว ไม่มี request ให้ยิง
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   // แถวแก้ไม่ได้ = ทุกเซลล์เป็นตัวหนังสือ ไม่มี control ให้เผื่อที่
   const editable = !disabled;
 
-  // เลือกคลังเสร็จ → โฟกัสช่องจำนวนของ**แถวเดียวกัน** ต่อ (Radix คืนโฟกัสให้ปุ่ม
-  // ที่เพิ่งกดเป็นค่า default ซึ่งเป็นทางตัน — พิมพ์ต่อแล้วตัวเลขหายเฉย ๆ)
-  // สองช่องนี้อยู่คนละเซลล์แล้ว จึงต้องมี ref กลางรายแถวให้ทั้งคู่ถือร่วมกัน
+  // กรอกราคาเสร็จ (Enter) → โฟกัสช่องจำนวนของ**แถวเดียวกัน** ต่อ — ปลายทางของสาย
+  // กรอก คลัง → สินค้า → ราคา → จำนวน · ช่องราคากับช่องจำนวนอยู่คนละเซลล์
+  // จึงต้องมี ref กลางรายแถวให้ทั้งคู่ถือร่วมกัน
   const qtyRefs = useRef(
     new Map<string, React.RefObject<HTMLInputElement | null>>(),
   );
@@ -110,7 +120,16 @@ export function useGrnItemTable({
     const dataColumns: ColumnDef<GrnItemField>[] = [
       {
         id: "location",
-        header: tfl("location"),
+        // ต้องมี accessor ถึงจะกดเรียงได้ (คอลัมน์ display ล้วนกดไม่ได้) — ค่าที่ใช้
+        // เรียงจริงมาจาก sortingFn ข้างล่างซึ่งอ่านฟอร์มสด ๆ
+        accessorFn: (item) => item.location_name,
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("location")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.location_name ?? "").localeCompare(
+            liveItem(form, b.index)?.location_name ?? "",
+          ),
         size: COL.location,
         cell: ({ row }) => (
           <LocationCell
@@ -121,15 +140,21 @@ export function useGrnItemTable({
               (!!row.original.purchase_order_detail_id &&
                 !!row.original.location_id)
             }
-            open={row.id === openLocationId ? true : undefined}
-            onOpenChange={(open) => onLocationOpenChange(row.id, open)}
-            nextFocusRef={qtyRefFor(row.id)}
+            isManual={!row.original.purchase_order_detail_id}
+            onPicked={() => onLocationPicked(row.id)}
           />
         ),
       },
       {
         id: "product",
-        header: tfl("product"),
+        accessorFn: (item) => item.product_name,
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("product")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.product_name ?? "").localeCompare(
+            liveItem(form, b.index)?.product_name ?? "",
+          ),
         size: COL.product,
         cell: ({ row }) => (
           <ProductCell
@@ -137,7 +162,8 @@ export function useGrnItemTable({
             index={row.index}
             isManual={!row.original.purchase_order_detail_id}
             disabled={disabled}
-            autoOpen={row.id === autoOpenProductId}
+            open={row.id === openProductId ? true : undefined}
+            onOpenChange={(open) => onProductOpenChange(row.id, open)}
             onPicked={() => onProductPicked(row.id)}
           />
         ),
@@ -210,7 +236,7 @@ export function useGrnItemTable({
             index={row.index}
             disabled={disabled}
             autoFocus={row.id === autoFocusPriceId}
-            onCommit={() => onPriceCommitted(row.id)}
+            onCommit={() => qtyRefFor(row.id).current?.focus()}
           />
         ),
       },
@@ -327,12 +353,11 @@ export function useGrnItemTable({
     disabled,
     editable,
     isPo,
-    autoOpenProductId,
+    openProductId,
     autoFocusPriceId,
-    openLocationId,
-    onLocationOpenChange,
+    onProductOpenChange,
+    onLocationPicked,
     onProductPicked,
-    onPriceCommitted,
     onDeleteItem,
     qtyRefFor,
     tfl,
@@ -342,7 +367,12 @@ export function useGrnItemTable({
   return useReactTable({
     data: itemFields,
     columns,
+    // เรียงที่ table ไม่ใช่ที่ `data` — ทุกเซลล์ผูก `items.${row.index}` ไว้
+    // สลับลำดับใน data เมื่อไร index จะไม่ตรงกับ field array อีก (เหมือน PR)
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
   });
 }

@@ -162,19 +162,15 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
   });
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [poDialogOpen, setPoDialogOpen] = useState(false);
-  // แถว (row id) ที่ต้องเปิดตัวเลือกสินค้า/โฟกัสราคา/เปิดตัวเลือกคลังอยู่ตอนนี้
-  const [autoOpenProductId, setAutoOpenProductId] = useState<string | null>(
-    null,
-  );
+  // แถว (row id) ที่ต้องเปิดตัวเลือกสินค้า/โฟกัสราคาอยู่ตอนนี้
+  const [openProductId, setOpenProductId] = useState<string | null>(null);
   const [autoFocusPriceId, setAutoFocusPriceId] = useState<string | null>(null);
-  const [openLocationId, setOpenLocationId] = useState<string | null>(null);
 
   // สลับโหมดดู↔แก้ = เริ่มกรอกรอบใหม่ ล้างสถานะนำทางทั้งชุด — ตารางไม่ได้ unmount
   // ตอนสลับโหมด ของค้างจากรอบก่อน (เช่นเลือกสินค้าไว้แล้วกด Cancel) จะกลับมาเด้ง
   // lookup หรือดูดเคอร์เซอร์ทันทีที่กด Edit ทั้งที่ผู้ใช้ยังไม่ได้แตะอะไร
   useEffect(() => {
-    setAutoOpenProductId(null);
-    setOpenLocationId(null);
+    setOpenProductId(null);
     setAutoFocusPriceId(null);
   }, [disabled]);
 
@@ -202,30 +198,31 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
   };
 
   /**
-   * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
+   * เลือกคลังเสร็จ → เปิดตัวเลือกสินค้าของแถวเดิมต่อ
    *
    * Radix คืน focus ให้ปุ่มที่เพิ่งกดเป็นค่า default ซึ่งกลายเป็นทางตัน: ผู้ใช้พิมพ์
-   * ต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
+   * ต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มที่เพิ่งกด
    *
-   * เส้นทางคือ **สินค้า → ราคา → คลัง → จำนวน** ครบทั้งแถวในบรรทัดเดียว
+   * เส้นทางคือ **คลัง → สินค้า → ราคา → จำนวน** ครบทั้งแถวในบรรทัดเดียว
+   * (คลังมาก่อนเพราะมันเป็นตัวกำหนดว่าเลือกสินค้าอะไรได้บ้าง)
    *
    * callback ทุกตัวที่ส่งเข้า useGrnItemTable ห่อ useCallback ไว้ เพราะมันเป็น dep
    * ของ columns useMemo — ปล่อยให้เป็นฟังก์ชันใหม่ทุก render เท่ากับ columns
    * recompute ทุก render แล้ว cell ที่มีช่องกรอกจะโดนสร้างใหม่จนโฟกัสหลุด
    */
+  const handleLocationPicked = useCallback(
+    (rowId: string) => setOpenProductId(rowId),
+    [],
+  );
+
+  /** เลือกสินค้าเสร็จ → โฟกัสช่องราคาต่อ */
   const handleProductPicked = useCallback((rowId: string) => {
-    setAutoOpenProductId(null);
+    setOpenProductId(null);
     setAutoFocusPriceId(rowId);
   }, []);
 
-  /** กรอกราคาเสร็จ (Enter) → เปิดตัวเลือกคลังของแถวเดิมต่อ */
-  const handlePriceCommitted = useCallback((rowId: string) => {
-    setAutoFocusPriceId(null);
-    setOpenLocationId(rowId);
-  }, []);
-
-  const handleLocationOpenChange = useCallback(
-    (rowId: string, open: boolean) => setOpenLocationId(open ? rowId : null),
+  const handleProductOpenChange = useCallback(
+    (rowId: string, open: boolean) => setOpenProductId(open ? rowId : null),
     [],
   );
 
@@ -239,21 +236,34 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
     itemFields,
     disabled,
     isPo: !isManual,
-    autoOpenProductId,
+    openProductId,
+    onProductOpenChange: handleProductOpenChange,
     autoFocusPriceId,
-    openLocationId,
-    onLocationOpenChange: handleLocationOpenChange,
+    onLocationPicked: handleLocationPicked,
     onProductPicked: handleProductPicked,
-    onPriceCommitted: handlePriceCommitted,
     onDeleteItem: handleDeleteItem,
   });
 
   const handleAddItem = () => {
-    prependItem({ ...EMPTY_DETAIL });
-    // แถวใหม่อยู่บนสุดเสมอ — เปิดตัวเลือกสินค้าให้เลย ไม่ต้องกดซ้ำ
-    setAutoOpenProductId(null);
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — ของที่มาส่งพร้อมกัน
+    // ใบเดียวมักเข้าคลังเดิมติดกันหลายรายการ เติมคลังให้ล่วงหน้าแล้วแก้เองได้
+    // (ทรงเดียวกับ PR/PO) · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field
+    // array เก็บค่าตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_name: prev.location_name,
+          location_code: prev.location_code,
+          location_type: prev.location_type,
+        }
+      : {};
+
+    prependItem({ ...EMPTY_DETAIL, ...carriedLocation });
+    // ล้างสถานะนำทางของแถวก่อนหน้าทิ้ง — ไม่งั้น lookup ของแถวเดิมเด้งขึ้นมา
+    // ทับตอนที่ผู้ใช้กำลังจะเริ่มกรอกแถวใหม่
+    setOpenProductId(null);
     setAutoFocusPriceId(null);
-    setOpenLocationId(null);
   };
 
   // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
@@ -285,8 +295,27 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
       />
     ));
 
-  const deleteTarget =
-    deleteIndex == null ? undefined : itemFields[deleteIndex]?.product_name;
+  /**
+   * ข้อความยืนยันลบ — บอกให้ครบว่าแถวไหน
+   *
+   * ของเดิมโยนชื่อสินค้าดิบ ๆ เป็น description (ไม่มีประโยค) ใต้หัวข้อ "ลบสินค้า"
+   * ซึ่งอ่านแล้วเหมือนกำลังลบสินค้าออกจากระบบ ไม่ใช่เอาแถวออกจากใบ · และแถวหนึ่ง
+   * ของใบรับสินค้าคือ สินค้า + คลัง ชื่อสินค้าอย่างเดียวจึงไม่พอเมื่อสินค้าตัวเดียวกัน
+   * รับเข้าหลายคลังในใบเดียว
+   *
+   * อ่านผ่าน getValues ไม่ใช่ itemFields — field array เก็บค่าตอน mount ไม่ใช่ค่า
+   * ล่าสุดที่ผู้ใช้เพิ่งเลือก
+   */
+  const deleteDescription = (() => {
+    if (deleteIndex == null) return undefined;
+    const row = form.getValues(`items.${deleteIndex}`);
+    const product =
+      row?.product_name ||
+      t("removeItemUntitled", { index: deleteIndex + 1 });
+    return row?.location_name
+      ? t("removeItemConfirm", { product, location: row.location_name })
+      : t("removeItemConfirmNoLocation", { product });
+  })();
 
   return (
     <div className="space-y-2 pt-2">
@@ -325,8 +354,8 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
       <DeleteDialog
         open={deleteIndex !== null}
         onOpenChange={(open) => !open && setDeleteIndex(null)}
-        title={t("deleteProduct")}
-        description={deleteTarget || undefined}
+        title={t("removeItem")}
+        description={deleteDescription}
         onConfirm={() => {
           if (deleteIndex !== null) removeItem(deleteIndex);
           setDeleteIndex(null);

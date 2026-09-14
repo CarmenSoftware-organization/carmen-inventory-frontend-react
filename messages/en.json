@@ -3912,7 +3912,9 @@
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this goods receive note.",
       "removeItem": "Remove Item",
-      "deleteProduct": "Delete Product",
+      "removeItemConfirm": "Remove \"{product}\" at {location} from this receipt?",
+      "removeItemConfirmNoLocation": "Remove \"{product}\" from this receipt?",
+      "removeItemUntitled": "line #{index}",
       "tabItems": "Items",
       "tabDetail": "Detail",
       "tabPayment": "Payment",
@@ -4013,7 +4015,7 @@
       "poCount": "{count} PO(s)",
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
-      "deleteProductLine": "Remove this product and all its locations"
+      "deleteProductLine": "Remove this line"
     },
     "approval": {
       "entity": "Approval",

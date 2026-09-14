@@ -27,6 +27,10 @@ interface LookupProductInLocationProps {
   readonly readOnly?: boolean;
   /** เปิด popover ทันทีตอน mount — ใช้ตอนกดเพิ่มรายการแล้วให้เลือกสินค้าต่อเลย */
   readonly defaultOpen?: boolean;
+  /** คุมการเปิด/ปิดจากข้างนอก — ใช้ตอนพากรอกทีละช่องหลังเลือกคลังเสร็จ
+   *  (`defaultOpen` ยิงแค่ตอน mount ซึ่งเซลล์ในตาราง mount ไปตั้งแต่แถวเกิดแล้ว) */
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
 }
 
 export function LookupProductInLocation({
@@ -36,6 +40,8 @@ export function LookupProductInLocation({
   onValueChange,
   disabled,
   defaultOpen,
+  open,
+  onOpenChange,
   placeholder,
   className,
   size,
@@ -78,6 +84,8 @@ export function LookupProductInLocation({
     <LookupCombobox
       size={size}
       defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       value={value}
       onValueChange={onValueChange}
       items={products}

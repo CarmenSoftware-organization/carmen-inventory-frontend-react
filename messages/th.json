@@ -3907,7 +3907,9 @@
       "noItems": "ยังไม่มีรายการ",
       "noItemsDesc": "เพิ่มรายการในใบรับสินค้านี้",
       "removeItem": "ลบรายการ",
-      "deleteProduct": "ลบสินค้า",
+      "removeItemConfirm": "เอา \"{product}\" ที่ {location} ออกจากใบนี้ใช่ไหม",
+      "removeItemConfirmNoLocation": "เอา \"{product}\" ออกจากใบนี้ใช่ไหม",
+      "removeItemUntitled": "รายการที่ {index}",
       "tabItems": "รายการ",
       "tabDetail": "รายละเอียด",
       "tabPayment": "การชำระเงิน",
@@ -4008,7 +4010,7 @@
       "poCount": "{count} ใบสั่งซื้อ",
       "committed": "ยืนยันใบรับสินค้าแล้ว ของเข้าสต๊อกเรียบร้อย",
       "commit": "ยืนยันรับสินค้า",
-      "deleteProductLine": "ลบสินค้านี้พร้อมทุกที่เก็บของมัน"
+      "deleteProductLine": "ลบรายการนี้"
     },
     "approval": {
       "entity": "การอนุมัติ",
