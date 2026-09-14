@@ -204,7 +204,7 @@ export function useCnItemTable({
       },
       {
         id: "grn_total",
-        header: tfl("amount"),
+        header: tfl("total"),
         size: CN_COL.amount,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -252,19 +252,15 @@ export function useCnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // h-11 ตายตัวทั้งแถวหลักและแถวคืน (ดู CnReturnRow) — ปล่อยให้สูงตาม
-        // เนื้อหา แถวหลักจะ 39px เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวคืนบรรทัด
-        // เดียวได้ 24px สองแถบเลยไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่
-        // 40 เพราะช่องสินค้ากินสองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px
-        // ดูอัดแน่นกว่าแถวคืนที่มีบรรทัดเดียว (เท่ากับ PO/GRN)
-        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
+        cellClassName: cn(
+          "py-2.5",
+          !disabled && "min-h-11",
+          col.meta?.cellClassName,
+        ),
       },
     }));
   }, [form, disabled, type, itemFields, tfl, onDelete]);
 
-  // กางทุกแถวไว้ตั้งแต่แรกเสมอ — ฝั่งคืนคือสาระของใบลดหนี้ ไม่ใช่รายละเอียดเสริม
-  // (โหมดแก้ต้องกรอกทุกบรรทัดอยู่แล้ว โหมดอ่านก็ต้องเห็นว่าคืนอะไรไปเท่าไหร่)
-  // พับเองได้ถ้าอยากกวาดตาดูเฉพาะยอดตาม GRN
   const [expanded, setExpanded] = useState<ExpandedState>(true);
 
   const table = useReactTable({

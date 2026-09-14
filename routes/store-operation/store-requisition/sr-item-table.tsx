@@ -16,7 +16,6 @@ import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldPlainText } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
@@ -98,7 +97,10 @@ const ProductCell = memo(function ProductCell({
 
   if (disabled) {
     return (
-      <div className="flex items-center gap-0.5">
+      // ชิดบน ไม่ใช่กึ่งกลาง — ไอคอนสต็อกเป็นปุ่มสูง 24px ดันกล่อง flex ให้สูงกว่า
+      // ตัวหนังสือ `items-center` เลยดันชื่อสินค้าลงมาต่ำกว่าคอลัมน์อื่นทั้งแถว
+      // ซึ่งทำให้ `cellAlign: "top"` ของตารางไม่มีผลที่เห็นได้เลย
+      <div className="flex items-start gap-0.5">
         <div className="min-w-0 flex-1">
           <NameWithSubtext primary={productName} secondary={productLocalName} />
         </div>
@@ -392,16 +394,24 @@ export function useSrItemTable({
         size: 80,
       },
       {
+        // โหมดอ่านใช้ NameWithSubtext (align="end") ทุกช่อง ไม่ใช่ FieldPlainText —
+        // ตัวนั้นเป็นกล่อง `min-h-8 items-center` เพื่อให้สูงเท่าช่องกรอกตอนแก้ไข
+        // พอเอามาใช้ในโหมดอ่าน ตัวเลขเลยลอยกลางกล่อง 32px ต่ำกว่าบรรทัดแรกของชื่อ
+        // สินค้า ทำให้ `cellAlign: "top"` ของตารางไม่มีผลที่เห็นได้เลย · ของกลาง
+        // ตัวใหม่เป็นข้อความล้วน ชิดขวา + tabular-nums ให้ในตัว
         accessorKey: "requested_qty",
         header: tfl("requested"),
         cell: ({ row }) => {
           if (disabled || lockNonApproved) {
             return (
-              <FieldPlainText className="justify-end tabular-nums">
-                {row.original.requested_qty == null
-                  ? ""
-                  : formatQty(row.original.requested_qty)}
-              </FieldPlainText>
+              <NameWithSubtext
+                align="end"
+                primary={
+                  row.original.requested_qty == null
+                    ? ""
+                    : formatQty(row.original.requested_qty)
+                }
+              />
             );
           }
           const qtyError =
@@ -431,11 +441,14 @@ export function useSrItemTable({
               cell: ({ row }) => {
                 if (disabled || lockApproved) {
                   return (
-                    <FieldPlainText className="justify-end tabular-nums">
-                      {row.original.approved_qty == null
-                        ? ""
-                        : formatQty(row.original.approved_qty)}
-                    </FieldPlainText>
+                    <NameWithSubtext
+                      align="end"
+                      primary={
+                        row.original.approved_qty == null
+                          ? ""
+                          : formatQty(row.original.approved_qty)
+                      }
+                    />
                   );
                 }
                 return (
@@ -471,11 +484,14 @@ export function useSrItemTable({
               cell: ({ row }) => {
                 if (disabled || lockIssued) {
                   return (
-                    <FieldPlainText className="justify-end tabular-nums">
-                      {row.original.issued_qty == null
-                        ? ""
-                        : formatQty(row.original.issued_qty)}
-                    </FieldPlainText>
+                    <NameWithSubtext
+                      align="end"
+                      primary={
+                        row.original.issued_qty == null
+                          ? ""
+                          : formatQty(row.original.issued_qty)
+                      }
+                    />
                   );
                 }
                 return (
@@ -506,9 +522,10 @@ export function useSrItemTable({
         id: "amount",
         header: tfl("amount"),
         cell: ({ row }) => (
-          <FieldPlainText className="justify-end font-semibold tabular-nums">
-            {formatCurrency(srItemAmount(row.original))}
-          </FieldPlainText>
+          <NameWithSubtext
+            align="end"
+            primary={formatCurrency(srItemAmount(row.original))}
+          />
         ),
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },

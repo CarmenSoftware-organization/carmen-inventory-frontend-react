@@ -279,7 +279,7 @@ export function useGrnItemTable({
       },
       {
         id: "amount",
-        header: tfl("amount"),
+        header: tfl("total"),
         size: COL.amt,
         meta: rightMeta,
         cell: ({ row }) => (

@@ -346,7 +346,7 @@ export function usePoItemTable({
       },
       {
         id: "amount",
-        header: tfl("amount"),
+        header: tfl("total"),
         size: COL.amount,
         meta: {
           headerClassName: "text-right",

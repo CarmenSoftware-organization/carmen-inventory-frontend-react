@@ -46,7 +46,7 @@ export function QtyCell({
         className="w-full"
         value={formatQty(quantity ?? 0)}
         suffix={unitName}
-        suffixClassName="ml-1 inline-block w-[4ch] text-right"
+        suffixClassName="text-right"
       />
     );
   }
