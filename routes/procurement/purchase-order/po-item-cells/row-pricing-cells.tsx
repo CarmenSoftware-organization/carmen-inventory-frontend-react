@@ -10,6 +10,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { PoFormValues } from "../po-form-schema";
@@ -123,14 +124,11 @@ function RateSubtext({
   readonly rate: number;
 }) {
   return (
-    <div className="text-right">
-      <p className="text-xs tabular-nums">{formatCurrency(amount)}</p>
-      {rate > 0 && (
-        <p className="text-muted-foreground text-micro-legal tabular-nums">
-          {rate}%
-        </p>
-      )}
-    </div>
+    <NameWithSubtext
+      align="end"
+      primary={formatCurrency(amount)}
+      secondary={rate > 0 ? `${rate}%` : undefined}
+    />
   );
 }
 
