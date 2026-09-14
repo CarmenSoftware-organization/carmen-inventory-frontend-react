@@ -152,8 +152,6 @@ export interface CreatePoDto {
     currency_id: string;
     currency_code: string;
     exchange_rate: number;
-    delivery_point_id: string | null;
-    delivery_point_name: string;
     description: string;
     order_date: string;
     credit_term_id?: string;
@@ -195,12 +193,6 @@ export interface PurchaseOrder {
   currency_id: string;
   currency_code: string;
   exchange_rate: number;
-  /**
-   * จุดส่งของระดับหัวใบ — รายการแต่ละแถวมีของตัวเองแยกต่างหาก (`PurchaseOrderDetail`)
-   * optional ด้วยเหตุผลเดียวกับ `comment` ราย detail: ส่งขึ้นได้ แต่ยังไม่ได้กลับมา
-   */
-  delivery_point_id?: string | null;
-  delivery_point_name?: string | null;
   description: string;
   order_date: string;
   credit_term_id: string | null;

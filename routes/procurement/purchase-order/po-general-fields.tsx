@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
-import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
 import { useCurrency } from "@/hooks/use-currency";
 import { useProfile } from "@/hooks/use-profile";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
@@ -208,31 +207,6 @@ export function PoGeneralFields({
             />
           </InputSuffixAddon>
         </InputSuffixField>
-      </Field>
-
-      {/* จุดส่งของระดับหัวใบ — ของทั้งใบไปลงที่เดียวกันเป็นเคสปกติ แถวในตาราง
-          ยังมีจุดส่งของของตัวเองอยู่เหมือนเดิม ไม่ได้ถูกแทนที่ */}
-      <Field>
-        <FieldLabel>{tfl("deliveryPoint")}</FieldLabel>
-        <Controller
-          control={form.control}
-          name="delivery_point_id"
-          render={({ field, fieldState }) => (
-            <LookupDeliveryPoint
-              value={field.value ?? ""}
-              onValueChange={field.onChange}
-              onItemChange={(deliveryPoint) => {
-                form.setValue("delivery_point_name", deliveryPoint.name);
-              }}
-              // ป้ายสำรอง — จุดส่งของที่ถูกปิดใช้งานไปแล้วจะไม่อยู่ใน list
-              // ที่ lookup ดึงมา ชื่อที่เก็บไว้ในใบจึงเป็นตัวเดียวที่บอกได้ว่าเลือกอะไรไว้
-              defaultLabel={form.getValues("delivery_point_name")}
-              disabled={fieldDisabled}
-              error={fieldState.error?.message}
-              className="w-full text-xs"
-            />
-          )}
-        />
       </Field>
 
       {/* คำอธิบาย/หมายเหตุ อยู่ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยกใต้ฟอร์ม —

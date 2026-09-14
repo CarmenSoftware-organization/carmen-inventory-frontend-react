@@ -105,11 +105,6 @@ export function createPoSchema(
     currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
     currency_code: z.string().optional(),
     exchange_rate: z.coerce.number().min(0),
-    // จุดส่งของระดับหัวใบ — คู่ id/name แบบเดียวกับ PR (lookup คืน id ฟอร์มเก็บชื่อ
-    // ไว้โชว์เอง) แต่ไม่บังคับกรอก ใบเก่าทั้งระบบไม่มีค่านี้ บังคับเมื่อไหร่ใบเดิม
-    // กด Save ไม่ผ่านสักใบจนกว่าจะไล่เลือกให้ครบ
-    delivery_point_id: z.string().nullable(),
-    delivery_point_name: z.string(),
     description: z.string(),
     order_date: z.string().min(1, tv("required", { field: tf("orderDate") })),
     credit_term_id: z.string(),
@@ -181,8 +176,6 @@ export const EMPTY_FORM: PoFormValues = {
   currency_id: "",
   currency_code: "",
   exchange_rate: 1,
-  delivery_point_id: null,
-  delivery_point_name: "",
   description: "",
   order_date: "",
   credit_term_id: "",
@@ -215,8 +208,6 @@ export function getDefaultValues(
       currency_id: po.currency_id ?? "",
       currency_code: po.currency_code ?? "",
       exchange_rate: po.exchange_rate ?? 1,
-      delivery_point_id: po.delivery_point_id ?? null,
-      delivery_point_name: po.delivery_point_name ?? "",
       description: po.description ?? "",
       order_date: po.order_date ?? "",
       credit_term_id: po.credit_term_id ?? "",

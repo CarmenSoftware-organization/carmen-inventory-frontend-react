@@ -57,8 +57,6 @@ export function buildPoPayload(
       currency_id: values.currency_id,
       currency_code: values.currency_code ?? "",
       exchange_rate: values.exchange_rate,
-      delivery_point_id: values.delivery_point_id || null,
-      delivery_point_name: values.delivery_point_name,
       description: values.description,
       order_date: values.order_date,
       ...(values.credit_term_id

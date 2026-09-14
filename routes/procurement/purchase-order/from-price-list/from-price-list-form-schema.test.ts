@@ -21,8 +21,6 @@ function makeValid(
     currency_id: "cur-1",
     currency_code: "THB",
     exchange_rate: 1,
-    delivery_point_id: null,
-    delivery_point_name: "",
     description: "",
     order_date: "2026-05-28T00:00:00.000Z",
     credit_term_id: "",
