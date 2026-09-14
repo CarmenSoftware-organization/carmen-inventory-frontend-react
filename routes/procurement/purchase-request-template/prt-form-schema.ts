@@ -14,6 +14,9 @@ import type {
 function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    // เวอร์ชันของ "แถว" ไม่ใช่ของแม่แบบ — backend ล็อกแยกกันคนละชั้น แถวที่เพิ่ง
+    // เพิ่มยังไม่มี (ไม่ต้องส่งตอน add)
+    doc_version: z.coerce.number().optional(),
     location_id: z
       .string()
       .nullable()
@@ -25,6 +28,10 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .string()
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("deliveryPoint") })),
+    // display เท่านั้น — ไม่ส่งเข้า payload · จำเป็นเพราะจุดส่งของที่ถูกปิดใช้งาน
+    // แล้วจะไม่อยู่ใน list ที่ lookup ดึงมา (`is_active: false`) ชื่อที่เก็บไว้กับ
+    // แม่แบบจึงเป็นตัวเดียวที่บอกได้ว่าแถวนี้เลือกอะไรไว้
+    delivery_point_name: z.string(),
     product_id: z
       .string()
       .nullable()
@@ -76,12 +83,15 @@ export const PRT_ITEM = {
   location_name: "",
   location_code: "",
   delivery_point_id: null,
+  delivery_point_name: "",
   product_id: null,
   product_name: "",
   product_local_name: "",
   inventory_unit_id: null,
   inventory_unit_name: "",
-  requested_qty: 1,
+  // เริ่มที่ 0 — แม่แบบเก็บ "ของชุดนี้" เป็นหลัก จำนวนจริงมากรอกตอนทำใบขอซื้อ
+  // การ default เป็น 1 ทำให้ทุกแถวมีเลขที่ไม่มีใครตั้งใจใส่ติดไปกับแม่แบบ
+  requested_qty: 0,
   requested_unit_id: null,
   requested_unit_name: "",
   currency_id: null,
@@ -114,10 +124,12 @@ export function getDefaultValues(
       items:
         template.purchase_request_template_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           location_id: d.location_id ?? null,
           location_name: d.location_name ?? "",
           location_code: d.location_code ?? "",
           delivery_point_id: d.delivery_point_id ?? null,
+          delivery_point_name: d.delivery_point_name ?? "",
           product_id: d.product_id,
           product_name: d.product_name,
           product_local_name: d.product_local_name ?? "",
@@ -142,6 +154,7 @@ export function mapItemToPayload(
   item: PrtFormValues["items"][number],
 ): PrtDetailPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     location_id: item.location_id || null,
     delivery_point_id: item.delivery_point_id || null,
     product_id: item.product_id || null,

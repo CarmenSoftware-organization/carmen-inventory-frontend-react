@@ -236,6 +236,8 @@ export enum PR_ITEM_PRICELIST_COMPARE_TYPE {
 }
 
 export interface PrtDetailPayload {
+  /** บังคับเฉพาะแถวที่ update — backend เช็ค optimistic lock ราย row แยกจากหัวเอกสาร */
+  doc_version?: number;
   location_id: string | null;
   delivery_point_id: string | null;
   product_id: string | null;

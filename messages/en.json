@@ -3646,6 +3646,7 @@
       "deleteConfirm": "Are you sure you want to delete template \"{name}\"? This action cannot be undone.",
       "notFound": "Template not found",
       "addItem": "Add Item",
+      "selectWorkflowFirst": "Select a workflow first, then add items.",
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this template.",
       "removeItem": "Remove Item",

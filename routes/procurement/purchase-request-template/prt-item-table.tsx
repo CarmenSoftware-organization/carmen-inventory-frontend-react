@@ -20,8 +20,9 @@ import {
   InputSuffixPlain,
   InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
-import { LookupLocation } from "@/components/lookup/lookup-location";
+import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { useUnitDecimals } from "@/hooks/use-product-units";
+import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -155,7 +156,10 @@ const WatchedProductUnit = ({
           onValueChange={field.onChange}
           disabled={disabled}
           readOnly={readOnly}
-          className="w-20 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+          // ความกว้างคงที่ = 4 ตัวอักษร + ที่ของลูกศร (ช่องว่างซ้ายขวา 1rem +
+          // ไอคอน 1rem) ผูกกับ `ch` ไม่ใช่ px คงที่ เปลี่ยนขนาดฟอนต์เมื่อไรก็ยัง
+          // พอดี 4 ตัวเท่าเดิม · ของเดิม w-20 ตัดชื่อหน่วยสี่ตัวทิ้งเป็นจุดไข่ปลา
+          className="w-[calc(4ch+4rem)] shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
           error={unitError}
         />
       )}
@@ -189,18 +193,27 @@ const QtyUnitCell = ({
     useWatch({ control, name: `items.${index}.requested_unit_id` }) ?? "";
   // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
   const decimals = useUnitDecimals(productId, unitId);
+  // ตัวเดียวกับที่คุม input — โหมดอ่านจึงแสดงเท่าที่โหมดกรอกพิมพ์ได้พอดี
+  const formatQty = useQuantityFormatter(decimals);
 
   if (readOnly) {
     return (
       <InputSuffixPlain
+        // 0 เป็นค่าที่ตั้งใจใส่ได้ จึงต้องโชว์เป็น 0 ไม่ใช่ขีด — ขีดไว้ให้เฉพาะ
+        // แถวที่ไม่มีค่าเลยจริง ๆ · ทศนิยมตามหน่วยเดียวกับตอนกรอก คนอ่านจะได้เห็น
+        // เท่าที่พิมพ์ได้พอดี
         value={
-          qty == null || qty === 0 ? (
+          qty == null ? (
             <span className="text-muted-foreground">—</span>
           ) : (
-            qty
+            formatQty(Number(qty))
           )
         }
         suffix={unitName}
+        // จองที่ให้หน่วย 4 ตัวอักษรตายตัว — ไม่งั้นแถวที่เป็น BOX กับ KG ดัน
+        // ตัวเลขไปคนละตำแหน่ง อ่านลงมาทั้งคอลัมน์แล้วเลขเต้น (ข้อความทั้งก้อน
+        // ชิดขวา ความยาวหน่วยจึงเป็นตัวกำหนดว่าเลขจบตรงไหน)
+        suffixClassName="ml-1 inline-block w-[4ch] text-left"
       />
     );
   }
@@ -208,12 +221,23 @@ const QtyUnitCell = ({
   return (
     <InputSuffixField error={!!qtyError} disabled={disabled}>
       <InputSuffixQty
+        // ไม่ override min — InputSuffixQty เป็น min=0 อยู่แล้ว และ 0 เป็นค่าที่
+        // ใส่ได้จริงในแม่แบบ (schema ก็ min(0)) ของเดิม min=1 บล็อกไว้ที่ตัว input
         decimals={decimals}
-        min={1}
         placeholder={tfl("qty")}
-        {...form.register(`items.${index}.requested_qty`, {
-          valueAsNumber: true,
-        })}
+        {...form.register(`items.${index}.requested_qty`)}
+        // ลบเลขจนช่องว่าง = `valueAsNumber` คืน NaN ซึ่ง zod ตีเป็น "ไม่ใช่ตัวเลข"
+        // แล้วขอบแดงค้างอยู่อย่างนั้น แม้ผู้ใช้จะพิมพ์ 0 กลับเข้าไปก็ยังไม่หาย
+        // เพราะค่าที่ค้างในฟอร์มเป็น NaN ไม่ใช่ 0 — ช่องว่างคือ 0 อ่านเขียนที่เดียว
+        // ตรงนี้ (ท่าเดียวกับ PO/GRN) ไม่ใช่ปล่อย NaN ไหลเข้าฟอร์ม
+        onChange={(e) => {
+          const n = e.currentTarget.valueAsNumber;
+          form.setValue(
+            `items.${index}.requested_qty`,
+            Number.isNaN(n) ? 0 : n,
+            { shouldDirty: true, shouldValidate: true },
+          );
+        }}
       />
       <InputSuffixAddon>
         <WatchedProductUnit
@@ -285,20 +309,39 @@ export function usePrtItemTable({
               control={form.control}
               name={`items.${row.index}.location_id`}
               render={({ field }) => (
-                <LookupLocation
+                <LookupUserLocation
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
                   onItemChange={(location) => {
-                    if (location.delivery_point?.id) {
-                      form.setValue(
-                        `items.${row.index}.delivery_point_id`,
-                        location.delivery_point.id,
-                      );
-                    }
+                    // ชื่อกับรหัสคลังเป็นของ display ล้วน ไม่เข้า payload — แต่
+                    // โหมดอ่านของคอลัมน์นี้อ่านจากสองฟิลด์นี้ ของเดิมไม่เคยเขียน
+                    // ลงฟอร์มเลย แถวที่เพิ่งเลือกคลังจึงว่างเปล่าจนกว่าจะโหลดใหม่
+                    form.setValue(
+                      `items.${row.index}.location_name`,
+                      location.name,
+                    );
+                    form.setValue(
+                      `items.${row.index}.location_code`,
+                      location.code ?? "",
+                    );
+                    // คลังที่ไม่มีจุดส่งของต้องล้างของเดิมทิ้ง ไม่ใช่ปล่อยค้าง —
+                    // ไม่งั้นแถวนี้แบกจุดส่งของคลังก่อนหน้าไปกับแม่แบบโดยไม่มีใครเห็น
+                    // (ทรงเดียวกับ PR) · ล้างแล้วช่องจุดส่งของจะแดงให้เลือกใหม่เอง
+                    form.setValue(
+                      `items.${row.index}.delivery_point_id`,
+                      location.delivery_point?.id ?? null,
+                    );
+                    form.setValue(
+                      `items.${row.index}.delivery_point_name`,
+                      location.delivery_point?.name ?? "",
+                    );
                   }}
                   disabled={disabled}
-                  readOnly={readOnly}
-                  className="text-xs"
+                  defaultLabel={form.getValues(
+                    `items.${row.index}.location_name`,
+                  )}
+                  popoverWidth="w-[26.25rem]"
+                  className="h-8 w-full text-xs"
                   error={locationError}
                 />
               )}
@@ -384,6 +427,18 @@ export function usePrtItemTable({
                 <LookupDeliveryPoint
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  onItemChange={(deliveryPoint) => {
+                    form.setValue(
+                      `items.${row.index}.delivery_point_name`,
+                      deliveryPoint.name,
+                    );
+                  }}
+                  // จุดส่งของที่ถูกปิดใช้งานแล้วไม่อยู่ใน list ที่ lookup ดึงมา
+                  // (lookup กรอง is_active) ไม่ส่งป้ายสำรองไป = ช่องว่างเปล่า
+                  // ทั้งที่แม่แบบมีค่าอยู่
+                  defaultLabel={form.getValues(
+                    `items.${row.index}.delivery_point_name`,
+                  )}
                   disabled={disabled}
                   readOnly={readOnly}
                   className="w-full text-xs"
