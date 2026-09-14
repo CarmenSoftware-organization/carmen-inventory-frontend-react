@@ -73,6 +73,7 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
       className="block w-full text-right"
       value={Number(qty) || 0}
       suffix={unitName}
+      suffixClassName="ml-1 inline-block w-[4ch] text-left"
     />
   );
 });

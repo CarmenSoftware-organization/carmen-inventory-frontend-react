@@ -235,6 +235,11 @@ export const QtyUnitPlain = memo(function QtyUnitPlain({
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
   return (
-    <InputSuffixPlain className="w-full" value={value} suffix={unitName} />
+    <InputSuffixPlain
+      className="w-full"
+      value={value}
+      suffix={unitName}
+      suffixClassName="ml-1 inline-block w-[4ch] text-left"
+    />
   );
 });

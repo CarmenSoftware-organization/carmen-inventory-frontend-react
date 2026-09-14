@@ -62,6 +62,7 @@ export const QtyUnitCell = function QtyUnitCell({
         className="w-full"
         value={formatQty(Number(qty))}
         suffix={unitName}
+        suffixClassName="ml-1 inline-block w-[4ch] text-left"
       />
     );
   }
@@ -111,6 +112,7 @@ export const OrderSummaryCell = function OrderSummaryCell({
       className="block w-full text-right"
       value={formatQty(Number(qty))}
       suffix={unitName}
+      suffixClassName="ml-1 inline-block w-[4ch] text-left"
     />
   );
 };
@@ -139,6 +141,7 @@ export const RecSummaryCell = function RecSummaryCell({
       className="block w-full text-right"
       value={formatQty(Number(received))}
       suffix={unitName}
+      suffixClassName="ml-1 inline-block w-[4ch] text-left"
     />
   );
 };
@@ -187,6 +190,7 @@ export const FocQtyCell = function FocQtyCell({
         className="block w-full text-right"
         value={formatQty(Number(qty))}
         suffix={unitName}
+        suffixClassName="ml-1 inline-block w-[4ch] text-left"
       />
     );
   }
