@@ -175,7 +175,9 @@ export function PoItemFields({
   const canClose =
     !!onClose &&
     !!poStatus &&
-    (poStatus === PO_STATUS.SENT || poStatus === PO_STATUS.PARTIAL);
+    (poStatus === PO_STATUS.APPROVED ||
+      poStatus === PO_STATUS.SENT_OR_PRINT ||
+      poStatus === PO_STATUS.PARTIAL);
 
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedIndices = selectedRows.map((r) => r.index);

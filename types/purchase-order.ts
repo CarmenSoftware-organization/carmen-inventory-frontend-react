@@ -6,7 +6,8 @@ import type { LastAction } from "./last-action";
 export enum PO_STATUS {
   DRAFT = "draft",
   IN_PROGRESS = "in_progress",
-  SENT = "sent",
+  APPROVED = "approved",
+  SENT_OR_PRINT = "sent_or_print",
   PARTIAL = "partial",
   CLOSED = "closed",
   COMPLETED = "completed",
