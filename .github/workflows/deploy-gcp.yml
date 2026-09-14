@@ -69,6 +69,7 @@ jobs:
           WS_URL: ${{ vars.WS_URL }}
           LICENSE_ENFORCEMENT: ${{ vars.LICENSE_ENFORCEMENT }}
           OTEL_ENABLED: ${{ vars.OTEL_ENABLED }}
+          OTEL_ENVIRONMENT: ${{ vars.OTEL_ENVIRONMENT }}
         run: |
           set -euo pipefail
 
@@ -119,8 +120,10 @@ jobs:
             --arg ws_url "$WS_URL" \
             --argjson license_enforcement "$LICENSE_ENFORCEMENT" \
             --argjson otel_enabled "$OTEL_ENABLED" \
+            --arg otel_environment "$OTEL_ENVIRONMENT" \
             '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: $otel_enabled}
-             + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)' > /tmp/config.json
+             + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)
+             + (if $otel_environment == "" then {} else {OTEL_ENVIRONMENT: $otel_environment} end)' > /tmp/config.json
 
           echo "config.json ที่จะอัปโหลด (ไม่มีความลับในไฟล์นี้):"
           cat /tmp/config.json
