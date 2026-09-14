@@ -22,8 +22,6 @@ export function grnItemCols(editable: boolean) {
     product: 200,
     /** ช่องเลือกคลังยาวกว่าชื่อคลัง โหมดอ่านจึงคืนที่ให้คอลัมน์อื่นได้ */
     location: editable ? 190 : 150,
-    /** หน่วยนับของสินค้า (มาจาก master ไม่ใช่หน่วยที่รับ) — โชว์อย่างเดียว */
-    unit: 76,
     /** จำนวนที่สั่ง — คอลัมน์เงื่อนไข มีเฉพาะใบที่อิง PO */
     order: editable ? QTY_COL : QTY_COL_READ_ONLY,
     received: editable ? QTY_COL : QTY_COL_READ_ONLY,

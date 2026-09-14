@@ -22,7 +22,6 @@ import {
   ItemTaxCell,
   LocationCell,
   QtyUnitCell,
-  UnitCol,
   RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-cells";
@@ -142,7 +141,6 @@ function poColSize(viewMode: boolean) {
     location: viewMode ? 150 : 180,
     // +ไอคอนสต็อกท้ายช่อง — ความกว้างเดิม (160) เหลือให้ชื่อสินค้าไม่ถึงร้อยกว่า px
     product: viewMode ? 170 : 200,
-    unit: viewMode ? 72 : 100,
     order: viewMode ? 85 : 140,
     foc: viewMode ? 85 : 130,
     received: 104,
@@ -238,20 +236,6 @@ export function usePoItemTable({
             readOnly={readOnly}
             showStatusBadge={showStatusBadge}
             canResetStatus={canResetStatus}
-          />
-        ),
-      },
-      {
-        id: "unit",
-        header: tfl("unit"),
-        size: COL.unit,
-        cell: ({ row }) => (
-          <UnitCol
-            control={form.control}
-            form={form}
-            index={row.index}
-            disabled={disabled}
-            readOnly={readOnly}
           />
         ),
       },

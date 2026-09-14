@@ -25,7 +25,6 @@ import {
   GrnItemTaxCell,
   LocationCell,
   ProductCell,
-  ProductUnitCell,
   QtyUnitCell,
   ReceivedQtyCell,
   UnitPriceCell,
@@ -166,14 +165,6 @@ export function useGrnItemTable({
             onOpenChange={(open) => onProductOpenChange(row.id, open)}
             onPicked={() => onProductPicked(row.id)}
           />
-        ),
-      },
-      {
-        id: "unit",
-        header: tfl("unit"),
-        size: COL.unit,
-        cell: ({ row }) => (
-          <ProductUnitCell control={form.control} index={row.index} />
         ),
       },
       ...(isPo
