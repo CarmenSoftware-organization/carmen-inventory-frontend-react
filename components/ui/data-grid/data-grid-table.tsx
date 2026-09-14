@@ -698,10 +698,17 @@ function DataGridTableBodyRowCell<TData>({
         //
         // ต้องบวก padding แนวตั้งเข้าไปเอง เพราะ box-sizing เป็น border-box ทั้งโปรเจกต์
         // `h-[2lh]` เปล่า ๆ จึงเหลือที่ให้ข้อความแค่ 2lh ลบ padding = ไม่ถึงสองบรรทัด
+        //
+        // เผื่อไว้เกิน 2lh อีกนิด (+0.25rem) เพราะ `lh` คิดจาก line-height ของ **เซลล์**
+        // แต่บรรทัดจริงในเซลล์ไม่ได้ใช้ค่านั้นเสมอ — บรรทัดรองเป็นฟอนต์เล็กกว่า และ
+        // ข้อความไทยต้องการกล่องสูงกว่าเพราะซ้อนได้ถึงสามชั้น (สระบน + วรรณยุกต์)
+        // พอรวมกันเกิน 2lh เมื่อไร `overflow:hidden` ของ line-clamp จะเฉือนทั้งหัว
+        // และท้าย (align-middle ดันเนื้อหาล้นออกสองด้านเท่า ๆ กัน) — เจอจริงที่ชื่อ
+        // สินค้าไทยอย่าง "ลูกชิ้นหมู" วรรณยุกต์หายทั้งคอลัมน์
         props.tableLayout?.rowClamp &&
           (props.tableLayout?.dense
-            ? "h-[calc(2lh+0.25rem)]"
-            : "h-[calc(2lh+0.5rem)]"),
+            ? "h-[calc(2lh+0.5rem)]"
+            : "h-[calc(2lh+0.75rem)]"),
         bodyCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&

@@ -334,9 +334,10 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // h-11 ตายตัวทุกแถว — ปล่อยให้สูงตามเนื้อหาแล้วแถวที่ชื่อสินค้ากินสอง
-        // บรรทัดจะสูงกว่าแถวอื่น ทั้งที่เป็นข้อมูลชนิดเดียวกัน
-        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
+        // อย่างน้อย 2.75rem ทุกแถวเพื่อให้สูงเท่ากัน แต่ไม่ตายตัว — `columnsResizable`
+        // ทำให้ของกลางแปะ `truncate` (overflow:hidden) ให้ทุก td ความสูงตายตัวจึง
+        // กลายเป็นกรรไกร ชื่อสินค้าไทยที่วรรณยุกต์ซ้อนสามชั้นจะโดนเฉือนหัวท้าย
+        cellClassName: cn("min-h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [
