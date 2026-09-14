@@ -593,6 +593,7 @@
     "voided": "Voided",
     "void": "Voided",
     "sent": "Sent",
+    "sent_or_print": "Sent or print",
     "closed": "Closed",
     "saved": "Saved",
     "committed": "Committed",

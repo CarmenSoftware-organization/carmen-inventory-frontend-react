@@ -4,7 +4,8 @@ import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 export const PO_STATUS_CONFIG = createStatusConfig([
   "draft",
   "in_progress",
-  "sent",
+  "approved",
+  "sent_or_print",
   "partial",
   "closed",
   "completed",

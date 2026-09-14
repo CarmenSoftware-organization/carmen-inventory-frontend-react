@@ -43,7 +43,7 @@ const STATUS_META: Record<string, StatusMeta> = {
   approved: { Icon: FileText, cssVar: "--status-approved" },
   completed: { Icon: CircleCheckBig, cssVar: "--status-completed" },
   voided: { Icon: CircleX, cssVar: "--status-voided" },
-  sent: { Icon: Send, cssVar: "--status-sent" },
+  sent_or_print: { Icon: Send, cssVar: "--status-sent" },
   partial: { Icon: CircleDashed, cssVar: "--status-partial" },
   closed: { Icon: Lock, cssVar: "--status-closed" },
   cancelled: { Icon: Ban, cssVar: "--status-cancelled" },

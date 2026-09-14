@@ -73,7 +73,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // ต่างก็ไม่เท่ากับ APPROVE/VIEW_ONLY อยู่แล้ว)
   const role = purchaseOrder?.role ?? STAGE_ROLE.CREATE;
   const terminalStatus =
-    purchaseOrder?.po_status === PO_STATUS.SENT ||
+    purchaseOrder?.po_status === PO_STATUS.APPROVED ||
+    purchaseOrder?.po_status === PO_STATUS.SENT_OR_PRINT ||
     purchaseOrder?.po_status === PO_STATUS.CLOSED ||
     purchaseOrder?.po_status === PO_STATUS.COMPLETED;
   const isReadOnly = role === STAGE_ROLE.APPROVE || terminalStatus;
@@ -87,7 +88,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
   const canClose =
     !!purchaseOrder &&
-    (purchaseOrder.po_status === PO_STATUS.SENT ||
+    (purchaseOrder.po_status === PO_STATUS.APPROVED ||
+      purchaseOrder.po_status === PO_STATUS.SENT_OR_PRINT ||
       purchaseOrder.po_status === PO_STATUS.PARTIAL);
   const { data: previousStages, isLoading: stagesLoading } =
     usePoPreviousStages(purchaseOrder?.id);
