@@ -210,7 +210,7 @@ const QtyUnitCell = ({
           )
         }
         suffix={unitName}
-        suffixClassName="ml-1 inline-block w-[4ch] text-left"
+        suffixClassName="ml-1 inline-block w-[4ch] text-right"
       />
     );
   }

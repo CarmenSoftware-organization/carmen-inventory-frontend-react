@@ -141,8 +141,8 @@ function poColSize(viewMode: boolean) {
     location: viewMode ? 150 : 180,
     // +ไอคอนสต็อกท้ายช่อง — ความกว้างเดิม (160) เหลือให้ชื่อสินค้าไม่ถึงร้อยกว่า px
     product: viewMode ? 170 : 200,
-    order: viewMode ? 85 : 140,
-    foc: viewMode ? 85 : 130,
+    order: viewMode ? 104 : 140,
+    foc: viewMode ? 104 : 140,
     received: 104,
     price: viewMode ? 104 : 140,
     subtotal: 100,

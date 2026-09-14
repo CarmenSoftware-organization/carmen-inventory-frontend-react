@@ -32,7 +32,7 @@ export function ReceivedCell({
       // null = ยังไม่ได้ค่าจาก GRN — ขีดไว้ ไม่โชว์ 0 ให้เข้าใจผิดว่ารับมา 0
       value={received == null ? "—" : formatQty(received)}
       suffix={unitName}
-      suffixClassName="ml-1 inline-block w-[4ch] text-left"
+      suffixClassName="ml-1 inline-block w-[4ch] text-right"
     />
   );
 }

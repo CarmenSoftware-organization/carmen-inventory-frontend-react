@@ -107,7 +107,32 @@ export function ItemPriceText({
   );
 }
 
-/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
+/**
+ * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
+ *
+ * ทรงเดียวกับรหัสคลังใต้ชื่อคลัง และชื่อท้องถิ่นใต้ชื่อสินค้า — ตัวเอกของคอลัมน์
+ * เงินคือจำนวนเงิน ส่วนเปอร์เซ็นต์เป็นที่มาของมัน ของเดิมวางเรียงบรรทัดเดียว
+ * (`7% · 35.00`) ซึ่งอ่านเหมือนสองค่าน้ำหนักเท่ากัน แล้วเลขเงินก็ไม่ตรงคอลัมน์
+ * กับแถวอื่นเพราะความยาวเปอร์เซ็นต์ดันมันไปเรื่อย
+ */
+function RateSubtext({
+  amount,
+  rate,
+}: {
+  readonly amount: number;
+  readonly rate: number;
+}) {
+  return (
+    <div className="text-right">
+      <p className="text-xs tabular-nums">{formatCurrency(amount)}</p>
+      {rate > 0 && (
+        <p className="text-muted-foreground text-micro-legal tabular-nums">
+          {rate}%
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
 export function ItemDiscountCell({
@@ -133,11 +158,7 @@ export function ItemDiscountCell({
   const amount = line.discountAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
@@ -202,19 +223,10 @@ export function ItemTaxCell({
   const amount = line.taxAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
-          {rate}%
-        </span>
-      )}
       {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
       <div className="flex items-center gap-1.5">
         <TaxOverrideInput
@@ -248,6 +260,11 @@ export function ItemTaxCell({
           }}
         />
       </div>
+      {rate > 0 && (
+        <span className="text-muted-foreground text-micro-legal text-right tabular-nums">
+          {rate}%
+        </span>
+      )}
     </div>
   );
 }
