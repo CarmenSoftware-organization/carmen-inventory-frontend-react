@@ -11,12 +11,11 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { InputQty } from "@/components/ui/input/input-qty";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { InventoryTooltip } from "@/components/share/inventory-tooltip";
@@ -28,12 +27,18 @@ import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
-import { srItemAmount } from "./sr-form-helpers";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { cn } from "@/lib/utils";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { useProductCostByLocationQty } from "@/hooks/use-product-cost";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixPlain,
+  InputSuffixQty,
+} from "@/components/ui/input/input-suffix";
 
 const ProductCell = memo(function ProductCell({
   control,
@@ -274,7 +279,139 @@ const StatusCell = memo(function StatusCell({
   );
 });
 
-const UnitCell = memo(function UnitCell({
+type SrQtyField = "requested_qty" | "approved_qty" | "issued_qty";
+
+/**
+ * จำนวน + หน่วย ในกล่องเดียว (ทรงเดียวกับ PO/GRN)
+ *
+ * เดิมหน่วยเป็นคอลัมน์ของตัวเองคั่นอยู่ระหว่างสินค้ากับจำนวน — อ่านแล้วต้องกวาดตา
+ * กลับไปดูว่าเลขในแต่ละคอลัมน์นับเป็นหน่วยอะไร ทั้งที่ทั้งสามคอลัมน์ใช้หน่วยเดียวกัน
+ * เอามาต่อท้ายเลขแทน คอลัมน์เลยหายไปหนึ่งช่องและอ่านจบในตัว
+ */
+const QtyUnitCell = memo(function QtyUnitCell({
+  control,
+  form,
+  index,
+  field,
+  readOnly,
+}: {
+  control: Control<SrFormValues>;
+  form: UseFormReturn<SrFormValues>;
+  index: number;
+  field: SrQtyField;
+  /** แถวนี้แก้ไม่ได้ — ตัวหนังสือล้วน ไม่ใช่ช่องกรอกสีเทา */
+  readOnly: boolean;
+}) {
+  "use no memo";
+  const qty = useWatch({ control, name: `items.${index}.${field}` });
+  const unitName =
+    useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  // ไม่ส่ง decimals — SR ไม่มี unit_id ราย item (มีแต่ unit_name) จึงหา decimal_place
+  // ของหน่วยไม่ได้ ทั้งฝั่งอ่านและฝั่งกรอกจึงตกที่ DEFAULT_QTY_DECIMALS ตัวเดียวกัน
+  const formatQty = useQuantityFormatter();
+  const tfl = useTranslations("field");
+  const name = `items.${index}.${field}` as const;
+
+  if (readOnly) {
+    return (
+      <InputSuffixPlain
+        className="block w-full text-right"
+        value={qty == null ? "" : formatQty(Number(qty))}
+        suffix={unitName}
+        suffixClassName="text-right"
+      />
+    );
+  }
+
+  const error = form.formState.errors.items?.[index]?.[field]?.message;
+  return (
+    <InputSuffixField className="w-full" error={!!error}>
+      <InputSuffixQty
+        placeholder={tfl("qty")}
+        defaultValue={qty == null ? undefined : Number(qty)}
+        {...form.register(name)}
+        onChange={(e) => {
+          // ลบเลขจนช่องว่าง = NaN ซึ่ง zod ตีเป็น "ไม่ใช่ตัวเลข" แล้วขอบแดงค้าง
+          // แม้พิมพ์ 0 กลับเข้าไป (ท่าเดียวกับ PO/PRT)
+          const n = e.target.valueAsNumber;
+          form.setValue(name, Number.isNaN(n) ? 0 : n, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+      />
+      {unitName && (
+        <InputSuffixAddon>
+          <span className="text-muted-foreground px-2 text-xs">{unitName}</span>
+        </InputSuffixAddon>
+      )}
+    </InputSuffixField>
+  );
+});
+
+/** ความกว้างช่องแคบหัวตาราง (checkbox / #) — พอดีตัว checkbox 16px + px-2 สองข้าง */
+const SR_NARROW_COL = 28;
+
+/**
+ * ดึงต้นทุนของแถวจาก backend แล้วเขียนกลับเข้าฟอร์ม (render null)
+ *
+ * `GET /{bu}/cost/products/{product_id}/location/{from_location_id}/qty/{qty}` —
+ * ต้นทุนผูกกับล็อตที่มีอยู่จริงในคลังต้นทาง ณ ตอนนั้น คิดฝั่ง client ไม่ได้
+ *
+ * ติดตั้งหนึ่งตัวต่อแถวที่ระดับ `SrItemFields` ไม่ใช่ในเซลล์ — เซลล์ยอดเงินกับ
+ * ยอดรวมท้ายใบจะได้อ่านค่าเดียวกันจากฟอร์ม ไม่ใช่ต่างคนต่างยิง (ทรงเดียวกับ
+ * `PoItemComputedSync` และ IA)
+ */
+export const SrItemCostSync = memo(function SrItemCostSync({
+  form,
+  index,
+  fromLocationId,
+}: {
+  form: UseFormReturn<SrFormValues>;
+  index: number;
+  fromLocationId: string;
+}) {
+  "use no memo";
+  const buCode = useBuCode();
+  const control = form.control;
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const qty = useWatch({ control, name: `items.${index}.requested_qty` });
+  const { data } = useProductCostByLocationQty(
+    buCode,
+    productId || undefined,
+    fromLocationId || undefined,
+    typeof qty === "number" ? qty : 0,
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    // เขียนเฉพาะตอนค่าต่างจริง — เท่ากันแล้วยัง setValue ซ้ำคือ render วนเปล่า
+    // และค่าพวกนี้เป็น display ล้วน ไม่ต้อง dirty ฟอร์มให้ติด discard dialog
+    if (form.getValues(`items.${index}.total_cost`) !== data.total_cost) {
+      form.setValue(`items.${index}.total_cost`, data.total_cost);
+    }
+    if (
+      form.getValues(`items.${index}.cost_per_unit`) !==
+      data.average_cost_per_unit
+    ) {
+      form.setValue(
+        `items.${index}.cost_per_unit`,
+        data.average_cost_per_unit,
+      );
+    }
+  }, [data, form, index]);
+
+  return null;
+});
+
+/**
+ * ยอดเงินของแถว — อ่าน `total_cost` ที่ `SrItemCostSync` เขียนไว้
+ *
+ * ต้อง `useWatch` ไม่ใช่ `getValues` เพราะค่ามาทีหลัง (หลัง API ตอบ) ถ้าอ่านครั้ง
+ * เดียวตอน render เซลล์จะค้างที่ 0 ตลอด
+ */
+const AmountCell = memo(function AmountCell({
   control,
   index,
 }: {
@@ -282,13 +419,11 @@ const UnitCell = memo(function UnitCell({
   index: number;
 }) {
   "use no memo";
-  const unitName =
-    useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
-  return <span className="text-muted-foreground text-xs">{unitName}</span>;
+  const total = useWatch({ control, name: `items.${index}.total_cost` });
+  return (
+    <NameWithSubtext align="end" primary={formatCurrency(Number(total) || 0)} />
+  );
 });
-
-/** ความกว้างช่องแคบหัวตาราง (checkbox / #) — พอดีตัว checkbox 16px + px-2 สองข้าง */
-const SR_NARROW_COL = 28;
 
 export type SrItemField = FieldArrayWithId<SrFormValues, "items", "id">;
 
@@ -318,10 +453,6 @@ export function useSrItemTable({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
-  // ไม่ส่ง decimals — SR ไม่มี unit_id ราย item (มีแต่ unit_name) จึงหา decimal_place
-  // ของหน่วยไม่ได้ และ `InputQty` ข้างล่างก็ไม่ได้ส่ง decimals เหมือนกัน ทั้งสองฝั่ง
-  // จึงตกที่ DEFAULT_QTY_DECIMALS ตัวเดียวกัน = แสดงเท่าที่พิมพ์ได้พอดี
-  const formatQty = useQuantityFormatter();
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
   const allCount = itemFields.length;
@@ -391,45 +522,18 @@ export function useSrItemTable({
         size: 200,
       },
       {
-        accessorKey: "unit_name",
-        header: tfl("unit"),
-        cell: ({ row }) => (
-          <UnitCell control={form.control} index={row.index} />
-        ),
-        size: 80,
-      },
-      {
         accessorKey: "requested_qty",
         header: tfl("requested"),
-        cell: ({ row }) => {
-          if (disabled || lockNonApproved) {
-            return (
-              <NameWithSubtext
-                align="end"
-                primary={
-                  row.original.requested_qty == null
-                    ? ""
-                    : formatQty(row.original.requested_qty)
-                }
-              />
-            );
-          }
-          const qtyError =
-            form.formState.errors.items?.[row.index]?.requested_qty?.message;
-          return (
-            <InputQty
-              errorIconAlign="left"
-              placeholder={tfl("qty")}
-              className="text-right"
-              disabled={disabled}
-              error={qtyError}
-              {...form.register(`items.${row.index}.requested_qty`, {
-                valueAsNumber: true,
-              })}
-            />
-          );
-        },
-        size: 100,
+        cell: ({ row }) => (
+          <QtyUnitCell
+            control={form.control}
+            form={form}
+            index={row.index}
+            field="requested_qty"
+            readOnly={disabled || lockNonApproved}
+          />
+        ),
+        size: 128,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
       ...(role === STAGE_ROLE.CREATE
@@ -438,36 +542,16 @@ export function useSrItemTable({
             {
               accessorKey: "approved_qty",
               header: tfl("approved"),
-              cell: ({ row }) => {
-                if (disabled || lockApproved) {
-                  return (
-                    <NameWithSubtext
-                      align="end"
-                      primary={
-                        row.original.approved_qty == null
-                          ? ""
-                          : formatQty(row.original.approved_qty)
-                      }
-                    />
-                  );
-                }
-                return (
-                  <InputQty
-                    errorIconAlign="left"
-                    placeholder={tfl("qty")}
-                    className="text-right"
-                    disabled={disabled}
-                    error={
-                      form.formState.errors.items?.[row.index]?.approved_qty
-                        ?.message
-                    }
-                    {...form.register(`items.${row.index}.approved_qty`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-                );
-              },
-              size: 100,
+              cell: ({ row }) => (
+                <QtyUnitCell
+                  control={form.control}
+                  form={form}
+                  index={row.index}
+                  field="approved_qty"
+                  readOnly={disabled || lockApproved}
+                />
+              ),
+              size: 128,
               meta: {
                 headerClassName: "text-right",
                 cellClassName: "text-right",
@@ -480,36 +564,16 @@ export function useSrItemTable({
             {
               accessorKey: "issued_qty",
               header: tfl("issued"),
-              cell: ({ row }) => {
-                if (disabled || lockIssued) {
-                  return (
-                    <NameWithSubtext
-                      align="end"
-                      primary={
-                        row.original.issued_qty == null
-                          ? ""
-                          : formatQty(row.original.issued_qty)
-                      }
-                    />
-                  );
-                }
-                return (
-                  <InputQty
-                    errorIconAlign="left"
-                    placeholder={tfl("qty")}
-                    className="text-right"
-                    disabled={disabled}
-                    error={
-                      form.formState.errors.items?.[row.index]?.issued_qty
-                        ?.message
-                    }
-                    {...form.register(`items.${row.index}.issued_qty`, {
-                      valueAsNumber: true,
-                    })}
-                  />
-                );
-              },
-              size: 100,
+              cell: ({ row }) => (
+                <QtyUnitCell
+                  control={form.control}
+                  form={form}
+                  index={row.index}
+                  field="issued_qty"
+                  readOnly={disabled || lockIssued}
+                />
+              ),
+              size: 128,
               meta: {
                 headerClassName: "text-right",
                 cellClassName: "text-right",
@@ -520,10 +584,7 @@ export function useSrItemTable({
         id: "amount",
         header: tfl("total"),
         cell: ({ row }) => (
-          <NameWithSubtext
-            align="end"
-            primary={formatCurrency(srItemAmount(row.original))}
-          />
+          <AmountCell control={form.control} index={row.index} />
         ),
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
@@ -656,7 +717,6 @@ export function useSrItemTable({
     t,
     tfl,
     tc,
-    formatQty,
     translateStageStatus,
     itemFields,
   ]);

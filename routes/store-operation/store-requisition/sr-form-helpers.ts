@@ -103,12 +103,15 @@ export function buildSrDuplicateValues(
 /**
  * ยอดเงินของรายการ SR
  *
- * backend ยังไม่ส่งราคาต่อหน่วยมากับ store_requisition_detail เลยคง 0 ไว้ก่อน
- * ทั้งคอลัมน์ amount ในตารางและยอดรวมท้ายฟอร์มเรียกตัวนี้ตัวเดียว — วันไหนมีราคา
- * มาแล้วแก้ที่นี่จุดเดียว ยอดในตารางกับยอดรวมจะไม่หลุดกันเอง (บทเรียนจาก PO)
+ * `store_requisition_detail` ไม่มีราคาติดมากับใบ — ต้นทุนมาจากเส้น
+ * `/{bu}/cost/products/{product}/location/{from}/qty/{qty}` ซึ่ง `SrItemCostSync`
+ * ยิงให้รายแถวแล้วเขียน `total_cost` กลับเข้าฟอร์ม ตัวนี้จึงแค่หยิบค่านั้นมา
+ *
+ * ทั้งคอลัมน์ยอดเงินในตารางและยอดรวมท้ายฟอร์มเรียกตัวนี้ตัวเดียว — ยอดสองที่จึง
+ * ไม่มีทางหลุดกันเอง (บทเรียนจาก PO)
  */
-export function srItemAmount(_item: SrFormValues["items"][number]): number {
-  return 0;
+export function srItemAmount(item: SrFormValues["items"][number]): number {
+  return Number(item.total_cost) || 0;
 }
 
 /**

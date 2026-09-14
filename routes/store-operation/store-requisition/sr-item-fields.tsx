@@ -15,7 +15,7 @@ import EmptyComponent from "@/components/empty-component";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
 import { SR_ITEM, SR_ITEM_STAGE } from "./sr-form-schema";
-import { useSrItemTable } from "./sr-item-table";
+import { SrItemCostSync, useSrItemTable } from "./sr-item-table";
 import { SrSelectDialog } from "./sr-select-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
 import { getDeleteDescription } from "@/lib/form-utils";
@@ -216,11 +216,23 @@ export function SrItemFields({
             onClick={handleAddItem}
             size="sm"
             className="ms-auto"
+            variant="secondary"
           >
             <Plus /> {t("addItem")}
           </Button>
         )}
       </div>
+
+      {/* ดึงต้นทุนรายแถวจาก backend แล้วเขียนกลับเข้าฟอร์ม — หนึ่งตัวต่อแถว ติดตั้ง
+          ที่นี่ไม่ใช่ในเซลล์ เพื่อให้คอลัมน์ยอดเงินกับยอดรวมท้ายใบอ่านค่าเดียวกัน */}
+      {itemFields.map((item, i) => (
+        <SrItemCostSync
+          key={item.id}
+          form={form}
+          index={i}
+          fromLocationId={fromLocationId}
+        />
+      ))}
 
       <DataGrid
         table={table}
@@ -228,12 +240,11 @@ export function SrItemFields({
         tableLayout={{
           rowClamp: false,
           checkbox: !disabled,
-          // ชิดบนตลอด ไม่ผูกกับ `disabled` — เซลล์ในตารางนี้กลายเป็นตัวหนังสือตาม
-          // **role** ด้วย (ผู้อนุมัติ/ผู้จ่ายของ/ผู้ดูอย่างเดียวเห็นจำนวนเป็นข้อความ
-          // ทั้งที่ฟอร์มยังไม่ disabled) ผูกกับ disabled อย่างเดียวจึงไม่ครอบเคสจริง
-          // · โหมดกรอกก็ไม่เสียอะไร ตารางนี้ไม่ได้ตั้งความสูงขั้นต่ำให้แถว แถวจึง
-          // สูงเท่าเนื้อหา ชิดบนกับกึ่งกลางให้ผลเหมือนกัน
-          cellAlign: "top",
+          // โหมดอ่านชิดบน — เซลล์ที่มีบรรทัดรอง (ชื่อท้องถิ่นใต้ชื่อสินค้า) กับเซลล์
+          // บรรทัดเดียวจะได้เริ่มที่เส้นเดียวกัน · โหมดแก้ไขกึ่งกลางทั้งแถว เพราะ
+          // เซลล์ส่วนใหญ่เป็นช่องกรอกสูงเท่ากัน ชิดบนแล้วช่องที่เป็นตัวหนังสือจะ
+          // ลอยอยู่เหนือช่องกรอกที่อยู่ข้าง ๆ
+          cellAlign: disabled ? "top" : "middle",
         }}
         emptyMessage={
           <EmptyComponent

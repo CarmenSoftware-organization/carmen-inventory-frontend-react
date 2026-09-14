@@ -26,6 +26,11 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     approved_qty: z.coerce.number(),
     issued_qty: z.coerce.number(),
+    // ต้นทุนที่ backend คิดจากล็อตจริง (`/cost/products/.../qty/...`) — display
+    // เท่านั้น ไม่ส่ง payload · เก็บลงฟอร์มเพื่อให้คอลัมน์ยอดเงินกับยอดรวมท้ายใบ
+    // อ่านค่าเดียวกัน ไม่ใช่ต่างคนต่างยิง API
+    cost_per_unit: z.coerce.number().optional(),
+    total_cost: z.coerce.number().optional(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
     // snapshot สถานะจาก server ตอนโหลด — ใช้ lock ปุ่ม reset (ไม่ส่ง payload)
@@ -110,6 +115,8 @@ export const SR_ITEM = {
   requested_qty: 0,
   approved_qty: 0,
   issued_qty: 0,
+  cost_per_unit: 0,
+  total_cost: 0,
   current_stage_status: "pending",
   stage_status: "",
   _initial_stage_status: "pending",
