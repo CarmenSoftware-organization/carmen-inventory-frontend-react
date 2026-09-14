@@ -63,7 +63,7 @@ const po = (
   ({
     id,
     po_no: `PO${id}`,
-    po_status: "sent",
+    po_status: "sent_or_print",
     grn_status: "open",
     vendor_id: "vendor-1",
     vendor_name: "Vendor",

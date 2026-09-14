@@ -9,7 +9,7 @@ describe("statusMeta", () => {
     "approved",
     "completed",
     "voided",
-    "sent",
+    "sent_or_print",
     "partial",
     "closed",
     "cancelled",

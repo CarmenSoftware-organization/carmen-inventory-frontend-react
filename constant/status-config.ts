@@ -46,6 +46,9 @@ const STATUS_CLASSNAMES: Record<string, string> = {
   /* Info / Submitted */
   submitted: `${DOT} before:bg-[var(--status-submitted)]`,
   sent: `${DOT} before:bg-[var(--status-sent)]`,
+  /* PO "sent" ถูก rename เป็น "sent_or_print" (§2026-09-14) — คงสี teal เดิม
+     ไม่มี CSS var ใหม่ให้ เพราะยังเป็นแนวคิดเดียวกัน (ส่งถึง vendor แล้ว) */
+  sent_or_print: `${DOT} before:bg-[var(--status-sent)]`,
   open: `${DOT} before:bg-[var(--status-open)]`,
   /* Progress / Active */
   active: `${DOT} before:bg-[var(--status-approved)]`,

@@ -27,7 +27,7 @@ export const TIME_RANGE_OPTIONS = [
 const GROUP_MINE_SUFFIX = "#mine";
 
 /** นิยาม group ต่อ doc type — statuses = stage ของ workflow เอกสารนั้นจริงๆ
- * (ไม่ลอก PR: PO มี sent/ไม่มี approved, SR สั้นกว่า) สีของแต่ละ status มาจาก
+ * (ไม่ลอก PR: PO มี approved/sent_or_print แยกกัน, SR สั้นกว่า) สีของแต่ละ status มาจาก
  * --status-* canonical ผ่าน statusMeta อยู่แล้ว */
 interface GroupDef {
   readonly doc: string; // pr | po | sr
@@ -43,7 +43,7 @@ const GROUP_DEFS: readonly GroupDef[] = [
   {
     doc: "po",
     label: "PO",
-    statuses: ["draft", "in_progress", "sent", "completed"],
+    statuses: ["draft", "in_progress", "approved", "sent_or_print", "completed"],
   },
   { doc: "sr", label: "SR", statuses: ["draft", "in_progress", "completed"] },
 ];
