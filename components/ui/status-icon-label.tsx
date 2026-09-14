@@ -71,6 +71,15 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   review: { icon: Undo2, color: "var(--status-review)" },
   send_back: { icon: Undo2, color: "var(--status-review)" },
   sendback: { icon: Undo2, color: "var(--status-review)" },
+  /* สถานะระดับ "รายการ" (PR/PO/SR) — คำกริยาคือสิ่งที่คนกดส่งไป ส่วนรูปอดีตข้างบน
+     คือสิ่งที่บันทึกแล้ว ทั้งคู่โผล่บนจอได้ทั้งคู่แล้วแต่ว่าอ่านจากฟอร์มหรือจาก
+     server จึงต้องมีไอคอนเหมือนกัน ไม่งั้นแถวที่เพิ่งติ๊กจะกลายเป็นขีดของ FALLBACK
+     ทั้งที่แถวข้าง ๆ ที่โหลดมามีไอคอนปกติ */
+  pending: { icon: Clock, color: "var(--status-pending)" },
+  approve: { icon: Check, color: "var(--status-approved)" },
+  reject: { icon: X, color: "var(--status-rejected)" },
+  submit: { icon: Send, color: "var(--status-submitted)" },
+  submitted: { icon: Send, color: "var(--status-submitted)" },
 };
 
 /**

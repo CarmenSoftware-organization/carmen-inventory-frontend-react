@@ -29,10 +29,11 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { srItemAmount } from "./sr-form-helpers";
-import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { cn } from "@/lib/utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 
 const ProductCell = memo(function ProductCell({
   control,
@@ -222,9 +223,6 @@ const StatusCell = memo(function StatusCell({
   const initialStatus =
     useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
   const effective = stageStatus || currentStatus;
-  const config =
-    SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
-
   // approver/issuer แก้สถานะได้ เฉพาะตอนอยู่โหมดแก้ไข; และล็อกถ้า server ส่งมา
   // แล้วเป็น approve/reject — เกณฑ์เดียวกับ PR/PO
   const canEdit =
@@ -249,23 +247,30 @@ const StatusCell = memo(function StatusCell({
     );
   };
 
+  // ไอคอน + คำ ชุดเดียวกับหน้ารายการ SR (`StatusIconLabel` ใน use-sr-table)
+  // ไม่ใช่ป้ายพื้นทึบ — ป้ายมีพื้นกับ padding ของตัวเอง
+  // พอคอลัมน์แคบหรือสถานะภาษาไทยยาว ("ส่งกลับแก้ไข") มันจะถูกบีบจนห่อบรรทัดแล้ว
+  // ดันความสูงทั้งแถว · ตัวหนังสือกว้างเท่าคำพอดี (typography ชุดเดียวกับ
+  // `StatusIconLabel` ของหน้ารายการ แค่ไม่มีไอคอน)
   return (
-    <Badge
-      className={`${config.className} inline-flex items-center gap-1`}
-      size="xs"
-    >
-      {translate(effective)}
+    <span className="inline-flex items-center gap-1">
+      <StatusIconLabel
+        status={effective || SR_ITEM_STAGE.PENDING}
+        label={translate(effective) ?? ""}
+        className="uppercase"
+      />
       {showReset && (
         <button
           type="button"
           aria-label="Reset status"
-          className="rounded-full opacity-60 hover:opacity-100 focus-visible:outline-none"
+          title="Clear"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
           onClick={handleReset}
         >
-          <X className="size-2.5" />
+          <X className="size-3" />
         </button>
       )}
-    </Badge>
+    </span>
   );
 });
 
@@ -394,11 +399,6 @@ export function useSrItemTable({
         size: 80,
       },
       {
-        // โหมดอ่านใช้ NameWithSubtext (align="end") ทุกช่อง ไม่ใช่ FieldPlainText —
-        // ตัวนั้นเป็นกล่อง `min-h-8 items-center` เพื่อให้สูงเท่าช่องกรอกตอนแก้ไข
-        // พอเอามาใช้ในโหมดอ่าน ตัวเลขเลยลอยกลางกล่อง 32px ต่ำกว่าบรรทัดแรกของชื่อ
-        // สินค้า ทำให้ `cellAlign: "top"` ของตารางไม่มีผลที่เห็นได้เลย · ของกลาง
-        // ตัวใหม่เป็นข้อความล้วน ชิดขวา + tabular-nums ให้ในตัว
         accessorKey: "requested_qty",
         header: tfl("requested"),
         cell: ({ row }) => {
@@ -455,7 +455,6 @@ export function useSrItemTable({
                   <InputQty
                     errorIconAlign="left"
                     placeholder={tfl("qty")}
-                    size="xs"
                     className="text-right"
                     disabled={disabled}
                     error={
@@ -498,7 +497,6 @@ export function useSrItemTable({
                   <InputQty
                     errorIconAlign="left"
                     placeholder={tfl("qty")}
-                    size="xs"
                     className="text-right"
                     disabled={disabled}
                     error={
@@ -520,7 +518,7 @@ export function useSrItemTable({
           ] satisfies ColumnDef<SrItemField>[])),
       {
         id: "amount",
-        header: tfl("amount"),
+        header: tfl("total"),
         cell: ({ row }) => (
           <NameWithSubtext
             align="end"
@@ -629,12 +627,20 @@ export function useSrItemTable({
       (item) => (item.history?.length ?? 0) > 0,
     );
 
+    // ระยะในเซลล์เท่ากับ PO/GRN/CN — ของกลางให้มาแค่ `py-1` ซึ่งแน่นกว่าตารางรายการ
+    // โมดูลอื่นอยู่จุดเดียวในแอป อ่านสลับหน้ากันแล้วรู้สึกเหมือนคนละระบบ
     return [
       ...(showSelect ? [srSelectColumn] : []),
       indexColumn,
       ...dataColumns,
       ...(canDelete || hasAnyHistory ? [actionColumn] : []),
-    ];
+    ].map((col) => ({
+      ...col,
+      meta: {
+        ...col.meta,
+        cellClassName: cn("py-2.5", col.meta?.cellClassName),
+      },
+    }));
   }, [
     form,
     disabled,
