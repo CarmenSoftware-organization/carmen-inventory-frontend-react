@@ -64,10 +64,7 @@ export function PrLastReceivingInfo({ control, index, buCode }: Props) {
             <Info className="size-3" />
           </span>
         </TooltipTrigger>
-        {/* การ์ดสีเดียวกับธีม ไม่ใช่ป้ายกลับสีตาม default ของ TooltipContent —
-            ข้างในมีสีที่คิดมาสำหรับพื้นสว่าง (muted-foreground, primary) วางบนพื้น
-            เกือบดำแล้วอ่านไม่ออก และตัวนี้อยู่ติดกับ tooltip สต็อกซึ่งเป็นการ์ดอยู่แล้ว */}
-        <TooltipContent className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md">
+        <TooltipContent>
           <div className="space-y-0.5 text-xs">
             <div className="font-semibold">{t("lastReceiving")}</div>
             {loading ? (

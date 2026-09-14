@@ -285,7 +285,7 @@ export function LookupCombobox<T>({
           {showTooltip && (
             <TooltipContent
               side="top"
-              className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+              className="max-w-[20rem]"
             >
               <p className="text-xs font-semibold">{selectedLabel}</p>
             </TooltipContent>

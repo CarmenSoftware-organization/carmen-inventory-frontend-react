@@ -145,7 +145,7 @@ export function useActivityLogTable({
             {desc.length > 40 && (
               <TooltipContent
                 side="top"
-                className="bg-popover text-popover-foreground max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                className="max-w-[20rem]"
               >
                 <p className="text-xs leading-snug">{desc}</p>
               </TooltipContent>

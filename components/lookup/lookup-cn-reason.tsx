@@ -132,10 +132,7 @@ export function LookupCnReason({
           </TooltipContent>
         )}
         {showTooltip && (
-          <TooltipContent
-            side="top"
-            className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
-          >
+          <TooltipContent side="top">
             <p className="text-xs font-semibold">{selectedLabel}</p>
           </TooltipContent>
         )}

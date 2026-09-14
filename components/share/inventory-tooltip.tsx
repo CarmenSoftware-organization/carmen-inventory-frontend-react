@@ -82,10 +82,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className={cn(
-            "bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md",
-            hasProduct ? "w-56" : "max-w-56",
-          )}
+          className={hasProduct ? "w-56" : "max-w-56"}
         >
           {!hasProduct && (
             <p className="text-muted-foreground text-micro">

@@ -154,7 +154,7 @@ export const ProductCell = memo(function ProductCell({
               {(productCode || productName) && (
                 <TooltipContent
                   side="top"
-                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                  className="max-w-[20rem]"
                 >
                   <div className="space-y-1">
                     <p className="text-foreground/60 text-micro font-semibold">
