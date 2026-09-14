@@ -32,9 +32,12 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     order_unit_id: z.string().nullable(),
     order_unit_name: z.string(),
     order_unit_conversion_factor: z.coerce.number(),
+    // 0 ได้ — ของชั่งน้ำหนักสั่งเป็นเศษได้ (เกลือ 0.5 kg) และร่างที่ยังไม่รู้ยอด
+    // ก็ต้องเซฟไว้ก่อนได้ ขั้นต่ำ 1 บังคับให้พิมพ์เลขก่อนถึงจะบันทึกได้ · ที่ยังกัน
+    // อยู่คือค่าติดลบ ซึ่งพิมพ์เข้ามาได้จริง (เกณฑ์เดียวกับ PR/PRT)
     order_qty: z.coerce
       .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     base_unit_id: z.string().nullable(),
     base_unit_name: z.string(),
     base_qty: z.coerce.number(),
@@ -133,10 +136,12 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   order_unit_id: null,
   order_unit_name: "",
   order_unit_conversion_factor: 1,
-  order_qty: 1,
+  order_qty: 0,
   base_unit_id: null,
   base_unit_name: "",
-  base_qty: 1,
+  // ยอดฐาน = order_qty x ตัวคูณหน่วย — PoItemComputedSync เขียนทับให้เองตอนกรอก
+  // ค่าเริ่มต้นจึงต้องตามจำนวนสั่ง (0) ไม่ใช่ 1 ที่ไม่ได้มาจากอะไรเลย
+  base_qty: 0,
   price: 0,
   sub_total_price: 0,
   net_amount: 0,

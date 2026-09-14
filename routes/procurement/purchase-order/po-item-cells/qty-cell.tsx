@@ -204,10 +204,20 @@ export const FocQtyCell = function FocQtyCell({
         {...form.register(name)}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
-          form.setValue(name, Number.isNaN(n) ? 0 : n, {
+          const next = Number.isNaN(n) ? 0 : n;
+          form.setValue(name, next, {
             shouldDirty: true,
             shouldValidate: true,
           });
+          // มีของแถมแล้ว = แถวนี้ไม่ต้องมีจำนวนสั่ง/ราคาอีก (ดู validateSubmitItems)
+          // ขอบแดงที่ค้างจากการกดส่งรอบก่อนต้องหายทันทีที่กรอก ไม่ใช่รอกดส่งอีกรอบ
+          // ถึงจะรู้ว่าหายแล้ว
+          if (next > 0) {
+            form.clearErrors([
+              `items.${index}.order_qty`,
+              `items.${index}.price`,
+            ]);
+          }
         }}
       />
       <InputSuffixAddon>

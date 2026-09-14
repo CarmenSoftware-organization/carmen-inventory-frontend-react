@@ -68,7 +68,9 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
             }
           }}
           disabled={disabled || !productId}
-          className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+          // กว้างคงที่ = 4 ตัวอักษร + ที่ของลูกศร (ทรงเดียวกับ PRT) ผูกกับ `ch`
+          // เปลี่ยนขนาดฟอนต์ของตารางเมื่อไรก็ยังพอดี 4 ตัวเท่าเดิม
+          className="h-full w-[calc(4ch+4rem)] shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
         />
       )}
     />
