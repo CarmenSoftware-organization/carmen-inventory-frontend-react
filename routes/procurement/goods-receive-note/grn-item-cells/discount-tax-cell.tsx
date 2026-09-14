@@ -5,11 +5,34 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "../grn-form-schema";
 import { useGrnItemLine } from "./use-grn-item-line";
 
 /** Discount cell ต่อแถว — override toggle + rate/amount combo (shared กับ PO) */
+/**
+ * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
+ *
+ * ใช้ของกลางตัวเดียวกับคอลัมน์ชื่อสินค้า/คลัง ทรงบรรทัดรองจะได้เปลี่ยนที่เดียว
+ * — ที่นั่นมี leading/padding ที่เผื่อวรรณยุกต์ไทยไว้แล้วด้วย
+ */
+function RateSubtext({
+  amount,
+  rate,
+}: {
+  readonly amount: number;
+  readonly rate: number;
+}) {
+  return (
+    <NameWithSubtext
+      align="end"
+      primary={formatCurrency(amount)}
+      secondary={rate > 0 ? `${rate}%` : undefined}
+    />
+  );
+}
+
 export function GrnItemDiscountCell({
   form,
   index,
@@ -32,11 +55,7 @@ export function GrnItemDiscountCell({
   const amount = useGrnItemLine(form, index).discountAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
@@ -98,19 +117,10 @@ export function GrnItemTaxCell({
   const amount = useGrnItemLine(form, index).taxAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
-          {rate}%
-        </span>
-      )}
       {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
       <div className="flex items-center gap-1.5">
         <TaxOverrideInput
@@ -143,6 +153,11 @@ export function GrnItemTaxCell({
           }}
         />
       </div>
+      {rate > 0 && (
+        <span className="text-muted-foreground text-micro-legal text-right tabular-nums">
+          {rate}%
+        </span>
+      )}
     </div>
   );
 }

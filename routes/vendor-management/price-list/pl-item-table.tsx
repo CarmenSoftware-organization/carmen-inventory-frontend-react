@@ -83,7 +83,11 @@ function PLItemEditTable({
       <DataGrid
         table={table}
         recordCount={detailFields.length}
-        tableLayout={{ headerSticky: true }}
+        tableLayout={{
+          headerSticky: true,
+          // โหมดอ่านชิดบน — ชื่อสินค้ามีบรรทัดรอง เซลล์อื่นไม่มี
+          cellAlign: isView ? "top" : "middle",
+        }}
       >
         <DataGridContainer>
           <DataGridTable />

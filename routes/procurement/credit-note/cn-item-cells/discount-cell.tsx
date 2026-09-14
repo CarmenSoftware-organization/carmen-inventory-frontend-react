@@ -1,5 +1,6 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import {
   DiscountOverrideInput,
@@ -13,6 +14,27 @@ import { useCnItemLine } from "./helpers";
  * Discount — override toggle + rate/amount combo (shared) เฉพาะ quantity_return
  * (amount_discount กรอก CN amount ตรง → ไม่มีส่วนลดต่อบรรทัด)
  */
+/**
+ * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
+ *
+ * ใช้ของกลางตัวเดียวกับคอลัมน์ชื่อสินค้า/คลัง ทรงบรรทัดรองจะได้เปลี่ยนที่เดียว
+ */
+function RateSubtext({
+  amount,
+  rate,
+}: {
+  readonly amount: number;
+  readonly rate: number;
+}) {
+  return (
+    <NameWithSubtext
+      align="end"
+      primary={formatCurrency(amount)}
+      secondary={rate > 0 ? `${rate}%` : undefined}
+    />
+  );
+}
+
 export function DiscountCell({
   form,
   index,
@@ -47,11 +69,7 @@ export function DiscountCell({
     );
   }
   if (disabled) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ

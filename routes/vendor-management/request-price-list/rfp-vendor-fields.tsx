@@ -251,7 +251,11 @@ export function RfpVendorFields({
         <DataGrid
           table={table}
           recordCount={vendorRows.length}
-          tableLayout={{ headerSticky: true }}
+          tableLayout={{
+            headerSticky: true,
+            // โหมดอ่านชิดบน — ชื่อผู้ขายมีรหัสเป็นบรรทัดรอง เซลล์อื่นไม่มี
+            cellAlign: isDisabled ? "top" : "middle",
+          }}
         >
           <DataGridContainer>
             <DataGridTable />

@@ -231,7 +231,13 @@ export function CnItem({ form, disabled }: Props) {
         // ความกว้างจริง ตารางเลยพอดีจอไม่ต้องเลื่อน และสัดส่วนคอลัมน์ยังเท่าเดิม
         // ซึ่งจำเป็น เพราะแถว "คืน" เป็นตารางซ้อนที่คิด % จาก CN_COL ชุดเดียวกัน
         // (table-auto ทำให้คอลัมน์จัดตามเนื้อหา สัดส่วนไม่ตรง แถวคืนเลยเหลื่อม)
-        tableLayout={disabled ? {} : { columnsResizable: true }}
+        tableLayout={
+          // โหมดอ่านชิดบน — เซลล์ที่มีบรรทัดรอง (รหัสคลัง · ชื่อท้องถิ่น ·
+          // เปอร์เซ็นต์ใต้ยอดเงิน) กับเซลล์บรรทัดเดียวจะได้เริ่มที่เส้นเดียวกัน
+          disabled
+            ? { cellAlign: "top" }
+            : { columnsResizable: true, cellAlign: "middle" }
+        }
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}

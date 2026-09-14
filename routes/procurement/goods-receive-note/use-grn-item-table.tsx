@@ -334,10 +334,17 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // อย่างน้อย 2.75rem ทุกแถวเพื่อให้สูงเท่ากัน แต่ไม่ตายตัว — `columnsResizable`
+        // การจัดแนวตั้งย้ายไปเป็น `cellAlign` ของ DataGrid แล้ว (ดู grn-item-table)
+        // — โหมดอ่านห้ามตั้งความสูงขั้นต่ำ ที่ว่างส่วนเกินจะไปกองใต้เนื้อหาด้านเดียว
+        // ช่องไฟบน/ล่างของแถวเลยไม่เท่ากัน · โหมดแก้ไขตั้งได้เพราะเซลล์เป็นช่องกรอก
+        // สูงเท่ากันหมด และต้องเป็น min- ไม่ใช่ h- ตายตัว เพราะ `columnsResizable`
         // ทำให้ของกลางแปะ `truncate` (overflow:hidden) ให้ทุก td ความสูงตายตัวจึง
-        // กลายเป็นกรรไกร ชื่อสินค้าไทยที่วรรณยุกต์ซ้อนสามชั้นจะโดนเฉือนหัวท้าย
-        cellClassName: cn("min-h-11 py-1 align-middle", col.meta?.cellClassName),
+        // กลายเป็นกรรไกรเฉือนวรรณยุกต์ของชื่อสินค้าไทย
+        cellClassName: cn(
+          "py-2.5",
+          editable && "min-h-11",
+          col.meta?.cellClassName,
+        ),
       },
     }));
   }, [

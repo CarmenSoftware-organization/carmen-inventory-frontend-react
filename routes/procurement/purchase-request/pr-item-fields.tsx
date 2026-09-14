@@ -507,6 +507,9 @@ export function PrItemFields({
             rowClamp: false,
             checkbox: !!prStatus && prStatus !== "draft",
             columnsResizable: true,
+            // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง บางเซลล์ไม่มี กึ่งกลางแล้ว
+            // เซลล์บรรทัดเดียวจะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน
+            cellAlign: isDisabled ? "top" : "middle",
           }}
           emptyMessage={
             // กรองจนไม่เหลือแถว ≠ ใบนี้ไม่มีของ — ข้อความ "ยังไม่มีรายการ" ตรงนั้น

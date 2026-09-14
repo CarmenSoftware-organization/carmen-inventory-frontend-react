@@ -94,7 +94,11 @@ export function AdjItemFields({
           )}
 
           <DataGrid
-            tableLayout={{ rowClamp: false }}
+            tableLayout={{
+              rowClamp: false,
+              // โหมดอ่านชิดบน — ชื่อสินค้ามีบรรทัดรอง เซลล์อื่นไม่มี
+              cellAlign: disabled ? "top" : "middle",
+            }}
             table={table}
             recordCount={itemFields.length}
             emptyMessage={

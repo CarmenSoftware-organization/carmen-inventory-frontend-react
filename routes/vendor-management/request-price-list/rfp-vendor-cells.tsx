@@ -13,6 +13,7 @@ import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { cn } from "@/lib/utils";
 import { RfpSendEmailDialog } from "./rfp-send-email-dialog";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const EMPTY = (
   <span className="text-muted-foreground text-micro italic">—</span>
@@ -28,16 +29,7 @@ export function VendorNameCell({
 }) {
   "use no memo";
   if (!name) return EMPTY;
-  return (
-    <div className="flex min-w-0 flex-col">
-      <p className="text-foreground truncate text-xs font-semibold">{name}</p>
-      {code && (
-        <p className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
-          {code}
-        </p>
-      )}
-    </div>
-  );
+  return <NameWithSubtext primary={name} secondary={code || undefined} />;
 }
 
 /** Plain contact value — optional mailto/tel link, em-dash when empty */

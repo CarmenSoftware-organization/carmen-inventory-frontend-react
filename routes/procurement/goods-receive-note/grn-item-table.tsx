@@ -337,6 +337,10 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
           // เซลล์มีช่องกรอก — clamp สองบรรทัดทำ layout ของ control เพี้ยน
           rowClamp: false,
           columnsResizable: true,
+          // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง (รหัสคลัง · ชื่อท้องถิ่น ·
+          // เปอร์เซ็นต์ใต้ยอดเงิน) บางเซลล์ไม่มี กึ่งกลางแล้วเซลล์บรรทัดเดียว
+          // จะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน (ทรงเดียวกับ PO)
+          cellAlign: disabled ? "top" : "middle",
         }}
         emptyMessage={
           <EmptyComponent

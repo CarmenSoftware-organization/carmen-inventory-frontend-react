@@ -225,7 +225,12 @@ export function SrItemFields({
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        tableLayout={{ rowClamp: false, checkbox: !disabled }}
+        tableLayout={{
+          rowClamp: false,
+          checkbox: !disabled,
+          // โหมดอ่านชิดบน — ชื่อสินค้ามีชื่อท้องถิ่นเป็นบรรทัดรอง เซลล์อื่นไม่มี
+          cellAlign: disabled ? "top" : "middle",
+        }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}

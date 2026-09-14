@@ -377,6 +377,10 @@ export function PoItemFields({
           tableLayout={{
             rowClamp: false,
             checkbox: showApproveCheckbox,
+            // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง (รหัสคลัง · ชื่อท้องถิ่น ·
+            // เปอร์เซ็นต์ใต้ยอดเงิน) บางเซลล์ไม่มี กึ่งกลางแล้วเซลล์บรรทัดเดียว
+            // จะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน
+            cellAlign: disabled || readOnly ? "top" : "middle",
             // table กว้างเกิน container → scroll แนวนอน (เหมือน PR): width =
             // getTotalSize(), column กว้างตาม size px ที่กำหนด
             columnsResizable: true,

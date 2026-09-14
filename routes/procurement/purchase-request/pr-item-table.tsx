@@ -514,7 +514,8 @@ export function usePrItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
+        // การจัดแนวตั้งอยู่ที่ `cellAlign` ของ DataGrid แล้ว (ดู pr-item-fields)
+        cellClassName: cn("py-2", col.meta?.cellClassName),
       },
     }));
 

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 interface StockReplLocationProps {
   readonly location: Location;
@@ -111,19 +112,10 @@ export function StockReplLocation({
       // ชื่อหลักบน local name เป็นบรรทัดรองข้างล่าง — ยาวเกินคอลัมน์ให้ตัดด้วย
       // ellipsis (table เป็น table-fixed ความกว้างตาม size ข้างล่าง)
       cell: ({ row }) => (
-        <div className="min-w-0">
-          <p className="truncate" title={row.getValue("name")}>
-            {row.getValue("name") || "..."}
-          </p>
-          {row.original.local_name && (
-            <p
-              className="text-muted-foreground text-micro truncate"
-              title={row.original.local_name}
-            >
-              {row.original.local_name}
-            </p>
-          )}
-        </div>
+        <NameWithSubtext
+          primary={row.getValue("name") || "..."}
+          secondary={row.original.local_name || undefined}
+        />
       ),
       enableSorting: false,
       size: 180,
@@ -280,7 +272,12 @@ export function StockReplLocation({
           <DataGrid
             table={table}
             recordCount={products.length}
-            tableLayout={{ checkbox: true }}
+            tableLayout={{
+              checkbox: true,
+              // ชื่อสินค้ามีชื่อท้องถิ่นเป็นบรรทัดรอง เซลล์อื่นไม่มี — ชิดบนให้
+              // ทุกคอลัมน์เริ่มบรรทัดแรกที่เส้นเดียวกัน (ตารางนี้อ่านอย่างเดียว)
+              cellAlign: "top",
+            }}
           >
             <DataGridContainer>
               <DataGridTable />

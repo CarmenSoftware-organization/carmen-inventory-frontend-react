@@ -430,7 +430,7 @@ function DataGridTableBodyRowSkeletonCell<TData>({
           : undefined
       }
       className={cn(
-        "align-middle",
+        props.tableLayout?.cellAlign === "top" ? "align-top" : "align-middle",
         bodyCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -691,7 +691,7 @@ function DataGridTableBodyRowCell<TData>({
         isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
       }
       className={cn(
-        "align-middle",
+        props.tableLayout?.cellAlign === "top" ? "align-top" : "align-middle",
         // ทุกแถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ แม้เนื้อหามีบรรทัดเดียว — `h` บน
         // table-cell ทำตัวเป็นความสูงขั้นต่ำ (`2lh` อิง line-height จริงของเซลล์
         // ไม่ผูกกับ font size ที่แต่ละหน้าตั้งไว้) จังหวะแถวจะได้ไม่กระโดดตามความยาวชื่อ

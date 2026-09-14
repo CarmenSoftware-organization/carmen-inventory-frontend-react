@@ -111,6 +111,8 @@ export function PrtItemFields({
       <DataGrid
         table={table}
         recordCount={itemFields.length}
+        // โหมดอ่านชิดบน — คลังมีรหัสเป็นบรรทัดรอง เซลล์อื่นไม่มี
+        tableLayout={{ cellAlign: readOnly ? "top" : "middle" }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}
