@@ -11,7 +11,6 @@ import {
   ClipboardCheck,
   Loader2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import {
@@ -53,16 +52,6 @@ const STEPS: ReadonlyArray<{
 const PO_LIST_PATH = "/procurement/purchase-order";
 const COMPLETED_INDICATOR = <Check className="size-3" aria-hidden="true" />;
 
-/**
- * สร้างใบสั่งซื้อจากใบขอซื้อ — หน้าเต็ม 2 ขั้น (ทรงเดียวกับ from-price-list)
- *
- * ของเดิมเป็น dialog ซ้อน dialog: กดสร้าง → เลือกวิธี → เปิด dialog อีกใบที่มี
- * ตารางเลือกใบขอซื้อกับตารางตรวจสอบอยู่ข้างใน ตารางกว้าง ๆ สองตารางในกล่องลอย
- * ที่ปิดแล้วของหายหมด
- *
- * งานจริงอยู่ที่หลังบ้านสองเส้น: `group` จัดกลุ่มใบขอซื้อให้ดูก่อน แล้ว `confirm`
- * ถึงจะสร้างจริง — หน้านี้ไม่มีฟอร์มของตัวเอง จึงไม่ต้องมี react-hook-form
- */
 export function FromPrContent() {
   const navigate = useNavigate();
   const t = useTranslations("procurement.purchaseOrder");
@@ -85,14 +74,8 @@ export function FromPrContent() {
     (id) => rowSelection[id],
   );
   const selectedCount = selectedPrIds.length;
-
-  // "มีของค้าง" = เลือกอะไรไปแล้วก็นับ ตั้งแต่ลำดับขั้นอนุมัติ ไม่ใช่รอจนติ๊กใบ —
-  // ยังไม่ได้สร้างอะไร แต่ออกไปแล้วต้องมาไล่เลือกใหม่ทั้งหมด
   const isDirty = (!!workflowId || selectedCount > 0) && !isConfirming;
-
   const discard = useDiscardConfirm({ isDirty, isPending });
-  // ปุ่มยกเลิกกับลูกศรย้อนกลับเรียก navigate() ตรง ๆ ซึ่ง useNavigationGuard
-  // ดักไม่ได้ (ดักแค่คลิกลิงก์กับปุ่ม Back ของเบราว์เซอร์)
   const handleCancel = () => discard.confirm(() => navigate(PO_LIST_PATH));
   const navGuard = useNavigationGuard(isDirty && !isPending);
 
@@ -120,8 +103,6 @@ export function FromPrContent() {
 
   const handleStepChange = (value: number) => {
     if (isPending) return;
-    // ถอยกลับได้เสมอ ส่วนเดินหน้าต้องผ่าน handleNext เพราะขั้นที่ 2 ต้องรอ
-    // ผลจัดกลุ่มจากหลังบ้านก่อน
     if (value <= step) setStep(Math.max(1, value) as Step);
   };
 
@@ -176,10 +157,20 @@ export function FromPrContent() {
           </h1>
           <p className="text-muted-foreground text-sm">{t("fromPrDesc")}</p>
         </div>
-        {selectedCount > 0 && (
-          <Badge className="mt-0.5 shrink-0 tabular-nums">
-            {t("nSelected", { count: selectedCount })}
-          </Badge>
+        {step === LAST_STEP && (
+          <Button
+            size="sm"
+            className="mr-8"
+            onClick={handleConfirm}
+            disabled={isConfirming}
+          >
+            {isConfirming ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <ClipboardCheck aria-hidden="true" />
+            )}
+            {tc("confirm")}
+          </Button>
         )}
       </header>
 
@@ -189,9 +180,6 @@ export function FromPrContent() {
         indicators={{ completed: COMPLETED_INDICATOR }}
         className="px-9"
       >
-        {/* แถบขั้นตอนกว้างเท่าที่มันต้องใช้ ไม่กางเต็มจอ — StepperNav บังคับ
-            w-full ของตัวเองไว้ด้วย data-variant ซึ่งชนะ class ที่ส่งเข้าไป
-            เลยต้องคุมความกว้างจากกล่องข้างนอกแทน · max-w-full กันจอแคบล้น */}
         <div className="mx-auto w-96 max-w-full">
           <StepperNav>
             {STEPS.map(({ step: s, labelKey }, i, arr) => (
@@ -259,23 +247,10 @@ export function FromPrContent() {
               {tc("next")}
             </Button>
           )}
-          {step === LAST_STEP && (
-            <Button size="sm" onClick={handleConfirm} disabled={isConfirming}>
-              {isConfirming ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <ClipboardCheck aria-hidden="true" />
-              )}
-              {tc("confirm")}
-            </Button>
-          )}
         </div>
       </footer>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
-
-      {/* ตัวเดียวกันแต่คนละต้นทาง — อันนี้ของคลิกลิงก์ใน sidebar กับปุ่ม Back
-          ของเบราว์เซอร์ ซึ่ง useNavigationGuard ดักไว้ให้ */}
       <DiscardDialog
         open={navGuard.isOpen}
         onOpenChange={(o) => {
