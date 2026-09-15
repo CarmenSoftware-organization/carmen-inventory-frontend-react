@@ -3,7 +3,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import { CACHE_DYNAMIC } from "@/lib/cache-config";
+import { CACHE_NONE } from "@/lib/cache-config";
 
 export interface OnOrderRow {
   po_id: string | null;
@@ -45,6 +45,8 @@ export function useProductOnOrder(productId: string | undefined) {
       return json.data;
     },
     enabled: !!buCode && !!productId,
-    ...CACHE_DYNAMIC,
+    // เปิด dialog ทีไรยิงใหม่ทุกครั้ง — ไม่โชว์ค่าเก่าค้างระหว่างรอ
+    refetchOnMount: "always",
+    ...CACHE_NONE,
   });
 }

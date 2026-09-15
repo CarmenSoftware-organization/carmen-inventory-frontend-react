@@ -239,7 +239,8 @@ export function PrPricelistDialog({
           at_date: atDate,
           currency_id: currencyId,
         });
-        const res = await httpClient.get(url);
+        // no-store — ราคาเปลี่ยนได้ระหว่างวัน ห้ามกินของที่ browser cache ไว้
+        const res = await httpClient.get(url, { cache: "no-store" });
         if (!res.ok) return;
         const json = await res.json();
         setLists(json.data?.lists ?? []);
