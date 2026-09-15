@@ -366,6 +366,26 @@ function DataGridTableBody({ children }: { children: ReactNode }) {
  * <DataGridTableBodyRowSkeleton>{skeletonCells}</DataGridTableBodyRowSkeleton>
  * ```
  */
+/**
+ * สีสลับแถวคิดจาก **ลำดับของข้อมูล** ไม่ใช่ `:nth-child(odd)` ของ DOM
+ *
+ * ตารางที่มี footer row (หมายเหตุรายแถว) แทรกระหว่างแถวข้อมูล ทำให้ลำดับใน DOM
+ * เป็น data-footer-data-footer… แถวข้อมูลจึงตกอยู่ตำแหน่งคี่หมดทุกแถว = ไม่สลับสี
+ * เลยสักแถว · คิดจาก `row.index` แล้ว footer หยิบสีของแถวแม่ไปใช้ได้ด้วย แถวข้อมูล
+ * กับแถวย่อยของมันจึงเป็นก้อนสีเดียวกัน
+ *
+ * ใช้ token `--accent` ไม่ใช่ `--muted` — บนพื้น card ของโหมดมืด (#1f1f1f) สี muted
+ * (#222222) ต่างกันแค่ 3 ขั้น มองแทบไม่ออก ส่วน accent เป็น "พื้นผิวที่สว่างที่สุด
+ * ของโหมดมืด / เข้มที่สุดของโหมดสว่าง" (ดู docs/DESIGN.md) จึงห่างจาก card พอให้
+ * เห็นลายในทั้งสองธีม
+ */
+function stripeClass(index: number, stripped?: boolean) {
+  if (!stripped) return undefined;
+  return index % 2 === 0
+    ? "bg-accent hover:bg-accent"
+    : "hover:bg-transparent";
+}
+
 function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, props } = useDataGrid();
@@ -514,8 +534,7 @@ function DataGridTableBodyRow<TData>({
           props.tableLayout?.rowBorder &&
           "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
         props.tableLayout?.cellBorder && "*:last:border-e-0",
-        props.tableLayout?.stripped &&
-          "odd:bg-muted/30 odd:hover:bg-muted/50 hover:bg-transparent",
+        stripeClass(row.index, props.tableLayout?.stripped),
         table.options.enableRowSelection && "*:first:relative",
         props.tableClassNames?.bodyRow,
       )}
@@ -562,6 +581,8 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
     <tr
       className={cn(
         props.tableLayout?.rowBorder && "[&:not(:last-child)>td]:border-b",
+        // สีเดียวกับแถวแม่ — แถวที่กางออกคือรายละเอียดของรายการเดียวกัน
+        stripeClass(row.index, props.tableLayout?.stripped),
       )}
     >
       {start > 0 && (
@@ -619,6 +640,8 @@ function DataGridTableBodyRowFooter<TData>({ row }: { row: Row<TData> }) {
         // ที่ว่างของแถบเลื่อน ดูเป็นของเสียมากกว่าของตั้งใจ (PR เป็นหน้าเดียวที่
         // ใช้ footerContent จึงเป็นหน้าเดียวที่มีเส้นนี้ ต่างจาก PO/GRN/CN)
         "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
+        // สีเดียวกับแถวแม่ — แถวหมายเหตุเป็นส่วนหนึ่งของรายการเดียวกัน ไม่ใช่แถวใหม่
+        stripeClass(row.index, props.tableLayout?.stripped),
         props.tableClassNames?.bodyRow,
       )}
     >
@@ -955,7 +978,10 @@ function DataGridTable<TData>() {
         })}
       </DataGridTableHead>
 
-      {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && (
+      {/* ตัวคั่น 8px ระหว่างหัวตารางกับแถวแรก — มีไว้ให้ตารางแบบ "แถวลอย"
+          (ไม่มีเส้นคั่น) ดูไม่ติดหัวตาราง · ตารางสลับสีไม่ต้องการ เพราะแถบสีของ
+          แถวแรกจะถูกตัดด้วยช่องว่างสีพื้น กลายเป็นแถบขาวพาดอยู่ใต้หัวตาราง */}
+      {!props.tableLayout?.stripped && !props.tableLayout?.rowBorder && (
         <DataGridTableRowSpacer />
       )}
 

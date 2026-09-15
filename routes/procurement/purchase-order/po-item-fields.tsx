@@ -386,6 +386,9 @@ export function PoItemFields({
             // table กว้างเกิน container → scroll แนวนอน (เหมือน PR): width =
             // getTotalSize(), column กว้างตาม size px ที่กำหนด
             columnsResizable: true,
+            // สลับสีตามลำดับรายการ — แถวหมายเหตุใต้แต่ละรายการได้สีเดียวกับแถวแม่
+            // อ่านเป็นก้อนเดียว ไม่ใช่สองแถวที่บังเอิญอยู่ติดกัน
+            stripped: true,
           }}
           emptyMessage={
             <EmptyComponent
