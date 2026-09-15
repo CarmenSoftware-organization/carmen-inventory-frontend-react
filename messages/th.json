@@ -3593,7 +3593,7 @@
       "selectTemplateDesc": "เลือกแม่แบบเพื่อกรอกข้อมูลใบขอซื้อ",
       "noTemplates": "ไม่มีแม่แบบ",
       "noTemplatesDesc": "สร้างแม่แบบเพื่อกรอกข้อมูลใบขอซื้อ",
-      "priceListComparison": "เปรียบเทียบรายการราคา",
+      "priceListComparison": "เปรียบเทียบราคา",
       "priceListLoadFailed": "โหลดรายการราคาไม่สำเร็จ",
       "noPriceList": "ไม่พบรายการราคา",
       "noPriceListDesc": "ไม่พบรายการราคาสำหรับสินค้านี้",

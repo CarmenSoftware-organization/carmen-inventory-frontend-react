@@ -298,11 +298,11 @@ export function PrPricelistDialog({
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 p-0 sm:max-w-5xl">
         <div className="space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
-            <DialogTitle className="truncate text-base">
-              {productName}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
+            <DialogTitle className="text-base">
               {t("priceListComparison")}
+            </DialogTitle>
+            <DialogDescription className="truncate">
+              {productName}
             </DialogDescription>
             <div className="text-muted-foreground text-micro mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="inline-flex items-center gap-1">

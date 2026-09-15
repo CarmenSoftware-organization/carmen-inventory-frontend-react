@@ -3598,7 +3598,7 @@
       "selectTemplateDesc": "Choose a template to prefill your purchase request.",
       "noTemplates": "No Templates Available",
       "noTemplatesDesc": "Create a template to prefill your purchase request.",
-      "priceListComparison": "Price List Comparison",
+      "priceListComparison": "Price Comparison",
       "priceListLoadFailed": "Failed to load price lists",
       "noPriceList": "No Price List Found",
       "noPriceListDesc": "No price list found for this item.",
