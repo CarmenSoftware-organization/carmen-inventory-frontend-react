@@ -96,14 +96,14 @@ export function PrHeader({
       </Field>
     ) : null);
 
-  const descriptionCell =
-    descriptionField ??
-    (description?.trim() ? (
-      <Field className="lg:col-span-2">
-        <FieldLabel>{tfl("description")}</FieldLabel>
-        <Input value={description} disabled />
-      </Field>
-    ) : null);
+  // โชว์เสมอแม้ยังไม่ได้กรอก — ช่องที่หายไปทั้งช่องทำให้หัวเอกสารของใบที่มีคำอธิบาย
+  // กับใบที่ไม่มีเป็นคนละทรง และคนอ่านแยกไม่ออกว่า "ไม่มีคำอธิบาย" กับ "ไม่มีช่องนี้"
+  const descriptionCell = descriptionField ?? (
+    <Field className="lg:col-span-2">
+      <FieldLabel>{tfl("description")}</FieldLabel>
+      <Input value={description ?? ""} disabled />
+    </Field>
+  );
 
   // สองแถวเป็นคนละ grid แต่ track เดียวกัน — บังคับให้ workflow/description
   // ขึ้นบรรทัดใหม่เสมอ ไม่ว่าแถวบนจะมีกี่ช่อง (ถ้าใช้ grid เดียวแล้วปล่อยไหลเอง
