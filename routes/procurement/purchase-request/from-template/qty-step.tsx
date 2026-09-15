@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type SortingState,
   useReactTable,
   getCoreRowModel,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import type {
   PurchaseRequestTemplate,
@@ -35,6 +38,7 @@ const buildQtyColumns = (
     id: "index",
     header: "#",
     size: 48,
+    enableSorting: false,
     meta: {
       headerClassName: "text-center",
       cellClassName: "text-center text-muted-foreground tabular-nums",
@@ -43,7 +47,14 @@ const buildQtyColumns = (
   },
   {
     accessorKey: "location_name",
-    header: tfl("location"),
+    header: ({ column }) => (
+      <DataGridColumnHeader column={column} title={tfl("location")} />
+    ),
+    // ชื่อคลังเป็นข้อความ — localeCompare ให้ไทย/อังกฤษเรียงตามภาษา ไม่ใช่ code point
+    sortingFn: (a, b) =>
+      (a.original.location_name ?? "").localeCompare(
+        b.original.location_name ?? "",
+      ),
     size: 180,
     cell: ({ row }) => (
       <NameWithSubtext
@@ -54,7 +65,13 @@ const buildQtyColumns = (
   },
   {
     accessorKey: "product_name",
-    header: tfl("product"),
+    header: ({ column }) => (
+      <DataGridColumnHeader column={column} title={tfl("product")} />
+    ),
+    sortingFn: (a, b) =>
+      (a.original.product_name ?? "").localeCompare(
+        b.original.product_name ?? "",
+      ),
     size: 320,
     cell: ({ row }) => (
       <NameWithSubtext
@@ -66,6 +83,7 @@ const buildQtyColumns = (
   {
     id: "requested",
     header: tfl("requested"),
+    enableSorting: false,
     size: 180,
     meta: { headerClassName: "text-right", cellClassName: "text-right" },
     cell: ({ row }) => {
@@ -95,6 +113,7 @@ const buildQtyColumns = (
   {
     accessorKey: "currency_code",
     header: tfl("currency"),
+    enableSorting: false,
     size: 90,
     meta: {
       headerClassName: "text-center",
@@ -105,6 +124,7 @@ const buildQtyColumns = (
   {
     accessorKey: "delivery_point_name",
     header: tfl("deliveryPoint"),
+    enableSorting: false,
     size: 160,
     meta: { cellClassName: "text-muted-foreground" },
     cell: ({ row }) => row.original.delivery_point_name || "—",
@@ -148,10 +168,16 @@ export function QtyStep({ template, onBack, onContinue }: QtyStepProps) {
     [tfl, handleQtyChange],
   );
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data: rows,
     columns,
+    // เรียงฝั่ง client ล้วน — ข้อมูลมาทั้งชุดกับเทมเพลตอยู่แล้ว ไม่มี query ให้ยิงซ้ำ
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
   });
 

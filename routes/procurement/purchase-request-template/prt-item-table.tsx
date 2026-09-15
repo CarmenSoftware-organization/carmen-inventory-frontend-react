@@ -8,10 +8,12 @@ import {
 } from "react-hook-form";
 import {
   type ColumnDef,
+  type SortingState,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +27,7 @@ import { useUnitDecimals } from "@/hooks/use-product-units";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
@@ -289,7 +292,18 @@ export function usePrtItemTable({
     const dataColumns: ColumnDef<PrtItemField>[] = [
       {
         accessorKey: "location_id",
-        header: tfl("location"),
+        // เรียงตามชื่อคลัง ไม่ใช่ค่าใน accessor (location_id เป็น uuid เรียงแล้วมั่ว)
+        // และอ่านค่าสดจากฟอร์ม — `itemFields` เป็น snapshot ตอน mount ไม่ขยับตาม
+        // setValue ที่ cell เขียนลงไป เปลี่ยนคลังแล้วเรียงจะได้ชื่อเก่า
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("location")} />
+        ),
+        sortingFn: (a, b) =>
+          (
+            form.getValues(`items.${a.index}.location_name`) ?? ""
+          ).localeCompare(
+            form.getValues(`items.${b.index}.location_name`) ?? "",
+          ),
         cell: ({ row }) => {
           if (readOnly) {
             return (
@@ -350,7 +364,13 @@ export function usePrtItemTable({
 
       {
         accessorKey: "product_id",
-        header: tfl("product"),
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("product")} />
+        ),
+        sortingFn: (a, b) =>
+          (form.getValues(`items.${a.index}.product_name`) ?? "").localeCompare(
+            form.getValues(`items.${b.index}.product_name`) ?? "",
+          ),
         cell: ({ row }) => (
           <ProductCell
             control={form.control}
@@ -365,6 +385,7 @@ export function usePrtItemTable({
       {
         id: "requested_qty",
         header: tfl("requested"),
+        enableSorting: false,
         cell: ({ row }) => (
           <QtyUnitCell
             control={form.control}
@@ -383,6 +404,7 @@ export function usePrtItemTable({
       {
         accessorKey: "currency_id",
         header: tfl("currency"),
+        enableSorting: false,
         cell: ({ row }) => {
           const currencyError =
             form.formState.errors.items?.[row.index]?.currency_id?.message;
@@ -412,6 +434,7 @@ export function usePrtItemTable({
       {
         accessorKey: "delivery_point_id",
         header: tfl("deliveryPoint"),
+        enableSorting: false,
         cell: ({ row }) => {
           const deliveryPointError =
             form.formState.errors.items?.[row.index]?.delivery_point_id
@@ -475,10 +498,17 @@ export function usePrtItemTable({
     return [indexColumn, ...dataColumns, ...(readOnly ? [] : [actionColumn])];
   }, [tfl, readOnly, form, disabled, onDelete]);
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
+    // เรียงที่ table ไม่ใช่ที่ `data` — ทุก cell ผูก `items.${row.index}` ไว้กับฟอร์ม
+    // ถ้าสลับลำดับใน data เอง index จะไม่ตรงกับ field array อีก (ท่าเดียวกับ PR)
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return { table };
