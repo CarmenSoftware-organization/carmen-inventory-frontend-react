@@ -64,7 +64,10 @@ export function useGrnItemTable({
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.goodsReceiveNote");
   const [sorting, setSorting] = useState<SortingState>([]);
-  const isView = !disabled;
+  // `disabled` = ใบนี้แก้ไม่ได้ (โหมดอ่าน หรือกำลังบันทึก) — isView คือตัวเดียวกัน
+  // ไม่ใช่ตรงข้าม ใส่ `!` เมื่อไรคอลัมน์จะใช้ความกว้างโหมดอ่านตอนกด Edit และ
+  // discount/tax จะกลายเป็นช่องกรอกตอนเปิดอ่าน
+  const isView = disabled;
 
   const qtyRefs = useRef(
     new Map<string, React.RefObject<HTMLInputElement | null>>(),
@@ -131,7 +134,7 @@ export function useGrnItemTable({
           (liveItem(form, a.index)?.product_name ?? "").localeCompare(
             liveItem(form, b.index)?.product_name ?? "",
           ),
-        size: isView ? 120 : 190,
+        size: 120,
         cell: ({ row }) => (
           <ProductCell
             form={form}
