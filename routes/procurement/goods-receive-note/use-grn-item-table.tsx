@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import type { GrnFormValues } from "./grn-form-schema";
-import { grnItemCols } from "./grn-item-columns";
 import {
   GrnAmountCell,
   GrnItemDiscountCell,
@@ -30,13 +29,8 @@ import {
   UnitPriceCell,
 } from "./grn-item-cells";
 
-/** แถวหนึ่งของตาราง = หนึ่งบรรทัดของเอกสาร (สินค้า + คลัง) */
 export type GrnItemField = FieldArrayWithId<GrnFormValues, "items", "id">;
 
-/**
- * ค่าสดของแถวจากฟอร์ม — `itemFields` ที่ table ถือไว้เป็น snapshot ตอน mount
- * เรียงจากค่านั้นแปลว่าเรียงตามชื่อที่ผู้ใช้เพิ่งเปลี่ยนไม่ได้ (ทรงเดียวกับ PR)
- */
 function liveItem(form: UseFormReturn<GrnFormValues>, index: number) {
   return form.getValues(`items.${index}`);
 }
@@ -44,20 +38,12 @@ function liveItem(form: UseFormReturn<GrnFormValues>, index: number) {
 interface UseGrnItemTableOptions {
   form: UseFormReturn<GrnFormValues>;
   itemFields: GrnItemField[];
-  /**
-   * ทั้งใบแก้ไม่ได้ (โหมดอ่าน หรือกำลังบันทึกอยู่) — เกณฑ์เดียวจบเหมือน PO:
-   * แก้ไม่ได้เมื่อไร ทุกเซลล์เป็นตัวหนังสือ ไม่มีช่องกรอกสีเทาให้กดไม่ติด
-   */
   disabled: boolean;
   isPo: boolean;
-  /** แถวที่ต้องเปิดตัวเลือกสินค้าอยู่ตอนนี้ (เพิ่งเลือกคลังเสร็จ) */
   openProductId: string | null;
   onProductOpenChange: (rowId: string, open: boolean) => void;
-  /** แถวที่ต้องโฟกัสช่องราคาอยู่ตอนนี้ (เพิ่งเลือกสินค้าเสร็จ) */
   autoFocusPriceId: string | null;
-  /** เลือกคลังของแถวเสร็จแล้ว — ใช้พาไปเปิดตัวเลือกสินค้าต่อ */
   onLocationPicked: (rowId: string) => void;
-  /** เลือกสินค้าของแถวเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
   onProductPicked: (rowId: string) => void;
   onDeleteItem: (index: number) => void;
 }
@@ -77,18 +63,13 @@ export function useGrnItemTable({
   "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.goodsReceiveNote");
-  // เรียงฝั่ง client ล้วน — รายการทั้งหมดอยู่ในฟอร์มอยู่แล้ว ไม่มี request ให้ยิง
   const [sorting, setSorting] = useState<SortingState>([]);
+  const isView = !disabled;
 
-  // แถวแก้ไม่ได้ = ทุกเซลล์เป็นตัวหนังสือ ไม่มี control ให้เผื่อที่
-  const editable = !disabled;
-
-  // กรอกราคาเสร็จ (Enter) → โฟกัสช่องจำนวนของ**แถวเดียวกัน** ต่อ — ปลายทางของสาย
-  // กรอก คลัง → สินค้า → ราคา → จำนวน · ช่องราคากับช่องจำนวนอยู่คนละเซลล์
-  // จึงต้องมี ref กลางรายแถวให้ทั้งคู่ถือร่วมกัน
   const qtyRefs = useRef(
     new Map<string, React.RefObject<HTMLInputElement | null>>(),
   );
+
   const qtyRefFor = useCallback((rowId: string) => {
     const map = qtyRefs.current;
     if (!map.has(rowId)) map.set(rowId, { current: null });
@@ -96,15 +77,13 @@ export function useGrnItemTable({
   }, []);
 
   const columns = useMemo<ColumnDef<GrnItemField>[]>(() => {
-    const COL = grnItemCols(editable);
-
     const indexColumn: ColumnDef<GrnItemField> = {
       id: "index",
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
       enableResizing: false,
-      size: COL.leading,
+      size: 40,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -119,8 +98,6 @@ export function useGrnItemTable({
     const dataColumns: ColumnDef<GrnItemField>[] = [
       {
         id: "location",
-        // ต้องมี accessor ถึงจะกดเรียงได้ (คอลัมน์ display ล้วนกดไม่ได้) — ค่าที่ใช้
-        // เรียงจริงมาจาก sortingFn ข้างล่างซึ่งอ่านฟอร์มสด ๆ
         accessorFn: (item) => item.location_name,
         header: ({ column }) => (
           <DataGridColumnHeader column={column} title={tfl("location")} />
@@ -129,7 +106,7 @@ export function useGrnItemTable({
           (liveItem(form, a.index)?.location_name ?? "").localeCompare(
             liveItem(form, b.index)?.location_name ?? "",
           ),
-        size: COL.location,
+        size: isView ? 140 : 190,
         cell: ({ row }) => (
           <LocationCell
             form={form}
@@ -154,7 +131,7 @@ export function useGrnItemTable({
           (liveItem(form, a.index)?.product_name ?? "").localeCompare(
             liveItem(form, b.index)?.product_name ?? "",
           ),
-        size: COL.product,
+        size: isView ? 120 : 190,
         cell: ({ row }) => (
           <ProductCell
             form={form}
@@ -172,7 +149,7 @@ export function useGrnItemTable({
             {
               id: "order",
               header: tfl("order"),
-              size: COL.order,
+              size: 140,
               meta: rightMeta,
               cell: ({ row }) => (
                 <QtyUnitCell
@@ -180,7 +157,6 @@ export function useGrnItemTable({
                   index={row.index}
                   qtyField="approved_qty"
                   unitField="approved_unit_id"
-                  // จำนวนที่สั่งมาจาก PO เสมอ — เป็นตัวเลขให้เทียบ ไม่ใช่ช่องกรอก
                   disabled
                 />
               ),
@@ -190,7 +166,7 @@ export function useGrnItemTable({
       {
         id: "received",
         header: tfl("received"),
-        size: COL.received,
+        size: 140,
         meta: rightMeta,
         cell: ({ row }) => (
           <ReceivedQtyCell
@@ -204,7 +180,7 @@ export function useGrnItemTable({
       {
         id: "foc",
         header: tfl("foc"),
-        size: COL.foc,
+        size: 140,
         meta: rightMeta,
         cell: ({ row }) => (
           <QtyUnitCell
@@ -219,7 +195,7 @@ export function useGrnItemTable({
       {
         id: "price",
         header: tfl("unitPrice"),
-        size: COL.price,
+        size: 120,
         meta: rightMeta,
         cell: ({ row }) => (
           <UnitPriceCell
@@ -234,7 +210,7 @@ export function useGrnItemTable({
       {
         id: "subtotal",
         header: tfl("subtotal"),
-        size: COL.sub,
+        size: 100,
         meta: rightMeta,
         cell: ({ row }) => (
           <GrnAmountCell form={form} index={row.index} field="subtotal" />
@@ -243,16 +219,14 @@ export function useGrnItemTable({
       {
         id: "discount",
         header: tfl("discount"),
-        size: COL.discount,
+        size: isView ? 96 : 190,
         meta: rightMeta,
-        // โหมดดูเป็น "10% · 320.00" ซึ่งยาวกว่าคอลัมน์เมื่อหักระยะขอบออก
-        // ปล่อยไว้จะตัดขึ้นบรรทัดใหม่แล้วแถวสูงกว่าแถวอื่น
         cell: ({ row }) => (
           <div className="whitespace-nowrap">
             <GrnItemDiscountCell
               form={form}
               index={row.index}
-              editable={editable}
+              editable={!isView}
             />
           </div>
         ),
@@ -260,7 +234,7 @@ export function useGrnItemTable({
       {
         id: "net",
         header: tfl("net"),
-        size: COL.net,
+        size: 92,
         meta: rightMeta,
         cell: ({ row }) => (
           <GrnAmountCell form={form} index={row.index} field="netAmount" />
@@ -269,18 +243,18 @@ export function useGrnItemTable({
       {
         id: "tax",
         header: tfl("tax"),
-        size: COL.tax,
+        size: isView ? 96 : 190,
         meta: rightMeta,
         cell: ({ row }) => (
           <div className="whitespace-nowrap">
-            <GrnItemTaxCell form={form} index={row.index} editable={editable} />
+            <GrnItemTaxCell form={form} index={row.index} editable={!isView} />
           </div>
         ),
       },
       {
         id: "amount",
         header: tfl("total"),
-        size: COL.amt,
+        size: 104,
         meta: rightMeta,
         cell: ({ row }) => (
           <GrnAmountCell
@@ -317,7 +291,7 @@ export function useGrnItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: COL.action,
+      size: isView ? 48 : 64,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -334,15 +308,9 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // การจัดแนวตั้งย้ายไปเป็น `cellAlign` ของ DataGrid แล้ว (ดู grn-item-table)
-        // — โหมดอ่านห้ามตั้งความสูงขั้นต่ำ ที่ว่างส่วนเกินจะไปกองใต้เนื้อหาด้านเดียว
-        // ช่องไฟบน/ล่างของแถวเลยไม่เท่ากัน · โหมดแก้ไขตั้งได้เพราะเซลล์เป็นช่องกรอก
-        // สูงเท่ากันหมด และต้องเป็น min- ไม่ใช่ h- ตายตัว เพราะ `columnsResizable`
-        // ทำให้ของกลางแปะ `truncate` (overflow:hidden) ให้ทุก td ความสูงตายตัวจึง
-        // กลายเป็นกรรไกรเฉือนวรรณยุกต์ของชื่อสินค้าไทย
         cellClassName: cn(
           "py-2.5",
-          editable && "min-h-11",
+          !isView && "min-h-11",
           col.meta?.cellClassName,
         ),
       },
@@ -350,7 +318,7 @@ export function useGrnItemTable({
   }, [
     form,
     disabled,
-    editable,
+    isView,
     isPo,
     openProductId,
     autoFocusPriceId,
@@ -366,8 +334,6 @@ export function useGrnItemTable({
   return useReactTable({
     data: itemFields,
     columns,
-    // เรียงที่ table ไม่ใช่ที่ `data` — ทุกเซลล์ผูก `items.${row.index}` ไว้
-    // สลับลำดับใน data เมื่อไร index จะไม่ตรงกับ field array อีก (เหมือน PR)
     state: { sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),

@@ -95,14 +95,26 @@ export function ProductCell({
   // แก้ไม่ได้ → ชื่อสินค้าเป็นตัวหนังสือ (เกณฑ์เดียวกับ PO) · แถวที่อ้าง PO ก็
   // เปลี่ยนสินค้าไม่ได้แม้ใบจะอยู่โหมดแก้ไข — สินค้าถูกกำหนดมาจากใบสั่งซื้อแล้ว
   if (isManual && !disabled) {
+    // ชื่อท้องถิ่นโชว์ใต้ตัวเลือกด้วย — ของเดิมมีเฉพาะโหมดอ่าน พอกด Edit บรรทัด
+    // ภาษาไทยหายไปทั้งคอลัมน์ ทั้งที่คนกรอกใช้ชื่อนั้นยืนยันว่าเลือกถูกตัว
     return (
-      <ManualProductCell
-        form={form}
-        index={index}
-        open={open}
-        onOpenChange={onOpenChange}
-        onPicked={onPicked}
-      />
+      <div className="min-w-0">
+        <ManualProductCell
+          form={form}
+          index={index}
+          open={open}
+          onOpenChange={onOpenChange}
+          onPicked={onPicked}
+        />
+        {productLocalName && (
+          <p
+            className="text-muted-foreground text-micro-legal truncate py-0.5 leading-[normal]"
+            title={productLocalName}
+          >
+            {productLocalName}
+          </p>
+        )}
+      </div>
     );
   }
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;

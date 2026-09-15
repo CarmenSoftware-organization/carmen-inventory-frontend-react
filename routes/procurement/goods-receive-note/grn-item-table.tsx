@@ -37,6 +37,9 @@ export const mapPoDetailToItems = (
         purchase_order_detail_id: d.id,
         product_id: d.product_id,
         product_name: d.product_name ?? "",
+        // ชื่อท้องถิ่นมากับ PO อยู่แล้ว ไม่ลอกมาด้วย = แถวที่มาจาก PO ไม่มีบรรทัด
+        // ภาษาไทยใต้ชื่อสินค้า ต่างจากแถวที่กรอกเอง ทั้งที่เป็นสินค้าตัวเดียวกัน
+        product_local_name: d.product_local_name ?? "",
         received_qty: d.order_qty,
         received_unit_id: d.order_unit_id,
         received_base_qty: d.base_qty,
@@ -68,6 +71,7 @@ export const mapPoDetailToItems = (
       purchase_order_detail_id: d.id,
       product_id: d.product_id,
       product_name: d.product_name ?? "",
+      product_local_name: d.product_local_name ?? "",
       location_id: loc.location_id,
       location_name: loc.location_name,
       location_code: loc.location_code ?? "",

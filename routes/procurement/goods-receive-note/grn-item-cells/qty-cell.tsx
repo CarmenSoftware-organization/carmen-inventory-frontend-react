@@ -73,7 +73,7 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
       className="block w-full text-right"
       value={Number(qty) || 0}
       suffix={unitName}
-      suffixClassName="ml-1 inline-block w-[4ch] text-right"
+      suffixClassName="text-right"
     />
   );
 });
@@ -99,7 +99,6 @@ export function QtyUnitCell({
   unitField: GrnUnitField;
   disabled: boolean;
   error?: string;
-  /** ให้ caller โฟกัสช่องนี้ได้ — ต่อ ref ของ RHF ไม่ทับกัน */
   inputRef?: React.RefObject<HTMLInputElement | null>;
 }) {
   "use no memo";
@@ -107,7 +106,6 @@ export function QtyUnitCell({
     control: form.control,
     name: [`items.${index}.product_id`, `items.${index}.${unitField}`] as const,
   });
-  // ทศนิยมที่กรอกได้ = ของหน่วยที่เลือกอยู่ ไม่ใช่ค่าคงที่ (kg กรอกเศษได้ EA ไม่ได้)
   const decimals = useUnitDecimals(productId ?? undefined, unitId ?? undefined);
 
   if (disabled) {
