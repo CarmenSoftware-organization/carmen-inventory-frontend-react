@@ -91,7 +91,10 @@ export function PrHeader({
     workflowField ??
     (workflowName ? (
       <Field>
-        <FieldLabel>{tfl("workflow")}</FieldLabel>
+        {/* ดาวแดงติดอยู่กับ "ช่องนี้ต้องมีค่า" ไม่ใช่ "ตอนนี้กรอกได้" — โหมดอ่าน
+            กับใบที่มาจากเทมเพลต (workflow ถูกล็อก) จึงต้องมีเหมือนกัน ไม่งั้น
+            ฟิลด์เดียวกันหน้าตาเปลี่ยนไปมาตามโหมดโดยไม่มีเหตุผลที่คนใช้อธิบายได้ */}
+        <FieldLabel required>{tfl("workflow")}</FieldLabel>
         <Input value={workflowName} disabled />
       </Field>
     ) : null);

@@ -93,7 +93,7 @@ interface PrItemHistoryEntry {
   message?: string | null;
 }
 
-interface PurchaseRequestTemplateDetail
+export interface PurchaseRequestTemplateDetail
   extends TaxFields, DiscountFields {
   id: string;
   purchase_request_template_id: string;

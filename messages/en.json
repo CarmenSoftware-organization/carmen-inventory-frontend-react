@@ -3597,6 +3597,7 @@
       "fromTemplateDesc": "Use a saved template to save time and enforce best practices.",
       "selectTemplate": "Select Template",
       "selectTemplateDesc": "Choose a template to prefill your purchase request.",
+      "templateQtyDesc": "Set the quantity for this round. Items left at 0 are not included.",
       "noTemplates": "No Templates Available",
       "noTemplatesDesc": "Create a template to prefill your purchase request.",
       "priceListComparison": "Price Comparison",

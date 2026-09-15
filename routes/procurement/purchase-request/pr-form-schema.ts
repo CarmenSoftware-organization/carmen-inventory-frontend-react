@@ -454,7 +454,9 @@ function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
     exchange_rate: 1,
     delivery_point_id: d.delivery_point_id ?? null,
     delivery_point_name: d.delivery_point_name ?? "",
-    delivery_date: "",
+    // วันส่งของต้นทาง (ใบเดิม/รอบที่ตั้งเทมเพลตไว้) เป็นอดีตไปแล้ว ตั้งพรุ่งนี้ให้
+    // เป็นค่าเริ่มแทนการทิ้งว่างให้ไล่กรอกทีละแถว — แก้ทับได้ตามปกติ
+    delivery_date: addDays(new Date().toISOString(), 1),
     pricelist_detail_id: null,
     pricelist_no: null,
     pricelist_type: "",
@@ -479,20 +481,12 @@ function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
  * เป็นคนที่กำลังสร้าง ไม่ใช่คนขอของใบเดิม
  */
 export function getDuplicateValues(pr: PurchaseRequest): PrFormValues {
-  // วันส่งของใบเดิมเป็นอดีตไปแล้วเกือบทุกครั้ง ทิ้งว่างไว้ก็ต้องไล่ตั้งทีละแถวเอง
-  // ตั้งพรุ่งนี้ให้เป็นค่าเริ่ม (แก้ทับได้ตามปกติ) — freshItem ยังคืน "" เหมือนเดิม
-  // เพราะใบใหม่จาก template ไม่ได้ผูกกับรอบส่งของใบไหน
-  const deliveryDate = addDays(new Date().toISOString(), 1);
   return {
     ...EMPTY_FORM,
     description: pr.description ?? "",
     workflow_id: pr.workflow_id ?? "",
     department_id: pr.department_id ?? "",
-    items:
-      pr.purchase_request_detail?.map((d) => ({
-        ...freshItem(d),
-        delivery_date: deliveryDate,
-      })) ?? [],
+    items: pr.purchase_request_detail?.map(freshItem) ?? [],
   };
 }
 

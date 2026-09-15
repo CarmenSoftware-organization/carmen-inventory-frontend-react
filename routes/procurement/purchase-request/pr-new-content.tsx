@@ -1,25 +1,24 @@
 import { Suspense } from "react";
-import { useSearchParams } from "react-router";
+import { useLocation, useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { PurchaseRequestForm } from "./pr-form";
-import {
-  usePurchaseRequestById,
-  usePurchaseRequestTemplates,
-} from "./use-purchase-request";
+import { usePurchaseRequestById } from "./use-purchase-request";
 import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
+import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 
 const PrNewInner = () => {
   const [searchParams] = useSearchParams();
-  const templateId = searchParams.get("template_id");
+  // เทมเพลตมาทาง state ของ router ไม่ใช่ query — หน้า /from-template กรองแถวที่
+  // ขอจริงกับจำนวนที่กรอกมาให้แล้ว ส่ง id ผ่าน URL จะได้จำนวนของเทมเพลตกลับมาแทน
+  // (refresh แล้ว state หาย = ได้ฟอร์มเปล่า ซึ่งตรงกับความจริงว่าไม่มีอะไรค้างอยู่)
+  const template = useLocation().state?.template as
+    | PurchaseRequestTemplate
+    | undefined;
   // ?duplicate_id= — สร้างสำเนาจากใบเดิม (ปุ่ม Duplicate ในหน้า detail/เมนูแถว)
   const duplicateId = searchParams.get("duplicate_id");
 
-  // ดึง templates เฉพาะตอนเข้ามาแบบ ?template_id= — blank PR ไม่ต้องใช้
-  const { data: templates, isLoading } = usePurchaseRequestTemplates(
-    !!templateId,
-  );
   const { data: duplicateFrom, isError: duplicateError } =
     usePurchaseRequestById(duplicateId ?? undefined);
 
@@ -27,16 +26,9 @@ const PrNewInner = () => {
   // disabled (รอ buCode) isLoading เป็น false ทั้งที่ยังไม่มีของ ถ้าปล่อยผ่าน
   // ฟอร์มจะ mount เปล่า ๆ แล้ว defaultValues ถูกแช่ไปตลอด (useForm อ่านครั้งเดียว)
   // ดึงใบเดิมพลาด → ตกไปฟอร์มเปล่าแทนที่จะค้าง skeleton
-  if (
-    (templateId && isLoading) ||
-    (duplicateId && !duplicateFrom && !duplicateError)
-  ) {
+  if (duplicateId && !duplicateFrom && !duplicateError) {
     return <FormSkeleton />;
   }
-
-  const template = templateId
-    ? templates?.find((item) => item.id === templateId)
-    : undefined;
 
   return (
     <PurchaseRequestForm template={template} duplicateFrom={duplicateFrom} />

@@ -257,6 +257,13 @@ export const router = createBrowserRouter([
                   import("./procurement/purchase-request/purchase-request-new.route"),
               },
               {
+                path: "purchase-request/from-template",
+                lazy: () =>
+                  import(
+                    "./procurement/purchase-request/from-template/from-template.route"
+                  ),
+              },
+              {
                 path: "purchase-request/:id",
                 lazy: () =>
                   import("./procurement/purchase-request/purchase-request-edit.route"),
