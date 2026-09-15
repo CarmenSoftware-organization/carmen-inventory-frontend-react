@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -32,7 +32,6 @@ const PR_LIST_PATH = "/procurement/purchase-request";
 
 const buildQtyColumns = (
   tfl: ReturnType<typeof useTranslations>,
-  qtyById: Record<string, number>,
   onQtyChange: (id: string, qty: number) => void,
 ): ColumnDef<PurchaseRequestTemplateDetail>[] => [
   {
@@ -78,15 +77,15 @@ const buildQtyColumns = (
         <InputSuffixField>
           <InputSuffixQty
             aria-label={`${tfl("requested")} ${d.product_name}`}
-            defaultValue={qtyById[d.id] ?? d.requested_qty ?? 0}
+            defaultValue={d.requested_qty ?? 0}
             className="tabular-nums"
             onChange={(e) => {
               const n = e.target.valueAsNumber;
               onQtyChange(d.id, Number.isNaN(n) ? 0 : n);
             }}
           />
-          <InputSuffixAddon>
-            <span className="text-muted-foreground px-2 text-xs">
+          <InputSuffixAddon className="w-13">
+            <span className="text-muted-foreground flex-1 px-2 text-right text-xs">
               {d.requested_unit_name}
             </span>
           </InputSuffixAddon>
@@ -135,12 +134,22 @@ export function FromTemplateContent() {
     setSelected(template);
   };
 
+  // functional update → ตัวนี้ไม่ต้องรู้ค่า qty ปัจจุบัน identity จึงคงที่ตลอดชีวิตหน้า
+  const handleQtyChange = useCallback((id: string, qty: number) => {
+    setQtyById((prev) => ({ ...prev, [id]: qty }));
+  }, []);
+
+  // columns ต้อง memo — ไม่งั้นทุกครั้งที่พิมพ์เลข cell renderer เป็นฟังก์ชันคนละตัว
+  // React มองเป็นคอมโพเนนต์คนละชนิด แล้ว unmount/remount ช่องกรอกทิ้ง focus กลางคัน
+  const qtyColumns = useMemo(
+    () => buildQtyColumns(tfl, handleQtyChange),
+    [tfl, handleQtyChange],
+  );
+
   const qtyRows = selected?.purchase_request_template_detail ?? [];
   const qtyTable = useReactTable({
     data: qtyRows,
-    columns: buildQtyColumns(tfl, qtyById, (id, qty) =>
-      setQtyById((prev) => ({ ...prev, [id]: qty })),
-    ),
+    columns: qtyColumns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
   });
