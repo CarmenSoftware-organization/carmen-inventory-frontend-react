@@ -1,67 +1,7 @@
-import { memo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { useWatch, type Control, type UseFormReturn } from "react-hook-form";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
-import { OnHandDialog } from "@/components/share/on-hand-dialog";
-import { OnOrderDialog } from "@/components/share/on-order-dialog";
-import { useBuCode } from "@/hooks/use-bu-code";
+import type { UseFormReturn } from "react-hook-form";
 import type { PoFormValues } from "../po-form-schema";
 import { ProductCell } from "./product-cell";
-
-/**
- * ยอดคงเหลือ/กำลังสั่งของสินค้าในแถว — ไอคอนที่ hover แล้วกางตัวเลข กดต่อได้
- * อีกชั้นเพื่อดูว่าของอยู่คลังไหน/ติดใบไหน (ทรงเดียวกับ PR และ SR)
- *
- * ยอดผูกกับ **คลังของแถวนั้น** ไม่ใช่ทั้ง BU — คนสั่งซื้ออยากรู้ว่าคลังที่กำลังสั่งเข้า
- * มีของเหลือเท่าไร ไม่ใช่ยอดรวมทั้งโรงแรม · ยังไม่เลือกสินค้า ไอคอนจางและกดไม่ได้
- */
-const PoInventoryTooltip = memo(function PoInventoryTooltip({
-  control,
-  index,
-}: {
-  control: Control<PoFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const buCode = useBuCode();
-  const locationId =
-    useWatch({ control, name: `items.${index}.location_id` }) ?? "";
-  const productId =
-    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
-  const unitName =
-    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
-  const [onHandOpen, setOnHandOpen] = useState(false);
-  const [onOrderOpen, setOnOrderOpen] = useState(false);
-
-  return (
-    <>
-      <InventoryTooltip
-        buCode={buCode}
-        locationId={locationId}
-        productId={productId}
-        unitName={unitName}
-        icon="package"
-        className={productId ? "text-primary" : "text-muted-foreground"}
-        onOnHandClick={productId ? () => setOnHandOpen(true) : undefined}
-        onOnOrderClick={productId ? () => setOnOrderOpen(true) : undefined}
-      />
-      {productId && (
-        <>
-          <OnHandDialog
-            open={onHandOpen}
-            onOpenChange={setOnHandOpen}
-            productId={productId}
-          />
-          <OnOrderDialog
-            open={onOrderOpen}
-            onOpenChange={setOnOrderOpen}
-            productId={productId}
-          />
-        </>
-      )}
-    </>
-  );
-});
 
 interface CellProps {
   readonly form: UseFormReturn<PoFormValues>;
@@ -107,9 +47,6 @@ export function ProductHeaderCell({
             FOC
           </Badge>
         )}
-        {/* ปิดท้ายแถว — ป้ายเป็นข้อมูลของแถว ส่วนไอคอนนี้เป็นปุ่ม ไม่เอาไปแทรกกลาง
-            ระหว่างชื่อกับป้ายจนอ่านเป็นชุดเดียวกัน */}
-        <PoInventoryTooltip control={form.control} index={index} />
       </div>
     </div>
   );

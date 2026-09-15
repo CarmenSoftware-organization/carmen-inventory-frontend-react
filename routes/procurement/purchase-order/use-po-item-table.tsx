@@ -22,7 +22,6 @@ import {
   ItemTaxCell,
   LocationCell,
   QtyUnitCell,
-  RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-cells";
 import { PriceCell, ProductHeaderCell, StatusCell } from "./po-item-cells";
@@ -242,15 +241,6 @@ export function usePoItemTable({
             disabled={disabled}
             readOnly={readOnly}
           />
-        ),
-      },
-      {
-        id: "received",
-        header: tfl("received"),
-        size: viewMode ? 104 : 140,
-        meta: rightMeta,
-        cell: ({ row }) => (
-          <RecSummaryCell control={form.control} index={row.index} />
         ),
       },
       {

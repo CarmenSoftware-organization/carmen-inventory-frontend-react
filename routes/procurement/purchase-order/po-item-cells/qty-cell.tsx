@@ -24,6 +24,28 @@ function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
   return useUnitDecimals(productId, unitId);
 }
 
+const ReceivedSubtext = function ReceivedSubtext({
+  control,
+  index,
+}: {
+  control: Control<PoFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const received =
+    useWatch({ control, name: `items.${index}.received_qty` }) ?? 0;
+  const unitName =
+    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
+  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
+  // โชว์ทุกแถวแม้ยังไม่รับ (0) — บรรทัดที่โผล่บ้างหายบ้างทำให้แยกไม่ออกว่าแถวที่
+  // ไม่มีบรรทัดคือ "ยังไม่รับ" หรือ "ใบนี้ไม่มีข้อมูลรับของ"
+  return (
+    <p className="text-muted-foreground text-micro-legal text-right tabular-nums">
+      {formatQty(Number(received))} {unitName}
+    </p>
+  );
+};
+
 export const QtyUnitCell = function QtyUnitCell({
   control,
   form,
@@ -51,39 +73,45 @@ export const QtyUnitCell = function QtyUnitCell({
   if (disabled || readOnly) {
     const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
     return (
-      <InputSuffixPlain
-        className="w-full"
-        value={formatQty(Number(qty))}
-        suffix={unitName}
-        suffixClassName="text-right"
-      />
+      <div className="w-full">
+        <InputSuffixPlain
+          className="w-full"
+          value={formatQty(Number(qty))}
+          suffix={unitName}
+          suffixClassName="text-right"
+        />
+        <ReceivedSubtext control={control} index={index} />
+      </div>
     );
   }
 
   return (
-    <InputSuffixField className="w-full" error={invalid}>
-      <InputSuffixQty
-        decimals={decimals}
-        placeholder="0"
-        defaultValue={Number(qty)}
-        {...form.register(name)}
-        onChange={(e) => {
-          const n = e.target.valueAsNumber;
-          form.setValue(name, Number.isNaN(n) ? 0 : n, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-        }}
-      />
-      <InputSuffixAddon>
-        <WatchedProductUnit
-          control={control}
-          form={form}
-          index={index}
-          disabled={disabled}
+    <div className="w-full">
+      <InputSuffixField className="w-full" error={invalid}>
+        <InputSuffixQty
+          decimals={decimals}
+          placeholder="0"
+          defaultValue={Number(qty)}
+          {...form.register(name)}
+          onChange={(e) => {
+            const n = e.target.valueAsNumber;
+            form.setValue(name, Number.isNaN(n) ? 0 : n, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+          }}
         />
-      </InputSuffixAddon>
-    </InputSuffixField>
+        <InputSuffixAddon>
+          <WatchedProductUnit
+            control={control}
+            form={form}
+            index={index}
+            disabled={disabled}
+          />
+        </InputSuffixAddon>
+      </InputSuffixField>
+      <ReceivedSubtext control={control} index={index} />
+    </div>
   );
 };
 
@@ -104,29 +132,6 @@ export const OrderSummaryCell = function OrderSummaryCell({
     <InputSuffixPlain
       className="block w-full text-right"
       value={formatQty(Number(qty))}
-      suffix={unitName}
-      suffixClassName="text-right"
-    />
-  );
-};
-
-export const RecSummaryCell = function RecSummaryCell({
-  control,
-  index,
-}: {
-  control: Control<PoFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const received =
-    useWatch({ control, name: `items.${index}.received_qty` }) ?? 0;
-  const unitName =
-    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
-  const formatQty = useQuantityFormatter(useOrderUnitDecimals(control, index));
-  return (
-    <InputSuffixPlain
-      className="block w-full text-right"
-      value={formatQty(Number(received))}
       suffix={unitName}
       suffixClassName="text-right"
     />

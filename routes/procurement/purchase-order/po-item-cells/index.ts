@@ -7,7 +7,6 @@ export { StatusCell } from "./status-cell";
 export {
   QtyUnitCell,
   OrderSummaryCell,
-  RecSummaryCell,
   FocQtyCell,
 } from "./qty-cell";
 export { PriceCell } from "./price-cell";
