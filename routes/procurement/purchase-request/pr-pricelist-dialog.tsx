@@ -57,6 +57,7 @@ const buildColumns = (
   tc: ReturnType<typeof useTranslations>,
   readOnly: boolean,
   minPrice: number,
+  onAssign: (entry: PricelistEntry) => void,
 ): ColumnDef<PricelistEntry>[] => {
   const base: ColumnDef<PricelistEntry>[] = [
     {
@@ -160,13 +161,18 @@ const buildColumns = (
   return [
     ...base,
     {
-      id: "select",
+      id: "assign",
       header: "",
       size: 90,
       meta: { cellClassName: "text-right" },
-      cell: () => (
-        <Button type="button" size="xs" variant="success">
-          {tc("select")}
+      cell: ({ row }) => (
+        <Button
+          type="button"
+          size="xs"
+          variant="success"
+          onClick={() => onAssign(row.original)}
+        >
+          {tc("assign")}
         </Button>
       ),
     },
@@ -276,6 +282,7 @@ export function PrPricelistDialog({
     tc,
     readOnly,
     minPrice,
+    handleSelect,
   );
 
   const table = useReactTable({
@@ -335,7 +342,6 @@ export function PrPricelistDialog({
             isLoading={isLoading}
             loadingMode="spinner"
             emptyMessage={emptyMessage}
-            onRowClick={readOnly ? undefined : handleSelect}
             tableLayout={{
               headerBackground: true,
               headerSticky: true,
@@ -344,10 +350,8 @@ export function PrPricelistDialog({
             tableClassNames={{
               base: "text-xs",
               headerRow: "h-10",
-              // readOnly = เลือกไม่ได้ → ไม่ต้องขึ้น pointer/hover ให้เข้าใจผิดว่าคลิกได้
-              bodyRow: readOnly
-                ? "h-11"
-                : "h-11 hover:bg-primary/5 cursor-pointer",
+              // เลือกด้วยปุ่ม Assign เท่านั้น — แถวไม่ใช่เป้าคลิก จึงไม่มี pointer
+              bodyRow: "h-11 hover:bg-primary/5",
             }}
           >
             <DataGridContainer className="rounded-lg border">
