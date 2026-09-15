@@ -13,7 +13,6 @@ import {
   DataGridTableHeadRow,
   DataGridTableHeadRowCell,
   DataGridTableHeadRowCellResize,
-  DataGridTableRowSpacer,
 } from "@/components/ui/data-grid/data-grid-table";
 import {
   closestCenter,
@@ -249,10 +248,6 @@ function DataGridTableDnd<TData>({
               );
             })}
           </DataGridTableHead>
-
-          {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && (
-            <DataGridTableRowSpacer />
-          )}
 
           <DataGridTableBody>
             {props.loadingMode === "skeleton" &&

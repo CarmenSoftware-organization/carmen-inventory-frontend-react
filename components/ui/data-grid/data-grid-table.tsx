@@ -304,21 +304,6 @@ function DataGridTableHeadRowCellResize<TData>({
   );
 }
 
-/**
- * Spacer tbody ระหว่าง head และ body
- *
- * Render `<tbody>` สูง 2 (h-2) เพื่อเพิ่มระยะห่างเมื่อเปิด stripped หรือ
- * ไม่ใช้ rowBorder ใช้ `aria-hidden` ไม่ให้ screen reader อ่าน
- *
- * @returns JSX element ของ spacer tbody
- * @example
- * ```tsx
- * <DataGridTableRowSpacer />
- * ```
- */
-function DataGridTableRowSpacer() {
-  return <tbody aria-hidden="true" className="h-2"></tbody>;
-}
 
 /**
  * `<tbody>` ของ DataGrid
@@ -374,15 +359,18 @@ function DataGridTableBody({ children }: { children: ReactNode }) {
  * เลยสักแถว · คิดจาก `row.index` แล้ว footer หยิบสีของแถวแม่ไปใช้ได้ด้วย แถวข้อมูล
  * กับแถวย่อยของมันจึงเป็นก้อนสีเดียวกัน
  *
- * ใช้ token `--accent` ไม่ใช่ `--muted` — บนพื้น card ของโหมดมืด (#1f1f1f) สี muted
- * (#222222) ต่างกันแค่ 3 ขั้น มองแทบไม่ออก ส่วน accent เป็น "พื้นผิวที่สว่างที่สุด
- * ของโหมดมืด / เข้มที่สุดของโหมดสว่าง" (ดู docs/DESIGN.md) จึงห่างจาก card พอให้
- * เห็นลายในทั้งสองธีม
+ * ใช้ token `--accent` ไม่ใช่ `--muted` — บนพื้น card ของโหมดมืด สี muted ห่างจาก
+ * card แค่ขั้นเดียว มองแทบไม่ออก ส่วน accent เป็น "พื้นผิวที่สว่างที่สุดของโหมดมืด /
+ * เข้มที่สุดของโหมดสว่าง" (ดู docs/DESIGN.md) จึงห่างพอในทั้งสองธีม
+ *
+ * โหมดสว่างลดความทึบเหลือ 65% — พื้น card เป็นขาวล้วน แถบ accent เต็มค่าเลยหนัก
+ * เกินไปจนแย่งความสนใจไปจากตัวข้อมูล ส่วนโหมดมืดใช้เต็มค่าเพราะพื้นเข้มกลืนอยู่แล้ว
  */
 function stripeClass(index: number, stripped?: boolean) {
+  // `DataGrid` เติม default ให้แล้ว (เปิด) — ตารางไหนไม่เอาส่ง `stripped: false`
   if (!stripped) return undefined;
   return index % 2 === 0
-    ? "bg-accent hover:bg-accent"
+    ? "bg-accent/65 hover:bg-accent/65 dark:bg-accent dark:hover:bg-accent"
     : "hover:bg-transparent";
 }
 
@@ -399,8 +387,8 @@ function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
           props.tableLayout?.rowBorder &&
           "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
         props.tableLayout?.cellBorder && "*:last:border-e-0",
-        props.tableLayout?.stripped &&
-          "odd:bg-muted/30 odd:hover:bg-muted/50 hover:bg-transparent",
+        props.tableLayout?.stripped !== false &&
+          "odd:bg-accent/65 dark:odd:bg-accent hover:bg-transparent",
         table.options.enableRowSelection && "*:first:relative",
         props.tableClassNames?.bodyRow,
       )}
@@ -978,13 +966,6 @@ function DataGridTable<TData>() {
         })}
       </DataGridTableHead>
 
-      {/* ตัวคั่น 8px ระหว่างหัวตารางกับแถวแรก — มีไว้ให้ตารางแบบ "แถวลอย"
-          (ไม่มีเส้นคั่น) ดูไม่ติดหัวตาราง · ตารางสลับสีไม่ต้องการ เพราะแถบสีของ
-          แถวแรกจะถูกตัดด้วยช่องว่างสีพื้น กลายเป็นแถบขาวพาดอยู่ใต้หัวตาราง */}
-      {!props.tableLayout?.stripped && !props.tableLayout?.rowBorder && (
-        <DataGridTableRowSpacer />
-      )}
-
       <DataGridTableBody>
         {isLoading &&
         props.loadingMode === "skeleton" &&
@@ -1070,5 +1051,4 @@ export {
   DataGridTableLoader,
   DataGridTableRowSelect,
   DataGridTableRowSelectAll,
-  DataGridTableRowSpacer,
 };

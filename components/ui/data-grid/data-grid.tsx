@@ -190,7 +190,8 @@ function DataGrid<TData extends object>({
       cellBorder: false,
       rowBorder: true,
       rowRounded: false,
-      stripped: false,
+      // สลับสีแถวเป็นค่าเริ่มต้นของทุกตาราง — ตารางไหนไม่เอาส่ง `stripped: false`
+      stripped: true,
       headerSticky: false,
       headerBackground: true,
       headerBorder: true,
