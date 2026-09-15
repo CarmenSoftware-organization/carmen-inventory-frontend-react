@@ -17,11 +17,6 @@ interface UnitCellProps {
   readonly error?: string;
 }
 
-/**
- * Cell แสดง/แก้ไขหน่วยต้นทาง (from_unit) สำหรับ order_units
- * โหมด ingredient_units จะแสดงชื่อ inventory unit อ่านอย่างเดียว
- * โหมด view (disabled) จะแสดงเป็น plain text ของชื่อ unit แทน Lookup ที่ถูก disable
- */
 export function FromUnitCell({
   control,
   name,
@@ -57,7 +52,6 @@ export function FromUnitCell({
               onValueChange={(v) => onUnitChange(index, v)}
               disabled={disabled}
               excludeIds={usedIds.filter((id) => id !== field.value)}
-              size="xs"
               error={error}
             />
           )
@@ -107,7 +101,6 @@ export function ToUnitCell({
               onValueChange={(v) => onUnitChange(index, v)}
               disabled={disabled}
               excludeIds={usedIds.filter((id) => id !== field.value)}
-              size="xs"
               error={error}
             />
           )
