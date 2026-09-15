@@ -198,6 +198,17 @@ export function PrItemFields({
 
   const selectedRows = table.getSelectedRowModel().rows;
 
+  // HOD กด Edit = ตั้งใจจะตัดสินทั้งใบ ติ๊กทุกแถวให้เลย แล้วค่อยเอาออกเฉพาะแถวที่
+  // ไม่เห็นด้วย — เร็วกว่าไล่ติ๊กสิบแถวเพื่อกดอนุมัติรวดเดียว · toggleAllRowsSelected
+  // เคารพ enableRowSelection อยู่แล้ว แถวที่ stage ก่อนหน้าล็อกไว้จึงไม่ถูกติ๊ก
+  // ยิงเฉพาะตอนสลับเข้าโหมดแก้ไข ไม่ใช่ทุก render — ไม่งั้นแถวที่ผู้ใช้เพิ่งเอา
+  // ติ๊กออกจะเด้งกลับมาเอง
+  useEffect(() => {
+    if (isDisabled || role !== STAGE_ROLE.APPROVE) return;
+    table.toggleAllRowsSelected(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ตั้งค่าครั้งเดียวต่อการเข้าโหมดแก้ไข
+  }, [isDisabled, role]);
+
   const canBulkAction =
     !isDisabled &&
     (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
@@ -351,6 +362,8 @@ export function PrItemFields({
     table.resetRowSelection();
   };
 
+  const hasSelection = selectedRows.length > 0;
+
   const bulkActionDialogConfig: Record<
     string,
     {
@@ -383,12 +396,16 @@ export function PrItemFields({
             ดันไปขวาด้วย ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสิน
             มันจะเหลือลูกตัวเดียวแล้วไปกองซ้าย */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {selectedRows.length > 0 && canBulkAction && (
+          {/* ยังไม่ติ๊กแถว = ปุ่มอยู่แต่กดไม่ได้ ไม่ใช่หายไป — ซ่อนแล้วโผล่ทำให้แถบ
+              ทั้งแถวขยับทุกครั้งที่ติ๊ก และคนที่ยังไม่เคยติ๊กจะไม่รู้เลยว่าตัดสิน
+              รายแถวได้ ปุ่มที่กดไม่ได้อย่างน้อยยังบอกว่ามีทางนี้อยู่ */}
+          {canBulkAction && (
             <>
               <Button
                 type="button"
                 variant="success"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkApprove}
               >
                 <Check />
@@ -398,6 +415,7 @@ export function PrItemFields({
                 type="button"
                 variant="warning"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkReview}
               >
                 <Eye />
@@ -407,6 +425,7 @@ export function PrItemFields({
                 type="button"
                 variant="destructive"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkReject}
               >
                 <X />
@@ -417,6 +436,7 @@ export function PrItemFields({
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={!hasSelection}
                   onClick={handleBulkSplit}
                 >
                   <Scissors />
