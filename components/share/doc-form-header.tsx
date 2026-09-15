@@ -1,6 +1,5 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router";
-import { DocSequenceNav } from "@/components/share/doc-sequence-nav";
 import { useProfile } from "@/hooks/use-profile";
 import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
@@ -105,11 +104,8 @@ export function DocFormHeader({
             </h1>
             {badges}
           </div>
-          {/* shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
-              DocSequenceNav render ตัวเองเฉพาะเมื่อ detail นี้อยู่ในลำดับของ
-              list ที่เพิ่งเปิดมา (ดู use-doc-sequence) หน้าอื่นได้ null เงียบ ๆ */}
+          {/* shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน */}
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <DocSequenceNav />
             {actions}
           </div>
         </div>

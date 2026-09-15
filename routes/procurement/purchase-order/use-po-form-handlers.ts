@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  removeFromDocSequence,
-  useDocSequence,
-} from "@/hooks/use-doc-sequence";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -76,7 +72,6 @@ export function usePoFormHandlers({
   revealErrors,
 }: UsePoFormHandlersOptions) {
   const navigate = useNavigate();
-  const location = useLocation();
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
@@ -233,9 +228,8 @@ export function usePoFormHandlers({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/purchase-order");
   };
@@ -301,13 +295,9 @@ export function usePoFormHandlers({
    * ที่เพิ่งติ๊กแถว (ติ๊กแล้ว setValue ทำให้ dirty) ถ้าไม่ปิด guard ก่อน การ
    * navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่บันทึกไปแล้ว
    */
-  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
-  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิว (แบบเดียวกับ onSuccessList ของ PR)
-  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    removeFromDocSequence(location.pathname);
-    navigate(seq?.nextPath ?? "/procurement/purchase-order");
+    navigate("/procurement/purchase-order");
   };
 
   const runSubmitPo = async () => {

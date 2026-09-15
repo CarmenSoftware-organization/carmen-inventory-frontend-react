@@ -239,7 +239,7 @@ export const QtyUnitPlain = memo(function QtyUnitPlain({
       className="w-full"
       value={value}
       suffix={unitName}
-      suffixClassName="ml-1 inline-block w-[4ch] text-right"
+      suffixClassName="text-right"
     />
   );
 });
