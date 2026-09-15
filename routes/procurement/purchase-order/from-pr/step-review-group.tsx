@@ -74,16 +74,11 @@ function ExpandedProducts({
   );
 }
 
-/**
- * ตรวจสอบใบสั่งซื้อที่จะถูกสร้าง — หลังบ้านจัดกลุ่มใบขอซื้อตามผู้ขายกับสกุลเงิน
- * มาให้แล้ว หน้านี้แค่แสดงผลลัพธ์ก่อนกดยืนยัน แก้อะไรไม่ได้
- */
 export function StepReviewGroup({
   data,
   workflowName,
 }: {
   readonly data: GroupPrPo[];
-  /** workflow ที่ใบทั้งชุดจะเดินตาม — มาจาก `data.workflow` ของ group-pr */
   readonly workflowName?: string;
 }) {
   "use no memo";
@@ -92,10 +87,6 @@ export function StepReviewGroup({
   const { dateFormat, defaultCurrencyCode } = useProfile();
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
-  // บวกเองจากยอดรายสินค้าที่แสดงอยู่ (`total`) แล้วคูณเรตของใบนั้นเป็นสกุลฐาน —
-  // แต่ละใบอาจคนละสกุลเงิน (หลังบ้านจัดกลุ่มตามผู้ขาย+สกุลเงิน) บวกกันตรง ๆ คือ
-  // บวกเลขคนละหน่วย · ไม่ใช้ `base_total_price` / `base_price` ที่หลังบ้านส่งมา
-  // เพราะของจริงมันมาเป็น 0 ยอดรวมเลยเป็นศูนย์ทั้งที่รายการมียอดอยู่
   const grandTotal = useMemo(
     () =>
       round2(
@@ -137,12 +128,10 @@ export function StepReviewGroup({
           ),
         },
       },
-      // ยังไม่มีเลขที่ใบตอนนี้ — ใบเพิ่งถูกจัดกลุ่ม ยังไม่ได้สร้าง po_no จึงว่าง
-      // ทั้งคอลัมน์ ใช้ลำดับแทนเพื่อให้อ้างถึงกลุ่มที่กำลังดูอยู่ได้
       {
         id: "index",
         header: "#",
-        size: 48,
+        size: 40,
         enableSorting: false,
         meta: {
           headerClassName: "text-center",
@@ -195,8 +184,6 @@ export function StepReviewGroup({
 
   return (
     <div className="space-y-2">
-      {/* ใบที่กำลังจะสร้างทั้งชุดเดินตาม workflow เดียวกัน — บอกไว้ตรงนี้ก่อนกด
-          ยืนยัน เพราะในฟอร์ม PO ช่องนี้แก้ไม่ได้อีกแล้ว */}
       {workflowName && (
         <p className="text-muted-foreground text-xs">
           {t("workflowLabel")}:{" "}
@@ -211,8 +198,6 @@ export function StepReviewGroup({
         <DataGridContainer scroll className="max-h-112">
           <DataGridTable />
         </DataGridContainer>
-        {/* อยู่นอก container ที่เลื่อนได้ — ยอดรวมต้องเห็นตลอด ไม่ใช่เลื่อนตามตาราง
-          หายไปตอนใบเยอะ */}
         {data.length > 0 && (
           <div className="border-border/60 flex items-center justify-end gap-2 border-t px-3 py-2 text-xs">
             <span className="text-muted-foreground">{tfl("grandTotal")}</span>
