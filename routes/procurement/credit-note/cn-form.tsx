@@ -278,7 +278,10 @@ export function CnForm({ creditNote }: CnFormProps) {
       if (res.ok) {
         const fresh = ((await res.json())?.data ?? null) as FreshCn | null;
         if (import.meta.env.DEV && fresh?.doc_version == null) {
-          console.warn("[CN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+          console.warn(
+            "[CN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน",
+            id,
+          );
         }
         return fresh;
       }
@@ -286,7 +289,8 @@ export function CnForm({ creditNote }: CnFormProps) {
         console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", res.status, id);
     } catch (err) {
       // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้องไม่เงียบ
-      if (import.meta.env.DEV) console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", err);
+      if (import.meta.env.DEV)
+        console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
@@ -394,9 +398,6 @@ export function CnForm({ creditNote }: CnFormProps) {
         className="space-y-3 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled || isView} />
-
-        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
-            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
         <hr className="border-border" />
 
         <CnItem form={form} disabled={isDisabled} />
@@ -405,8 +406,6 @@ export function CnForm({ creditNote }: CnFormProps) {
       <CnFooterAction
         control={form.control}
         canSubmit={
-          // โผล่ทุกโหมดของใบร่าง (เหมือน PR) — คนกรอกเสร็จแล้วอยากส่งเลย ไม่ต้อง
-          // กด Save → ออกจากโหมดแก้ → ค่อยกด Submit ให้ครบสามจังหวะ
           isAdd || (!isLocked && creditNote?.doc_status === CN_STATUS.DRAFT)
         }
         isPending={isPending}

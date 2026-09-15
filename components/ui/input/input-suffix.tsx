@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { InputAmount } from "@/components/ui/input/input-amount";
 import {
   capQtyDecimals,
   DEFAULT_QTY_DECIMALS,
@@ -212,6 +213,39 @@ function InputSuffixQty({
 }
 
 /**
+ * เวอร์ชัน "จำนวนเงิน/เรต" ของ InputSuffixInput — ค่าที่ไม่ได้โฟกัสจะโชว์ทศนิยม
+ * เต็มจำนวนตำแหน่งเสมอ (เรตแลกเปลี่ยน 1 → `1.00000`)
+ *
+ * ต่างจาก `InputSuffixInput` + `type="number"` ตรงที่ input ตัวเลขของเบราว์เซอร์
+ * โชว์ค่าดิบเสมอ ใส่ `step` ยังไงก็ไม่มีทางได้ trailing zeros — ตัวนี้ห่อ
+ * `InputAmount` ซึ่งเก็บ draft ระหว่างพิมพ์แล้ว format ตอนเลิกโฟกัส
+ *
+ * @example
+ * <InputSuffixField>
+ *   <InputSuffixAmount decimals={5} value={rate} onValueChange={setRate} />
+ *   <InputSuffixAddon><LookupCurrency … /></InputSuffixAddon>
+ * </InputSuffixField>
+ */
+function InputSuffixAmount({
+  className,
+  disabled,
+  ...props
+}: React.ComponentProps<typeof InputAmount>) {
+  const ctx = React.useContext(InputSuffixContext);
+  return (
+    <InputAmount
+      data-slot="input-suffix-input"
+      disabled={disabled ?? ctx.disabled}
+      className={cn(
+        "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+/**
  * Slot ทางขวาของ InputSuffixField สำหรับ suffix (unit lookup / currency select /
  * ข้อความ เช่น "kg", "THB") — มี divider เส้นตั้งคั่นด้านซ้ายในตัว, shrink-0
  *
@@ -312,6 +346,7 @@ export {
   InputSuffixField,
   InputSuffixInput,
   InputSuffixQty,
+  InputSuffixAmount,
   InputSuffixAddon,
   InputSuffixPlain,
 };
