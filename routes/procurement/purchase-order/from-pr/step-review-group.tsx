@@ -78,7 +78,14 @@ function ExpandedProducts({
  * ตรวจสอบใบสั่งซื้อที่จะถูกสร้าง — หลังบ้านจัดกลุ่มใบขอซื้อตามผู้ขายกับสกุลเงิน
  * มาให้แล้ว หน้านี้แค่แสดงผลลัพธ์ก่อนกดยืนยัน แก้อะไรไม่ได้
  */
-export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
+export function StepReviewGroup({
+  data,
+  workflowName,
+}: {
+  readonly data: GroupPrPo[];
+  /** workflow ที่ใบทั้งชุดจะเดินตาม — มาจาก `data.workflow` ของ group-pr */
+  readonly workflowName?: string;
+}) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
@@ -187,25 +194,35 @@ export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
   });
 
   return (
-    <DataGrid
-      table={table}
-      recordCount={data.length}
-      tableLayout={{ headerSticky: true, rowBorder: true }}
-    >
-      <DataGridContainer scroll className="max-h-[28rem]">
-        <DataGridTable />
-      </DataGridContainer>
-      {/* อยู่นอก container ที่เลื่อนได้ — ยอดรวมต้องเห็นตลอด ไม่ใช่เลื่อนตามตาราง
-          หายไปตอนใบเยอะ */}
-      {data.length > 0 && (
-        <div className="border-border/60 flex items-center justify-end gap-2 border-t px-3 py-2 text-xs">
-          <span className="text-muted-foreground">{tfl("grandTotal")}</span>
-          <span className="font-semibold tabular-nums">
-            {formatCurrency(grandTotal)}
-          </span>
-          <span className="text-muted-foreground">{defaultCurrencyCode}</span>
-        </div>
+    <div className="space-y-2">
+      {/* ใบที่กำลังจะสร้างทั้งชุดเดินตาม workflow เดียวกัน — บอกไว้ตรงนี้ก่อนกด
+          ยืนยัน เพราะในฟอร์ม PO ช่องนี้แก้ไม่ได้อีกแล้ว */}
+      {workflowName && (
+        <p className="text-muted-foreground text-xs">
+          {t("workflowLabel")}:{" "}
+          <span className="text-foreground font-medium">{workflowName}</span>
+        </p>
       )}
-    </DataGrid>
+      <DataGrid
+        table={table}
+        recordCount={data.length}
+        tableLayout={{ headerSticky: true, rowBorder: true }}
+      >
+        <DataGridContainer scroll className="max-h-112">
+          <DataGridTable />
+        </DataGridContainer>
+        {/* อยู่นอก container ที่เลื่อนได้ — ยอดรวมต้องเห็นตลอด ไม่ใช่เลื่อนตามตาราง
+          หายไปตอนใบเยอะ */}
+        {data.length > 0 && (
+          <div className="border-border/60 flex items-center justify-end gap-2 border-t px-3 py-2 text-xs">
+            <span className="text-muted-foreground">{tfl("grandTotal")}</span>
+            <span className="font-semibold tabular-nums">
+              {formatCurrency(grandTotal)}
+            </span>
+            <span className="text-muted-foreground">{defaultCurrencyCode}</span>
+          </div>
+        )}
+      </DataGrid>
+    </div>
   );
 }

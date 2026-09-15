@@ -67,6 +67,8 @@ export function FromPrContent() {
   const [step, setStep] = useState<Step>(1);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [groupedData, setGroupedData] = useState<GroupPrPo[]>([]);
+  /** workflow ที่หลังบ้านผูกให้ทั้งชุดตอนจัดกลุ่ม (`data.workflow.name`) */
+  const [groupWorkflowName, setGroupWorkflowName] = useState("");
   const [workflowId, setWorkflowId] = useState("");
   const [isGrouping, setIsGrouping] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -98,6 +100,7 @@ export function FromPrContent() {
       if (!res.ok) throw await ApiError.from(res, "Failed to group PRs");
       const json = await res.json();
       setGroupedData(json.data.groups);
+      setGroupWorkflowName(json.data.workflow?.name ?? "");
       setStep(2);
     } catch (err) {
       errorToast(err);
@@ -220,7 +223,10 @@ export function FromPrContent() {
             />
           </StepperContent>
           <StepperContent value={2}>
-            <StepReviewGroup data={groupedData} />
+            <StepReviewGroup
+              data={groupedData}
+              workflowName={groupWorkflowName}
+            />
           </StepperContent>
         </StepperPanel>
       </Stepper>
