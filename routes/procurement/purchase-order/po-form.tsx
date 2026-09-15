@@ -202,7 +202,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // เหตุผลเดียวกับ price list ข้างบน
   const isFromPr = !isManual && !isPoDraft;
   const contentLocked = fieldsDisabled || isFromPr;
-  const locationsDisabled = isDisabled || isFromPr;
+  // `isDisabled` ยกเว้นผู้อนุมัติไว้ (ดูบรรทัดที่ประกาศ) เพื่อให้ตัดสินรายแถวได้
+  // แต่การยกเว้นนั้นรั่วมาถึงช่องคลังด้วย ผู้อนุมัติที่แค่เปิดอ่านใบเลยเจอ
+  // combobox แทนข้อความ ทั้งที่ยังไม่ได้กด Edit — โหมดอ่านคือโหมดอ่านทุก role
+  const locationsDisabled = isDisabled || isFromPr || isView;
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (

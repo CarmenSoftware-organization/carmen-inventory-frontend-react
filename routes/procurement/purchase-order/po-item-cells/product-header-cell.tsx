@@ -7,7 +7,6 @@ import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
 import type { PoFormValues } from "../po-form-schema";
 import { ProductCell } from "./product-cell";
-import { StatusCell } from "./status-cell";
 
 /**
  * ยอดคงเหลือ/กำลังสั่งของสินค้าในแถว — ไอคอนที่ hover แล้วกางตัวเลข กดต่อได้
@@ -73,13 +72,13 @@ interface CellProps {
 
 interface ProductHeaderCellProps extends CellProps {
   readonly isFoc: boolean;
-  readonly showStatusBadge: boolean;
-  /** ผู้อนุมัติในโหมดแก้ไขล้างสถานะรายแถวกลับเป็นรอได้ */
-  readonly canResetStatus?: boolean;
 }
 
 /**
- * Product cell — name (ProductCell) + FOC/Status badges + local name + code/SKU
+ * Product cell — name (ProductCell) + ป้าย FOC + local name + code/SKU
+ *
+ * จุดสถานะย้ายไปอยู่ท้ายคอลัมน์คลังแล้ว (ตำแหน่งเดียวกับ PR) — คอลัมน์นี้ยาว
+ * ที่สุดในตาราง สถานะจึงไปกองอยู่กลางแถวคนละที่กับที่ตาไล่หาใน PR
  *
  * Font ของทุก line ใช้ inherit จาก parent (`text-xs` บน table) — ไม่ override
  */
@@ -89,8 +88,6 @@ export function ProductHeaderCell({
   disabled,
   readOnly,
   isFoc,
-  showStatusBadge,
-  canResetStatus,
 }: ProductHeaderCellProps) {
   "use no memo";
   return (
@@ -109,14 +106,6 @@ export function ProductHeaderCell({
           <Badge variant="success-light" size="xs">
             FOC
           </Badge>
-        )}
-        {showStatusBadge && (
-          <StatusCell
-            control={form.control}
-            form={form}
-            index={index}
-            canReset={canResetStatus}
-          />
         )}
         {/* ปิดท้ายแถว — ป้ายเป็นข้อมูลของแถว ส่วนไอคอนนี้เป็นปุ่ม ไม่เอาไปแทรกกลาง
             ระหว่างชื่อกับป้ายจนอ่านเป็นชุดเดียวกัน */}
