@@ -114,7 +114,7 @@ export function StepReviewGroup({
     () => [
       {
         id: "expander",
-        size: 32,
+        size: 40,
         header: () => null,
         cell: ({ row }) => (
           <button
