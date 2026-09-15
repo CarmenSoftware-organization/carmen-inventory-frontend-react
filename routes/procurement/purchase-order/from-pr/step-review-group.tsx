@@ -130,9 +130,21 @@ export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
           ),
         },
       },
-      { accessorKey: "po_no", header: tfl("poNo") },
-      { accessorKey: "vendor_name", header: tfl("vendor") },
+      // ยังไม่มีเลขที่ใบตอนนี้ — ใบเพิ่งถูกจัดกลุ่ม ยังไม่ได้สร้าง po_no จึงว่าง
+      // ทั้งคอลัมน์ ใช้ลำดับแทนเพื่อให้อ้างถึงกลุ่มที่กำลังดูอยู่ได้
+      {
+        id: "index",
+        header: "#",
+        size: 48,
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground tabular-nums",
+        },
+        cell: ({ row }) => row.index + 1,
+      },
       { accessorKey: "pr", header: t("prRef") },
+      { accessorKey: "vendor_name", header: tfl("vendor") },
       {
         accessorKey: "delivery_date",
         header: tfl("deliveryDate"),

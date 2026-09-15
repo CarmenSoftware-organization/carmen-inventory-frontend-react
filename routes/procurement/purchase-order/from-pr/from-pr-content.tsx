@@ -12,6 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import {
   Stepper,
@@ -36,6 +37,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type { GroupPrPo } from "@/types/purchase-order";
 import { StepSelectPr } from "./step-select-pr";
 import { StepReviewGroup } from "./step-review-group";
+import { StepResult, type ConfirmPrResult } from "./step-result";
 
 type Step = 1 | 2;
 
@@ -68,6 +70,9 @@ export function FromPrContent() {
   const [workflowId, setWorkflowId] = useState("");
   const [isGrouping, setIsGrouping] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  /** ผลลัพธ์จาก confirm-pr — มีค่าเมื่อไรคือจบงานแล้ว หน้าเปลี่ยนเป็นสรุป */
+  const [result, setResult] = useState<ConfirmPrResult | null>(null);
 
   const isPending = isGrouping || isConfirming;
   const selectedPrIds = Object.keys(rowSelection).filter(
@@ -127,17 +132,24 @@ export function FromPrContent() {
         },
       );
       if (!res.ok) throw await ApiError.from(res, "Failed to confirm PRs");
-      await res.json();
+      const json = await res.json();
       toast.success(tt("createSuccess", { entity: t("entity") }));
       await queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.PURCHASE_ORDERS],
       });
-      navigate(PO_LIST_PATH);
+      // ไม่เด้งกลับ list — backend ส่งใบที่สร้างมาให้ครบแล้ว โชว์ให้เห็นว่าได้
+      // อะไรมาบ้างพร้อมลิงก์เข้าใบ ดีกว่าให้ไปไล่หาเองในรายการพันใบ
+      setConfirmOpen(false);
+      setResult(json.data as ConfirmPrResult);
     } catch (err) {
       errorToast(err);
       setIsConfirming(false);
     }
   };
+
+  // สร้างเสร็จแล้ว = จบงาน หน้าสรุปทับทั้งหน้า ไม่เหลือ stepper/ปุ่มของขั้นตอนเดิม
+  // ให้กดย้อนกลับไปสร้างซ้ำจากชุดเดิม (PR ที่ใช้ไปแล้วเลือกซ้ำไม่ได้)
+  if (result) return <StepResult result={result} />;
 
   return (
     <div className="flex flex-col gap-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -161,7 +173,7 @@ export function FromPrContent() {
           <Button
             size="sm"
             className="mr-8"
-            onClick={handleConfirm}
+            onClick={() => setConfirmOpen(true)}
             disabled={isConfirming}
           >
             {isConfirming ? (
@@ -249,6 +261,19 @@ export function FromPrContent() {
           )}
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t("confirmCreateTitle")}
+        description={t("confirmCreateDesc", {
+          poCount: groupedData.length,
+          prCount: selectedCount,
+        })}
+        isPending={isConfirming}
+        onConfirm={handleConfirm}
+        confirmText={tc("confirm")}
+      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
       <DiscardDialog

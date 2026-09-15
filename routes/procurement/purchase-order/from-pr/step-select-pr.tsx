@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -27,6 +27,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ListFilter } from "@/components/list-filter/list-filter";
 import { Button } from "@/components/ui/button";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
@@ -146,6 +147,49 @@ export function StepSelectPr({
     [t, tfl, dateFormat],
   );
 
+  /** workflow ของใบที่ติ๊กไว้ — ใช้ตัดสินว่าการติ๊กครั้งถัดไปข้าม workflow ไหม */
+  const workflowOf = useMemo(() => {
+    const m = new Map<string, { id: string; name: string }>();
+    for (const pr of allRows) {
+      m.set(pr.id, { id: pr.workflow_id, name: pr.workflow_name });
+    }
+    return m;
+  }, [allRows]);
+
+  /** การติ๊กที่ข้าม workflow — ค้างไว้รอผู้ใช้ยืนยันก่อนทิ้งใบที่เลือกไว้เดิม */
+  const [crossWorkflow, setCrossWorkflow] = useState<{
+    next: RowSelectionState;
+    workflowId: string;
+    workflowName: string;
+  } | null>(null);
+
+  const applySelection = (next: RowSelectionState) => {
+    const ids = Object.keys(next).filter((id) => next[id]);
+    const workflows = new Set(
+      ids.map((id) => workflowOf.get(id)?.id).filter(Boolean),
+    );
+    // ใบที่รวมเป็นใบสั่งซื้อเดียวกันต้องมาจาก workflow เดียวกัน — ปล่อยให้ติ๊ก
+    // ข้ามได้แล้วไปตกตอน group คือให้ผู้ใช้เสียเวลาเลือกฟรี ๆ ทั้งหน้า
+    if (workflows.size > 1) {
+      // ใบที่เพิ่งติ๊กคือเจตนาล่าสุด ใบเก่าที่ workflow ไม่ตรงคือส่วนที่จะถูกทิ้ง
+      const added = ids.find((id) => !rowSelection[id]);
+      const wf = added ? workflowOf.get(added) : undefined;
+      if (added && wf) {
+        setCrossWorkflow({
+          next: Object.fromEntries(
+            ids
+              .filter((id) => workflowOf.get(id)?.id === wf.id)
+              .map((id) => [id, true]),
+          ),
+          workflowId: wf.id,
+          workflowName: wf.name,
+        });
+        return;
+      }
+    }
+    onRowSelectionChange(next);
+  };
+
   const table = useReactTable({
     data: purchaseRequests,
     columns,
@@ -153,7 +197,7 @@ export function StepSelectPr({
     onRowSelectionChange: (updater) => {
       const next =
         typeof updater === "function" ? updater(rowSelection) : updater;
-      onRowSelectionChange(next);
+      applySelection(next);
     },
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
@@ -242,6 +286,22 @@ export function StepSelectPr({
           </DataGridContainer>
         </DataGrid>
       )}
+      <ConfirmDialog
+        open={!!crossWorkflow}
+        onOpenChange={(open) => {
+          if (!open) setCrossWorkflow(null);
+        }}
+        title={t("crossWorkflowTitle")}
+        description={t("crossWorkflowDesc", {
+          workflow: crossWorkflow?.workflowName ?? "",
+        })}
+        confirmText={tc("confirm")}
+        onConfirm={() => {
+          if (crossWorkflow) onRowSelectionChange(crossWorkflow.next);
+          setCrossWorkflow(null);
+        }}
+      />
     </div>
+
   );
 }
