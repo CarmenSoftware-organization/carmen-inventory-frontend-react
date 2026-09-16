@@ -11,9 +11,7 @@ import {
   FieldError,
   FieldInput,
   FieldLabel,
-  FieldSelect,
 } from "@/components/ui/field";
-import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,12 +30,13 @@ import {
 } from "@/hooks/use-notification-template";
 import type { NotificationTemplate } from "@/types/noti-tmpl";
 import {
-  NOTIFICATION_CHANNEL_OPTIONS,
   getDefaultValues,
   mapToPayload,
   notificationTemplateSchema,
   type NotificationTemplateFormValues,
 } from "./noti-tmpl-form-schema";
+import { NotiTmplPreview } from "./noti-tmpl-preview";
+import { VariableChips } from "./noti-tmpl-variable-chips";
 import { openActivity } from "@/components/share/activity-sheet-host";
 
 const LIST_PATH = "/system-admin/notification-template";
@@ -77,7 +76,9 @@ export function NotificationTemplateForm({
 
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedActive = useWatch({ control: form.control, name: "is_active" });
+  const watchedBody = useWatch({ control: form.control, name: "body" });
   const title = isAdd ? t("add") : watchedName || t("untitled");
+
 
   const onSubmit = (values: NotificationTemplateFormValues) => {
     const payload = mapToPayload(values);
@@ -119,7 +120,7 @@ export function NotificationTemplateForm({
   const submitLabel = isPending ? pendingLabel : actionLabel;
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
@@ -213,7 +214,7 @@ export function NotificationTemplateForm({
           title={t("sectionGeneralTitle")}
           description={t("sectionGeneralDesc")}
         >
-          <Field>
+          <Field className="sm:col-span-2">
             <FieldLabel htmlFor="nt-name" required>
               {tfl("name")}
             </FieldLabel>
@@ -224,31 +225,6 @@ export function NotificationTemplateForm({
               maxLength={100}
               error={errors.name?.message}
               {...form.register("name")}
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel required>{t("colChannel")}</FieldLabel>
-            <Controller
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FieldSelect
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={t("selectChannel")}
-                  disabled={isDisabled}
-                  error={errors.type?.message}
-                >
-                  <SelectContent>
-                    {NOTIFICATION_CHANNEL_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </FieldSelect>
-              )}
             />
           </Field>
 
@@ -276,42 +252,52 @@ export function NotificationTemplateForm({
                   checked={field.value}
                   onCheckedChange={field.onChange}
                   disabled={isDisabled}
+                  // สถานะเดียวกันเคยแสดงสามที่: badge ข้างชื่อเรื่อง, สวิตช์ และ
+                  // badge ซ้ำในกล่องสวิตช์ — เหลือสองที่ที่ทำหน้าที่ต่างกันจริง
+                  hideBadge
                 />
               )}
             />
           </div>
         </SettingSection>
 
-        {/* Section: Message content */}
+        {/* Section: Message content — section เดียวของหน้าที่กินเต็มความกว้าง
+            เพราะเป็นงานจริงของหน้านี้ ครึ่งซ้ายเขียน ครึ่งขวาเห็นผลทันที */}
         <SettingSection
+          wide
           title={t("sectionMessageTitle")}
           description={t("sectionMessageDesc")}
         >
-          <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="nt-subject">{t("colSubject")}</FieldLabel>
-            <FieldInput
-              id="nt-subject"
-              placeholder={t("subjectPlaceholder")}
-              disabled={isDisabled}
-              maxLength={200}
-              {...form.register("subject")}
-            />
-          </Field>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="min-w-0 space-y-5">
+              <Field>
+                <FieldLabel htmlFor="nt-body" required>
+                  {t("colBody")}
+                </FieldLabel>
+                <Textarea
+                  id="nt-body"
+                  placeholder={t("bodyPlaceholder")}
+                  disabled={isDisabled}
+                  maxLength={259}
+                  rows={6}
+                  className="min-h-32"
+                  aria-invalid={!!errors.body}
+                  {...form.register("body")}
+                />
+                <FieldError>{errors.body?.message}</FieldError>
+                <VariableChips
+                  label={t("insertVariable")}
+                  targetId="nt-body"
+                  disabled={isDisabled}
+                />
+              </Field>
+            </div>
 
-          <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="nt-body" required>
-              {t("colBody")}
-            </FieldLabel>
-            <Textarea
-              id="nt-body"
-              placeholder={t("bodyPlaceholder")}
-              disabled={isDisabled}
-              maxLength={259}
-              aria-invalid={!!errors.body}
-              {...form.register("body")}
+            <NotiTmplPreview
+              name={watchedName || t("untitled")}
+              body={watchedBody ?? ""}
             />
-            <FieldError>{errors.body?.message}</FieldError>
-          </Field>
+          </div>
         </SettingSection>
       </form>
 
@@ -345,7 +331,7 @@ export function NotificationTemplateForm({
 
 export function NotificationTemplateFormSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Skeleton className="size-8 rounded-md" />
@@ -354,10 +340,19 @@ export function NotificationTemplateFormSkeleton() {
         </div>
         <Skeleton className="h-8 w-20" />
       </div>
-      {/* General: name · channel · description(textarea) · status */}
-      <SettingSectionSkeleton first fields={["half", "half", "tall", "full"]} />
-      {/* Message content: subject · body(textarea) */}
-      <SettingSectionSkeleton fields={["full", "tall"]} />
+      {/* General: name · description(textarea) · status */}
+      <SettingSectionSkeleton first fields={["full", "tall", "full"]} />
+      {/* Message content: ครึ่งซ้ายช่องกรอก ครึ่งขวาพรีวิว */}
+      <div className="border-border/70 mt-8 space-y-4 border-t pt-8">
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-3 w-64" />
+        </div>
+        <div className="bg-card grid gap-6 rounded-xl border p-5 shadow-sm sm:p-6 lg:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </div>
     </div>
   );
 }
