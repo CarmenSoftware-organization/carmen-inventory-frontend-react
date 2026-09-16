@@ -1,8 +1,8 @@
 # Deploy — static SPA hosting
 
-Two supported targets: **AWS S3 + CloudFront** and **Google Cloud Storage (+ Cloud CDN)**.
-Both share the same model: one immutable build artifact; the per-environment
-`config.json` lives on the bucket (never in the bundle); `index.html` is no-cache.
+สี่ปลายทางที่รองรับ: **AWS S3 + CloudFront** · **Google Cloud Storage (+ Cloud CDN)** ·
+**Docker (nginx)** · **Vercel** — ทุกตัวใช้โมเดลเดียวกัน: build artifact ก้อนเดียวไม่ผูก
+environment, `config.json` ต่อ environment อยู่นอก bundle, `index.html` เป็น no-cache
 
 `bun run build:{local,dev,uat,prod}` เลือกได้ว่า `dist/config.json` จะมาจากไฟล์ไหน แต่
 **ไม่กระทบการ deploy ทั้งสองทาง** — `deploy-s3.sh` / `deploy-gcs.sh` ตัด `dist/config.json`
@@ -139,14 +139,21 @@ non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
 
 ---
 
-## Vercel — git push to the `vercel` branch
-
-โมเดลเดียวกับ `carmen-platform`: **branch `vercel` เป็น mirror ของ `main`** และ Vercel
-ตั้ง Production Branch เป็น `vercel` — จะ deploy เมื่อสั่งเท่านั้น ไม่ใช่ทุกครั้งที่ merge เข้า main
+## Vercel — `vercel --prod` จากเครื่องเท่านั้น
 
 ```bash
-git push origin main:vercel      # deploy production
+vercel --prod      # จากเครื่องที่มี public/config.prod.json
 ```
+
+⚠️ **git-triggered deployment ใช้ไม่ได้กับรีโปนี้** — ณ 8 ก.ย. 2026 deployment ที่ Vercel
+สร้างจาก GitHub webhook เป็น `CANCELED` ทุกใบติดกัน 21 ใบ ทุก branch (main, PR) โดย
+build log ว่างเปล่า = ถูกยกเลิกก่อน build เริ่ม **ยังไม่ทราบสาเหตุ** โครงสร้าง branch
+`vercel` (mirror ของ `main`, Production Branch = `vercel`) ตั้งไว้ครบแล้วตามโมเดลของ
+`carmen-platform` แต่ `git push origin main:vercel` จะไม่ deploy อะไรเลย ถ้าจะรื้อ
+ให้เริ่มที่ banner ในหน้า project settings ของ dashboard
+
+อย่าอ่าน `"live": false` จาก API ว่าโปรเจกต์ถูก pause — `carmen-platform` ที่ deploy
+สำเร็จก็เป็น `false` เหมือนกัน
 
 ### ตั้งค่าครั้งเดียวใน Vercel project settings
 
@@ -158,7 +165,11 @@ git push origin main:vercel      # deploy production
 Build/Output ไม่ต้องตั้ง — `vercel.json` ใช้ preset `vite` (`bun run build` → `dist/`)
 และ header/SPA rewrite อยู่ในไฟล์นั้นแล้ว
 
-**`APP_CONFIG_JSON` คือทางเดียวที่ config ไปถึง Vercel ได้** — `public/config*.json` ถูก
+**`APP_CONFIG_JSON` คือทางเดียวที่ config ไปถึง Vercel ได้ *ถ้า* deploy มาจาก git** —
+แต่ `vercel --prod` อัปโหลดโฟลเดอร์ในเครื่องขึ้นไปทั้งดุ้น ไฟล์ `public/config.prod.json`
+จึงติดไปด้วยและเส้นทาง fallback นี้ **ยังไม่เคยถูกเรียกใช้จริงสักครั้ง** — ถ้าวันหนึ่ง git
+deploy กลับมาทำงาน ต้องตั้ง env var ตัวนี้ (scope Production) ก่อน ไม่งั้น build ตายที่
+`public/config.prod.json not found` · `public/config*.json` ถูก
 gitignore ทั้งหมด clone ที่ Vercel จึงไม่มีไฟล์ และ `emitBuildConfig()` ใน `vite.config.ts`
 จะ fallback มาอ่าน env var นี้แทน (validate `BACKEND_URL`/`X_APP_ID` แล้ว fail build ทันที
 ถ้า JSON เสียหรือคีย์ขาด — ดีกว่าไปพังเป็นหน้า "Failed to load application configuration"
@@ -177,10 +188,23 @@ backend ไม่งั้นได้ 401 แล้วเด้งออกห�
 
 ## Shared notes
 
-- `config.json` shape (see `public/config.sample.json`):
+- `config.json` shape (see `public/config.sample.json` · คำอธิบายต่อคีย์อยู่ใน README
+  §Runtime & build configuration):
   ```json
-  { "BACKEND_URL": "https://<backend-host>", "X_APP_ID": "<app id>", "WS_URL": "wss://<backend-host>/ws" }
+  {
+    "BACKEND_URL": "https://<backend-host>",
+    "X_APP_ID": "<app id>",
+    "WS_URL": "wss://<backend-host>/ws",
+    "LICENSE_ENFORCEMENT": true,
+    "OTEL_ENABLED": true,
+    "OTEL_ENVIRONMENT": "prod"
+  }
   ```
+  `BACKEND_URL` + `X_APP_ID` บังคับ ที่เหลือ optional · **`LICENSE_ENFORCEMENT`,
+  `OTEL_ENABLED`, `OTEL_ENVIRONMENT` ต้องเติมด้วยมือในไฟล์ config ของแต่ละ
+  environment** (ไฟล์พวกนี้ถูก gitignore) และ **Docker entrypoint
+  (`docker/40-render-config-json.sh`) render ให้แค่ 3 คีย์แรก** — ปลายทาง Docker
+  จึงเปิด license enforcement / telemetry จาก env ไม่ได้
 - **Backend prerequisite for S3/GCS (see spec §4)** — CORS: allow the CDN/bucket origin,
   methods GET/POST/PUT/PATCH/DELETE, headers `Authorization`, `Content-Type`,
   `x-app-id`. (The Docker target is exempt — its nginx proxies `/api/*` same-origin.)

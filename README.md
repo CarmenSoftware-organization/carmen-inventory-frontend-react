@@ -5,7 +5,7 @@ migrated from the legacy Next.js app (that repo has since been removed)
 and built for static hosting on **S3 + CloudFront** (no server runtime; the browser talks
 to the backend directly).
 
-**Migration status: complete** — 125 lazy routes across every section:
+**Migration status: complete** — 162 lazy routes across every section:
 
 | Section | Routes |
 |---|---|
@@ -46,19 +46,80 @@ account.
 
 ## Commands
 
+<!-- AUTO-GENERATED: package.json scripts — regenerate, do not hand-edit -->
+
+| Command | Description |
+|---|---|
+| `bun dev` | Dev server — alias for `dev:local` (`VITE_DEV_PROXY_TARGET=<backend>` to proxy `/api`) |
+| `bun run dev:local` | Dev server serving `public/config.local.json` as `/config.json` |
+| `bun run dev:dev` | Dev server serving `public/config.dev.json` |
+| `bun run dev:uat` | Dev server serving `public/config.uat.json` |
+| `bun run dev:prod` | Dev server serving `public/config.prod.json` |
+| `bun run build` | `tsc --noEmit` + `vite build` → `dist/` (bakes `config.prod.json` as `dist/config.json`) |
+| `bun run build:local` | Same, but `dist/config.json` = `public/config.local.json` |
+| `bun run build:dev` | Same, but `dist/config.json` = `public/config.dev.json` |
+| `bun run build:uat` | Same, but `dist/config.json` = `public/config.uat.json` |
+| `bun run build:prod` | Same, but `dist/config.json` = `public/config.prod.json` |
+| `bun run build:bump [patch\|minor\|major]` | Cut a release: bump `package.json` + release commit + annotated tag (local only, never pushes); run on `main` with a clean tree; gates on typecheck + lint + `test:run`; prompts for the level if omitted |
+| `bun run typecheck` | `tsc --noEmit` only |
+| `bun run preview` | Serve the production build locally |
+| `bun test` | Vitest watch |
+| `bun test:run [path]` | Vitest single run (optionally one file) |
+| `bun run lint` | ESLint (incl. the `next*`-import guard and the module-boundary rules) |
+| `bun run clear` | Delete `dist/` and `node_modules/` |
+| `bun run gen:license-fixture` | Regenerate `constant/__fixtures__/license-catalog.ts` from a backend checkout (needs `BACKEND_REPO`) |
+| `bun run gen:route-map [--check]` | Regenerate the URL→file tables in `docs/modules/README.md` from `routes/router.tsx`; `--check` fails instead of writing |
+
+The `build:*` variants only affect `bun run preview` locally — S3/GCS/Docker each supply
+their own `config.json` at deploy/run time, and Vercel runs a bare `bun run build`.
+
+Deploy scripts (details in [docs/deploy.md](docs/deploy.md)):
+
 ```bash
-bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
-bun run dev:{local,dev,uat,prod}   # Dev server serving public/config.<env>.json (dev aliases dev:local)
-bun run build        # tsc + vite build → dist/
-bun run typecheck    # tsc --noEmit only
-bun run build:bump [patch|minor|major]   # Cut a release: bump package.json + release commit + annotated tag (local only, never pushes); run on main with a clean tree; gates on typecheck+lint+test:run; prompts for level if omitted
-bun run preview      # Serve the production build locally
-bun run lint         # ESLint          bun test            # Vitest watch
-bun test:run         # Run all tests   bun test:run <path> # Single file
-scripts/deploy-s3.sh <bucket> <cloudfront-id>       # Deploy to S3/CloudFront (docs/deploy.md)
-scripts/deploy-gcs.sh <bucket> [url-map]            # Deploy to GCS/Cloud CDN (docs/deploy.md)
-scripts/deploy-docker.sh [tag] [registry]           # Build/push Docker image (nginx + /api proxy)
+scripts/deploy-s3.sh <bucket> <cloudfront-id>       # S3 + CloudFront
+scripts/deploy-gcs.sh <bucket> [url-map]            # GCS + Cloud CDN
+scripts/deploy-docker.sh [tag] [registry]           # Docker image (nginx + /api proxy)
+scripts/cloudfront-security-headers.sh <dist-id> public/config.<env>.json   # once per distribution
+scripts/setup-gcs-cdn.sh                            # GCS CDN + security headers (idempotent)
 ```
+
+<!-- /AUTO-GENERATED -->
+
+## Runtime & build configuration
+
+<!-- AUTO-GENERATED: lib/runtime-config.ts + public/config.sample.json + vite.config.ts -->
+
+**Runtime** — `public/config.json`, fetched at boot by `loadRuntimeConfig()`. There is no
+`.env`; nothing below is baked into the bundle.
+
+| Key | Required | Description | Example |
+|---|---|---|---|
+| `BACKEND_URL` | Yes | Backend origin. `""` means same-origin (Docker nginx proxy, or the Vite dev proxy) | `https://backend.example.com` |
+| `X_APP_ID` | Yes | App id this deployment is registered under in the backend's allowlist | `carmen-inventory` |
+| `WS_URL` | No | WebSocket endpoint; omit to disable real-time notifications | `wss://backend.example.com/ws` |
+| `LICENSE_ENFORCEMENT` | No | `false` (default) = shadow mode — the license banner and write locks do nothing. Turn on only after the backend has enforcement on **and** every BU is backfilled | `true` |
+| `OTEL_ENABLED` | No | Ship traces/errors to SigNoz via `${BACKEND_URL}/telemetry/v1`. Not set = off, and the OTel SDK is never even downloaded | `true` |
+| `OTEL_ENVIRONMENT` | No | Environment name attached to every trace/error. Not set = `dev` | `prod` |
+
+> `public/config*.json` is gitignored except `config.sample.json`, so the optional keys
+> must be added **by hand** per environment — there is no env var or build flag for them.
+> The Docker entrypoint (`docker/40-render-config-json.sh`) renders only `BACKEND_URL`,
+> `X_APP_ID` and `WS_URL`; the optional keys are unreachable in that target today.
+
+**Build / dev env vars** — read by `vite.config.ts` and the scripts, never by app code.
+
+| Variable | Required | Description | Example |
+|---|---|---|---|
+| `CONFIG_ENV` | No | Which `public/config.<env>.json` the dev server serves at `/config.json` (default `local`) | `local`, `dev`, `uat`, `prod` |
+| `VITE_DEV_PROXY_TARGET` | No | Dev only — proxy `/api/*` to this backend so dev never needs CORS | `http://localhost:4000` |
+| `BUILD_CONFIG_FILE` | No | Which `public/<file>` is emitted as `dist/config.json` (default `config.prod.json`) | `config.uat.json` |
+| `APP_CONFIG_JSON` | No | Whole `config.json` as a JSON string; the fallback when `public/<BUILD_CONFIG_FILE>` is absent (git clones, e.g. CI). Validated at build time | `{"BACKEND_URL":"…","X_APP_ID":"…"}` |
+| `BACKEND_REPO` | For `gen:license-fixture` | Path to a `carmen-turborepo-backend-v2` checkout | `../carmen-turborepo-backend-v2` |
+
+Container runtime (`docker-compose.yml`): `BACKEND_URL`, `X_APP_ID`, `WS_URL`,
+`PROXY_SSL_VERIFY`, plus `IMAGE_TAG` / `REGISTRY` for image selection.
+
+<!-- /AUTO-GENERATED -->
 
 ## Architecture in one minute
 
@@ -68,13 +129,20 @@ scripts/deploy-docker.sh [tag] [registry]           # Build/push Docker image (n
 - **Auth:** access token in memory only; refresh token in localStorage behind
   `lib/auth/refresh-token-storage.ts`. Boot: `loadRuntimeConfig()` → `refreshTokens()` →
   render. `RequireAuth` redirects to `/login` whenever the token store empties.
-- **Runtime config:** `public/config.json` (`BACKEND_URL`, `X_APP_ID`, optional `WS_URL`)
-  is fetched at boot — one build artifact deploys to every environment.
-- **Routing:** lazy route modules in `routes/<section>/.../page.tsx`, each exporting
-  `Component`; section parents carry a shared error-boundary adapter.
+- **Runtime config:** `public/config.json` is fetched at boot — one build artifact
+  deploys to every environment (keys above).
+- **Routing:** routes are colocated — `routes/<module>/<feature>/<feature>.route.tsx`
+  exporting `Component`, with its components/hooks/tests flat beside it (no `page.tsx`,
+  no `_components/`, no `[id]/`). Dynamic segments are native React Router
+  (`path: ":id"` + `useParams`). Section parents carry a shared error-boundary adapter,
+  and the root route has a full-page catch-all.
+- **Module boundary (ESLint-enforced):** `routes/<A>/` may not import from `routes/<B>/`,
+  and `components/` `hooks/` `lib/` `constant/` `types/` may not import from `routes/`
+  at all.
 
-Full guidance for working in this repo (incl. the module-migration recipe used to port
-the app): **CLAUDE.md**. Design history: `docs/superpowers/specs/` + `docs/superpowers/plans/`.
+How to get a change in (setup, gate, commit format, PR checklist):
+[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md). Full guidance for working in this repo
+(incl. the module-migration recipe used to port the app): **CLAUDE.md**. Design history: `docs/superpowers/specs/` + `docs/superpowers/plans/`.
 
 ## Deploying
 
@@ -85,19 +153,25 @@ Four supported targets — step-by-step in [docs/deploy.md](docs/deploy.md):
 | **AWS S3 + CloudFront** | private bucket + OAC, 403/404 → `/index.html` fallback | yes |
 | **GCS (+ Cloud CDN)** | bucket website fallback or LB backend bucket | yes |
 | **Docker** | nginx serves `dist/` and **proxies `/api/*` to the backend itself** | **no** |
-| **Vercel** | `git push origin main:vercel` builds the `vercel` branch | yes |
+| **Vercel** | `vercel --prod` from a machine that has `public/config.prod.json` | yes |
 
 For the static-CDN targets the per-environment `config.json` lives on the bucket; the
 Docker image renders it from env (`BACKEND_URL`, `X_APP_ID`, `WS_URL`) at container start;
-Vercel bakes it into the build from the `APP_CONFIG_JSON` env var.
+Vercel uploads the local folder (config file included), so its `APP_CONFIG_JSON`
+fallback has never actually been exercised. **Git-triggered Vercel deploys do not work
+on this repo** — every webhook deployment has come back `CANCELED` before the build
+starts (as of 2026-09-08); `vercel --prod` from a developer machine is the only path.
 
 > CORS (S3/GCS only): allow the CDN origin, headers `Authorization`, `Content-Type`,
 > `x-app-id`. Dev never needs CORS thanks to the Vite proxy.
 
 ## Testing
 
-- **288 unit/integration tests** (Vitest + Testing Library) — auth flows (refresh mutex,
-  401 retry), http-client URL rewrite, route guards, i18n, compat layer, ported module tests.
+- **1,522 tests across 195 files** (Vitest + Testing Library) — auth flows (refresh
+  mutex, 401 retry), http-client URL rewrite, route guards, i18n, security-header/CSP
+  hashes, license gating, and per-module hook/component tests.
+- CI (`.github/workflows/ci.yml`) runs `lint` → `test:run` → `build` on every push and PR
+  to `main`; `build` includes `tsc --noEmit`.
 - **Playwright e2e** lives in the dedicated suite
   [carmen-inventory-frontend-e2e](../carmen-inventory-frontend-e2e) (191+ TC-annotated
   tests, frontend-agnostic). Run it against this SPA with:
