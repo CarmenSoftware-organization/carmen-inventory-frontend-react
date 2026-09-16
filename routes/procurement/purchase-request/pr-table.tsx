@@ -56,11 +56,8 @@ interface UsePurchaseRequestTableOptions {
   onApprove?: (item: PurchaseRequest) => void;
   onReject?: (item: PurchaseRequest) => void;
   isMyPending?: boolean;
-  /** ผู้ใช้กดติ๊กหนึ่งแถว — คนเรียกเป็นคนตัดสินว่าจะติ๊กให้จริงไหม */
   onRowSelect?: (item: PurchaseRequest, next: boolean) => void;
-  /** ผู้ใช้กดติ๊กหัวตาราง */
   onSelectAll?: () => void;
-  /** selection ถือโดยคนเรียก (key = pr id) เพราะกติกาการเลือกอยู่ที่นั่น */
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
 }
@@ -87,8 +84,6 @@ export function usePurchaseRequestTable({
   const tc = useTranslations("common");
   const t = useTranslations("procurement.purchaseRequest");
   const navigate = useNavigate();
-  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่ม Add: ต้องมี workflow ที่เริ่มได้
-  // (PR ไม่มี permission .create ใน catalog) กดไม่ผ่านเด้ง dialog บอกเหตุผล
   const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
   const handleDuplicate = (item: PurchaseRequest) => {
     if (!canCreatePr) {
@@ -133,19 +128,21 @@ export function usePurchaseRequestTable({
     {
       accessorKey: "workflow_name",
       header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={tfl("type")}
-          className="justify-center"
-        />
+        <DataGridColumnHeader column={column} title={tfl("workflow")} />
+      ),
+      cell: ({ row }) => (
+        <span
+          className="wrap-break-word whitespace-normal"
+          title={row.original.workflow_name ?? undefined}
+        >
+          {row.original.workflow_name}
+        </span>
       ),
       meta: {
-        headerTitle: tfl("type"),
+        headerTitle: tfl("workflow"),
         skeleton: columnSkeletons.text,
-        cellClassName: "text-center",
-        headerClassName: "text-center",
       },
-      size: 100,
+      size: 110,
     },
     {
       accessorKey: "workflow_current_stage",
@@ -162,7 +159,7 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.text,
       },
-      size: 100,
+      size: 120,
     },
     {
       accessorKey: "pr_status",
@@ -180,9 +177,7 @@ export function usePurchaseRequestTable({
           <StatusIconLabel
             status={status}
             label={config.label}
-            // คอลัมน์นี้จัดกลาง — ตัว label เป็น inline-flex ซึ่ง `text-center`
-            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
-            className="flex w-full justify-center"
+            className="flex justify-center"
           />
         );
       },
@@ -199,15 +194,31 @@ export function usePurchaseRequestTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("requester")} />
       ),
+      cell: ({ row }) => (
+        <span
+          className="wrap-break-word whitespace-normal"
+          title={row.original.requestor_name ?? undefined}
+        >
+          {row.original.requestor_name}
+        </span>
+      ),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
-      size: 180,
+      size: 120,
     },
     {
       accessorKey: "department_name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
-      size: 220,
+      size: 140,
+      cell: ({ row }) => (
+        <span
+          className="wrap-break-word whitespace-normal"
+          title={row.original.department_name ?? undefined}
+        >
+          {row.original.department_name}
+        </span>
+      ),
       meta: { headerTitle: tfl("department"), skeleton: columnSkeletons.text },
     },
     {
@@ -215,7 +226,7 @@ export function usePurchaseRequestTable({
       header: ({ column }) => (
         <DataGridColumnHeader
           column={column}
-          title={tfl("totalAmount")}
+          title={tfl("amount")}
           className="justify-end"
         />
       ),
@@ -223,23 +234,21 @@ export function usePurchaseRequestTable({
         const amount = row.original.base_total_amount;
         if (amount == null) return <span></span>;
         return (
-          <div className="text-right">
-            <span className="font-medium">
-              {formatAmount(amount, amountFormat)}
-            </span>
+          <p className="font-medium">
+            {formatAmount(amount, amountFormat)}
             <span className="text-muted-foreground ms-1 text-xs font-normal">
               {defaultCurrencyCode}
             </span>
-          </div>
+          </p>
         );
       },
       meta: {
-        headerTitle: tfl("totalAmount"),
+        headerTitle: tfl("amount"),
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 120,
+      size: 80,
     },
     ...auditColumns<PurchaseRequest>(tfl, dateTimeFormat),
   ];
@@ -288,7 +297,6 @@ export function usePurchaseRequestTable({
               <DropdownMenuSeparator />
             )}
 
-            {/* Duplicate ได้ทุกสถานะ — สั่งของประจำสัปดาห์คือก๊อปใบเดิมแล้วแก้จำนวน */}
             <DropdownMenuItem onClick={() => handleDuplicate(item)}>
               <Copy aria-hidden="true" />
               {tc("duplicate")}
@@ -309,15 +317,11 @@ export function usePurchaseRequestTable({
     );
   });
 
-  // ติ๊กเองไม่ได้ทันที — ส่งให้คนเรียกตัดสินก่อน เพราะใบฉบับร่างกับใบที่กำลัง
-  // ดำเนินการทำงานคนละอย่าง จึงเลือกปนกันไม่ได้
   const prSelectColumn: DisplayColumnDef<PurchaseRequest> = {
     id: "select",
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    // เท่า selectColumn() ของกลาง — คอลัมน์ติ๊กของ PR เขียนเองเพราะกติกาการเลือก
-    // ต่างจากชาวบ้าน ไม่ใช่เพราะอยากได้ความกว้างต่างจากชาวบ้าน
     size: 55,
     meta: {
       headerClassName: "text-center print:hidden",
