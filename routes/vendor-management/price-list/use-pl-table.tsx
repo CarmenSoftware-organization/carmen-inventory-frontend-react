@@ -28,13 +28,6 @@ interface UsePriceListTableOptions {
   onDelete: (priceList: PriceList) => void;
 }
 
-/**
- * Hook สร้างตาราง price list list พร้อม column no/name/vendor/effective period/status
- * @param props - ข้อมูล price list, total, params, tableConfig และ callbacks สำหรับ edit/delete
- * @returns react-table instance ที่พร้อมใช้กับ DataGrid
- * @example
- * const { table } = usePriceListTable({ priceLists, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function usePriceListTable({
   priceLists,
   totalRecords,
@@ -123,9 +116,6 @@ export function usePriceListTable({
           </StatusDotBadge>
         );
       },
-      // ป้าย `lg` (px-3 + text-sm) ยาวกว่า 100 หน่วยที่คอลัมน์สถานะเคยได้ — กล่อง
-      // clamp ของ DataGrid บีบ badge ด้วย `max-w-full` แล้ว `overflow-hidden`
-      // เฉือนคำยาว (Submitted / Inactive / ไม่ใช้งาน) จนชิดขอบ
       size: 140,
       meta: {
         headerTitle: tfl("status"),
@@ -150,7 +140,6 @@ export function usePriceListTable({
     data: priceLists,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
     initialState: {
       columnVisibility: { created_at: false, updated_at: false },
     },
