@@ -109,7 +109,10 @@ export function usePriceListTemplateTable({
           </StatusDotBadge>
         );
       },
-      size: 100,
+      // ป้าย `lg` (px-3 + text-sm) ยาวกว่า 100 หน่วยที่คอลัมน์สถานะเคยได้ — กล่อง
+      // clamp ของ DataGrid บีบ badge ด้วย `max-w-full` แล้ว `overflow-hidden`
+      // เฉือนคำยาว (Submitted / Inactive / ไม่ใช้งาน) จนชิดขอบ
+      size: 140,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
