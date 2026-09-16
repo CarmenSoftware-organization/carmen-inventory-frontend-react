@@ -19,6 +19,14 @@
 - **ค่าว่าง:** `<base>_id === null` จะได้ `<base>: null` **ห้ามส่ง `{}` หรือ `{ id: null }`**
 - **`product_local_name`** ยุบเข้า `product` เป็นคีย์ `local_name` ไม่แยกเป็น entity ใหม่
 - **allowlist ห้ามแปลง:** `created_by_id`, `updated_by_id`, `deleted_by_id` (มี `audit` ครอบแล้ว) · `po_no`, `pr_no`, `grn_no`, `sr_no`, `si_no`, `so_no`, `cn_no`, `invoice_no`, `tax_invoice_no`, `sequence_no`, `doc_version` (ไม่ใช่ reference)
+- **ฟิลด์ที่มีแต่ `_name`/`_code` โดยไม่มี `_id` คู่ → ปล่อยเป็น flat ไม่แปลง** (38 group ใน 28 ไฟล์
+  ส่วนใหญ่อยู่ใน list schema เช่น `StoreRequisitionListItemResponseSchema` ที่มี `requestor_name`,
+  `department_name`, `from_location_name` โดยไม่มี id เลย) — มันเป็น**ข้อความไว้แสดงผล ไม่ใช่ reference**
+  เพราะไม่มี entity ให้ชี้ไปหา การแปลงเป็น `{ name }` จะได้ object ที่โกหกว่าตัวเองเป็น reference
+  **และการทำให้มันเป็น reference จริงต้องเพิ่มคอลัมน์ id ใน query ของ micro-business
+  ซึ่งผิดข้อจำกัดหลักของงานนี้ที่ห้ามแตะ micro-business**
+  ผลที่ยอมรับ: list กับ detail ของเอกสารเดียวกันจะรูปร่างต่างกันตรงจุดที่ backend ส่งมาแค่ชื่อ
+  (list อ่าน `row.requestor_name` · detail อ่าน `doc.requestor?.name`)
 - **ขอบเขตที่ยืนยันแล้ว:** 146 group ฝั่ง response (40 ไฟล์) + 174 group ฝั่ง request (63 ไฟล์) — **รวม `<x>_id` ที่ไม่มีคู่ด้วย** แม้จะได้ `{ id }` ห่อเปล่า
 - **backend-v2 มี formatter hook ที่จัด prettier ทับไฟล์หลังทุก edit** — ไฟล์บน main ไม่ compliant อยู่แล้ว ต้องคืนไฟล์ที่ไม่ได้ตั้งใจแก้ก่อน commit ทุกครั้ง ไม่งั้นได้ churn หลายร้อยบรรทัด
 - **`turbo run build` ไม่ใช่ด่าน type ของ gateway** (`nest build` ใช้ SWC ที่ strip type) ต้องรัน `bunx tsc --noEmit` เอง
