@@ -62,18 +62,6 @@ const TotalCostCell = memo(function TotalCostCell({
   );
 });
 
-/**
- * ดึงต้นทุนของสินค้าในคลังที่เลือก แล้วเติมลงแถวให้อัตโนมัติ
- *
- * ยิงตั้งแต่เลือกสินค้าเสร็จ (qty เป็น 0 ได้) แล้วยิงใหม่ทุกครั้งที่จำนวนเปลี่ยน —
- * หลังบ้านคิดต้นทุนแบบ FIFO ต่อจำนวนที่ขอ ค่าที่ได้จึงผูกกับ qty เสมอ
- *
- * ค่าที่เติมให้แก้ทับได้ทั้งหมด (ไม่ได้ล็อกช่อง) — `requested_qty` ที่คืนมาอาจ
- * น้อยกว่าที่ขอถ้าของในคลังไม่พอ เขียนกลับลงช่องจำนวนเพื่อให้เห็นของจริง
- *
- * ใช้ทั้ง stock-in และ stock-out — เดิม stock-out ไปเรียก last-receiving ซึ่งเป็น
- * ต้นทุนครั้งล่าสุดที่รับเข้า ไม่ใช่ต้นทุนของล็อตที่จะถูกตัดออกจริง
- */
 const CostProbe = memo(function CostProbe({
   form,
   index,
@@ -102,8 +90,6 @@ const CostProbe = memo(function CostProbe({
     form.setValue(`items.${index}.total_cost`, data.total_cost, {
       shouldDirty: true,
     });
-    // เขียนกลับเฉพาะตอนต่างจริง — ค่าเท่ากันแล้วยัง setValue ซ้ำจะวน render เปล่า
-    // และค่าที่เขียนกลับคือ path param ของรอบถัดไป ต้องให้มันนิ่ง
     if (
       typeof data.requested_qty === "number" &&
       data.requested_qty !== form.getValues(`items.${index}.qty`)
@@ -160,8 +146,6 @@ const ProductCell = memo(function ProductCell({
     );
   }
   return (
-    // ช่องเลือกสินค้าชิดซ้าย กล่องยอดคงเหลือชิดขวา — แนวเดียวกับโหมด view
-    // (CostProbe คืน null ไม่กินที่ในแถว)
     <div className="flex items-center justify-between gap-1.5 pr-4">
       <div className="min-w-0 flex-1">
         <Controller
@@ -181,8 +165,6 @@ const ProductCell = memo(function ProductCell({
                     `items.${index}.product_local_name`,
                     product.local_name ?? "",
                   );
-                  // list endpoint คืนหน่วยเป็น flat string ส่วน detail เป็น object
-                  // (ดู types/product.ts) — อ่านทั้งสองทางไว้
                   form.setValue(
                     `items.${index}.unit_name`,
                     product.inventory_unit?.name ??
@@ -299,7 +281,6 @@ export function useAdjItemTable({
       {
         accessorKey: "unit_name",
         header: tfl("unit"),
-        // แสดงผลอย่างเดียว — ได้ค่าจากสินค้าที่เลือก (inventory unit) แก้ไม่ได้
         cell: ({ row }) => (
           <UnitCell control={form.control} index={row.index} />
         ),
