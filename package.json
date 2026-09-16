@@ -21,7 +21,8 @@
     "test:run": "vitest run",
     "lint": "eslint .",
     "clear": "rm -rf dist node_modules",
-    "gen:license-fixture": "bun scripts/gen-license-fixture.ts"
+    "gen:license-fixture": "bun scripts/gen-license-fixture.ts",
+    "gen:route-map": "bun scripts/gen-route-map.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
