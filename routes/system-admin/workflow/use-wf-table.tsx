@@ -14,7 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { WorkflowDto } from "@/types/workflows";
-import { WfTypeLabel } from "./wf-type-label";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -89,24 +88,6 @@ export function useWfTable({
           </CellAction>
         );
       },
-    },
-    {
-      accessorKey: "workflow_type",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={t("workflowType")}
-          className="justify-center"
-        />
-      ),
-      cell: ({ row }) => (
-        <WfTypeLabel
-          type={row.getValue("workflow_type")}
-          className={cn(!row.original.is_active && "opacity-60")}
-        />
-      ),
-      size: 180,
-      meta: { cellClassName: "text-center" },
     },
     {
       id: "flow",

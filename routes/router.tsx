@@ -651,7 +651,12 @@ export const router = createBrowserRouter([
               },
               {
                 path: "workflow",
-                lazy: () => import("./system-admin/workflow/workflow.route"),
+                element: (
+                  <Navigate
+                    to="/system-admin/workflow/purchase-request"
+                    replace
+                  />
+                ),
               },
               // สามเส้นนี้ต้องมาก่อน `workflow/:id` — react-router จัดลำดับ static
               // เหนือ dynamic ให้อยู่แล้ว แต่เขียนติดกันไว้จะได้เห็นความสัมพันธ์

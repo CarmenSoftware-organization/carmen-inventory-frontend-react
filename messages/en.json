@@ -1735,6 +1735,9 @@
     "workflow": {
       "entity": "Workflow",
       "title": "Workflow",
+      "titlePurchaseRequest": "Purchase Request Workflow",
+      "titlePurchaseOrder": "Purchase Order Workflow",
+      "titleStoreRequisition": "Store Requisition Workflow",
       "desc": "Who approves what, and in which order, before a document can go through.",
       "add": "New Workflow",
       "edit": "Edit Workflow",
