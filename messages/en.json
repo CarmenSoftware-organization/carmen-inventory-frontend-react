@@ -2183,6 +2183,45 @@
         "send": "Send test",
         "invalidEmail": "Enter a valid email address"
       }
+    },
+    "emailTemplate": {
+      "title": "Email Messages",
+      "desc": "Reusable subject and message templates for emailing purchase orders and pricing requests to vendors.",
+      "entity": "Email message",
+      "add": "Add message",
+      "empty": "No email messages yet. Add one so the send dialog starts from your own wording.",
+      "loadError": "Could not load email messages",
+      "table": {
+        "name": "Name",
+        "docType": "Document",
+        "subject": "Subject",
+        "status": "Status"
+      },
+      "docType": {
+        "po": "Purchase order",
+        "rfp": "Request for pricing"
+      },
+      "defaultBadge": "Default",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "\"{name}\" is now the default message",
+      "deleteTitle": "Delete email message",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "dialog": {
+        "templateName": "Message name",
+        "docType": "Document type",
+        "subject": "Subject",
+        "subjectPlaceholder": "Purchase order {{po_no}}",
+        "body": "Message",
+        "insertVariable": "Insert variable",
+        "preview": "Preview",
+        "backToEdit": "Back to editing",
+        "defaultCc": "Default CC",
+        "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
+        "note": "Note",
+        "enabled": "Enabled"
+      }
     }
   },
   "vendorManagement": {
@@ -4585,6 +4624,7 @@
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
     "emailProfile": "Email Profiles",
+    "emailTemplate": "Email Messages",
     "inventoryPeriod": "Inventory Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",

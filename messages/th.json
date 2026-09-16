@@ -2183,6 +2183,45 @@
         "send": "ส่งทดสอบ",
         "invalidEmail": "กรอกอีเมลให้ถูกรูปแบบ"
       }
+    },
+    "emailTemplate": {
+      "title": "ข้อความอีเมล",
+      "desc": "หัวเรื่องและเนื้อความสำเร็จรูปสำหรับส่งใบสั่งซื้อและคำขอราคาให้ผู้ขายทางอีเมล",
+      "entity": "ข้อความอีเมล",
+      "add": "เพิ่มข้อความ",
+      "empty": "ยังไม่มีข้อความอีเมล เพิ่มไว้เพื่อให้กล่องส่งเอกสารเริ่มจากข้อความของคุณเอง",
+      "loadError": "โหลดข้อความอีเมลไม่สำเร็จ",
+      "table": {
+        "name": "ชื่อ",
+        "docType": "เอกสาร",
+        "subject": "หัวเรื่อง",
+        "status": "สถานะ"
+      },
+      "docType": {
+        "po": "ใบสั่งซื้อ",
+        "rfp": "คำขอรายการราคา"
+      },
+      "defaultBadge": "ค่าเริ่มต้น",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "setDefault": "ตั้งเป็นค่าเริ่มต้น",
+      "setDefaultSuccess": "ตั้ง \"{name}\" เป็นข้อความเริ่มต้นแล้ว",
+      "deleteTitle": "ลบข้อความอีเมล",
+      "deleteConfirm": "ลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "dialog": {
+        "templateName": "ชื่อข้อความ",
+        "docType": "ชนิดเอกสาร",
+        "subject": "หัวเรื่อง",
+        "subjectPlaceholder": "ใบสั่งซื้อเลขที่ {{po_no}}",
+        "body": "เนื้อความ",
+        "insertVariable": "แทรกตัวแปร",
+        "preview": "ดูตัวอย่าง",
+        "backToEdit": "กลับไปแก้ไข",
+        "defaultCc": "สำเนาถึง (ค่าเริ่มต้น)",
+        "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
+        "note": "หมายเหตุ",
+        "enabled": "เปิดใช้งาน"
+      }
     }
   },
   "vendorManagement": {
@@ -4575,6 +4614,7 @@
     "workflowStoreRequisition": "ใบเบิกของ",
     "interface": "การเชื่อมต่อระบบภายนอก",
     "emailProfile": "โปรไฟล์อีเมล",
+    "emailTemplate": "ข้อความอีเมล",
     "inventoryPeriod": "รอบสินค้าคงคลัง",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",
