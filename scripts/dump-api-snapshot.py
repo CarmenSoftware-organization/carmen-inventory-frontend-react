@@ -36,7 +36,6 @@ ENDPOINTS = [
     ('cn', f'/api/{BU}/credit-notes'),
     ('si', f'/api/{BU}/stock-ins'),
     ('so', f'/api/{BU}/stock-outs'),
-    ('sr', f'/api/{BU}/store-requisitions'),
     ('rfp', f'/api/{BU}/request-for-pricings'),
     ('product', f'/api/config/{BU}/products'),
     ('pricelist', f'/api/config/{BU}/pricelists'),
@@ -60,3 +59,18 @@ if m:
     url = f'/api/{BU}/purchase-requests/{m.group(1)}'
     save('pr.detail.json', get(url), url)
     print('pr: ok')
+
+# SR ใช้ route คนละแบบ: list ข้าม BU ต้องส่ง bu_code เป็น query param
+# และ items ห่ออยู่ที่ data[0].data — ไม่มี route GET /:bu/store-requisitions
+sr_list_url = f'/api/store-requisitions?perpage=5&bu_code={BU}'
+sr_list = get(sr_list_url)
+save('sr.list.json', sr_list, sr_list_url)
+try:
+    sr_id = sr_list['data'][0]['data'][0]['id']
+except (KeyError, IndexError, TypeError):
+    sr_id = None
+    print('sr: ไม่มีข้อมูล ข้าม detail')
+if sr_id:
+    sr_detail_url = f'/api/{BU}/store-requisitions/{sr_id}'
+    save('sr.detail.json', get(sr_detail_url), sr_detail_url)
+    print('sr: ok')
