@@ -35,11 +35,6 @@ interface UseInventoryAdjustmentTableOptions {
   onDelete: (item: InventoryAdjustment) => void;
 }
 
-/**
- * Hook สร้างตาราง Inventory Adjustment
- * Auto-append columns: select, index, action ผ่าน useConfigTable
- * (`hideStatus` เพราะ IA มี doc_status เอง ไม่ใช่ is_active)
- */
 export function useInventoryAdjustmentTable({
   items,
   totalRecords,
@@ -109,6 +104,8 @@ export function useInventoryAdjustmentTable({
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.badge,
+        cellClassName: "text-center",
+        headerClassName: "text-center",
       },
     },
     {
@@ -148,8 +145,6 @@ export function useInventoryAdjustmentTable({
           <StatusIconLabel
             status={status}
             label={config?.label ?? status}
-            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
-            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
             className="flex w-full justify-center"
           />
         );
@@ -164,18 +159,15 @@ export function useInventoryAdjustmentTable({
     {
       accessorKey: "base_total_cost",
       header: tfl("total"),
-      // ยอด + รหัสสกุลเงินของ BU (สกุลเดียวทั้งใบ ไม่มีต่อรายการ) แบบเดียวกับ PR
       cell: ({ row }) => (
-        <>
-          <span className="font-medium">
-            {formatAmount(row.original.base_total_cost, amountFormat)}
-          </span>
+        <p className="font-medium">
+          {formatAmount(row.original.base_total_cost, amountFormat)}
           {defaultCurrencyCode && (
             <span className="text-muted-foreground ms-1 text-xs font-normal">
               {defaultCurrencyCode}
             </span>
           )}
-        </>
+        </p>
       ),
       meta: {
         headerTitle: tfl("total"),
