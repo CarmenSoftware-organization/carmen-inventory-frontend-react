@@ -31,8 +31,8 @@ API ของระบบใช้สองแบบปนกันในกา�
 
 | ฝั่ง | ขนาด |
 |---|---|
-| response (serializer ที่ gateway) | 85 reference group / 23 ไฟล์ |
-| request (write DTO ที่ gateway) | 103 reference group / 44 ไฟล์ |
+| response (serializer ที่ gateway) | **146 reference group / 40 ไฟล์** |
+| request (DTO ที่ gateway) | **174 reference group / 63 ไฟล์** |
 | frontend-react | 2,358 จุด / 297 ไฟล์ |
 | mobile | 453 จุด / 36 ไฟล์ |
 | e2e | 23 จุด / 8 ไฟล์ |
@@ -93,13 +93,26 @@ performance และทำให้ diff ตรวจไม่ได้ว่�
 `invoice_no`, `tax_invoice_no`, `sequence_no`, `doc_version` และพวก `_rate` / `_amount` /
 `_qty` ทั้งหมด กติกา "ต้องมี `_id` คู่" คัดออกได้เองโดยอัตโนมัติ ที่เหลือใส่ allowlist
 
-### สามเคสที่ตัดสินไว้แล้ว
+### สี่เคสที่ตัดสินไว้แล้ว
 
 1. **`product_local_name`** เป็นชื่อที่สองของ product ตัวเดียวกัน ไม่ใช่ entity คนละตัว
    → ยุบเข้าด้วยกันเป็น `product: { id, name, local_name, code }`
-2. **`_id` ที่ไม่มีคู่** (เช่น `tax_profile_id` ที่มากับ `tax_profile_name: null`)
-   → **ยังแปลงเป็น object** `tax_profile: { id, name }` เพื่อให้ contract สม่ำเสมอ
-3. **ค่าว่าง:** ถ้า `<base>_id` เป็น `null` → ส่ง `<base>: null`
+2. **`_id` ที่ไม่มีคู่** → **ยังแปลงเป็น object** แม้จะได้ `{ id }` เปล่า ๆ
+   เพื่อให้ contract สม่ำเสมอ 100% ไม่มี flat หลงเหลือ
+
+   **ตัวเลขจริงหลังนับรายไฟล์: นี่คือส่วนใหญ่ ไม่ใช่เคสหายาก** — response 61 จาก 146
+   และ request **140 จาก 174** เป็น `<x>_id` โดด ๆ แปลว่า payload ฝั่งเขียนเกือบทั้งหมด
+   จะกลายเป็น `{ id }` ห่อเปล่า เช่น
+   `{ vendor: {id}, currency: {id}, purchase_order_detail: { add: [{ product: {id},
+   location: {id}, order_unit: {id} }] } }`
+   ยืนยันแล้วว่าเอาแบบนี้ โดยรู้ราคาของมัน (งานฝั่ง request โตขึ้นเกือบ 3 เท่า
+   เทียบกับการแปลงเฉพาะตัวที่มีคู่)
+3. **คอลัมน์ audit ไม่แตะ** — `created_by_id` / `updated_by_id` / `deleted_by_id`
+   (134 จุดใน response) **ห้ามแปลง** เพราะมี `audit` object ครอบอยู่แล้ว และ gateway
+   ตั้งใจ strip ฟิลด์ดิบพวกนี้ทิ้ง (ดูบันทึก "Gateway strips raw audit fields")
+   การแปลงเป็น `created_by: { id }` จะไปชนกับ `audit` ที่มีอยู่ → ใส่ allowlist
+
+4. **ค่าว่าง:** ถ้า `<base>_id` เป็น `null` → ส่ง `<base>: null`
    **ไม่ใช่ `{}` และไม่ใช่ `{ id: null, name: null }`**
    (ของเดิมที่ PO ทำอยู่ส่ง `{}` ซึ่งทำให้ FE แยกไม่ออกว่า "ไม่มีค่า" กับ "โหลดไม่ได้")
    ฝั่ง FE อ่านด้วย `po.credit_term?.name ?? "—"`
