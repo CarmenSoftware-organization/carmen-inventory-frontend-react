@@ -38,7 +38,9 @@ export const API_ENDPOINTS = {
   ANALYTICS_EVENTS: "/api/proxy/api/analytics-events",
   APPLICATION_ROLES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/application-roles`,
-  APPROVAL_PENDING: "/api/proxy/api/my-approve",
+  // รายการรวม PR/PO/SR จาก view sys_v_my_pending — คืน list แบนชุดเดียวที่เรียงและ
+  // แบ่งหน้ามาจาก SQL แล้ว ต่างจาก /api/my-approve เดิมที่คืนสามกลุ่มแยกและแบ่งหน้าแยกกัน
+  APPROVAL_PENDING: "/api/proxy/api/my-pending",
   APPROVAL_PENDING_SUMMARY: "/api/proxy/api/my-approve/pending",
   APP_CONFIGS: (buCode: string) => `/api/proxy/api/config/${buCode}/app-config`,
   APP_CONFIG_BY_KEY: (buCode: string, key: string) =>

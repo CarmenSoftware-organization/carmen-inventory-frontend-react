@@ -13,6 +13,7 @@ import {
   indexColumn,
   sendbackColumn,
 } from "@/components/ui/data-grid/columns";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import {
   DataGrid,
   DataGridContainer,
@@ -75,7 +76,9 @@ export default function ApprovalQueueList({
     indexColumn<ApprovalItem>(params),
     {
       accessorKey: "doc_no",
-      header: t("document"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={t("document")} />
+      ),
       cell: ({ row }) => {
         const item = row.original;
 
@@ -89,12 +92,18 @@ export default function ApprovalQueueList({
           </Link>
         );
       },
-      meta: { skeleton: columnSkeletons.text },
+      meta: { headerTitle: t("document"), skeleton: columnSkeletons.text },
     },
     sendbackColumn<ApprovalItem>(tc("sendBack")),
     {
       accessorKey: "doc_type",
-      header: tfl("type"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("type")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => (
         <Badge
           variant={
@@ -108,6 +117,7 @@ export default function ApprovalQueueList({
       ),
       size: 60,
       meta: {
+        headerTitle: tfl("type"),
         cellClassName: "text-center",
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
@@ -116,20 +126,32 @@ export default function ApprovalQueueList({
 
     {
       accessorKey: "doc_date",
-      header: tfl("date"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("date")} />
+      ),
       cell: ({ row }) => (
         <span className="text-muted-foreground">
           {formatDate(row.original.doc_date, dateFormat)}
         </span>
       ),
       size: 100,
-      meta: { skeleton: columnSkeletons.text },
+      meta: { headerTitle: tfl("date"), skeleton: columnSkeletons.text },
     },
     {
-      accessorKey: "status",
-      header: tfl("status"),
+      // id ต้องเป็นชื่อคอลัมน์ของ view (doc_status) ไม่ใช่ชื่อที่ normalize แล้ว (status)
+      // เพราะ id คือคีย์ที่ถูกส่งไปเป็น `sort=<id>:asc` และ backend ทิ้งคีย์นอก
+      // allowlist เงียบ ๆ แล้วถอยไปเรียงตาม doc_date แทน — คลิกแล้วจะเหมือนไม่มีอะไรเกิดขึ้น
+      id: "doc_status",
+      accessorFn: (row) => row.status,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+        const status = row.original.status;
         const config =
           PR_STATUS_CONFIG[status ?? "draft"] ?? PR_STATUS_CONFIG.draft;
         return (
@@ -144,6 +166,7 @@ export default function ApprovalQueueList({
       },
       size: 100,
       meta: {
+        headerTitle: tfl("status"),
         cellClassName: "text-center",
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
