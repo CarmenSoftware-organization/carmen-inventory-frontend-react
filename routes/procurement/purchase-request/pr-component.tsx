@@ -125,8 +125,13 @@ export default function PurchaseRequestComponent() {
   const isGridMode = isMobile || displayMode === "grid";
   const { exportPurchaseRequest, isExporting } = useExportPurchaseRequest();
 
+  /**
+   * เรียงตามวันที่เป็นค่าเริ่มต้นทั้งสองกลุ่ม แต่คนละทิศ — "รอฉันดำเนินการ" เป็นคิวงาน
+   * ใบเก่าสุดต้องอยู่บนสุด (asc) ส่วน "เอกสารทั้งหมด" เป็นทะเบียนย้อนหลัง
+   * ใบล่าสุดต้องอยู่บนสุด (desc) · ค่านี้มีผลเฉพาะตอนไม่มี `sort` ใน URL
+   */
   const { params, search, setSearch, tableConfig } = useDataGridState({
-    defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
+    defaultSort: viewMode === "my-pending" ? "pr_date:asc" : "pr_date:desc",
   });
 
   const prFilterFields = usePrFilterFields({
@@ -137,7 +142,7 @@ export default function PurchaseRequestComponent() {
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PURCHASE_REQUEST,
     fields: prFilterFields,
-    defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
+    defaultSort: viewMode === "my-pending" ? "pr_date:asc" : "pr_date:desc",
   });
 
   const queryParams = { ...params, filter: lf.filterParam };
