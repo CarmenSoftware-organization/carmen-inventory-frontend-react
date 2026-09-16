@@ -72,6 +72,10 @@ export default function ApprovalComponent() {
   const { params, search, setSearch, filter, setFilter, tableConfig } =
     useDataGridState({
       defaultPerpage: 10,
+      // ตรงกับ MY_PENDING_DEFAULT_SORT ของ backend (เอกสารที่รอนานสุดขึ้นก่อน)
+      // ประกาศไว้ฝั่งนี้ด้วยเพื่อให้หัวคอลัมน์โชว์ลูกศรตั้งแต่เปิดหน้า และการคลิก
+      // สลับ asc↔desc ได้ตลอด ไม่ตกไปอยู่สถานะ "ไม่เรียง" ที่มองไม่ออกว่าต่างกัน
+      defaultSort: "doc_date:asc",
     });
 
   const activeType = filter?.match(/doc_type:(\w+)/)?.[1] ?? "total";
