@@ -6,7 +6,8 @@ import type { LastAction } from "./last-action";
 export enum PO_STATUS {
   DRAFT = "draft",
   IN_PROGRESS = "in_progress",
-  SENT = "sent",
+  APPROVED = "approved",
+  SENT_OR_PRINT = "sent_or_print",
   PARTIAL = "partial",
   CLOSED = "closed",
   COMPLETED = "completed",
@@ -16,30 +17,6 @@ export enum PO_TYPE {
   MANUAL = "manual",
   PL = "pricelist",
   PR = "purchase_request",
-}
-
-interface PoDetailLocation {
-  location_id: string | null;
-  location_code: string | null;
-  location_name: string | null;
-  delivery_point_id: string | null;
-  delivery_point_name: string | null;
-  order_qty: number;
-  order_base_qty: number;
-  received_qty: number;
-  foc_qty: number;
-  // per-location pricing (optional — POs เก่าอาจไม่มี, load แล้ว fallback ค่า item)
-  discount_rate?: number;
-  discount_amount?: number;
-  is_discount_adjustment?: boolean;
-  tax_profile_id?: string | null;
-  tax_profile_name?: string;
-  tax_rate?: number;
-  tax_amount?: number;
-  is_tax_adjustment?: boolean;
-  sub_total_price?: number;
-  net_amount?: number;
-  total_price?: number;
 }
 
 interface PurchaseOrderDetail extends ItemMoneyFields {
@@ -68,28 +45,51 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
   is_foc: boolean;
   discount_rate: number;
   discount_amount: number;
-  pr_detail: PrDetailRef[];
-  locations: PoDetailLocation[];
+  is_tax_adjustment?: boolean;
+  is_discount_adjustment?: boolean;
+  sequence_no?: number;
+  /**
+   * แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location (2026-09-09)
+   * ของเดิมเป็น `locations: PoDetailLocation[]` ซ้อนอยู่ในแถว แล้ว `order_qty`
+   * ระดับแถวคือผลรวมของทุก location — ตอนนี้ค่าพวกนี้อยู่บนแถวตรง ๆ
+   */
+  location_id: string | null;
+  location_code: string | null;
+  location_name: string | null;
+  delivery_point_id: string | null;
+  delivery_point_name: string | null;
+  /**
+   * ฟิลด์ที่ frontend ส่งขึ้นแล้วแต่ response ยังไม่ส่งกลับมา — ประกาศเป็น optional
+   * ตามความจริง ไม่ใช่ตามที่อยากให้เป็น (`getDefaultValues` เติมค่าว่างให้อยู่แล้ว)
+   */
+  comment?: string | null;
+  foc_qty: number;
+  foc_unit_id?: string | null;
+  foc_unit_name?: string | null;
+  base_sub_total_price?: number;
+  base_net_amount?: number;
+  base_total_price?: number;
+  stages_status?: Record<string, unknown>;
+  info?: Record<string, unknown>;
+  pr_details: PrDetailRef[];
   history?: PoItemHistoryEntry[];
 }
 
-/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบสั่งซื้อ */
 export interface PoItemHistoryEntry {
   at: string;
   seq: number;
   name: string;
-  /** บาง entry หลังบ้านส่งมาแค่ id ไม่มีชื่อ */
   user: { id: string; name?: string };
   status: string;
   message?: string | null;
 }
 
 export interface PrDetailRef {
-  pr_detail_id: string;
+  pr_detail_id: string | null;
   order_qty: number;
-  order_unit_id: string;
-  order_unit_name: string;
   order_base_qty: number;
+  received_qty: number;
+  foc_qty: number;
 }
 
 export interface PoDetailPayload {
@@ -120,29 +120,18 @@ export interface PoDetailPayload {
   discount_amount: number;
   is_discount_adjustment: boolean;
   is_foc: boolean;
-  pr_detail: PrDetailRef[];
+  foc_qty: number;
+  pr_details: PrDetailRef[];
   description: string;
-  locations: PoDetailPayloadLocation[];
-}
-
-interface PoDetailPayloadLocation {
-  location_id: string;
+  // แถวหนึ่ง = คลังเดียว — ของเดิมส่ง `locations[]` ซ้อนในแถว
+  location_id: string | null;
   location_code: string;
   location_name: string;
-  order_qty: number;
-  order_base_qty: number;
-  price: number;
-  discount_rate: number;
-  discount_amount: number;
-  is_discount_adjustment: boolean;
-  tax_profile_id: string | null;
-  tax_profile_name: string;
-  tax_rate: number;
-  tax_amount: number;
-  is_tax_adjustment: boolean;
-  sub_total_price: number;
-  net_amount: number;
-  total_price: number;
+  delivery_point_id: string | null;
+  delivery_point_name: string;
+  comment: string;
+  foc_unit_id: string | null;
+  foc_unit_name: string;
 }
 
 export interface CreatePoDto {
@@ -183,14 +172,10 @@ export interface PurchaseOrder {
   po_type: string;
   workflow_id: string | null;
   workflow_name: string;
-  workflow_current_stage: string;
-  workflow_previous_stage: string;
-  workflow_next_stage: string;
+  workflow_current_stage: string | null;
+  workflow_previous_stage: string | null;
+  workflow_next_stage: string | null;
   workflow_history?: WorkflowHistoryEntry[];
-  /**
-   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
-   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
-   */
   last_action?: LastAction | null;
   vendor_id: string;
   vendor_name: string;
@@ -200,14 +185,18 @@ export interface PurchaseOrder {
   exchange_rate: number;
   description: string;
   order_date: string;
-  credit_term_id: string;
-  credit_term_name: string;
+  credit_term_id: string | null;
+  credit_term_name: string | null;
   credit_term_value: number;
   buyer_id: string;
   buyer_name: string;
   email: string;
   remarks: string;
-  note: string;
+  approval_date: string | null;
+  vendor?: { id: string; name: string };
+  currency?: { id: string; code: string };
+  user_action?: Record<string, unknown>;
+  info?: Record<string, unknown>;
   doc_version: number;
   total_amount: number;
   // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
@@ -234,6 +223,7 @@ interface PoGrnDetailLocation {
   request_base_unit_id?: string | null;
   request_base_unit_name?: string | null;
   received_qty?: number;
+  can_use?: boolean;
 }
 
 export interface PoGrnDetail {
@@ -256,6 +246,7 @@ export interface PoGrnDetail {
   net_amount: number;
   is_foc: boolean;
   locations: PoGrnDetailLocation[];
+  can_use?: boolean;
 }
 
 export interface PoForGrn {
@@ -271,6 +262,7 @@ export interface PoForGrn {
   currency_code: string;
   exchange_rate: number;
   po_detail: PoGrnDetail[];
+  can_use?: boolean;
 }
 
 // --- Vendor for GRN (from /purchase-order/grn/vendor) ---

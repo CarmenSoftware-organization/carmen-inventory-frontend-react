@@ -28,9 +28,6 @@ interface CuisineFormProps {
   readonly cuisine?: Cuisine;
 }
 
-/**
- * ฟอร์มสำหรับสร้างและแก้ไขข้อมูล cuisine รองรับโหมด view/edit/add
- */
 const LIST_PATH = "/operation-plan/cuisine";
 
 export function CuisineForm({ cuisine }: CuisineFormProps) {

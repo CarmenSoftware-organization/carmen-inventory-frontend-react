@@ -13,13 +13,6 @@ const CurrencyDialog = lazy(() =>
   import("./currency-dialog").then((mod) => ({ default: mod.CurrencyDialog })),
 );
 
-/**
- * Component หลักของหน้ารายการ Currency ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Currency
- * @example
- * // route: /config/currency
- * <CurrencyComponent />
- */
 export default function CurrencyComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

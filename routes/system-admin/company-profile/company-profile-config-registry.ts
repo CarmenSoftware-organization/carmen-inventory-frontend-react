@@ -2,13 +2,9 @@ import { printFormConfigKey } from "@/lib/print-form-config";
 import type { PrintDocumentType } from "@/lib/print-document";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
-/** option ของ enum config (datatype "enum") */
 export interface ConfigOption {
-  /** ค่าที่เก็บ (canonical snake_case, locale-independent) */
   value: string;
-  /** i18n key ของ label option (relative ต่อ defaultSetting) */
   labelKey: string;
-  /** แสดง option นี้เฉพาะเมื่อ BU.calculation_method === ค่านี้ (undefined = แสดงเสมอ) */
   visibleWhenCalcMethod?: string;
 }
 
@@ -17,17 +13,11 @@ export interface ConfigOption {
  * (default = defaultValue) พอ user เปิดแล้ว save ค่าจะถูกเขียนลง backend
  */
 export interface SeededConfigItem {
-  /** key จริงที่ backend ใช้ */
   key: string;
-  /** ชนิดข้อมูล — "boolean" → ConfigField render เป็น Switch */
   datatype: string;
-  /** ค่าเริ่มต้น (string เสมอ ตาม BusinessUnitConfigItem) */
   defaultValue: string;
-  /** label canonical (EN) ที่ persist ลง backend — locale-independent กัน false-dirty */
   label: string;
-  /** i18n key สำหรับ "แสดงผล" (relative ต่อ namespace defaultSetting) */
   labelKey: string;
-  /** สำหรับ datatype "enum" — รายการ option ตามลำดับที่แสดง */
   options?: ConfigOption[];
   /**
    * สำหรับ enum ที่ options มาจาก report-template API (ไม่ใช่ static `options`)
@@ -36,18 +26,13 @@ export interface SeededConfigItem {
   optionsGroup?: string;
 }
 
-/** section ที่จัดกลุ่ม seeded config items */
 export interface ConfigSection {
-  /** id ภายใน (ไม่แสดงผล) */
   id: string;
-  /** i18n key ของหัวข้อ (relative ต่อ defaultSetting) */
   titleKey: string;
-  /** i18n key ของคำอธิบาย */
   descKey: string;
   items: SeededConfigItem[];
 }
 
-/** registry ของ config ที่ frontend seed จัดกลุ่มตาม section */
 export const CONFIG_SECTIONS: readonly ConfigSection[] = [
   {
     id: "pr",
@@ -136,35 +121,26 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
   },
 ];
 
-/** seeded items ทั้งหมด flatten จากทุก section */
 export const SEEDED_ITEMS: readonly SeededConfigItem[] =
   CONFIG_SECTIONS.flatMap((s) => s.items);
 
-/** เซ็ตของ key ที่ registry เป็นเจ้าของ (ใช้ partition ตอน render) */
 export const SEEDED_KEYS: ReadonlySet<string> = new Set(
   SEEDED_ITEMS.map((i) => i.key),
 );
 
-/** entry ของ config ใน section — เก็บ absolute index (สำหรับ RHF path) + labelKey */
 export interface ConfigSectionEntry {
   item: BusinessUnitConfigItem;
-  /** index ใน merged config array — ใช้กับ RHF path `config.${index}.value` */
   index: number;
-  /** i18n key สำหรับ display label (จาก registry) */
   labelKey: string;
-  /** สำหรับ enum — options จาก registry (undefined = ไม่ใช่ enum) */
   options?: ConfigOption[];
-  /** สำหรับ enum ที่ options มาจาก API — report_group ที่ใช้กรอง */
   optionsGroup?: string;
 }
 
-/** entry ของ config ที่ไม่อยู่ใน registry section (backend-only) */
 export interface ConfigOtherEntry {
   item: BusinessUnitConfigItem;
   index: number;
 }
 
-/** section ที่พร้อม render (มี entry อย่างน้อย 1) */
 export interface ConfigRenderSection {
   id: string;
   titleKey: string;
@@ -172,11 +148,8 @@ export interface ConfigRenderSection {
   entries: ConfigSectionEntry[];
 }
 
-/** ผลของการจัดกลุ่ม config เพื่อ render */
 export interface ConfigRenderGroups {
-  /** section จาก registry ที่มี entry (ตามลำดับ registry) */
   sections: ConfigRenderSection[];
-  /** items ที่ไม่อยู่ใน registry section → section "Configuration" เดิม */
   other: ConfigOtherEntry[];
 }
 

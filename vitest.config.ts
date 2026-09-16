@@ -4,7 +4,10 @@ import { defineConfig } from "vitest/config";
 import { appVersion } from "./scripts/app-version";
 
 export default defineConfig({
-  plugins: [react()],
+  // React Compiler ต้องเปิดให้ตรงกับ vite.config.ts — ไม่งั้นเทสต์รันคนละไบนารี
+  // กับของที่ deploy จริง แล้ว "use no memo" 194 จุดในแอปจะไม่มีอะไรคุ้มกันเลย
+  // (พิสูจน์แล้ว: ถอด directive ที่ DataGrid ออก suite แดงเฉพาะตอนเปิดบรรทัดนี้)
+  plugins: [react({ babel: { plugins: ["babel-plugin-react-compiler"] } })],
   test: {
     environment: "jsdom",
     environmentOptions: { jsdom: { url: "http://localhost" } },

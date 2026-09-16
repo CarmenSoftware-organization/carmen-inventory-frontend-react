@@ -20,7 +20,6 @@ interface CuisineGeneralFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/** General info section — name · region · description */
 export function CuisineGeneralFields({
   form,
   isDisabled,
@@ -45,7 +44,6 @@ export function CuisineGeneralFields({
           <FieldInput
             id="cuisine-name"
             placeholder={t("namePlaceholder")}
-            className="h-8"
             disabled={isDisabled}
             maxLength={100}
             error={errors.name?.message}
@@ -63,7 +61,6 @@ export function CuisineGeneralFields({
                 value={field.value}
                 onValueChange={field.onChange}
                 placeholder={t("selectRegion")}
-                className="h-8 w-full text-sm"
                 disabled={isDisabled}
                 error={errors.region?.message}
               >
@@ -87,7 +84,6 @@ export function CuisineGeneralFields({
         <Textarea
           id="cuisine-description"
           placeholder={tfl("optional")}
-          rows={2}
           disabled={isDisabled}
           maxLength={256}
           {...form.register("description")}

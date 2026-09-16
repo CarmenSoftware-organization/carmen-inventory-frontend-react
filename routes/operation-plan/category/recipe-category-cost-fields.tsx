@@ -9,7 +9,6 @@ interface RecipeCategoryCostFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/** Default cost settings — labor% · overhead% · target food cost% */
 export function RecipeCategoryCostFields({
   form,
   isDisabled,

@@ -6,24 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-/**
- * Container กล่องเดียวสำหรับรวม Input + Addon (icon/ปุ่ม/ข้อความ)
- *
- * ใช้ composition pattern — render ลูกเป็น InputGroupAddon, InputGroupInput,
- * InputGroupText, InputGroupButton ได้อิสระ รองรับ align แบบ inline (ซ้าย/ขวา)
- * และ block (บน/ล่าง) ผ่าน data-align ของลูก จัดการ focus/error state รวมของ
- * กลุ่มผ่าน CSS :has() selector
- *
- * @param props - props ของ div พร้อม className เสริม
- * @returns JSX element ของกล่อง group
- * @example
- * ```tsx
- * <InputGroup>
- *   <InputGroupAddon><Search /></InputGroupAddon>
- *   <InputGroupInput placeholder="Search..." />
- * </InputGroup>
- * ```
- */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -130,21 +112,6 @@ const inputGroupButtonVariants = cva(
   },
 );
 
-/**
- * ปุ่มขนาดเล็กสำหรับใช้ภายใน InputGroupAddon
- *
- * Default type="button" variant="ghost" size="xs" ปรับ radius/padding
- * ให้เข้ากับความสูง 36px ของ InputGroup รองรับ size: xs, sm, icon-xs, icon-sm
- *
- * @param props - props ของ Button + size variant
- * @returns JSX element ปุ่ม
- * @example
- * ```tsx
- * <InputGroupButton size="icon-xs" onClick={clear}>
- *   <X />
- * </InputGroupButton>
- * ```
- */
 function InputGroupButton({
   className,
   type = "button",

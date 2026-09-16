@@ -21,16 +21,6 @@ export interface UsePrintDocumentResult {
   isPrinting: boolean;
 }
 
-/**
- * UI-side wrapper around printDocument(): pulls buCode from context, applies the
- * BU's configured print form, manages a loading flag so callers can disable
- * buttons, and surfaces failures via toast.
- *
- * The form comes from the BU record (`useBusinessUnit`), not from the profile —
- * `useProfile().defaultBu.config` is a different, curated object shape that does
- * not carry the config array the Default Setting page edits. The query is cached
- * for 5 minutes, so this costs no extra request per print.
- */
 export function usePrintDocument(): UsePrintDocumentResult {
   const buCode = useBuCode();
   const { defaultBu } = useProfile();

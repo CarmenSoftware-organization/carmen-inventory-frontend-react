@@ -13,6 +13,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Eye,
+  FilterX,
   Loader2,
   Plus,
   RefreshCcw,
@@ -26,6 +27,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   AlertDialog,
@@ -39,7 +41,8 @@ import {
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrFormValues } from "./pr-form-schema";
-import { usePrItemTable } from "./pr-item-table";
+import { usePrItemTable } from "./use-pr-item-table";
+import { usePrItemFilter } from "./use-pr-item-filter";
 import {
   PrActionDialog,
   type StageOption,
@@ -94,12 +97,15 @@ export function PrItemFields({
 }: PrItemFieldsProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
+  const tl = useTranslations("lookup");
   const [isAllocating, setIsAllocating] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<
     PR_ITEM_STAGE_STATUS.REVIEW | PR_ITEM_STAGE_STATUS.REJECTED | null
   >(null);
   const [showOverQtyWarning, setShowOverQtyWarning] = useState(false);
+
+  const filter = usePrItemFilter(form);
 
   const {
     fields: itemFields,
@@ -114,11 +120,32 @@ export function PrItemFields({
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — คนเบิกของมัก
+    // เบิกจากคลังเดิมติดกันหลายรายการ เติมคลัง + จุดส่งของให้ล่วงหน้าแล้วแก้เอง
+    // ได้ · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field array เก็บค่า
+    // ตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_code: prev.location_code,
+          location_name: prev.location_name,
+          location_type: prev.location_type,
+          delivery_point_id: prev.delivery_point_id,
+          delivery_point_name: prev.delivery_point_name,
+        }
+      : {};
+
+    // วันที่ต้องการของก็ตามมาจากแถวก่อนหน้าเหมือนคลัง — ของที่เบิกพร้อมกันมัก
+    // ต้องการวันเดียวกัน · แถวแรกของใบยังไม่มีอะไรให้ตาม ใช้พรุ่งนี้เหมือนเดิม
+    const carriedDeliveryDate = prev?.delivery_date || tomorrow.toISOString();
+
     prependItem(
       {
         ...PR_ITEM,
         currency_id: defaultBu?.config?.default_currency_id ?? null,
-        delivery_date: tomorrow.toISOString(),
+        delivery_date: carriedDeliveryDate,
+        ...carriedLocation,
       },
       { shouldFocus: false },
     );
@@ -159,6 +186,7 @@ export function PrItemFields({
   } = usePrItemTable({
     form,
     itemFields,
+    filter,
     isDisabled,
     prStatus,
     role,
@@ -169,6 +197,17 @@ export function PrItemFields({
   });
 
   const selectedRows = table.getSelectedRowModel().rows;
+
+  // HOD กด Edit = ตั้งใจจะตัดสินทั้งใบ ติ๊กทุกแถวให้เลย แล้วค่อยเอาออกเฉพาะแถวที่
+  // ไม่เห็นด้วย — เร็วกว่าไล่ติ๊กสิบแถวเพื่อกดอนุมัติรวดเดียว · toggleAllRowsSelected
+  // เคารพ enableRowSelection อยู่แล้ว แถวที่ stage ก่อนหน้าล็อกไว้จึงไม่ถูกติ๊ก
+  // ยิงเฉพาะตอนสลับเข้าโหมดแก้ไข ไม่ใช่ทุก render — ไม่งั้นแถวที่ผู้ใช้เพิ่งเอา
+  // ติ๊กออกจะเด้งกลับมาเอง
+  useEffect(() => {
+    if (isDisabled || role !== STAGE_ROLE.APPROVE) return;
+    table.toggleAllRowsSelected(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ตั้งค่าครั้งเดียวต่อการเข้าโหมดแก้ไข
+  }, [isDisabled, role]);
 
   const canBulkAction =
     !isDisabled &&
@@ -323,6 +362,8 @@ export function PrItemFields({
     table.resetRowSelection();
   };
 
+  const hasSelection = selectedRows.length > 0;
+
   const bulkActionDialogConfig: Record<
     string,
     {
@@ -355,12 +396,16 @@ export function PrItemFields({
             ดันไปขวาด้วย ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสิน
             มันจะเหลือลูกตัวเดียวแล้วไปกองซ้าย */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {selectedRows.length > 0 && canBulkAction && (
+          {/* ยังไม่ติ๊กแถว = ปุ่มอยู่แต่กดไม่ได้ ไม่ใช่หายไป — ซ่อนแล้วโผล่ทำให้แถบ
+              ทั้งแถวขยับทุกครั้งที่ติ๊ก และคนที่ยังไม่เคยติ๊กจะไม่รู้เลยว่าตัดสิน
+              รายแถวได้ ปุ่มที่กดไม่ได้อย่างน้อยยังบอกว่ามีทางนี้อยู่ */}
+          {canBulkAction && (
             <>
               <Button
                 type="button"
                 variant="success"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkApprove}
               >
                 <Check />
@@ -370,6 +415,7 @@ export function PrItemFields({
                 type="button"
                 variant="warning"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkReview}
               >
                 <Eye />
@@ -379,6 +425,7 @@ export function PrItemFields({
                 type="button"
                 variant="destructive"
                 size="sm"
+                disabled={!hasSelection}
                 onClick={handleBulkReject}
               >
                 <X />
@@ -389,6 +436,7 @@ export function PrItemFields({
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={!hasSelection}
                   onClick={handleBulkSplit}
                 >
                   <Scissors />
@@ -399,6 +447,15 @@ export function PrItemFields({
           )}
 
           <div className="ms-auto flex flex-wrap items-center gap-1.5">
+            {/* กรองแถวฝั่ง client — ไม่มี onSaveClick เพราะ saved view ผูกกับหน้า
+                list ไม่ใช่ตารางในฟอร์ม (ดู use-pr-item-filter.tsx) */}
+            <ListFilter
+              fields={filter.fields}
+              values={filter.values}
+              setValue={filter.setValue}
+              onClearAll={filter.clearAll}
+              activeCount={filter.activeCount}
+            />
             {selectedRows.length > 0 && (
               <PrAskAiMenu
                 items={selectedRows.map((row) => {
@@ -470,13 +527,26 @@ export function PrItemFields({
             rowClamp: false,
             checkbox: !!prStatus && prStatus !== "draft",
             columnsResizable: true,
+            // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง บางเซลล์ไม่มี กึ่งกลางแล้ว
+            // เซลล์บรรทัดเดียวจะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน
+            cellAlign: isDisabled ? "top" : "middle",
           }}
           emptyMessage={
-            <EmptyComponent
-              icon={BoxIcon}
-              title={t("noItems")}
-              description={t("noItemsDesc")}
-            />
+            // กรองจนไม่เหลือแถว ≠ ใบนี้ไม่มีของ — ข้อความ "ยังไม่มีรายการ" ตรงนั้น
+            // จะหลอกให้คนไปกด Add Item ทั้งที่ของอยู่ครบ แค่ถูกซ่อน
+            filter.activeCount > 0 ? (
+              <EmptyComponent
+                icon={FilterX}
+                title={tc("noSearchResult")}
+                description={tl("noFoundDesc")}
+              />
+            ) : (
+              <EmptyComponent
+                icon={BoxIcon}
+                title={t("noItems")}
+                description={t("noItemsDesc")}
+              />
+            )
           }
         >
           <DataGridContainer scroll>

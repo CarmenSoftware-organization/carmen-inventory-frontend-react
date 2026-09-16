@@ -22,18 +22,6 @@ type ChartContextProps = {
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
-/**
- * Hook เข้าถึง ChartConfig จาก ChartContext
- *
- * Throw error ถ้าถูกเรียกนอก <ChartContainer> ใช้โดย ChartTooltipContent/
- * ChartLegendContent เพื่ออ่าน label/icon/color ของแต่ละ data key
- *
- * @returns { config } ที่ส่งเข้ามาตอนสร้าง ChartContainer
- * @example
- * ```tsx
- * const { config } = useChart();
- * ```
- */
 function useChart() {
   const context = React.useContext(ChartContext);
 
@@ -44,24 +32,6 @@ function useChart() {
   return context;
 }
 
-/**
- * Container หลักของ chart ครอบ recharts ResponsiveContainer + ChartContext
- *
- * สร้าง unique chartId, provide ChartContext และ inject ChartStyle สำหรับ
- * CSS custom properties ของสี (--color-xxx) ตามธีม light/dark ใช้เป็น
- * wrapper ของทุก chart (BarChart, PieChart ฯลฯ)
- *
- * @param props - id (optional), config (ChartConfig), children (recharts element)
- * @returns JSX element ของ chart container
- * @example
- * ```tsx
- * <ChartContainer config={{ revenue: { label: "Revenue", color: "#3b82f6" } }}>
- *   <BarChart data={data}>
- *     <Bar dataKey="revenue" fill="var(--color-revenue)" />
- *   </BarChart>
- * </ChartContainer>
- * ```
- */
 function ChartContainer({
   id,
   className,
@@ -97,20 +67,6 @@ function ChartContainer({
   );
 }
 
-/**
- * Inject <style> tag สำหรับ CSS custom properties ของสีใน chart
- *
- * สร้าง --color-{key} ต่อ light/dark theme จาก ChartConfig เพื่อให้
- * recharts อ้างอิงสีผ่าน "var(--color-xxx)" ได้โดยตรง
- * คืน null ถ้า config ไม่มีสี/theme
- *
- * @param props - id (chartId) และ config (ChartConfig)
- * @returns JSX style element หรือ null
- * @example
- * ```tsx
- * <ChartStyle id="chart-1" config={config} />
- * ```
- */
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color,
@@ -146,20 +102,6 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-/**
- * Custom tooltip content ของ recharts ที่ใช้ธีม shadcn
- *
- * render label + แต่ละ data point พร้อม indicator (dot/line/dashed),
- * formatter, hideLabel/hideIndicator รองรับ nameKey/labelKey สำหรับ
- * lookup ใน ChartConfig คืน null เมื่อไม่ active
- *
- * @param props - props ของ recharts Tooltip + indicator, nameKey, labelKey, formatter
- * @returns JSX element ของ tooltip หรือ null
- * @example
- * ```tsx
- * <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
- * ```
- */
 function ChartTooltipContent({
   active,
   payload,
@@ -308,20 +250,6 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend;
 
-/**
- * Custom legend content ของ recharts ที่ใช้ธีม shadcn
- *
- * render รายการสีและ label ตาม payload ของ recharts Legend รองรับ
- * hideIcon, verticalAlign (top/bottom), nameKey สำหรับ ChartConfig lookup
- * คืน null เมื่อ payload ว่าง
- *
- * @param props - payload, verticalAlign, hideIcon, nameKey, className
- * @returns JSX element ของ legend หรือ null
- * @example
- * ```tsx
- * <ChartLegend content={<ChartLegendContent />} />
- * ```
- */
 function ChartLegendContent({
   className,
   hideIcon = false,

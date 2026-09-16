@@ -6,7 +6,6 @@ import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PrFormValues } from "./pr-form-schema";
 
-/** ตรงกับ maxLength ของ description ใน schema */
 const DESCRIPTION_MAX = 256;
 
 /**
@@ -22,9 +21,7 @@ export function PrWorkflowField({
   isAdd,
 }: {
   readonly form: UseFormReturn<PrFormValues>;
-  /** submit pending → ช่องยังอยู่แต่กดไม่ได้ */
   readonly disabled: boolean;
-  /** กำลังสร้างใบใหม่ — ให้เลือกเฉพาะ workflow ที่ผู้ใช้เริ่มใบได้ */
   readonly isAdd?: boolean;
 }) {
   const tfl = useTranslations("field");
@@ -50,7 +47,6 @@ export function PrWorkflowField({
   );
 }
 
-/** ช่องคำอธิบายที่แก้ไขได้ — กติกาตำแหน่งเดียวกับ workflow */
 export function PrDescriptionField({
   form,
   disabled,

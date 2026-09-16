@@ -21,13 +21,8 @@ import type { BusinessSettingFormValues } from "./company-profile-form-schema";
 type Form = UseFormReturn<BusinessSettingFormValues>;
 type FormName = FieldPath<BusinessSettingFormValues>;
 
-/**
- * ค่าแทน "" ใน enum Select — Radix ห้าม SelectItem ที่ value=""
- * ถ้า options มี option ที่ value นี้ แปลว่า config นั้นยอมรับค่าว่างได้
- */
 export const CONFIG_ENUM_EMPTY = "__config_enum_empty__";
 
-/** อ่าน error message ของ field (รองรับ nested path เช่น `amount_format.locales`) */
 function fieldError(form: Form, name: FormName): string | undefined {
   let cur: unknown = form.formState.errors;
   for (const part of name.split(".")) {
@@ -41,20 +36,6 @@ function fieldError(form: Form, name: FormName): string | undefined {
   return typeof msg === "string" ? msg : undefined;
 }
 
-/**
- * Field read-only หนึ่งช่องในหน้า Business Setting
- *
- * แสดง label, คำอธิบายว่า field นี้คืออะไร (`description`) และค่าในกล่อง
- * disabled สีเทา (ว่าง = em dash) — `mono` สำหรับ UUID/ค่าเทคนิค,
- * `fullWidth` ให้ field กินเต็มแถว (เช่น address ที่ยาว)
- *
- * @param label - ชื่อ field
- * @param value - ค่า (string/number/null)
- * @param description - อธิบายว่า field นี้คืออะไร
- * @param mono - แสดงค่าด้วย font mono (UUID ฯลฯ)
- * @param fullWidth - กินเต็มความกว้าง 2 คอลัมน์
- * @param children - override การ render ค่า (เช่น badge, ปุ่ม reveal)
- */
 export function SettingField({
   label,
   value,
@@ -95,7 +76,6 @@ export function SettingField({
   );
 }
 
-/** โครง label + description + slot ของ field ในโหมด edit (ไม่มีกล่องค่า) */
 function EditShell({
   label,
   description,
@@ -127,13 +107,6 @@ function EditShell({
   );
 }
 
-/**
- * Field แก้ไขได้ — view = กล่อง read-only (`SettingField`), edit = input ผูก RHF
- *
- * @param editing - true = โหมดแก้ไข
- * @param type - text | number | textarea
- * @param displayValue - ค่าที่แสดงในโหมด view
- */
 export function EditableField({
   editing,
   form,
@@ -155,7 +128,6 @@ export function EditableField({
   readonly displayValue?: string | number | null;
   readonly fullWidth?: boolean;
   readonly mono?: boolean;
-  /** character-count cap (โชว์ counter). default: textarea 256 · text 100 */
   readonly maxLength?: number;
 }) {
   if (!editing) {
@@ -251,7 +223,6 @@ function SelectControl({
   );
 }
 
-/** Field แบบ dropdown (controlled) — view = กล่อง read-only */
 export function SelectField({
   editing,
   form,
@@ -395,11 +366,8 @@ export function ConfigField({
   readonly item: BusinessUnitConfigItem;
   readonly yesLabel: string;
   readonly noLabel: string;
-  /** override display label (เช่น i18n ของ seeded item); ไม่มี → ใช้ item.label */
   readonly label?: string;
-  /** สำหรับ enum — options ที่ resolve แล้ว (value + label i18n) */
   readonly options?: readonly { value: string; label: string }[];
-  /** ปิดการแก้ไขชั่วคราว (เช่น options ยังโหลดไม่เสร็จ) */
   readonly disabled?: boolean;
 }) {
   const isBool = item.datatype === "boolean";

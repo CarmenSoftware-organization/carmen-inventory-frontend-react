@@ -15,13 +15,6 @@ import type {
 
 const VENDOR_CERTIFICATE_KEYS = [QUERY_KEYS.VENDOR_CERTIFICATES];
 
-/**
- * รายการใบรับรองของ vendor หนึ่งราย
- * GET `/api/config/{bu}/vendor-certificates/vendor/{vendorId}`
- *
- * @param vendorId - id ของ vendor (query disabled จนกว่าจะมีค่า)
- * @param params - พารามิเตอร์ pagination/search/filter
- */
 export function useVendorCertificates(
   vendorId: string | undefined,
   params?: ParamsDto,
@@ -45,12 +38,6 @@ export function useVendorCertificates(
   });
 }
 
-/**
- * ใบรับรอง vendor ตาม id
- * GET `/api/config/{bu}/vendor-certificates/{id}`
- *
- * @param id - id ของ vendor certificate
- */
 export function useVendorCertificateById(id: string | undefined) {
   const buCode = useBuCode();
   return useQuery<VendorCertificate, ApiError>({
@@ -69,12 +56,6 @@ export function useVendorCertificateById(id: string | undefined) {
   });
 }
 
-/**
- * สร้างใบรับรองใต้ vendor
- * POST `/api/config/{bu}/vendor-certificates/vendor/{vendorId}` (vendor_id อยู่ใน URL)
- *
- * @returns mutation รับ `{ vendor_id, ...CreateVendorCertificateDto }`
- */
 export function useCreateVendorCertificate() {
   return useApiMutation<CreateVendorCertificateDto & { vendor_id: string }>({
     mutationFn: ({ vendor_id, ...data }, buCode) =>
@@ -87,12 +68,6 @@ export function useCreateVendorCertificate() {
   });
 }
 
-/**
- * แก้ไขใบรับรอง vendor
- * PATCH `/api/config/{bu}/vendor-certificates/{id}`
- *
- * @returns mutation รับ `{ id, ...CreateVendorCertificateDto }`
- */
 export function useUpdateVendorCertificate() {
   return useApiMutation<
     CreateVendorCertificateDto & { id: string; doc_version?: number }
@@ -107,12 +82,6 @@ export function useUpdateVendorCertificate() {
   });
 }
 
-/**
- * ลบใบรับรอง vendor
- * DELETE `/api/config/{bu}/vendor-certificates/{id}`
- *
- * @returns mutation รับ id (string)
- */
 export function useDeleteVendorCertificate() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>

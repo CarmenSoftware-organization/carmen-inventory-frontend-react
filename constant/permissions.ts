@@ -12,7 +12,6 @@
  * พบ permission ใหม่ใน BE catalog → เพิ่มที่ไฟล์นี้
  */
 
-/** Helper: สร้าง CRUD set จาก prefix — view/create/update/delete */
 function crud<P extends string>(prefix: P) {
   return {
     view: `${prefix}.view`,
@@ -22,7 +21,6 @@ function crud<P extends string>(prefix: P) {
   } as const;
 }
 
-/** Helper: สร้าง view-only resource */
 function viewOnly<P extends string>(prefix: P) {
   return { view: `${prefix}.view` } as const;
 }
@@ -117,27 +115,19 @@ export const PERMISSIONS = {
   report_analytics: {
     view: "report_analytics.view",
   },
-  /**
-   * Frontend-only placeholder — BE catalog ยังไม่มี operation_plan namespace
-   * ใช้ gate menu/route ของ /operation-plan/* ให้ non-admin denied ทั้งกลุ่ม
-   * พอ BE เพิ่ม perm นี้ → ปรับให้ตรงและลบ comment นี้
-   */
   operation_plan: {
     view: "operation_plan.view",
   },
 } as const;
 
-/** Recursive helper — pull ทุก string value ใน nested object */
 type Leaves<T> = T extends string
   ? T
   : T extends object
     ? { [K in keyof T]: Leaves<T[K]> }[keyof T]
     : never;
 
-/** Union ของทุก permission key ที่มีใน catalog */
 export type Permission = Leaves<typeof PERMISSIONS>;
 
-/** Action เพิ่ม-แก้-ลบ-ดู ที่ใช้บ่อยใน CRUD prefix */
 export type PermissionAction = "view" | "create" | "update" | "delete";
 
 /**

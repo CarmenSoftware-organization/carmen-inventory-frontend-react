@@ -3,7 +3,6 @@ import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { CnFormValues } from "../cn-form-schema";
 
-/** Price — plain text เสมอ (ล็อกจาก GRN) */
 export function PriceCell({
   control,
   index,

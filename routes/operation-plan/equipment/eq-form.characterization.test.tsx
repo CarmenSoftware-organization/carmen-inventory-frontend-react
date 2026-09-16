@@ -86,7 +86,6 @@ beforeEach(() => {
  * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้ ถ้า refactor แล้วเปลี่ยน ต้องเป็นเพราะตั้งใจ
  */
 describe("EquipmentForm — characterization", () => {
-  /** ฟอร์มเปิดมาที่โหมด view เสมอเมื่อมี entity — ต้องกด Edit ก่อนถึงจะ submit ได้ */
   async function enterEditMode() {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
   }

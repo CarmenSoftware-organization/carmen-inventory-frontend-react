@@ -10,12 +10,6 @@ interface WorkflowTrackProps {
 
 type StageState = "done" | "current" | "pending" | "voided";
 
-/**
- * ตำแหน่งในลำดับ → สถานะของช่อง
- *
- * `currentIndex` เป็น -1 ได้เมื่อ `currentStage` เป็นสตริงว่าง (ถูก filter ทิ้งไป
- * ก่อนหน้า) — กรณีนั้นทุกช่องกลายเป็น pending ซึ่งตรงกับพฤติกรรมเดิมของไฟล์นี้
- */
 function resolveState(
   i: number,
   currentIndex: number,

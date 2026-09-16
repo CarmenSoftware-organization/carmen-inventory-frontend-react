@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import type { PrFormValues } from "../pr-form-schema";
@@ -77,29 +78,23 @@ export const ProductCell = memo(function ProductCell({
   );
   if (isDisabled || isRowLocked) {
     return (
-      <div className="flex flex-col gap-0.5">
-        <div className="flex items-center">
-          {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
-          <p
-            className="min-w-0 flex-1 truncate text-left text-xs font-semibold"
-            title={productName || undefined}
-          >
-            {productName || <span className="text-muted-foreground">—</span>}
-          </p>
-          {inventoryTooltip}
+      // ไอคอนอยู่ **นอก** stack สองบรรทัด จัดกลางเทียบทั้งก้อน — ทรงเดียวกับ SR
+      // (sr-item-table.tsx) ปุ่ม icon-xs 24px จึงไม่ไปดันบรรทัดแรกให้สูงกว่าตัวหนังสือ
+      // ซึ่งเป็นต้นเหตุที่คอลัมน์นี้กับ Location เคยมีระยะไม่เท่ากัน
+      <div className="flex items-center gap-0.5">
+        <div className="min-w-0 flex-1">
+          <NameWithSubtext
+            primary={productName || "—"}
+            secondary={productLocalName || "—"}
+          />
         </div>
-        <p
-          className="text-muted-foreground text-micro-legal truncate"
-          title={productLocalName || undefined}
-        >
-          {productLocalName || <span className="text-muted-foreground">—</span>}
-        </p>
+        {inventoryTooltip}
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1.5">
       <Controller
         control={control}
         name={`items.${index}.product_id`}
@@ -131,12 +126,27 @@ export const ProductCell = memo(function ProductCell({
                           `items.${index}.product_local_name`,
                           product.local_name ?? "",
                         );
+                        // หน่วยนับสต็อกของสินค้า — ไม่ใช่หน่วยที่ขอเบิก แต่เป็น key
+                        // ที่ last-receiving ใช้ถามต้นทุนครั้งก่อน (ดู
+                        // pr-last-receiving-info / pr-price-alert-badge)
+                        // ไม่เซ็ตไว้ = แถวที่เพิ่งเลือกสินค้าไม่มีไอคอนราคาครั้งก่อน
+                        // และไม่มีธงเตือนราคาแพงขึ้นเลย ทั้งที่ของเดิมในใบมี
+                        form.setValue(
+                          `items.${index}.inventory_unit_id`,
+                          product.inventory_unit?.id ?? null,
+                        );
+                        form.setValue(
+                          `items.${index}.inventory_unit_name`,
+                          product.inventory_unit?.name ??
+                            product.inventory_unit_name ??
+                            "",
+                        );
                       }
                       form.setValue(`items.${index}.requested_unit_id`, "");
                       form.setValue(`items.${index}.foc_unit_id`, "");
                       form.setValue(`items.${index}.approved_unit_id`, "");
                     }}
-                    className="h-7 w-full text-xs"
+                    className="h-8 w-full text-xs"
                     defaultLabel={productName}
                   />
                 </div>
@@ -144,7 +154,7 @@ export const ProductCell = memo(function ProductCell({
               {(productCode || productName) && (
                 <TooltipContent
                   side="top"
-                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                  className="max-w-[20rem]"
                 >
                   <div className="space-y-1">
                     <p className="text-foreground/60 text-micro font-semibold">

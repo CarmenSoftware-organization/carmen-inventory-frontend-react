@@ -26,7 +26,6 @@ const th = JSON.parse(
   readFileSync(join(ROOT, "messages/th.json"), "utf-8"),
 ) as { common: Record<string, string> };
 
-/** `normal` ไม่มี class ของตัวเอง — ค่าของมันคือ rule `html` เปล่าใน @layer base */
 function declaredPercent(scale: FontScale): number | null {
   const selector =
     scale === DEFAULT_FONT_SCALE

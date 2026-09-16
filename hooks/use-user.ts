@@ -21,48 +21,10 @@ const crud = createConfigCrud<User, never>({
   label: "user",
 });
 
-/**
- * Hook ดึงรายการผู้ใช้ในระบบแบบแบ่งหน้า
- *
- * Re-export จาก `createConfigCrud.useList` ของ user module
- * ใช้ใน `LookupUser` (ภายใน workflow), system-admin > users
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<User>
- * @example
- * ```ts
- * const { data } = useUser({ page: 1, perpage: 20 });
- * ```
- */
 export const useUser = crud.useList;
 
-/**
- * Hook สำหรับลบผู้ใช้
- *
- * Re-export จาก factory รับ id string เรียก DELETE
- *
- * @returns UseMutationResult สำหรับลบ user
- * @example
- * ```ts
- * useDeleteUser().mutate(user.id);
- * ```
- */
 export const useDeleteUser = crud.useDelete;
 
-/**
- * Hook ดึงข้อมูลผู้ใช้พร้อมบทบาท (role) ตามรหัส
- *
- * ยิง `GET /config/{bu}/users/{id}` ที่คืน UserDetail พร้อม role mapping มาในตัว
- * (ย้ายมาจาก `user-application-roles/{id}` เดิม) enabled เมื่อมีทั้ง buCode และ id
- *
- * @param id - รหัสผู้ใช้
- * @returns UseQueryResult ของ UserDetail
- * @example
- * ```ts
- * const { data } = useUserById(params.id);
- * ```
- */
 export function useUserById(id: string | undefined) {
   const buCode = useBuCode();
 

@@ -1,7 +1,6 @@
 import { ApiError, ERROR_CODES, type ErrorCode } from "@/lib/api-error";
 import type { TranslationFn } from "@/lib/i18n-schema";
 
-/** Map ApiError codes → i18n key under `errors.*` namespace */
 const CODE_TO_KEY: Record<ErrorCode, string> = {
   [ERROR_CODES.UNAUTHORIZED]: "sessionExpired",
   [ERROR_CODES.SESSION_EXPIRED]: "sessionExpired",
@@ -29,9 +28,12 @@ const APP_CODE_TO_KEY: Record<string, string> = {
   WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS: "workflowInProgress",
   WORKFLOW_STAGE_CHANGE_BLOCKED: "workflowInProgress",
   WORKFLOW_STAGE_WOULD_HAVE_NO_ACTOR: "workflowStageNoActor",
+  // วันที่รับของอยู่นอกงวดที่เปิดอยู่ — ผู้ใช้แก้เองได้ (เปลี่ยนวันที่ หรือให้ฝ่าย
+  // บัญชีเปิดงวด) ปล่อยตกไปข้อความกลางจะกลายเป็น "กรอกไม่ถูกต้อง" แล้วไล่ตรวจ
+  // ทั้งฟอร์มโดยไม่มีอะไรผิดสักช่อง
+  GRN_DATE_OUTSIDE_OPEN_PERIOD: "dateOutsideOpenPeriod",
 };
 
-/** ข้อความกลางเมื่อไม่รู้ว่าเกิดอะไร — บอกว่าให้ทำอะไรต่อ ดีกว่าบอกว่าอะไรพัง */
 function fallbackKey(code: ErrorCode, statusCode?: number): string {
   // 400 ทั่วไปไม่ได้แปลว่า "กรอกไม่ครบ" เสมอไป กรอกครบแต่ค่าผิดก็ 400 —
   // บอกให้ตรวจฟอร์มอีกรอบตรงกว่า ส่วนโค้ดที่บอกชัดว่าขาด field ค่อยใช้ missingField
@@ -84,10 +86,6 @@ export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
   return t("unexpected");
 }
 
-/**
- * Correlation ID สำหรับให้ user แจ้ง support
- * ใช้ statusCode + เลขสุ่ม timestamp (พอใช้ก่อนมี Sentry/Datadog)
- */
 export function getErrorId(err: unknown): string | undefined {
   if (err instanceof ApiError && err.statusCode) {
     const ts = Date.now().toString(36).slice(-6).toUpperCase();

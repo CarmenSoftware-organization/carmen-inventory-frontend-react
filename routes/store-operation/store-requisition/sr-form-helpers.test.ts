@@ -6,7 +6,6 @@ import {
 } from "./sr-form-helpers";
 import type { StoreRequisition } from "@/types/store-requisition";
 
-/** ตัดมาจาก response จริงของ GET /store-requisitions/:id (เอาเฉพาะที่ฟอร์มใช้) */
 const sr = {
   id: "5f0b1b3e-2f0a-4a34-9b0a-3d2a1c4e5f60",
   sr_no: "SR260600012",

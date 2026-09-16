@@ -3,12 +3,6 @@ import { useWatch, type Control, type UseFormReturn } from "react-hook-form";
 import type { CnFormValues } from "../cn-form-schema";
 import { useCnItemLine } from "./helpers";
 
-/**
- * คำนวณ + set discount/net/tax/total ของ item — mount ตลอด (ทุก row) เพื่อให้ยอด
- * recompute เสมอ ตามประเภทใบลดหนี้ (quantity_return vs amount_discount)
- * — ไม่เขียนทับ net_amount ที่ผู้ใช้กรอก (amount_discount), discount_amount ที่
- * override (is_discount_adjustment) หรือ tax_amount ที่ override (is_tax_adjustment)
- */
 export const CnItemComputedSync = memo(function CnItemComputedSync({
   control,
   form,

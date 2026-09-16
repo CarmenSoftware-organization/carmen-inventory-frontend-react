@@ -4,7 +4,6 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
-/** หนึ่งล็อตที่ถูกดึงมาคิดต้นทุน (FIFO) — ยังไม่มีที่ไหนแสดงผล เก็บไว้ให้ครบ shape */
 export interface ProductCostLot {
   lot_no: string;
   qty: number;
@@ -20,13 +19,11 @@ export interface ProductCostByLocationQty {
   location_id?: string;
   location_code?: string;
   location_name?: string;
-  /** จำนวนที่หลังบ้านคิดต้นทุนให้จริง — อาจไม่เท่ากับที่ขอไปถ้าของไม่พอ */
   requested_qty?: number;
   average_cost_per_unit: number;
   total_cost: number;
   lots?: ProductCostLot[];
   currency?: string;
-  /** ชื่อเดิมของ inventory_unit_name — เผื่อ endpoint เก่ายังตอบแบบนี้อยู่ */
   unit_name?: string;
 }
 
@@ -42,18 +39,10 @@ export interface ProductLastReceiving {
   currency?: string;
 }
 
-/**
- * Last receiving cost ต่อ inventory unit — shape ตรงกับ response ของ endpoint
- * PRODUCT_LAST_RECEIVING_BY_UNIT (source doc + ต้นทุนต่อหน่วยครั้งล่าสุดที่รับเข้า)
- */
 export interface ProductLastReceivingByUnit {
-  /** ชนิดเอกสารต้นทาง เช่น "good_received_note" */
   type?: string;
-  /** เลขที่เอกสารต้นทาง (เช่น GRN no) */
   no?: string;
-  /** id เอกสารต้นทาง */
   id?: string;
-  /** ต้นทุนต่อหน่วย (ตาม inventory unit ที่ query) ครั้งล่าสุดที่รับเข้า */
   cost_per_unit: number;
   currency_id?: string;
   currency_code?: string;

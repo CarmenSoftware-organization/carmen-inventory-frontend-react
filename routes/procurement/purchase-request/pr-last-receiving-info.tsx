@@ -19,10 +19,6 @@ interface Props {
   readonly buCode?: string;
 }
 
-/**
- * ไอคอน info ข้าง label ราคาต่อหน่วย — hover แล้วยิง API last-receiving (per inventory
- * unit) แบบ lazy และแสดง tooltip ต้นทุนต่อหน่วยครั้งล่าสุดที่รับเข้า + เอกสารต้นทาง
- */
 export function PrLastReceivingInfo({ control, index, buCode }: Props) {
   "use no memo";
   const t = useTranslations("procurement.purchaseRequest");

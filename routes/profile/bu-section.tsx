@@ -63,10 +63,6 @@ type ImageUploadText = {
   readonly cancel: string;
 };
 
-/**
- * Reusable image upload card — handles preview, upload, remove with confirm dialog.
- * Used for both BU logo (landscape, contain) and BU avatar (round, cover).
- */
 function ImageUploadField({
   imageUrl,
   entityId,
@@ -82,7 +78,6 @@ function ImageUploadField({
   readonly useDelete: typeof useDeleteBuLogo;
   readonly shape: "landscape" | "round";
   readonly text: ImageUploadText;
-  /** Hint Next.js ว่า image นี้อยู่ above-the-fold (กัน LCP warning) */
   readonly priority?: boolean;
 }) {
   const [preview, setPreview] = useState<string | null>(null);
@@ -264,9 +259,6 @@ function ImageUploadField({
   );
 }
 
-/**
- * คอมโพเนนต์ย่อยแสดงรายการข้อมูลหนึ่งรายการพร้อมไอคอน label และ value
- */
 function InfoItem({
   icon: Icon,
   label,
@@ -299,9 +291,6 @@ function InfoItem({
   );
 }
 
-/**
- * คอมโพเนนต์ย่อยแสดงส่วนย่อยพร้อมหัวข้อและไอคอน
- */
 function SubSection({
   title,
   icon: Icon,
@@ -322,9 +311,6 @@ function SubSection({
   );
 }
 
-/**
- * คอมโพเนนต์แสดงรายละเอียด Business Unit รวมถึงข้อมูลโรงแรมและบริษัท
- */
 export default function BUSection({ bu }: { bu: BusinessUnit }) {
   const t = useTranslations("profile");
   const tfl = useTranslations("field");

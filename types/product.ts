@@ -67,12 +67,9 @@ export interface ProductLookupItem {
   id: string;
   code: string;
   name: string;
-  /** เส้นที่ไม่มี workflow ไม่ส่งฟิลด์นี้มา */
   local_name?: string;
-  /** เส้น workflow ส่งมาเป็น product_sku (เป็น null ได้) */
   sku?: string;
   inventory_unit?: { id: string; name: string };
-  /** list endpoint บางเส้นคืนหน่วยเป็น flat string */
   inventory_unit_name?: string;
 }
 

@@ -15,23 +15,6 @@ interface LookupCategoryProps {
   readonly error?: string;
 }
 
-/**
- * Lookup สำหรับเลือกหมวดหมู่สินค้า (Category)
- *
- * ดึงข้อมูลหมวดหมู่ผ่าน `useCategory({ perpage: -1 })` และ filter เฉพาะ `is_active = true`
- * แสดงเป็น popover combobox พร้อม badge แสดง code และชื่อหมวดหมู่ รองรับการค้นหาแบบ client-side
- * onValueChange ส่งทั้ง id และ object `CategoryDto` เต็มสำหรับ side effects
- *
- * @param value - id ของ category ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object CategoryDto
- * @returns JSX popover element ของ category lookup
- * @example
- * ```tsx
- * <Controller name="category_id" control={form.control} render={({ field }) => (
- *   <LookupCategory value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupCategory({
   value,
   onValueChange,

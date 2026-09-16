@@ -50,20 +50,19 @@ export function CnReturnRow({
         {showActionCol && <col style={{ width: pct(CN_COL.action) }} />}
       </colgroup>
       <tbody>
-        {/* h-11 + px-3 py-1 = ระยะเดียวกับเซลล์ของตารางหลักเป๊ะ ๆ เดิมแถวคืนใช้
-            px-2/px-1 และไม่มีความสูงขั้นต่ำ แถบจึงเตี้ยกว่าแถวหลักที่ชื่อสินค้า
-            กินสองบรรทัด อ่านแล้วเหมือนคนละตาราง */}
-        <tr className="h-11 align-middle">
-          {/* ป้ายบอกว่าแถวนี้คือของที่คืน — อยู่ท้ายช่วง product+location ชิดขวา
-              ติดกับช่องค่าแรก · เดิมวางซ้อนอยู่เหนือค่า ทำให้ค่าในช่องนี้ต่ำกว่า
-              ค่าช่องอื่นทั้งแถว อ่านแล้วไม่เป็นแนวเดียวกัน */}
-          <td className="text-muted-foreground text-micro px-3 py-1 text-right font-semibold">
+        {/* px-3 py-2.5 = ระยะเดียวกับเซลล์ของตารางหลักเป๊ะ ๆ เดิมแถวคืนใช้
+            px-2/px-1 แถบจึงเตี้ยกว่าแถวหลัก อ่านแล้วเหมือนคนละตาราง · เลิกล็อก
+            h-11 ตามตารางหลักที่เลิกไปแล้ว ไม่งั้นแถบคืนสูงค้างอยู่คนเดียว */}
+        {/* ชิดบนในโหมดอ่านเหมือนตารางหลัก — แถบนี้อยู่ใต้แถวเดียวกัน ถ้าจัดคนละ
+            แนวกันจะอ่านเหมือนคนละรายการ · โหมดแก้ไขยังกึ่งกลาง มีช่องกรอกอยู่ */}
+        <tr className={disabled ? "align-top" : "align-middle"}>
+          <td className="text-muted-foreground text-micro px-3 py-2.5 text-right font-semibold">
             {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
           </td>
           {/* ช่องกรอกของแถวอยู่ตรงนี้ช่องเดียว สลับตามประเภทใบ — quantity_return
               กรอกจำนวนคืน, amount_discount กรอกยอดลดหนี้ตรง ๆ (จำนวนคืนไม่มีผล
               ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก) */}
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             {isAmountDiscountRow ? (
               <SubtotalCell
                 form={form}
@@ -81,15 +80,15 @@ export function CnReturnRow({
             )}
           </td>
           {/* ราคาต่อหน่วยเท่าฝั่งรับเสมอ — คืนของชิ้นเดิมในราคาเดิม */}
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <PriceCell control={form.control} index={index} />
           </td>
           {/* ช่องกรอกย้ายไปอยู่ช่องแรกของแถวแล้ว ตรงนี้จึงเป็นยอดอ่านอย่างเดียว
               ทั้งสองโหมด (amount_discount → subtotal = ยอดที่กรอกเอง) */}
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <LineSubtotalText form={form} index={index} type={type} />
           </td>
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <DiscountCell
               form={form}
               index={index}
@@ -97,10 +96,10 @@ export function CnReturnRow({
               disabled={disabled}
             />
           </td>
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <NetCell control={form.control} index={index} />
           </td>
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <TaxCell
               form={form}
               index={index}
@@ -108,10 +107,10 @@ export function CnReturnRow({
               disabled={disabled}
             />
           </td>
-          <td className="px-3 py-1 text-right">
+          <td className="px-3 py-2.5 text-right">
             <TotalCell control={form.control} index={index} />
           </td>
-          {showActionCol && <td className="px-3 py-1" />}
+          {showActionCol && <td className="px-3 py-2.5" />}
         </tr>
       </tbody>
     </table>

@@ -2,7 +2,6 @@ import { round2 } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import type { PricelistExternalDetailDto } from "@/types/price-list-external";
 
-/** จัดรูปเงิน 2 ตำแหน่ง + คั่นหลักพัน (mirror ตาราง edit) */
 const fmtMoney = (n: number) =>
   n.toLocaleString("en-US", {
     minimumFractionDigits: 2,

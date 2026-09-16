@@ -19,7 +19,6 @@ import { setRuntimeConfigForTests } from "@/lib/runtime-config";
  * เห็นจริง — ไม่ผูกกับรูปร่างของโค้ด เทสต์จึงรอดข้ามการ refactor ไปได้
  */
 
-/** mutation ปลอมที่เรียก onSuccess ทันที — ไม่ต้องรอ network */
 export function fakeMutation(result: unknown = { data: { id: "new-id" } }) {
   return {
     mutate: vi.fn(
@@ -35,7 +34,6 @@ export function fakeMutation(result: unknown = { data: { id: "new-id" } }) {
   };
 }
 
-/** อ่าน payload ของการเรียก mutate ครั้งแรก */
 export function firstPayload(mut: {
   mutate: ReturnType<typeof vi.fn>;
 }): Record<string, unknown> | undefined {
@@ -54,7 +52,6 @@ export function renderForm(ui: ReactElement) {
   );
 }
 
-/** ยิง submit ผ่าน <form id> ตรง ๆ — ผ่าน handleSubmit จริง validation จึงยังทำงาน */
 export function submitForm(formId: string) {
   const el = document.getElementById(formId);
   if (!el) throw new Error(`ไม่พบ <form id="${formId}">`);

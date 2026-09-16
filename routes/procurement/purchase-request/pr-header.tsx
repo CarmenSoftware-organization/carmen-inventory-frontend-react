@@ -16,19 +16,12 @@ interface PrHeaderProps {
   readonly reqName: string;
   readonly departmentName: string;
   readonly prDateDisplay: string;
-  /** ชื่อ workflow — ใช้ตอนอ่านอย่างเดียว (แก้ได้ให้ส่ง workflowField มาแทน) */
   readonly workflowName?: string;
-  /** ช่องเลือก workflow ตอนแก้ได้ — วางในเซลล์เดียวกับตอนอ่านอย่างเดียว */
   readonly workflowField?: ReactNode;
-  /** คำอธิบายใบ — ใช้ตอนอ่านอย่างเดียว */
   readonly description?: string;
-  /** ช่องกรอกคำอธิบายตอนแก้ได้ — วางในเซลล์เดียวกับตอนอ่านอย่างเดียว */
   readonly descriptionField?: ReactNode;
-  /** ปุ่ม action (PrFormActions) — caller ประกอบเอง */
   readonly actions: ReactNode;
-  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 
@@ -91,19 +84,22 @@ export function PrHeader({
     workflowField ??
     (workflowName ? (
       <Field>
-        <FieldLabel>{tfl("workflow")}</FieldLabel>
+        {/* ดาวแดงติดอยู่กับ "ช่องนี้ต้องมีค่า" ไม่ใช่ "ตอนนี้กรอกได้" — โหมดอ่าน
+            กับใบที่มาจากเทมเพลต (workflow ถูกล็อก) จึงต้องมีเหมือนกัน ไม่งั้น
+            ฟิลด์เดียวกันหน้าตาเปลี่ยนไปมาตามโหมดโดยไม่มีเหตุผลที่คนใช้อธิบายได้ */}
+        <FieldLabel required>{tfl("workflow")}</FieldLabel>
         <Input value={workflowName} disabled />
       </Field>
     ) : null);
 
-  const descriptionCell =
-    descriptionField ??
-    (description?.trim() ? (
-      <Field className="lg:col-span-2">
-        <FieldLabel>{tfl("description")}</FieldLabel>
-        <Input value={description} disabled />
-      </Field>
-    ) : null);
+  // โชว์เสมอแม้ยังไม่ได้กรอก — ช่องที่หายไปทั้งช่องทำให้หัวเอกสารของใบที่มีคำอธิบาย
+  // กับใบที่ไม่มีเป็นคนละทรง และคนอ่านแยกไม่ออกว่า "ไม่มีคำอธิบาย" กับ "ไม่มีช่องนี้"
+  const descriptionCell = descriptionField ?? (
+    <Field className="lg:col-span-2">
+      <FieldLabel>{tfl("description")}</FieldLabel>
+      <Input value={description ?? ""} disabled />
+    </Field>
+  );
 
   // สองแถวเป็นคนละ grid แต่ track เดียวกัน — บังคับให้ workflow/description
   // ขึ้นบรรทัดใหม่เสมอ ไม่ว่าแถวบนจะมีกี่ช่อง (ถ้าใช้ grid เดียวแล้วปล่อยไหลเอง

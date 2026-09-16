@@ -12,12 +12,10 @@ import { Badge } from "../ui/badge";
 interface LookupNotificationTemplateProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  /** channel ที่ใช้ filter ประเภท template (app/email/...) */
   readonly channelType: NotificationTemplateType;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }

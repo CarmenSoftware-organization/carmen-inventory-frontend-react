@@ -6,11 +6,6 @@ export interface RecipeImage {
   url: string;
 }
 
-/**
- * One gallery manifest entry. References an existing image by `id` XOR a newly
- * uploaded file by `file_index` (index into the multipart `images` part).
- * Array order = sort_order. At most one item may set `is_primary: true`.
- */
 export type RecipeGalleryManifestItem =
   | {
       id: string;
@@ -124,19 +119,11 @@ export interface CreateRecipeDto {
   is_active: boolean;
 }
 
-/**
- * Variables for creating a recipe via multipart.
- * `gallery` present → send manifest + `images`; absent → no images.
- */
 export interface CreateRecipeVars extends CreateRecipeDto {
   images?: File[];
   gallery?: RecipeGalleryManifestItem[];
 }
 
-/**
- * Variables for updating a recipe via multipart (full-sync gallery).
- * `gallery` present → full-sync (omitted existing ids are deleted); absent → keep all existing.
- */
 export interface UpdateRecipeVars extends CreateRecipeDto {
   id: string;
   images?: File[];

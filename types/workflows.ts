@@ -168,7 +168,6 @@ export interface WorkflowDto {
   description?: string;
   data?: WorkflowData;
   audit?: AuditInfo;
-  /** ผู้ใช้ที่ล็อกอินอยู่เริ่มเอกสารด้วย workflow นี้ได้ไหม (backend ตอบมาต่อคน) */
   can_create?: boolean;
 }
 
@@ -206,7 +205,6 @@ export interface Template {
 
 interface WorkflowData {
   document_reference_pattern: string;
-  /** PO เท่านั้น — พิมพ์ลายเซ็นของ PR ต้นทางต่อด้วยของ PO เอง */
   inherit_signature_from_pr?: boolean;
   stages: Stage[];
   routing_rules: RoutingRule[];

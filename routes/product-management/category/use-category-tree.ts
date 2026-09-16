@@ -14,20 +14,6 @@ interface UseCategoryTreeProps {
   isLoading: boolean;
 }
 
-/**
- * Hook สร้างโครงสร้างต้นไม้หมวดหมู่จาก categories, subCategories และ itemGroups
- * โดยแปลงข้อมูลเรียบให้เป็น CategoryNode[] แบบ nested และสืบทอดค่า is_used_in_recipe / is_sold_directly จาก parent เมื่อ child ไม่ได้กำหนด
- * พร้อมจัดการ expand state แบบ override ทั้งหมด (expandAll / collapseAll) ควบคู่กับการ toggle รายตัว
- * @param props - categories, subCategories, itemGroups (ข้อมูลดิบ) และ isLoading
- * @returns object ที่มี categoryData (tree), expanded state, และฟังก์ชัน expandAll, collapseAll, toggleExpand
- * @example
- * const { categoryData, expanded, expandAll, collapseAll, toggleExpand } = useCategoryTree({
- *   categories: catData?.data ?? [],
- *   subCategories: subData?.data ?? [],
- *   itemGroups: igData?.data ?? [],
- *   isLoading,
- * });
- */
 export function useCategoryTree({
   categories,
   subCategories,

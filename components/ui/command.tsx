@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** Root ของ Command (cmdk) — ใช้สำหรับ command palette / combobox แบบค้นหา */
 function Command({
   className,
   ...props
@@ -28,11 +27,6 @@ function Command({
   );
 }
 
-/**
- * Command palette ที่แสดงใน Dialog มี title/description ซ่อน
- * @param props - title, description, showCloseButton และ props ของ Dialog
- * @returns React element command dialog
- */
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
@@ -64,7 +58,6 @@ function CommandDialog({
   );
 }
 
-/** ช่องค้นหาของ Command พร้อมไอคอน SearchIcon */
 function CommandInput({
   className,
   ...props
@@ -87,7 +80,6 @@ function CommandInput({
   );
 }
 
-/** รายการ scrollable ของ Command */
 function CommandList({
   className,
   ...props
@@ -104,7 +96,6 @@ function CommandList({
   );
 }
 
-/** Empty state เมื่อไม่มีผลลัพธ์ใน Command */
 function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
@@ -117,7 +108,6 @@ function CommandEmpty({
   );
 }
 
-/** กลุ่มของรายการใน Command */
 function CommandGroup({
   className,
   ...props
@@ -134,7 +124,6 @@ function CommandGroup({
   );
 }
 
-/** เส้นคั่นระหว่างกลุ่มรายการใน Command */
 function CommandSeparator({
   className,
   ...props
@@ -148,7 +137,6 @@ function CommandSeparator({
   );
 }
 
-/** รายการหนึ่งตัวเลือกของ Command */
 function CommandItem({
   className,
   ...props
@@ -165,7 +153,6 @@ function CommandItem({
   );
 }
 
-/** แสดง keyboard shortcut ชิดขวาใน CommandItem */
 function CommandShortcut({
   className,
   ...props

@@ -47,7 +47,6 @@ interface NotificationTemplateFormProps {
   readonly template?: NotificationTemplate;
 }
 
-/** ฟอร์มสร้าง/ดู/แก้ไข Notification Template รองรับโหมด add/view/edit */
 export function NotificationTemplateForm({
   template,
 }: NotificationTemplateFormProps) {
@@ -103,9 +102,8 @@ export function NotificationTemplateForm({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const handleDelete = () => {
     if (!template) return;
     deleteMut.mutate(template.id, {
@@ -345,7 +343,6 @@ export function NotificationTemplateForm({
   );
 }
 
-/** Loading skeleton that mirrors the form's real layout (header + 2 sections). */
 export function NotificationTemplateFormSkeleton() {
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">

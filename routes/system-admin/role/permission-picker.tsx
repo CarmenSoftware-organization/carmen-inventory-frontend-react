@@ -72,7 +72,6 @@ export function PermissionPicker({
     const meta = CATEGORY_META[cat];
     return meta ? t(meta.tkey) : cat;
   };
-  /** ชื่อ resource: คีย์เจาะจงหมวด → คีย์กลาง → ชื่อดิบแบบ Title Case */
   const getResourceLabel = (r: GroupedResource) => {
     if (r.resourceKey === MODULE_RESOURCE_KEY) return t("moduleAccess");
     const key = resourceLabelKeys(r.category, r.resourceKey).find((k) =>

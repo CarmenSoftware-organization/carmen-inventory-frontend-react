@@ -664,7 +664,6 @@ export default function CompanyProfileComponent() {
   );
 }
 
-/** รูป branding (logo/avatar) แบบ read-only — landscape หรือ round */
 function BrandImage({
   url,
   shape,

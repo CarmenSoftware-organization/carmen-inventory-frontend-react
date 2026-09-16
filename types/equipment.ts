@@ -45,15 +45,10 @@ export interface Equipment {
   audit: EquipmentAudit;
 }
 
-/** Variables for creating equipment — metadata fields + optional image file (multipart). */
 export interface CreateEquipmentVars extends CreateEquipmentDto {
   image?: File | null;
 }
 
-/**
- * Variables for updating equipment via multipart.
- * `image` attached → replaces; `remove_image: true` with no image → deletes; neither → keeps.
- */
 export interface UpdateEquipmentVars extends CreateEquipmentDto {
   id: string;
   image?: File | null;

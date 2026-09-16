@@ -5,7 +5,6 @@ import {
 } from "@/types/report-history";
 import { createStatusConfig } from "./status-config";
 
-/** Display label per backend format enum */
 export const REPORT_FORMAT_LABELS: Record<ReportFormatRaw, string> = {
   REPORT_FORMAT_PDF: "PDF",
   REPORT_FORMAT_EXCEL: "Excel",
@@ -36,7 +35,6 @@ export const JOB_STATUS_CONFIG = createStatusConfig(
   },
 );
 
-/** Map backend prefixed status → bare status key used by JOB_STATUS_CONFIG */
 const RAW_TO_KEY: Record<ReportStatusRaw, ReportStatus> = {
   JOB_STATUS_QUEUED: "queued",
   JOB_STATUS_PROCESSING: "processing",

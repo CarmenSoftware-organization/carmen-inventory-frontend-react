@@ -14,19 +14,6 @@ import { useUser } from "@/hooks/use-user";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types/workflows";
 
-/**
- * รวมชื่อเต็มของ user
- *
- * Concatenate `firstname`, `middlename`, `lastname` คั่นด้วย space กรอง
- * ช่องว่างออกใช้สำหรับแสดงและ filter ใน `FilterRequester`
- *
- * @param user - ข้อมูล user object
- * @returns string ชื่อเต็มของ user
- * @example
- * ```ts
- * getUserFullName({ firstname: "John", lastname: "Doe" }); // "John Doe"
- * ```
- */
 function getUserFullName(user: User) {
   return [user.firstname, user.middlename, user.lastname]
     .filter(Boolean)
@@ -42,29 +29,9 @@ interface FilterRequesterProps {
    * schema ฝั่ง backend ไม่ใช่ requester) — PO ใช้ `created_by_id` กรองผู้จัดซื้อ
    */
   readonly fieldKey?: string;
-  /** ข้อความบนปุ่ม/ช่องค้น — default label "ผู้ขอ" */
   readonly label?: string;
 }
 
-/**
- * ตัวกรองรายชื่อคน (ผู้ขอ/ผู้จัดซื้อ) แบบ multi-select
- *
- * Render Popover button + Command พร้อม search input และรายการ user fetch
- * ข้อมูลจาก `useUser` แสดงชื่อเต็มผ่าน `getUserFullName` parse/serialize
- * URL filter รูปแบบ `<fieldKey>|string:id1,id2`
- *
- * @param props - props ของ filter
- * @param props.value - URL filter string ปัจจุบัน
- * @param props.onChange - callback เปลี่ยนค่า filter
- * @param props.className - className เพิ่มเติม
- * @param props.fieldKey - ชื่อคอลัมน์ใน clause (default `requestor_id`)
- * @param props.label - ข้อความบนปุ่ม (default label "ผู้ขอ")
- * @returns JSX element ของ filter popover
- * @example
- * ```tsx
- * <FilterRequester value={extraFilter} onChange={setExtraFilter} />
- * ```
- */
 export function FilterRequester({
   value,
   onChange,

@@ -24,18 +24,19 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PrStatusSelectDialog } from "./pr-select-dialog";
 import { PrListDialogs } from "./pr-list-dialogs";
 import { ErrorState } from "@/components/ui/error-state";
-import { usePurchaseRequestTable } from "./pr-table";
+import { usePrTable } from "./use-pr-table";
 import PrCardList from "./pr-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
+import { useCan } from "@/hooks/use-can";
+import { canDeletePr } from "./pr-ownership";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -52,24 +53,30 @@ const CreatePRDialog = lazy(() =>
   import("./pr-create-dialog").then((mod) => ({ default: mod.CreatePRDialog })),
 );
 
-/**
- * คอมโพเนนต์หน้ารายการ PR หลัก รวม toolbar, filters, table/card view,
- * batch approve/reject, delete dialog และ create dialog เชื่อมกับ URL state ผ่าน `useDataGridState`
- * @returns React element ของหน้ารายการใบขอซื้อ
- * @example
- * // ใช้ใน app/(root)/procurement/purchase-request/page.tsx
- * <PurchaseRequestComponent />
- */
 export default function PurchaseRequestComponent() {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const { defaultCurrencyCode, dateTimeFormat } = useProfile();
+  const { defaultCurrencyCode, dateTimeFormat, userId } = useProfile();
+  const { isAdmin } = useCan();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
     null,
   );
+
+  /**
+   * ใบของคนอื่น backend ลบไม่ให้อยู่แล้ว — บอกตั้งแต่ตอนกด อย่าเปิดกล่องยืนยันก่อน
+   * แล้วค่อยเด้ง 403 หลังกดยืนยัน (ดู pr-ownership.ts) · จุดเดียวคุมทั้งแถวในตาราง
+   * และการ์ดในโหมด grid
+   */
+  const requestDelete = (item: PurchaseRequest) => {
+    if (!canDeletePr(item, userId, isAdmin)) {
+      dispatchPermissionDenied(undefined, t("deleteNotOwner"));
+      return;
+    }
+    setDeleteTarget(item);
+  };
   const [approveTarget, setApproveTarget] = useState<PurchaseRequest | null>(
     null,
   );
@@ -110,8 +117,13 @@ export default function PurchaseRequestComponent() {
   const isGridMode = isMobile || displayMode === "grid";
   const { exportPurchaseRequest, isExporting } = useExportPurchaseRequest();
 
+  /**
+   * เรียงตามวันที่เป็นค่าเริ่มต้นทั้งสองกลุ่ม แต่คนละทิศ — "รอฉันดำเนินการ" เป็นคิวงาน
+   * ใบเก่าสุดต้องอยู่บนสุด (asc) ส่วน "เอกสารทั้งหมด" เป็นทะเบียนย้อนหลัง
+   * ใบล่าสุดต้องอยู่บนสุด (desc) · ค่านี้มีผลเฉพาะตอนไม่มี `sort` ใน URL
+   */
   const { params, search, setSearch, tableConfig } = useDataGridState({
-    defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
+    defaultSort: viewMode === "my-pending" ? "pr_date:asc" : "pr_date:desc",
   });
 
   const prFilterFields = usePrFilterFields({
@@ -122,7 +134,7 @@ export default function PurchaseRequestComponent() {
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PURCHASE_REQUEST,
     fields: prFilterFields,
-    defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
+    defaultSort: viewMode === "my-pending" ? "pr_date:asc" : "pr_date:desc",
   });
 
   const queryParams = { ...params, filter: lf.filterParam };
@@ -175,18 +187,6 @@ export default function PurchaseRequestComponent() {
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
 
-  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav) — my-pending ยิงชุด
-  // เต็ม (perpage: -1) แยกอีกหนึ่ง query เพื่อให้ ↑↓ เดินได้ทุกใบที่รอเราอยู่ ไม่ใช่แค่
-  // หน้าที่เปิดค้างไว้ (คนอนุมัติไล่เคลียร์ได้จบชุดโดยไม่ต้องเด้งกลับ list)
-  // all-document ไม่ทำแบบนี้ — ใบทั้งระบบมีหลักพัน ดึงมาทั้งกองเพื่อเอาแค่ id ไม่คุ้ม
-  // ระหว่างชุดเต็มยังโหลดไม่เสร็จใช้แถวหน้าปัจจุบันไปก่อน ปุ่มจึงไม่หายวับ
-  const docSequenceQuery = useMyPendingPurchaseRequest(
-    { ...queryParams, page: undefined, perpage: -1 },
-    { enabled: viewMode === "my-pending" },
-  );
-  const docSequenceItems =
-    viewMode === "my-pending" ? (docSequenceQuery.data?.data ?? items) : items;
-  useRecordDocSequence(docSequenceItems.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -194,13 +194,21 @@ export default function PurchaseRequestComponent() {
   const selection = usePrSelection(items);
   const { selectedItems, hasSelection, selectedGroup } = selection;
 
-  const table = usePurchaseRequestTable({
+  const requestBatchDelete = () => {
+    if (!selectedItems.every((item) => canDeletePr(item, userId, isAdmin))) {
+      dispatchPermissionDenied(undefined, t("batchDeleteNotOwner"));
+      return;
+    }
+    setBatchDeleteOpen(true);
+  };
+
+  const table = usePrTable({
     items,
     totalRecords,
     params,
     tableConfig,
     onEdit: (item) => navigate(`/procurement/purchase-request/${item.id}`),
-    onDelete: setDeleteTarget,
+    onDelete: requestDelete,
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
     isMyPending: viewMode === "my-pending",
@@ -273,7 +281,7 @@ export default function PurchaseRequestComponent() {
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => setBatchDeleteOpen(true)}
+                onClick={requestBatchDelete}
               >
                 <Trash2 aria-hidden="true" />
                 {tc("delete")}
@@ -342,7 +350,7 @@ export default function PurchaseRequestComponent() {
               }
               onApprove={setApproveTarget}
               onReject={setRejectTarget}
-              onDelete={setDeleteTarget}
+              onDelete={requestDelete}
               isMyPending={viewMode === "my-pending"}
             />
             {useInfiniteScroll && grid.hasMore && (

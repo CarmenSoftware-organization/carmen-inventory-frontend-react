@@ -32,6 +32,7 @@ import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
@@ -53,24 +54,50 @@ export default function PriceListTemplateComponent() {
   const { exportPriceListTemplate, isExporting } = useExportPriceListTemplate();
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
+  // ป้ายเป็น i18n ให้ตรงกับป้ายในตาราง — ค่าเป็น clause เต็มต่อตัว
+  // MultiSelectFilter join เองเมื่อเลือกหลายตัว
+  const statusOptions = useMemo(
+    () =>
+      (["draft", "active", "inactive"] as const).map((status) => ({
+        label: ts(status),
+        value: `status|string:${status}`,
+      })),
+    [ts],
+  );
+
   // field เดียว — ไม่มี vendor/business_type/date param อื่นในโค้ดเดิม (grep ทั้ง
-  // ไฟล์ยืนยันแล้ว) labelKey ของ option เป็น i18n key จริง (status.draft ฯลฯ)
-  // จึงใช้ control: "status" ทั่วไปได้ตรง ๆ
+  // ไฟล์ยืนยันแล้ว) · ใช้ MultiSelectFilter แทน control: "status" (Select ข้อความ
+  // เปล่า) เพื่อให้เมนูมีไอคอนสถานะชุดเดียวกับคอลัมน์ในตาราง ไอคอนมาจากค่าท้าย
+  // value (`status|string:draft` → draft) ผ่าน lookupIcon ไม่ต้องประกาศซ้ำ
   const priceListTemplateFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "filter",
         section: "listView.sectionDocument",
-        control: "status",
+        control: "custom",
         labelKey: "common.status",
-        options: [
-          { labelKey: "status.draft", value: "status|string:draft" },
-          { labelKey: "status.active", value: "status|string:active" },
-          { labelKey: "status.inactive", value: "status|string:inactive" },
-        ],
+        // custom control ไม่มี `options` ให้ chip ไปหา label เอง — ไม่ใส่ตัวนี้
+        // chip จะกลายเป็นค่าดิบ ("draft") แทนป้ายภาษาไทย
+        valueText: (value) => {
+          const selected = new Set(value.split(","));
+          const labels = statusOptions
+            .filter((o) => selected.has(o.value))
+            .map((o) => o.label);
+          return labels.length > 1
+            ? `${labels[0]} +${labels.length - 1}`
+            : labels[0];
+        },
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={statusOptions}
+            className="w-full"
+          />
+        ),
       },
     ],
-    [],
+    [statusOptions],
   );
 
   const lf = useListFilters({

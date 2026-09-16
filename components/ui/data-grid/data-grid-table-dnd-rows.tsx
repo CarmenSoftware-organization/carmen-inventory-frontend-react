@@ -19,7 +19,6 @@ import {
   DataGridTableHeadRow,
   DataGridTableHeadRowCell,
   DataGridTableHeadRowCellResize,
-  DataGridTableRowSpacer,
 } from "@/components/ui/data-grid/data-grid-table";
 import {
   closestCenter,
@@ -53,21 +52,6 @@ const SortableRowContext = createContext<Pick<
   "attributes" | "listeners"
 > | null>(null);
 
-/**
- * Drag handle ของ row
- *
- * Render ปุ่มไอคอน GripHorizontal เป็น drag handle ของ sortable row โดย
- * อ่าน `attributes` และ `listeners` จาก `SortableRowContext` (provided โดย
- * `DataGridTableDndRow`) ถ้าไม่มี context จะ fallback เป็นปุ่ม disabled
- *
- * @param props - props ของ component
- * @param props.className - className เพิ่มเติม
- * @returns JSX element ของ drag handle button
- * @example
- * ```tsx
- * <DataGridTableDndRowHandle />
- * ```
- */
 function DataGridTableDndRowHandle({ className }: { className?: string }) {
   const context = useContext(SortableRowContext);
 
@@ -106,22 +90,6 @@ function DataGridTableDndRowHandle({ className }: { className?: string }) {
   );
 }
 
-/**
- * Sortable row wrapper
- *
- * Render `DataGridTableBodyRow` ภายใน `SortableRowContext.Provider` เพื่อแชร์
- * `attributes` และ `listeners` ของ `useSortable` ให้ `DataGridTableDndRowHandle`
- * ใช้งาน รองรับ drag-to-reorder แนวตั้ง
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.row - Row instance ของ TanStack Table
- * @returns JSX element ของ sortable row
- * @example
- * ```tsx
- * <DataGridTableDndRow row={row} />
- * ```
- */
 function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
   const {
     transform,
@@ -162,23 +130,6 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
   );
 }
 
-/**
- * DataGrid table variant รองรับลาก rows เพื่อ reorder
- *
- * Render `<table>` ภายใน `DndContext` ที่จำกัดการลากในแนวตั้ง
- * (`restrictToVerticalAxis`) และไม่เลย container ใช้ `SortableContext` แบบ
- * `verticalListSortingStrategy` รองรับ skeleton/empty state ปกติ
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.handleDragEnd - callback เมื่อ drag เสร็จ รับ DragEndEvent
- * @param props.dataIds - array ของ row ids ที่ใช้ใน SortableContext
- * @returns JSX element ของ table พร้อม DndContext
- * @example
- * ```tsx
- * <DataGridTableDndRows handleDragEnd={onEnd} dataIds={ids} />
- * ```
- */
 function DataGridTableDndRows<TData>({
   handleDragEnd,
   dataIds,
@@ -276,10 +227,6 @@ function DataGridTableDndRows<TData>({
               );
             })}
           </DataGridTableHead>
-
-          {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && (
-            <DataGridTableRowSpacer />
-          )}
 
           <DataGridTableBody>
             {props.loadingMode === "skeleton" &&

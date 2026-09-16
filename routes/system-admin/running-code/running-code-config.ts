@@ -16,20 +16,14 @@ import { format as formatDate } from "date-fns";
  * ที่บันทึก
  */
 
-/** ชนิดของส่วนประกอบหนึ่งชิ้นในเลขที่เอกสาร */
 export type PartKind = "text" | "date" | "running" | "token";
 
 export interface CodePart {
   kind: PartKind;
-  /** `text` — ตัวอักษรคงที่ เช่น "GRN" หรือตัวคั่น "-" */
   text?: string;
-  /** `date` — รูปแบบวันที่แบบ date-fns เช่น `yyMM` */
   pattern?: string;
-  /** `running` — จำนวนหลัก */
   digits?: number;
-  /** `running` — ตัวอักษรที่ใช้เติมหน้า (ปกติ "0") */
   pad?: string;
-  /** `token` — ชื่อค่าที่ดึงจากข้อมูล เช่น `PRODUCT-SUB-CAT` */
   token?: string;
 }
 
@@ -50,7 +44,6 @@ const DATE_RE = /^date\(\s*'([^']+)'\s*\)$/;
 const TOKEN_RE = /^\{(.+)\}$/;
 const SLOT_RE = /\{([^{}]+)\}/g;
 
-/** ชื่อช่องตามลำดับ: A, B, … Z, AA, AB, … (เกิน 26 ชิ้นแทบไม่มีจริง แต่ไม่ควรพัง) */
 export function slotName(index: number): string {
   let n = index;
   let name = "";
@@ -120,7 +113,6 @@ function serializeValue(part: CodePart): string {
   }
 }
 
-/** ประกอบรายการส่วนประกอบกลับเป็น config ที่ backend รับ */
 export function serializeConfig(
   parts: CodePart[],
   extra: Record<string, unknown> = {},

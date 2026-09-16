@@ -65,14 +65,6 @@ export function useRoleById(id: string | undefined) {
   });
 }
 
-/**
- * Hook สร้าง role ใหม่ผ่าน POST
- * Invalidate APPLICATION_ROLES cache เมื่อสำเร็จ
- * @returns mutation สำหรับสร้าง role
- * @example
- * const create = useCreateRole();
- * create.mutate({ name: "Manager", permissions });
- */
 export function useCreateRole() {
   return useApiMutation<CreateRoleDto>({
     mutationFn: (data, buCode) =>
@@ -82,14 +74,6 @@ export function useCreateRole() {
   });
 }
 
-/**
- * Hook แก้ไขข้อมูล role ผ่าน PUT โดยระบุ id
- * Invalidate cache รายการ role เมื่อสำเร็จ
- * @returns mutation สำหรับอัพเดต role
- * @example
- * const update = useUpdateRole();
- * update.mutate({ id, ...values });
- */
 export function useUpdateRole() {
   return useApiMutation<UpdateRoleDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -99,14 +83,6 @@ export function useUpdateRole() {
   });
 }
 
-/**
- * Hook ลบ role ตาม id
- * DELETE และ invalidate รายการ role
- * @returns mutation สำหรับลบ role
- * @example
- * const del = useDeleteRole();
- * del.mutate(roleId);
- */
 export function useDeleteRole() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>

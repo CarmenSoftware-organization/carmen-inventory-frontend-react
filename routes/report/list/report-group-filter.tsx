@@ -6,11 +6,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** Sentinel ที่ใช้แทน "All Types" — radix Select ห้าม value เป็น "" */
 const ALL_VALUE = "__all__";
 
 interface ReportGroupFilterProps {
-  /** เก็บเป็น array เพื่อ backward-compat กับ caller (single-select → 0 หรือ 1 item) */
   readonly value: string[];
   readonly onChange: (value: string[]) => void;
   readonly groups: string[];
@@ -18,11 +16,6 @@ interface ReportGroupFilterProps {
   readonly noTypesFoundLabel: string;
 }
 
-/**
- * Single-select dropdown สำหรับกรอง report ตาม group
- *
- * เลือก "All Types" → clear filter, เลือก group → กรองเฉพาะ group นั้น
- */
 export function ReportGroupFilter({
   value,
   onChange,

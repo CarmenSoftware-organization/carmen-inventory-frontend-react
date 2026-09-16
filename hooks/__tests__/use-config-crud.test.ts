@@ -32,12 +32,6 @@ interface CreateWidget {
   is_active: boolean;
 }
 
-/**
- * สร้าง Response แบบ JSON สำหรับ mock httpClient ในเทสต์
- * @param status - HTTP status code
- * @param body - ข้อมูล body ที่จะ serialize เป็น JSON
- * @returns Response object พร้อม Content-Type: application/json
- */
 function jsonRes(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
     status,
@@ -45,11 +39,6 @@ function jsonRes(status: number, body: unknown) {
   });
 }
 
-/**
- * สร้าง React wrapper สำหรับทดสอบ hook โดยให้ QueryClientProvider ใหม่ต่อการทดสอบ 1 ครั้ง
- * โดยปิด retry ของ query/mutation เพื่อไม่ให้เทสต์รอโดยไม่จำเป็น
- * @returns Wrapper component สำหรับใช้กับ renderHook
- */
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

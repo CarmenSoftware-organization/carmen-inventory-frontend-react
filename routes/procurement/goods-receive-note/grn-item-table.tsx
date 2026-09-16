@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
   useFormState,
@@ -7,7 +7,7 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { BoxIcon, ChevronsDownUp, ChevronsUpDown, Plus } from "lucide-react";
+import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -20,8 +20,8 @@ import type { GrnFormValues } from "./grn-form-schema";
 import { EMPTY_DETAIL } from "./grn-form-schema";
 import EmptyComponent from "@/components/empty-component";
 import type { PoForGrn, PoGrnDetail } from "@/types/purchase-order";
-import { useGrnItemTable, type GrnGroup } from "./use-grn-item-table";
-import { GrnItemComputedSync } from "./grn-location-row";
+import { useGrnItemTable } from "./use-grn-item-table";
+import { GrnItemComputedSync } from "./grn-item-cells";
 
 export const mapPoDetailToItems = (
   d: PoGrnDetail,
@@ -32,12 +32,14 @@ export const mapPoDetailToItems = (
     return [
       {
         ...EMPTY_DETAIL,
-        _group_key: d.id,
         purchase_order_id: poId,
         purchase_order_no: poNo,
         purchase_order_detail_id: d.id,
         product_id: d.product_id,
         product_name: d.product_name ?? "",
+        // ชื่อท้องถิ่นมากับ PO อยู่แล้ว ไม่ลอกมาด้วย = แถวที่มาจาก PO ไม่มีบรรทัด
+        // ภาษาไทยใต้ชื่อสินค้า ต่างจากแถวที่กรอกเอง ทั้งที่เป็นสินค้าตัวเดียวกัน
+        product_local_name: d.product_local_name ?? "",
         received_qty: d.order_qty,
         received_unit_id: d.order_unit_id,
         received_base_qty: d.base_qty,
@@ -57,33 +59,36 @@ export const mapPoDetailToItems = (
     ];
   }
 
-  return d.locations.map((loc) => ({
-    ...EMPTY_DETAIL,
-    _group_key: d.id,
-    purchase_order_id: poId,
-    purchase_order_no: poNo,
-    purchase_order_detail_id: d.id,
-    product_id: d.product_id,
-    product_name: d.product_name ?? "",
-    location_id: loc.location_id,
-    location_name: loc.location_name,
-    location_code: loc.location_code ?? "",
-    location_type: loc.location_type ?? "",
-    received_qty: loc.remain_qty ?? loc.order_qty,
-    received_unit_id: loc.request_unit_id || d.order_unit_id,
-    received_base_qty: loc.request_base_qty ?? 0,
-    received_base_unit_id: loc.request_base_unit_id || d.base_unit_id,
-    approved_qty: loc.requested_qty ?? loc.order_qty,
-    approved_unit_id: loc.request_unit_id || d.order_unit_id,
-    foc_qty: loc.foc_qty ?? 0,
-    // ราคาต่อหน่วยเป็นของ product ไม่ใช่ของ location — PO ใบหนึ่งมีราคาเดียว
-    // ทุก location ของรายการเดียวกันจึงใช้ราคาเดียวกัน ส่วน net/total ปล่อย
-    // ศูนย์ไว้ได้เพราะ GrnItemComputedSync คำนวณทับตามจำนวนที่รับจริงของแต่ละ
-    // location
-    unit_price: d.price,
-    net_amount: 0,
-    total_price: 0,
-  }));
+  // PO หนึ่งบรรทัดที่กระจายหลายคลัง = GRN หลายบรรทัด บรรทัดละคลัง — ข้ามคลังที่
+  // หลังบ้านบอกว่าใช้ไม่ได้ (`can_use: false`) ไม่ใช่ดึงมาทุกคลังแล้วให้ผู้ใช้ไป
+  // เจอเอาตอนบันทึกว่ารับเข้าคลังนั้นไม่ได้
+  return d.locations
+    .filter((loc) => loc.can_use !== false)
+    .map((loc) => ({
+      ...EMPTY_DETAIL,
+      purchase_order_id: poId,
+      purchase_order_no: poNo,
+      purchase_order_detail_id: d.id,
+      product_id: d.product_id,
+      product_name: d.product_name ?? "",
+      product_local_name: d.product_local_name ?? "",
+      location_id: loc.location_id,
+      location_name: loc.location_name,
+      location_code: loc.location_code ?? "",
+      location_type: loc.location_type ?? "",
+      received_qty: loc.remain_qty ?? loc.order_qty,
+      received_unit_id: loc.request_unit_id || d.order_unit_id,
+      received_base_qty: loc.request_base_qty ?? 0,
+      received_base_unit_id: loc.request_base_unit_id || d.base_unit_id,
+      approved_qty: loc.requested_qty ?? loc.order_qty,
+      approved_unit_id: loc.request_unit_id || d.order_unit_id,
+      foc_qty: loc.foc_qty ?? 0,
+      // ราคาต่อหน่วยมาจาก PO ใบเดียวกัน ทุกบรรทัดที่แตกมาจากรายการเดียวจึงเริ่มที่
+      // ราคาเดียวกัน — แก้รายบรรทัดทีหลังได้ (ของที่รับจริงอาจต่อรองราคาใหม่)
+      unit_price: d.price,
+      net_amount: 0,
+      total_price: 0,
+    }));
 };
 
 const PoAddButton = memo(function PoAddButton({
@@ -115,7 +120,7 @@ const PoAddButton = memo(function PoAddButton({
  * error ระดับ array ของ items (เช่น "ต้องมีอย่างน้อย 1 รายการ") — subscribe errors
  * เองในคอมโพเนนต์ย่อยนี้ เพื่อ**ไม่ให้ GrnItemTable อ่าน form.formState.errors
  * โดยตรง** ซึ่งจะ subscribe แล้ว re-render ทั้งตารางทุกครั้งที่ validation รัน (เช่น
- * setValue discount/tax แบบ shouldValidate) → columns/groups recompute → product
+ * setValue discount/tax แบบ shouldValidate) → columns recompute → product
  * lookup remount แล้วเด้ง focus. แยกออกมาแล้ว GrnItemTable นิ่ง ไม่ churn ตอนพิมพ์
  */
 const ItemsArrayError = memo(function ItemsArrayError({
@@ -137,63 +142,46 @@ const ItemsArrayError = memo(function ItemsArrayError({
 interface GrnItemTableProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
-  /** view mode → qty ในแต่ละ location แสดงเป็น plain text */
-  readonly plainText?: boolean;
-  /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand group ที่ error */
-  readonly revealErrorSignal?: number;
 }
 
 /**
- * รายการสินค้าของ GRN — DataGrid group-by-product (แบบ PO): 1 row = 1 product,
- * expand → location rows (แต่ละ location มี Quantity/Pricing/Details + Add Location)
+ * รายการสินค้าของ GRN — **1 แถว = 1 บรรทัดของเอกสาร (สินค้า + คลัง)** ตารางเดียว
+ * ไม่มีกลุ่มสินค้าให้กาง (ทรงเดียวกับ PO หลังเลิก group location)
+ *
+ * ฟอร์มเก็บ `items` เป็น array แบนอยู่แล้ว การจับกลุ่มเมื่อก่อนเกิดตอน render
+ * เท่านั้น — เอาออกแล้ว index ของแถวจึงตรงกับ index ในฟอร์มพอดี
  */
-export function GrnItemTable({
-  form,
-  disabled,
-  plainText = false,
-  revealErrorSignal = 0,
-}: GrnItemTableProps) {
+export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
-  const tc = useTranslations("common");
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isManual = docType === "manual";
-  const [deleteGroup, setDeleteGroup] = useState<GrnGroup | null>(null);
+  // สกุลเงินของใบ — ส่งให้ dialog กันหยิบ PO คนละสกุลเข้ามา (watch ไม่ใช่
+  // getValues เพราะผู้ใช้เปลี่ยนสกุลเงินที่หัวใบได้ระหว่างกรอก)
+  const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const currencyName = useWatch({
+    control: form.control,
+    name: "currency_name",
+  });
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [poDialogOpen, setPoDialogOpen] = useState(false);
-  const [autoOpenProductKey, setAutoOpenProductKey] = useState<string | null>(
-    null,
-  );
-  const [autoOpenLocationKey, setAutoOpenLocationKey] = useState<string | null>(
-    null,
-  );
-  // กลุ่มที่ location lookup ต้องเปิดอยู่ตอนนี้ (คุมจากข้างนอก ไม่ใช่ defaultOpen
-  // เพราะแถวถูก mount ไปแล้วตั้งแต่ตอนกดเพิ่มรายการ)
-  const [openLocationKey, setOpenLocationKey] = useState<string | null>(null);
+  // แถว (row id) ที่ต้องเปิดตัวเลือกสินค้า/โฟกัสราคาอยู่ตอนนี้
+  const [openProductId, setOpenProductId] = useState<string | null>(null);
+  const [autoFocusPriceId, setAutoFocusPriceId] = useState<string | null>(null);
+
+  // สลับโหมดดู↔แก้ = เริ่มกรอกรอบใหม่ ล้างสถานะนำทางทั้งชุด — ตารางไม่ได้ unmount
+  // ตอนสลับโหมด ของค้างจากรอบก่อน (เช่นเลือกสินค้าไว้แล้วกด Cancel) จะกลับมาเด้ง
+  // lookup หรือดูดเคอร์เซอร์ทันทีที่กด Edit ทั้งที่ผู้ใช้ยังไม่ได้แตะอะไร
+  useEffect(() => {
+    setOpenProductId(null);
+    setAutoFocusPriceId(null);
+  }, [disabled]);
 
   const {
     fields: itemFields,
     prepend: prependItem,
-    insert: insertItem,
     remove: removeItem,
   } = useFieldArray({ control: form.control, name: "items" });
-
-  // group items by _group_key → 1 group = 1 row
-  const groups = useMemo<GrnGroup[]>(() => {
-    const map = new Map<string, GrnGroup>();
-    itemFields.forEach((item, index) => {
-      const key = item._group_key || `fallback-${item.id}`;
-      if (!map.has(key)) {
-        map.set(key, {
-          key,
-          productName: item.product_name || "",
-          isManual: !item.purchase_order_detail_id,
-          indices: [],
-        });
-      }
-      map.get(key)!.indices.push(index);
-    });
-    return Array.from(map.values());
-  }, [itemFields]);
 
   const excludePoIds = useMemo(() => {
     const ids = new Set<string>();
@@ -212,33 +200,72 @@ export function GrnItemTable({
     if (items.length > 0) prependItem(items);
   };
 
-  // เพิ่ม location ในกลุ่ม → insert row ต่อท้าย indices ของกลุ่ม (product เดิม, location ว่าง)
-  const handleAddLocation = (group: GrnGroup) => {
-    const idx = group.indices[0];
-    const productId = form.getValues(`items.${idx}.product_id`);
-    const productName = form.getValues(`items.${idx}.product_name`);
-    const insertAt = group.indices[group.indices.length - 1] + 1;
-    insertItem(insertAt, {
-      ...EMPTY_DETAIL,
-      _group_key: group.key,
-      product_id: productId,
-      product_name: productName,
-    });
-    setAutoOpenLocationKey(group.key);
-    setAutoOpenProductKey(null);
-  };
-
   /**
-   * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
+   * เลือกคลังเสร็จ → เปิดตัวเลือกสินค้าของแถวเดิมต่อ
    *
    * Radix คืน focus ให้ปุ่มที่เพิ่งกดเป็นค่า default ซึ่งกลายเป็นทางตัน: ผู้ใช้พิมพ์
-   * จำนวนต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
-   * ที่นี่จึงเปิด location ต่อให้เลย (เพิ่งกดได้เพราะ lookup ปลดล็อกตาม product_id)
-   * แล้วพอเลือกคลังเสร็จ GrnLocationRow จะโฟกัสช่องจำนวนต่อเอง
+   * ต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มที่เพิ่งกด
+   *
+   * เส้นทางคือ **คลัง → สินค้า → ราคา → จำนวน** ครบทั้งแถวในบรรทัดเดียว
+   * (คลังมาก่อนเพราะมันเป็นตัวกำหนดว่าเลือกสินค้าอะไรได้บ้าง)
+   *
+   * callback ทุกตัวที่ส่งเข้า useGrnItemTable ห่อ useCallback ไว้ เพราะมันเป็น dep
+   * ของ columns useMemo — ปล่อยให้เป็นฟังก์ชันใหม่ทุก render เท่ากับ columns
+   * recompute ทุก render แล้ว cell ที่มีช่องกรอกจะโดนสร้างใหม่จนโฟกัสหลุด
    */
-  const handleProductPicked = (groupKey: string) => {
-    setAutoOpenProductKey(null);
-    setOpenLocationKey(groupKey);
+  const handleLocationPicked = useCallback(
+    (rowId: string) => setOpenProductId(rowId),
+    [],
+  );
+
+  const handleProductPicked = useCallback((rowId: string) => {
+    setOpenProductId(null);
+    setAutoFocusPriceId(rowId);
+  }, []);
+
+  const handleProductOpenChange = useCallback(
+    (rowId: string, open: boolean) => setOpenProductId(open ? rowId : null),
+    [],
+  );
+
+  const handleDeleteItem = useCallback(
+    (index: number) => setDeleteIndex(index),
+    [],
+  );
+
+  const table = useGrnItemTable({
+    form,
+    itemFields,
+    disabled,
+    isPo: !isManual,
+    openProductId,
+    onProductOpenChange: handleProductOpenChange,
+    autoFocusPriceId,
+    onLocationPicked: handleLocationPicked,
+    onProductPicked: handleProductPicked,
+    onDeleteItem: handleDeleteItem,
+  });
+
+  const handleAddItem = () => {
+    // แถวใหม่ขึ้นบนสุด "รายการก่อนหน้า" จึงคือแถวแรกปัจจุบัน — ของที่มาส่งพร้อมกัน
+    // ใบเดียวมักเข้าคลังเดิมติดกันหลายรายการ เติมคลังให้ล่วงหน้าแล้วแก้เองได้
+    // (ทรงเดียวกับ PR/PO) · อ่านผ่าน getValues ไม่ใช่ itemFields[0] เพราะ field
+    // array เก็บค่าตอน mount ไม่ใช่ค่าล่าสุดที่ผู้ใช้เพิ่งเลือก
+    const prev = form.getValues("items.0");
+    const carriedLocation = prev?.location_id
+      ? {
+          location_id: prev.location_id,
+          location_name: prev.location_name,
+          location_code: prev.location_code,
+          location_type: prev.location_type,
+        }
+      : {};
+
+    prependItem({ ...EMPTY_DETAIL, ...carriedLocation });
+    // ล้างสถานะนำทางของแถวก่อนหน้าทิ้ง — ไม่งั้น lookup ของแถวเดิมเด้งขึ้นมา
+    // ทับตอนที่ผู้ใช้กำลังจะเริ่มกรอกแถวใหม่
+    setOpenProductId(null);
+    setAutoFocusPriceId(null);
   };
 
   // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
@@ -250,57 +277,6 @@ export function GrnItemTable({
     if (itemFields.length === 0 && !disabled && isManual) handleAddItem();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
   }, [submitCount]);
-
-  const handleRemoveGroup = (indices: number[]) => {
-    [...indices].sort((a, b) => b - a).forEach((i) => removeItem(i));
-  };
-
-  const table = useGrnItemTable({
-    form,
-    groups,
-    itemFields,
-    disabled,
-    plainText,
-    isPo: !isManual,
-    autoOpenProductKey,
-    autoOpenLocationKey,
-    openLocationKey,
-    onLocationOpenChange: (key, open) => setOpenLocationKey(open ? key : null),
-    onProductPicked: handleProductPicked,
-    onAddLocation: handleAddLocation,
-    onDeleteGroup: setDeleteGroup,
-    onDeleteItem: removeItem,
-  });
-
-  // validation ไม่ผ่าน: field location/received_qty/discount/tax อยู่ใน group expand
-  // → auto-expand group ที่ติด error ให้ scrollToFirstInvalidField เจอ field (mirror PO)
-  useEffect(() => {
-    if (!revealErrorSignal) return;
-    const itemErrors = form.formState.errors.items;
-    if (!itemErrors) return;
-    const next: Record<string, boolean> = {};
-    for (const group of groups) {
-      if (group.indices.some((i) => itemErrors[i])) next[group.key] = true;
-    }
-    if (Object.keys(next).length === 0) return;
-    table.setExpanded((prev) => ({
-      ...(typeof prev === "object" ? prev : {}),
-      ...next,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealErrorSignal]);
-
-  const handleAddItem = () => {
-    const key = crypto.randomUUID();
-    prependItem({ ...EMPTY_DETAIL, _group_key: key });
-    setAutoOpenProductKey(key);
-    setAutoOpenLocationKey(null);
-    // auto-expand product ใหม่ (บนสุด) ให้กรอก location ได้เลย
-    table.setExpanded((prev) => ({
-      ...(typeof prev === "object" ? prev : {}),
-      [key]: true,
-    }));
-  };
 
   const addAction =
     !disabled &&
@@ -321,46 +297,52 @@ export function GrnItemTable({
       />
     ));
 
+  /**
+   * ข้อความยืนยันลบ — บอกให้ครบว่าแถวไหน
+   *
+   * ของเดิมโยนชื่อสินค้าดิบ ๆ เป็น description (ไม่มีประโยค) ใต้หัวข้อ "ลบสินค้า"
+   * ซึ่งอ่านแล้วเหมือนกำลังลบสินค้าออกจากระบบ ไม่ใช่เอาแถวออกจากใบ · และแถวหนึ่ง
+   * ของใบรับสินค้าคือ สินค้า + คลัง ชื่อสินค้าอย่างเดียวจึงไม่พอเมื่อสินค้าตัวเดียวกัน
+   * รับเข้าหลายคลังในใบเดียว
+   *
+   * อ่านผ่าน getValues ไม่ใช่ itemFields — field array เก็บค่าตอน mount ไม่ใช่ค่า
+   * ล่าสุดที่ผู้ใช้เพิ่งเลือก
+   */
+  const deleteDescription = (() => {
+    if (deleteIndex == null) return undefined;
+    const row = form.getValues(`items.${deleteIndex}`);
+    const product =
+      row?.product_name ||
+      t("removeItemUntitled", { index: deleteIndex + 1 });
+    return row?.location_name
+      ? t("removeItemConfirm", { product, location: row.location_name })
+      : t("removeItemConfirmNoLocation", { product });
+  })();
+
   return (
     <div className="space-y-2 pt-2">
       <div className="flex flex-wrap items-center justify-end gap-1.5">
-        {groups.length > 0 && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-            }
-          >
-            {table.getIsAllRowsExpanded() ? (
-              <>
-                <ChevronsDownUp /> {tc("collapseAll")}
-              </>
-            ) : (
-              <>
-                <ChevronsUpDown /> {tc("expandAll")}
-              </>
-            )}
-          </Button>
-        )}
         {addAction}
       </div>
 
       <ItemsArrayError control={form.control} />
 
-      {/* compute sync — 1 ต่อ location index, เขียน derived discount/tax/net/total กลับ form */}
+      {/* compute sync — 1 ตัวต่อแถว เขียน derived discount/tax/net/total กลับ form */}
       {itemFields.map((item, i) => (
         <GrnItemComputedSync key={item.id} form={form} index={i} />
       ))}
 
       <DataGrid
         table={table}
-        recordCount={groups.length}
+        recordCount={itemFields.length}
         tableLayout={{
-          // table กว้างเกิน container → scroll แนวนอน (เหมือน PO): width =
-          // getTotalSize(), column กว้างตาม size px ที่กำหนด
+          // เซลล์มีช่องกรอก — clamp สองบรรทัดทำ layout ของ control เพี้ยน
+          rowClamp: false,
           columnsResizable: true,
+          // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง (รหัสคลัง · ชื่อท้องถิ่น ·
+          // เปอร์เซ็นต์ใต้ยอดเงิน) บางเซลล์ไม่มี กึ่งกลางแล้วเซลล์บรรทัดเดียว
+          // จะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน (ทรงเดียวกับ PO)
+          cellAlign: disabled ? "top" : "middle",
         }}
         emptyMessage={
           <EmptyComponent
@@ -370,25 +352,19 @@ export function GrnItemTable({
           />
         }
       >
-        {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
-            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับเนื้อหา
-            โดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
         <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>
 
       <DeleteDialog
-        open={!!deleteGroup}
-        onOpenChange={(open) => !open && setDeleteGroup(null)}
-        title={t("deleteProduct")}
-        description={deleteGroup?.productName || undefined}
+        open={deleteIndex !== null}
+        onOpenChange={(open) => !open && setDeleteIndex(null)}
+        title={t("removeItem")}
+        description={deleteDescription}
         onConfirm={() => {
-          if (deleteGroup) {
-            handleRemoveGroup(deleteGroup.indices);
-            setDeleteGroup(null);
-          }
+          if (deleteIndex !== null) removeItem(deleteIndex);
+          setDeleteIndex(null);
         }}
       />
 
@@ -397,6 +373,8 @@ export function GrnItemTable({
           open={poDialogOpen}
           onOpenChange={setPoDialogOpen}
           vendorId={form.getValues("vendor_id") ?? ""}
+          currencyId={currencyId ?? ""}
+          currencyName={currencyName ?? ""}
           excludeIds={excludePoIds}
           onSelect={handleSelectPoList}
         />

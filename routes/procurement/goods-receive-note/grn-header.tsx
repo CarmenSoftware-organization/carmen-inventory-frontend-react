@@ -30,9 +30,7 @@ interface GrnHeaderProps {
   readonly isCommitted: boolean;
   readonly isVoid: boolean;
   readonly deleteIsPending: boolean;
-  /** display only — ไม่เข้า payload */
   readonly receivedByName: string;
-  /** display only — ไม่เข้า payload */
   readonly departmentName: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
@@ -43,10 +41,6 @@ interface GrnHeaderProps {
   readonly onSave: () => void;
 }
 
-/**
- * Header ของฟอร์ม GRN — ใช้ `DocFormHeader` กลางร่วมกับ PO/PR
- * คง permission guard (Edit/Delete ผ่าน useCan) จาก FormToolbar เดิมไว้
- */
 export function GrnHeader({
   goodsReceiveNote,
   mode,

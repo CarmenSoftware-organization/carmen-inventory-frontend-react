@@ -24,11 +24,9 @@ interface ScGeneralFieldsProps {
   readonly form: UseFormReturn<SpotCheckFormValues>;
   readonly disabled: boolean;
   readonly isView?: boolean;
-  /** ซ่อน location_id field — ใช้กับ entry mode ที่ pre-fill location จาก URL */
   readonly hideLocation?: boolean;
 }
 
-/** General settings card — method picker (3 cards) + location + items + min_value + description */
 export function ScGeneralFields({
   form,
   disabled,

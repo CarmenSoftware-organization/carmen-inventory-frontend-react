@@ -50,7 +50,6 @@ interface PdTabGeneralProps {
     categoryName: string,
     subCategoryName: string,
   ) => void;
-  /** รูปที่เลือกไว้แต่ยังไม่อัปโหลด — ฟอร์มเป็นคนถือ ส่งขึ้นตอนกด Save */
   readonly pendingImages?: readonly File[];
   readonly onPendingImagesChange?: (files: File[]) => void;
 }

@@ -291,7 +291,6 @@ function installErrorHandlers(): void {
   });
 }
 
-/** ใช้ตอน error boundary จับได้ */
 export function currentTraceId(): string | undefined {
   return trace.getActiveSpan()?.spanContext().traceId;
 }

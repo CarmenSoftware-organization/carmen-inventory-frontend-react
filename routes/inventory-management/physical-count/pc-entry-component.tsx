@@ -40,10 +40,6 @@ type CountFilter = "all" | "counted" | "uncounted";
 const ROW_ESTIMATE = 156; // px ของการ์ดหนึ่งใบ + gap (อิงจริง ~140-160)
 const ROW_GAP = 8; // gap-2
 
-/**
- * คอมโพเนนต์หน้าบันทึกผลการนับ Physical Count (entry mode)
- * Performance: virtualized list + memoized rows + uncontrolled inputs (commit on blur)
- */
 export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const navigate = useNavigate();

@@ -2,7 +2,7 @@ import { TriangleAlert, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { useLicense } from "@/hooks/use-license";
 import type { SeatExpiringSoon } from "@/hooks/use-license";
-import type { BusinessUnitSeat } from "@/types/profile";
+import type { BusinessUnitSeat } from "@/types/license";
 
 interface SeatQuotaBannerProps {
   readonly seat: BusinessUnitSeat;

@@ -5,31 +5,26 @@
  * ยกเว้น `users[]` ที่หน้านี้ไม่ได้ใช้จึงไม่ระบุไว้
  */
 
-/** ข้อมูล connection ของฐานข้อมูลประจำ BU */
 interface BusinessUnitDbConnection {
   host: string;
   port: number;
   schema: string;
   database: string;
-  /** รหัสผ่าน DB — UI แสดงแบบ mask พร้อมปุ่ม reveal เท่านั้น */
   password: string;
   provider: string;
   username: string;
 }
 
-/** รูปแบบตัวเลข (Intl) — ใช้ร่วมกับ amount/quantity/perpage/recipe */
 export interface BusinessUnitNumberFormat {
   locales: string;
   minimumIntegerDigits: number;
 }
 
-/** URL รูปภาพ pre-signed พร้อมเวลาหมดอายุ (logo/avatar) */
 interface BusinessUnitImage {
   url: string;
   expires_at: string;
 }
 
-/** รายการตั้งค่าใน `config` — value เป็น string เสมอ ตีความตาม `datatype` */
 export interface BusinessUnitConfigItem {
   key: string;
   label: string;
@@ -37,7 +32,6 @@ export interface BusinessUnitConfigItem {
   value: string;
 }
 
-/** รายการ audit หนึ่งครั้ง (created/updated) */
 interface BusinessUnitAuditEntry {
   at: string;
   id: string;
@@ -60,7 +54,6 @@ export interface BusinessUnitDetail {
   is_hq: boolean;
   is_active: boolean;
   db_connection: BusinessUnitDbConnection | null;
-  /** GET อาจคืน `{}` (ว่าง) หรือ array ของ setting — component normalize เป็น array เสมอ */
   config: BusinessUnitConfigItem[] | Record<string, unknown>;
   default_currency_id: string | null;
   calculation_method: string | null;
@@ -115,7 +108,6 @@ export interface BusinessUnitDetail {
   audit: BusinessUnitAudit | null;
 }
 
-/** field ที่แก้ไขได้ในหน้า Business Setting (ฐานของ PATCH payload) */
 interface BusinessUnitEditable {
   code: string;
   name: string;
@@ -170,8 +162,6 @@ interface BusinessUnitEditable {
   config: BusinessUnitConfigItem[];
 }
 
-/** payload PATCH — ส่งเฉพาะ field ที่แก้จริง (partial) + doc_version สำหรับ
- * optimistic lock (กัน 409 ตอน backend เทียบ version) */
 export type BusinessUnitPatch = Partial<BusinessUnitEditable> & {
   doc_version?: number;
 };

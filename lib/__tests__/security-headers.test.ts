@@ -16,7 +16,6 @@ import { describe, expect, it } from "vitest";
 const ROOT = join(import.meta.dirname, "../..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf-8");
 
-/** ไฟล์ config ของทุกปลายทาง deploy ที่ต้องมี header ชุดนี้ */
 const HOSTING_CONFIGS = [
   "docker/30-render-security-headers.sh",
   "vercel.json",
@@ -37,7 +36,6 @@ const HOSTING_CONFIGS = [
  */
 const SCRIPT_TAG = /<script\b([^>]*)>([\s\S]*?)<\/script(?:\s[^>]*)?>/gi;
 
-/** เนื้อของ inline script ทุกตัว — ตัวที่มี `src` โหลดจากไฟล์ ไม่ต้องมี hash */
 function inlineScriptBodies(html: string): string[] {
   const bodies: string[] = [];
   for (const [, attrs, body] of html.matchAll(SCRIPT_TAG)) {

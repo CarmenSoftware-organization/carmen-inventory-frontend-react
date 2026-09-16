@@ -13,7 +13,6 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
     product_local_name: z.string(),
-    /** ชื่อหน่วยนับจากสินค้าที่เลือก — แสดงผลเท่านั้น ไม่อยู่ใน payload */
     unit_name: z.string(),
     // ห้ามติดลบ แต่ 0 ผ่านได้ — แถวใหม่เริ่มที่ 0 จะได้ไม่ขึ้น error ทันทีที่กด
     // เพิ่มรายการ (กติกาเดียวกับ SR) · ทศนิยมใส่ได้ ไม่ปัดให้ (ดู CLAUDE.md
@@ -97,7 +96,6 @@ function minDate(a: Date, b: Date): Date {
   return new Date(Math.min(a.getTime(), b.getTime()));
 }
 
-/** Cap today's date at the end of the current period so add-mode never starts outside it. */
 export function resolveDefaultDate(periodEnd?: string): string {
   const today = new Date();
   if (!periodEnd) return today.toISOString();

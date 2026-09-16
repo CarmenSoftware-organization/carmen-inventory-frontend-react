@@ -26,17 +26,13 @@ import type {
 import { srStockVisible } from "./sr-form-helpers";
 
 interface SrStockTableProps {
-  /** ใบที่ยังไม่บันทึกไม่มี id — ไม่ยิง API และปุ่มพิมพ์กดไม่ได้ */
   readonly srId?: string;
   readonly srNo?: string;
-  /** ต่ำกว่า completed = ยังไม่มีอะไรให้ดู (ดู `srStockVisible`) */
   readonly docStatus?: StoreRequisitionStatus;
 }
 
-/** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
 type StockDirection = "" | "in" | "out";
 
-/** ค่าที่ backend ส่งมาแทน "ไม่มี lot" — โชว์เป็นขีดให้เข้าชุดกับคอลัมน์อื่น */
 const NO_LOT = "-";
 
 /**

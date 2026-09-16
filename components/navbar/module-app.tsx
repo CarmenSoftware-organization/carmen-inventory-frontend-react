@@ -84,7 +84,6 @@ export default function ModuleApp() {
   );
 }
 
-/** kbd chip for the shortcut hint */
 function HintKey({ children }: { readonly children: React.ReactNode }) {
   return (
     <kbd className="bg-muted text-micro-legal inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 font-semibold">
@@ -98,7 +97,6 @@ interface LauncherTileProps {
   readonly path: string;
   readonly label: string;
   readonly denied: boolean;
-  /** BU ปัจจุบันไม่ได้ซื้อ feature นี้ — คนละเรื่องกับ denied, ชนะ denied เสมอ */
   readonly locked: boolean;
   readonly permission?: import("@/constant/permissions").Permission;
   readonly onNavigate: () => void;

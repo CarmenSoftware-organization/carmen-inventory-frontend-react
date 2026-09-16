@@ -89,8 +89,15 @@ interface FlowNodeProps {
 function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
   // แต่ละโหนดแยกกันด้วย "รูปร่าง" ของไอคอน ไม่ใช่สี — strip นี้เป็นแผนผังของ
   // นิยาม workflow ไม่มีโหนดไหน "กำลังทำงาน" อยู่ จึงไม่มีอะไรควรได้ accent
-  const Icon =
-    kind === "start"
+  // ยกเว้นมงกุฎ HOD ที่ใช้สีชุดเดียวกับในฟอร์ม (wf-sort-table-item) เพราะมันคือ
+  // ป้ายบอกสถานะพิเศษของ stage ไม่ใช่การแยกหมวด และต้องหาเจอตอนกวาดตาทั้งคอลัมน์
+  //
+  // stage ที่เป็น HOD ใช้มงกุฎ**แทน**ไอคอน role ไปเลย ไม่ใช่แปะทับมุม — ที่ขนาด
+  // 16px ในเซลล์ตาราง สองสัญลักษณ์ซ้อนกันอ่านเป็นก้อนเดียว (role ยังอยู่ในฟอร์ม)
+  const isHodNode = kind === "middle" && !!isHod;
+  const Icon = isHodNode
+    ? Crown
+    : kind === "start"
       ? Play
       : kind === "end"
         ? CheckCircle2
@@ -100,19 +107,16 @@ function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
 
   const node = (
     <span
-      className="text-muted-foreground relative inline-flex shrink-0"
+      className={cn(
+        "inline-flex shrink-0",
+        isHodNode ? "text-warning-ink" : "text-muted-foreground",
+      )}
       aria-label={ariaLabel}
     >
       <Icon
         className={cn("size-4", kind === "start" && "fill-current")}
         aria-hidden="true"
       />
-      {isHod && kind === "middle" && (
-        <Crown
-          className="absolute -top-1.5 -right-1.5 size-2.5 fill-current"
-          aria-hidden="true"
-        />
-      )}
     </span>
   );
 
@@ -121,7 +125,7 @@ function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
       <TooltipTrigger asChild>{node}</TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
         {label}
-        {isHod && kind === "middle" && " · HOD"}
+        {isHodNode && " · HOD"}
       </TooltipContent>
     </Tooltip>
   );

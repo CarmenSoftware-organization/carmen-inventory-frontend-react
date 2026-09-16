@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { getDefaultValues, mapItemToPayload } from "./ia-form-schema";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 
-/** ตัดมาจาก response จริงของ GET /stock-in/:id (ตัดฟิลด์ที่ฟอร์มไม่ได้ใช้ออก) */
 const adjustment = {
   id: "db0c651b-fd83-43e7-99e8-893ebcbf3a18",
   si_date: "2026-05-31T00:00:00.000Z",

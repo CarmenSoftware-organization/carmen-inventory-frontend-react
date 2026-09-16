@@ -2,12 +2,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 
-/**
- * Button labels are normal-size text, so WCAG 2.1 AA wants 4.5:1 against the
- * button's own background. Nothing in the type system links `--success` in
- * globals.css to `text-white` in button.tsx, so a token tweak can drop a
- * variant below the line silently — this reads both files and does the math.
- */
 const AA_NORMAL_TEXT = 4.5;
 
 const ROOT = join(import.meta.dirname, "../..");
@@ -47,7 +41,6 @@ function contrast(a: Rgb, b: Rgb): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Composite `fg` at `alpha` over `bg` — mirrors Tailwind's `bg-x/60`. */
 function over(fg: Rgb, bg: Rgb, alpha: number): Rgb {
   return fg.map((c, i) => c * alpha + bg[i] * (1 - alpha)) as Rgb;
 }
@@ -71,18 +64,12 @@ function token(theme: keyof typeof THEMES, name: string): Rgb {
 const WHITE: Rgb = [1, 1, 1];
 const BLACK: Rgb = [0, 0, 0];
 
-/** The class string button.tsx declares for a variant — the source of truth. */
 function variantClasses(variant: string): string {
   const m = new RegExp(`\\b${variant}:\\s*\\n?\\s*"([^"]+)"`).exec(button);
   if (!m) throw new Error(`button.tsx: no ${variant} variant`);
   return m[1];
 }
 
-/**
- * The label colour button.tsx actually declares for a variant in a theme, so
- * the ratios below are computed from the real pair rather than a copy of it —
- * flipping `text-black` back to `text-white` has to move a number here.
- */
 function labelColour(variant: string, theme: "light" | "dark"): Rgb {
   const classes = variantClasses(variant);
   const dark = /dark:text-(white|black)/.exec(classes)?.[1];
@@ -116,14 +103,6 @@ describe("button variants meet WCAG AA against their own background", () => {
     expect(contrast(effective, WHITE)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
   });
 
-  /**
-   * Every `bg-x text-x-foreground` pairing, not just the button's — the same
-   * two tokens dress badges, sidebar items and anything else that needs a
-   * filled surface, so a token nudge has to clear the bar for all of them.
-   *
-   * `primary`/`sidebar-primary` on dark were 4.11:1 and `destructive` 3.34:1
-   * (light) / 3.25:1 (dark) until the tokens moved.
-   */
   it.each([
     ["primary", "primary-foreground"],
     ["sidebar-primary", "sidebar-primary-foreground"],
@@ -142,12 +121,6 @@ describe("button variants meet WCAG AA against their own background", () => {
     }
   });
 
-  /**
-   * `--primary` on dark has to serve two jobs that pull apart: a fill behind
-   * `--primary-foreground`, and `text-primary` for links on the page itself.
-   * No lightness satisfies both with a white label — which is why the label
-   * went dark and the token went brighter. Guard the second job too.
-   */
   it.each(["background", "card"])(
     "text-primary stays readable on dark %s",
     (surface) => {
@@ -178,13 +151,6 @@ describe("button variants meet WCAG AA against their own background", () => {
   });
 });
 
-/**
- * `--x-foreground` is x-coloured text for a page background — it turns light in
- * dark mode. Pairing it with a solid `bg-x` therefore lands amber-on-amber
- * (1.07:1 in the offline banner) or teal-on-teal. The tint form (`bg-x/10
- * text-x-foreground`) is the correct and common use, so only the solid form is
- * banned here.
- */
 describe("no solid semantic background pairs with its own -foreground token", () => {
   const SEMANTIC = ["warning", "success", "info"] as const;
 

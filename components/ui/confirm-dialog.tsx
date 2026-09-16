@@ -20,7 +20,6 @@ interface ConfirmDialogProps {
   readonly onConfirm: () => void;
   readonly isPending?: boolean;
   readonly confirmText?: string;
-  /** ไอคอนบนปุ่มยืนยัน — ต่างกันตาม action ที่ถาม (Check ตอน commit ฯลฯ) */
   readonly confirmIcon?: React.ReactNode;
   readonly variant?: "default" | "destructive";
 }

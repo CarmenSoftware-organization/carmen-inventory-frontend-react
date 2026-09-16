@@ -4,7 +4,6 @@ import { Tabs as TabsPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Tabs root (shadcn) รองรับ orientation แนวนอน/แนวตั้ง */
 function Tabs({
   className,
   orientation = "horizontal",
@@ -39,7 +38,6 @@ const tabsListVariants = cva(
   },
 );
 
-/** รายการ tabs triggers — รองรับ variant default/line */
 function TabsList({
   className,
   variant = "default",
@@ -56,7 +54,6 @@ function TabsList({
   );
 }
 
-/** ปุ่ม trigger แต่ละ tab */
 function TabsTrigger({
   className,
   ...props
@@ -76,7 +73,6 @@ function TabsTrigger({
   );
 }
 
-/** Content panel ของแต่ละ tab */
 function TabsContent({
   className,
   ...props

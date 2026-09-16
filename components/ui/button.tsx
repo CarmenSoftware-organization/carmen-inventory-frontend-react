@@ -53,11 +53,6 @@ const buttonVariants = cva(
   },
 );
 
-/**
- * Button component หลักของระบบ รองรับ variant และ size หลากหลาย
- * @param props - variant, size, asChild และ props ของ button element
- * @returns React element ปุ่ม
- */
 function Button({
   className,
   variant = "default",

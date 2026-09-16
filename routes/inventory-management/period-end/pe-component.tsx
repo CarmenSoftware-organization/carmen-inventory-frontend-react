@@ -34,7 +34,6 @@ import { PeStartBlockedDialog } from "./pe-start-blocked-dialog";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { StartCountingBlockers } from "@/types/period-end";
 
-/** true เมื่อ payload หน้าตาเหมือนรายการเอกสารที่บล็อกจริง ๆ ไม่ใช่ error body อื่นที่บังเอิญมี data */
 const isStartCountingBlockers = (
   value: unknown,
 ): value is StartCountingBlockers =>
@@ -88,7 +87,7 @@ export default function PeComponent() {
         <span
           aria-hidden="true"
           className="bg-primary/10 text-primary inline-flex size-9 items-center justify-center rounded-xl"
-          style={{ color: "var(--module-inventory)" }}
+          style={{ color: "var(--primary)" }}
         >
           <CalendarRange className="size-5" />
         </span>
@@ -119,7 +118,7 @@ export default function PeComponent() {
       {!isLoading && data && (
         <Card
           className="border-l-4"
-          style={{ borderLeftColor: "var(--module-inventory)" }}
+          style={{ borderLeftColor: "var(--primary)" }}
         >
           <CardHeader>
             <CardDescription className="text-micro font-semibold tracking-[0.18em] uppercase">

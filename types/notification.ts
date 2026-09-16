@@ -1,9 +1,5 @@
 import type { PaginatedResponse } from "@/types/params";
 
-/**
- * ชนิดเอกสารที่การแจ้งเตือนอ้างถึง — ตรงกับ `enum_notification_doc_type` ฝั่ง platform schema
- * (`system`/`business_unit` คือประกาศ ไม่ผูกกับเอกสารใด)
- */
 export type NotificationDocType =
   | "system"
   | "business_unit"
@@ -13,7 +9,6 @@ export type NotificationDocType =
   | "good_received_note"
   | "credit_note";
 
-/** เหตุการณ์ที่ทำให้เกิดการแจ้งเตือน — ตรงกับ `enum_notification_event` */
 type NotificationEvent = "info" | "workflow" | "comment";
 
 /**
@@ -27,17 +22,11 @@ export type NotificationSource = "personal" | "broadcast";
  * ส่วนคีย์รายเอกสารเป็นของแถวก่อน redesign ที่ยังค้างอยู่ในฐาน ไม่มีการผลิตใหม่
  */
 export interface NotificationMetadata {
-  /** id เอกสาร (จาก `doc_id` ของ envelope) — คีย์หลักที่ใช้สร้าง deep-link */
   id?: string | null;
-  /** @deprecated คีย์เก่าก่อน redesign — อ่านเป็น fallback ของแถวประวัติเท่านั้น */
   pr_id?: string;
-  /** @deprecated ดู `pr_id` */
   po_id?: string;
-  /** @deprecated ดู `pr_id` */
   sr_id?: string;
-  /** @deprecated ดู `pr_id` */
   grn_id?: string;
-  /** @deprecated ดู `pr_id` */
   cn_id?: string;
   action?: string;
   current_stage?: string;
@@ -45,32 +34,19 @@ export interface NotificationMetadata {
   [key: string]: unknown;
 }
 
-/** แถวการแจ้งเตือนหนึ่งใบตามที่ gateway ส่งมา (รวมทั้งแถวส่วนตัวและแถวประกาศ) */
 export interface Notification {
   id: string;
-  /** `personal` (ส่งตรง to_user_id) หรือ `broadcast` (system-wide) */
   source?: NotificationSource;
-  /** Document type ของการแจ้งเตือน */
   doc_type?: NotificationDocType | null;
-  /** Event type ของการแจ้งเตือน */
   event?: NotificationEvent | null;
-  /** Title ของการแจ้งเตือน */
   title?: string | null;
-  /** Message/body ของการแจ้งเตือน */
   message?: string | null;
-  /** Entity reference + action */
   metadata?: NotificationMetadata | null;
-  /** อ่านแล้วหรือยัง */
   is_read?: boolean;
-  /** เวลาที่ถูก emit ขึ้น WS — null = ยังไม่เคย emit (เช่นยังตั้งเวลาอยู่) */
   pushed_at?: string | null;
-  /** Scheduled time (ถ้ากำหนดเวลา) */
   scheduled_at?: string | null;
-  /** nullable บนสายจริง — ทุกจุดที่แสดงเวลาต้องกันค่าว่าง */
   created_at?: string | null;
-  /** User ที่ส่งมา */
   from_user_id?: string | null;
-  /** User ที่รับ */
   to_user_id?: string | null;
 }
 
@@ -83,7 +59,6 @@ interface NotificationSummary {
   read: number;
 }
 
-/** ซองของ `GET /api/notifications` และ `GET /api/notifications/unread` */
 export interface NotificationListResponse extends PaginatedResponse<Notification> {
   summary?: NotificationSummary;
 }

@@ -87,16 +87,6 @@ export const EMPTY_FORM: SpotCheckFormValues = {
 
 // --- Helpers ---
 
-/**
- * สร้างค่า default ของฟอร์ม Spot Check จากข้อมูลที่มีอยู่
- * ใช้ใน ScForm ทั้งโหมด add (ไม่ส่ง arg) และ edit (ส่ง entity)
- *
- * @param spotCheck - ข้อมูล SpotCheck สำหรับโหมดแก้ไข (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม spot check
- * @example
- * const defaults = getDefaultValues(spotCheck);
- * const form = useForm<SpotCheckFormValues>({ defaultValues: defaults });
- */
 export function getDefaultValues(spotCheck?: SpotCheck): SpotCheckFormValues {
   if (spotCheck) {
     return {
@@ -116,12 +106,6 @@ export function getDefaultValues(spotCheck?: SpotCheck): SpotCheckFormValues {
   return { ...EMPTY_FORM, products: [] };
 }
 
-/**
- * Map form values → API payload (discriminated union ตาม method)
- * - random      → { location_id, method, items, description?, note? }
- * - high_value  → { location_id, method, items, min_value, description?, note? }
- * - manual      → { location_id, method, product_id: string[], description?, note? }
- */
 export function mapFormToPayload(
   values: SpotCheckFormValues,
 ): CreateSpotCheckDto {

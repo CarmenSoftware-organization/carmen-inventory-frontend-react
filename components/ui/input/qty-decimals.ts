@@ -10,13 +10,6 @@
  */
 export const QTY_MAX_DECIMALS = 5;
 
-/**
- * ใช้เมื่อยังไม่รู้ `decimal_place` ของหน่วยนั้น (กำลังโหลด / ไม่มีหน่วยให้ดู)
- *
- * ค่าจริงต่อหน่วยมาจาก master data — `/api/{bu}/units/order/product/{id}` ส่ง
- * `decimal_place` มาให้ทุกหน่วยอยู่แล้ว (kg ให้เศษ, EA เป็น 0) อ่านผ่าน
- * `useUnitDecimals` · เลข 2 ตรงกับ `DEFAULT_DECIMAL_PLACE` ฝั่งหลังบ้าน
- */
 export const DEFAULT_QTY_DECIMALS = 2;
 
 /**
@@ -28,16 +21,6 @@ export const DEFAULT_QTY_DECIMALS = 2;
  */
 export const QTY_STEP = "any";
 
-/**
- * ตัดทศนิยมส่วนที่เกินเพดานออกจากค่าที่กำลังพิมพ์ (แก้ที่ DOM ก่อนส่งต่อ onChange)
- *
- * @param el - input element ที่กำลังพิมพ์
- * @param decimals - จำนวนทศนิยมสูงสุด (default `DEFAULT_QTY_DECIMALS`)
- * @example
- * ```ts
- * onChange={(e) => { capQtyDecimals(e.currentTarget); onChange?.(e); }}
- * ```
- */
 export function capQtyDecimals(
   el: HTMLInputElement,
   decimals: number = DEFAULT_QTY_DECIMALS,

@@ -30,7 +30,6 @@ const enumOptions = [
   { value: "last_cost", label: "Last cost" },
 ];
 
-/** harness: RHF form ที่มี config[0] = item ที่ส่งเข้ามา */
 function Harness({
   editing,
   item,

@@ -9,15 +9,12 @@ import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductInLocationProps {
   readonly locationId: string;
-  /** ส่งมาเมื่อต้องกรองสินค้าตาม workflow ด้วย (products-location-workflow) —
-   * ส่งมาแต่ยังว่าง = รอเลือก workflow ก่อน จะยังไม่ fetch */
   readonly workflowId?: string;
   readonly value: string;
   readonly onValueChange: (value: string, product?: ProductLookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
@@ -25,28 +22,11 @@ interface LookupProductInLocationProps {
   readonly disableTooltip?: boolean;
   readonly error?: string;
   readonly readOnly?: boolean;
-  /** เปิด popover ทันทีตอน mount — ใช้ตอนกดเพิ่มรายการแล้วให้เลือกสินค้าต่อเลย */
   readonly defaultOpen?: boolean;
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
 }
 
-/**
- * Lookup Popover สำหรับเลือกสินค้าที่มีอยู่ใน location ที่กำหนด (cascading)
- *
- * ใช้ `useProductsByLocation(locationId)` ดึงเฉพาะสินค้าที่ผูกกับ location นั้น ๆ
- * พร้อม server-side search และ infinite scroll (perpage 30) disabled เมื่อไม่มี `locationId`
- * รองรับ `excludeIds` กัน duplicate ใน item list
- *
- * @param value - product_id ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object Product
- * @returns JSX popover element ของ product-in-location lookup
- * @example
- * ```tsx
- * const locationId = useWatch({ control, name: "location_id" });
- * <Controller name="product_id" control={control} render={({ field }) => (
- *   <LookupProductInLocation locationId={locationId} value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupProductInLocation({
   locationId,
   workflowId,
@@ -54,6 +34,8 @@ export function LookupProductInLocation({
   onValueChange,
   disabled,
   defaultOpen,
+  open,
+  onOpenChange,
   placeholder,
   className,
   size,
@@ -96,6 +78,8 @@ export function LookupProductInLocation({
     <LookupCombobox
       size={size}
       defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       value={value}
       onValueChange={onValueChange}
       items={products}

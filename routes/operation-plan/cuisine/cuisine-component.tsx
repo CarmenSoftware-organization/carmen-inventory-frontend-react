@@ -39,13 +39,6 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการ cuisine รองรับ list/grid view และ filter ตามภูมิภาค
- * @returns React element ของรายการ cuisine
- * @example
- * // ใช้ภายใน page.tsx ของโมดูล cuisine
- * <CuisineComponent />
- */
 export default function CuisineComponent() {
   const t = useTranslations("operationPlan.cuisine");
   const tc = useTranslations("common");

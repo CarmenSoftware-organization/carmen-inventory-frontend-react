@@ -3,8 +3,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   actionColumn,
   auditColumns,
@@ -12,6 +11,7 @@ import {
   indexColumn,
   selectColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
@@ -27,13 +27,6 @@ interface UsePriceListTableOptions {
   onDelete: (priceList: PriceList) => void;
 }
 
-/**
- * Hook สร้างตาราง price list list พร้อม column no/name/vendor/effective period/status
- * @param props - ข้อมูล price list, total, params, tableConfig และ callbacks สำหรับ edit/delete
- * @returns react-table instance ที่พร้อมใช้กับ DataGrid
- * @example
- * const { table } = usePriceListTable({ priceLists, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function usePriceListTable({
   priceLists,
   totalRecords,
@@ -46,6 +39,7 @@ export function usePriceListTable({
   const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const deleteGate = useDeleteGate();
 
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
@@ -116,15 +110,22 @@ export function usePriceListTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
         return (
-          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
-            {ts(status as "draft" | "submitted" | "active" | "inactive")}
-          </StatusDotBadge>
+          <StatusIconLabel
+            status={status}
+            // ป้ายมาจาก i18n ไม่ใช่ PL_STATUS_CONFIG ที่เป็นอังกฤษล้วน — หน้านี้มีไทย
+            // อยู่แล้ว ไม่ถอยไปเป็นอังกฤษเพื่อให้เหมือน PR
+            label={ts(status as "draft" | "submitted" | "active" | "inactive")}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง text-center ของเซลล์
+            // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
-      size: 100,
+      size: 120,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
+        headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
     },
@@ -136,6 +137,7 @@ export function usePriceListTable({
     indexColumn<PriceList>(params),
     ...dataColumns,
     actionColumn<PriceList>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.no },
     }),
   ];
@@ -144,7 +146,6 @@ export function usePriceListTable({
     data: priceLists,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
     initialState: {
       columnVisibility: { created_at: false, updated_at: false },
     },

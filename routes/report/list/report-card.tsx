@@ -10,14 +10,6 @@ interface ReportCardProps {
   readonly onSelect: (item: Report) => void;
 }
 
-/**
- * Premium ERP-style card สำหรับ Report template
- *
- * - Glass card + primary-tinted accent bar (เน้นเมื่อ hover)
- * - Icon tile gradient + system badge ตอนเป็น standard template
- * - Hover: lift + glow + ArrowUpRight reveal
- * - Click หรือ Enter/Space → เปิด dialog เลือก parameter
- */
 export default function ReportCard({ item, onSelect }: ReportCardProps) {
   const t = useTranslations("report");
   return (

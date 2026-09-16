@@ -10,16 +10,10 @@ import type {
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
-import { isoToDateInput } from "@/lib/date-utils";
+import { addDays, isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 
-/**
- * สร้าง zod schema สำหรับ detail แต่ละรายการของใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns zod object schema ของ PR detail
- */
 function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -53,9 +47,12 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     location_name: z.string(),
     location_type: z.string(),
     delivery_point_name: z.string(),
+    // 0 ได้ — ตั้งใจ ให้ตรงกับ foc_qty/approved_qty ที่เป็น min(0) อยู่แล้ว
+    // (ขั้นต่ำ 1 ไปบังคับให้ต้องพิมพ์ตัวเลขก่อนถึงจะบันทึกร่างได้ ทั้งที่ยอดจริง
+    // มาทีหลังในหลายเคส) ที่ยังกันอยู่คือค่าติดลบ ซึ่งพิมพ์เข้ามาได้จริง
     requested_qty: z.coerce
       .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     requested_unit_id: z
       .string()
       .nullable()
@@ -113,12 +110,6 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema หลักของฟอร์มใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns zod object schema ของ PR
- */
 export function createPrSchema(
   tv: TranslationFn,
   tf: TranslationFn,
@@ -187,6 +178,33 @@ export function createPrSchema(
 }
 
 export type PrFormValues = z.infer<ReturnType<typeof createPrSchema>>;
+
+/**
+ * แถวที่ "ไม่ได้ขออะไรเลย" — ทั้งจำนวนที่ขอและของแถมเป็น 0 ทั้งคู่
+ *
+ * **ไม่ได้อยู่ใน zod โดยตั้งใจ** — resolver ตัวเดียวถูกใช้ทั้งตอนกด Save และตอนกด
+ * Submit แยกกันไม่ได้ ถ้าใส่ไว้ในนั้นร่างที่ยังกรอกไม่เสร็จจะเซฟไม่ได้ ซึ่งขัดกับ
+ * ความหมายของคำว่าร่าง กฎนี้จึงเป็นด่านของ "ส่งใบ" อย่างเดียว (ดู handleSubmitPr)
+ *
+ * 0 ที่จำนวนที่ขออนุญาตได้เมื่อ FOC > 0 — ของที่ได้ฟรีล้วน ไม่ได้ซื้อ · เทียบด้วย
+ * `> 0` บนค่าทศนิยมตาม decimal_place ของหน่วย 0.5 kg จึงผ่าน ไม่ได้บังคับจำนวนเต็ม
+ *
+ * @returns index ของแถวที่ไม่ผ่าน (ว่าง = ผ่านหมด)
+ */
+export function findRowsMissingQty(
+  items: readonly Pick<
+    PrFormValues["items"][number],
+    "requested_qty" | "foc_qty"
+  >[],
+): number[] {
+  const out: number[] = [];
+  items.forEach((item, i) => {
+    if (Number(item.requested_qty) <= 0 && Number(item.foc_qty) <= 0) {
+      out.push(i);
+    }
+  });
+  return out;
+}
 
 // --- Defaults ---
 
@@ -383,13 +401,6 @@ interface FreshItemSource {
   comment?: string | null;
 }
 
-/**
- * แถว item ตั้งต้นสำหรับใบใหม่จาก source (template หรือใบเดิมตอน duplicate) —
- * เก็บเฉพาะ "ของที่สั่ง" (สินค้า จำนวน หน่วย สถานที่ ภาษี ส่วนลด) แล้วทิ้งของที่
- * ผูกกับเอกสาร/รอบราคาเดิม (vendor, pricelist, approved, stage, delivery_date)
- * ให้เริ่มรอบใหม่ — ราคาใน price list เปลี่ยนได้ทุกสัปดาห์ ลาก pricelist_detail_id
- * เก่ามาคือชี้ราคาที่ตายแล้ว
- */
 function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
   return {
     product_id: d.product_id,
@@ -424,7 +435,9 @@ function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
     exchange_rate: 1,
     delivery_point_id: d.delivery_point_id ?? null,
     delivery_point_name: d.delivery_point_name ?? "",
-    delivery_date: "",
+    // วันส่งของต้นทาง (ใบเดิม/รอบที่ตั้งเทมเพลตไว้) เป็นอดีตไปแล้ว ตั้งพรุ่งนี้ให้
+    // เป็นค่าเริ่มแทนการทิ้งว่างให้ไล่กรอกทีละแถว — แก้ทับได้ตามปกติ
+    delivery_date: addDays(new Date().toISOString(), 1),
     pricelist_detail_id: null,
     pricelist_no: null,
     pricelist_type: "",
@@ -536,27 +549,6 @@ export function resolveApprovedQty(
   return approved > 0 ? approved : Number(item.requested_qty) || 0;
 }
 
-/**
- * แปลง item ของฟอร์มเป็น payload ที่ส่งไปยัง API ของ PR detail
- * จัดการการแปลง empty string เป็น null สำหรับ foreign key ต่าง ๆ และ normalize stage status
- * ใช้ร่วมกับ buildItemChanges เพื่อสร้าง payload add/update/remove ก่อนเรียก mutation
- * @param item - ค่า item จากฟอร์ม (PrFormValues["items"][number])
- * @returns payload ของ PR detail ชนิด PurchaseRequestDetailPayload สำหรับส่งไป backend
- * @example
- * const changes = buildItemChanges(
- *   values.items,
- *   defaultValues.items,
- *   form.formState.dirtyFields.items,
- *   mapItemToPayload,
- * );
- * await updatePR.mutateAsync({ id: prId, purchase_request_detail: changes });
- */
-/**
- * สร้าง payload สำหรับ workflow stage action แบบ submit/reject
- * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id จะถูกรวม)
- * @param defaultMessage - ข้อความ fallback เมื่อ item ไม่มี stage_message
- * @returns รายการ WorkflowStageDetail สำหรับส่งไป API
- */
 export function prepareStageDetails(
   items: PrFormValues["items"],
   defaultMessage: string = "",
@@ -570,13 +562,6 @@ export function prepareStageDetails(
     }));
 }
 
-/**
- * สร้าง payload สำหรับ workflow action approve/reject ของ PR (stage role approve)
- * รวมข้อมูล qty, pricing, delivery, tax, discount ของแต่ละ item
- * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id)
- * @param purchaseRequestId - id ของ PR สำหรับฝังใน payload
- * @returns รายการ ApproveDetail สำหรับส่งไป API
- */
 export function prepareApproveDetails(
   items: PrFormValues["items"],
   purchaseRequestId?: string,

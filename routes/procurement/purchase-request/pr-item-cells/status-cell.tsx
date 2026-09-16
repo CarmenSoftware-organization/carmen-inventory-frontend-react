@@ -19,7 +19,6 @@ export const StatusCell = memo(function StatusCell({
   form?: UseFormReturn<PrFormValues>;
   index: number;
   role?: string;
-  /** ฟอร์มอยู่โหมดอ่าน — ปุ่มล้างสถานะต้องหายไป ไม่ใช่แค่จางลง */
   isDisabled?: boolean;
 }) {
   "use no memo";

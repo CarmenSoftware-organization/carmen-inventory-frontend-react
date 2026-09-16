@@ -12,11 +12,6 @@ vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
 beforeEach(() => vi.clearAllMocks());
 
-/**
- * Drives the real path: a failing mutation → the QueryClient's MutationCache →
- * reportApiError → the handler ApiErrorToaster installs. Nothing is stubbed
- * between the mutation and the toast.
- */
 function renderFailingMutation(error: unknown, meta?: Record<string, unknown>) {
   const queryClient = makeQueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }) => (

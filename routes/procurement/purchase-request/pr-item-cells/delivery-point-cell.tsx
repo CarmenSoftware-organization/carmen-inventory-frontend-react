@@ -43,7 +43,8 @@ export const DeliveryPointCell = memo(function DeliveryPointCell({
           onItemChange={(item) => {
             form.setValue(`items.${index}.delivery_point_name`, item.name);
           }}
-          className="h-7 w-full text-xs"
+          defaultLabel={dpName}
+          className="h-8 w-full text-xs"
         />
       )}
     />

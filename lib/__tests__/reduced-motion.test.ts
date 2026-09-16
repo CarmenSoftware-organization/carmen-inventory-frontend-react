@@ -2,25 +2,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 
-/**
- * The app carries ~273 `transition-*`, ~142 `animate-*` and four global
- * transition rules in globals.css. None of them honoured
- * `prefers-reduced-motion` until the block this test guards.
- *
- * The subtle part — and the reason this is a test rather than a comment — is the
- * exemption. The boilerplate everyone copies sets `animation-iteration-count: 1`
- * on `*`, which freezes the 81 loading spinners and 12 skeletons after a single
- * cycle. A frozen spinner does not read as "motion removed", it reads as "request
- * hung": the blanket rule would be deleting information, not decoration. So
- * `.animate-spin` and `.animate-pulse` are restored inside the block.
- *
- * That exemption is exactly the kind of thing a later cleanup deletes as
- * redundant, so: this.
- */
 const ROOT = join(import.meta.dirname, "../..");
 const css = readFileSync(join(ROOT, "styles/globals.css"), "utf-8");
 
-/** the body of the `@media (prefers-reduced-motion: reduce)` block */
 function reducedMotionBlock(): string {
   const start = css.search(
     /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/,

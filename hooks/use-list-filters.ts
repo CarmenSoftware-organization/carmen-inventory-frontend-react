@@ -22,7 +22,6 @@ import type { ListPageKey } from "@/constant/list-page-keys";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
 
-/** ค่าดิบราย id จาก clause — ตัด "col|type:" ทิ้ง (รองรับทั้ง merge และ clause ซ้ำ prefix) */
 function clauseTokens(value: string): string[] {
   return value
     .split(",")
@@ -33,7 +32,6 @@ function clauseTokens(value: string): string[] {
     .filter(Boolean);
 }
 
-/** ชื่อตัวแรก +N — คืน undefined เมื่อไม่มีชื่อให้โชว์ (ให้ fallback ทำงานต่อ) */
 function firstPlusRest(names: readonly string[]): string | undefined {
   if (names.length === 0) return undefined;
   return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
@@ -85,7 +83,6 @@ export function chipValueText(
 
 export interface UseListFiltersOptions {
   pageKey: ListPageKey;
-  /** field ที่จะ render เป็น filter chip/sheet — ดู note เรื่อง reference stability ที่ `useURLValues` */
   fields: readonly FilterFieldDef[];
   /**
    * sort ที่หน้าใช้เมื่อ URL ไม่มี `sort` param — เก็บไว้เป็นข้อมูลอ้างอิงให้ caller
@@ -97,23 +94,17 @@ export interface UseListFiltersOptions {
 
 export interface UseListFiltersResult {
   values: Record<string, string>;
-  /** เขียนค่า filter field หนึ่งตัวลง URL แล้วรีเซ็ต page กลับหน้าแรก */
   setValue: (key: string, value: string) => void;
-  /** ล้างทุก filter field + saved-view ที่กำลัง apply (`sv`) + page */
   clearAll: () => void;
   filterParam: string | undefined;
-  /** ค่า `sort` ดิบจาก URL — `""` แปลว่าใช้ default sort ของหน้า */
   sortParam: string;
   activeFilters: ActiveFilter[];
   view: {
     current: SavedView | null;
     scope: ViewScope | null;
     isDirty: boolean;
-    /** เขียน filters + sort + sv ทับ URL ทั้งชุดแบบอะตอมมิก (ล้าง field เดิมก่อนเสมอ) */
     apply: (view: SavedView) => void;
-    /** ล้างแค่ `sv` — filter ที่แก้ไว้ยังอยู่ (กลายเป็น "unsaved" ไม่ผูก view ไหน) */
     clear: () => void;
-    /** เขียนค่าของ view ปัจจุบันทับ URL อีกรอบ (ใช้ปุ่ม "Discard changes") */
     revert: () => void;
     /**
      * บันทึก filter+sort ปัจจุบันเป็น view ชื่อ `name` ใน scope นั้น — ชื่อซ้ำ =
@@ -121,7 +112,6 @@ export interface UseListFiltersResult {
      * ต่อตรงกับ `onSave` ของ `SaveViewDialog` ได้เลย
      */
     saveOrUpdate: (name: string, scope: ViewScope) => Promise<void>;
-    /** ชื่อ view ที่มีอยู่แล้วใน scope นั้น — ให้ `SaveViewDialog` เตือนชื่อซ้ำ */
     existingNames: (scope: ViewScope) => string[];
   } & UseListViewsResult;
 }
@@ -355,8 +345,6 @@ export function useListFilters(
   const existingNames = (scope: ViewScope) =>
     (scope === "bu" ? views.buViews : views.userViews).map((v) => v.name);
 
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (เดิมทุกหน้า list ก๊อปฟังก์ชันนี้ไว้เองคนละก๊อป — ย้ายมารวมที่นี่จุดเดียว) */
   const saveOrUpdate = async (name: string, scope: ViewScope) => {
     const list = scope === "bu" ? views.buViews : views.userViews;
     const existing = list.find((v) => v.name === name);

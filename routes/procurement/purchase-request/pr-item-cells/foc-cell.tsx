@@ -30,13 +30,14 @@ export const FocCell = memo(function FocCell({
   const isRowLocked = useIsRowLocked(control, index);
   const qtyDisabled = isQtyDisabled || isRowLocked;
   const unitDisabled = isUnitDisabled || isRowLocked;
-  const formatQty = useQuantityFormatter();
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const unitId =
     useWatch({ control, name: `items.${index}.foc_unit_id` }) ?? "";
   // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
   const decimals = useUnitDecimals(productId, unitId);
+  // ตัวเดียวกับที่คุม input — โหมดอ่านจึงแสดงเท่าที่โหมดแก้พิมพ์ได้พอดี
+  const formatQty = useQuantityFormatter(decimals);
 
   if (qtyDisabled && unitDisabled) {
     return (

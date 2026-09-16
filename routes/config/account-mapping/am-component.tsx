@@ -15,7 +15,6 @@ import type { AccountMappingRow } from "@/types/account-mapping";
 import { AM_MOCK_ROWS } from "./am-mock";
 import { useAmTable } from "./use-am-table";
 
-/** ค้นหาแบบกวาดทุกคอลัมน์ข้อความของแถว — พอ backend มาแล้วย้ายไปค้นฝั่ง server */
 const matches = (row: AccountMappingRow, term: string) => {
   const haystack = [
     row.business_unit,
@@ -38,7 +37,6 @@ const matches = (row: AccountMappingRow, term: string) => {
   return haystack.includes(term);
 };
 
-/** ตารางของแท็บเดียว — สองแท็บใช้โครงเดียวกัน ต่างแค่ชุดแถวที่กรองมาแล้ว */
 function AmTable({ rows }: { readonly rows: AccountMappingRow[] }) {
   "use no memo";
   const table = useAmTable({ data: rows });

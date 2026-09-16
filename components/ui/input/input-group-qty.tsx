@@ -11,7 +11,6 @@ type Props = Omit<
   React.ComponentProps<typeof InputGroupInput>,
   "type" | "step" | "inputMode"
 > & {
-  /** เพดานทศนิยม (default `DEFAULT_QTY_DECIMALS`; ส่ง `useUnitDecimals(...)` เข้ามาเพื่อใช้ค่าจริงของหน่วย) */
   readonly decimals?: number;
 };
 

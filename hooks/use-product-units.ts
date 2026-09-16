@@ -13,10 +13,6 @@ export interface ProductUnit {
   id: string;
   name: string;
   conversion: number;
-  /**
-   * จำนวนทศนิยมที่หน่วยนี้รับได้ — มาจาก master data (`tb_unit_conversion`)
-   * 0 = หน่วยนับเป็นชิ้น (EA) กรอกเศษไม่ได้ · หลังบ้าน default เป็น 2
-   */
   decimal_place?: number;
 }
 
@@ -47,14 +43,6 @@ export function useProductUnits(productId: string | undefined) {
   });
 }
 
-/**
- * Hook ดึงหน่วยของสินค้าทั้งหมดที่ใช้ได้ (available units)
- * ใช้ใน lookup หน่วยสินค้าในฟอร์ม ใช้ CACHE_STATIC และ guard ด้วย buCode+productId
- * @param productId - รหัสสินค้า
- * @returns React Query ของรายการ ProductUnit ที่ใช้ได้
- * @example
- * const { data: units } = useProductAvailableUnits(productId);
- */
 export function useProductAvailableUnits(productId: string | undefined) {
   const buCode = useBuCode();
 

@@ -22,17 +22,14 @@ type PeriodEndStatus = "open" | "closed" | "locked";
 
 export type ReviewTransactionKey = "pr" | "po" | "grn" | "cn" | "sr" | "si" | "so";
 
-/** ประเภทเอกสารที่ต้องเคลียร์ก่อนเปิดรอบตรวจนับ — PR/PO ไม่อยู่ในนี้เพราะไม่แตะ ledger */
 export type StartCountingBlockerKey = "grn" | "stock_in" | "stock_out" | "sr";
 
-/** รายการเอกสารค้างที่ backend ส่งมากับ 422 เพื่อให้ UI ลิสต์ให้ user ไปจัดการต่อได้ */
 export interface StartCountingBlockers {
   counts: Record<StartCountingBlockerKey, number>;
   total: number;
   documents: Record<StartCountingBlockerKey, ReviewDocument[]>;
 }
 
-/** ผลลัพธ์ของการเปิดรอบตรวจนับ — `already_counting` = เปิดอยู่แล้ว (กดซ้ำได้ ไม่ error) */
 export interface StartCountingResult {
   period: PeriodEnd;
   physical_count_period: { id: string; status: PhysicalCountPeriodStatus };
@@ -55,11 +52,6 @@ export interface ReviewTransactionStat {
   documents: ReviewDocument[];
 }
 
-/**
- * API ส่ง physical_count เป็น flat structure เหมือนกับ PhysicalCountLocation
- * ของโมดูล PC — reuse type เพื่อความ consistent (id, code, name,
- * location_type, physical_count_status, ฯลฯ)
- */
 type ReviewPhysicalCountItem = PhysicalCountLocation;
 
 export interface PeriodEndReview {
@@ -67,7 +59,6 @@ export interface PeriodEndReview {
   start_date: string;
   end_date: string;
   status: PeriodEndStatus;
-  /** รอบตรวจนับของงวดนี้ — null เมื่อยังไม่เคยเปิด */
   physical_count_period: {
     id: string;
     status: PhysicalCountPeriodStatus;

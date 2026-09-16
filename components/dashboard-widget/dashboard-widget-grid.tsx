@@ -81,7 +81,6 @@ import {
   type TimeSeriesPoint,
 } from "@/types/dashboard-widget";
 
-/** Widget that has its dataset payload resolved — `meta` and `data` are guaranteed. */
 export type ResolvedWidget = CompositeWidgetItem & {
   readonly meta: DatasetMeta;
   readonly data: DatasetData<DatasetShape>;
@@ -95,7 +94,6 @@ const CHART_COLORS = [
   "var(--chart-5)",
 ];
 
-/** จัดลำดับ render group ตาม widget_type ให้ layout ลงตัวบน grid 4-col */
 const WIDGET_TYPE_ORDER: Record<string, number> = {
   kpi: 0,
   gauge: 0,
@@ -126,9 +124,7 @@ export interface DashboardWidgetGridProps {
   readonly description: string;
   readonly moduleName: string;
   readonly subTileFor: (datasetId: string) => string;
-  /** config ล้วนของ module (ไม่มีค่า dataset) — แต่ละใบยิงค่าของตัวเอง */
   readonly query: UseQueryResult<SystemWidgetConfigListResponse>;
-  /** dataset_id ที่ต้องการซ่อน (ไม่ render) */
   readonly hiddenDatasets?: ReadonlySet<string>;
 }
 
@@ -218,7 +214,6 @@ function skeletonVariantFor(widgetType: string): "kpi" | "bar" | "pie" {
   return "bar";
 }
 
-/** widget_type ที่ `WidgetRouter` วาดได้จริง — ตัวอื่นไม่ต้องยิง dataset ให้เปลือง */
 const RENDERABLE_TYPES = new Set([
   "kpi",
   "gauge",
@@ -229,12 +224,6 @@ const RENDERABLE_TYPES = new Set([
   "table",
 ]);
 
-/**
- * รวม config + payload ที่ resolve แล้วให้อยู่ในรูปที่การ์ดทุกใบรับได้
- * @param config - config ของ widget (อาจพ่วง meta/data มาด้วยถ้า caller มีอยู่แล้ว)
- * @param detail - payload จาก `GET /api/{bu}/datasets/{id}` (ถ้ายิงเอง)
- * @returns ResolvedWidget เมื่อมีข้อมูลครบ ไม่งั้น undefined
- */
 function resolveWidget(
   config: SystemWidgetConfigItem,
   detail: DashboardDatasetDetail | undefined,
@@ -304,7 +293,6 @@ export function LazyWidget({
   );
 }
 
-/** ใบเดียวในกริดมาตรฐาน — เลือกการ์ดตาม widget_type ให้เอง */
 function LazyWidgetCard({
   config,
   moduleName,
@@ -824,7 +812,6 @@ export function LineCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
 
 type TableRow = Record<string, unknown>;
 
-/** Allowlist of icon names a table dataset may emit via an "icon" column. */
 const TABLE_ICONS: Record<string, LucideIcon> = {
   "undo-2": Undo2,
   "circle-x": CircleX,
@@ -843,7 +830,6 @@ function formatTableCell(value: unknown, type?: TableColumn["type"]): string {
   return String(value);
 }
 
-/** Render a cell — an "icon" column maps its string value to a lucide icon. */
 function renderTableCell(
   value: unknown,
   type?: TableColumn["type"],
@@ -857,11 +843,6 @@ function renderTableCell(
   return formatTableCell(value, type);
 }
 
-/**
- * Generic table widget — renders any dataset with `shape === "table"` by building
- * dynamic columns from `data.columns` and rows from `data.rows`. Reusable for any
- * table-shaped dataset (the column set is data-driven, not hardcoded).
- */
 /**
  * ข้อมูลของ widget ในรูปตาราง — ตัวที่เป็น `table` อยู่แล้วส่งต่อตรง ๆ ส่วน
  * categorical/ranked สร้างคอลัมน์ให้เอง
@@ -1072,10 +1053,6 @@ export function WidgetSkeleton({
   );
 }
 
-/**
- * ชุด skeleton แบบ static หลายทรง + คละขนาด (bento) ให้ใกล้เคียง dashboard จริง
- * — kpi กว้าง 1 คอลัมน์, chart (bar/pie) กว้าง 2 คอลัมน์ ตรงกับ `WidgetRouter`
- */
 export function WidgetSkeletonCards() {
   return (
     <>

@@ -27,12 +27,6 @@ interface WfStageGeneralProps {
   readonly index: number;
   readonly isFirst: boolean;
   readonly isDisabled: boolean;
-  /**
-   * ปิดเฉพาะช่องชื่อ stage
-   *
-   * เอกสารที่กำลังเดินอยู่เก็บชื่อ stage ปัจจุบันไว้แล้วใช้ค้นหาใน workflow ทุกครั้งที่ทำ action
-   * เปลี่ยนชื่อเมื่อไร เอกสารเหล่านั้นจะหา stage ไม่เจอและเดินต่อไม่ได้เลย
-   */
   readonly isNameDisabled: boolean;
 }
 
@@ -68,12 +62,12 @@ export function WfStageGeneral({
   } as const;
 
   return (
-    <FieldGroup className="gap-6 pt-4">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <FieldGroup className="gap-4 pt-4">
+      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
         <Field>
           <FieldLabel>{t("stageName")}</FieldLabel>
           <Input
-            className="h-9"
+            size="sm"
             disabled={isDisabled || isNameDisabled}
             {...form.register(`data.stages.${index}.name`)}
           />
@@ -90,7 +84,7 @@ export function WfStageGeneral({
                 onValueChange={field.onChange}
                 disabled={isDisabled}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,12 +154,12 @@ export function WfStageGeneral({
         </Field>
       )}
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
         <Field>
           <FieldLabel>{t("sla")}</FieldLabel>
           <Input
             type="number"
-            className="h-9"
+            size="sm"
             disabled={isDisabled}
             {...form.register(`data.stages.${index}.sla`)}
           />
@@ -181,7 +175,7 @@ export function WfStageGeneral({
                 onValueChange={field.onChange}
                 disabled={isDisabled}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,7 +191,7 @@ export function WfStageGeneral({
         </Field>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[2fr_1fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 @lg:grid-cols-[2fr_1fr_1fr]">
         <div>
           <FieldLabel className="mb-1.5">{t("availableActions")}</FieldLabel>
           <div className="flex flex-wrap gap-x-3 gap-y-1">

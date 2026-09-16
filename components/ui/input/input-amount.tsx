@@ -10,15 +10,11 @@ type InputAmountBaseProps = Omit<
 >;
 
 interface AmountInputProps extends InputAmountBaseProps {
-  /** Override max decimal places (e.g. per-item currency decimals). Falls back to default currency from profile. */
   readonly decimals?: number;
-  /** จำนวนเงินปัจจุบัน (controlled) — แหล่งความจริงคือ form value */
   readonly value: number;
-  /** เรียกเมื่อค่าเปลี่ยน ส่งเป็น number (0 เมื่อว่าง/ไม่ใช่ตัวเลข) */
   readonly onValueChange: (value: number) => void;
 }
 
-/** ตัดอักขระที่ไม่ใช่ตัวเลข/จุด, เหลือจุดเดียว, จำกัดทศนิยมไม่เกิน decimals */
 function sanitizeAmount(raw: string, decimals: number): string {
   let s = raw.replace(/[^0-9.]/g, "");
   const firstDot = s.indexOf(".");
@@ -30,7 +26,6 @@ function sanitizeAmount(raw: string, decimals: number): string {
   return extra > 0 ? s.slice(0, s.length - extra) : s;
 }
 
-/** format ค่าตัวเลขเป็นทศนิยมคงที่สำหรับแสดงตอนไม่โฟกัส (10 → "10.00") */
 function formatFixed(value: number, decimals: number): string {
   if (value == null || Number.isNaN(value)) return "";
   return Number(value).toFixed(decimals);

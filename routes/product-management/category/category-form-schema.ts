@@ -20,18 +20,6 @@ export const categorySchema = z.object({
 
 export type CategoryFormValues = z.infer<typeof categorySchema>;
 
-/**
- * สร้างค่าเริ่มต้นของฟอร์มหมวดหมู่ตามประเภทและ node ที่เกี่ยวข้อง
- * ถ้ามี selectedNode จะใช้ค่าเดิมของ node นั้น หากไม่มีจะสืบทอดจาก parentNode (deviation, flags, tax) เพื่อให้ child มีค่าเริ่มต้นสอดคล้องกับ parent
- * นอกจากนี้จะเพิ่ม product_category_id หรือ product_subcategory_id ให้อัตโนมัติตามประเภทของหมวดหมู่
- * @param type - ประเภทของหมวดหมู่ (category / subcategory / itemgroup)
- * @param selectedNode - node ที่กำลังแก้ไข (สำหรับโหมด edit, ถ้ามี)
- * @param parentNode - node แม่เพื่อสืบทอดค่าเริ่มต้น (สำหรับโหมด add)
- * @returns CategoryFormValues ที่พร้อมใช้เป็น defaultValues ใน react-hook-form
- * @example
- * const defaults = getDefaultValues("subcategory", undefined, categoryNode);
- * const form = useForm({ defaultValues: defaults });
- */
 export function getDefaultValues(
   type: CategoryType,
   selectedNode?: CategoryNode,

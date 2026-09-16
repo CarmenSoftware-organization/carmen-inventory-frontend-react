@@ -20,12 +20,6 @@ export interface SrPreviousStage {
   name: string;
 }
 
-/**
- * ดึงรายการ stage ก่อนหน้า (previous stages) ของ SR สำหรับ send-back picker
- * API คืน object map แล้ว transform เป็น array ของ { key, name } (เหมือน PR)
- * @param srId - รหัส SR
- * @param enabled - เปิด/ปิดการ fetch (เช่นเปิดเฉพาะตอน dialog เปิด)
- */
 export function useSrPreviousStages(srId: string | undefined, enabled = true) {
   const buCode = useBuCode();
 
@@ -274,7 +268,6 @@ export function useDeleteStoreRequisition() {
   });
 }
 
-/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
 export const srCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.STORE_REQUISITION_COMMENTS,
   commentEndpoint: API_ENDPOINTS.STORE_REQUISITION_COMMENT,
@@ -282,13 +275,9 @@ export const srCommentCrud = createCommentCrud({
   label: "store requisition",
 });
 
-/** ดึงความคิดเห็นของ SR ตาม sr id */
 export const useStoreRequisitionComments = srCommentCrud.useComments;
-/** สร้างความคิดเห็นใน SR ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
 export const useCreateStoreRequisitionComment = srCommentCrud.useCreate;
-/** แก้ไขความคิดเห็นใน SR ตาม comment id */
 export const useUpdateStoreRequisitionComment = srCommentCrud.useUpdate;
-/** ลบความคิดเห็นใน SR ตาม comment id */
 export const useDeleteStoreRequisitionComment = srCommentCrud.useDelete;
 
 // --- Export ---
@@ -299,11 +288,6 @@ interface ExportStoreRequisitionArgs {
   columns: XlsxColumn<StoreRequisition>[];
 }
 
-/**
- * Hook ส่งออก SR เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list (เลือกตาม viewMode) — caller กำหนด columns พร้อม translation
- * @returns { exportStoreRequisition, isExporting }
- */
 export function useExportStoreRequisition() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

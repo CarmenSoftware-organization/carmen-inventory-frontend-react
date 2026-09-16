@@ -177,17 +177,6 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 });
 
-/**
- * docs/DESIGN.md: "semantic colors should appear ONCE per element, never
- * clustered. Repeating one color across icon-box + icon + chip on a neutral
- * surface reads as glowing/neon … error state = red icon only; neutral box,
- * muted label, neutral border."
- *
- * This dialog once carried nine destructive signals (tinted border, corner
- * radial-gradient, gradient tile, pulsing glow, icon, and a chip with its own
- * fill/text/border/dot). Asserting on the source keeps them from creeping back:
- * the rendered DOM cannot show that a colour is *absent* from the design.
- */
 describe("chrome stays flat and single-signal", () => {
   const src = readFileSync(
     join(import.meta.dirname, "permission-denied-dialog.tsx"),

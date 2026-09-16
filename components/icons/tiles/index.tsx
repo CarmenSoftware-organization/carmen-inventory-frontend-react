@@ -1,12 +1,3 @@
-/**
- * Carmen Tile System — illustrated SVG tiles per module + submodule
- *
- * - `AppTile` — 10 module tiles (Google Workspace style)
- * - `SubTile` — 56 submodule tiles (inherit parent module palette)
- *
- * Palette lives in `./palette`, shared SVG primitives in `./primitives`,
- * tile definitions in `./app-tiles` and `./sub-tiles`.
- */
 
 import { AppTiles } from "./app-tiles";
 import { getPalette } from "./palette";
@@ -30,7 +21,6 @@ interface AppTileProps {
   readonly size?: number;
 }
 
-/** Render illustrated module tile — fallback เป็น squircle เปล่าเมื่อไม่รู้จัก name */
 export function AppTile({ name, size = 44 }: AppTileProps) {
   const palette = getPalette(name);
   const Tile = AppTiles[name];
@@ -54,12 +44,10 @@ interface SubTileProps {
   readonly size?: number;
 }
 
-/** มี SubTile ของชื่อนี้จริงไหม — ให้ caller เลือกไม่ render แทนได้ tile เปล่า */
 export function hasSubTile(name: string): boolean {
   return Boolean(SubTiles[name]);
 }
 
-/** Render illustrated submodule tile — palette มาจาก parent module (fallback = config) */
 export function SubTile({ name, parentName, size = 44 }: SubTileProps) {
   const palette = getPalette(parentName) ?? getPalette("config");
   const Tile = SubTiles[name];

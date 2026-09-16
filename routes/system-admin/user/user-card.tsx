@@ -8,10 +8,6 @@ interface Props {
   readonly onDelete?: (item: User) => void;
 }
 
-/**
- * การ์ดผู้ใช้ 1 คน สำหรับหน้ารายการโหมด grid/mobile
- * ไม่มีสถานะในข้อมูลผู้ใช้ที่ endpoint นี้คืนมา จึงไม่มี badge มุมขวาบน
- */
 export default function UserCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 

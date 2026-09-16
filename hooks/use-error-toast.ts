@@ -3,20 +3,6 @@ import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { getErrorId, getUserErrorMessage } from "@/lib/error-message";
 
-/**
- * Hook แสดง toast error ด้วยข้อความ user-friendly ตาม i18n
- *
- * - toast แสดงประโยคเดียวตาม error code เสมอ ไม่มี description
- * - รายละเอียดดิบ + รหัส error ลง `console.error` ให้ dev ไล่ต่อ
- *
- * @example
- * ```ts
- * const errorToast = useErrorToast();
- * updateMutation.mutate(payload, {
- *   onError: (err) => errorToast(err),
- * });
- * ```
- */
 export function useErrorToast() {
   const t = useTranslations("errors");
 

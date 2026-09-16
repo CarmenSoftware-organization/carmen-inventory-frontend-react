@@ -11,6 +11,7 @@ import {
   indexColumn,
   actionColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { User } from "@/types/workflows";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -24,13 +25,6 @@ interface UseUserTableOptions {
   onDelete: (user: User) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับตารางผู้ใช้ พร้อมคอลัมน์ชื่อ/อีเมล/แผนก/action
- * @param options - users, totalRecords, params, tableConfig, onEdit และ onDelete
- * @returns react-table instance สำหรับ User list
- * @example
- * const table = useUserTable({ users, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useUserTable({
   users,
   totalRecords,
@@ -41,6 +35,7 @@ export function useUserTable({
 }: UseUserTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
 
   const columns: ColumnDef<User>[] = [
     selectColumn<User>(),
@@ -72,7 +67,7 @@ export function useUserTable({
         <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
     },
-    actionColumn<User>(onDelete),
+    actionColumn<User>(onDelete, deleteGate),
   ];
 
   return useReactTable({

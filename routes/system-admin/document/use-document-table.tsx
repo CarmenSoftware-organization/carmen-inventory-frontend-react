@@ -18,6 +18,7 @@ import {
   indexColumn,
   actionColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { DocumentFile } from "@/types/document";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -33,13 +34,6 @@ interface UseDocumentTableOptions {
   onDelete: (doc: DocumentFile) => void;
 }
 
-/**
- * คืนค่าข้อมูลประเภทไฟล์ (icon, label key, className) ตาม content type
- * @param contentType - MIME type ของไฟล์ (เช่น "application/pdf")
- * @returns ออบเจกต์ที่มี icon component, labelKey และ className สำหรับสี
- * @example
- * getFileTypeInfo("application/pdf"); // { icon: FileText, labelKey: "pdf", className: "text-red-500" }
- */
 const getFileTypeInfo = (contentType: string) => {
   if (
     contentType.includes("spreadsheet") ||
@@ -102,13 +96,6 @@ const getFileTypeInfo = (contentType: string) => {
   };
 };
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตารางเอกสาร (Document) พร้อมไอคอนประเภทไฟล์
- * @param options - อาร์เรย์ documents, totalRecords, params, tableConfig และ callback onDelete
- * @returns TanStack Table instance สำหรับ Document
- * @example
- * const table = useDocumentTable({ documents, totalRecords, params, tableConfig, onDelete });
- */
 export function useDocumentTable({
   documents,
   totalRecords,
@@ -121,6 +108,7 @@ export function useDocumentTable({
   const { dateFormat } = useProfile();
   const t = useTranslations("systemAdmin.document");
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
 
   const columns: ColumnDef<DocumentFile>[] = [
     selectColumn<DocumentFile>(),
@@ -177,7 +165,7 @@ export function useDocumentTable({
       cell: ({ row }) => formatDate(row.getValue("lastModified"), dateFormat),
       size: 120,
     },
-    actionColumn<DocumentFile>(onDelete),
+    actionColumn<DocumentFile>(onDelete, deleteGate),
   ];
 
   return useReactTable({

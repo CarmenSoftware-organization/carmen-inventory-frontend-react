@@ -44,12 +44,6 @@ export interface PricelistEntry {
   is_preferred?: boolean;
 }
 
-/**
- * สร้าง column definitions สำหรับตารางเปรียบเทียบราคา — premium ERP design
- *
- * เพิ่ม highlight ราคาต่ำสุด (best deal), badge เมื่อ preferred vendor,
- * ปุ่ม Select variant success เมื่อเลือกได้
- */
 const buildColumns = (
   dateFormat: string,
   tfl: ReturnType<typeof useTranslations>,
@@ -57,6 +51,7 @@ const buildColumns = (
   tc: ReturnType<typeof useTranslations>,
   readOnly: boolean,
   minPrice: number,
+  onAssign: (entry: PricelistEntry) => void,
 ): ColumnDef<PricelistEntry>[] => {
   const base: ColumnDef<PricelistEntry>[] = [
     {
@@ -160,13 +155,18 @@ const buildColumns = (
   return [
     ...base,
     {
-      id: "select",
+      id: "assign",
       header: "",
       size: 90,
       meta: { cellClassName: "text-right" },
-      cell: () => (
-        <Button type="button" size="xs" variant="success">
-          {tc("select")}
+      cell: ({ row }) => (
+        <Button
+          type="button"
+          size="xs"
+          variant="success"
+          onClick={() => onAssign(row.original)}
+        >
+          {tc("assign")}
         </Button>
       ),
     },
@@ -189,12 +189,6 @@ interface PrPricelistDialogProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Dialog แสดงรายการราคาของสินค้าให้เลือกเพื่อใช้ในรายการ PR — premium ERP
- *
- * โหลดราคาจาก API price-compare แสดงตาราง + highlight best price + preferred
- * vendor badge + คลิก row เพื่อเลือก (หรือปุ่ม Select)
- */
 export function PrPricelistDialog({
   open,
   onOpenChange,
@@ -232,8 +226,12 @@ export function PrPricelistDialog({
           unit_id: unitId,
           at_date: atDate,
           currency_id: currencyId,
+          // ราคาขึ้นกับจำนวนที่สั่ง (ขั้นบันได MOQ) — 0 ถูก buildQueryString
+          // ตัดทิ้งเองเมื่อยังไม่ได้กรอกจำนวน backend จะได้ตกไปที่ขั้นต่ำสุด
+          qty: requestedQty || "",
         });
-        const res = await httpClient.get(url);
+        // no-store — ราคาเปลี่ยนได้ระหว่างวัน ห้ามกินของที่ browser cache ไว้
+        const res = await httpClient.get(url, { cache: "no-store" });
         if (!res.ok) return;
         const json = await res.json();
         setLists(json.data?.lists ?? []);
@@ -246,7 +244,7 @@ export function PrPricelistDialog({
     };
 
     fetchPriceLists();
-  }, [open, productId, unitId, currencyId, atDate, buCode, t]);
+  }, [open, productId, unitId, currencyId, atDate, requestedQty, buCode, t]);
 
   const handleSelect = (entry: PricelistEntry) => {
     if (readOnly) return;
@@ -276,6 +274,7 @@ export function PrPricelistDialog({
     tc,
     readOnly,
     minPrice,
+    handleSelect,
   );
 
   const table = useReactTable({
@@ -298,11 +297,11 @@ export function PrPricelistDialog({
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 p-0 sm:max-w-5xl">
         <div className="space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
-            <DialogTitle className="truncate text-base">
-              {productName}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
+            <DialogTitle className="text-base">
               {t("priceListComparison")}
+            </DialogTitle>
+            <DialogDescription className="truncate">
+              {productName}
             </DialogDescription>
             <div className="text-muted-foreground text-micro mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="inline-flex items-center gap-1">
@@ -335,7 +334,6 @@ export function PrPricelistDialog({
             isLoading={isLoading}
             loadingMode="spinner"
             emptyMessage={emptyMessage}
-            onRowClick={readOnly ? undefined : handleSelect}
             tableLayout={{
               headerBackground: true,
               headerSticky: true,
@@ -344,10 +342,8 @@ export function PrPricelistDialog({
             tableClassNames={{
               base: "text-xs",
               headerRow: "h-10",
-              // readOnly = เลือกไม่ได้ → ไม่ต้องขึ้น pointer/hover ให้เข้าใจผิดว่าคลิกได้
-              bodyRow: readOnly
-                ? "h-11"
-                : "h-11 hover:bg-primary/5 cursor-pointer",
+              // เลือกด้วยปุ่ม Assign เท่านั้น — แถวไม่ใช่เป้าคลิก จึงไม่มี pointer
+              bodyRow: "h-11 hover:bg-primary/5",
             }}
           >
             <DataGridContainer className="rounded-lg border">

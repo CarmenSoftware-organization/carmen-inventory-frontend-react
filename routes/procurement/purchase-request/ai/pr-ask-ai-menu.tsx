@@ -16,11 +16,6 @@ interface PrAskAiMenuProps {
   readonly disabled?: boolean;
 }
 
-/**
- * ปุ่ม "Ask AI" + dropdown เลือก provider (Claude/ChatGPT/Gemini/Google)
- * กดเลือก → สร้าง prompt จาก item ที่เลือก แล้วเปิดหน้า provider ใน tab ใหม่
- * provider ที่ prefill ผ่าน URL ไม่ได้ (Gemini) จะ copy prompt ลง clipboard ช่วย
- */
 export function PrAskAiMenu({ items, disabled }: PrAskAiMenuProps) {
   const t = useTranslations("procurement.purchaseRequest");
 

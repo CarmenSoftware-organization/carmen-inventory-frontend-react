@@ -6,10 +6,6 @@ import type {
 } from "@/types/notification";
 import { safeNavigationHref } from "@/lib/utils";
 
-/**
- * doc_type → base path ของหน้ารายละเอียด
- * `null` = ไม่มีหน้าให้ลิงก์ไป (ประกาศระบบ/หน่วยธุรกิจ) → ผู้เรียกเปิด detail dialog แทน
- */
 export const DOC_TYPE_ROUTES: Record<NotificationDocType, string | null> = {
   system: null,
   business_unit: null,
@@ -35,16 +31,10 @@ export const DOC_TYPE_LABEL_KEY: Record<NotificationDocType, string> = {
 };
 
 export interface NotificationTileRef {
-  /** SubTile glyph key (ชื่อ submodule ใน module-list) */
   readonly name: string;
-  /** Parent module name → กำหนดจานสีของ tile */
   readonly parent: string;
 }
 
-/**
- * Illustrated app-tile (SubTile) ต่อ doc_type — squircle ชุดเดียวกับ sidebar/dashboard
- * doc_type ที่ไม่มีในนี้ (`system`, `business_unit`) ตกไปที่ tile กระดิ่ง
- */
 export const NOTIFICATION_TILE: Partial<
   Record<NotificationDocType, NotificationTileRef>
 > = {
@@ -55,10 +45,6 @@ export const NOTIFICATION_TILE: Partial<
   store_requisition: { name: "storeRequisition", parent: "storeOperations" },
 };
 
-/**
- * คีย์ metadata เก่าต่อ doc_type — ใช้เป็น fallback สำหรับแถวที่เขียนก่อน redesign
- * write path ปัจจุบันเขียน id เอกสารไว้ที่ `metadata.id` เสมอ
- */
 const LEGACY_ID_KEY: Partial<
   Record<NotificationDocType, keyof NotificationMetadata>
 > = {
@@ -89,13 +75,6 @@ export function getNotificationHref(n: NotificationType): string | undefined {
     : undefined;
 }
 
-/**
- * แปลง markdown-style `[label](url)` ใน message เป็น `<Link>`
- * (`safeNavigationHref` กรอง URL อันตรายออก)
- *
- * @param message - ข้อความดิบ (รับ null/undefined ได้ → คืน [])
- * @returns array ของ ReactNode
- */
 export function formatMessage(message: string | null | undefined) {
   if (!message) return [];
   const parts = message.split(/(\[.*?\]\(.*?\))/g);

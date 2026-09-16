@@ -14,7 +14,7 @@ export function WfStructureLockNotice({ count }: { readonly count: number }) {
   const t = useTranslations("systemAdmin.workflow.documents");
 
   return (
-    <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-400">
+    <div className="border-warning/30 bg-warning/5 text-warning-ink mb-4 flex items-start gap-2.5 rounded-lg border p-3 text-sm">
       <Lock className="mt-0.5 size-4 shrink-0" />
       <span>{t("structureLocked", { count })}</span>
     </div>

@@ -157,14 +157,17 @@ export function RecipeImageGallery({
             "bg-muted/40 flex h-44 w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 text-center transition-colors md:h-56 lg:h-64",
             !disabled && "hover:bg-muted/60 cursor-pointer",
             disabled && "cursor-not-allowed opacity-60",
-            isDragging && "border-primary bg-primary/10",
+            isDragging && "border-primary bg-primary/5",
           )}
         >
           <div className="bg-card flex size-12 items-center justify-center rounded-md border">
             {isDragging ? (
-              <Upload className="text-primary size-5" aria-hidden="true" />
+              <Upload className="text-foreground size-5" aria-hidden="true" />
             ) : (
-              <ImageIcon className="text-primary size-5" aria-hidden="true" />
+              <ImageIcon
+                className="text-muted-foreground size-5"
+                aria-hidden="true"
+              />
             )}
           </div>
           <div className="space-y-0.5">
@@ -205,7 +208,7 @@ export function RecipeImageGallery({
               type="button"
               onClick={openFilePicker}
               aria-label={t("addImage")}
-              className="bg-card text-muted-foreground hover:border-primary hover:text-primary flex size-12 shrink-0 items-center justify-center rounded-md border border-dashed transition-colors md:size-14"
+              className="bg-card text-muted-foreground hover:border-primary hover:text-foreground flex size-12 shrink-0 items-center justify-center rounded-md border border-dashed transition-colors md:size-14"
             >
               <Plus className="size-4" aria-hidden="true" />
             </button>

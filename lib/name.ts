@@ -1,4 +1,3 @@
-/** ตัดสระไทย/วรรณยุกต์/ไม้ออก เก็บเฉพาะพยัญชนะ + อักษรอื่น ๆ */
 function cleanThaiName(name: string): string {
   const thaiVowelsAndMarks = /[ะ-ฺ็-๎]/g;
   const leadingThaiFrontVowels = /^[เ-ไ]+/;

@@ -3,8 +3,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   actionColumn,
   auditColumns,
@@ -12,6 +11,7 @@ import {
   indexColumn,
   selectColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -26,13 +26,6 @@ interface UsePriceListTemplateTableOptions {
   onDelete: (template: PriceListTemplate) => void;
 }
 
-/**
- * Hook สร้างตาราง price list template list พร้อม column และ config สำหรับ DataGrid
- * @param props - templates, total, params, tableConfig และ callbacks สำหรับ edit/delete
- * @returns react-table instance
- * @example
- * const { table } = usePriceListTemplateTable({ templates, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function usePriceListTemplateTable({
   templates,
   totalRecords,
@@ -46,6 +39,7 @@ export function usePriceListTemplateTable({
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const deleteGate = useDeleteGate();
 
   const dataColumns: ColumnDef<PriceListTemplate>[] = [
     {
@@ -64,10 +58,16 @@ export function usePriceListTemplateTable({
       id: "currency_code",
       accessorFn: (row) => row.currency?.code ?? "",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("currency")} />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("currency")}
+          className="justify-center"
+        />
       ),
       meta: {
         headerTitle: tfl("currency"),
+        cellClassName: "text-center",
+        headerClassName: "text-center",
         skeleton: columnSkeletons.textShort,
       },
     },
@@ -102,12 +102,16 @@ export function usePriceListTemplateTable({
           inactive: ts("inactive"),
         };
         return (
-          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
-            {labelMap[status] ?? status}
-          </StatusDotBadge>
+          <StatusIconLabel
+            status={status}
+            label={labelMap[status] ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง text-center ของเซลล์
+            // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
-      size: 100,
+      size: 120,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
@@ -123,6 +127,7 @@ export function usePriceListTemplateTable({
     indexColumn<PriceListTemplate>(params),
     ...dataColumns,
     actionColumn<PriceListTemplate>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.name },
     }),
   ];

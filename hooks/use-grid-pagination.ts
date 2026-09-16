@@ -17,28 +17,9 @@ interface UseGridPaginationOptions<T> {
   };
   params: ParamsDto;
   enabled: boolean;
-  /**
-   * Extra value folded into the reset signature. Use when the same params drive
-   * two different list hooks (e.g. a my-pending vs all-document toggle): the
-   * accumulated items/page reset to 1 when this changes, so the new list does
-   * not get appended onto the previous one's pages.
-   */
   resetKey?: unknown;
 }
 
-/**
- * Hook จัดการ infinite scroll pagination สำหรับ grid/list บนมือถือ
- * ใช้ IntersectionObserver ตรวจจับ sentinel element เพื่อโหลดหน้าถัดไป
- * รีเซ็ตรายการเมื่อ filter/search เปลี่ยน และ dedupe ตาม id ของ item
- * @param options - object ประกอบด้วย useListHook, params และ enabled
- * @returns object ประกอบด้วย items, totalRecords, isLoading, isLoadingMore, hasMore, sentinelRef, error และ refetch
- * @example
- * const { items, hasMore, sentinelRef, isLoadingMore } = useGridPagination({
- *   useListHook: useVendor,
- *   params: { search: query },
- *   enabled: isMobile,
- * });
- */
 export function useGridPagination<T>({
   useListHook,
   params,

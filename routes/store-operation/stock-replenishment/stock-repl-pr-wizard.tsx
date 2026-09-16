@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
+import {
+  type ColumnDef,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,15 +16,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { useCreateStockReplPr } from "./use-stock-replenishment";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 
-/** แถวที่ผู้ใช้ติ๊กไว้ พร้อมคลังต้นสังกัด — ProductLocation เองไม่ได้พกคลังมาด้วย */
 export interface StockReplPrRow {
   readonly location: Location;
   readonly product: ProductLocation;
@@ -29,11 +39,9 @@ interface StockReplPrWizardProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly rows: readonly StockReplPrRow[];
-  /** สร้างสำเร็จ — หน้าแม่ใช้ล้าง selection */
   readonly onCreated?: () => void;
 }
 
-/** สินค้าตัวเดียวกันโผล่ได้หลายคลัง — คีย์จึงต้องมีคลังด้วย */
 const rowKey = (row: StockReplPrRow) =>
   `${row.location.location_id}:${row.product.id}`;
 
@@ -41,6 +49,8 @@ interface RowDraft {
   qty: number;
   unitId: string;
 }
+
+type PrTableRow = StockReplPrRow & { readonly draft: RowDraft };
 
 /**
  * Wizard สร้างใบขอซื้อจากรายการที่ติ๊กในหน้า Stock Replenishment
@@ -68,6 +78,8 @@ export function StockReplPrWizard({
   rows,
   onCreated,
 }: StockReplPrWizardProps) {
+  // React Compiler แช่ JSX ของ DataGrid ได้ (table เป็น ref คงที่) — พิมพ์จำนวนแล้วตารางจะไม่ขยับ
+  "use no memo";
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
@@ -97,18 +109,124 @@ export function StockReplPrWizard({
   const draftOf = (row: StockReplPrRow): RowDraft =>
     drafts.get(rowKey(row)) ?? { qty: row.product.reorder_qty, unitId: "" };
 
-  const patchDraft = (row: StockReplPrRow, patch: Partial<RowDraft>) => {
-    const key = rowKey(row);
-    setDrafts((prev) => {
-      const next = new Map(prev);
-      next.set(key, { ...draftOf(row), ...patch });
-      return next;
-    });
-  };
+  // functional update → ไม่ต้องรู้ค่า drafts ปัจจุบัน identity จึงคงที่ตลอดชีวิต dialog
+  const patchDraft = useCallback(
+    (row: StockReplPrRow, patch: Partial<RowDraft>) => {
+      const key = rowKey(row);
+      setDrafts((prev) => {
+        const next = new Map(prev);
+        next.set(key, {
+          ...(prev.get(key) ?? { qty: row.product.reorder_qty, unitId: "" }),
+          ...patch,
+        });
+        return next;
+      });
+    },
+    [],
+  );
 
-  const handleRemove = (row: StockReplPrRow) => {
+  const handleRemove = useCallback((row: StockReplPrRow) => {
     setRemoved((prev) => new Set(prev).add(rowKey(row)));
-  };
+  }, []);
+
+  const tableRows: PrTableRow[] = activeRows.map((row) => ({
+    ...row,
+    draft: draftOf(row),
+  }));
+
+  const columns = useMemo<ColumnDef<PrTableRow>[]>(
+    () => [
+      {
+        id: "index",
+        header: "#",
+        size: 48,
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground tabular-nums",
+        },
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        id: "location",
+        header: tfl("location"),
+        size: 160,
+        enableSorting: false,
+        meta: { cellClassName: "text-muted-foreground" },
+        cell: ({ row }) => row.original.location.location_name,
+      },
+      {
+        id: "product",
+        header: tfl("product"),
+        size: 260,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <NameWithSubtext
+            primary={row.original.product.name}
+            secondary={row.original.product.code}
+          />
+        ),
+      },
+      {
+        id: "qty",
+        header: t("requestQty"),
+        size: 150,
+        enableSorting: false,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        cell: ({ row }) => (
+          <InputQty
+            aria-label={`${t("requestQty")} ${row.original.product.name}`}
+            value={row.original.draft.qty}
+            onChange={(e) =>
+              patchDraft(row.original, {
+                qty: e.currentTarget.valueAsNumber || 0,
+              })
+            }
+            className="ms-auto h-7 w-24 text-right text-xs"
+          />
+        ),
+      },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: 170,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <LookupProductUnit
+            productId={row.original.product.id}
+            value={row.original.draft.unitId}
+            onValueChange={(unitId) => patchDraft(row.original, { unitId })}
+          />
+        ),
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 56,
+        enableSorting: false,
+        meta: { cellClassName: "text-center" },
+        cell: ({ row }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => handleRemove(row.original)}
+            aria-label={tc("delete")}
+          >
+            <Trash2 className="text-destructive size-3.5" />
+          </Button>
+        ),
+      },
+    ],
+    [t, tfl, tc, patchDraft, handleRemove],
+  );
+
+  const table = useReactTable({
+    data: tableRows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => rowKey(row),
+  });
 
   // แถวที่จำนวนเป็น 0/ติดลบ หรือยังไม่มีหน่วย backend ปฏิเสธที่ DTO อยู่แล้ว
   const canContinue =
@@ -191,77 +309,24 @@ export function StockReplPrWizard({
           </p>
         </div>
 
-        <div className="max-h-[24rem] overflow-auto rounded-md border">
-          <table className="w-full text-xs">
-            <thead className="bg-muted/40 sticky top-0">
-              {/* ไม่ใส่ text-left รวมที่ tr — arbitrary variant `[&>th]:text-left`
-                    specificity สูงกว่า `text-right` รายตัว หัวคอลัมน์ตัวเลขเลยไม่ยอมชิดขวา */}
-              <tr className="[&>th]:px-2 [&>th]:py-1.5 [&>th]:font-semibold">
-                <th className="w-10 text-center">#</th>
-                <th className="text-left">{tfl("location")}</th>
-                <th className="text-left">{tfl("product")}</th>
-                <th className="text-right">{t("requestQty")}</th>
-                <th className="text-left">{tfl("unit")}</th>
-                <th className="w-10" />
-              </tr>
-            </thead>
-            <tbody>
-              {activeRows.map((row, index) => {
-                const draft = draftOf(row);
-                return (
-                  <tr
-                    key={rowKey(row)}
-                    className="border-t [&>td]:px-2 [&>td]:py-1.5"
-                  >
-                    <td className="text-muted-foreground text-center tabular-nums">
-                      {index + 1}
-                    </td>
-                    <td className="text-muted-foreground">
-                      {row.location.location_name}
-                    </td>
-                    <td className="min-w-0">
-                      <p className="truncate" title={row.product.name}>
-                        {row.product.name}
-                      </p>
-                      <p className="text-muted-foreground text-micro">
-                        {row.product.code}
-                      </p>
-                    </td>
-                    <td className="text-right">
-                      <InputQty
-                        value={draft.qty}
-                        onChange={(e) =>
-                          patchDraft(row, {
-                            qty: e.currentTarget.valueAsNumber || 0,
-                          })
-                        }
-                        className="ms-auto h-7 w-24 text-right text-xs"
-                      />
-                    </td>
-                    <td>
-                      <LookupProductUnit
-                        productId={row.product.id}
-                        value={draft.unitId}
-                        onValueChange={(unitId) => patchDraft(row, { unitId })}
-                      />
-                    </td>
-                    <td>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => handleRemove(row)}
-                        aria-label={tc("delete")}
-                      >
-                        <Trash2 className="text-destructive size-3.5" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataGrid
+          table={table}
+          recordCount={tableRows.length}
+          tableLayout={{
+            headerSticky: true,
+            // เซลล์มี input/select — clamp ใช้ -webkit-box แล้วทำ layout ของ control เพี้ยน
+            rowClamp: false,
+          }}
+          tableClassNames={{
+            // header ทึบ ไม่งั้นแถวที่เลื่อนอยู่ใต้มันทะลุขึ้นมา (stripped ทำ header โปร่ง)
+            headerRow: "bg-muted",
+            headerSticky: "sticky top-0 z-10",
+          }}
+        >
+          <DataGridContainer scroll className="max-h-96">
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
 
         <DialogFooter>
           <Button

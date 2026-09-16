@@ -5,7 +5,6 @@ import type {
   NotificationTemplateType,
 } from "@/types/noti-tmpl";
 
-/** ตัวเลือกช่องทางการแจ้งเตือน (ใช้ใน FieldSelect) */
 export const NOTIFICATION_CHANNEL_OPTIONS: ReadonlyArray<{
   value: NotificationTemplateType;
   label: string;
@@ -33,7 +32,6 @@ export const EMPTY_FORM: NotificationTemplateFormValues = {
   is_active: true,
 };
 
-/** แปลงข้อมูล template เป็นค่าเริ่มต้นของฟอร์ม */
 export function getDefaultValues(
   template?: NotificationTemplate,
 ): NotificationTemplateFormValues {
@@ -48,7 +46,6 @@ export function getDefaultValues(
   };
 }
 
-/** แปลงค่าฟอร์มเป็น payload สำหรับ API (subject ว่าง → null) */
 export function mapToPayload(
   values: NotificationTemplateFormValues,
 ): CreateNotificationTemplateDto {

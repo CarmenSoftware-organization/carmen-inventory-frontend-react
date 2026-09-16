@@ -26,25 +26,26 @@ const toSafePathSegment = (value: string): string => {
 
 export const API_ENDPOINTS = {
   ACTIVITY_LOGS: (buCode: string) => `/api/proxy/api/${buCode}/activity-logs`,
-  /** ประวัติกิจกรรมของเอกสารเดียว (เรียงเก่า→ใหม่ตาม backend) */
   ACTIVITY_LOGS_BY_RECORD: (buCode: string, entityId: string) =>
     `/api/proxy/api/${buCode}/activity-logs/record/${entityId}`,
-  /** log รายการเดียว + `changes` (diff ของ old_data/new_data ที่ backend คำนวณให้) */
   ACTIVITY_LOG_DETAIL: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/activity-logs/${id}/detail`,
   ADJUSTMENT_TYPES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/adjustment-types`,
-  /** UI telemetry batch ingest (click + page view) — ดู lib/analytics.ts */
   ANALYTICS_EVENTS: "/api/proxy/api/analytics-events",
   APPLICATION_ROLES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/application-roles`,
-  APPROVAL_PENDING: "/api/proxy/api/my-approve",
+  // รายการรวม PR/PO/SR จาก view sys_v_my_pending — คืน list แบนชุดเดียวที่เรียงและ
+  // แบ่งหน้ามาจาก SQL แล้ว ต่างจาก /api/my-approve เดิมที่คืนสามกลุ่มแยกและแบ่งหน้าแยกกัน
+  APPROVAL_PENDING: "/api/proxy/api/my-pending",
   APPROVAL_PENDING_SUMMARY: "/api/proxy/api/my-approve/pending",
   APP_CONFIGS: (buCode: string) => `/api/proxy/api/config/${buCode}/app-config`,
   APP_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-config/${key}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
+  APP_CONFIG_TEST_EMAIL_PROFILE: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/app-config/test-email-profile`,
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
@@ -52,14 +53,19 @@ export const API_ENDPOINTS = {
     `/api/proxy/api-system/business-units/${id}/avatar`,
   BUSINESS_UNIT_LOGO: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/logo`,
-  /** ผังบัญชีของ BU — ชื่อ resource ฝั่ง backend คือ chart-of-accounts */
   CHART_OF_ACCOUNTS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/chart-of-accounts`,
+  /**
+   * ดึงผังบัญชีจาก Carmen 4 ตามคอนฟิก `interface_accounting_carmen_gl`
+   * — backend เขียนแบบ all-or-nothing และตัดสินเรื่องรหัสซ้ำ/รหัสที่มีเฉพาะฝั่งเรา
+   * จาก `sync_policy` ในคอนฟิกนั้น ไม่ใช่จาก payload ของคำขอ
+   */
+  CHART_OF_ACCOUNTS_IMPORT_CARMEN_GL: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/chart-of-accounts/import-from-interface/carmen-gl`,
   CN_REASONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/credit-note-reasons`,
   CN_REASONS_CONFIG: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/credit-note-reasons`,
-  /** ผู้ใช้รายคน (อ่าน/แก้ไข) — แทน user-application-roles/{id} ของเดิม */
   CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/users/${userId}`,
   CREDIT_NOTE: (buCode: string) => `/api/proxy/api/${buCode}/credit-notes`,
@@ -132,13 +138,10 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/product/${productId}/location`,
   INVENTORY_ADJUSTMENTS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-adjustments`,
+  LICENSE: "/api/proxy/api/license",
   LOCATIONS: (buCode: string) => `/api/proxy/api/config/${buCode}/locations`,
   LOCATIONS_BY_PRODUCT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/user-locations/product/${productId}`,
-  /**
-   * location ของ product ที่ **workflow นั้นอนุญาต** — แคบกว่า
-   * `LOCATIONS_BY_PRODUCT` ที่กรองด้วยสิทธิ์ user อย่างเดียว ใช้ในฟอร์ม PO
-   */
   LOCATIONS_BY_WORKFLOW_PRODUCT: (
     buCode: string,
     workflowId: string,
@@ -185,7 +188,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/notifications/${toSafePathSegment(id)}/read`,
   NOTIFICATION_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/notification-templates`,
-  PERIODS: (buCode: string) => `/api/proxy/api/${buCode}/periods`,
+  INVENTORY_PERIODS: (buCode: string) => `/api/proxy/api/${buCode}/inventory-periods`,
   PERIOD_ENDS: (buCode: string) => `/api/proxy/api/${buCode}/period-ends`,
   PERIOD_END_CURRENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/current`,
@@ -193,7 +196,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/period-ends/review`,
   PERIOD_END_START_COUNTING: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/start-counting`,
-  PERIOD_NEXT: (buCode: string) => `/api/proxy/api/${buCode}/periods/next`,
+  INVENTORY_PERIOD_NEXT: (buCode: string) => `/api/proxy/api/${buCode}/inventory-periods/next`,
   PERMISSIONS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/permissions`,
   PHYSICAL_COUNT: (buCode: string) =>
@@ -315,6 +318,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_SEND_EMAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/${id}/send-email`,
   PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>
@@ -352,7 +357,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/reports/history`,
   REPORT_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/templates`,
-  /** platform-level form templates (ไม่ผูก BU) — ใช้เลือกแบบฟอร์มการพิมพ์ */
   REPORT_TEMPLATE_FORMS: "/api/proxy/api-system/report-templates/forms",
   REPORT_LOOKUPS: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/lookups`,
@@ -367,7 +371,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/running-codes`,
   RUNNING_CODES_INIT: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/running-codes/init`,
-  /** backend ยังไม่มี endpoint นี้ — หน้า /config/shelf สร้างรอ contract นี้ไว้ */
   SHELVES: (buCode: string) => `/api/proxy/api/config/${buCode}/shelves`,
   SPOT_CHECK: (buCode: string) => `/api/proxy/api/${buCode}/spot-checks`,
   // Spot check comment (header level) — id = spot_check_id (GET/POST list) หรือ comment id (PATCH/DELETE)
@@ -443,12 +446,6 @@ export const API_ENDPOINTS = {
   VENDOR_CERTIFICATES_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/config/${buCode}/vendor-certificates/vendor/${vendorId}`,
   WORKFLOWS: (buCode: string) => `/api/proxy/api/config/${buCode}/workflows`,
-  /**
-   * รายการ workflow ของชนิดเอกสารเดียว — `slug` เป็น kebab-case ของชนิดใบ
-   * (`purchase-request` · `purchase-order` · `store-requisition`)
-   *
-   * คนละตัวกับ `WORKFLOW_BY_TYPE` ที่อยู่นอก `config/` และใช้กับ lookup ในฟอร์ม
-   */
   WORKFLOWS_BY_DOC_TYPE: (buCode: string, slug: string) =>
     `/api/proxy/api/config/${buCode}/workflows/${slug}`,
   WORKFLOW_BY_TYPE: (buCode: string, type: string) =>

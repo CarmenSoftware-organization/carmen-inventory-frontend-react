@@ -117,7 +117,6 @@ export async function downloadExternalPricelistXlsx(
   );
 }
 
-/** parse ค่าเป็นเลข — ช่องว่าง/อ่านไม่ออก คืน fallback (คงค่าเดิม ไม่ล้าง) */
 function toNum(v: unknown, fallback: number): number {
   if (v === "" || v == null) return fallback;
   const n = Number(String(v).replace(/,/g, "").trim());
@@ -127,15 +126,12 @@ function toNum(v: unknown, fallback: number): number {
 export type ExcelImportResult =
   | {
       readonly ok: false;
-      /** "structure" = ไม่ใช่ไฟล์ price list · "no-match" = ไม่มี product ตรงเลย */
       readonly reason: "structure" | "no-match";
     }
   | {
       readonly ok: true;
       readonly updated: PricelistExternalDetailDto[];
-      /** จำนวนแถวที่จับคู่ product_code ได้และเอาค่าเข้า */
       readonly applied: number;
-      /** จำนวนแถวที่มี Product Code แต่หาไม่เจอในเอกสาร (ข้าม) */
       readonly skipped: number;
     };
 

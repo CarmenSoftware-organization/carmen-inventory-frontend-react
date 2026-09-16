@@ -29,22 +29,6 @@ interface LookupCnReasonProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Lookup Select สำหรับเลือกเหตุผลของ Credit Note (CN Reason)
- *
- * ดึงข้อมูลผ่าน `useCnReason({ perpage: 30 })` แสดงเป็น shadcn Select
- * พร้อม Tooltip แสดงชื่อเหตุผลเต็มเมื่อ hover (ช่วยกรณี cell แคบ)
- *
- * @param value - id ของ CN reason ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX select element ของ CN reason lookup
- * @example
- * ```tsx
- * <Controller name="cn_reason_id" control={form.control} render={({ field }) => (
- *   <LookupCnReason value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupCnReason({
   value,
   onValueChange,
@@ -132,10 +116,7 @@ export function LookupCnReason({
           </TooltipContent>
         )}
         {showTooltip && (
-          <TooltipContent
-            side="top"
-            className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
-          >
+          <TooltipContent side="top">
             <p className="text-xs font-semibold">{selectedLabel}</p>
           </TooltipContent>
         )}

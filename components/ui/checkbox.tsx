@@ -4,12 +4,6 @@ import { Checkbox as CheckboxPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Checkbox component ห่อ Radix Checkbox — ติ๊กครบเป็นเครื่องหมายถูก ติ๊กบางส่วน
- * (indeterminate) เป็นขีด
- * @param props - props ของ Radix Checkbox Root
- * @returns React element checkbox
- */
 function Checkbox({
   className,
   ...props

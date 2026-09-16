@@ -14,7 +14,6 @@ interface SrFooterProps {
   readonly isPending: boolean;
   readonly role?: string;
   readonly action: SrAction;
-  /** ยอดรวมทั้งใบ — คำนวณจาก srGrandTotal ตัวเดียวกับคอลัมน์ amount ในตาราง */
   readonly grandTotal: number;
   readonly hasItems: boolean;
   /**
@@ -22,9 +21,7 @@ interface SrFooterProps {
    * ส่วนแท็บ Stock ใช้ยอดเข้า/ออกจาก API เพราะเป็นคนละหน่วยและคนละความหมาย
    */
   readonly activeTab: "items" | "stock";
-  /** ใบที่ยังไม่บันทึกไม่มี id — แท็บ Stock ไม่มีอะไรให้สรุป */
   readonly srId?: string;
-  /** ต่ำกว่า completed = แท็บ Stock ไม่โชว์ตาราง footer จึงไม่ต้องสรุปอะไร */
   readonly docStatus?: string;
   readonly onSubmit: () => void;
   readonly onApprove: () => void;

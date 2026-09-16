@@ -19,11 +19,9 @@ import {
   type PartKind,
 } from "./running-code-config";
 
-/** รูปแบบวันที่ที่ให้เลือก — ป้ายคือ "ตัวอย่างของวันนี้" ไม่ใช่ชื่อรูปแบบ */
 const DATE_PATTERNS = ["yyMM", "yyyyMM", "yy", "yyyy", "yyMMdd", "yyyyMMdd"];
 
 interface Props {
-  /** ค่า config เป็นข้อความ JSON (แหล่งความจริงเดียวกับโหมดขั้นสูง) */
   readonly value: string;
   readonly onChange: (next: string) => void;
   readonly disabled?: boolean;

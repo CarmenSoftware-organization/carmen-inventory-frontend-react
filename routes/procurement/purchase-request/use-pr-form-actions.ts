@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { FieldErrors, UseFormReturn } from "react-hook-form";
@@ -9,14 +9,11 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import {
-  removeFromDocSequence,
-  useDocSequence,
-} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
+import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import {
   useCreatePurchaseRequest,
@@ -34,6 +31,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
 import {
   type PrFormValues,
+  findRowsMissingQty,
   mapItemToPayload,
   prepareStageDetails,
   prepareApproveDetails,
@@ -65,7 +63,6 @@ export function usePrFormActions({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const navigate = useNavigate();
-  const location = useLocation();
   const buCode = useBuCode();
   const { defaultBu } = useProfile();
 
@@ -82,18 +79,32 @@ export function usePrFormActions({
       const res = await httpClient.get(
         `${API_ENDPOINTS.PURCHASE_REQUEST(buCode)}/${id}`,
       );
-      if (res.ok) return (await res.json())?.data ?? null;
-    } catch {
-      // network/parse fail — fallback ค่าจาก form/prop
+      if (res.ok) {
+        const fresh = (await res.json())?.data ?? null;
+        // 200 แต่ไม่มี doc_version = backend ไม่ส่งมา ไม่ใช่ "ใบนี้ไม่มีเวอร์ชัน"
+        // ต้องเห็นตอน dev ไม่งั้นจะไปโผล่เป็น 409 ตอนบันทึกแล้วหาต้นตอไม่เจอ
+        if (import.meta.env.DEV && fresh?.doc_version == null) {
+          console.warn("[PR] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+        }
+        return fresh;
+      }
+      if (import.meta.env.DEV)
+        console.warn("[PR] ดึง doc_version สดไม่สำเร็จ", res.status, id);
+    } catch (err) {
+      // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้อง
+      // ไม่เงียบ ผลของการ fallback คือส่ง doc_version เก่า ซึ่งจบที่ 409 ปลายทาง
+      // แล้วสาวกลับมาถึงบรรทัดนี้ไม่ได้ถ้าไม่มีอะไรบอก
+      if (import.meta.env.DEV) console.warn("[PR] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
 
   const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
-    fresh?.doc_version ??
-    form.getValues("doc_version") ??
-    purchaseRequest?.doc_version ??
-    0;
+    pickDocVersion(
+      fresh?.doc_version,
+      form.getValues("doc_version"),
+      purchaseRequest?.doc_version,
+    );
 
   // re-sync doc_version จาก response /save กลับเข้า form (header + ราย detail
   // ตาม id) — กัน save ซ้ำส่ง version เก่า
@@ -173,18 +184,9 @@ export function usePrFormActions({
     onCancel: navGuard.cancel,
   };
 
-  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อ
-  // ใบถัดไปเลยแทนกลับ list ให้คนอนุมัติไล่เคลียร์ my-pending ได้รวดเดียว
-  // (ใบสุดท้าย/เข้าตรงจาก deep link → กลับ list ตามเดิม) — ที่ /new sequence
-  // เป็น null เสมอ (path ไม่ลงท้าย id) create-then-submit จึงกลับ list ปกติ
-  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    // ใบนี้ action จบแล้วหลุดจาก my-pending — ตัดออกจากคิวก่อนเดินต่อ ให้เลข
-    // n/N ของใบถัดไปตรงกับจำนวนที่เหลือใน list จริง (nextPath คำนวณไว้ก่อนตัด
-    // จึงยังชี้ใบถัดไปถูกตัว)
-    removeFromDocSequence(location.pathname);
-    navigate(seq?.nextPath ?? "/procurement/purchase-request");
+    navigate("/procurement/purchase-request");
   };
 
   const toSubmitStageDetails = (
@@ -198,25 +200,37 @@ export function usePrFormActions({
 
   const buildCreateDetails = (
     values: PrFormValues,
-  ): CreatePurchaseRequestDto["details"] => ({
-    ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
-    pr_date: new Date(values.pr_date).toISOString(),
-    description: values.description,
-    requestor_id: values.requestor_id,
-    workflow_id: values.workflow_id,
-    department_id: values.department_id,
-    purchase_request_detail: buildItemChanges(
+    docVersion?: number,
+    freshDetails?: readonly { id: string; doc_version?: number }[],
+  ): CreatePurchaseRequestDto["details"] => {
+    const detail = buildItemChanges(
       values.items,
       defaultValues.items,
       mapItemToPayload,
-    ),
-  });
+    );
+    // lock ของ backend เช็คราย detail ด้วย ไม่ใช่แค่หัวเอกสาร (ดู
+    // withFreshDetailVersions) ทับหลัง buildItemChanges เสมอ ไม่ใช่ก่อน
+    detail.update = withFreshDetailVersions(detail.update, freshDetails);
+    return {
+      ...((docVersion ?? values.doc_version) != null
+        ? { doc_version: docVersion ?? values.doc_version }
+        : {}),
+      pr_date: new Date(values.pr_date).toISOString(),
+      description: values.description,
+      requestor_id: values.requestor_id,
+      workflow_id: values.workflow_id,
+      department_id: values.department_id,
+      purchase_request_detail: detail,
+    };
+  };
 
   // สร้าง save payload ตาม stage role (purchase/approve ส่งรายละเอียดเต็ม,
   // role อื่นใช้ diff ของ buildCreateDetails) — ใช้ร่วมกันทั้งปุ่ม Save (onSubmit)
   // และ save-before-action ก่อนยิง workflow event
   const buildSaveDetails = (
     values: PrFormValues,
+    docVersion?: number,
+    freshDetails?: readonly { id: string; doc_version?: number }[],
   ): CreatePurchaseRequestDto["details"] => {
     if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
       return preparePurchaseDetails(
@@ -230,7 +244,7 @@ export function usePrFormActions({
         purchaseRequest.id,
       ) as unknown as CreatePurchaseRequestDto["details"];
     }
-    return buildCreateDetails(values);
+    return buildCreateDetails(values, docVersion, freshDetails);
   };
 
   // เรียก /save ก่อน workflow action ถ้าฟอร์มถูกแก้ (dirty) — กันค่าที่แก้ราย
@@ -239,10 +253,15 @@ export function usePrFormActions({
   const saveDirtyEdits = async (): Promise<boolean> => {
     if (!purchaseRequest || !form.formState.isDirty) return true;
     try {
+      const fresh = await fetchFreshPr(purchaseRequest.id);
       const data = await updatePr.mutateAsync({
         id: purchaseRequest.id,
         stage_role: purchaseRequest.role,
-        details: buildSaveDetails(form.getValues()),
+        details: buildSaveDetails(
+          form.getValues(),
+          resolveDocVersion(fresh),
+          fresh?.purchase_request_detail,
+        ),
       });
       syncDocVersions(data);
       return true;
@@ -252,15 +271,20 @@ export function usePrFormActions({
     }
   };
 
-  const onSubmit = (values: PrFormValues) => {
+  const onSubmit = async (values: PrFormValues) => {
     const details = buildCreateDetails(values);
 
     if (isEdit && purchaseRequest) {
+      const fresh = await fetchFreshPr(purchaseRequest.id);
       updatePr.mutate(
         {
           id: purchaseRequest.id,
           stage_role: purchaseRequest.role,
-          details: buildSaveDetails(values),
+          details: buildSaveDetails(
+            values,
+            resolveDocVersion(fresh),
+            fresh?.purchase_request_detail,
+          ),
         },
         {
           onSuccess: (data) => {
@@ -303,9 +327,8 @@ export function usePrFormActions({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/purchase-request");
   };
@@ -336,9 +359,17 @@ export function usePrFormActions({
     );
   };
 
-  const doSaveAndSubmitPr = (values: PrFormValues) => {
+  const doSaveAndSubmitPr = async (values: PrFormValues) => {
     if (!purchaseRequest) return;
-    const details = buildCreateDetails(values);
+    // /save ที่ปุ่ม Submit เรียก ต้องใช้เลขสดเหมือน action อื่น — ค่าในฟอร์มค้างเก่า
+    // ได้เสมอ (Save ครั้งก่อน bump ไปแล้วแต่ syncDocVersions อาศัย response ที่อาจ
+    // ไม่มี field นั้นมาให้)
+    const fresh = await fetchFreshPr(purchaseRequest.id);
+    const details = buildCreateDetails(
+      values,
+      resolveDocVersion(fresh),
+      fresh?.purchase_request_detail,
+    );
     updatePr.mutate(
       { id: purchaseRequest.id, stage_role: purchaseRequest.role, details },
       {
@@ -456,8 +487,53 @@ export function usePrFormActions({
     );
   };
 
+  /**
+   * ด่าน "ส่งใบ" เท่านั้น — ร่างที่ยังไม่ได้ใส่จำนวนต้องเซฟได้ กฎนี้จึงไม่อยู่ใน
+   * zod (resolver ตัวเดียวกันถูกใช้ทั้ง Save และ Submit แยกกันไม่ได้)
+   *
+   * @returns true = มีแถวที่ไม่ผ่าน (ผู้เรียกต้องหยุด)
+   */
+  const blockOnMissingQty = (): boolean => {
+    const rows = findRowsMissingQty(form.getValues("items") ?? []);
+    if (rows.length === 0) return false;
+    for (const index of rows) {
+      form.setError(`items.${index}.requested_qty`, {
+        type: "manual",
+        message: tv("qtyOrFoc"),
+      });
+    }
+    scrollToFirstInvalidField();
+    toast.warning(tv("incompleteItems", { count: rows.length }));
+    return true;
+  };
+
+  /**
+   * ตรวจก่อนเปิดกล่องยืนยันส่งใบ — ติดตรงไหนต้องรู้**ก่อน**ตอบว่า "ส่ง"
+   *
+   * ของเดิมเปิดกล่องยืนยันทันที แล้วค่อยไป validate ข้างใน `handleSubmitPr`
+   * ผู้ใช้จึงต้องกดยืนยันเสร็จก่อนถึงจะรู้ว่ากรอกไม่ครบ — ถามแล้วตอบแล้วค่อยบอกว่า
+   * ทำไม่ได้ (ทรงเดียวกับ `onValidatePurchase` ของปุ่ม Purchase Approve)
+   *
+   * toast/scroll ทำในนี้ที่เดียว ผู้เรียกแค่ return เฉย ๆ เมื่อได้ false
+   * — อย่าไปเติม toast ซ้ำที่ปุ่ม ไม่งั้นเด้งสองใบ
+   */
+  const validateSubmitPr = async (): Promise<boolean> => {
+    fillKnownItemDefaults();
+    if (blockOnMissingQty()) return false;
+    return new Promise<boolean>((resolve) => {
+      form.handleSubmit(
+        () => resolve(true),
+        (errors) => {
+          revealInvalid(errors);
+          resolve(false);
+        },
+      )();
+    });
+  };
+
   const handleSubmitPr = () => {
     fillKnownItemDefaults();
+    if (blockOnMissingQty()) return;
     if (purchaseRequest) {
       form.handleSubmit(doSaveAndSubmitPr, revealInvalid)();
       return;
@@ -654,6 +730,7 @@ export function usePrFormActions({
     onSubmit,
     handleCancel,
     handleBack,
+    validateSubmitPr,
     handleSubmitPr,
     revealInvalid,
     fillKnownItemDefaults,

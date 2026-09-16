@@ -39,13 +39,6 @@ interface EquipmentCategoryDialogProps {
   readonly equipmentCategory?: EquipmentCategory | null;
 }
 
-/**
- * Dialog สำหรับสร้างและแก้ไขหมวดหมู่อุปกรณ์
- * @param props - open, onOpenChange และ equipmentCategory เดิม (ถ้ามี)
- * @returns React element ของ Dialog
- * @example
- * <EquipmentCategoryDialog open={open} onOpenChange={setOpen} equipmentCategory={selected} />
- */
 export function EquipmentCategoryDialog({
   open,
   onOpenChange,

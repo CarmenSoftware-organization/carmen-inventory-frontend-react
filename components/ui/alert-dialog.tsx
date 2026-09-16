@@ -4,14 +4,12 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-/** Root ของ AlertDialog — ครอบ state เปิด/ปิดของกล่องแจ้งเตือน */
 function AlertDialog({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
 }
 
-/** Trigger สำหรับเปิด AlertDialog */
 function AlertDialogTrigger({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
@@ -20,7 +18,6 @@ function AlertDialogTrigger({
   );
 }
 
-/** Portal ของ AlertDialog — render เนื้อหาออกนอก DOM tree ปัจจุบัน */
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
@@ -29,7 +26,6 @@ function AlertDialogPortal({
   );
 }
 
-/** Overlay สีทึบด้านหลัง AlertDialog */
 function AlertDialogOverlay({
   className,
   ...props
@@ -46,11 +42,6 @@ function AlertDialogOverlay({
   );
 }
 
-/**
- * กล่องเนื้อหาหลักของ AlertDialog รองรับขนาด default และ sm
- * @param props - ขนาดและ props มาตรฐานของ Radix Content
- * @returns React element กล่อง dialog
- */
 function AlertDialogContent({
   className,
   size = "default",
@@ -74,7 +65,6 @@ function AlertDialogContent({
   );
 }
 
-/** ส่วน header ของ AlertDialog (title + description) */
 function AlertDialogHeader({
   className,
   ...props
@@ -91,7 +81,6 @@ function AlertDialogHeader({
   );
 }
 
-/** ส่วน footer ของ AlertDialog สำหรับวางปุ่ม action/cancel */
 function AlertDialogFooter({
   className,
   ...props
@@ -108,7 +97,6 @@ function AlertDialogFooter({
   );
 }
 
-/** ชื่อหัวเรื่องของ AlertDialog */
 function AlertDialogTitle({
   className,
   ...props
@@ -125,7 +113,6 @@ function AlertDialogTitle({
   );
 }
 
-/** คำอธิบายรายละเอียดของ AlertDialog */
 function AlertDialogDescription({
   className,
   ...props
@@ -139,7 +126,6 @@ function AlertDialogDescription({
   );
 }
 
-/** ช่องสำหรับแสดงไอคอน/รูปภาพประกอบใน AlertDialog */
 function AlertDialogMedia({
   className,
   ...props
@@ -159,7 +145,6 @@ function AlertDialogMedia({
   );
 }
 
-/** ปุ่มยืนยัน action ของ AlertDialog ใช้ Button component ภายใน */
 function AlertDialogAction({
   className,
   variant = "default",
@@ -178,7 +163,6 @@ function AlertDialogAction({
   );
 }
 
-/** ปุ่มยกเลิกของ AlertDialog ใช้ Button component ภายใน */
 function AlertDialogCancel({
   className,
   variant = "outline",

@@ -11,7 +11,7 @@ import {
 import { ALLERGEN_OPTIONS } from "@/constant/recipe";
 import { cn } from "@/lib/utils";
 import { SettingSection } from "@/components/ui/setting-section";
-import { CardSubLabel } from "./recipe-card-sub-label";
+import { EyeBrow } from "@/components/ui/eye-brow";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeComplianceFieldsProps {
@@ -71,12 +71,12 @@ export function RecipeComplianceFields({
       >
         <FieldGroup className="gap-4">
           <div>
-            <CardSubLabel className="flex items-center gap-1.5">
+            <EyeBrow className="flex items-center gap-1.5">
               {t("allergens")}
               <span className="text-muted-foreground ml-1 font-semibold tracking-normal normal-case">
                 · {t("allergensFlagged", { count: flaggedCount })}
               </span>
-            </CardSubLabel>
+            </EyeBrow>
 
             <div className="mt-2 flex flex-wrap gap-1.5">
               {ALLERGEN_OPTIONS.map((allergen) => (
@@ -102,14 +102,19 @@ export function RecipeComplianceFields({
                         }}
                         aria-pressed={on}
                         className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                          "inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-semibold transition-colors",
                           on
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-border bg-card text-foreground/70 hover:border-foreground/40",
+                            ? "border-primary/40 bg-primary/10 text-foreground"
+                            : "border-border bg-card text-muted-foreground hover:border-primary/40",
                           isDisabled && "cursor-not-allowed opacity-60",
                         )}
                       >
-                        {on && <Check className="size-3" aria-hidden="true" />}
+                        {on && (
+                          <Check
+                            className="text-primary size-3"
+                            aria-hidden="true"
+                          />
+                        )}
                         {allergen.label}
                       </button>
                     );
@@ -119,11 +124,11 @@ export function RecipeComplianceFields({
               {customList.map((custom) => (
                 <span
                   key={custom}
-                  className="border-warning bg-warning/10 text-warning-foreground inline-flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1 text-xs font-semibold"
+                  className="border-border bg-muted text-foreground inline-flex items-center gap-1.5 rounded-md border border-dashed px-3 py-1 text-xs font-semibold"
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   {custom}
-                  <span className="text-micro-legal font-semibold opacity-70">
+                  <span className="text-muted-foreground text-micro-legal font-semibold">
                     {t("customAllergen")}
                   </span>
                 </span>
@@ -138,7 +143,7 @@ export function RecipeComplianceFields({
             <FieldInput
               id="recipe-custom-allergens"
               placeholder={t("otherAllergensPlaceholder")}
-              className="h-8"
+              size="sm"
               disabled={isDisabled}
               maxLength={256}
               error={form.formState.errors.allergens?.custom?.message}
@@ -148,7 +153,7 @@ export function RecipeComplianceFields({
           </Field>
 
           <div>
-            <CardSubLabel>{t("tags")}</CardSubLabel>
+            <EyeBrow>{t("tags")}</EyeBrow>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {TAG_CATALOG.map((tag) => {
                 const on = tagsList.includes(tag.key);
@@ -160,14 +165,19 @@ export function RecipeComplianceFields({
                     onClick={() => toggleTag(tag.key)}
                     aria-pressed={on}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                      "inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-semibold transition-colors",
                       on
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border bg-card text-foreground/70 hover:border-foreground/40",
+                        ? "border-primary/40 bg-primary/10 text-foreground"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40",
                       isDisabled && "cursor-not-allowed opacity-60",
                     )}
                   >
-                    {on && <Check className="size-3" aria-hidden="true" />}
+                    {on && (
+                      <Check
+                        className="text-primary size-3"
+                        aria-hidden="true"
+                      />
+                    )}
                     {t(
                       tag.labelKey as
                         | "tagSeasonal"

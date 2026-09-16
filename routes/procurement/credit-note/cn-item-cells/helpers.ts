@@ -28,7 +28,6 @@ export const CN_COL = {
   action: 40,
 } as const;
 
-/** ผลรวมความกว้างของช่วงที่แถวกางครอบ (product → amount, +action ถ้ามี) */
 export function cnReturnRowTotal(showActionCol: boolean): number {
   return (
     CN_COL.product +
@@ -44,7 +43,6 @@ export function cnReturnRowTotal(showActionCol: boolean): number {
   );
 }
 
-/** อ่านค่าที่ต้องใช้คำนวณของ item เดียว → computeCnItemAmounts (honor override) */
 export function useCnItemLine(
   form: UseFormReturn<CnFormValues>,
   index: number,

@@ -2,11 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Input component หลักของระบบ รองรับ counter ความยาวเมื่อมี maxLength (type text)
- * @param props - props ของ input element
- * @returns React element input (หรือ input + counter)
- */
 function Input({
   className,
   type,
@@ -19,7 +14,6 @@ function Input({
   ref: forwardedRef,
   ...props
 }: Omit<React.ComponentProps<"input">, "size"> & {
-  /** ความสูงให้ตรงกับ Select / LookupCombobox: xs=h-6 · sm=h-8 · default=h-9 */
   size?: "xs" | "sm" | "default";
 }) {
   const [length, setLength] = React.useState(0);

@@ -180,6 +180,7 @@ function EditForm({
               </span>
             </FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               type="number"
               inputMode="decimal"
               min={0}
@@ -254,9 +255,6 @@ function EditForm({
   );
 }
 
-/**
- * ฟอร์มสร้าง Exchange Rate ใหม่แบบ manual โดยเลือกสกุลเงินและวันที่
- */
 function CreateForm({
   onOpenChange,
   onPendingChange,
@@ -350,6 +348,7 @@ function CreateForm({
           <Field>
             <FieldLabel required>{tfl("exchangeRate")}</FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               type="number"
               inputMode="decimal"
               min={0}
@@ -382,12 +381,6 @@ function CreateForm({
   );
 }
 
-/**
- * Dialog หลักของ Exchange Rate — premium ERP design
- *
- * รองรับทั้ง create (manual) และ edit โดย render sub-form ตาม mode
- * มี primary accent strip + icon-beside-title header
- */
 export function ExchangeRateDialog({
   mode,
   open,

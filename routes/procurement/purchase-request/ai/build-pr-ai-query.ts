@@ -38,7 +38,6 @@ const CONTEXT = [
   "",
 ];
 
-/** ตัวเลขในตาราง — ไม่ใส่ตัวคั่นหลักพันเพราะทำให้ AI อ่านผิดเป็นทศนิยม */
 function money(value: number | undefined, currency: string | undefined) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     return "—";
@@ -46,12 +45,6 @@ function money(value: number | undefined, currency: string | undefined) {
   return `${value.toFixed(2)}${currency ? ` ${currency}` : ""}`;
 }
 
-/**
- * สร้าง prompt สำหรับส่งให้ AI provider จากรายการ item ที่เลือก
- *
- * @param items - รายการ item ที่ติ๊กเลือกไว้
- * @returns ข้อความ prompt พร้อมส่ง
- */
 export function buildPrAiQuery(items: readonly PrAiQueryItem[]): string {
   const rows = items
     .filter((it) => it.productName)

@@ -38,11 +38,8 @@ export interface Vendor {
   is_active: boolean;
   business_type: { id: string; name: string }[];
   contacts?: VendorContact[];
-  /** @deprecated use `contacts` */
   tb_vendor_contact?: VendorContact[];
-  /** audit ที่ backend enrich มา (created/updated พร้อมชื่อผู้ทำ) — ใช้แสดงคอลัมน์ list/card */
   audit?: Audit;
-  /** Optimistic-concurrency version; required when PATCHing the record. */
   doc_version: number;
 }
 
@@ -58,7 +55,6 @@ interface VendorAddressPayload extends VendorAddressData {
 }
 
 export interface CreateVendorDto {
-  /** Sent on update only — backend requires it for optimistic concurrency. */
   doc_version?: number;
   name: string;
   code: string;

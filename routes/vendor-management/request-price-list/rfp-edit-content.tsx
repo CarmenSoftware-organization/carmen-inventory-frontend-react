@@ -4,13 +4,6 @@ import { RequestPriceListForm } from "./rfp-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-/**
- * เนื้อหาหลักของหน้าแก้ไข RFP โหลดข้อมูลตาม id และแสดง form
- * @param props - id ของ RFP ที่จะแก้ไข
- * @returns React element ของ content แก้ไข RFP
- * @example
- * <RfpEditContent id="rfp-001" />
- */
 export function RfpEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.requestPriceList");
   const {

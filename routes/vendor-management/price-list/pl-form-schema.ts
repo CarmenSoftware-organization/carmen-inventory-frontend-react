@@ -3,12 +3,6 @@ import type { FieldArrayWithId } from "react-hook-form";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { PriceList } from "@/types/price-list";
 
-/**
- * สร้าง zod schema สำหรับรายการสินค้าใน price list หนึ่งรายการ
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ price list detail
- */
 function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -28,12 +22,6 @@ function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema ของ price list form พร้อมตรวจสอบช่วงวันที่
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ price list form
- */
 export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
@@ -119,12 +107,6 @@ const EMPTY_FORM: PriceListFormValues = {
   pricelist_detail: [],
 };
 
-/**
- * คำนวณค่าเริ่มต้นของ price list form จากข้อมูลที่มีอยู่ หรือใช้ค่าเริ่มต้น
- * @param priceList - ข้อมูล price list ที่จะใช้ pre-fill (optional)
- * @param options - ตัวเลือกเพิ่มเติม เช่น default currency id
- * @returns ค่า default ของ price list form
- */
 export function getDefaultValues(
   priceList?: PriceList,
   options?: { defaultCurrencyId?: string },
@@ -187,12 +169,6 @@ export const PRICE_LIST_DETAIL_EMPTY = {
   is_preferred: false,
 } satisfies PriceListFormValues["pricelist_detail"][number];
 
-/**
- * แปลง price list detail จาก form values เป็น payload สำหรับส่ง API พร้อม sequence number
- * @param d - ข้อมูล detail ใน form
- * @param index - ลำดับของรายการใน array
- * @returns payload object ของ detail
- */
 export function mapDetailToPayload(
   d: PriceListFormValues["pricelist_detail"][number],
   index: number,

@@ -17,10 +17,6 @@ function openViewerUrl(url: string, target: "_blank" | "self" | null): void {
   else if (target === "self") window.location.href = safe;
 }
 
-/**
- * Safely read an error response body and format it as a ": <detail>" suffix
- * (truncated to 200 chars), or "" when the body is empty/unreadable.
- */
 async function errorSuffix(res: Response): Promise<string> {
   const body = await res.text().catch(() => "");
   return body ? `: ${body.slice(0, 200)}` : "";
@@ -46,34 +42,9 @@ export interface ViewerResponse {
 }
 
 export interface PrintDocumentOptions {
-  /**
-   * Document UUID — preferred when present. When set, we hit the
-   * document-specific print endpoint that builds full data payload
-   * (header + details + signatures) — see DEDICATED_PRINT_ENDPOINTS for the
-   * types that have one.
-   */
   documentId?: string;
-  /**
-   * Filters passed to the generic report viewer. Use the param names
-   * declared in the print template's source view/function
-   * (e.g. {DocumentNo: "PR-2024-001"}). Used as a fallback when
-   * documentId isn't available or the doc type doesn't have a dedicated
-   * print endpoint yet.
-   */
   filters?: Record<string, unknown>;
-  /**
-   * Where to open the resulting viewer URL. Defaults to a new tab.
-   * Set to "self" to navigate the current tab; pass null to suppress the
-   * window.open call entirely (caller handles the URL).
-   */
   target?: "_blank" | "self" | null;
-  /**
-   * Report template to render with. Normally supplied by usePrintDocument()
-   * from the BU's print-form config; pass it explicitly to override. Optional
-   * for Path 1 (the dedicated endpoint already knows its own template).
-   * Required for Path 2 (the generic viewer) — there is no server-side
-   * default mapping to fall back on; omitting it throws.
-   */
   templateId?: string;
 }
 
@@ -120,26 +91,6 @@ export interface PrintDocumentResult {
   templateName: string | null;
 }
 
-/**
- * Print a document. Two paths:
- *
- *   1. Dedicated endpoint (documentType is in DEDICATED_PRINT_ENDPOINTS and
- *      options.documentId is supplied) — the endpoint composes the full data
- *      payload server-side and returns a ready viewer_url.
- *   2. Generic fallback (no dedicated endpoint, or no documentId) — posts
- *      options.templateId (the BU's configured print form, normally supplied
- *      by usePrintDocument()) straight to POST /api/{bu}/reports/viewer with
- *      the caller's filters. There is no server-side mapping to resolve a
- *      template anymore; the caller must already know which one to use.
- *
- *      This path renders from the template's own source view/function. Every
- *      form template in micro-report's seed has source_name: null and renders
- *      instead from the payload a dedicated endpoint composes — so for EOP (the
- *      only remaining type with no dedicated endpoint) this generic viewer path
- *      is NOT known to work today.
- *
- * Throws Error on any failure; callers should toast/log it.
- */
 export async function printDocument(
   buCode: string,
   documentType: PrintDocumentType,

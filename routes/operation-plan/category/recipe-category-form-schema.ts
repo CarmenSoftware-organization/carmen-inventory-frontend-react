@@ -31,14 +31,6 @@ export const EMPTY_FORM: RecipeCategoryFormValues = {
   margin_target: 0,
 };
 
-/**
- * แปลงข้อมูลหมวดหมู่สูตรอาหารเป็นค่าเริ่มต้นของฟอร์ม
- * @param category - ข้อมูลหมวดหมู่ที่มีอยู่ (ถ้ามี)
- * @returns ค่าเริ่มต้นของฟอร์มหมวดหมู่สูตรอาหาร
- * @example
- * const defaults = getDefaultValues(category);
- * form.reset(defaults);
- */
 export function getDefaultValues(
   category?: RecipeCategory,
 ): RecipeCategoryFormValues {
@@ -68,14 +60,6 @@ export function getDefaultValues(
   };
 }
 
-/**
- * แปลงค่าจากฟอร์มเป็น payload สำหรับส่งไปยัง API
- * @param values - ค่าฟอร์มหมวดหมู่สูตรอาหาร
- * @returns payload พร้อมส่งไปยัง API
- * @example
- * const payload = mapToPayload(form.getValues());
- * await createRecipeCategory(payload);
- */
 export function mapToPayload(values: RecipeCategoryFormValues) {
   return {
     code: values.code,

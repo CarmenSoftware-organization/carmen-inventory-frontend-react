@@ -10,27 +10,10 @@ interface LookupCuisineProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกประเภทอาหาร (Cuisine)
- *
- * ดึงข้อมูลผ่าน `useCuisine` hook พร้อม server-side search และ infinite scroll
- * ผ่าน `useLookupPagination` (perpage 30) โดย filter เฉพาะ `is_active = true`
- *
- * @param value - id ของ cuisine ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX popover element ของ cuisine lookup
- * @example
- * ```tsx
- * <Controller name="cuisine_id" control={form.control} render={({ field }) => (
- *   <LookupCuisine value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupCuisine({
   value,
   onValueChange,

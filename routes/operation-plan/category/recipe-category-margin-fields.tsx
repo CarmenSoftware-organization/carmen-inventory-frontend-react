@@ -14,7 +14,6 @@ interface RecipeCategoryMarginFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/** Default profit margins — minimum · target */
 export function RecipeCategoryMarginFields({
   form,
   isDisabled,

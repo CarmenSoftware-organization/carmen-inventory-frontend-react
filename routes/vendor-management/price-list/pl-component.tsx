@@ -88,19 +88,47 @@ export default function PriceListComponent() {
     [currencyData],
   );
 
+  // ป้ายเป็น i18n (ไม่ใช่ createStatusFilterOptions ที่เป็นอังกฤษล้วน) ให้ตรงกับ
+  // ป้ายในตาราง — ค่าเป็น clause เต็มต่อตัว MultiSelectFilter join เองเมื่อเลือกหลายตัว
+  const statusOptions = useMemo(
+    () =>
+      (["draft", "submitted", "active", "inactive"] as const).map((status) => ({
+        label: ts(status),
+        value: `status|string:${status}`,
+      })),
+    [ts],
+  );
+
   const priceListFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
+        // MultiSelectFilter แทน control: "status" (Select ข้อความเปล่า) เพื่อให้
+        // เมนูมีไอคอนสถานะชุดเดียวกับคอลัมน์ในตาราง — ไอคอนมาจากค่าท้าย value
+        // (`status|string:draft` → draft) ผ่าน lookupIcon ไม่ต้องประกาศซ้ำ
+        // ผลพลอยได้คือเลือกได้หลายสถานะเหมือนรายการเอกสารอื่น (PR/PO)
         key: "filter",
         section: "listView.sectionDocument",
-        control: "status",
+        control: "custom",
         labelKey: "common.status",
-        options: [
-          { labelKey: "status.draft", value: "status|string:draft" },
-          { labelKey: "status.submitted", value: "status|string:submitted" },
-          { labelKey: "status.active", value: "status|string:active" },
-          { labelKey: "status.inactive", value: "status|string:inactive" },
-        ],
+        // custom control ไม่มี `options` ให้ chip ไปหา label เอง — ไม่ใส่ตัวนี้
+        // chip จะกลายเป็นค่าดิบ ("draft") แทนป้ายภาษาไทย
+        valueText: (value) => {
+          const selected = new Set(value.split(","));
+          const labels = statusOptions
+            .filter((o) => selected.has(o.value))
+            .map((o) => o.label);
+          return labels.length > 1
+            ? `${labels[0]} +${labels.length - 1}`
+            : labels[0];
+        },
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={statusOptions}
+            className="w-full"
+          />
+        ),
       },
       {
         key: "currency",
@@ -142,7 +170,7 @@ export default function PriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [vendorOptions, currencyOptions],
+    [vendorOptions, currencyOptions, statusOptions],
   );
 
   const lf = useListFilters({

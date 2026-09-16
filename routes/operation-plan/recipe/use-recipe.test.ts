@@ -35,7 +35,6 @@ function createWrapper() {
   return Wrapper;
 }
 
-/** Read multipart parts back from the FormData passed to fetch. */
 function partsOf(fetchMock: ReturnType<typeof vi.fn>) {
   const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
   const body = init.body as FormData;

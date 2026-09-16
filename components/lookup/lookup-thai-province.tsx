@@ -7,26 +7,11 @@ interface LookupThaiProvinceProps {
   readonly onValueChange: (provinceCode: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly onItemChange?: (province: ThaiProvince) => void;
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกจังหวัดของประเทศไทย
- *
- * ใช้ `useThaiProvinces()` ดึงข้อมูลจังหวัด 77 จังหวัด ค้นหาได้ทั้งภาษาไทย/อังกฤษ/code
- * มี `onItemChange` ส่ง object `ThaiProvince` เต็มสำหรับ reset district/subdistrict
- *
- * @param value - province code ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง provinceCode (number)
- * @returns JSX popover element ของ Thai province lookup
- * @example
- * ```tsx
- * <LookupThaiProvince value={provinceCode} onValueChange={setProvinceCode} />
- * ```
- */
 export function LookupThaiProvince({
   value,
   onValueChange,

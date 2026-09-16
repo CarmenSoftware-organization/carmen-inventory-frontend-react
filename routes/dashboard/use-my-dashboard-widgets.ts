@@ -74,11 +74,6 @@ export function myDashboardWidgetDataQueryOptions(
   };
 }
 
-/**
- * Resolved data ของ widget เดี่ยว — สำหรับ caller ที่ไม่ต้องรวมหลายตัว
- * @param widgetId - ID ของ personal widget
- * @returns UseQueryResult ของ DashboardDatasetDetail
- */
 export function useMyDashboardWidgetData(widgetId: string | undefined) {
   const buCode = useBuCode();
   return useQuery(myDashboardWidgetDataQueryOptions(buCode, widgetId));

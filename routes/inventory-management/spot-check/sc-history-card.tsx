@@ -17,10 +17,6 @@ interface ScHistoryCardProps {
   readonly onClick: (sc: SpotCheck) => void;
 }
 
-/**
- * Card สำหรับ History view — แสดง spot check บันทึกหนึ่งรายการ
- * Click → navigate ไป /spot-check/[id]
- */
 export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();

@@ -18,7 +18,6 @@ import {
   useExportCreditNote,
 } from "./use-credit-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import type { CreditNote } from "@/types/credit-note";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
@@ -76,9 +75,6 @@ export default function CnComponent() {
 
   const creditNotes = useInfiniteScroll ? grid.items : (data?.data ?? []);
 
-  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
-
-  useRecordDocSequence(creditNotes.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -190,6 +186,10 @@ export default function CnComponent() {
             tableLayout={{ headerSticky: true }}
           >
             <DataGridContainer
+              // โหมดการ์ด: กล่องนอกไม่ใช่การ์ด เป็นแค่ตัวคุมพื้นที่เลื่อนกับแถบ
+              // แบ่งหน้า — ทา `bg-card` ทับการ์ดที่เป็น `bg-card` อยู่แล้วเมื่อไร
+              // ก็กลายเป็นการ์ดซ้อนการ์ดที่แยกกันไม่ออก
+              border={false}
               className={cn(
                 "flex flex-col",
                 lf.activeFilters.length > 0
@@ -197,7 +197,7 @@ export default function CnComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              <div className="flex-1 overflow-auto p-3">
+              <div className="flex-1 overflow-auto">
                 <CnCardList
                   items={creditNotes}
                   isLoading={isLoading}

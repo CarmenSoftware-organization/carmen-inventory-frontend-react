@@ -31,20 +31,13 @@ import type {
 interface ScLocationCardProps {
   readonly item: SpotCheckLocation;
   readonly index?: number;
-  /** ถูกเรียกเมื่อกด Start (ไม่มี latest_spot_check) → ไป /location/[id] */
   readonly onStart: (item: SpotCheckLocation) => void;
-  /** ถูกเรียกเมื่อกด Resume (มี latest_spot_check) → ไป /spot-check/[id] */
   readonly onResume: (
     item: SpotCheckLocation,
     latest: SpotCheckLocationLatest,
   ) => void;
 }
 
-/**
- * การ์ดแสดง location ใน Spot Check list
- * - latest_spot_check === null → mode "Start" (ปุ่ม outline + ไม่มี info panel)
- * - latest_spot_check !== null → mode "Resume" (premium info panel + Reset + Resume)
- */
 export function ScLocationCard({
   item,
   index,

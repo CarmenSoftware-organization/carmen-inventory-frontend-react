@@ -1,12 +1,10 @@
 import { useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router";
-import { DocSequenceNav } from "@/components/share/doc-sequence-nav";
 import { useProfile } from "@/hooks/use-profile";
 import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
 import { BackButton } from "@/components/share/back-button";
 
-/** segment ท้าย path เป็น id ของเอกสารจริงไหม — /new (สร้างใหม่) ไม่ใช่ */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface DocFormHeaderProps {
@@ -16,7 +14,6 @@ interface DocFormHeaderProps {
    * ว่าเป็นค่าตัวอย่าง — ใช้ในฟอร์ม create/edit ที่ชื่อว่างได้ (vendor-management)
    */
   readonly titleMuted?: boolean;
-  /** บรรทัดย่อยใต้ title (เช่น document version) */
   readonly subtitle?: ReactNode;
   readonly backLabel: string;
   readonly onBack: () => void;
@@ -30,14 +27,7 @@ interface DocFormHeaderProps {
    * ข้างขวาจะหักความกว้าง ribbon ทำให้คอลัมน์ drift
    */
   readonly workflowStepBelow?: boolean;
-  /** icon/visual block ก่อน title — สำหรับ icon-hero (เช่น IA, period-end) */
   readonly leading?: ReactNode;
-  /**
-   * content column ไม่มี px-4 — ใช้เมื่อ consumer จัด horizontal padding ให้
-   * header+form body เองแล้ว (เช่นอยู่ใน centered card `p-4` หรือ container ที่
-   * form body ก็ flush) เพื่อให้ title/ribbon align กับ form body ตัวจริง
-   * (form body ที่มี px-4 ของตัวเอง เช่น PR/PO → ปล่อย default false)
-   */
   readonly flush?: boolean;
 }
 
@@ -105,11 +95,8 @@ export function DocFormHeader({
             </h1>
             {badges}
           </div>
-          {/* shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
-              DocSequenceNav render ตัวเองเฉพาะเมื่อ detail นี้อยู่ในลำดับของ
-              list ที่เพิ่งเปิดมา (ดู use-doc-sequence) หน้าอื่นได้ null เงียบ ๆ */}
+          {/* shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน */}
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <DocSequenceNav />
             {actions}
           </div>
         </div>

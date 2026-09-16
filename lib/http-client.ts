@@ -19,18 +19,6 @@ const RATE_LIMIT_MAX_REQUESTS = 50; // max requests per window
 
 const requestTimestamps: number[] = [];
 
-/**
- * ตรวจสอบ client-side rate limit แบบ sliding window
- *
- * Throw ApiError เมื่อเกินจำนวนที่กำหนดในช่วง window
- *
- * @returns void (ไม่คืนค่า แต่ throw เมื่อเกิน limit)
- * @throws {ApiError} ที่มี code RATE_LIMITED เมื่อเกิน limit
- * @example
- * ```ts
- * checkRateLimit(); // throws หากเกิน 50 req ต่อ 10s
- * ```
- */
 const checkRateLimit = (): void => {
   const now = Date.now();
   // Remove timestamps outside the window
@@ -53,18 +41,6 @@ const checkRateLimit = (): void => {
   requestTimestamps.push(now);
 };
 
-/**
- * แปลง error ใดๆ ที่เกิดขึ้นระหว่าง fetch ให้เป็น ApiError
- *
- * จำแนกเป็น TIMEOUT (AbortError) หรือ NETWORK_ERROR
- *
- * @param error - error object ดิบจาก fetch
- * @returns ApiError ที่จำแนกประเภทแล้ว
- * @example
- * ```ts
- * try { await fetch(url); } catch (e) { throw toApiError(e); }
- * ```
- */
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;
   // AbortController.abort() → "AbortError"; AbortSignal.timeout() → "TimeoutError"
@@ -178,19 +154,6 @@ const dispatchAuthError = (message?: string) => {
   }
 };
 
-/**
- * พยายามอ่าน message จาก error response body
- *
- * ใช้ clone() เพื่อไม่ consume body ให้ caller ใช้ต่อได้
- * คืน undefined หาก parse ล้มเหลว
- *
- * @param response - Response object ที่เป็น error
- * @returns ข้อความ error หรือ undefined
- * @example
- * ```ts
- * const msg = await readErrorMessage(response);
- * ```
- */
 const readErrorMessage = async (
   response: Response,
 ): Promise<string | undefined> => {
@@ -218,23 +181,6 @@ const readErrorBody = async (response: Response): Promise<unknown> => {
   }
 };
 
-/**
- * จัดการ error responses ฝั่ง client: 401, 403, 429
- *
- * - 401: พยายาม refresh token และลองใหม่ หรือแจ้ง session expired
- * - 403: แจ้ง forbidden event และ throw ApiError
- * - 429: throw rate-limited error
- *
- * @param response - Response ดิบจาก fetch
- * @param url - URL เดิมสำหรับ retry หลัง refresh
- * @param init - RequestInit options เดิม
- * @returns Response ที่ handle แล้ว (อาจเป็น retry response)
- * @throws {ApiError} เมื่อ auth ล้มเหลวหรือ rate limited
- * @example
- * ```ts
- * const finalRes = await handleClientErrors(res, url, init);
- * ```
- */
 const handleClientErrors = async (
   response: Response,
   url: string,
@@ -327,21 +273,6 @@ const handleClientErrors = async (
   return response;
 };
 
-/**
- * ฟังก์ชันหลักสำหรับยิง HTTP request
- *
- * ตรวจ rate limit, เพิ่ม Content-Type header, serialize body เป็น JSON
- * และจัดการ client errors โดยอัตโนมัติ
- *
- * @param url - URL ที่จะ request
- * @param method - HTTP method
- * @param options - options เพิ่มเติม (body, headers, ฯลฯ)
- * @returns Response object
- * @example
- * ```ts
- * await request("/api/proxy/users", "POST", { body: { name: "John" } });
- * ```
- */
 const request = async (
   url: string,
   method: HttpMethod,

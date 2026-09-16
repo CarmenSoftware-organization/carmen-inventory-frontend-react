@@ -2,12 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { PhysicalCount } from "@/types/physical-count";
 
-/**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์ม Physical Count
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema ของฟอร์ม physical count
- */
 export function createPhysicalCountSchema(
   tv: TranslationFn,
   tf: TranslationFn,
@@ -33,16 +27,6 @@ export const EMPTY_FORM: PhysicalCountFormValues = {
 
 // --- Helpers ---
 
-/**
- * สร้างค่า default ของฟอร์ม Physical Count จากข้อมูลที่มีอยู่
- * ใช้ใน PcForm ทั้งโหมด add (ไม่ส่ง arg) และ edit (ส่ง entity)
- *
- * @param physicalCount - entity เดิมสำหรับโหมดแก้ไข (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม physical count
- * @example
- * const defaults = getDefaultValues(physicalCount);
- * const form = useForm({ defaultValues: defaults });
- */
 export function getDefaultValues(
   physicalCount?: PhysicalCount,
 ): PhysicalCountFormValues {

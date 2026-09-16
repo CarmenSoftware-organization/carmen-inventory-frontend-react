@@ -11,27 +11,16 @@ import {
 export type AiProviderId =
   "claude" | "chatgpt" | "gemini" | "deepseek" | "grok" | "google";
 
-/** icon ที่รับ `className` — รองรับทั้ง lucide icon และ custom brand icon */
 export type ProviderIcon = ComponentType<{ readonly className?: string }>;
 
 export interface AiProvider {
   readonly id: AiProviderId;
   readonly label: string;
   readonly icon: ProviderIcon;
-  /** สร้าง URL เปิดหน้า provider พร้อม prompt/query (เปิด tab ใหม่) */
   readonly buildUrl: (query: string) => string;
-  /**
-   * provider รองรับ prefill prompt ผ่าน URL ไหม
-   * ถ้า false (เช่น Gemini) caller ควร copy prompt ลง clipboard ช่วย
-   * เพราะเปิดหน้า app เปล่า ๆ
-   */
   readonly supportsPrefill: boolean;
 }
 
-/**
- * Registry ของ AI/search provider ที่ใช้ในปุ่ม "Ask AI" ของ PR
- * เพิ่ม provider ใหม่ได้โดยเติม entry ที่นี่ที่เดียว
- */
 export const AI_PROVIDERS: readonly AiProvider[] = [
   {
     id: "claude",

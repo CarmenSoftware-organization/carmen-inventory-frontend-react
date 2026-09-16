@@ -14,13 +14,6 @@ import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 
-/**
- * แปลงข้อความ snake_case เป็น Title Case สำหรับแสดงชื่อ entity type
- * @param value - ข้อความรูปแบบ snake_case ที่ต้องการแปลง
- * @returns ข้อความในรูปแบบ Title Case
- * @example
- * formatEntityType("purchase_order"); // "Purchase Order"
- */
 function formatEntityType(value: string): string {
   if (!value) return "";
   return value
@@ -36,13 +29,6 @@ interface UseActivityLogTableOptions {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตาราง Activity Log (เวลา, action, user, entity, description, IP)
- * @param options - อาร์เรย์ logs, จำนวน totalRecords, params และ tableConfig จาก useDataGridState
- * @returns TanStack Table instance สำหรับ Activity Log
- * @example
- * const table = useActivityLogTable({ logs, totalRecords, params, tableConfig });
- */
 export function useActivityLogTable({
   logs,
   totalRecords,
@@ -145,7 +131,7 @@ export function useActivityLogTable({
             {desc.length > 40 && (
               <TooltipContent
                 side="top"
-                className="bg-popover text-popover-foreground max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                className="max-w-[20rem]"
               >
                 <p className="text-xs leading-snug">{desc}</p>
               </TooltipContent>

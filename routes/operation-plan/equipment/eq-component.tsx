@@ -39,13 +39,6 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการอุปกรณ์ รองรับ list/grid view และ filter ตามหมวดหมู่
- * @returns React element ของรายการอุปกรณ์
- * @example
- * // ใช้ภายใน page.tsx ของโมดูล equipment
- * <EquipmentComponent />
- */
 export default function EquipmentComponent() {
   const t = useTranslations("operationPlan.equipment");
   const tc = useTranslations("common");

@@ -41,13 +41,6 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการหมวดหมู่สูตรอาหาร รองรับ list/grid view และ filter
- * @returns React element ของรายการหมวดหมู่สูตรอาหาร
- * @example
- * // ใช้ภายใน page.tsx ของโมดูล category
- * <RecipeCategoryComponent />
- */
 export default function RecipeCategoryComponent() {
   const t = useTranslations("operationPlan.recipeCategory");
   const tc = useTranslations("common");

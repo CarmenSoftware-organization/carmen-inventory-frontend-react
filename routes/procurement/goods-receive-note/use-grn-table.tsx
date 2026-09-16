@@ -97,7 +97,11 @@ export function useGrnTable({
             label={config?.label ?? status.toUpperCase()}
             // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
             // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
-            className="flex w-full justify-center"
+            //
+            // สีเดียวกับคอลัมน์ชนิดใบ — ไอคอนรับสีจากข้อความแทนสีประจำสถานะ
+            // (`!` เพราะ StatusIconLabel ใส่สีมาเป็น inline style ซึ่ง class ธรรมดา
+            // สู้ไม่ได้ · แก้ที่คอมโพเนนต์ไม่ได้ มันเป็นของกลางทั้งแอป)
+            className="text-muted-foreground flex w-full justify-center [&_svg]:text-current!"
           />
         );
       },

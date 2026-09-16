@@ -13,16 +13,6 @@ interface ProductCardProps {
   readonly onDelete: (item: Product) => void;
 }
 
-/**
- * การ์ดสินค้า 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/SR/IA — ไฟล์นี้เหลือแค่ว่า
- * ข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตารางสินค้า
- *
- * @param props.item - ข้อมูลสินค้า
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function ProductCard({
   item,
   onEdit,

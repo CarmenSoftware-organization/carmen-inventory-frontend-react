@@ -52,7 +52,7 @@ function makeValid(
         tax_profile_name: "VAT 7%",
         tax_rate: 7,
         tax_amount: 35,
-        locations: [{ id: "loc-1", order_qty: 5, received_qty: 0 }],
+        location_id: "loc-1",
       },
     ],
     ...overrides,

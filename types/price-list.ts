@@ -2,10 +2,6 @@ import type { Audit } from "@/types/audit";
 
 type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
-/**
- * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —
- * vendor ที่มี price list active ในวันที่ระบุ
- */
 export interface PriceListActiveVendor {
   id: string;
   code: string;
@@ -39,6 +35,7 @@ export interface PriceListDetailItem {
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  can_use?: boolean;
   doc_version?: number;
 }
 
@@ -56,6 +53,7 @@ export interface PriceList {
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];
+  can_use?: boolean;
   doc_version?: number;
   audit?: PriceListAudit;
 }

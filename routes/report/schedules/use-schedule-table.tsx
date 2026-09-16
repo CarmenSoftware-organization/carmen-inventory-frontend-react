@@ -18,15 +18,6 @@ const FORMAT_LABELS: Record<ReportFormat, string> = {
   json: "JSON",
 };
 
-/**
- * อ่าน `schedule_config` แปลงเป็นข้อความความถี่ (i18n)
- * ถ้าไม่มี config ใช้ cron expression เป็น fallback
- *
- * @param row - one ReportSchedule
- * @param t - translator (namespace reportSchedule)
- * @param weekdayShort - localized short weekday names (index 0 = Sunday)
- * @returns label string
- */
 function formatScheduleConfig(
   row: ReportSchedule,
   t: ReturnType<typeof useTranslations>,
@@ -53,18 +44,6 @@ interface UseScheduleTableOptions {
   readonly onDelete: (schedule: ReportSchedule) => void;
 }
 
-/**
- * สร้าง column definitions ของหน้า Report Schedules
- *
- * แยกออกจาก `schedule-component.tsx` ให้ตรง pattern `use-{module}-table`
- * ของโปรเจกต์ component ภายนอกเอา columns ไปป้อน `useReactTable` ต่อ
- *
- * @param options.onDelete - callback ตอนกดปุ่ม trash บนแถว
- * @returns array ของ `ColumnDef<ReportSchedule>`
- * @example
- * const columns = useScheduleTableColumns({ onDelete: setPendingDelete });
- * const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
- */
 export function useScheduleTableColumns({
   onDelete,
 }: UseScheduleTableOptions): ColumnDef<ReportSchedule>[] {

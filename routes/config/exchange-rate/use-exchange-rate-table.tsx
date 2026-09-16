@@ -12,6 +12,7 @@ import {
   columnSkeletons,
   indexColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { CellAction } from "@/components/ui/cell-action";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -39,6 +40,7 @@ export function useExchangeRateTable({
 }: UseExchangeRateTableOptions) {
   const { dateTimeFormat, defaultCurrencyCode } = useProfile();
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
 
   const columns: ColumnDef<ExchangeRateItem>[] = useMemo(
     () => [
@@ -98,9 +100,9 @@ export function useExchangeRateTable({
       },
 
       ...auditColumns<ExchangeRateItem>(tfl, dateTimeFormat),
-      actionColumn<ExchangeRateItem>(onDelete),
+      actionColumn<ExchangeRateItem>(onDelete, deleteGate),
     ],
-    [params, dateTimeFormat, defaultCurrencyCode, onEdit, onDelete, tfl],
+    [params, dateTimeFormat, defaultCurrencyCode, onEdit, onDelete, tfl, deleteGate],
   );
 
   return useReactTable({

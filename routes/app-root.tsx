@@ -4,7 +4,6 @@ import { I18nProvider } from "@/components/i18n-provider";
 import Providers from "@/components/providers";
 import { TopLoader } from "@/components/top-loader";
 
-/** Root ของ React tree — แทน app/layout.tsx เดิม (fonts/styles โหลดใน main.tsx) */
 export default function AppRoot() {
   return (
     <I18nProvider>

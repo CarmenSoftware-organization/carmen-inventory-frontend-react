@@ -4,12 +4,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useTranslations } from "use-intl";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useCan } from "@/hooks/use-can";
-import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
-import { buildPermissionKey } from "@/constant/permissions";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import {
   selectColumn,
   indexColumn,
@@ -26,12 +23,7 @@ interface UseConfigTableOptions<T> {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
   onDelete?: (item: T) => void;
   hideStatus?: boolean;
-  /** เช่น `"configuration.department"` — เช็ค {prefix}.delete เพื่อ guard ปุ่ม delete ใน row */
   permissionPrefix?: string;
-  /**
-   * initial TanStack state ที่ไม่ถูกคุมแบบ controlled (columnVisibility ฯลฯ)
-   * เช่น ซ่อนคอลัมน์ audit เป็น default: `{ columnVisibility: { created_at: false, updated_at: false } }`
-   */
   initialState?: InitialTableState;
   /**
    * เปิดเมนู Activity ในแถว — ไม่ส่ง = ไม่มีเมนู
@@ -85,37 +77,16 @@ export function useConfigTable<T>({
   // breaks reference-equality checks the library relies on internally.
   "use no memo";
 
-  const { can, isAdmin, canWrite } = useCan();
-  const tl = useTranslations("license");
-  const autoPrefix = usePermissionPrefix();
-  const prefix = permissionPrefix ?? autoPrefix;
-  const deletePermission = prefix
-    ? buildPermissionKey(prefix, "delete")
-    : undefined;
-  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
-  // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่ม delete ของแถวจริง (ไม่ใช่แค่ dim+dispatch แบบ
-  // deleteDenied) มาก่อน deleteDenied เสมอเพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
-  const writeDisabled = !canWrite;
-  const writeDisabledTitle = writeDisabled
-    ? tl("writeDisabledTitle")
-    : undefined;
+  // ของกลางตัวเดียวกับปุ่มลบบนการ์ด (`ListCard`) และตารางที่ประกอบ column เอง —
+  // แถวกับการ์ดของหน้าเดียวกันจะได้ไม่คุมสิทธิ์คนละแบบ
+  const deleteGate = useDeleteGate(permissionPrefix);
 
   const allColumns: ColumnDef<T>[] = [
     selectColumn<T>(),
     indexColumn<T>(params),
     ...columns,
     ...(hideStatus ? [] : [statusColumn<T>()]),
-    ...(onDelete
-      ? [
-          actionColumn<T>(onDelete, {
-            deleteDenied,
-            deletePermission,
-            writeDisabled,
-            writeDisabledTitle,
-            activity,
-          }),
-        ]
-      : []),
+    ...(onDelete ? [actionColumn<T>(onDelete, { ...deleteGate, activity })] : []),
   ];
 
   return useReactTable({

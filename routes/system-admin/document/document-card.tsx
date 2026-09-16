@@ -4,13 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { DocumentFile } from "@/types/document";
 
-/**
- * แปลงจำนวน bytes เป็นข้อความขนาดไฟล์ (B, KB, MB) สำหรับแสดงในการ์ด
- * @param bytes - ขนาดไฟล์เป็น bytes
- * @returns ข้อความแสดงขนาดไฟล์ในหน่วยที่เหมาะสม
- * @example
- * formatSize(2048); // "2.0 KB"
- */
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -23,13 +16,6 @@ interface DocumentCardProps {
   readonly onClick?: (item: DocumentFile) => void;
 }
 
-/**
- * การ์ดแสดงข้อมูลเอกสาร (Document) สำหรับ mobile view
- * @param props - ข้อมูล item เอกสาร, ลำดับ index และ callback onClick
- * @returns React element ของการ์ดเอกสาร
- * @example
- * <DocumentCard item={doc} index={0} onClick={handleOpen} />
- */
 export default function DocumentCard({
   item,
   index,

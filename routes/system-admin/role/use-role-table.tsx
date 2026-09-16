@@ -9,6 +9,7 @@ import {
   actionColumn,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import type { Role } from "@/types/role";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -22,13 +23,6 @@ interface UseRoleTableOptions {
   onDelete: (item: Role) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับตาราง Role พร้อมคอลัมน์เลือก/ลำดับ/ชื่อ/จำนวนสิทธิ์/action
- * @param options - items, totalRecords, params, tableConfig, onEdit และ onDelete
- * @returns react-table instance
- * @example
- * const table = useRoleTable({ items, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useRoleTable({
   items,
   totalRecords,
@@ -39,6 +33,7 @@ export function useRoleTable({
 }: UseRoleTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const deleteGate = useDeleteGate();
   const dataColumns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
@@ -71,7 +66,7 @@ export function useRoleTable({
     selectColumn<Role>(),
     indexColumn<Role>(params),
     ...dataColumns,
-    actionColumn<Role>(onDelete),
+    actionColumn<Role>(onDelete, deleteGate),
   ];
 
   return useReactTable({

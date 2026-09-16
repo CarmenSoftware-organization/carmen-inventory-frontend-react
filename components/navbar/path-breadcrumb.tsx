@@ -12,21 +12,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { moduleList } from "@/constant/module-list";
 
-/**
- * ตรวจสอบว่า segment ของ URL เป็น id หรือไม่
- *
- * ใช้ regex ตรวจ 3 รูปแบบ: numeric id (เฉพาะตัวเลข), UUID มาตรฐาน 8-4-4-4-12
- * และ MongoDB ObjectId (24 hex chars) ใช้โดย `PathBreadcrumb` เพื่อกรอง
- * segment ที่เป็น id ออกจาก breadcrumb
- *
- * @param segment - segment ของ path ที่ต้องการตรวจสอบ
- * @returns true ถ้า segment match รูปแบบ id รูปแบบใดรูปแบบหนึ่ง
- * @example
- * ```ts
- * isIdSegment("123"); // true
- * isIdSegment("new"); // false
- * ```
- */
 function isIdSegment(segment: string) {
   // numeric id
   if (/^\d+$/.test(segment)) return true;
@@ -42,7 +27,6 @@ function isIdSegment(segment: string) {
   return false;
 }
 
-/** Map URL path segment → modules translation key */
 const SEGMENT_TO_KEY: Record<string, string> = {};
 function addModuleSegments(modules: typeof moduleList) {
   for (const mod of modules) {

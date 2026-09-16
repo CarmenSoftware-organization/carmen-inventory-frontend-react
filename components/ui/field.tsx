@@ -43,20 +43,6 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   );
 }
 
-/**
- * Legend ของ FieldSet
- *
- * Render `<legend>` หัวเรื่องของ FieldSet รองรับ variant `legend` (text-base)
- * หรือ `label` (text-sm) ผ่าน data attribute
- *
- * @param props - props ของ legend
- * @param props.variant - "legend" หรือ "label"
- * @returns JSX element ของ legend
- * @example
- * ```tsx
- * <FieldLegend variant="label">Personal info</FieldLegend>
- * ```
- */
 function FieldLegend({
   className,
   variant = "legend",
@@ -77,20 +63,6 @@ function FieldLegend({
   );
 }
 
-/**
- * Group container ของ Field หลายรายการ
- *
- * Render `<div>` flex column ที่มี gap-7 (default) ระหว่าง Field รองรับ
- * container query (`@container/field-group`) ให้ Field child ปรับ orientation
- * ตามขนาดของ group
- *
- * @param props - props ของ div
- * @returns JSX element ของ field group
- * @example
- * ```tsx
- * <FieldGroup className="gap-3"><Field>...</Field></FieldGroup>
- * ```
- */
 function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -143,25 +115,6 @@ const fieldVariants = cva(
   },
 );
 
-/**
- * Field หนึ่งช่องของฟอร์ม
- *
- * Render `<div role="group">` ที่ครอบ FieldLabel + control + FieldError
- * รองรับ orientation `vertical` (default), `horizontal` หรือ `responsive`
- * (vertical บนจอเล็กแล้วเปลี่ยนเป็น horizontal บน @md ของ container query)
- * เพิ่ม `data-invalid="true"` เพื่อให้ child element เปลี่ยนสี destructive
- *
- * @param props - props ของ field
- * @param props.orientation - vertical/horizontal/responsive
- * @returns JSX element ของ field
- * @example
- * ```tsx
- * <Field orientation="horizontal">
- *   <FieldLabel>Active</FieldLabel>
- *   <Switch />
- * </Field>
- * ```
- */
 function Field({
   className,
   orientation = "vertical",
@@ -178,25 +131,6 @@ function Field({
   );
 }
 
-/**
- * Content container ภายใน Field
- *
- * Render `<div>` flex column ที่ครอบ label + description + control เป็นกลุ่ม
- * เดียวภายใน Field มักใช้กับ horizontal orientation พร้อม checkbox/radio
- *
- * @param props - props ของ div
- * @returns JSX element ของ field content
- * @example
- * ```tsx
- * <Field orientation="horizontal">
- *   <Checkbox />
- *   <FieldContent>
- *     <FieldLabel>Subscribe</FieldLabel>
- *     <FieldDescription>Receive emails</FieldDescription>
- *   </FieldContent>
- * </Field>
- * ```
- */
 function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -210,21 +144,6 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/**
- * Label ของ Field
- *
- * Render Radix `Label` ที่ใส่ data attribute สำหรับ disabled state ของ Field
- * พ่อ และเพิ่มเครื่องหมาย `*` สีแดงเมื่อ `required` รองรับ embed `<Field>`
- * เพื่อทำ card-style label
- *
- * @param props - props ของ label
- * @param props.required - แสดงเครื่องหมาย required
- * @returns JSX element ของ label
- * @example
- * ```tsx
- * <FieldLabel htmlFor="email" required>Email</FieldLabel>
- * ```
- */
 function FieldLabel({
   className,
   required,
@@ -274,19 +193,6 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/**
- * Description ของ Field
- *
- * Render `<p>` คำอธิบายย่อยสีเทา รองรับ link styling อัตโนมัติ ใช้ใต้
- * FieldLabel เพื่ออธิบายเพิ่มเติม
- *
- * @param props - props ของ paragraph
- * @returns JSX element ของ description
- * @example
- * ```tsx
- * <FieldDescription>This will be visible to other users.</FieldDescription>
- * ```
- */
 function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
@@ -302,20 +208,6 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-/**
- * Separator ระหว่างกลุ่ม Field
- *
- * Render เส้นคั่นแนวนอน หากมี `children` จะ render text overlay ตรงกลาง
- * (เช่น "OR") ใช้สำหรับแบ่ง section ภายใน FieldGroup
- *
- * @param props - props ของ div
- * @param props.children - ข้อความ overlay ตรงกลาง (optional)
- * @returns JSX element ของ separator
- * @example
- * ```tsx
- * <FieldSeparator>OR</FieldSeparator>
- * ```
- */
 function FieldSeparator({
   children,
   className,

@@ -13,7 +13,6 @@ interface Props {
   readonly onDelete?: (item: Currency) => void;
 }
 
-/** การ์ดสกุลเงิน สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function CurrencyCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 

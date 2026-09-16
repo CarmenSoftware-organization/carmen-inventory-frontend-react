@@ -24,7 +24,6 @@ function makeStageWithoutSignatureKey(name: string) {
   return { ...rest, name };
 }
 
-/** render WfStageGeneral ของ stage หนึ่งตัว โดยมี stages ทั้งชุดอยู่ใน form state */
 function Harness({
   stages,
   index,

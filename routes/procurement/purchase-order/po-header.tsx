@@ -1,5 +1,15 @@
+import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
+import {
+  Building2,
+  Lock,
+  Mail,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
@@ -10,6 +20,15 @@ import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { PoSendEmailDialog } from "./po-send-email-dialog";
+
+const SEND_EMAIL_STATUSES: readonly PO_STATUS[] = [
+  PO_STATUS.APPROVED,
+  PO_STATUS.SENT_OR_PRINT,
+  PO_STATUS.PARTIAL,
+  PO_STATUS.CLOSED,
+  PO_STATUS.COMPLETED,
+];
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -27,9 +46,7 @@ interface PoHeaderProps {
   readonly onShowClose: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
-  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 
@@ -56,11 +73,17 @@ export function PoHeader({
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
+  const [showSendEmail, setShowSendEmail] = useState(false);
 
   const isView = mode === "view";
   const isEditMode = mode === "edit";
   const isAdd = !purchaseOrder;
   const headerTitle = purchaseOrder?.po_no ?? t("entity");
+  // ไม่ผูกกับโหมด view/edit — สถานะ partial ยังแก้ไขได้ (ไม่ใช่ terminalStatus) แต่
+  // ต้องส่งอีเมลได้เหมือนกัน เอกสารที่ส่งจริงมาจาก DB ที่ persist แล้วเสมอ ไม่ใช่
+  // ฟอร์มที่ยังไม่ได้บันทึก
+  const canSendEmail =
+    !!purchaseOrder && SEND_EMAIL_STATUSES.includes(purchaseOrder.po_status);
   const poStatusConfig = purchaseOrder
     ? PO_STATUS_CONFIG[purchaseOrder.po_status]
     : null;
@@ -102,7 +125,9 @@ export function PoHeader({
     <>
       {purchaseOrder && (
         <>
-          {canClose && purchaseOrder.po_status === PO_STATUS.SENT && (
+          {canClose &&
+            (purchaseOrder.po_status === PO_STATUS.APPROVED ||
+              purchaseOrder.po_status === PO_STATUS.SENT_OR_PRINT) && (
             <Button
               size="sm"
               variant="outline"
@@ -155,6 +180,17 @@ export function PoHeader({
             >
               <Trash2 aria-hidden="true" />
               {tc("delete")}
+            </Button>
+          )}
+          {canSendEmail && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isPending}
+              onClick={() => setShowSendEmail(true)}
+            >
+              <Mail aria-hidden="true" />
+              {t("sendEmail.button")}
             </Button>
           )}
           <DocActionsMenu
@@ -222,12 +258,12 @@ export function PoHeader({
 
   const workflowStepEl = purchaseOrder?.workflow_current_stage ? (
     <WorkflowTrack
-      previousStage={purchaseOrder.workflow_previous_stage}
+      previousStage={purchaseOrder.workflow_previous_stage ?? undefined}
       currentStage={purchaseOrder.workflow_current_stage}
       nextStage={
         purchaseOrder.po_status === "completed"
           ? undefined
-          : purchaseOrder.workflow_next_stage
+          : (purchaseOrder.workflow_next_stage ?? undefined)
       }
     />
   ) : undefined;
@@ -239,20 +275,35 @@ export function PoHeader({
   ) : undefined;
 
   return (
-    <DocFormHeader
-      title={headerTitle}
-      subtitle={
-        docMeta || workflowStep ? (
-          <span className="flex flex-col gap-1">
-            {docMeta}
-            {workflowStep}
-          </span>
-        ) : undefined
-      }
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-    />
+    <>
+      <DocFormHeader
+        title={headerTitle}
+        subtitle={
+          docMeta || workflowStep ? (
+            <span className="flex flex-col gap-1">
+              {docMeta}
+              {workflowStep}
+            </span>
+          ) : undefined
+        }
+        backLabel={tc("goBack")}
+        onBack={onBack}
+        badges={badges}
+        actions={actions}
+      />
+      {/* mount เฉพาะตอน dialog เปิดจริง (ไม่ใช่แค่เช็คสถานะ PO) — ใบที่ส่งได้แล้ว
+          (sent/partial/closed/completed) คือใบส่วนใหญ่ที่คนเปิดดู เช็คแค่ canSendEmail
+          จะทำให้ useEmailProfiles/useVendorById ยิงทุกครั้งที่เปิดหน้า PO เหล่านี้
+          ทั้งที่ยังไม่ได้กดปุ่ม — unmount/remount ทุกรอบตั้งใจ: EmailChipField กับ
+          state ในตัว dialog reset เองผ่าน lifecycle ของ component (initializedRef
+          ออกแบบมารองรับ mount ใหม่ทุกครั้งที่เปิดอยู่แล้ว) */}
+      {canSendEmail && showSendEmail && purchaseOrder && (
+        <PoSendEmailDialog
+          open={showSendEmail}
+          onOpenChange={setShowSendEmail}
+          purchaseOrder={purchaseOrder}
+        />
+      )}
+    </>
   );
 }

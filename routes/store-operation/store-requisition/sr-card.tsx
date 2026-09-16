@@ -17,18 +17,6 @@ interface SrCardProps {
   readonly onDelete: (item: StoreRequisition) => void;
 }
 
-/**
- * การ์ดใบเบิกสินค้า 1 ใบ สำหรับหน้ารายการ mobile/grid
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/IA — ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน
- * ครบเท่าคอลัมน์ของตาราง SR
- *
- * @param props.item - ข้อมูล StoreRequisition
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- * @example
- * <SrCard item={sr} onEdit={(it) => navigate(`/.../${it.id}`)} onDelete={setDeleteTarget} />
- */
 export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

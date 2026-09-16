@@ -1,10 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeLineAmounts, type LineAmountInput } from "@/lib/line-pricing";
 
-/**
- * เครื่องคิดเงินของบรรทัดสินค้า — ใช้ร่วมกันทั้ง PR · PO · GRN · CN
- * สูตรเพี้ยนที่นี่ที่เดียว = ยอดเงินทุกโมดูลผิดพร้อมกัน
- */
 const line = (over: Partial<LineAmountInput> = {}): LineAmountInput => ({
   price: 100,
   qty: 3,

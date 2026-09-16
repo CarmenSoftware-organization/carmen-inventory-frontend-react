@@ -10,13 +10,6 @@ interface UserActivityCardProps {
   onClick?: () => void;
 }
 
-/**
- * การ์ดแสดงข้อมูลกิจกรรมผู้ใช้ (User Activity) สำหรับ grid/mobile view
- * @param props - ข้อมูล log, ลำดับ index และ callback onClick เมื่อคลิกการ์ด
- * @returns React element ของการ์ด User Activity
- * @example
- * <UserActivityCard log={log} index={0} onClick={() => setSelected(log)} />
- */
 export function UserActivityCard({
   log,
   index,

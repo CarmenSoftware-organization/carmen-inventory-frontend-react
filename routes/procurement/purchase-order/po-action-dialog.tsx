@@ -96,12 +96,6 @@ const TONE: Record<
   },
 };
 
-/**
- * Dialog ใช้ร่วมสำหรับ workflow actions ของ PO — premium ERP design
- *
- * รองรับ approve/reject/send back/close/cancel พร้อมกรอกข้อความแยกรายรายการ
- * และเลือก destination stage สีธีมเปลี่ยนตาม `confirmVariant`
- */
 export function PoActionDialog({
   open,
   onOpenChange,

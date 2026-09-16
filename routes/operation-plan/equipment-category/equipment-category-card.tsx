@@ -13,15 +13,6 @@ interface EquipmentCategoryCardProps {
   readonly onDelete: (item: EquipmentCategory) => void;
 }
 
-/**
- * การ์ดหมวดหมู่อุปกรณ์ 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดโมดูลอื่น
- *
- * @param props.item - ข้อมูลหมวดหมู่อุปกรณ์
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function EquipmentCategoryCard({
   item,
   onEdit,

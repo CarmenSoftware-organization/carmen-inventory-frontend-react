@@ -8,8 +8,10 @@ import {
 import {
   Activity,
   Banknote,
+  Box,
   Boxes,
   Briefcase,
+  Building,
   Building2,
   Calendar,
   ChefHat,
@@ -53,7 +55,6 @@ import { cn } from "@/lib/utils";
 import { FilterFieldControl } from "./filter-field-control";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
 
-/** icon default ต่อชนิด control — field ระบุ `icon` เองได้เมื่ออยากให้สื่อกว่านี้ */
 const CONTROL_ICONS: Record<FilterFieldDef["control"], LucideIcon> = {
   status: CircleDashed,
   "multi-select": ListChecks,
@@ -92,10 +93,16 @@ const FIELD_ICONS: Record<string, LucideIcon> = {
   "field.subCategory": Folder,
   "field.itemGroup": Boxes,
   // สถานที่ / ขอบเขต
-  "field.location": MapPin,
-  "field.fromLocation": MapPin,
-  "field.toLocation": MapPin,
+  // location ในแอปนี้คือ "คลัง/สถานที่เก็บของ" ไม่ใช่พิกัดบนแผนที่ — ใช้ Building
+  // ตรงกับไอคอนของ /config/location ใน sidebar ส่วนหมุดปักแผนที่สงวนไว้ให้
+  // delivery point ซึ่งเป็นจุดส่งของจริง ๆ (และเป็นไอคอนของมันใน sidebar เช่นกัน)
+  "field.location": Building,
+  "field.fromLocation": Building,
+  "field.toLocation": Building,
+  "field.deliveryPoint": MapPin,
   "field.region": Globe,
+  // สินค้า — ตรงกับ /product-management/product ใน sidebar
+  "field.product": Box,
   // คน
   "field.receivedBy": UserRound,
   "field.createdBy": UserRound,
@@ -116,8 +123,6 @@ const FIELD_ICONS: Record<string, LucideIcon> = {
   "inventoryManagement.transaction.selectDateRange": Calendar,
 };
 
-/** ลำดับเลือก icon: field ประกาศเอง → map ตาม labelKey → labelKey ลงท้าย
- * .status (สถานะเป็น custom ในหลายหน้า) → default ตามชนิด control */
 function fieldIcon(f: FilterFieldDef): LucideIcon {
   if (f.icon) return f.icon;
   const byLabel = FIELD_ICONS[f.labelKey];
@@ -126,9 +131,6 @@ function fieldIcon(f: FilterFieldDef): LucideIcon {
   return CONTROL_ICONS[f.control];
 }
 
-/** ขนาด/padding ของ panel ตัวเลือกต่อชนิด control — Command list จัด layout เอง
- * (p-0) ส่วนปฏิทินกว้างตามเนื้อ และช่วงจำนวนเงินเป็น input ต้องมีขอบหายใจ
- * export ให้ chip ใน ActiveFilterBar ใช้ขนาดเดียวกันตอนเปิด editor จาก chip */
 export const SUBMENU_CLASS: Record<FilterFieldDef["control"], string> = {
   status: "w-48 p-1",
   "multi-select": "w-56 p-0",
@@ -146,11 +148,10 @@ interface ListFilterMenuProps {
   readonly values: Record<string, string>;
   readonly setValue: (key: string, value: string) => void;
   readonly onClearAll?: () => void;
-  readonly onSaveClick: () => void;
+  readonly onSaveClick?: () => void;
   readonly activeCount: number;
 }
 
-/** ระยะกันชนขอบ viewport ของ submenu — เท่ากับ collisionPadding ที่ Radix ใช้ */
 const EDGE_PADDING = 8;
 
 /**
@@ -203,7 +204,6 @@ function Submenu({
   );
 }
 
-/** แถวเมนูชั้นแรก — ใช้ร่วมกันทั้งแถว field และแถวคำสั่งท้ายเมนู */
 function MenuRow({
   icon: Icon,
   label,
@@ -396,14 +396,16 @@ export function ListFilterMenu({
             else for (const f of fields) setValue(f.key, "");
           }}
         />
-        <MenuRow
-          icon={Bookmark}
-          label={tv("saveCurrent")}
-          onClick={() => {
-            setOpen(false);
-            onSaveClick();
-          }}
-        />
+        {onSaveClick && (
+          <MenuRow
+            icon={Bookmark}
+            label={tv("saveCurrent")}
+            onClick={() => {
+              setOpen(false);
+              onSaveClick();
+            }}
+          />
+        )}
       </PopoverContent>
     </Popover>
   );

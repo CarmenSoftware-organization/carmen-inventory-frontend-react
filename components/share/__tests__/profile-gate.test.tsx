@@ -14,6 +14,11 @@ vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => profile(),
 }));
 
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
 const mutate = vi.fn();
 vi.mock("@/hooks/use-logout", () => ({
   useLogout: () => ({ mutate, isPending: false }),
@@ -32,6 +37,8 @@ const baseProfile = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // ค่าปกติของ license: มาแล้วและไม่บล็อกอะไร — เคสที่ยังโหลดอยู่เขียนทับเอง
+  licenseQuery.mockReturnValue({ isPending: false, data: undefined });
 });
 
 describe("ProfileGate", () => {

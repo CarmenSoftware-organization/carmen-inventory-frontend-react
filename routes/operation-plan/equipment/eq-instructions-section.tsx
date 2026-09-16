@@ -10,7 +10,6 @@ interface EqInstructionsSectionProps {
   readonly isDisabled: boolean;
 }
 
-/** Instructions — operation · safety · cleaning */
 export function EqInstructionsSection({
   form,
   isDisabled,

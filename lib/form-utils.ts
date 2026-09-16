@@ -30,3 +30,13 @@ export function getDeleteDescription<T extends FieldValues>(
   const label = name || `Item #${index + 1}`;
   return `Are you sure you want to remove "${label}"?`;
 }
+
+export function getSubmitLabel(
+  isPending: boolean,
+  isAdd: boolean,
+  tc: (key: string) => string,
+  tform: (key: string) => string,
+): string {
+  if (isPending) return isAdd ? tform("creating") : tform("saving");
+  return isAdd ? tc("create") : tc("save");
+}

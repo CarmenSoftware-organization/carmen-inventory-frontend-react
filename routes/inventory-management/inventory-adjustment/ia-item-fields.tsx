@@ -15,7 +15,7 @@ import EmptyComponent from "@/components/empty-component";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
 import { ADJ_ITEM } from "./ia-form-schema";
-import { useAdjItemTable } from "./ia-item-table";
+import { useAdjItemTable } from "./use-ia-item-table";
 import { getDeleteDescription } from "@/lib/form-utils";
 
 interface AdjItemFieldsProps {
@@ -94,7 +94,11 @@ export function AdjItemFields({
           )}
 
           <DataGrid
-            tableLayout={{ rowClamp: false }}
+            tableLayout={{
+              rowClamp: false,
+              // โหมดอ่านชิดบน — ชื่อสินค้ามีบรรทัดรอง เซลล์อื่นไม่มี
+              cellAlign: disabled ? "top" : "middle",
+            }}
             table={table}
             recordCount={itemFields.length}
             emptyMessage={

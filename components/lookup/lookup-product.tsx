@@ -13,12 +13,11 @@ interface LookupProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly error?: string;
-  /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม item ใหม่) */
   readonly defaultOpen?: boolean;
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -51,6 +50,7 @@ export function LookupProduct({
   excludeIds,
   error,
   defaultOpen,
+  nextFocusRef,
 }: LookupProductProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -83,6 +83,7 @@ export function LookupProduct({
       value={value}
       onValueChange={onValueChange}
       defaultOpen={defaultOpen}
+      nextFocusRef={nextFocusRef}
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}

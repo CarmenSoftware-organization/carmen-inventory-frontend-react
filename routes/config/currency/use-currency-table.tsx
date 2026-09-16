@@ -23,14 +23,6 @@ interface UseCurrencyTableOptions {
   onDelete: (currency: Currency) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Currency พร้อมคอลัมน์ code, name, symbol, exchange rate
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/currency
- * const { table } = useCurrencyTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useCurrencyTable({
   data,
   totalRecords,

@@ -11,7 +11,6 @@ interface StatusSwitchProps {
   readonly activeText?: string;
   readonly inactiveText?: string;
   readonly id?: string;
-  /** ซ่อน status badge ด้านล่าง (เลี่ยง redundant กับ Switch toggle) */
   readonly hideBadge?: boolean;
 }
 

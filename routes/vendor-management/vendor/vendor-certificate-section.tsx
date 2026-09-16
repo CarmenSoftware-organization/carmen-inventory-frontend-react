@@ -32,10 +32,6 @@ interface VendorCertificateSectionProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Section จัดการใบรับรองของ vendor — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน vendor form)
- * วางนอก `<form>` แสดงเฉพาะตอนมี vendor แล้ว (มี vendorId)
- */
 export function VendorCertificateSection({
   vendorId,
   readOnly,

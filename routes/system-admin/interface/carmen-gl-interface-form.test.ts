@@ -17,6 +17,7 @@ describe("carmenGlSchema", () => {
       vendor_path: "api/interface/vendor",
       set_account_mapping_all_items: true,
       allow_posting_transfer_to_gl: false,
+      sync_policy: { on_duplicate: "skip", on_local_only: "keep" },
     });
     expect(parsed.success).toBe(true);
   });
@@ -65,7 +66,8 @@ describe("toFormValues / toApiValue", () => {
       vendor_path: "api/z",
       set_account_mapping_all_items: false,
       allow_posting_transfer_to_gl: true,
-    };
+      sync_policy: { on_duplicate: "upsert", on_local_only: "delete" },
+    } as const;
     expect(toFormValues(toApiValue(values))).toEqual(values);
   });
 });

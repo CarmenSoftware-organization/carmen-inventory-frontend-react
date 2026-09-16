@@ -1,15 +1,9 @@
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import {
-  Tag as TagIcon,
-  Sparkles,
-  Check,
-  Truck,
-  Flame,
-  ChefHat,
-  type LucideIcon,
-} from "lucide-react";
+import { Check, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EyeBrow } from "@/components/ui/eye-brow";
+import { formatCurrency } from "@/lib/currency-utils";
 import { RecipeNameField } from "./recipe-name-field";
 import { RecipeImageGallery } from "./recipe-image-gallery";
 import {
@@ -75,7 +69,7 @@ export function RecipeHeroFields({
               >
                 <SelectTrigger
                   size="xs"
-                  className="text-micro h-6 gap-1.5 rounded-full px-2 font-semibold tracking-wider"
+                  className="text-micro h-6 gap-1.5 rounded-md px-2 font-semibold tracking-wider"
                   aria-label={tfl("difficulty")}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -85,7 +79,7 @@ export function RecipeHeroFields({
                         className={cn(
                           "size-1.5 rounded-full",
                           dot <= (DIFFICULTY_DOTS[difficulty] ?? 0)
-                            ? "bg-warning"
+                            ? "bg-foreground"
                             : "bg-muted-foreground/30",
                         )}
                         aria-hidden="true"
@@ -116,15 +110,18 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-full border px-2 font-semibold transition-colors",
+                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-md border px-2 font-semibold transition-colors",
                   field.value
-                    ? "border-foreground bg-foreground text-background"
+                    ? "border-primary/40 bg-primary/10 text-foreground"
                     : "border-border bg-card text-muted-foreground",
                   isDisabled && "cursor-not-allowed opacity-60",
                 )}
                 aria-pressed={field.value}
               >
-                <Check className="size-2.5" aria-hidden="true" />
+                <Check
+                  className={cn("size-2.5", field.value && "text-primary")}
+                  aria-hidden="true"
+                />
                 {field.value ? t("active") : t("inactive")}
               </button>
             )}
@@ -139,15 +136,18 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-full border px-2 font-semibold transition-colors",
+                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-md border px-2 font-semibold transition-colors",
                   field.value
-                    ? "border-foreground bg-foreground text-background"
+                    ? "border-primary/40 bg-primary/10 text-foreground"
                     : "border-border bg-card text-muted-foreground",
                   isDisabled && "cursor-not-allowed opacity-60",
                 )}
                 aria-pressed={field.value}
               >
-                <Truck className="size-2.5" aria-hidden="true" />
+                <Truck
+                  className={cn("size-2.5", field.value && "text-primary")}
+                  aria-hidden="true"
+                />
                 {t("deductsStock")}
               </button>
             )}
@@ -180,37 +180,23 @@ export function RecipeHeroFields({
         <p
           className={cn(
             "max-w-2xl text-sm leading-relaxed",
-            description ? "text-foreground/80" : "text-muted-foreground italic",
+            description ? "text-foreground" : "text-muted-foreground italic",
           )}
         >
           {description || tfl("description")}
         </p>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <QuickStat label={t("prep")} value={`${prepTime || 0}m`} />
+          <QuickStat label={t("cook")} value={`${cookTime || 0}m`} />
+          <QuickStat label={t("yield")} value={`${baseYield || 0}`} />
           <QuickStat
-            icon={ChefHat}
-            label={t("prep")}
-            value={`${prepTime || 0}m`}
-          />
-          <QuickStat
-            icon={Flame}
-            label={t("cook")}
-            value={`${cookTime || 0}m`}
-          />
-          <QuickStat
-            icon={TagIcon}
-            label={t("yield")}
-            value={`${baseYield || 0}`}
-          />
-          <QuickStat
-            icon={Sparkles}
             label={t("total")}
             value={`${totalTime}m`}
-            accent
             sub={
               computed.costPerPortion > 0
-                ? `฿${computed.costPerPortion.toFixed(2)}`
+                ? `฿${formatCurrency(computed.costPerPortion)}`
                 : undefined
             }
           />
@@ -221,30 +207,18 @@ export function RecipeHeroFields({
 }
 
 function QuickStat({
-  icon: Icon,
   label,
   value,
   sub,
-  accent,
 }: {
-  readonly icon: LucideIcon;
   readonly label: string;
   readonly value: string;
   readonly sub?: React.ReactNode;
-  readonly accent?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-md border px-3 py-2",
-        accent ? "border-foreground/20 bg-muted/60" : "bg-card",
-      )}
-    >
-      <div className="text-muted-foreground text-micro-legal flex items-center gap-1 font-bold tracking-wider uppercase">
-        <Icon className="size-3" aria-hidden="true" />
-        {label}
-      </div>
-      <div className="text-foreground mt-1 text-xl font-semibold tracking-tight tabular-nums">
+    <div>
+      <EyeBrow>{label}</EyeBrow>
+      <div className="text-foreground mt-0.5 text-lg font-semibold tracking-tight tabular-nums">
         {value}
       </div>
       {sub && (

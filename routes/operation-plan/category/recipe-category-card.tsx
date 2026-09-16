@@ -14,16 +14,6 @@ interface RecipeCategoryCardProps {
   readonly onDelete: (item: RecipeCategory) => void;
 }
 
-/**
- * การ์ดหมวดหมู่สูตรอาหาร 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดโมดูลอื่น
- *
- * @param props.item - ข้อมูลหมวดหมู่
- * @param props.parentName - ชื่อหมวดแม่ (resolve จาก parent_id)
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function RecipeCategoryCard({
   item,
   parentName,

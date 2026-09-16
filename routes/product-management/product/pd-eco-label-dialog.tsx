@@ -75,9 +75,6 @@ interface ProductEcoLabelDialogProps {
   readonly ecoLabel?: ProductEcoLabel | null;
 }
 
-/**
- * Dialog สร้าง/แก้ไข eco label ของ product — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน product form)
- */
 export function ProductEcoLabelDialog({
   open,
   onOpenChange,

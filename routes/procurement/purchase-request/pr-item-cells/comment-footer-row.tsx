@@ -35,7 +35,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
     // ไม่ใช่ edit → ไม่มี comment ไม่ต้องแสดง; มีก็โชว์ในเครื่องหมายคำพูด ตัวเอียง muted
     if (!comment) return null;
     return (
-      <div className="px-2 pb-4">
+      <div className="px-3 pb-4">
         <p className="text-muted-foreground text-xs wrap-break-word whitespace-pre-wrap italic">
           {`"${comment}"`}
         </p>
@@ -43,7 +43,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
     );
   }
   return (
-    <div className="px-2 pb-4">
+    <div className="px-3 pb-4">
       <Input
         id={`items-${index}-comment`}
         placeholder={placeholder}

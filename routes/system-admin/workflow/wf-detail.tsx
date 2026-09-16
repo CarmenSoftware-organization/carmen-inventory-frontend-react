@@ -178,7 +178,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
           onSubmit={form.handleSubmit(onSubmit, () =>
             scrollToFirstInvalidField(),
           )}
-          className="bg-card text-card-foreground mt-6 flex flex-col overflow-hidden rounded-xl border shadow-sm"
+          className="bg-card text-card-foreground mt-6 flex flex-col overflow-hidden rounded-xl border"
         >
           <Tabs
             value={activeTab}

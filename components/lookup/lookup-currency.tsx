@@ -31,7 +31,6 @@ interface LookupCurrencyProps {
   readonly excludeIds?: Set<string>;
   readonly error?: string;
   readonly readOnly?: boolean;
-  /** fill the container width instead of the default content-width (w-fit) */
   readonly fullWidth?: boolean;
 }
 
@@ -139,10 +138,7 @@ export function LookupCurrency({
           </TooltipContent>
         )}
         {showTooltip && (
-          <TooltipContent
-            side="top"
-            className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
-          >
+          <TooltipContent side="top">
             <p className="text-foreground/60 text-micro font-semibold">
               {selected?.code} ({selected?.symbol})
             </p>

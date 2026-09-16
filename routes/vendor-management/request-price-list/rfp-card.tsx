@@ -16,17 +16,6 @@ interface RfpCardProps {
   readonly onDelete: (item: RequestPriceList) => void;
 }
 
-/**
- * การ์ดใบขอราคา 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product/vendor/price-list —
- * ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง
- * RFP ไม่มีสถานะเอกสาร มุมขวาบนจึงเป็นจำนวน vendor ที่ถูกส่งขอราคา
- *
- * @param props.item - ข้อมูลใบขอราคา
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function RfpCard({ item, onEdit, onDelete }: RfpCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();

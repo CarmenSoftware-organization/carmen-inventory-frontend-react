@@ -15,7 +15,8 @@ import EmptyComponent from "@/components/empty-component";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
 import { SR_ITEM, SR_ITEM_STAGE } from "./sr-form-schema";
-import { useSrItemTable } from "./sr-item-table";
+import { SrItemCostSync } from "./sr-item-cost-sync";
+import { useSrItemTable } from "./use-sr-item-table";
 import { SrSelectDialog } from "./sr-select-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
 import { getDeleteDescription } from "@/lib/form-utils";
@@ -26,7 +27,6 @@ interface SrItemFieldsProps {
   readonly disableAdd?: boolean;
   readonly fromLocationId: string;
   readonly toLocationId: string;
-  /** workflow ของใบ — ร่วมเป็นเกณฑ์กรองสินค้ากับคู่คลัง */
   readonly workflowId: string;
   readonly role?: string;
 }
@@ -216,16 +216,36 @@ export function SrItemFields({
             onClick={handleAddItem}
             size="sm"
             className="ms-auto"
+            variant="secondary"
           >
             <Plus /> {t("addItem")}
           </Button>
         )}
       </div>
 
+      {/* ดึงต้นทุนรายแถวจาก backend แล้วเขียนกลับเข้าฟอร์ม — หนึ่งตัวต่อแถว ติดตั้ง
+          ที่นี่ไม่ใช่ในเซลล์ เพื่อให้คอลัมน์ยอดเงินกับยอดรวมท้ายใบอ่านค่าเดียวกัน */}
+      {itemFields.map((item, i) => (
+        <SrItemCostSync
+          key={item.id}
+          form={form}
+          index={i}
+          fromLocationId={fromLocationId}
+        />
+      ))}
+
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        tableLayout={{ rowClamp: false, checkbox: !disabled }}
+        tableLayout={{
+          rowClamp: false,
+          checkbox: !disabled,
+          // โหมดอ่านชิดบน — เซลล์ที่มีบรรทัดรอง (ชื่อท้องถิ่นใต้ชื่อสินค้า) กับเซลล์
+          // บรรทัดเดียวจะได้เริ่มที่เส้นเดียวกัน · โหมดแก้ไขกึ่งกลางทั้งแถว เพราะ
+          // เซลล์ส่วนใหญ่เป็นช่องกรอกสูงเท่ากัน ชิดบนแล้วช่องที่เป็นตัวหนังสือจะ
+          // ลอยอยู่เหนือช่องกรอกที่อยู่ข้าง ๆ
+          cellAlign: disabled ? "top" : "middle",
+        }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}

@@ -9,12 +9,6 @@ import { Button } from "@/components/ui/button";
 import ResetPasswordForm from "./reset-password-form";
 import type { ResetPasswordValues } from "./reset-password-schema";
 
-/**
- * หน้า `/reset-password?token=...` — ขั้นที่สองของการกู้คืนรหัสผ่าน
- *
- * ครอบด้วย `RedirectIfAuthed` ทั้งหน้าเหมือน `/register/verify` — คนที่ล็อกอินอยู่แล้วไม่มีเหตุผล
- * ให้มาถึงจอนี้ และมีหน้าเปลี่ยนรหัสผ่านในโปรไฟล์อยู่แล้ว
- */
 export function Component() {
   return (
     <RedirectIfAuthed>

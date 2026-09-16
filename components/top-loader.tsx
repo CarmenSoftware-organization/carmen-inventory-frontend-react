@@ -1,6 +1,5 @@
 import { useNavigation } from "react-router";
 
-/** แถบ loading บนสุดระหว่างเปลี่ยนหน้า — แทน nextjs-toploader */
 export function TopLoader() {
   const navigation = useNavigation();
   const active = navigation.state !== "idle";

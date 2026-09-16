@@ -17,7 +17,6 @@ interface HistoryCardProps {
   readonly item: ReportHistory;
 }
 
-/** สี CSS var ต่อสถานะ — ใช้กับ accent bar + icon tile gradient */
 const STATUS_COLOR: Record<ReportStatus, string> = {
   queued: "var(--status-pending)",
   processing: "var(--status-in-progress)",
@@ -26,15 +25,6 @@ const STATUS_COLOR: Record<ReportStatus, string> = {
   cancelled: "var(--status-cancelled)",
 };
 
-/**
- * Premium ERP-style card สำหรับ report history job
- *
- * - Glass card + tinted shadow + inner highlight overlay
- * - Left accent bar สีตามสถานะ
- * - Icon tile gradient ตามสถานะ
- * - Hover: lift + glow shadow + accent bar widen + ext-link reveal
- * - Click เปิด `file_url` ในแท็บใหม่ (เฉพาะเมื่อมี url)
- */
 export default function HistoryCard({ item }: HistoryCardProps) {
   const t = useTranslations("reportHistory");
 

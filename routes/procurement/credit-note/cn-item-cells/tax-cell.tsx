@@ -1,5 +1,6 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import {
   OverrideToggle,
@@ -9,7 +10,22 @@ import type { CnFormValues } from "../cn-form-schema";
 import type { CnCreditNoteType } from "../cn-item-compute";
 import { useCnItemLine } from "./helpers";
 
-/** Tax — override toggle + tax-profile/amount combo (shared, แบบ GRN/PO) */
+function RateSubtext({
+  amount,
+  rate,
+}: {
+  readonly amount: number;
+  readonly rate: number;
+}) {
+  return (
+    <NameWithSubtext
+      align="end"
+      primary={formatCurrency(amount)}
+      secondary={rate > 0 ? `${rate}%` : undefined}
+    />
+  );
+}
+
 export function TaxCell({
   form,
   index,
@@ -35,11 +51,7 @@ export function TaxCell({
   const amount = line.tax_amount;
 
   if (disabled) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     // ไม่มีป้าย "{rate}%" ลอยเหนือช่องกรอกแล้ว — มันดันแถวให้สูงขึ้นทั้งแถว

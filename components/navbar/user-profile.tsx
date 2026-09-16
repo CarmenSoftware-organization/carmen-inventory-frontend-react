@@ -44,9 +44,7 @@ function UserAvatar({
   readonly name: string;
   readonly fallbackText: string;
   readonly size: "sm" | "md";
-  /** trigger context: hover/data-state ring transitions */
   readonly interactive?: boolean;
-  /** above-the-fold: hint browser ว่า image นี้สำคัญ (LCP) */
   readonly eager?: boolean;
 }) {
   const isLarge = size === "md";
@@ -276,10 +274,6 @@ export function UserProfile() {
   );
 }
 
-/**
- * ยืนยันออกจากระบบ — แยกออกมาเพราะเมนูมีสองสาขา (ปกติ กับตอนโหลดโปรไฟล์ไม่ผ่าน)
- * ที่ต้องใช้ dialog ตัวเดียวกัน
- */
 function LogoutConfirmDialog({
   open,
   onOpenChange,

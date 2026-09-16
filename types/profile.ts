@@ -21,13 +21,10 @@ export interface UserProfile {
     middlename: string;
     lastname: string;
     telephone: string | null;
-    /** Object storage key for the avatar source — never display directly */
     avatar_file_token: string | null;
   };
   business_unit: BusinessUnit[];
-  /** Pre-signed avatar URL (S3 / object storage). Expires — re-fetch profile to refresh */
   avatar_url: string | null;
-  /** Pre-signed signature URL (transparent PNG). Expires — re-fetch profile to refresh. Null when unset. */
   signature_url: string | null;
 }
 
@@ -41,54 +38,11 @@ interface CurrentPeriod {
   status: string;
 }
 
-/**
- * ที่นั่งของ BU — เป็นตัวเลขของ **cluster** ที่ BU นี้สังกัด ไม่ใช่ของ BU เดี่ยว
- * BU ทุกตัวใน cluster เดียวกันได้ค่าชุดเดียวกันซ้ำ ๆ โดยตั้งใจ (pool ระดับ cluster) —
- * ห้ามเอาไปบวกกันข้าม BU
- */
-export interface BusinessUnitSeat {
-  used: number;
-  /** ไม่ nullable — ไม่มีค่าไหนแปลว่า "ไม่จำกัด" ศูนย์ที่นั่งคือศูนย์จริง ๆ */
-  cap: number;
-  pending_invites: number;
-}
-
-/**
- * License ของ BU ที่ platform ขายให้
- *
- * `state` ตอบว่าสัญญาอยู่ในสภาพไหน ส่วน `features` ตอบว่า feature ไหนอยู่ในสัญญา
- * สองชั้นนี้แยกกัน — BU ที่ state เป็น active แต่ไม่มี feature ในลิสต์ก็ใช้ไม่ได้
- *
- * `state: "none"` = ยังไม่เคยขายให้ BU นี้ (ต่างจาก field ที่หายไปทั้งก้อน ดู useLicense)
- * `state: "unresolved"` = backend อ่าน DB ไม่สำเร็จตอนประกอบ block ชั่วคราว — **ไม่ใช่**
- * "ยังไม่เคยซื้อ" ห้าม treat เหมือน none/expired/inactive (backend เองก็ปล่อยผ่านทั้ง
- * request เมื่อเจอค่านี้แม้แค่ BU เดียว)
- */
-export interface BusinessUnitLicense {
-  state: "active" | "expired" | "inactive" | "none" | "unresolved";
-  /** ISO 8601 Z — null เมื่อ state เป็น "none" หรือ "unresolved" */
-  end_date: string | null;
-  /** feature key ที่อยู่ในสัญญา รวม module ระดับบนและ resource ระดับล่าง เรียงตัวอักษรเสมอ */
-  features: string[];
-  /**
-   * feature key ที่ platform ปลดระวางแล้ว (`tb_license_feature.state = "hide"`)
-   *
-   * เป็นลิสต์ **global เดียวกันทุก BU** ไม่ใช่ของที่ BU นี้ซื้อ และ backend ตัดคีย์เหล่านี้
-   * ออกจาก `features` มาให้แล้ว — ฝั่งนี้ใช้มันตอบคำถามเดียวคือ "จะซ่อน หรือจะใส่แม่กุญแจ"
-   *
-   * **optional โดยตั้งใจ** — gateway รุ่นเก่ายังไม่ส่ง field นี้ `undefined` ต้องแปลว่า
-   * "ไม่ซ่อนอะไรเลย" (fail-open) ไม่ใช่ "ซ่อนทุกอย่าง"
-   */
-  hidden_features?: string[];
-  seat: BusinessUnitSeat;
-}
-
 export interface BusinessUnit {
   id: string;
   name: string;
   code: string;
   alias_name: string;
-  /** Object storage key for the BU logo — never display directly */
   logo_file_token: string | null;
   is_default: boolean;
   system_level: string;
@@ -99,14 +53,6 @@ export interface BusinessUnit {
    * did not send it / platform selected none) or an empty array → the UI shows nothing.
    */
   enabled_interfaces?: string[];
-  /**
-   * License ของ BU นี้ — **field ที่หายไปกับ state "none" ความหมายต่างกันสิ้นเชิง**
-   *
-   * หายไปทั้งก้อน = gateway รุ่นเก่ายังไม่ส่ง → UI ถือว่าไม่จำกัด (กันลำดับ deploy ผิด)
-   * มีแต่ state "none" = platform ยังไม่ขายให้ BU นี้ → UI ล็อกทุก module (เมื่อสวิตช์
-   * enforcement เปิด — ดู `useLicense`)
-   */
-  license?: BusinessUnitLicense;
   department: {
     id: string;
     name: string;
@@ -115,9 +61,7 @@ export interface BusinessUnit {
   current_period?: CurrentPeriod;
   config: BusinessUnitConfig;
   permissions: string[];
-  /** Pre-signed logo URL — for documents (PDF/print). May be wide/landscape. Null when `logo_file_token` is null. */
   logo_url: string | null;
-  /** Pre-signed avatar URL — for UI display only (square thumbnail, headers, lists). */
   avatar_url: string | null;
 }
 

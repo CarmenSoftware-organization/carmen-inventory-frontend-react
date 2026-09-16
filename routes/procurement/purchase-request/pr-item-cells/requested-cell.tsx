@@ -30,11 +30,12 @@ export const RequestedCell = memo(function RequestedCell({
   const isRowLocked = useIsRowLocked(control, index);
   // ยังไม่เลือกสินค้า → ปิด qty (กรอกจำนวนก่อนเลือกสินค้าไม่มีความหมาย) แสดง default 0
   const isFieldDisabled = isDisabled || isRowLocked || !productId;
-  const formatQty = useQuantityFormatter();
   const unitId =
     useWatch({ control, name: `items.${index}.requested_unit_id` }) ?? "";
   // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
   const decimals = useUnitDecimals(productId, unitId);
+  // ตัวเดียวกับที่คุม input — โหมดอ่านจึงแสดงเท่าที่โหมดแก้พิมพ์ได้พอดี
+  const formatQty = useQuantityFormatter(decimals);
 
   if (isFieldDisabled) {
     return (
@@ -50,11 +51,13 @@ export const RequestedCell = memo(function RequestedCell({
   return (
     <InputSuffixField
       className="w-full"
-      error={!!form.formState.errors.items?.[index]?.requested_qty}
+      // errorMessage ไม่ใช่ error — boolean ได้แค่กรอบแดงเปล่า ๆ ส่วน string
+      // ได้ไอคอนเตือน + tooltip บอกเหตุผลด้วย ซึ่งจำเป็นตั้งแต่มีกฎ "ขอ 0 ได้
+      // ก็ต่อเมื่อมี FOC" เพราะทางแก้อยู่คนละคอลัมน์ ไม่มีทางเดาเองได้
+      errorMessage={form.formState.errors.items?.[index]?.requested_qty?.message}
     >
       <InputSuffixQty
         decimals={decimals}
-        min={1}
         placeholder={tfl("qty")}
         defaultValue={qty ?? undefined}
         {...form.register(`items.${index}.requested_qty`)}

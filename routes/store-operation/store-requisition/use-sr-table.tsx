@@ -10,6 +10,7 @@ import {
   selectColumn,
   sendbackColumn,
 } from "@/components/ui/data-grid/columns";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useTranslations } from "use-intl";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -44,6 +45,7 @@ export function useStoreRequisitionTable({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
+  const deleteGate = useDeleteGate();
 
   const dataColumns: ColumnDef<StoreRequisition>[] = [
     {
@@ -198,6 +200,7 @@ export function useStoreRequisitionTable({
     indexColumn<StoreRequisition>(params),
     ...dataColumns,
     actionColumn<StoreRequisition>(onDelete, {
+      ...deleteGate,
       activity: { id: (r) => r.id, label: (r) => r.sr_no },
     }),
   ];

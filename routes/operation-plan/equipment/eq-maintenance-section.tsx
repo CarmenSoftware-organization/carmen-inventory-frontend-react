@@ -10,7 +10,6 @@ interface EqMaintenanceSectionProps {
   readonly isDisabled: boolean;
 }
 
-/** Maintenance — schedule + last/next dates */
 export function EqMaintenanceSection({
   form,
   isDisabled,

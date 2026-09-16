@@ -15,13 +15,6 @@ const ExtraCostDialog = lazy(() =>
   })),
 );
 
-/**
- * Component หลักของหน้ารายการ Extra Cost ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Extra Cost
- * @example
- * // route: /config/extra-cost
- * <ExtraCostComponent />
- */
 export default function ExtraCostComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

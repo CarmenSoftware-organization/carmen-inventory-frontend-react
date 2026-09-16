@@ -85,6 +85,7 @@ export function TaxProfileDialog({
               {tfl("taxRate")}
             </FieldLabel>
             <FieldInput
+              errorIconAlign="left"
               id="tax-profile-rate"
               type="number"
               inputMode="decimal"

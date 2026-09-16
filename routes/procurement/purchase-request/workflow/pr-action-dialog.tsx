@@ -95,17 +95,6 @@ const TONE: Record<
   },
 };
 
-/**
- * Dialog ใช้ร่วมสำหรับ workflow actions ของ PR — premium ERP design
- *
- * รองรับ approve, reject, return, send back, purchase approve รองรับการกรอก
- * ข้อความเหตุผลแยกรายรายการ (per-item messages) และการเลือก destination stage
- * สีธีมสลับตาม `confirmVariant`: success=CheckCircle, destructive=XCircle,
- * warning=AlertTriangle, info=Info, default=Send (Submit)
- *
- * @param props - props ของ dialog
- * @returns React element ของ AlertDialog
- */
 export function PrActionDialog({
   open,
   onOpenChange,

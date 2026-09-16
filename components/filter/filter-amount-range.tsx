@@ -11,23 +11,10 @@ import { cn } from "@/lib/utils";
 interface FilterAmountRangeProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
-  /** ชื่อคอลัมน์ใน clause เช่น `base_total_amount` */
   readonly fieldKey: string;
   readonly className?: string;
 }
 
-/**
- * ตัวกรองช่วงจำนวนเงิน (ต่ำสุด – สูงสุด) — UI pattern เดียวกับ FilterRangeEditor
- * ของ ReUI (สองช่องตัวเลขคั่นด้วยเส้น) ปล่อยข้างใดข้างหนึ่งว่างได้ (= ไม่จำกัดฝั่งนั้น)
- *
- * เก็บค่า URL รูปแบบ `<fieldKey>|num_range:min,max` (ฝั่งว่าง = สตริงว่าง)
- * commit ตอน blur หรือ Enter — ไม่เขียนรายตัวอักษร แนวเดียวกับช่องค้นที่ยิงตอน Enter
- *
- * @param props - value (clause ปัจจุบัน), onChange, fieldKey, className
- * @returns JSX element ของช่วงจำนวนเงินสองช่อง
- * @example
- * <FilterAmountRange value={v} onChange={set} fieldKey="base_total_amount" />
- */
 export function FilterAmountRange({
   value,
   onChange,

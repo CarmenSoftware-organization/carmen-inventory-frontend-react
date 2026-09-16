@@ -1,6 +1,5 @@
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/** ตัวกรองของหน้ารายการ Eco Label — status ใช้ค่า clause เต็มใน URL param "filter" */
 export const ECO_FILTER_FIELDS: FilterFieldDef[] = [
   {
     key: "filter",

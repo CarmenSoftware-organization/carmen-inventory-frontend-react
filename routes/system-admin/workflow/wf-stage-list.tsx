@@ -159,9 +159,9 @@ export function WfStageList({
   const filteredIds = filteredFields.map((f) => f.id);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between px-2">
-        <span className="text-foreground/80 text-sm font-semibold">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-foreground text-sm font-semibold">
           {t("stages")}
         </span>
         {!isDisabled && (
@@ -170,7 +170,7 @@ export function WfStageList({
             variant="outline"
             size="sm"
             onClick={handleAddStage}
-            className="hover:bg-muted/50 h-9 px-4 text-sm font-medium shadow-sm transition-all"
+            className="hover:bg-muted/50"
           >
             <Plus className="mr-1.5 size-3.5" />
             {t("addStage")}
@@ -179,12 +179,13 @@ export function WfStageList({
       </div>
 
       <div className="relative px-1">
-        <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+        <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
         <Input
           placeholder={tc("search") || "Search..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-9 pl-9"
+          size="sm"
+          className="pl-8"
         />
       </div>
 

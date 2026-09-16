@@ -6,20 +6,9 @@ interface UseNavigationGuardReturn {
   readonly confirm: () => void;
   readonly cancel: () => void;
   readonly back: () => void;
+  readonly leave: (href: string) => void;
 }
 
-/**
- * Block in-app navigation (link clicks + browser back) when `enabled` is true.
- * Caller renders its own confirm dialog using the returned isOpen / confirm / cancel.
- *
- * Notes:
- * - Browser-level events (refresh, close tab) are NOT covered — pair this with
- *   `useUnsavedChanges` for those (they get the browser-native dialog).
- * - Programmatic `navigate()` calls are NOT intercepted — only <a> clicks +
- *   browser back/forward. A programmatic back still trips the popstate listener
- *   though, so callers that already confirmed with the user must use the
- *   returned `back()` instead of `navigate(-1)`.
- */
 export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
   const navigate = useNavigate();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -133,10 +122,23 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     navigate(onSentinel ? -2 : -1);
   };
 
+  // Programmatic forward navigation for a caller that meant to leave with work
+  // still "dirty" (e.g. a wizard handing its selection off to the real form).
+  // A plain push would stack on top of the sentinel, and the sentinel is still
+  // owed a `history.back()` by this hook's teardown — the browser runs that
+  // traversal *after* the push lands, so the user is bounced straight back to
+  // the page they just left. Overwriting the sentinel leaves nothing to undo.
+  // (jsdom drops the queued traversal once a pushState intervenes, so a test
+  // can only observe the leftover entry, not the bounce.)
+  const leave = (href: string) => {
+    navigate(href, { replace: window.history.state?.__navGuard === true });
+  };
+
   return {
     isOpen: pendingHref !== null || pendingBack,
     confirm,
     cancel,
     back,
+    leave,
   };
 }

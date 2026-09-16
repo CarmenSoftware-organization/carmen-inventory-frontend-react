@@ -12,7 +12,6 @@
 
 import { useLocale } from "use-intl";
 
-/** ข้อมูลผู้ให้บริการ — แก้ที่เดียว มีผลทั้งสองฉบับสองภาษา */
 export const LEGAL_ENTITY = {
   company: "Carmen Software",
   privacyEmail: "privacy@carmensoftware.com",
@@ -20,7 +19,6 @@ export const LEGAL_ENTITY = {
 } as const;
 
 export interface LegalSection {
-  /** anchor id สำหรับสารบัญ */
   readonly id: string;
   readonly heading: string;
   readonly paragraphs?: readonly string[];
@@ -30,18 +28,15 @@ export interface LegalSection {
 export interface LegalDocument {
   readonly title: string;
   readonly eyebrow: string;
-  /** วันที่ฉบับนี้มีผล — เขียนเป็นข้อความไปเลย ไม่ต้อง format ตาม locale */
   readonly effective: string;
   readonly intro: string;
   readonly sections: readonly LegalSection[];
-  /** ลิงก์ไปอีกฉบับที่ท้ายหน้า */
   readonly crossLink: string;
   readonly tocLabel: string;
 }
 
 export type LegalLocale = "en" | "th";
 
-/** เลือกฉบับภาษาให้ตรงกับ locale ปัจจุบัน — ภาษาอื่นตกไปที่ en */
 export function useLegalDocument(
   documents: Record<LegalLocale, LegalDocument>,
 ): LegalDocument {

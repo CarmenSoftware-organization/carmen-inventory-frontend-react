@@ -2,7 +2,6 @@ import { useWatch, type Control } from "react-hook-form";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { CnFormValues } from "../cn-form-schema";
 
-/** ยอดฝั่ง GRN ช่องหนึ่ง — อ่านอย่างเดียว (ไม่เข้า payload) */
 export function GrnAmountCell({
   control,
   index,

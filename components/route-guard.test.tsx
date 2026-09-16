@@ -5,7 +5,7 @@ import { RouteGuard } from "./route-guard";
 import { PERMISSIONS } from "@/constant/permissions";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import type { RuntimeConfig } from "@/lib/runtime-config";
-import type { BusinessUnitLicense } from "@/types/profile";
+import type { BusinessUnitLicense } from "@/types/license";
 
 // t(key) → key
 vi.mock("use-intl", () => ({
@@ -26,6 +26,13 @@ vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => profile(),
 }));
 
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
+
+const BU_ID = "bu-1";
 const PERMISSION = PERMISSIONS.procurement.purchase_request.view; // "procurement.purchase_request.view"
 const FEATURE = "procurement.purchase_request"; // featureKeyOf(PERMISSION)
 const MODULE = "procurement"; // module ของ FEATURE — backend ส่งมาคู่กันเสมอ
@@ -62,8 +69,10 @@ function setup({
 }) {
   setRuntimeConfigForTests({ ...baseConfig, LICENSE_ENFORCEMENT: enforced });
   profile.mockReturnValue({
-    defaultBu: { system_level: systemLevel, permissions },
-    license: buLicense,
+    defaultBu: { id: BU_ID, system_level: systemLevel, permissions },
+  });
+  licenseQuery.mockReturnValue({
+    data: buLicense ? { business_unit: { [BU_ID]: buLicense } } : undefined,
   });
 }
 

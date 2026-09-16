@@ -97,11 +97,6 @@ const renderRealtime = (userId: string | undefined) =>
 // เพื่อให้คีย์แคชที่ทดสอบตรงกับที่ useUnreadNotifications() จะสร้างจริง
 const UNREAD_QUERY_KEY = notificationKeys.unreadPopover(10);
 
-/**
- * ดึง MockWebSocket instance ล่าสุดที่ถูกสร้างขึ้นในเทสต์
- * ใช้หลัง render hook เพื่อเข้าถึง WebSocket ที่ hook เพิ่งเปิด
- * @returns MockWebSocket ล่าสุดใน MockWebSocket.instances
- */
 function getLatestWs(): MockWebSocket {
   return MockWebSocket.instances[MockWebSocket.instances.length - 1];
 }

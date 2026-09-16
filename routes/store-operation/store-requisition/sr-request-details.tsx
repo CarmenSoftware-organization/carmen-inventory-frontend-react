@@ -17,9 +17,7 @@ interface LocationInfo {
 
 interface SrRequestDetailsProps {
   readonly form: UseFormReturn<SrFormValues>;
-  /** view mode + role-based lock → render เป็น plain text */
   readonly readOnly: boolean;
-  /** submit pending → input ยังอยู่แต่กดไม่ได้ */
   readonly disabled: boolean;
   /**
    * แจ้งคลังต้นทางที่เลือกกลับให้ผู้เรียก — optional เพราะตอนนี้ไม่มีใครต้องการ
@@ -29,9 +27,7 @@ interface SrRequestDetailsProps {
   readonly onFromLocInfoChange?: (info: LocationInfo) => void;
   readonly onToLocInfoChange: (info: LocationInfo) => void;
   readonly role?: string;
-  /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
   readonly isDraft?: boolean;
-  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
   readonly isAdd?: boolean;
 }
 

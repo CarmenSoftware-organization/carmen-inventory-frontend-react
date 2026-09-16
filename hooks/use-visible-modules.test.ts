@@ -194,6 +194,13 @@ vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => profile(),
 }));
 
+const licenseQuery = vi.fn();
+vi.mock("@/hooks/use-license-query", () => ({
+  useLicenseQuery: () => licenseQuery(),
+}));
+
+const BU_ID = "bu-1";
+
 function setupProfile({
   systemLevel = "user",
   permissions = [] as string[],
@@ -209,8 +216,10 @@ function setupProfile({
   };
 }) {
   profile.mockReturnValue({
-    defaultBu: { system_level: systemLevel, permissions },
-    license: buLicense,
+    defaultBu: { id: BU_ID, system_level: systemLevel, permissions },
+  });
+  licenseQuery.mockReturnValue({
+    data: buLicense ? { business_unit: { [BU_ID]: buLicense } } : undefined,
   });
 }
 

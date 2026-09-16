@@ -8,7 +8,6 @@ import {
   type Workflow,
 } from "@/types/workflows";
 
-/** ค่าเริ่มต้นของ recipient notification (object shape ใหม่ — แทน boolean เดิม) */
 export function emptyRecipientNotification(
   isActive = false,
 ): RecipientNotification {
@@ -22,7 +21,6 @@ export function emptyRecipientNotification(
   };
 }
 
-/** สร้าง recipients ทั้ง 3 (requestor/current_approve/next_step) จาก flag is_active */
 export function makeRecipients(
   requestor: boolean,
   currentApprove: boolean,
@@ -207,7 +205,6 @@ export const DEFAULT_WORKFLOW_DATA: WorkflowCreateModel["data"] = {
   products: [],
 };
 
-/** `data` ของ workflow อ่านด้วย schema ปัจจุบันไม่ได้ — คนละรูปแบบกันคนละรุ่น */
 export class WorkflowDataParseError extends Error {
   constructor() {
     super("Workflow data does not match the current schema");

@@ -27,7 +27,6 @@ export const FONT_SCALE_STORAGE_KEY = "carmen.font-scale";
 const isFontScale = (value: unknown): value is FontScale =>
   FONT_SCALES.includes(value as FontScale);
 
-/** อ่านค่าที่เก็บไว้ — ค่าที่ไม่รู้จักหรือ storage ใช้ไม่ได้คืน default */
 export function readStoredScale(): FontScale {
   try {
     const raw = localStorage.getItem(FONT_SCALE_STORAGE_KEY);

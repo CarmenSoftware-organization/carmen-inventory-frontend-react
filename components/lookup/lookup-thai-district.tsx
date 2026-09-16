@@ -8,31 +8,11 @@ interface LookupThaiDistrictProps {
   readonly onValueChange: (districtCode: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly onItemChange?: (district: ThaiDistrict) => void;
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกอำเภอ/เขตของประเทศไทย (cascading จาก provinceCode)
- *
- * ใช้ `useThaiDistricts(provinceCode)` ดึงเฉพาะ district ของจังหวัดที่เลือก
- * disabled เมื่อไม่มี `provinceCode` ค้นหาได้ทั้งภาษาไทย/อังกฤษ/code
- * มี `onItemChange` ส่ง object `ThaiDistrict` เต็มสำหรับ reset subdistrict
- *
- * @param value - district code ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง districtCode (number)
- * @returns JSX popover element ของ Thai district lookup
- * @example
- * ```tsx
- * <LookupThaiDistrict
- *   provinceCode={provinceCode}
- *   value={districtCode}
- *   onValueChange={setDistrictCode}
- * />
- * ```
- */
 export function LookupThaiDistrict({
   provinceCode,
   value,

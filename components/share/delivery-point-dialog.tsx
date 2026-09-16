@@ -31,7 +31,6 @@ interface DeliveryPointDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly deliveryPoint?: DeliveryPoint | null;
-  /** view-only mode: user มี view permission แต่ไม่มี update — disable form + hide save */
   readonly readOnly?: boolean;
 }
 

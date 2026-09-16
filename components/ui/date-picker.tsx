@@ -23,31 +23,10 @@ interface DatePickerProps {
   readonly size?: "xs" | "sm" | "default";
   readonly includeTime?: boolean;
   readonly hideClear?: boolean;
-  /** mark trigger เป็น invalid → screen reader + aria-invalid styling */
   readonly invalid?: boolean;
-  /** view mode → render เป็น plain text แทนปุ่ม popover */
   readonly readOnly?: boolean;
 }
 
-/**
- * ปุ่ม DatePicker เลือกวันเดียว ผ่าน Popover + Calendar
- *
- * value เก็บเป็น ISO string เพื่อ sync กับ react-hook-form/URL ง่าย
- * แสดงรูปแบบตาม dateFormat ของ user profile (useProfile hook)
- * รองรับ fromDate/toDate เพื่อ disable วันนอกช่วง และปุ่ม X clear
- * เมื่อมีค่าและไม่ disabled
- *
- * @param props - value, onValueChange, disabled, placeholder, fromDate, toDate, size
- * @returns JSX element ของ date picker
- * @example
- * ```tsx
- * <DatePicker
- *   value={form.watch("delivery_date")}
- *   onValueChange={(v) => form.setValue("delivery_date", v)}
- *   fromDate={new Date()}
- * />
- * ```
- */
 export function DatePicker({
   value,
   onValueChange,

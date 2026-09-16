@@ -42,28 +42,6 @@ interface DataGridColumnHeaderProps<
   visibility?: boolean;
 }
 
-/**
- * Component header cell ของ DataGrid (inner)
- *
- * Render header cell พร้อมปุ่ม sort และ dropdown menu แบบรวม controls
- * (filter, sort asc/desc, pin left/right, move left/right, columns visibility)
- * ตาม `tableLayout` ของ DataGrid ปรับ icon sort ตามสถานะปัจจุบัน และแสดงปุ่ม
- * unpin เมื่อ column ถูก pin
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @typeParam TValue - ประเภทค่า column
- * @param props - props ของ header
- * @param props.column - TanStack Table column instance
- * @param props.title - หัวข้อ column
- * @param props.icon - ไอคอนหน้า title (optional)
- * @param props.filter - element filter ที่จะแทรกใน dropdown (optional)
- * @param props.visibility - แสดง toggle column visibility submenu
- * @returns JSX element ของ header cell
- * @example
- * ```tsx
- * <DataGridColumnHeader column={column} title="Code" />
- * ```
- */
 function DataGridColumnHeaderInner<TData, TValue>({
   column,
   title = "",

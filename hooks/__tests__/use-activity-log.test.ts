@@ -18,14 +18,8 @@ import { httpClient } from "@/lib/http-client";
 
 const PR_ID = "9f1c0f34-0000-4000-8000-000000000001";
 
-/** params ต้องเป็น object เดิมทุก render ไม่งั้น queryKey เปลี่ยนเอง — ไม่ใช่เพราะ sheet เปิด/ปิด */
 const PARAMS = { perpage: 50 } as const;
 
-/**
- * สร้าง response ของ list activity log 1 รายการ ใช้แยกว่าเป็นการยิงรอบไหน
- * @param action - action ของ log ที่จะคืนกลับมา
- * @returns Response ที่ mock ให้ httpClient.get
- */
 function logResponse(action: string): Response {
   const body: PaginatedResponse<ActivityLog> = {
     data: [{ id: `log-${action}`, action } as ActivityLog],
@@ -34,11 +28,6 @@ function logResponse(action: string): Response {
   return new Response(JSON.stringify(body), { status: 200 });
 }
 
-/**
- * สร้าง wrapper ที่มี QueryClient ใหม่ต่อ 1 เทสต์ ปิด retry เพื่อไม่ให้เทสต์รอเก้อ
- * ไม่ตั้ง staleTime ระดับ client เพื่อให้ค่าที่ hook ตั้งเองเป็นตัวตัดสิน
- * @returns Wrapper component สำหรับ renderHook
- */
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },

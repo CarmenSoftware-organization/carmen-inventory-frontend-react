@@ -7,19 +7,6 @@ import { useDepartmentTable } from "./use-department-table";
 import { DEPARTMENT_FILTER_FIELDS } from "./department-filter-fields";
 import DepartmentCard from "./department-card";
 
-/**
- * Component หลักของหน้ารายการ Department ใช้ ConfigListTemplate แบบ page-based
- *
- * ส่ง `addPath` และ `getEditPath` ไปยัง `ConfigListTemplate` เพื่อให้ปุ่ม
- * เพิ่ม/แก้ไขนำทางไปยังหน้า new/[id]
- *
- * @returns React element ของหน้ารายการ Department
- * @example
- * ```tsx
- * // ใช้ใน app/(root)/config/department/page.tsx
- * <DepartmentComponent />
- * ```
- */
 export default function DepartmentComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

@@ -24,7 +24,6 @@ import {
 } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
 
-/** ค่าที่ต้อง snapshot ตอน save/update view — ตรงกับ `filterParam`/`sortParam` ของ useListFilters */
 interface ViewSnapshot {
   filters: Record<string, string>;
   sort?: string;
@@ -34,12 +33,8 @@ export interface UseListViewsResult {
   userViews: SavedView[];
   buViews: SavedView[];
   isLoading: boolean;
-  /** true = ยังมี query ใด query หนึ่ง (bu หรือ user) กำลัง fetch/refetch อยู่ —
-   * ต่างจาก `isLoading` (initial load เท่านั้น) ตรงที่ครอบคลุม refetch หลัง
-   * invalidation ด้วย (เช่นตอน saveAs แล้ว query ยัง refetch ค้างอยู่) */
   isFetching: boolean;
   error: Error | null;
-  /** true = admin ของ BU ปัจจุบัน — UI ใช้เพื่อโชว์ปุ่มจัดการ bu-scope view */
   canManageBu: boolean;
   saveAs: (
     name: string,
@@ -96,9 +91,6 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
   const buViews = readViews(buQuery.data?.value);
   const userViews = readViews(userQuery.data?.value);
 
-  /** ตัดคีย์ค่าว่าง/เว้นวรรคออกจาก snapshot ก่อนเก็บลง saved view — กัน filter
-   * chip ว่าง ๆ ค้างอยู่ใน view (จุดเดียว ผู้เรียกทั้ง 28 จุดยังส่ง `lf.values`
-   * ทั้งก้อนมาเหมือนเดิม ไม่ต้องแก้ที่เรียก) */
   const normalizeFilters = (
     filters: Record<string, string>,
   ): Record<string, string> =>
@@ -127,7 +119,6 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     return readViews(value.value);
   };
 
-  /** fetch fresh → แก้ไขด้วย `modify` → เขียนทับกลับ (ดู `fetchFreshViews`) */
   const writeViews = async (
     scope: ViewScope,
     modify: (fresh: SavedView[]) => SavedView[],
@@ -164,7 +155,6 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     return view;
   };
 
-  /** เขียนทับ filters/sort ของ view เดิม (id/name/created_* คงเดิม) */
   const update = async (
     viewId: string,
     scope: ViewScope,
@@ -179,7 +169,6 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     toast.success(t("updated"));
   };
 
-  /** เปลี่ยนแค่ชื่อ view — filters/sort เดิมไม่แตะ */
   const rename = async (
     viewId: string,
     scope: ViewScope,
@@ -191,7 +180,6 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     toast.success(t("renamed"));
   };
 
-  /** ลบ view ออกจาก array ของ scope นั้น */
   const remove = async (viewId: string, scope: ViewScope): Promise<void> => {
     await writeViews(scope, (fresh) => fresh.filter((v) => v.id !== viewId));
     toast.success(t("deleted"));

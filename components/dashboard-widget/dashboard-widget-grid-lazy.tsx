@@ -3,7 +3,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f"] as const;
 
-/** Fallback ระหว่างโหลด chunk ของ grid (recharts) — ไม่ดึง recharts มาด้วย */
 function DashboardWidgetGridSkeleton() {
   return (
     <div className="space-y-4 p-3" aria-busy="true">

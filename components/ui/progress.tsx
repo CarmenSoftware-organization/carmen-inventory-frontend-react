@@ -23,10 +23,6 @@ const TONE_CLASSES: Record<ProgressTone, { track: string; indicator: string }> =
     muted: { track: "bg-muted", indicator: "bg-muted-foreground/40" },
   };
 
-/**
- * เลือก tone อัตโนมัติตามค่า value (0–100)
- * 0 → muted, (0,50) → destructive, [50,100) → warning, 100 → success
- */
 const pickAutoTone = (value: number): ProgressTone => {
   if (value <= 0) return "muted";
   if (value >= 100) return "success";

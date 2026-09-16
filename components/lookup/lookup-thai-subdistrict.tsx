@@ -11,32 +11,11 @@ interface LookupThaiSubDistrictProps {
   readonly onValueChange: (subdistrictCode: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly onItemChange?: (subdistrict: ThaiSubDistrict) => void;
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกตำบล/แขวงของประเทศไทย (cascading จาก districtCode)
- *
- * ใช้ `useThaiSubDistricts(districtCode)` ดึงเฉพาะตำบลของอำเภอที่เลือก
- * disabled เมื่อไม่มี `districtCode` ค้นหาได้ทั้งภาษาไทย/อังกฤษ/code
- * มี `onItemChange` ส่ง object `ThaiSubDistrict` เต็มสำหรับ set postal code
- *
- * @param value - subdistrict code ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง subdistrictCode (number)
- * @returns JSX popover element ของ Thai subdistrict lookup
- * @example
- * ```tsx
- * <LookupThaiSubDistrict
- *   districtCode={districtCode}
- *   value={subdistrictCode}
- *   onValueChange={setSubdistrictCode}
- *   onItemChange={(s) => setPostalCode(s.postalCode)}
- * />
- * ```
- */
 export function LookupThaiSubDistrict({
   districtCode,
   value,

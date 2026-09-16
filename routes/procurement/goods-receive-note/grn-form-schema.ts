@@ -11,7 +11,6 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   const base = z.object({
     id: z.string().optional(),
     doc_version: z.coerce.number().optional(),
-    _group_key: z.string(),
     purchase_order_id: z.string().nullable(),
     purchase_order_no: z.string(),
     purchase_order_detail_id: z.string().nullable(),
@@ -123,10 +122,6 @@ export function createGrnSchema(tv: TranslationFn, tf: TranslationFn) {
     currency_name: z.string(),
     exchange_rate: z.coerce.number().nullable(),
     exchange_rate_date: z.string().nullable(),
-    received_at: z
-      .string()
-      .nullable()
-      .refine((v) => !!v, tv("required", { field: tf("receivedAt") })),
     info: z.string(),
     dimension: z.string(),
     // Extra cost header
@@ -142,7 +137,6 @@ export function createGrnSchema(tv: TranslationFn, tf: TranslationFn) {
 export type GrnFormValues = z.infer<ReturnType<typeof createGrnSchema>>;
 
 export const EMPTY_DETAIL: GrnFormValues["items"][number] = {
-  _group_key: "",
   purchase_order_id: null,
   purchase_order_no: "",
   purchase_order_detail_id: null,
@@ -197,7 +191,6 @@ const objectToText = (
 export function getDefaultValues(
   grn?: GoodsReceiveNote,
   options?: {
-    /** currency default ของ BU — set เป็น currency เริ่มต้นตอนสร้าง GRN ใหม่ (mirror PO) */
     defaultCurrencyId?: string;
     defaultCurrencyCode?: string;
   },
@@ -227,7 +220,6 @@ export function getDefaultValues(
       currency_name: options?.defaultCurrencyCode ?? "",
       exchange_rate: 1,
       exchange_rate_date: new Date().toISOString(),
-      received_at: new Date().toISOString(),
       info: "",
       dimension: "",
       allocate_extra_cost_type: "by_qty",
@@ -258,7 +250,6 @@ export function getDefaultValues(
     currency_name: grn.currency_name ?? "",
     exchange_rate: grn.exchange_rate ?? 1,
     exchange_rate_date: grn.exchange_rate_date,
-    received_at: grn.received_at,
     info: objectToText(grn.info),
     dimension: objectToText(grn.dimension),
     allocate_extra_cost_type:
@@ -279,7 +270,6 @@ export function getDefaultValues(
           // doc_version ของ detail ไม่ใช่ของ item — หลังบ้านล็อกด้วยเลขของ
           // tb_good_received_note_detail ส่งเลขของ item ไปจะ 409 ทุกครั้ง
           doc_version: detail.doc_version,
-          _group_key: detail.product_id,
           purchase_order_id: detail.purchase_order_id,
           purchase_order_no: detail.po_no ?? "",
           purchase_order_detail_id: detail.purchase_order_detail_id,

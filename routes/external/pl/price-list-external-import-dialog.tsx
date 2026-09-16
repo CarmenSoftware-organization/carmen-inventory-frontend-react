@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 interface PriceListExternalImportDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** เรียกเมื่อ vendor เลือก/วางไฟล์ — parent จัดการ parse + save เอง */
   readonly onFile: (file: File) => void;
   readonly isImporting?: boolean;
 }

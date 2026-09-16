@@ -33,7 +33,6 @@ import { SrStockTable } from "./sr-stock-table";
 
 interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
-  /** ใบเดิมที่ผู้ใช้กด Duplicate — prefill แล้วนับ dirty (แบบเดียวกับ PR) */
   readonly duplicateFrom?: StoreRequisition;
 }
 

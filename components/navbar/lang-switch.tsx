@@ -14,12 +14,6 @@ const LOCALE_LABELS: Record<SupportedLocale, string> = {
   th: "ไทย",
 };
 
-/**
- * Language switcher submenu — ฝังใน DropdownMenu อื่น
- *
- * mirror pattern เดียวกับ ThemeSwitch: SubTrigger ใช้ Globe icon, items แสดง
- * label ภาษาพร้อม check mark ที่ active
- */
 export function LangSwitch() {
   const locale = useLocale() as SupportedLocale;
   const t = useTranslations("common");

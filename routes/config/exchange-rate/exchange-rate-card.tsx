@@ -16,11 +16,6 @@ interface Props {
   readonly onDelete?: (item: ExchangeRateItem) => void;
 }
 
-/**
- * การ์ดอัตราแลกเปลี่ยน 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ไม่มีสถานะ active/inactive จึงไม่มี badge มุมขวาบน — หัวการ์ดเป็นรหัสสกุลเงิน
- */
 export default function ExchangeRateCard({
   item,
   baseCurrency,

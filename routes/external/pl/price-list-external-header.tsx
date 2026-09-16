@@ -9,7 +9,6 @@ interface PriceListHeaderProps {
   data: PricelistExternalDto;
 }
 
-/** meta cell แบบ stacked: eyebrow label เล็ก recede อยู่บน, value เด่นอยู่ล่าง */
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-0.5">

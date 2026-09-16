@@ -39,23 +39,14 @@ import {
   type ReportFormOption,
 } from "./use-report-form-templates";
 
-/** input ของ {@link buildPrintFormOptions} — รวมเป็น object เดียวกันจำนวน field ที่มาก */
 export interface BuildPrintFormOptionsParams {
-  /** ค่าปัจจุบันของ config item (template id หรือ "") */
   current: string;
-  /** options ของ report_group นั้น (undefined = ยังไม่มีข้อมูล) */
   list: ReportFormOption[] | undefined;
-  /** hook ยังโหลดอยู่ */
   isLoading: boolean;
-  /** hook ดึงข้อมูลไม่สำเร็จ (แยกจาก "template ถูกลบ/ปิดใช้งาน") */
   isError: boolean;
-  /** ป้ายสำหรับค่าที่หาไม่เจอในรายการ ทั้งที่โหลดสำเร็จแล้ว (unknown template จริง) */
   unknownLabel: string;
-  /** ป้ายระหว่างโหลด */
   loadingLabel: string;
-  /** ป้ายเมื่อโหลดล้มเหลว — ค่าที่เก็บไว้ยังคงอยู่ แต่ยังสรุปไม่ได้ว่า template หายไปจริงหรือไม่ */
   unavailableLabel: string;
-  /** ป้ายของ option ที่แทนค่าว่าง ("" = ใช้ค่าเริ่มต้นของระบบ) */
   systemDefaultLabel: string;
 }
 
@@ -98,16 +89,6 @@ export function buildPrintFormOptions({
   return [systemDefault, { value: current, label }, ...base];
 }
 
-/**
- * หน้า Default Setting (system-admin) — แสดง/แก้ไข operational config (PR/SI/PO)
- * ของ business unit ปัจจุบัน (จาก `useProfile().defaultBu`)
- *
- * config เก็บใน BU record เดียวกับหน้า Company Profile (field `config`) — save
- * ยิง `PATCH api/business-units` เฉพาะ field ที่เปลี่ยน (หน้านี้แก้แค่ config)
- * โหมด view = read-only, กด Edit → field กลายเป็น input (toggle ในหน้าเดียว)
- *
- * @returns React element ของหน้า default setting
- */
 export default function DefaultSettingComponent() {
   const tm = useTranslations("modules");
   const t = useTranslations("defaultSetting");

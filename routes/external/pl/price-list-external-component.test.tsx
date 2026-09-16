@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
+import { renderForm } from "@/lib/test-utils/form-characterization";
 import userEvent from "@testing-library/user-event";
 import type { UseFormReturn } from "react-hook-form";
 import PriceListExternalComponent from "./price-list-external-component";
@@ -102,7 +103,9 @@ describe("PriceListExternalComponent — save error surfacing", () => {
       isPending: false,
     } as unknown as ReturnType<typeof useUpdatePriceListExternal>);
 
-    render(<PriceListExternalComponent urlToken="tok" />);
+    // renderForm ให้ทั้ง Router กับ IntlProvider — หน้านี้มี useNavigationGuard
+    // (กัน vendor กด back ทิ้งราคาที่กรอกไว้) กับ DiscardDialog ซึ่งต้องใช้ทั้งคู่
+    renderForm(<PriceListExternalComponent urlToken="tok" />);
 
     // ทำให้ form dirty ก่อน ไม่งั้น handleSave จะ return ที่ guard "No changes"
     await userEvent.type(screen.getByLabelText("name"), "x");
@@ -119,7 +122,9 @@ describe("PriceListExternalComponent — save error surfacing", () => {
       isPending: false,
     } as unknown as ReturnType<typeof useUpdatePriceListExternal>);
 
-    render(<PriceListExternalComponent urlToken="tok" />);
+    // renderForm ให้ทั้ง Router กับ IntlProvider — หน้านี้มี useNavigationGuard
+    // (กัน vendor กด back ทิ้งราคาที่กรอกไว้) กับ DiscardDialog ซึ่งต้องใช้ทั้งคู่
+    renderForm(<PriceListExternalComponent urlToken="tok" />);
 
     await userEvent.type(screen.getByLabelText("name"), "x");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -143,7 +148,9 @@ describe("PriceListExternalComponent — submit error surfacing", () => {
       isPending: false,
     } as unknown as ReturnType<typeof useSubmitPriceListExternal>);
 
-    render(<PriceListExternalComponent urlToken="tok" />);
+    // renderForm ให้ทั้ง Router กับ IntlProvider — หน้านี้มี useNavigationGuard
+    // (กัน vendor กด back ทิ้งราคาที่กรอกไว้) กับ DiscardDialog ซึ่งต้องใช้ทั้งคู่
+    renderForm(<PriceListExternalComponent urlToken="tok" />);
 
     // ไม่ type — form ไม่ dirty จึงผ่าน guard ของ submit ได้
     // กด Submit ที่ตาราง → เปิด confirm dialog → กดยืนยันใน dialog

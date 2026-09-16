@@ -94,7 +94,12 @@ export function LookupProductUnit({
         size="sm"
         align="end"
         aria-invalid={!!error}
-        className={cn("text-xs", className, "w-fit")}
+        // ห้ามใส่ w-* ที่นี่ — `SelectTrigger` มี `w-fit` เป็นฐานอยู่แล้ว ต่อท้าย
+        // className อีกตัวเมื่อไหร่ tailwind-merge จะเขี่ยความกว้างที่ผู้เรียก
+        // ส่งมาทิ้งทุกครั้ง (PR/GRN/PRT ส่งความกว้างคงที่มาแล้วตายหมด ช่องหน่วย
+        // ในตารางเลยกว้างตามชื่อหน่วย ขอบขวาไม่ตรงกันสักแถว เฉพาะโหมดแก้ไข
+        // เพราะโหมดอ่านออกที่ FieldPlainText ก่อนถึงบรรทัดนี้)
+        className={cn("text-xs", className)}
       >
         {isLoading ? (
           <Loader2 className="text-muted-foreground size-3.5 animate-spin" />

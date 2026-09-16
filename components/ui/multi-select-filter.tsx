@@ -25,9 +25,7 @@ interface FilterOption {
   value: string;
   label: string;
   group?: string;
-  /** สีจุดสถานะหน้า label (ค่า CSS เช่น `var(--status-draft)`) — ไม่ใส่ = ไม่มีจุด */
   dotColor?: string;
-  /** ค่า status ดิบ — มีแล้วจะวาดไอคอนสถานะแทนจุด ให้ตรงกับที่เห็นในตาราง */
   statusKey?: string;
 }
 
@@ -41,7 +39,6 @@ function keyFromValue(value: string): string | undefined {
   return colon === -1 ? undefined : value.slice(colon + 1);
 }
 
-/** จุด/ไอคอนนำหน้า label ของตัวเลือกสถานะ — ตัวเดียวใช้ทั้งสองสาขาที่ render option */
 function OptionMarker({ option }: { readonly option: FilterOption }) {
   // ไม่รู้จักคีย์ = ไม่ใช่ field สถานะ/ชนิดใบ (ผู้ขาย แผนก ฯลฯ) ต้องไม่มีไอคอนโผล่
   const found = lookupIcon(

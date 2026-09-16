@@ -8,7 +8,6 @@ import { Badge } from "../ui/badge";
 
 type BadgeVariant = ComponentProps<typeof Badge>["variant"];
 
-/** map shape (backend enum) → label อ่านง่าย + สี badge แยกตามชนิด */
 const SHAPE_BADGE: Record<string, { label: string; variant: BadgeVariant }> = {
   scalar: { label: "Scalar", variant: "info-light" },
   scalar_delta: { label: "Scalar Δ", variant: "success-light" },
@@ -18,7 +17,6 @@ const SHAPE_BADGE: Record<string, { label: string; variant: BadgeVariant }> = {
   matrix: { label: "Matrix", variant: "destructive-light" },
 };
 
-/** fallback สำหรับ shape ที่ยังไม่ถูก map — humanize ค่า raw แล้วใช้สี outline */
 const getShapeBadge = (shape: string) =>
   SHAPE_BADGE[shape] ?? {
     label: shape.replaceAll("_", " "),
@@ -30,7 +28,6 @@ interface LookupDatasetProps {
   readonly onValueChange: (value: string) => void;
   readonly onItemChange?: (dataset: DashboardDataset) => void;
   readonly excludeIds?: Set<string>;
-  /** รายการ dataset เพิ่มเติมฝั่ง client (เช่น synthetic group widget) แสดงนำหน้า */
   readonly extraItems?: readonly DashboardDataset[];
   readonly category?: string;
   readonly shape?: string;
@@ -39,7 +36,6 @@ interface LookupDatasetProps {
   readonly placeholder?: string;
   readonly defaultLabel?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }

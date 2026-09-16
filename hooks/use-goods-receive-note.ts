@@ -305,14 +305,6 @@ export function useGoodsReceiveNoteById(id: string | undefined) {
   });
 }
 
-/**
- * Hook สำหรับสร้าง GRN ใหม่ผ่าน POST API
- * ทำการ invalidate GOODS_RECEIVE_NOTES cache เมื่อสำเร็จ
- * @returns mutation object จาก useApiMutation
- * @example
- * const createGrn = useCreateGoodsReceiveNote();
- * createGrn.mutate(payload);
- */
 export function useCreateGoodsReceiveNote() {
   return useApiMutation<CreateGrnDto>({
     mutationFn: (data, buCode) =>
@@ -322,14 +314,6 @@ export function useCreateGoodsReceiveNote() {
   });
 }
 
-/**
- * Hook สำหรับแก้ไข GRN ผ่าน PATCH API โดยระบุ id
- * Invalidate cache รายการ GRN เมื่อสำเร็จ
- * @returns mutation object จาก useApiMutation
- * @example
- * const updateGrn = useUpdateGoodsReceiveNote();
- * updateGrn.mutate({ id, ...values });
- */
 export function useUpdateGoodsReceiveNote() {
   return useApiMutation<CreateGrnDto & { id: string }>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -342,14 +326,6 @@ export function useUpdateGoodsReceiveNote() {
   });
 }
 
-/**
- * Hook สำหรับลบ GRN พร้อม optimistic update
- * ลบ item ออกจาก list cache ทันที และ rollback หาก API ล้มเหลว
- * @returns mutation object จาก useApiMutation
- * @example
- * const del = useDeleteGoodsReceiveNote();
- * del.mutate(grnId);
- */
 export function useDeleteGoodsReceiveNote() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -363,14 +339,6 @@ export function useDeleteGoodsReceiveNote() {
   });
 }
 
-/**
- * Hook สำหรับ save GRN ตาม id ผ่าน PATCH /save
- * ใช้หลัง create/update เพื่อเปลี่ยนสถานะจาก draft → saved และ invalidate cache
- * @returns mutation object จาก useApiMutation
- * @example
- * const saveGrn = useSaveGoodsReceiveNote();
- * saveGrn.mutate(grnId);
- */
 export function useSaveGoodsReceiveNote() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -382,14 +350,6 @@ export function useSaveGoodsReceiveNote() {
   });
 }
 
-/**
- * Hook สำหรับยืนยัน (confirm) GRN ตาม id ผ่าน PATCH /confirm
- * ใช้สำหรับเปลี่ยนสถานะ GRN เป็น committed และ invalidate cache
- * @returns mutation object จาก useApiMutation
- * @example
- * const confirm = useConfirmGoodsReceiveNote();
- * confirm.mutate(grnId);
- */
 export function useCommitGoodsReceiveNote() {
   return useApiMutation<{ id: string; doc_version: number }>({
     // ส่ง body { doc_version } — backend commit ต้องการ object (ไม่งั้น 400
@@ -404,14 +364,6 @@ export function useCommitGoodsReceiveNote() {
   });
 }
 
-/**
- * Hook สำหรับยกเลิก (void) GRN ตาม id ผ่าน DELETE /void
- * ทำ soft-delete เป็นสถานะ voided และ invalidate cache รายการ
- * @returns mutation object จาก useApiMutation
- * @example
- * const voidGrn = useVoidGoodsReceiveNote();
- * voidGrn.mutate(grnId);
- */
 export function useVoidGoodsReceiveNote() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -425,7 +377,6 @@ export function useVoidGoodsReceiveNote() {
 
 // --- Comments ---
 
-/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
 export const grnCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS,
   commentEndpoint: API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT,
@@ -433,13 +384,9 @@ export const grnCommentCrud = createCommentCrud({
   label: "goods receive note",
 });
 
-/** ดึงรายการ comment ของ GRN จาก `/api/{buCode}/good-received-note-comment/{grnId}` */
 export const useGoodsReceiveNoteComments = grnCommentCrud.useComments;
-/** สร้าง comment ของ GRN ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
 export const useCreateGrnComment = grnCommentCrud.useCreate;
-/** แก้ไข comment ของ GRN ตาม comment id */
 export const useUpdateGrnComment = grnCommentCrud.useUpdate;
-/** ลบ comment ของ GRN ตาม comment id */
 export const useDeleteGrnComment = grnCommentCrud.useDelete;
 
 // --- Export ---
@@ -449,11 +396,6 @@ interface ExportGoodsReceiveNoteArgs {
   columns: XlsxColumn<GoodsReceiveNote>[];
 }
 
-/**
- * Hook ส่งออก GRN เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportGoodsReceiveNote, isExporting }
- */
 export function useExportGoodsReceiveNote() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

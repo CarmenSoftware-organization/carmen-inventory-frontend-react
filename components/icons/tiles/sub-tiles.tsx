@@ -1,8 +1,3 @@
-/**
- * Carmen Tile System — SubTiles (submodule tiles)
- *
- * Each tile inherits its parent module palette.
- */
 
 import {
   BarChart,
@@ -1632,7 +1627,7 @@ export const SubTiles: Record<string, TileRenderer> = {
     </>
   ),
   // ════ Config ════
-  chartOfAccount: ({ palette }) => (
+  chartOfAccounts: ({ palette }) => (
     <>
       <TileBase palette={palette} />
       <Paper palette={palette} />

@@ -19,14 +19,6 @@ interface UseRecipeCategoryTableOptions {
   onDelete: (category: RecipeCategory) => void;
 }
 
-/**
- * Hook สร้างคอลัมน์และ instance ของตารางหมวดหมู่สูตรอาหารสำหรับ DataGrid
- * @param options - ข้อมูลหมวดหมู่, params และ callbacks
- * @returns table instance พร้อมใช้งานกับ DataGrid
- * @example
- * const table = useRecipeCategoryTable({ categories, allCategories, totalRecords, params, tableConfig, onEdit, onDelete });
- * return <DataGrid table={table} />;
- */
 export function useRecipeCategoryTable({
   categories,
   allCategories,

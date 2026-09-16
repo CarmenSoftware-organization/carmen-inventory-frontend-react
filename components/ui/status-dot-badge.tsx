@@ -2,7 +2,6 @@ import { type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-/** สีของ dot ตามความหมายของสถานะ (semantic tone) — chip เป็นสีกลางเสมอ */
 export type DotTone =
   | "success"
   | "info"
@@ -33,9 +32,7 @@ const DOT_SIZE = {
 } as const;
 
 interface StatusDotBadgeProps {
-  /** ความหมายของสถานะ → สีของ dot */
   readonly tone: DotTone;
-  /** ขนาด badge — `"sm"` list/grid, `"xs"` หัวฟอร์มกระชับ, `"lg"` table cell */
   readonly size?: keyof typeof DOT_SIZE;
   readonly className?: string;
   readonly children: ReactNode;
