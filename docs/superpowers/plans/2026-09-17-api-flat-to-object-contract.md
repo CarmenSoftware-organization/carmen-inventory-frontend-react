@@ -465,9 +465,15 @@ const FIELD_RE = /^\s{2,}([a-z_][a-z0-9_]*)\s*[?:]\s*(z\.|[A-Z])/;
 
 // globSync มีใน node:fs ตั้งแต่ Node 22 และ bun รองรับ
 // ถ้า runtime ไม่รองรับ ใช้ `new Bun.Glob('...').scanSync('.')` แทนได้
-const files = globSync('apps/backend-gateway/src/**/*.{serializer,dto}.ts').filter(
-  (p) => !p.includes('.spec.'),
-);
+//
+// ต้องครอบ swagger/ กับ example/ ด้วย ไม่ใช่แค่ serializer/dto —
+// วัดแล้วมี 62 reference group ใน 10 ไฟล์กลุ่มนั้น ถ้าไม่ครอบ Swagger docs
+// จะยังโชว์ flat field ต่อไปทั้งที่ API จริงเปลี่ยนไปแล้ว = เอกสารโกหก
+const files = [
+  ...globSync('apps/backend-gateway/src/**/*.{serializer,dto}.ts'),
+  ...globSync('apps/backend-gateway/src/**/swagger/*.ts'),
+  ...globSync('apps/backend-gateway/src/**/example/*.ts'),
+].filter((p) => !p.includes('.spec.'));
 
 let bad = 0;
 for (const file of files) {
@@ -508,10 +514,12 @@ console.log('✅ ไม่มี flat reference หลงเหลือ');
 cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
 bun run scripts/check-flat-refs.ts 2>&1 | tail -5
 ```
-Expected: `❌ เหลือ flat reference 320 group ที่ยังไม่ถูกแปลง`
+Expected: ราว ๆ `❌ เหลือ flat reference 382 group ที่ยังไม่ถูกแปลง`
+(146 serializer + 174 dto + 62 swagger/example)
 
-ตัวเลขนี้คือยอดตั้งต้น ทุก task ต่อจากนี้ต้องทำให้มันลดลง และจบงานที่ 0
-ถ้าได้ตัวเลขต่างจาก 320 มาก ให้ตรวจว่า `FIELD_RE` จับฟิลด์ตรงกับที่ serializer เขียนจริงไหม ก่อนไปต่อ
+**จดตัวเลขที่สคริปต์รายงานจริงไว้** — นั่นคือยอดตั้งต้น ทุก task ต่อจากนี้ต้องทำให้มันลดลง
+และจบงานที่ 0 ตัวเลขไม่ต้องตรงกับ 382 เป๊ะ (regex อาจจับได้ต่างกันเล็กน้อย) แต่ถ้าได้
+หลักสิบหรือหลักพัน แปลว่า `FIELD_RE` หรือ glob ผิด ให้แก้ก่อนไปต่อ
 
 - [ ] **Step 3: Commit**
 
