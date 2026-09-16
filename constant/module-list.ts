@@ -591,8 +591,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "inventoryPeriod",
         path: "/system-admin/inventory-period",
-        // key ของ license catalog ฝั่ง backend ยังเป็น system_admin.period — ห้ามเปลี่ยนตาม UI
-        licenseFeature: "system_admin.period", // app:periods
+        licenseFeature: "system_admin.inventory_period", // app:inventory-periods
         icon: Calendar,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,

@@ -14,8 +14,8 @@ import type {
 import type { ParamsDto } from "@/types/params";
 
 const crud = createConfigCrud<InventoryPeriod, CreateInventoryPeriodDto>({
-  queryKey: QUERY_KEYS.PERIODS,
-  endpoint: API_ENDPOINTS.PERIODS,
+  queryKey: QUERY_KEYS.INVENTORY_PERIODS,
+  endpoint: API_ENDPOINTS.INVENTORY_PERIODS,
   label: "inventory period",
   updateMethod: "PATCH",
 });
@@ -83,7 +83,7 @@ export const useDeleteInventoryPeriod = crud.useDelete;
 /**
  * Hook สำหรับ generate InventoryPeriod ถัดไปแบบ batch ตามการตั้งค่าที่ระบุ
  *
- * ยิง POST ไป `/config/{bu}/periods/next` พร้อม payload ตั้งค่า
+ * ยิง POST ไป `/api/{bu}/inventory-periods/next` พร้อม payload ตั้งค่า
  * เช่นจำนวนรอบที่ต้องการสร้าง + รูปแบบรหัสรอบ invalidate list หลังสำเร็จ
  *
  * @returns UseMutationResult รับ `GenerateNextInventoryPeriodDto` เป็น variable
@@ -96,8 +96,8 @@ export const useDeleteInventoryPeriod = crud.useDelete;
 export function useGenerateNextInventoryPeriod() {
   return useApiMutation<GenerateNextInventoryPeriodDto>({
     mutationFn: (data, buCode) =>
-      httpClient.post(API_ENDPOINTS.PERIOD_NEXT(buCode), data),
-    invalidateKeys: [QUERY_KEYS.PERIODS],
+      httpClient.post(API_ENDPOINTS.INVENTORY_PERIOD_NEXT(buCode), data),
+    invalidateKeys: [QUERY_KEYS.INVENTORY_PERIODS],
     errorMessage: "Failed to generate next inventory periods",
   });
 }
@@ -122,7 +122,7 @@ export function useExportInventoryPeriod() {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<InventoryPeriod>({
       fetch: async () => {
-        const url = buildUrl(API_ENDPOINTS.PERIODS(buCode), params);
+        const url = buildUrl(API_ENDPOINTS.INVENTORY_PERIODS(buCode), params);
         const res = await httpClient.get(url);
         if (!res.ok) throw new Error("Failed to fetch inventory periods");
         const json = await res.json();
