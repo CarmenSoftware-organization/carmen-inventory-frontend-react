@@ -1,18 +1,22 @@
 ---
 version: 1
 name: Carmen-inventory-ERP
-description: A dense hospitality supply-chain ERP. Neutral graphite surfaces carry a single Carmen-blue accent; chrome is flat and borderless-by-default so that rows of data, not the container, are what the eye lands on. Type is governed from the small end up — 97% of the app's text sits at or below 12px — and colour is split three ways: semantic status, per-module identity, and a 34-value document-status palette. Every rule here is measured against the code, not aspirational.
+verified: 2026-09-16   # counts and file references re-checked against the code on this date
+description: A dense hospitality supply-chain ERP. Neutral graphite surfaces carry a single Carmen-blue accent; chrome is flat and borderless-by-default so that rows of data, not the container, are what the eye lands on. Type is governed from the small end up — 97% of the app's text sits at or below 12px — and colour is split two ways: semantic status and a 41-value document-status palette — per-module identity was tried and removed. Every rule here is measured against the code, not aspirational — counts drift as the app grows, so treat them as evidence for a proportion, not as a contract.
 
 colors:
   # CARMEN BLUE — neutral graphite surfaces + Carmen blue accent.
   # Source of truth: styles/globals.css (OKLCH). Hex below are sRGB equivalents.
   #
-  # THREE COLOUR LAYERS, three stylesheets. Know which one you are in:
+  # TWO COLOUR LAYERS, plus one derived palette. Know which one you are in:
   #   styles/globals.css       semantic + surface + the status *inks* (below)
-  #   styles/module-colors.css per-module identity (dashboard/procurement/…)
-  #                            and the app-tile system
-  #   styles/badge-status.css  the 34-value document-status palette, with its
+  #   styles/badge-status.css  the 41-value document-status palette, with its
   #                            own hue-to-meaning table — see "Document status"
+  #   styles/module-colors.css NOT a layer any more — only the app-tile palette,
+  #                            derived from `--primary`. The `--module-*` and
+  #                            `--sub-*` tokens were DELETED 2026-09-10 because
+  #                            they had become a second, third and fourth accent
+  #                            on one page. Do not reintroduce them.
   #
   # USAGE — single accent signal (avoid "neon"): accent & semantic colors
   # (primary / destructive / success / warning) should appear ONCE per element,
@@ -31,7 +35,7 @@ colors:
   # All of them pass comfortably in dark mode (6–10:1), so the light values are
   # effectively tuned for the dark canvas.
   # RESOLVED by splitting the roles: `--<status>-ink` is the same hue and chroma
-  # at a lightness that clears AA, and the 82 `text-*` call sites use it. Fills
+  # at a lightness that clears AA, and the 96 `text-*` call sites use it. Fills
   # keep the plain token, so chips and badges are unchanged.
   #   text-warning-ink · text-success-ink · text-info-ink
   #   text-positive-ink · text-negative-ink · text-brand-ink
@@ -93,8 +97,8 @@ colors:
 
 typography:
   # The ladder is named from the DENSE END UP, which is the inversion that makes
-  # this an ERP type system rather than a marketing one: 1,059 `text-xs` uses and
-  # ~613 former sub-12px literals versus ~50 uses of `text-xl` and above. The
+  # this an ERP type system rather than a marketing one: 775 `text-xs` uses and
+  # ~613 former sub-12px literals versus 48 uses of `text-xl` and above. The
   # governed, tokenised part is everything at or below 12px; the display end is
   # the afterthought. Sizes below are the ramp — a literal `text-[…]` off this
   # ramp is a design-system bug (enforced, see Principles).
@@ -140,7 +144,7 @@ typography:
     letterSpacing: -0.075px
   fine-print:
     # 12px — dense body and form labels. Note `text-xs` is the same size and is
-    # the app's overwhelmingly dominant spelling (1,000+ sites); prefer it.
+    # the app's overwhelmingly dominant spelling (775 sites); prefer it.
     # Utility: `text-fine-print`
     fontSize: 12px
     fontWeight: 400
@@ -201,11 +205,11 @@ rounded:
   # in styles/globals.css; the rest are Tailwind's rounded-* steps off it.
   # A full-pill primary CTA was trialled on Button and intentionally REVERTED —
   # it did not fit dense ERP chrome. Pills are for indicators, not actions.
-  full: 9999px      # 269 uses — status dots, avatars, count chips
-  lg: 10px          # 204 uses — cards-in-lists, panels
+  full: 9999px      # 208 uses — status dots, avatars, count chips
+  lg: 10px          # 188 uses — cards-in-lists, panels
   md: 8px           # 180 uses — buttons, badges, inputs (the control radius)
-  xl: 12px          # 87 uses — the Card primitive
-  sm: 6px           # 64 uses — inline chips, table-cell affordances
+  xl: 12px          # 105 uses — the Card primitive
+  sm: 6px           # 60 uses — inline chips, table-cell affordances
   none: 0px         # 25 uses — flush table edges, full-bleed strips
 
 spacing:
@@ -283,20 +287,23 @@ That gives the interface one job above all others: **let someone scan hundreds o
 - **Density is the point.** The type ladder is governed from 8px up, not from the display sizes down, because that is where the app actually lives.
 - **Chrome recedes.** Cards are flat — a hairline border and a surface step, no shadows. Elevation is reserved for things that genuinely float (dialogs, popovers, dropdowns).
 - **One accent.** Carmen Blue is the only "you can act on this" colour. Status hues are information, not decoration, and appear once per element.
-- **Colour is stratified.** Semantic (`warning`/`success`/…), module identity (per ERP area), and document status (34 values) are three separate systems that must not be mixed. A document being _Rejected_ is not the same kind of fact as a field being _invalid_.
+- **Colour is stratified.** Semantic (`warning`/`success`/…) and document status (41 values) are two separate systems that must not be mixed. A document being _Rejected_ is not the same kind of fact as a field being _invalid_. There is deliberately no third, per-module layer — see below.
 - **Bilingual by default.** Thai and English share every surface, and Thai sets the floor for line-height and font stack.
 
 ## Colors
 
-### The three layers
+### The two layers
 
-| Layer           | File                       | What it means                                                           |
-| --------------- | -------------------------- | ----------------------------------------------------------------------- |
-| Semantic        | `styles/globals.css`       | State of a _control or message_ — invalid, warning, success, info       |
-| Module identity | `styles/module-colors.css` | Which _area of the ERP_ you are in — dashboard, procurement, inventory… |
-| Document status | `styles/badge-status.css`  | Where a _document_ is in its lifecycle — draft, submitted, approved…    |
+| Layer           | File                      | What it means                                                       |
+| --------------- | ------------------------- | ------------------------------------------------------------------- |
+| Semantic        | `styles/globals.css`      | State of a _control or message_ — invalid, warning, success, info   |
+| Document status | `styles/badge-status.css` | Where a _document_ is in its lifecycle — draft, submitted, approved… |
 
 Mixing them is the most common colour mistake here. A green `success` toast and a green `approved` badge mean different things and are allowed to be different greens.
+
+**There was a third layer and it was removed.** `styles/module-colors.css` used to carry `--module-*` and `--sub-*` identity colours per ERP area. On 2026-09-10 they were deleted and every call site moved to `var(--primary)`: painted onto buttons, steppers and badge dots, they had become a second, third and fourth accent on a single page — the exact thing the single-accent rule above exists to prevent. What is left in that file is the app-tile palette, which was always derived from `--primary`.
+
+**Distinguish modules with icons, wording and layout — not with colour.**
 
 ### Brand & accent
 
@@ -309,7 +316,7 @@ Neutral graphite in both themes, achromatic (chroma 0) so the accent is the only
 
 ### Document status
 
-`styles/badge-status.css` carries 34 status values with a documented hue-to-meaning table (gray = not started, sky = open, yellow = in progress, green = approved, indigo = completed, red = rejected, rose = cancelled, dark amber = locked, and so on), plus separate ramps for workflow actions (`wf-*`), stock direction, GRN origin, and cuisine regions. Each has a `-fg` partner for its label. **Add a status by editing that file, not by reaching for a semantic token** — a semantic `warning` chip and an `in-progress` chip drift apart the moment someone re-tunes one of them.
+`styles/badge-status.css` carries 41 status values with a documented hue-to-meaning table (gray = not started, sky = open, yellow = in progress, green = approved, indigo = completed, red = rejected, rose = cancelled, dark amber = locked, and so on), plus separate ramps for workflow actions (`wf-*`), stock direction, GRN origin, and cuisine regions. Each has a `-fg` partner for its label. **Add a status by editing that file, not by reaching for a semantic token** — a semantic `warning` chip and an `in-progress` chip drift apart the moment someone re-tunes one of them.
 
 ### Hairlines
 
@@ -326,7 +333,7 @@ Borders do the work shadows would. `{colors.border}` at 1px is the default separ
 "Sarabun", "Noto Sans Thai", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", sans-serif
 ```
 
-Font fallback is per-glyph, so Latin resolves from the first group and only Thai glyphs fall through to the second. No webfont is loaded — the bundle is static on a CDN and the stack is deliberately zero-request. Numeric columns pair with `tabular-nums` (used ~390×).
+Font fallback is per-glyph, so Latin resolves from the first group and only Thai glyphs fall through to the second. No webfont is loaded — the bundle is static on a CDN and the stack is deliberately zero-request. Numeric columns pair with `tabular-nums` (used ~360×).
 
 ### Hierarchy
 
@@ -350,7 +357,7 @@ The ramp is the `typography` block above. In practice:
 - **A new step must be registered with `cn()`, not just defined in CSS.** `cn()` is `twMerge(clsx(…))`, and tailwind-merge only knows Tailwind's built-in scale plus arbitrary values — not `@theme` font-size keys. An unregistered step is not treated as conflicting with `text-sm`/`text-xs`, so `cn("… text-sm", "text-micro-legal")` keeps **both** and CSS source order picks the winner. That is how the navbar avatar initials silently jumped 10px → 14px during the ladder migration; it never broke while the call site said `text-[0.625rem]`, because arbitrary values _are_ recognised. Add every new step to the `font-size` class group in `lib/utils.ts` (`lib/__tests__/cn-font-size.test.ts` fails if you forget).
 - **Sub-10px is for uppercase eyebrows and digits only** — never for running text. The 600 weight and wide tracking of caps are what keep 9px legible, and sentence copy has neither; digits get away with it because they are uniform-height with no ascenders, descenders or diacritics. It matters most in Thai, which stacks two levels of marks above the baseline (สระบน + วรรณยุกต์). **Enforced:** `type-ladder.test.ts` freezes every sub-10px site that is not `uppercase`, so a new one fails the suite until somebody either marks it `uppercase` or records why it is exempt. The proxy is deliberately crude — digits and illustration mock-ups are legitimately neither — because its job is to force a human look, not to classify.
 - **Thai sets the line-height floor.** Thai stacks two levels of diacritics above the baseline, which clip at `line-height: 1`. The tiers that carry Thai sentence text (`micro`, `micro-legal`, `fine-print`) ship at 1.35–1.4; only the uppercase tiers go tighter, and only because Thai has no uppercase.
-- **Weight 500 is the data-value tier.** The full ladder is **300 / 400 / 500 / 600 / 700**. 500 has exactly one job: _this is the value, as distinct from its label or its qualifier._ It is load-bearing — `FieldPlainText` bakes it in and is used ~140×, plus 38 inline sites, all doing the same thing:
+- **Weight 500 is the data-value tier.** The full ladder is **300 / 400 / 500 / 600 / 700**. 500 has exactly one job: _this is the value, as distinct from its label or its qualifier._ It is load-bearing — `FieldPlainText` bakes it in and is used ~175×, plus ~110 further `font-medium` sites, all doing the same thing:
 
   | pattern                | example                                                  |
   | ---------------------- | -------------------------------------------------------- |
@@ -423,7 +430,8 @@ Specs live in the `components` block above, read from the source. Notes that do 
 
 ### Don't
 
-- Don't mix the three colour layers — a document status is not a semantic state.
+- Don't mix the two colour layers — a document status is not a semantic state.
+- Don't reintroduce a per-module identity colour. It existed, it became a second accent, it was removed on purpose.
 - Don't set body copy, headings or display type at weight 500; it marks a data value against its label, and nothing else.
 - Don't put sub-10px type on running text, in either language.
 - Don't add a shadow to a card, panel or table.
@@ -434,7 +442,7 @@ Specs live in the `components` block above, read from the source. Notes that do 
 
 ## Responsive Behavior
 
-Carmen is desktop-first: it is a working tool for people at a desk, and the tables assume width. Real breakpoint usage in the code is `sm:` 723 · `lg:` 171 · `md:` 110 · `xl:` 33 · `2xl:` 1 — so the meaningful decisions are "does this stack on a phone" (`sm:`) and "does the sidebar/grid change on a laptop" (`lg:`). Do not design an eight-step responsive matrix; this app does not have one.
+Carmen is desktop-first: it is a working tool for people at a desk, and the tables assume width. Real breakpoint usage in the code is `sm:` 590 · `lg:` 181 · `md:` 123 · `xl:` 27 · `2xl:` 1 — so the meaningful decisions are "does this stack on a phone" (`sm:`) and "does the sidebar/grid change on a laptop" (`lg:`). Do not design an eight-step responsive matrix; this app does not have one.
 
 - Tables scroll horizontally rather than reflowing — a column that disappears is a column somebody was reading.
 - The sidebar collapses to icons, then to a sheet.
@@ -451,10 +459,10 @@ Carmen is desktop-first: it is a working tool for people at a desk, and the tabl
 
 ## Known Gaps
 
-- **Component specs are a map, not a full spec.** `components/ui/` holds ~73 primitives; the block above names the load-bearing ones and their variants. Individual anatomy (slot structure, every state) is not documented — read the component.
-- **Motion has no scale, but it does respect the user.** `globals.css` defines fade/float/pulse keyframes and four global interaction transitions; there is still no documented duration/easing scale. `prefers-reduced-motion` **is** honoured now: a blanket rule neutralises animation and transition, with `.animate-spin` and `.animate-pulse` deliberately exempted — the usual boilerplate's `animation-iteration-count: 1` freezes 81 spinners and 12 skeletons, and a frozen spinner reads as a hung request rather than as calm. Guarded by `lib/__tests__/reduced-motion.test.ts`, including the exemption.
-- **Focus and screen-reader behaviour are partly checked, not audited.** Every interactive primitive carries a `focus-visible` ring (`combobox` uses `focus-within` on its container instead — different mechanism, same result), and every custom clickable found with `tabIndex={0}` also has `role="button"` and an Enter/Space `onKeyDown`. That is a **code reading, not a live keyboard test** — driving real Tab focus through browser automation did not work here, so no one has actually tabbed the app end to end. Screen-reader behaviour is entirely unverified; `aria-label` appears in 166 of 874 component files, which is a coverage number, not a correctness one.
-- **Touch targets are desktop-first by choice.** 205 icon buttons render at 24–36px, below the 44px guideline. That is deliberate for a desk tool, but it means the app is not usable on a tablet without a pass over the dense controls.
-- **`styles/module-colors.css` is documented in its own header only.** The app-tile derivation (single-accent tints mixed in sRGB, deliberately not oklch, to avoid a hue shift toward pink) lives there and is worth reading before touching module colour.
+- **Component specs are a map, not a full spec.** `components/ui/` holds 67 top-level primitives (83 files counting sub-folders such as `data-grid/`); the block above names the load-bearing ones and their variants. Individual anatomy (slot structure, every state) is not documented — read the component.
+- **Motion has no scale, but it does respect the user.** `globals.css` defines fade/float/pulse keyframes and four global interaction transitions; there is still no documented duration/easing scale. `prefers-reduced-motion` **is** honoured now: a blanket rule neutralises animation and transition, with `.animate-spin` and `.animate-pulse` deliberately exempted — the usual boilerplate's `animation-iteration-count: 1` freezes ~100 spinners and ~11 skeletons, and a frozen spinner reads as a hung request rather than as calm. Guarded by `lib/__tests__/reduced-motion.test.ts`, including the exemption.
+- **Focus and screen-reader behaviour are partly checked, not audited.** Every interactive primitive carries a `focus-visible` ring (`combobox` uses `focus-within` on its container instead — different mechanism, same result), and every custom clickable found with `tabIndex={0}` also has `role="button"` and an Enter/Space `onKeyDown`. That is a **code reading, not a live keyboard test** — driving real Tab focus through browser automation did not work here, so no one has actually tabbed the app end to end. Screen-reader behaviour is entirely unverified; `aria-label` appears in 163 of 1,012 component files, which is a coverage number, not a correctness one.
+- **Touch targets are desktop-first by choice.** 145 icon buttons render at 24–36px, below the 44px guideline. That is deliberate for a desk tool, but it means the app is not usable on a tablet without a pass over the dense controls.
+- **`styles/module-colors.css` is documented in its own header only.** Since the identity tokens were removed it holds only the app-tile derivation (single-accent tints mixed in sRGB, deliberately not oklch, to avoid a hue shift toward pink) — read that header before touching tile colour.
 - **Empty, loading and error states** have implementations (`ErrorState`, `Empty`, skeletons) but no documented rules about when each applies.
 - **This document was previously an analysis of apple.com** — a teardown that arrived as the project's design doc and accumulated Carmen-specific corrections as marginal notes. The Apple-only material (product tiles, store pages, photography geometry, an eight-step breakpoint matrix) has been removed. If a rule here reads like it came from a marketing site rather than from this codebase, it is a bug — check it against the code and fix it.
