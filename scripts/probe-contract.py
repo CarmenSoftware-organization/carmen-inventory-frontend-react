@@ -14,22 +14,37 @@ OPAQUE = ('audit', 'info', 'user_action', 'last_action', 'stages_status')
 
 
 def flatten(node, out=None, prefix=''):
-    """คลี่ object กลับเป็น flat เพื่อเทียบกับ baseline ที่ยังเป็น flat"""
+    """คลี่ object กลับเป็น flat เพื่อเทียบกับ baseline ที่ยังเป็น flat
+
+    เก็บทุก scalar leaf ตาม path เต็ม (รวมของที่อยู่ใน dict ที่เป็น OPAQUE และของที่ซ้อน
+    หลายชั้น) แล้วเสริม alias รูป <base>_<key> ให้กับ dict ที่ไม่ใช่ OPAQUE ด้วย เพื่อให้
+    baseline แบบ flat เดิม (vendor_id / vendor_name) เทียบค่ากับหลังแปลงที่เป็น
+    vendor: {id, name} ได้ตรงกัน — OPAQUE มีผลแค่กับ alias นี้ (และกับ leftover_flat() ที่
+    ไม่ถือ dict พวกนี้เป็น entity reference) ห้ามใช้ตัดการเทียบค่าข้างในออกไปทั้งดุ้น
+    list ระดับบนสุด (เช่น data ของ *.list.json) ก็ต้องเดินด้วย ไม่งั้น flatten() จะ
+    คืนค่าว่างเสมอสำหรับทุก endpoint แบบ list
+    """
     if out is None:
         out = {}
     if isinstance(node, dict):
         for k, v in node.items():
             if k == '_url':
                 continue
-            if isinstance(v, dict) and k not in OPAQUE:
-                for kk, vv in v.items():
-                    if not isinstance(vv, (dict, list)):
-                        out[f'{prefix}{k}_{kk}'] = vv
+            path = f'{prefix}{k}'
+            if isinstance(v, dict):
+                flatten(v, out, f'{path}.')
+                if k not in OPAQUE:
+                    for kk, vv in v.items():
+                        if not isinstance(vv, (dict, list)):
+                            out[f'{path}_{kk}'] = vv
             elif isinstance(v, list):
                 for i, item in enumerate(v):
-                    flatten(item, out, f'{prefix}{k}[{i}].')
-            elif not isinstance(v, dict):
-                out[f'{prefix}{k}'] = v
+                    flatten(item, out, f'{path}[{i}].')
+            else:
+                out[path] = v
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            flatten(item, out, f'{prefix}[{i}].')
     return out
 
 
