@@ -19,8 +19,8 @@ export function ModuleVisual({ visualKey }: { readonly visualKey: VisualKey }) {
       return <RolesViz />;
     case "assign":
       return <AssignViz />;
-    case "period":
-      return <PeriodViz />;
+    case "inventoryPeriod":
+      return <InventoryPeriodViz />;
     case "workflows":
       return <WorkflowsViz />;
     case "docs":
@@ -143,7 +143,7 @@ function AssignViz() {
   );
 }
 
-function PeriodViz() {
+function InventoryPeriodViz() {
   const months = [
     "Jan",
     "Feb",

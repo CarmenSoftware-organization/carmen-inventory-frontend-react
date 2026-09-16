@@ -1,14 +1,14 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import type { Period } from "@/types/period";
+import type { InventoryPeriod } from "@/types/inventory-period";
 
 /**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์มงวดบัญชี (Period)
+ * สร้าง Zod schema สำหรับตรวจสอบฟอร์มรอบสินค้าคงคลัง (InventoryPeriod)
  * @param tv - ฟังก์ชันแปลข้อความ validation
  * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema สำหรับ Period form
+ * @returns Zod schema สำหรับ InventoryPeriod form
  */
-export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createInventoryPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
       fiscal_year: z.coerce
@@ -31,9 +31,9 @@ export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
     );
 }
 
-export type PeriodFormValues = z.infer<ReturnType<typeof createPeriodSchema>>;
+export type InventoryPeriodFormValues = z.infer<ReturnType<typeof createInventoryPeriodSchema>>;
 
-export const EMPTY_FORM: PeriodFormValues = {
+export const EMPTY_FORM: InventoryPeriodFormValues = {
   fiscal_year: new Date().getFullYear(),
   fiscal_month: 1,
   start_at: "",
@@ -42,11 +42,11 @@ export const EMPTY_FORM: PeriodFormValues = {
 };
 
 /**
- * คืนค่าเริ่มต้นของฟอร์มจาก entity Period (หากไม่มีจะคืน EMPTY_FORM)
- * @param period - ข้อมูล Period ที่ต้องการใช้เป็นค่าเริ่มต้น
- * @returns ค่าเริ่มต้นของ PeriodFormValues
+ * คืนค่าเริ่มต้นของฟอร์มจาก entity InventoryPeriod (หากไม่มีจะคืน EMPTY_FORM)
+ * @param period - ข้อมูล InventoryPeriod ที่ต้องการใช้เป็นค่าเริ่มต้น
+ * @returns ค่าเริ่มต้นของ InventoryPeriodFormValues
  */
-export function getDefaultValues(period?: Period | null): PeriodFormValues {
+export function getDefaultValues(period?: InventoryPeriod | null): InventoryPeriodFormValues {
   if (!period) return EMPTY_FORM;
   return {
     fiscal_year: period.fiscal_year,

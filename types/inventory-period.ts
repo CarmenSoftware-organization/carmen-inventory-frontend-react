@@ -1,6 +1,6 @@
-export type PeriodStatus = "open" | "closed" | "locked";
+export type InventoryPeriodStatus = "open" | "closed" | "locked";
 
-export interface Period {
+export interface InventoryPeriod {
   id: string;
   doc_version?: number;
   period: string;
@@ -8,19 +8,19 @@ export interface Period {
   fiscal_month: number;
   start_at: string;
   end_at: string;
-  status: PeriodStatus;
+  status: InventoryPeriodStatus;
 }
 
-export interface CreatePeriodDto {
+export interface CreateInventoryPeriodDto {
   doc_version?: number;
   fiscal_year: number;
   fiscal_month: number;
   start_at: string;
   end_at: string;
-  status: PeriodStatus;
+  status: InventoryPeriodStatus;
 }
 
-export interface GenerateNextPeriodDto {
+export interface GenerateNextInventoryPeriodDto {
   count: number;
   start_day: number;
 }

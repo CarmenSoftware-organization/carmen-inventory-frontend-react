@@ -3,40 +3,40 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import type { Period, PeriodStatus } from "@/types/period";
+import type { InventoryPeriod, InventoryPeriodStatus } from "@/types/inventory-period";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { PERIOD_STATUS_CONFIG } from "@/constant/period";
+import { INVENTORY_PERIOD_STATUS_CONFIG } from "@/constant/inventory-period";
 
-interface UsePeriodTableOptions {
-  periods: Period[];
+interface UseInventoryPeriodTableOptions {
+  periods: InventoryPeriod[];
   totalRecords: number;
   params: ParamsDto;
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
-  onEdit: (period: Period) => void;
+  onEdit: (period: InventoryPeriod) => void;
 }
 
 /**
- * Hook กำหนดคอลัมน์และ config ของตารางงวดบัญชี (Period)
+ * Hook กำหนดคอลัมน์และ config ของตารางรอบสินค้าคงคลัง (InventoryPeriod)
  * @param options - อาร์เรย์ periods, totalRecords, params, tableConfig และ callback onEdit
- * @returns TanStack Table instance สำหรับ Period
+ * @returns TanStack Table instance สำหรับ InventoryPeriod
  * @example
- * const table = usePeriodTable({ periods, totalRecords, params, tableConfig, onEdit });
+ * const table = useInventoryPeriodTable({ periods, totalRecords, params, tableConfig, onEdit });
  */
-export function usePeriodTable({
+export function useInventoryPeriodTable({
   periods,
   totalRecords,
   params,
   tableConfig,
   onEdit,
-}: UsePeriodTableOptions) {
-  const t = useTranslations("systemAdmin.period");
+}: UseInventoryPeriodTableOptions) {
+  const t = useTranslations("systemAdmin.inventoryPeriod");
   const { dateFormat } = useProfile();
 
-  const columns: ColumnDef<Period>[] = [
+  const columns: ColumnDef<InventoryPeriod>[] = [
     {
       accessorKey: "period",
       header: ({ column }) => (
@@ -104,9 +104,9 @@ export function usePeriodTable({
         />
       ),
       cell: ({ row }) => {
-        const status = row.getValue("status") as PeriodStatus;
+        const status = row.getValue("status") as InventoryPeriodStatus;
         const config =
-          PERIOD_STATUS_CONFIG[status] ?? PERIOD_STATUS_CONFIG.open;
+          INVENTORY_PERIOD_STATUS_CONFIG[status] ?? INVENTORY_PERIOD_STATUS_CONFIG.open;
         return (
           <StatusIconLabel
             status={status}
@@ -125,7 +125,7 @@ export function usePeriodTable({
     },
   ];
 
-  return useConfigTable<Period>({
+  return useConfigTable<InventoryPeriod>({
     data: periods,
     columns,
     totalRecords,
