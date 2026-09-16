@@ -242,10 +242,10 @@ export default function PcComponent() {
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
-  const periodTitle = period ? formatPeriodTitle(period.tb_period.period) : "";
+  const periodTitle = period ? formatPeriodTitle(period.tb_inventory_period.period) : "";
 
   const periodEndDate = period
-    ? formatDateUtil(period.tb_period.end_at, dateFormat)
+    ? formatDateUtil(period.tb_inventory_period.end_at, dateFormat)
     : "";
 
   return (

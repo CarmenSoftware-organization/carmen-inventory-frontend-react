@@ -1433,10 +1433,10 @@
           "stat": "247 active users · 38 admins",
           "meta": "3 pending invitations"
         },
-        "period": {
-          "name": "Period",
-          "one": "Fiscal periods, close & reopen.",
-          "long": "Define fiscal months and quarters, freeze them at close, and reopen with a documented reason. Period status drives what every transaction screen will accept.",
+        "inventoryPeriod": {
+          "name": "Inventory Period",
+          "one": "Inventory periods, close & reopen.",
+          "long": "Define inventory months and quarters, freeze them at close, and reopen with a documented reason. Inventory period status drives what every transaction screen will accept.",
           "stat": "May 2026 · Open",
           "meta": "next close · 31 May"
         },
@@ -1600,7 +1600,7 @@
         "master_eco_label": "Master Eco Label",
         "notification_template": "Notification Template",
         "operation_plan_category": "Recipe Category",
-        "period": "Accounting Period",
+        "period": "Inventory Period",
         "period_end": "Period End",
         "physical_count": "Physical Count",
         "physical_count_period": "Physical Count Period",
@@ -1928,14 +1928,14 @@
       "advancedConfig": "Advanced (JSON)",
       "configUnreadable": "This format is not supported by the editor — edit it as JSON below."
     },
-    "period": {
-      "entity": "Period",
-      "title": "Period",
-      "desc": "Accounting periods — open one to post into, close it when the month is done.",
-      "add": "Add Period",
-      "deleteTitle": "Delete Period",
-      "deleteConfirm": "Are you sure you want to delete period FY{year}/M{month}? This action cannot be undone.",
-      "period": "Period",
+    "inventoryPeriod": {
+      "entity": "Inventory Period",
+      "title": "Inventory Period",
+      "desc": "Inventory periods — open one to post into, close it when the month is done.",
+      "add": "Add Inventory Period",
+      "deleteTitle": "Delete Inventory Period",
+      "deleteConfirm": "Are you sure you want to delete inventory period FY{year}/M{month}? This action cannot be undone.",
+      "period": "Inventory Period",
       "fiscalYear": "Fiscal Year",
       "fiscalMonth": "Fiscal Month",
       "startAt": "Start Date",
@@ -1944,7 +1944,7 @@
       "statusOpen": "Open",
       "statusClosed": "Closed",
       "statusLocked": "Locked",
-      "generateNext": "Generate next 12 periods"
+      "generateNext": "Generate next 12 inventory periods"
     },
     "configEmail": {
       "title": "Email Configuration",
@@ -4558,7 +4558,7 @@
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
     "emailProfile": "Email Profiles",
-    "period": "Period",
+    "inventoryPeriod": "Inventory Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",
     "activityLog": "Activity Monitor",

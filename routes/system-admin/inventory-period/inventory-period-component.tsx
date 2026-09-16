@@ -23,27 +23,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  usePeriod,
-  useGenerateNextPeriod,
-  useExportPeriod,
-} from "./use-period";
+  useInventoryPeriod,
+  useGenerateNextInventoryPeriod,
+  useExportInventoryPeriod,
+} from "./use-inventory-period";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
-import type { Period } from "@/types/period";
+import type { InventoryPeriod } from "@/types/inventory-period";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
-import PeriodCard from "./period-card";
-import { PERIOD_STATUS_OPTIONS, PERIOD_STATUS_CONFIG } from "@/constant/period";
+import InventoryPeriodCard from "./inventory-period-card";
+import { INVENTORY_PERIOD_STATUS_OPTIONS, INVENTORY_PERIOD_STATUS_CONFIG } from "@/constant/inventory-period";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
-const PeriodDialog = lazy(() =>
-  import("./period-dialog").then((mod) => ({ default: mod.PeriodDialog })),
+const InventoryPeriodDialog = lazy(() =>
+  import("./inventory-period-dialog").then((mod) => ({ default: mod.InventoryPeriodDialog })),
 );
 import { cn } from "@/lib/utils";
-import { usePeriodTable } from "./use-period-table";
+import { useInventoryPeriodTable } from "./use-inventory-period-table";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -53,29 +53,29 @@ import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
 /**
- * Component หลักของหน้ารายการงวดบัญชี (Period) รองรับ desktop/mobile, filter, และการสร้างงวดถัดไป
- * @returns React element ของหน้า Period
+ * Component หลักของหน้ารายการรอบสินค้าคงคลัง (InventoryPeriod) รองรับ desktop/mobile, filter, และการสร้างรอบถัดไป
+ * @returns React element ของหน้า InventoryPeriod
  * @example
- * <PeriodComponent />
+ * <InventoryPeriodComponent />
  */
-export default function PeriodComponent() {
-  const generateNext = useGenerateNextPeriod();
-  const { exportPeriod, isExporting } = useExportPeriod();
+export default function InventoryPeriodComponent() {
+  const generateNext = useGenerateNextInventoryPeriod();
+  const { exportInventoryPeriod, isExporting } = useExportInventoryPeriod();
   const isMobile = useIsMobile();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
-  const [editPeriod, setEditPeriod] = useState<Period | null>(null);
+  const [editInventoryPeriod, setEditInventoryPeriod] = useState<InventoryPeriod | null>(null);
   const { params, search, setSearch, tableConfig } = useDataGridState();
-  const t = useTranslations("systemAdmin.period");
+  const t = useTranslations("systemAdmin.inventoryPeriod");
   const tc = useTranslations("common");
   const exportErrorToast = useExportErrorToast();
   const tt = useTranslations("toast");
 
-  // PERIOD_STATUS_OPTIONS มา createStatusFilterOptions — label เป็น literal
+  // INVENTORY_PERIOD_STATUS_OPTIONS มา createStatusFilterOptions — label เป็น literal
   // string ล้วน (เช่น "OPEN") ไม่ใช่ i18n key จึงต้องใช้ control: "custom" ห่อ
   // StatusFilter ตรง ๆ แทน control: "status" ทั่วไป — เหมือน pattern ของ
   // PO_TYPE/CN_TYPE ใน Task 19
-  const periodFilterFields = useMemo<FilterFieldDef[]>(
+  const inventoryPeriodFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "filter",
@@ -86,7 +86,7 @@ export default function PeriodComponent() {
           <StatusFilter
             value={value}
             onChange={onChange}
-            options={PERIOD_STATUS_OPTIONS}
+            options={INVENTORY_PERIOD_STATUS_OPTIONS}
             className="w-full"
           />
         ),
@@ -97,25 +97,25 @@ export default function PeriodComponent() {
 
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PERIOD,
-    fields: periodFilterFields,
+    fields: inventoryPeriodFilterFields,
   });
 
   const combinedParams = { ...params, filter: lf.filterParam };
 
   const useInfiniteScroll = !!isMobile;
-  const { data, isLoading, error, refetch } = usePeriod(combinedParams, {
+  const { data, isLoading, error, refetch } = useInventoryPeriod(combinedParams, {
     enabled: !useInfiniteScroll,
   });
 
-  const grid = useGridPagination<Period>({
-    useListHook: usePeriod,
+  const grid = useGridPagination<InventoryPeriod>({
+    useListHook: useInventoryPeriod,
     params: combinedParams,
     enabled: useInfiniteScroll,
   });
 
   const handleExport = async () => {
     try {
-      const count = await exportPeriod({
+      const count = await exportInventoryPeriod({
         params: combinedParams,
         columns: [
           { header: t("period"), value: (r) => r.period, width: 14 },
@@ -133,7 +133,7 @@ export default function PeriodComponent() {
           { header: t("endAt"), value: (r) => r.end_at ?? "", width: 14 },
           {
             header: t("status"),
-            value: (r) => PERIOD_STATUS_CONFIG[r.status]?.label ?? r.status,
+            value: (r) => INVENTORY_PERIOD_STATUS_CONFIG[r.status]?.label ?? r.status,
             width: 12,
           },
         ],
@@ -153,13 +153,13 @@ export default function PeriodComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  const table = usePeriodTable({
+  const table = useInventoryPeriodTable({
     periods,
     totalRecords,
     params,
     tableConfig,
     onEdit: (period) => {
-      setEditPeriod(period);
+      setEditInventoryPeriod(period);
       setDialogOpen(true);
     },
   });
@@ -222,7 +222,7 @@ export default function PeriodComponent() {
             <Button
               size="sm"
               onClick={() => {
-                setEditPeriod(null);
+                setEditInventoryPeriod(null);
                 setDialogOpen(true);
               }}
             >
@@ -280,7 +280,7 @@ export default function PeriodComponent() {
           search={search}
           onSearch={setSearch}
           lf={lf}
-          fields={periodFilterFields}
+          fields={inventoryPeriodFilterFields}
           onSaveViewClick={() => setSaveViewDialogOpen(true)}
         />
       </div>
@@ -298,11 +298,11 @@ export default function PeriodComponent() {
             <>
               <div className="grid grid-cols-1 gap-3">
                 {periods.map((p) => (
-                  <PeriodCard
+                  <InventoryPeriodCard
                     key={p.id}
                     item={p}
                     onEdit={(period) => {
-                      setEditPeriod(period);
+                      setEditInventoryPeriod(period);
                       setDialogOpen(true);
                     }}
                   />
@@ -348,10 +348,10 @@ export default function PeriodComponent() {
       </div>
 
       <Suspense fallback={null}>
-        <PeriodDialog
+        <InventoryPeriodDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          period={editPeriod}
+          period={editInventoryPeriod}
         />
       </Suspense>
 

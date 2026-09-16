@@ -616,8 +616,16 @@ export const router = createBrowserRouter([
                   import("./system-admin/notification-template/notification-template-edit.route"),
               },
               {
+                path: "inventory-period",
+                lazy: () =>
+                  import(
+                    "./system-admin/inventory-period/inventory-period.route"
+                  ),
+              },
+              // เดิมหน้านี้อยู่ที่ /system-admin/period — กัน bookmark เก่าพัง
+              {
                 path: "period",
-                lazy: () => import("./system-admin/period/period.route"),
+                element: <Navigate to="/system-admin/inventory-period" replace />,
               },
               {
                 path: "user-activity",

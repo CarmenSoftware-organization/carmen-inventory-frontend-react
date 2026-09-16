@@ -589,9 +589,9 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.system_configuration.view,
       },
       {
-        name: "period",
-        path: "/system-admin/period",
-        licenseFeature: "system_admin.period", // app:periods
+        name: "inventoryPeriod",
+        path: "/system-admin/inventory-period",
+        licenseFeature: "system_admin.inventory_period", // app:inventory-periods
         icon: Calendar,
         separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
