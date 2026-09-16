@@ -41,7 +41,7 @@ import {
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrFormValues } from "./pr-form-schema";
-import { usePrItemTable } from "./pr-item-table";
+import { usePrItemTable } from "./use-pr-item-table";
 import { usePrItemFilter } from "./use-pr-item-filter";
 import {
   PrActionDialog,

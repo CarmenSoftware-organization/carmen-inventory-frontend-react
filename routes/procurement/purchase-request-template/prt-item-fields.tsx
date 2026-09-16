@@ -13,7 +13,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { SettingSection } from "@/components/ui/setting-section";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrtFormValues } from "./prt-form-schema";
-import { usePrtItemTable } from "./prt-item-table";
+import { usePrtItemTable } from "./use-prt-item-table";
 import { PRT_ITEM } from "./prt-form-schema";
 import EmptyComponent from "@/components/empty-component";
 import { getDeleteDescription } from "@/lib/form-utils";

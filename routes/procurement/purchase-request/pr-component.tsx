@@ -30,7 +30,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PrStatusSelectDialog } from "./pr-select-dialog";
 import { PrListDialogs } from "./pr-list-dialogs";
 import { ErrorState } from "@/components/ui/error-state";
-import { usePurchaseRequestTable } from "./pr-table";
+import { usePrTable } from "./use-pr-table";
 import PrCardList from "./pr-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
@@ -211,7 +211,7 @@ export default function PurchaseRequestComponent() {
     setBatchDeleteOpen(true);
   };
 
-  const table = usePurchaseRequestTable({
+  const table = usePrTable({
     items,
     totalRecords,
     params,

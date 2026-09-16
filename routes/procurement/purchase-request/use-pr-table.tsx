@@ -62,7 +62,7 @@ interface UsePurchaseRequestTableOptions {
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
 }
 
-export function usePurchaseRequestTable({
+export function usePrTable({
   items,
   totalRecords,
   params,

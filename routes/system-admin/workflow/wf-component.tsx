@@ -29,7 +29,7 @@ import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { cn } from "@/lib/utils";
-import { useWfTable } from "./wf-table";
+import { useWfTable } from "./use-wf-table";
 import { useWfRowMutations } from "./use-wf-row-mutations";
 import { STATUS_OPTIONS, WF_TYPE_OPTIONS } from "./wf-filter-options";
 import { useListFilters } from "@/hooks/use-list-filters";
