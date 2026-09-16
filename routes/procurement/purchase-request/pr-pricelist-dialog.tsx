@@ -238,6 +238,9 @@ export function PrPricelistDialog({
           unit_id: unitId,
           at_date: atDate,
           currency_id: currencyId,
+          // ราคาขึ้นกับจำนวนที่สั่ง (ขั้นบันได MOQ) — 0 ถูก buildQueryString
+          // ตัดทิ้งเองเมื่อยังไม่ได้กรอกจำนวน backend จะได้ตกไปที่ขั้นต่ำสุด
+          qty: requestedQty || "",
         });
         // no-store — ราคาเปลี่ยนได้ระหว่างวัน ห้ามกินของที่ browser cache ไว้
         const res = await httpClient.get(url, { cache: "no-store" });
@@ -253,7 +256,7 @@ export function PrPricelistDialog({
     };
 
     fetchPriceLists();
-  }, [open, productId, unitId, currencyId, atDate, buCode, t]);
+  }, [open, productId, unitId, currencyId, atDate, requestedQty, buCode, t]);
 
   const handleSelect = (entry: PricelistEntry) => {
     if (readOnly) return;
