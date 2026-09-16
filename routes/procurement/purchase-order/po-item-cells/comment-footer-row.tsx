@@ -22,7 +22,9 @@ export const CommentFooterRow = memo(function CommentFooterRow({
 
   if (index === -1) return null;
   return (
-    <div className="flex items-center gap-2 px-3">
+    // pb เท่ากับ py ของเซลล์แถวแม่ (2.5) — `<td>` ของแถวหมายเหตุไม่มี padding
+    // ของตัวเอง ช่องไฟด้านล่างจึงต้องมาจากตรงนี้ ไม่งั้นช่องกรอกชนเส้นคั่นแถว
+    <div className="flex items-center gap-2 px-3 pb-2.5">
       <Input
         id={`items-${index}-comment`}
         placeholder={placeholder}
