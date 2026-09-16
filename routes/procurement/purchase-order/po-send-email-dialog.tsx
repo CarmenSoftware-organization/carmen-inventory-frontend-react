@@ -32,7 +32,6 @@ import {
   EMAIL_PLACEHOLDERS,
   fillTemplate,
   htmlToPlainText,
-  plainTextToHtml,
   templatesForDocType,
 } from "@/lib/email-template";
 import { formatDate } from "@/lib/date-utils";
@@ -152,11 +151,11 @@ function EmailChipField({
  * ให้ผู้ขายทางอีเมล
  *
  * - ไม่มีโปรไฟล์ที่เปิดใช้งานเลย → แสดงข้อความ + ลิงก์ไปหน้าตั้งค่า ไม่มีปุ่มส่งให้กด
- * - Subject/Body ตั้งต้นจาก template ของโปรไฟล์ที่เลือก แทน placeholder ด้วยค่าจริงของ PO
- *   — ผู้ใช้แก้ช่องไหนแล้ว สลับโปรไฟล์จะไม่ทับช่องนั้นอีก (เก็บ dirty flag แยกต่อช่อง
- *   ผ่าน ref ไม่ใช้ `formState.isDirty` เพราะฟอร์มนี้ไม่ได้ใช้ react-hook-form)
- * - CC ผูกกับโปรไฟล์ตรง ๆ (`default_cc`) — สลับโปรไฟล์แล้วเปลี่ยนตามเสมอ ต่างจาก
- *   subject/body เพราะเป็นค่ามาตรฐานของผู้ส่งคนนั้น ไม่ใช่ข้อความที่ผู้ใช้พิมพ์เอง
+ * - Subject/Body/CC ตั้งต้นจากข้อความที่เลือกในคลัง (`email_templates`) แทน placeholder
+ *   ด้วยค่าจริงของ PO — ผู้ใช้แก้ช่องไหนแล้ว สลับข้อความจะไม่ทับช่องนั้นอีก (เก็บ dirty flag
+ *   แยกต่อช่องผ่าน ref ไม่ใช้ `formState.isDirty` เพราะฟอร์มนี้ไม่ได้ใช้ react-hook-form)
+ * - โปรไฟล์ผู้ส่งคุมแค่ "ส่งจากใคร/ผ่าน SMTP ไหน" เท่านั้น สลับโปรไฟล์จึงไม่แตะหัวเรื่อง
+ *   เนื้อความ หรือ CC
  * - ส่งเสร็จอ่าน `sent`/`rejected` เสมอ — ไม่ปิด dialog ถ้าส่งไม่ถึงผู้รับบางคน/ทั้งหมด
  *   ให้ผู้ใช้เห็นค่าที่กรอกไว้และลองใหม่ได้ทันที
  */
@@ -179,8 +178,7 @@ export function PoSendEmailDialog({
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);
-  // คลังข้อความว่าง = ไม่ใช่ข้อผิดพลาด — ตกไปใช้เทมเพลตที่ติดมากับโปรไฟล์ผู้ส่ง
-  // (พฤติกรรมเดิมก่อนมี email_templates) BU ที่ตั้งค่าไว้แล้วจึงไม่พังตอนอัปเดต
+  // คลังข้อความว่าง = ไม่ใช่ข้อผิดพลาด — หัวเรื่อง/เนื้อความเริ่มจากช่องว่างให้ผู้ใช้พิมพ์เอง
   const poTemplates = templatesForDocType(emailTemplates, "po");
   const isLoading =
     profilesLoading || templatesLoading || vendorQuery.isLoading;
@@ -215,26 +213,19 @@ export function PoSendEmailDialog({
   };
 
   /**
-   * หัวเรื่อง/เนื้อความตั้งต้น — ข้อความจากคลัง (`email_templates`) มาก่อนเสมอ
-   * ถ้า BU ยังไม่ได้ตั้งคลังไว้จึงตกไปใช้เทมเพลตที่ติดมากับโปรไฟล์ผู้ส่งแบบเดิม
+   * หัวเรื่อง/เนื้อความตั้งต้นมาจากคลังข้อความ (`email_templates`) ทางเดียว —
+   * โปรไฟล์ผู้ส่งไม่ถือเทมเพลตอีกแล้ว คลังว่าง = เริ่มจากช่องว่างให้ผู้ใช้พิมพ์เอง
    */
-  const subjectFrom = (template?: EmailTemplate, profile?: EmailProfile) =>
+  const subjectFrom = (template?: EmailTemplate) =>
     fillTemplate(
-      template?.subject_template ?? profile?.subject_template ?? "",
+      template?.subject_template ?? "",
       placeholderValues,
       "text",
       "po",
     );
 
-  const bodyFrom = (template?: EmailTemplate, profile?: EmailProfile) =>
-    fillTemplate(
-      // เทมเพลตของโปรไฟล์เป็นข้อความล้วนมาแต่เดิม — ต้องแปลงเป็น HTML ก่อน
-      // ไม่งั้นการขึ้นบรรทัดใหม่หายหมดตอนเข้าตัวแก้ไข
-      template?.body_template ?? plainTextToHtml(profile?.body_template ?? ""),
-      placeholderValues,
-      "html",
-      "po",
-    );
+  const bodyFrom = (template?: EmailTemplate) =>
+    fillTemplate(template?.body_template ?? "", placeholderValues, "html", "po");
 
   // เติมค่าตั้งต้นครั้งเดียวต่อการเปิด dialog หนึ่งรอบ — รอทั้งโปรไฟล์และผู้ขายโหลด
   // เสร็จก่อน (ไม่งั้น "To" จะว่างเพราะยังไม่รู้อีเมลผู้ขาย) ปิดแล้วเปิดใหม่ = เริ่มนับหนึ่งใหม่
@@ -251,7 +242,6 @@ export function PoSendEmailDialog({
         ?.id ??
       enabledProfiles[0]?.id ??
       "";
-    const profile = enabledProfiles.find((p) => p.id === defaultId);
 
     const contacts = vendorQuery.data?.vendor_contact ?? [];
     const vendorEmail =
@@ -264,13 +254,9 @@ export function PoSendEmailDialog({
     setProfileId(defaultId);
     setTemplateId(template?.id ?? "");
     setTo(vendorEmail ? [vendorEmail] : []);
-    setCc(
-      template?.default_cc?.length
-        ? template.default_cc
-        : (profile?.default_cc ?? []),
-    );
-    setSubject(subjectFrom(template, profile));
-    setBody(bodyFrom(template, profile));
+    setCc(template?.default_cc ?? []);
+    setSubject(subjectFrom(template));
+    setBody(bodyFrom(template));
     setAttachPdf(true);
     setToError(false);
     setSubjectError(false);
@@ -290,19 +276,6 @@ export function PoSendEmailDialog({
     vendorQuery.data,
   ]);
 
-  const handleProfileChange = (nextId: string) => {
-    setProfileId(nextId);
-    const profile = enabledProfiles.find((p) => p.id === nextId);
-    if (!profile) return;
-    // CC ของโปรไฟล์ใช้เฉพาะตอนที่ข้อความที่เลือกไว้ไม่ได้กำหนด CC ของตัวเอง
-    const template = poTemplates.find((x) => x.id === templateId);
-    if (!template?.default_cc?.length) setCc(profile.default_cc);
-    // ไม่มีข้อความจากคลัง = เนื้อความยังมาจากโปรไฟล์ สลับโปรไฟล์จึงต้องเปลี่ยนตาม
-    if (template) return;
-    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(undefined, profile));
-    if (!isBodyDirtyRef.current) setBody(bodyFrom(undefined, profile));
-  };
-
   /**
    * เลือกข้อความจากคลัง — ทับหัวเรื่อง/เนื้อความที่ผู้ใช้ยังไม่ได้แก้เองเท่านั้น
    * (แก้แล้วแปลว่าตั้งใจเขียนของใบนี้ ไม่ควรโดนกลืนเพราะเผลอสลับ dropdown)
@@ -311,10 +284,9 @@ export function PoSendEmailDialog({
     setTemplateId(nextId);
     const template = poTemplates.find((x) => x.id === nextId);
     if (!template) return;
-    const profile = enabledProfiles.find((p) => p.id === profileId);
     if (template.default_cc?.length) setCc(template.default_cc);
-    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(template, profile));
-    if (!isBodyDirtyRef.current) setBody(bodyFrom(template, profile));
+    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(template));
+    if (!isBodyDirtyRef.current) setBody(bodyFrom(template));
   };
 
   const handleClose = (next: boolean) => {
@@ -323,15 +295,15 @@ export function PoSendEmailDialog({
   };
 
   const handleSend = () => {
-    // Admin-created profiles can leave subject_template/body_template empty (schema doesn't
-    // require them — see email-profile-schema.ts) while the backend's send-email DTO requires
-    // both non-empty (purchase-order.send-email.dto.ts, subject/body: z.string().min(1)).
-    // Without this check the first admin to hit that gap sees a 400 with no explanation of
-    // which field is empty. Checked here, not just "to", for the same reason "to" is checked:
-    // a genuine send attempt should never reach the backend already known to fail.
-    // โปรไฟล์ที่ admin สร้างเองปล่อย subject_template/body_template ว่างได้ (schema ไม่บังคับ)
-    // แต่ backend บังคับทั้งคู่ห้ามว่าง ถ้าไม่เช็คตรงนี้ admin คนแรกที่เจอช่องว่างนี้จะได้ 400
-    // โดยไม่รู้ว่าช่องไหนว่าง จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
+    // A BU with no email message in the store starts with an empty subject/body, while the
+    // backend's send-email DTO requires both non-empty (purchase-order.send-email.dto.ts,
+    // subject/body: z.string().min(1)). Without this check the first user to hit that gap sees
+    // a 400 with no explanation of which field is empty. Checked here, not just "to", for the
+    // same reason "to" is checked: a genuine send attempt should never reach the backend
+    // already known to fail.
+    // BU ที่ยังไม่มีข้อความในคลัง = หัวเรื่อง/เนื้อความเริ่มจากว่าง แต่ backend บังคับทั้งคู่
+    // ห้ามว่าง ถ้าไม่เช็คตรงนี้ผู้ใช้คนแรกที่เจอช่องว่างนี้จะได้ 400 โดยไม่รู้ว่าช่องไหนว่าง
+    // จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
     const trimmedSubject = subject.trim();
     // เนื้อความเป็น HTML แล้ว — `<p></p>` ที่ตัวแก้ไขทิ้งไว้ไม่ใช่เนื้อหา
     const hasSubjectError = trimmedSubject.length === 0;
@@ -416,7 +388,7 @@ export function PoSendEmailDialog({
               <FieldLabel htmlFor="pse-profile" required>
                 {t("profile")}
               </FieldLabel>
-              <Select value={profileId} onValueChange={handleProfileChange}>
+              <Select value={profileId} onValueChange={setProfileId}>
                 <SelectTrigger id="pse-profile" className="w-full">
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
