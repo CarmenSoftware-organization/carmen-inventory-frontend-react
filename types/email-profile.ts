@@ -11,11 +11,6 @@ export interface EmailProfile {
   };
   from_email: string;
   from_name: string;
-  reply_to: string;
-  default_cc: string[];
-  subject_template: string;
-  body_template: string;
-  note: string;
 }
 
 export interface EmailProfilesValue {

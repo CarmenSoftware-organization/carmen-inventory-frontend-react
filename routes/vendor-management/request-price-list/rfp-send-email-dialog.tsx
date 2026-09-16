@@ -253,19 +253,8 @@ export function RfpSendEmailDialog({
     enabledProfiles.find((p) => p.id === emailProfiles.default_profile_id) ??
     enabledProfiles[0];
   const profileId = pickedProfileId ?? defaultProfile?.id ?? "";
-  // CC ผูกกับโปรไฟล์ตรง ๆ — สลับโปรไฟล์แล้วเปลี่ยนตามเสมอ ต่างจากหัวเรื่อง/ข้อความ
-  // ที่เป็นของคำขอใบนี้ ไม่ใช่ค่ามาตรฐานของผู้ส่ง
-  const cc =
-    pickedCc ??
-    (selectedTemplate?.default_cc?.length
-      ? selectedTemplate.default_cc
-      : (enabledProfiles.find((p) => p.id === profileId)?.default_cc ?? []));
-
-  const handleProfileChange = (nextId: string) => {
-    setPickedProfileId(nextId);
-    // เลือกโปรไฟล์ใหม่ = CC กลับไปตามโปรไฟล์นั้น ทิ้งที่แก้ไว้เอง
-    setPickedCc(null);
-  };
+  // CC ตั้งต้นมาจากข้อความที่เลือกในคลังเท่านั้น — โปรไฟล์ผู้ส่งไม่ถือ CC ประจำแล้ว
+  const cc = pickedCc ?? selectedTemplate?.default_cc ?? [];
 
   /**
    * สลับข้อความสำเร็จรูป — ทับหัวเรื่อง/เนื้อความที่ยังไม่ได้แก้เองเท่านั้น
@@ -366,7 +355,7 @@ export function RfpSendEmailDialog({
           <div className="space-y-4">
             <Field>
               <FieldLabel htmlFor="rse-profile">{t("profile")}</FieldLabel>
-              <Select value={profileId} onValueChange={handleProfileChange}>
+              <Select value={profileId} onValueChange={setPickedProfileId}>
                 <SelectTrigger id="rse-profile" className="w-full">
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
