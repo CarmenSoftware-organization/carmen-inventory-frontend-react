@@ -543,7 +543,12 @@ function DataGridTableBodyRowCell<TData>({
         // ยกเว้นลูกที่เป็น component ของ design system (`data-slot`) — badge/checkbox
         // พวกนี้เป็น inline-flex การเปลี่ยนเป็น -webkit-box ทำให้ของข้างในหาย
         // (จุดสีของ StatusDotBadge หายไปทั้งคอลัมน์มาแล้ว) และมันสั้นอยู่แล้วไม่ต้องตัด
-        <div className="line-clamp-2 [&>*]:max-w-full [&>*:not([data-slot])]:line-clamp-2">
+        // ps-px + -ms-px ขยายกล่อง clip ไปทางซ้าย 1px โดยตำแหน่งข้อความไม่ขยับ
+        // (margin ลบหักล้าง padding พอดี) — `line-clamp` คือ overflow:hidden ที่
+        // ขอบกล่องตรงกับจุดเริ่มข้อความพอดี ส่วนสระหน้าไทย (ไ โ ใ) มี left side
+        // bearing ยื่นซ้ายเกิน advance width หัวสระเลยโดนเฉือนทุกเซลล์ที่ขึ้นต้น
+        // ด้วยสระพวกนี้ · padding ของ `<td>` ช่วยไม่ได้ เพราะ clip เกิดที่ div นี้
+        <div className="line-clamp-2 ps-px -ms-px [&>*]:max-w-full [&>*:not([data-slot])]:ps-px [&>*:not([data-slot])]:-ms-px [&>*:not([data-slot])]:line-clamp-2">
           {children}
         </div>
       ) : (
