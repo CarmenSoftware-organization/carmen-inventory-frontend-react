@@ -944,87 +944,60 @@ git commit -m "feat(api): serializer กลุ่ม inventory อ้าง enti
 
 ---
 
-### Task 9: แปลง serializer กลุ่ม config/master ที่เหลือ
+### Task 9: แปลง serializer กลุ่ม config/master ที่เหลือ (เฉพาะ runtime)
 
 **Files:**
-- Modify: serializer ที่เหลือทั้งหมดที่ `check-flat-refs.ts` ยังรายงาน (รวม `product`, `business-unit`, `cost-center`, `chart-of-accounts`, `adjustment-type`, `application-role`, `cluster`, `unit-conversion` ฯลฯ)
+- Modify: serializer + controller ที่เหลือใน `apps/backend-gateway/src` ซึ่ง `check-flat-refs.ts --runtime-only` ยังรายงาน
 
 **Interfaces:**
-- Consumes: `entityRef`, `collapseRefs`, `RefMap` จาก Task 3
-- Produces: `check-flat-refs.ts` รายงานเหลือเฉพาะไฟล์ `.dto.ts` (ฝั่ง request) เท่านั้น
+- Consumes: `@CollapseRefs` + collapse function จาก Task 7 · `gen-ref-map.ts`
+- Produces: ตัวนับ runtime ลดลงจนเหลือเฉพาะที่อธิบายได้
 
-**งานเพิ่มของ task นี้ — เอกสาร Swagger ที่จะกลายเป็นคำโกหก**
+**ขอบเขต: runtime เท่านั้น — ไม่รวมไฟล์ `swagger/` และ `example/`**
 
-ไฟล์ใต้ `swagger/` กับ `example/` เป็น NestJS DTO class ที่เขียนฟิลด์แบบ
-`product_id?: string;` (ชนิดตัวเล็ก) และ object literal ที่ค่าเป็น string ในเครื่องหมายคำพูด
-**`FIELD_RE` ของ `check-flat-refs.ts` อ่านทั้งสองแบบไม่ออก** (มันต้องการค่าที่ขึ้นต้นด้วย `z.`
-หรือตัวพิมพ์ใหญ่) ไฟล์กลุ่มนี้จึงแทบไม่ถูกนับเลย — รายงานแค่ 1 จาก ~62 group ที่มีจริง
+งานเอกสาร (594 group) ถูกแยกออกเป็นการตัดสินใจต่างหาก เพราะมันใหญ่กว่างาน runtime
+เกือบสองเท่าและไม่กระทบพฤติกรรม API เลย ใช้ `--runtime-only` เป็น gate ของ task นี้
 
-ไฟล์พวกนี้ถูก import เข้า controller จริง (เช่น `purchase-orders.controller.ts:71`)
-และเป็นที่มาของเอกสาร API ที่เผยแพร่ ถ้าไม่แก้ เอกสารจะโชว์ `vendor_id` / `vendor_name`
-ต่อไปทั้งที่ API จริงส่ง `vendor: {...}` แล้ว
+**สิ่งที่ต้องทำต่างจาก task ก่อนหน้า:** ไฟล์กลุ่มนี้ส่วนใหญ่ **ไม่มี golden snapshot**
+จึงต้อง **curl endpoint จริงมาสร้าง REFS map** ไม่ใช่เชื่อ schema — บทเรียนจาก
+inventory-transaction ที่ decorator ยิงผิดชั้นแล้วกลายเป็น no-op เงียบ ๆ
+**"ไม่มี snapshot" ไม่เท่ากับ "ตรวจไม่ได้"**
 
-ดังนั้น task นี้ต้องทำสองอย่าง:
-1. **ขยาย `FIELD_RE` ใน `scripts/check-flat-refs.ts`** ให้จับฟิลด์ที่ค่าเป็นชนิดตัวเล็ก
-   (`string`, `number`, `boolean`) และค่าที่เป็น string ในเครื่องหมายคำพูดได้ด้วย
-   ตัวเลขที่ต้องไล่จะกระโดดขึ้นราว 62 — นั่นถูกต้องแล้ว ไม่ใช่ความผิดพลาด
-2. แปลงไฟล์ `swagger/` และ `example/` ให้ตรงกับรูป object เหมือน serializer
-
-**false positive ที่รู้ตัวแล้ว 1 จุด:** `application_role_id: ApplicationRoleIdAddDto` ใน
-`config_user-application-roles/swagger/request.ts` — เป็น wrapper ของการเพิ่ม/ลบทีละหลายรายการ
-ไม่ใช่ entity reference ให้เติม base นั้นลง `REF_ALLOWLIST` พร้อมคอมเมนต์บอกเหตุผล
-
-- [ ] **Step 1: ดูรายชื่อที่เหลือ**
+- [ ] **Step 1: ดูรายการที่เหลือฝั่ง runtime**
 
 ```bash
 cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
-bun run scripts/check-flat-refs.ts 2>&1 | grep serializer | sort -u
+bun run scripts/check-flat-refs.ts --runtime-only 2>&1 | grep -A200 "=== runtime" | head -60
 ```
 
-- [ ] **Step 2: แปลงทีละไฟล์**
+- [ ] **Step 2: จัดกลุ่มตาม endpoint แล้วทำทีละกลุ่ม**
 
-รูปแบบการแก้ (เหมือนกันทุกไฟล์ — ไม่ต้องย้อนไปอ่าน task อื่น):
+สำหรับแต่ละ serializer:
+1. หา route ที่เสิร์ฟมันจริง (`grep` หา controller ที่ import schema นั้น)
+2. **curl endpoint นั้นด้วย token จาก `/tmp/carmen-contract-baseline/token.txt`**
+3. สร้าง REFS จาก payload ที่ได้ ไม่ใช่จาก schema
+4. ติด `@CollapseRefs` ที่ route โดยใช้ path ที่ตรงกับโครงสร้าง payload จริง
+5. curl ซ้ำ ยืนยันว่า reference กลายเป็น object และไม่มีคีย์ flat เหลือ
 
-```ts
-import { collapseRefs, entityRef, type RefMap } from '../entity-ref';
+**ถ้า endpoint ไหน curl ไม่ได้ (ต้องมีข้อมูลเฉพาะ / route ไม่ถูก mount) ให้ข้ามแล้วบันทึกไว้
+อย่าเดา REFS แล้วติด decorator ไปเฉย ๆ** — decorator ที่ผิด path คือ no-op เงียบ
+ซึ่งแย่กว่าไม่ทำ เพราะทำให้ตัวนับดูดีขึ้นทั้งที่ของจริงไม่เปลี่ยน
 
-// วางบล็อกที่ได้จาก gen-ref-map.ts
-const REFS = {
-  location: ['id', 'name', 'code'],
-  product: ['id', 'name', 'local_name', 'code'],
-} satisfies RefMap;
-
-// ห่อ schema ที่ export ด้วย collapseRefs แล้วเปลี่ยนฟิลด์ flat เป็น entityRef
-export const SomeResponseSchema = collapseRefs(
-  REFS,
-  z.object({
-    location: entityRef(['id', 'name', 'code']),
-    product: entityRef(['id', 'name', 'local_name', 'code']),
-    // ...ฟิลด์อื่นคงเดิม
-  }),
-);
-```
-
-**ชื่อ export ต้องไม่เปลี่ยน** controller อ้างชื่อเดิมอยู่ · ถ้าไฟล์มีทั้ง schema ส่วนหัวและ
-schema บรรทัดรายการ ต้องห่อ **แยกกันคนละ REFS** เพราะ `collapseRefs` ทำงานที่ระดับ
-object ก้อนเดียว ไม่ไล่ลงไปในลูก
-
-ไฟล์กลุ่มนี้ส่วนใหญ่มี reference แค่ 1–3 ตัว (เช่น `cost_center_group`, `account_group`, `default_currency`, `cluster`, `database_pool`, `inventory_unit`) แก้เร็วกว่ากลุ่มเอกสารมาก
-
-- [ ] **Step 3: ยืนยันว่าฝั่ง response สะอาดหมดแล้ว**
+- [ ] **Step 3: ยืนยัน**
 
 ```bash
 bunx tsc --noEmit -p apps/backend-gateway/tsconfig.json
-bun run scripts/check-flat-refs.ts 2>&1 | grep -c serializer
+bun run scripts/check-flat-refs.ts --runtime-only 2>&1 | tail -3
+cd ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react &&   python3 scripts/probe-contract.py /tmp/carmen-contract-baseline
+cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/backend-gateway && bunx jest --silent 2>&1 | grep -E "^(Tests:|Test Suites:)"
 ```
-Expected: `0`
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Commit ทีละกลุ่ม ไม่รวบ**
 
 ```bash
 git status --short
-git add apps/backend-gateway/src
-git commit -m "feat(api): serializer กลุ่ม config/master อ้าง entity ด้วย object แทน flat field"
+git add <ไฟล์ของกลุ่มนั้น>
+git commit -m "feat(api): serializer <กลุ่ม> อ้าง entity ด้วย object แทน flat field"
 ```
 
 ---
