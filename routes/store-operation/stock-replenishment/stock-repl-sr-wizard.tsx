@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
+import {
+  type ColumnDef,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { useCreateStockReplSr } from "./use-stock-replenishment";
@@ -59,6 +70,8 @@ export function StockReplSrWizard({
   products,
   onCreated,
 }: StockReplSrWizardProps) {
+  // React Compiler แช่ JSX ของ DataGrid ได้ (table เป็น ref คงที่) — พิมพ์จำนวนแล้วตารางจะไม่ขยับ
+  "use no memo";
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
@@ -84,13 +97,96 @@ export function StockReplSrWizard({
   const qtyOf = (product: ProductLocation) =>
     qtys.get(product.id) ?? product.reorder_qty;
 
-  const setQty = (product: ProductLocation, qty: number) => {
+  // functional update → ไม่ต้องรู้ค่า qtys ปัจจุบัน identity จึงคงที่ตลอดชีวิต dialog
+  const setQty = useCallback((product: ProductLocation, qty: number) => {
     setQtys((prev) => new Map(prev).set(product.id, qty));
-  };
+  }, []);
 
-  const handleRemove = (product: ProductLocation) => {
+  const handleRemove = useCallback((product: ProductLocation) => {
     setRemoved((prev) => new Set(prev).add(product.id));
-  };
+  }, []);
+
+  /** พก qty ปัจจุบันมากับแถว — cell จะได้อ่านค่าได้โดยที่ `columns` ไม่ต้อง recreate
+   *  ทุกคีย์ที่พิมพ์ (recreate = cell remount = focus หาย) */
+  const tableRows = activeProducts.map((product) => ({
+    product,
+    qty: qtyOf(product),
+  }));
+  type SrTableRow = (typeof tableRows)[number];
+
+  const columns = useMemo<ColumnDef<SrTableRow>[]>(
+    () => [
+      {
+        id: "index",
+        header: "#",
+        size: 48,
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground tabular-nums",
+        },
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        id: "product",
+        header: tfl("product"),
+        size: 360,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <NameWithSubtext
+            primary={row.original.product.name}
+            secondary={row.original.product.code}
+          />
+        ),
+      },
+      {
+        id: "qty",
+        header: t("requestQty"),
+        size: 150,
+        enableSorting: false,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        cell: ({ row }) => (
+          <InputQty
+            aria-label={`${t("requestQty")} ${row.original.product.name}`}
+            value={row.original.qty}
+            onChange={(e) =>
+              setQty(
+                row.original.product,
+                e.currentTarget.valueAsNumber || 0,
+              )
+            }
+            className="ms-auto h-7 w-24 text-right text-xs"
+          />
+        ),
+      },
+      {
+        id: "actions",
+        header: "",
+        size: 56,
+        enableSorting: false,
+        meta: { cellClassName: "text-center" },
+        cell: ({ row }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => handleRemove(row.original.product)}
+            aria-label={tc("delete")}
+          >
+            <Trash2 className="text-destructive size-3.5" />
+          </Button>
+        ),
+      },
+    ],
+    [t, tfl, tc, setQty, handleRemove],
+  );
+
+  const table = useReactTable({
+    data: tableRows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.product.id,
+  });
 
   // แถวที่จำนวนเป็น 0/ติดลบ backend ปฏิเสธที่ DTO อยู่แล้ว
   const canContinue =
@@ -169,60 +265,24 @@ export function StockReplSrWizard({
           </Field>
         </div>
 
-        <div className="max-h-[24rem] overflow-auto rounded-md border">
-          <table className="w-full text-xs">
-            <thead className="bg-muted/40 sticky top-0">
-              {/* ไม่ใส่ text-left รวมที่ tr — arbitrary variant `[&>th]:text-left`
-                  specificity สูงกว่า `text-right` รายตัว หัวคอลัมน์ตัวเลขเลยไม่ยอมชิดขวา */}
-              <tr className="[&>th]:px-2 [&>th]:py-1.5 [&>th]:font-semibold">
-                <th className="w-10 text-center">#</th>
-                <th className="text-left">{tfl("product")}</th>
-                <th className="text-right">{t("requestQty")}</th>
-                <th className="w-10" />
-              </tr>
-            </thead>
-            <tbody>
-              {activeProducts.map((product, index) => (
-                <tr
-                  key={product.id}
-                  className="border-t [&>td]:px-2 [&>td]:py-1.5"
-                >
-                  <td className="text-muted-foreground text-center tabular-nums">
-                    {index + 1}
-                  </td>
-                  <td className="min-w-0">
-                    <p className="truncate" title={product.name}>
-                      {product.name}
-                    </p>
-                    <p className="text-muted-foreground text-micro">
-                      {product.code}
-                    </p>
-                  </td>
-                  <td className="text-right">
-                    <InputQty
-                      value={qtyOf(product)}
-                      onChange={(e) =>
-                        setQty(product, e.currentTarget.valueAsNumber || 0)
-                      }
-                      className="ms-auto h-7 w-24 text-right text-xs"
-                    />
-                  </td>
-                  <td>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => handleRemove(product)}
-                      aria-label={tc("delete")}
-                    >
-                      <Trash2 className="text-destructive size-3.5" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataGrid
+          table={table}
+          recordCount={tableRows.length}
+          tableLayout={{
+            headerSticky: true,
+            // เซลล์มี input — clamp ใช้ -webkit-box แล้วทำ layout ของ control เพี้ยน
+            rowClamp: false,
+          }}
+          tableClassNames={{
+            // header ทึบ ไม่งั้นแถวที่เลื่อนอยู่ใต้มันทะลุขึ้นมา (stripped ทำ header โปร่ง)
+            headerRow: "bg-muted",
+            headerSticky: "sticky top-0 z-10",
+          }}
+        >
+          <DataGridContainer scroll className="max-h-96">
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
 
         <DialogFooter>
           <Button
