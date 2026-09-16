@@ -63,6 +63,10 @@ export function RfpVendorFields({
   } = useFieldArray({ control: form.control, name: "vendors" });
 
   const rfpName = requestPriceList?.name ?? "";
+  // คำขอที่ยังไม่ถูกบันทึกไม่มี id — dialog ส่งอีเมลจะปิดปุ่มส่งพร้อมบอกเหตุผลเอง
+  const rfpId = requestPriceList?.id;
+  const startDate = requestPriceList?.start_date;
+  const endDate = requestPriceList?.end_date;
 
   // ข้อมูลฝั่ง server ที่ไม่ได้อยู่บนฟอร์ม (url_token / has_submitted / pricelist)
   // — หาแบบ by vendor_id ไม่ใช่ index เพราะลำดับแถวขยับได้ระหว่างเพิ่ม-ลบ
@@ -190,8 +194,13 @@ export function RfpVendorFields({
           <VendorActionsCell
             urlToken={savedVendors.get(row.original.vendor_id)?.url_token ?? ""}
             email={row.original.contact_email}
+            rfpId={rfpId}
+            vendorId={row.original.vendor_id}
             vendorName={row.original.vendor_name ?? ""}
+            contactPerson={row.original.contact_person}
             rfpName={rfpName}
+            startDate={startDate}
+            endDate={endDate}
             isDisabled={isDisabled}
             onRemove={() => remove(row.index)}
           />
@@ -199,7 +208,16 @@ export function RfpVendorFields({
         meta: { headerClassName: "text-center", cellClassName: "text-right" },
       },
     ];
-  }, [tfl, isDisabled, remove, rfpName, savedVendors]);
+  }, [
+    tfl,
+    isDisabled,
+    remove,
+    rfpId,
+    rfpName,
+    startDate,
+    endDate,
+    savedVendors,
+  ]);
 
   const table = useReactTable({
     data: vendorRows,

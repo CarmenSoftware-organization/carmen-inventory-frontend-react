@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,32 +26,23 @@ import {
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useProfile } from "@/hooks/use-profile";
 import { useEmailProfiles } from "@/hooks/use-email-profiles";
+import { useEmailTemplates } from "@/hooks/use-email-templates";
 import { useVendorById } from "@/hooks/use-vendor";
+import {
+  EMAIL_PLACEHOLDERS,
+  fillTemplate,
+  htmlToPlainText,
+  plainTextToHtml,
+  templatesForDocType,
+} from "@/lib/email-template";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { EmailProfile } from "@/types/email-profile";
+import type { EmailTemplate } from "@/types/email-template";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { usePoSendEmail } from "./use-po-send-email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function fillTemplate(
-  template: string,
-  values: {
-    po_no: string;
-    vendor_name: string;
-    bu_name: string;
-    total: string;
-    delivery_date: string;
-  },
-): string {
-  return template
-    .replaceAll("{{po_no}}", values.po_no)
-    .replaceAll("{{vendor_name}}", values.vendor_name)
-    .replaceAll("{{bu_name}}", values.bu_name)
-    .replaceAll("{{total}}", values.total)
-    .replaceAll("{{delivery_date}}", values.delivery_date);
-}
 
 interface PoSendEmailDialogProps {
   readonly open: boolean;
@@ -182,15 +173,22 @@ export function PoSendEmailDialog({
     isLoading: profilesLoading,
     isError: profilesError,
   } = useEmailProfiles();
+  const { value: emailTemplates, isLoading: templatesLoading } =
+    useEmailTemplates();
   const vendorQuery = useVendorById(purchaseOrder.vendor_id);
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);
-  const isLoading = profilesLoading || vendorQuery.isLoading;
+  // คลังข้อความว่าง = ไม่ใช่ข้อผิดพลาด — ตกไปใช้เทมเพลตที่ติดมากับโปรไฟล์ผู้ส่ง
+  // (พฤติกรรมเดิมก่อนมี email_templates) BU ที่ตั้งค่าไว้แล้วจึงไม่พังตอนอัปเดต
+  const poTemplates = templatesForDocType(emailTemplates, "po");
+  const isLoading =
+    profilesLoading || templatesLoading || vendorQuery.isLoading;
   const hasNoProfiles =
     !isLoading && (profilesError || enabledProfiles.length === 0);
 
   const [profileId, setProfileId] = useState("");
+  const [templateId, setTemplateId] = useState("");
   const [to, setTo] = useState<string[]>([]);
   const [cc, setCc] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
@@ -216,6 +214,28 @@ export function PoSendEmailDialog({
       : "",
   };
 
+  /**
+   * หัวเรื่อง/เนื้อความตั้งต้น — ข้อความจากคลัง (`email_templates`) มาก่อนเสมอ
+   * ถ้า BU ยังไม่ได้ตั้งคลังไว้จึงตกไปใช้เทมเพลตที่ติดมากับโปรไฟล์ผู้ส่งแบบเดิม
+   */
+  const subjectFrom = (template?: EmailTemplate, profile?: EmailProfile) =>
+    fillTemplate(
+      template?.subject_template ?? profile?.subject_template ?? "",
+      placeholderValues,
+      "text",
+      "po",
+    );
+
+  const bodyFrom = (template?: EmailTemplate, profile?: EmailProfile) =>
+    fillTemplate(
+      // เทมเพลตของโปรไฟล์เป็นข้อความล้วนมาแต่เดิม — ต้องแปลงเป็น HTML ก่อน
+      // ไม่งั้นการขึ้นบรรทัดใหม่หายหมดตอนเข้าตัวแก้ไข
+      template?.body_template ?? plainTextToHtml(profile?.body_template ?? ""),
+      placeholderValues,
+      "html",
+      "po",
+    );
+
   // เติมค่าตั้งต้นครั้งเดียวต่อการเปิด dialog หนึ่งรอบ — รอทั้งโปรไฟล์และผู้ขายโหลด
   // เสร็จก่อน (ไม่งั้น "To" จะว่างเพราะยังไม่รู้อีเมลผู้ขาย) ปิดแล้วเปิดใหม่ = เริ่มนับหนึ่งใหม่
   useEffect(() => {
@@ -237,15 +257,20 @@ export function PoSendEmailDialog({
     const vendorEmail =
       contacts.find((c) => c.is_primary)?.email || contacts[0]?.email || "";
 
+    const template =
+      poTemplates.find((x) => x.id === emailTemplates.defaults.po) ??
+      poTemplates[0];
+
     setProfileId(defaultId);
+    setTemplateId(template?.id ?? "");
     setTo(vendorEmail ? [vendorEmail] : []);
-    setCc(profile?.default_cc ?? []);
-    setSubject(
-      profile ? fillTemplate(profile.subject_template, placeholderValues) : "",
+    setCc(
+      template?.default_cc?.length
+        ? template.default_cc
+        : (profile?.default_cc ?? []),
     );
-    setBody(
-      profile ? fillTemplate(profile.body_template, placeholderValues) : "",
-    );
+    setSubject(subjectFrom(template, profile));
+    setBody(bodyFrom(template, profile));
     setAttachPdf(true);
     setToError(false);
     setSubjectError(false);
@@ -261,6 +286,7 @@ export function PoSendEmailDialog({
     isLoading,
     enabledProfiles,
     emailProfiles.default_profile_id,
+    emailTemplates,
     vendorQuery.data,
   ]);
 
@@ -268,13 +294,27 @@ export function PoSendEmailDialog({
     setProfileId(nextId);
     const profile = enabledProfiles.find((p) => p.id === nextId);
     if (!profile) return;
-    setCc(profile.default_cc);
-    if (!isSubjectDirtyRef.current) {
-      setSubject(fillTemplate(profile.subject_template, placeholderValues));
-    }
-    if (!isBodyDirtyRef.current) {
-      setBody(fillTemplate(profile.body_template, placeholderValues));
-    }
+    // CC ของโปรไฟล์ใช้เฉพาะตอนที่ข้อความที่เลือกไว้ไม่ได้กำหนด CC ของตัวเอง
+    const template = poTemplates.find((x) => x.id === templateId);
+    if (!template?.default_cc?.length) setCc(profile.default_cc);
+    // ไม่มีข้อความจากคลัง = เนื้อความยังมาจากโปรไฟล์ สลับโปรไฟล์จึงต้องเปลี่ยนตาม
+    if (template) return;
+    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(undefined, profile));
+    if (!isBodyDirtyRef.current) setBody(bodyFrom(undefined, profile));
+  };
+
+  /**
+   * เลือกข้อความจากคลัง — ทับหัวเรื่อง/เนื้อความที่ผู้ใช้ยังไม่ได้แก้เองเท่านั้น
+   * (แก้แล้วแปลว่าตั้งใจเขียนของใบนี้ ไม่ควรโดนกลืนเพราะเผลอสลับ dropdown)
+   */
+  const handleTemplateChange = (nextId: string) => {
+    setTemplateId(nextId);
+    const template = poTemplates.find((x) => x.id === nextId);
+    if (!template) return;
+    const profile = enabledProfiles.find((p) => p.id === profileId);
+    if (template.default_cc?.length) setCc(template.default_cc);
+    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(template, profile));
+    if (!isBodyDirtyRef.current) setBody(bodyFrom(template, profile));
   };
 
   const handleClose = (next: boolean) => {
@@ -293,9 +333,9 @@ export function PoSendEmailDialog({
     // แต่ backend บังคับทั้งคู่ห้ามว่าง ถ้าไม่เช็คตรงนี้ admin คนแรกที่เจอช่องว่างนี้จะได้ 400
     // โดยไม่รู้ว่าช่องไหนว่าง จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
     const trimmedSubject = subject.trim();
-    const trimmedBody = body.trim();
+    // เนื้อความเป็น HTML แล้ว — `<p></p>` ที่ตัวแก้ไขทิ้งไว้ไม่ใช่เนื้อหา
     const hasSubjectError = trimmedSubject.length === 0;
-    const hasBodyError = trimmedBody.length === 0;
+    const hasBodyError = htmlToPlainText(body).length === 0;
     if (to.length === 0 || hasSubjectError || hasBodyError) {
       setToError(to.length === 0);
       setSubjectError(hasSubjectError);
@@ -390,6 +430,24 @@ export function PoSendEmailDialog({
               </Select>
             </Field>
 
+            {poTemplates.length > 0 && (
+              <Field>
+                <FieldLabel htmlFor="pse-template">{t("template")}</FieldLabel>
+                <Select value={templateId} onValueChange={handleTemplateChange}>
+                  <SelectTrigger id="pse-template" className="w-full">
+                    <SelectValue placeholder={t("templatePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {poTemplates.map((template: EmailTemplate) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+
             <Field data-invalid={toError}>
               <FieldLabel htmlFor="pse-to" required>
                 {t("to")}
@@ -440,17 +498,17 @@ export function PoSendEmailDialog({
               <FieldLabel htmlFor="pse-body" required>
                 {t("body")}
               </FieldLabel>
-              <Textarea
+              <RichTextEditor
                 id="pse-body"
                 value={body}
-                onChange={(e) => {
+                onChange={(html) => {
                   isBodyDirtyRef.current = true;
-                  setBody(e.target.value);
-                  if (e.target.value.trim().length > 0) setBodyError(false);
+                  setBody(html);
+                  if (htmlToPlainText(html).length > 0) setBodyError(false);
                 }}
-                rows={6}
-                className="min-h-32 text-xs"
-                aria-invalid={bodyError}
+                placeholders={EMAIL_PLACEHOLDERS.po}
+                placeholderLabel={t("insertVariable")}
+                ariaInvalid={bodyError}
                 disabled={sendEmail.isPending}
               />
               {bodyError && <FieldError>{t("bodyRequired")}</FieldError>}

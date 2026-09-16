@@ -2539,7 +2539,16 @@
         "remove": "Remove {email}",
         "duplicateEmail": "Already added",
         "send": "Send",
-        "unavailable": "Not available yet"
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
+        "toRequired": "At least one recipient is required",
+        "sending": "Sending...",
+        "sendSuccess": "Price list request sent",
+        "sendFailed": "Could not send the price list request",
+        "sendPartial": "Sent, but these addresses were rejected: {emails}",
+        "unsavedRfp": "Save the request first, then send it to vendors",
+        "subjectBodyRequired": "Subject and message cannot be empty"
       }
     }
   },
@@ -3857,6 +3866,9 @@
         "desc": "Email {poNo} to the vendor with the PO attached as a PDF.",
         "profile": "Sender profile",
         "profilePlaceholder": "Select a sender profile",
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
         "noProfiles": "No enabled email profile is set up for this business unit yet.",
         "goToSettings": "Go to email profile settings",
         "loadError": "Could not load email profiles",

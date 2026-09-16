@@ -134,6 +134,33 @@ export function htmlToPlainText(html: string): string {
   return (doc.body.textContent ?? "").replaceAll(/\n{3,}/g, "\n\n").trim();
 }
 
+/**
+ * แปลงข้อความล้วนเป็น HTML ย่อหน้าละบรรทัด
+ *
+ * ใช้ตอนยกข้อความจาก `email_profiles` (ซึ่งเป็นข้อความล้วนมาแต่เดิม) มาใส่ editor —
+ * ถ้าโยนดิบ ๆ ลงไป การขึ้นบรรทัดใหม่ทั้งหมดจะหายเพราะ HTML ยุบ whitespace
+ */
+export function plainTextToHtml(text: string): string {
+  if (!text.trim()) return "";
+  // ข้อความที่มี tag อยู่แล้วคือ HTML ที่เคยบันทึกไว้ ไม่ใช่ข้อความล้วน — อย่าแปลงซ้ำ
+  if (/<[a-z][\s\S]*>/i.test(text)) return sanitizeEmailHtml(text);
+  return text
+    .split(/\n{2,}/)
+    .map(
+      (para) =>
+        `<p>${para
+          .split("\n")
+          .map((line) =>
+            line
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;"),
+          )
+          .join("<br />")}</p>`,
+    )
+    .join("");
+}
+
 const EMPTY_VALUE: EmailTemplatesValue = { defaults: {}, templates: [] };
 
 /**
