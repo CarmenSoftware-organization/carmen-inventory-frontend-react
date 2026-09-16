@@ -3,8 +3,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   actionColumn,
   auditColumns,
@@ -111,15 +110,22 @@ export function usePriceListTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
         return (
-          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
-            {ts(status as "draft" | "submitted" | "active" | "inactive")}
-          </StatusDotBadge>
+          <StatusIconLabel
+            status={status}
+            // ป้ายมาจาก i18n ไม่ใช่ PL_STATUS_CONFIG ที่เป็นอังกฤษล้วน — หน้านี้มีไทย
+            // อยู่แล้ว ไม่ถอยไปเป็นอังกฤษเพื่อให้เหมือน PR
+            label={ts(status as "draft" | "submitted" | "active" | "inactive")}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง text-center ของเซลล์
+            // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
-      size: 140,
+      size: 120,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
+        headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
     },

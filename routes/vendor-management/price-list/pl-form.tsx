@@ -7,8 +7,7 @@ import { toast } from "sonner";
 
 import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
@@ -179,9 +178,13 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                   · {plNo}
                 </span>
               )}
-              <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
-                {tsStatus(watchedStatus)}
-              </StatusDotBadge>
+              <StatusIconLabel
+                status={watchedStatus}
+                label={tsStatus(watchedStatus)}
+                // เบากว่าในตาราง: ตัวเอกของแถบนี้คือชื่อ/เลขที่ใบ สถานะเป็นข้อมูล
+                // ประกอบ เหลือสีไว้ที่ไอคอนจุดเดียว (ท่าเดียวกับหัวฟอร์ม PR/PO)
+                className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+              />
             </>
           }
           actions={

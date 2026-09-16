@@ -1,9 +1,11 @@
+import type { ComponentType } from "react";
 import {
   Archive,
   ArrowLeftRight,
   BadgePercent,
   Ban,
   Check,
+  CircleSmall,
   Clock,
   FileText,
   Flag,
@@ -24,8 +26,18 @@ import {
   Warehouse,
   X,
   type LucideIcon,
+  type LucideProps,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/**
+ * จุดสีทึบขนาดเท่าจุดของชิปเดิม (`CircleSmall` r=6 + fill = 8px ที่กล่อง 14px)
+ * — ใช้แทนไอคอนสำหรับสถานะที่เป็น "เปิด/ปิด" ซึ่งมีแค่สองค่าตรงข้ามกัน ไม่มี
+ * รูปทรงให้แยก ต่างจากสถานะเอกสารที่ไล่เป็นลำดับเจ็ดแปดค่า
+ */
+const FilledDot = (props: LucideProps) => (
+  <CircleSmall {...props} fill="currentColor" />
+);
 
 /**
  * ไอคอนกับสีของแต่ละสถานะ — สัญลักษณ์เปล่า ไม่มีวงกลมกำกับ เพราะวงกลมกินพื้นที่
@@ -42,7 +54,10 @@ import { cn } from "@/lib/utils";
  * สีอ้าง custom property ชุดเดียวกับ dot chip เดิมใน `styles/badge-status.css`
  * ตัวสถานะจึงไม่เปลี่ยนสีเมื่อสลับไปหน้าที่ยังใช้ chip
  */
-const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
+const STATUS_ICON: Record<
+  string,
+  { icon: ComponentType<LucideProps>; color?: string }
+> = {
   draft: { icon: PenLine, color: "var(--status-draft)" },
   in_progress: { icon: Clock, color: "var(--status-in-progress)" },
   approved: { icon: Check, color: "var(--status-approved)" },
@@ -80,6 +95,11 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   reject: { icon: X, color: "var(--status-rejected)" },
   submit: { icon: Send, color: "var(--status-submitted)" },
   submitted: { icon: Send, color: "var(--status-submitted)" },
+  /* price list / template — เปิด/ปิดใช้งานเป็นจุดสี ไม่ใช่รูปทรง (ดู FilledDot)
+     สีตามชิปเดิมใน STATUS_CLASSNAMES: active = เขียวเดียวกับ approved ·
+     inactive = เทาเดียวกับ closed */
+  active: { icon: FilledDot, color: "var(--status-approved)" },
+  inactive: { icon: FilledDot, color: "var(--status-closed)" },
 };
 
 /**

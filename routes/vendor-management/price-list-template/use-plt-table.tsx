@@ -3,8 +3,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   actionColumn,
   auditColumns,
@@ -27,13 +26,6 @@ interface UsePriceListTemplateTableOptions {
   onDelete: (template: PriceListTemplate) => void;
 }
 
-/**
- * Hook สร้างตาราง price list template list พร้อม column และ config สำหรับ DataGrid
- * @param props - templates, total, params, tableConfig และ callbacks สำหรับ edit/delete
- * @returns react-table instance
- * @example
- * const { table } = usePriceListTemplateTable({ templates, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function usePriceListTemplateTable({
   templates,
   totalRecords,
@@ -66,10 +58,16 @@ export function usePriceListTemplateTable({
       id: "currency_code",
       accessorFn: (row) => row.currency?.code ?? "",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("currency")} />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("currency")}
+          className="justify-center"
+        />
       ),
       meta: {
         headerTitle: tfl("currency"),
+        cellClassName: "text-center",
+        headerClassName: "text-center",
         skeleton: columnSkeletons.textShort,
       },
     },
@@ -104,15 +102,16 @@ export function usePriceListTemplateTable({
           inactive: ts("inactive"),
         };
         return (
-          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
-            {labelMap[status] ?? status}
-          </StatusDotBadge>
+          <StatusIconLabel
+            status={status}
+            label={labelMap[status] ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง text-center ของเซลล์
+            // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
-      // ป้าย `lg` (px-3 + text-sm) ยาวกว่า 100 หน่วยที่คอลัมน์สถานะเคยได้ — กล่อง
-      // clamp ของ DataGrid บีบ badge ด้วย `max-w-full` แล้ว `overflow-hidden`
-      // เฉือนคำยาว (Submitted / Inactive / ไม่ใช้งาน) จนชิดขอบ
-      size: 140,
+      size: 120,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",

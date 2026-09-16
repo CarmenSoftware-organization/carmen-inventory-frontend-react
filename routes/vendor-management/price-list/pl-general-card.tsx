@@ -9,13 +9,10 @@ import {
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import {
-  PRICE_LIST_STATUS_OPTIONS,
-  PL_STATUS_TONE,
-} from "@/constant/price-list";
+import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -194,15 +191,15 @@ export function PLGeneralCard({
       </Field>
 
       {/* Status */}
-      <Field className="sm:col-span-2">
+      <Field>
         <FieldLabel>{tfl("status")}</FieldLabel>
         {isView ? (
           <div>
-            <StatusDotBadge
-              tone={PL_STATUS_TONE[form.getValues("status")] ?? "neutral"}
-            >
-              {ts(form.getValues("status") as PlStatus)}
-            </StatusDotBadge>
+            <StatusIconLabel
+              status={form.getValues("status")}
+              label={ts(form.getValues("status") as PlStatus)}
+              className="uppercase"
+            />
           </div>
         ) : (
           <Controller
@@ -219,7 +216,14 @@ export function PLGeneralCard({
                 <SelectContent>
                   {PRICE_LIST_STATUS_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      {ts(opt.value as PlStatus)}
+                      {/* ไอคอนในตัวเลือกด้วย ไม่ใช่แค่ข้อความ — ค่าที่เลือกแล้ว
+                          ถูก render ซ้ำที่ trigger จึงเห็นไอคอนเดียวกับที่ตาราง
+                          และตัวกรองแสดง */}
+                      <StatusIconLabel
+                        status={opt.value}
+                        label={ts(opt.value as PlStatus)}
+                        className="uppercase"
+                      />
                     </SelectItem>
                   ))}
                 </SelectContent>

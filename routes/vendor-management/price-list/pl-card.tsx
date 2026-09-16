@@ -1,11 +1,10 @@
 import { useTranslations } from "use-intl";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
 } from "@/components/share/list-card";
-import { PL_STATUS_TONE } from "@/constant/price-list";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
@@ -49,12 +48,13 @@ export default function PriceListCard({
     <ListCard
       title={item.name || "..."}
       badge={
-        <StatusDotBadge
-          tone={PL_STATUS_TONE[item.status] ?? "neutral"}
-          size="xs"
-        >
-          {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
-        </StatusDotBadge>
+        <StatusIconLabel
+          status={item.status}
+          label={ts(
+            item.status as "draft" | "submitted" | "active" | "inactive",
+          )}
+          className="uppercase"
+        />
       }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
