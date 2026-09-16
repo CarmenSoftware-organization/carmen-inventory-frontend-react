@@ -953,6 +953,27 @@ git commit -m "feat(api): serializer กลุ่ม inventory อ้าง enti
 - Consumes: `entityRef`, `collapseRefs`, `RefMap` จาก Task 3
 - Produces: `check-flat-refs.ts` รายงานเหลือเฉพาะไฟล์ `.dto.ts` (ฝั่ง request) เท่านั้น
 
+**งานเพิ่มของ task นี้ — เอกสาร Swagger ที่จะกลายเป็นคำโกหก**
+
+ไฟล์ใต้ `swagger/` กับ `example/` เป็น NestJS DTO class ที่เขียนฟิลด์แบบ
+`product_id?: string;` (ชนิดตัวเล็ก) และ object literal ที่ค่าเป็น string ในเครื่องหมายคำพูด
+**`FIELD_RE` ของ `check-flat-refs.ts` อ่านทั้งสองแบบไม่ออก** (มันต้องการค่าที่ขึ้นต้นด้วย `z.`
+หรือตัวพิมพ์ใหญ่) ไฟล์กลุ่มนี้จึงแทบไม่ถูกนับเลย — รายงานแค่ 1 จาก ~62 group ที่มีจริง
+
+ไฟล์พวกนี้ถูก import เข้า controller จริง (เช่น `purchase-orders.controller.ts:71`)
+และเป็นที่มาของเอกสาร API ที่เผยแพร่ ถ้าไม่แก้ เอกสารจะโชว์ `vendor_id` / `vendor_name`
+ต่อไปทั้งที่ API จริงส่ง `vendor: {...}` แล้ว
+
+ดังนั้น task นี้ต้องทำสองอย่าง:
+1. **ขยาย `FIELD_RE` ใน `scripts/check-flat-refs.ts`** ให้จับฟิลด์ที่ค่าเป็นชนิดตัวเล็ก
+   (`string`, `number`, `boolean`) และค่าที่เป็น string ในเครื่องหมายคำพูดได้ด้วย
+   ตัวเลขที่ต้องไล่จะกระโดดขึ้นราว 62 — นั่นถูกต้องแล้ว ไม่ใช่ความผิดพลาด
+2. แปลงไฟล์ `swagger/` และ `example/` ให้ตรงกับรูป object เหมือน serializer
+
+**false positive ที่รู้ตัวแล้ว 1 จุด:** `application_role_id: ApplicationRoleIdAddDto` ใน
+`config_user-application-roles/swagger/request.ts` — เป็น wrapper ของการเพิ่ม/ลบทีละหลายรายการ
+ไม่ใช่ entity reference ให้เติม base นั้นลง `REF_ALLOWLIST` พร้อมคอมเมนต์บอกเหตุผล
+
 - [ ] **Step 1: ดูรายชื่อที่เหลือ**
 
 ```bash
