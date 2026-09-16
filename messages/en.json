@@ -1978,24 +1978,25 @@
     "notificationTemplate": {
       "entity": "Notification Template",
       "title": "Notification Template",
-      "desc": "The wording of the emails and alerts sent when a document moves along.",
+      "desc": "The wording of the in-app alerts sent when a document moves along.",
       "add": "Add Notification Template",
       "edit": "Edit Notification Template",
       "untitled": "Untitled Template",
       "deleteTitle": "Delete Notification Template",
       "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Good Received Note Approved",
-      "subjectPlaceholder": "Email subject (optional)",
       "bodyPlaceholder": "Message body — supports template variables",
-      "selectChannel": "Select channel",
       "sectionGeneralTitle": "General",
-      "sectionGeneralDesc": "Identify the template and the channel it is delivered through.",
+      "sectionGeneralDesc": "Name the template and choose whether it is in use.",
       "sectionMessageTitle": "Message content",
-      "sectionMessageDesc": "The subject and body sent to recipients. Supports template variables.",
+      "sectionMessageDesc": "What recipients see in their notifications. Supports template variables.",
       "colName": "Name",
-      "colChannel": "Channel",
-      "colSubject": "Subject",
-      "colBody": "Body"
+      "colBody": "Body",
+      "colMessage": "Message",
+      "insertVariable": "Insert:",
+      "previewNow": "now",
+      "previewUnknownVars": "No value is supplied for these — recipients will see them as-is:",
+      "previewTitle": "Preview"
     },
     "queryDataset": {
       "title": "Query Dataset"
