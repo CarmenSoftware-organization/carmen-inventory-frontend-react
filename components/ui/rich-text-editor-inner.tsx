@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -53,6 +53,12 @@ export function RichTextEditorInner({
 }: RichTextEditorProps) {
   "use no memo";
 
+  // HTML ก้อนล่าสุดที่ผ่านมือ editor ตัวนี้ (ทั้งที่พิมพ์เองและที่รับมาจากภายนอก)
+  // ใช้แทนการถาม editor ว่าตอนนี้มีอะไรอยู่ — `editor.getHTML()` โยน
+  // "Cannot read properties of null (reading 'cached')" เมื่อถูกเรียกหลัง editor
+  // ถูก destroy ซึ่งเกิดทุกครั้งใน StrictMode (mount → unmount → remount)
+  const lastHtmlRef = useRef(value);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
@@ -67,14 +73,20 @@ export function RichTextEditorInner({
         ...(id ? { id } : {}),
       },
     },
-    onUpdate: ({ editor }) => onChange(sanitizeEmailHtml(editor.getHTML())),
+    onUpdate: ({ editor }) => {
+      const html = sanitizeEmailHtml(editor.getHTML());
+      lastHtmlRef.current = html;
+      onChange(html);
+    },
   });
 
-  // ซิงก์ค่าจากภายนอก (สลับ template, รีเซ็ตฟอร์ม) โดยไม่กวนการพิมพ์ — เทียบกับ
-  // HTML ปัจจุบันก่อนเสมอ ไม่งั้น setContent จะเด้งเคอร์เซอร์กลับต้นทุกครั้งที่พิมพ์
+  // ซิงก์ค่าจากภายนอก (สลับ template, รีเซ็ตฟอร์ม) โดยไม่กวนการพิมพ์ — ค่าที่เท่ากับ
+  // ก้อนล่าสุดคือเสียงสะท้อนของสิ่งที่เพิ่งพิมพ์ ไม่ใช่การเปลี่ยนจากภายนอก ถ้า
+  // setContent ทุกครั้งเคอร์เซอร์จะเด้งกลับต้นทุกตัวอักษร
   useEffect(() => {
-    if (!editor) return;
-    if (value === editor.getHTML()) return;
+    if (!editor || editor.isDestroyed) return;
+    if (value === lastHtmlRef.current) return;
+    lastHtmlRef.current = value;
     editor.commands.setContent(value, { emitUpdate: false });
   }, [editor, value]);
 

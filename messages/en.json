@@ -2212,7 +2212,7 @@
         "templateName": "Message name",
         "docType": "Document type",
         "subject": "Subject",
-        "subjectPlaceholder": "Purchase order {{po_no}}",
+        "subjectPlaceholder": "e.g. Purchase order PO-2026-000123",
         "body": "Message",
         "insertVariable": "Insert variable",
         "preview": "Preview",
@@ -2220,7 +2220,8 @@
         "defaultCc": "Default CC",
         "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
         "note": "Note",
-        "enabled": "Enabled"
+        "enabled": "Enabled",
+        "insertIntoSubject": "Insert into subject"
       }
     }
   },

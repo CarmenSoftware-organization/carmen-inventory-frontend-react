@@ -169,6 +169,31 @@ export function EmailTemplateDialog({
                 aria-invalid={!!form.formState.errors.subject_template}
                 placeholder={t("dialog.subjectPlaceholder")}
               />
+              {/* หัวเรื่องไม่มีตัวแก้ไขจึงไม่มีเมนูแทรกตัวแปรในตัว — วางชิปไว้ใต้ช่อง
+                  ให้กดแล้วต่อท้ายได้ (ข้อความแปลใส่ {{ }} ไม่ได้ ICU จะอ่านเป็น argument) */}
+              <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                <span className="text-muted-foreground text-micro">
+                  {t("dialog.insertIntoSubject")}
+                </span>
+                {placeholders.map((key) => (
+                  <Button
+                    key={key}
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    className="text-micro-legal h-5 px-1.5 font-mono"
+                    onClick={() =>
+                      form.setValue(
+                        "subject_template",
+                        `${subjectTemplate}{{${key}}}`,
+                        { shouldDirty: true },
+                      )
+                    }
+                  >
+                    {`{{${key}}}`}
+                  </Button>
+                ))}
+              </div>
               {form.formState.errors.subject_template && (
                 <FieldError>{tc("required")}</FieldError>
               )}

@@ -2212,7 +2212,7 @@
         "templateName": "ชื่อข้อความ",
         "docType": "ชนิดเอกสาร",
         "subject": "หัวเรื่อง",
-        "subjectPlaceholder": "ใบสั่งซื้อเลขที่ {{po_no}}",
+        "subjectPlaceholder": "เช่น ใบสั่งซื้อเลขที่ PO-2026-000123",
         "body": "เนื้อความ",
         "insertVariable": "แทรกตัวแปร",
         "preview": "ดูตัวอย่าง",
@@ -2220,7 +2220,8 @@
         "defaultCc": "สำเนาถึง (ค่าเริ่มต้น)",
         "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
         "note": "หมายเหตุ",
-        "enabled": "เปิดใช้งาน"
+        "enabled": "เปิดใช้งาน",
+        "insertIntoSubject": "แทรกในหัวเรื่อง"
       }
     }
   },
