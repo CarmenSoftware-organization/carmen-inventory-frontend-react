@@ -61,14 +61,20 @@
 
 ```bash
 mkdir -p /tmp/carmen-contract-baseline/api
-cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
-bunx jest --silent 2>&1 | tee /tmp/carmen-contract-baseline/tests-red-raw.txt
-grep -E "^(FAIL|Tests:|Test Suites:)" /tmp/carmen-contract-baseline/tests-red-raw.txt \
-  > /tmp/carmen-contract-baseline/tests-red.txt
-cat /tmp/carmen-contract-baseline/tests-red.txt
+# ต้องรันจาก "ใน" แต่ละ app — รีโปนี้ไม่มี jest config ที่ root
+# (`bun run test` ที่ root = `turbo run test` ซึ่งเรียก jest ในแต่ละ app)
+# สั่ง `bunx jest` จาก root จะกวาด dist/*.spec.js ด้วย ได้ตัวเลขขยะ 1,376 suite
+cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/backend-gateway
+bunx jest --silent 2>&1 | grep -E "^(FAIL|Tests:|Test Suites:)" \
+  > /tmp/carmen-contract-baseline/gateway-red.txt
+cat /tmp/carmen-contract-baseline/gateway-red.txt
 ```
 
-คาดว่าจะเห็นราว 15 suite แดง **นี่คือของเดิม ไม่ใช่ของที่เราทำพัง** ถ้าไม่เก็บไว้จะแยกไม่ออกทีหลัง
+Expected: `Test Suites: 2 failed, 471 passed, 473 total` · `Tests: 4 failed, 5260 passed, 5264 total`
+(suite ที่แดงคือ `application/purchase-orders/purchase-orders.controller.spec.ts` กับอีกหนึ่งตัว)
+
+**นี่คือของเดิมที่แดงอยู่แล้วบน main ไม่ใช่ของที่เราทำพัง** ถ้าไม่เก็บไว้จะแยกไม่ออกทีหลัง
+ถ้าได้ตัวเลขหลักพัน แปลว่ารันผิดที่ (จาก root แทนที่จะเป็นในโฟลเดอร์ app) ให้ย้อนไปทำตามคำสั่งข้างบน
 
 - [ ] **Step 2: ล็อกอินเก็บ token**
 
@@ -172,48 +178,83 @@ git commit -m "chore(scripts): สคริปต์ดัมพ์ response ข
 
 ---
 
-### Task 2: หาข้อมูล SR ให้ golden snapshot ครอบ
+### Task 2: เติม SR เข้า golden snapshot ด้วย route ที่ถูกต้อง
 
-**Files:** ไม่แก้โค้ด — เป็นงานหาข้อมูล
+**Files:**
+- Modify: `scripts/dump-api-snapshot.py` (ใน frontend-react)
 
 **Interfaces:**
 - Consumes: `token.txt` จาก Task 1
-- Produces: `api/sr.detail.json` ใน baseline หรือข้อสรุปว่าไม่มี BU ไหนมีข้อมูล SR เลย
+- Produces: `api/sr.list.json` + `api/sr.detail.json` ที่เป็นข้อมูลจริง (ของเดิมเป็น body ของ 404)
 
-- [ ] **Step 1: ไล่หา BU ที่มี store requisition**
+**ทำไมต้องมี task นี้:** Task 1 ดัมพ์ SR ไม่ได้เพราะแผนรุ่นแรกเขียน URL ที่ไม่มีอยู่จริง
+gateway **ไม่มี route `GET /:bu_code/store-requisitions`** เลย มีแต่
+
+- list ข้าม BU: `GET /api/store-requisitions` — **ต้องส่ง `bu_code` เป็น query param**
+  ไม่งั้นได้ `data: []` และ items ห่ออยู่ที่ `data[0].data` ไม่ใช่ `data` ตรง ๆ
+- detail: `GET /api/:bu_code/store-requisitions/:id`
+
+ยืนยันแล้วว่า T02 มี SR อยู่ **64 รายการ** และ detail มี 7 reference group
+(`from_location`, `to_location`, `workflow`, `issue_by`, `requestor`, `department`, `last_action_by`)
+
+- [ ] **Step 1: เพิ่ม SR เข้าสคริปต์ดัมพ์ โดยแยกจาก ENDPOINTS ปกติ**
+
+SR ใช้รูปแบบ URL คนละแบบกับตัวอื่น จึงต่อท้ายไฟล์ ไม่ใช่ใส่ใน `ENDPOINTS`:
+
+```python
+# SR ใช้ route คนละแบบ: list ข้าม BU ต้องส่ง bu_code เป็น query param
+# และ items ห่ออยู่ที่ data[0].data — ไม่มี route GET /:bu/store-requisitions
+sr_list_url = f'/api/store-requisitions?perpage=5&bu_code={BU}'
+sr_list = get(sr_list_url)
+save('sr.list.json', sr_list, sr_list_url)
+try:
+    sr_id = sr_list['data'][0]['data'][0]['id']
+except (KeyError, IndexError, TypeError):
+    sr_id = None
+    print('sr: ไม่มีข้อมูล ข้าม detail')
+if sr_id:
+    sr_detail_url = f'/api/{BU}/store-requisitions/{sr_id}'
+    save('sr.detail.json', get(sr_detail_url), sr_detail_url)
+    print('sr: ok')
+```
+
+- [ ] **Step 2: ลบ SR ออกจากลิสต์ `ENDPOINTS` เดิม**
+
+บรรทัด `('sr', f'/api/{BU}/store-requisitions'),` ต้องถูกลบทิ้ง ไม่งั้นจะเขียนทับ
+`sr.list.json` ด้วย body ของ 404 อีกรอบ
+
+- [ ] **Step 3: รันดัมพ์ใหม่แล้วยืนยันว่า SR เป็นข้อมูลจริง**
 
 ```bash
 cd /tmp/carmen-contract-baseline
-TOKEN=$(cat token.txt); A=9c83fd4b-ce3f-4de2-a522-349ad1280b10
-for BU in T02 T01 BL_AVG ZEBRA_AVG; do
-  N=$(curl -s "http://localhost:4000/api/$BU/store-requisitions?perpage=1" \
-      -H "Authorization: Bearer $TOKEN" -H "x-app-id: $A" \
-      | python3 -c "import json,sys; d=json.load(sys.stdin).get('data') or []; print(len(d) if isinstance(d,list) else len(d.get('items',[])))" 2>/dev/null)
-  echo "$BU: $N รายการ"
-done
+python3 ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/scripts/dump-api-snapshot.py
+python3 -c "
+import json
+for f in ('sr.list.json','sr.detail.json'):
+    d=json.load(open('api/'+f))
+    print(f, '→ success:', d.get('success'), '| _url:', d.get('_url'))
+    assert d.get('success') is True, f+' ไม่ใช่ข้อมูลจริง'
+print('SR snapshot ใช้ได้')
+"
 ```
+Expected: ทั้งสองไฟล์ `success: True` และมี `_url`
 
-- [ ] **Step 2: ถ้าเจอ BU ที่มีข้อมูล ให้ดัมพ์เพิ่มเข้า baseline**
-
-แก้ตัวแปร `BU` ใน `scripts/dump-api-snapshot.py` ชั่วคราวเป็นรหัส BU ที่เจอ แล้วรันซ้ำ หรือดัมพ์ตรง ๆ:
+- [ ] **Step 4: ยืนยันว่าไฟล์อื่นไม่เสียหาย**
 
 ```bash
 cd /tmp/carmen-contract-baseline
-TOKEN=$(cat token.txt); A=9c83fd4b-ce3f-4de2-a522-349ad1280b10
-BU=<รหัส BU ที่เจอจาก Step 1>
-ID=$(curl -s "http://localhost:4000/api/$BU/store-requisitions?perpage=1" \
-  -H "Authorization: Bearer $TOKEN" -H "x-app-id: $A" \
-  | python3 -c "import sys,re; print(re.search(r'\"id\"\s*:\s*\"([0-9a-f-]{36})\"', sys.stdin.read()).group(1))")
-curl -s "http://localhost:4000/api/$BU/store-requisitions/$ID" \
-  -H "Authorization: Bearer $TOKEN" -H "x-app-id: $A" \
-  | python3 -c "import json,sys; d=json.load(sys.stdin); d['_url']='/api/$BU/store-requisitions/$ID'; print(json.dumps(d,indent=2,ensure_ascii=False,sort_keys=True))" \
-  > api/sr.detail.json
-head -40 api/sr.detail.json
+ls api/ | wc -l
+grep -l '_url' api/*.json | wc -l
 ```
+Expected: ตัวเลขทั้งสองเท่ากัน และเป็น 19 (18 เดิม + sr.detail.json ที่เพิ่มมา)
 
-- [ ] **Step 3: ถ้าไม่มี BU ไหนมีเลย — หยุดแล้วรายงานผู้ใช้**
+- [ ] **Step 5: Commit**
 
-SR มี 9 reference group ที่จะถูกแปลงโดยไม่มี golden snapshot รองรับ **อย่าเดาแล้วทำต่อเงียบ ๆ** ให้ถามผู้ใช้ว่าจะสร้างเอกสาร SR ทดสอบ หรือยอมรับความเสี่ยงตรงนี้แล้วบันทึกไว้
+```bash
+cd ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react
+git add scripts/dump-api-snapshot.py
+git commit -m "fix(scripts): ดัมพ์ SR ด้วย route ที่มีอยู่จริง (list ข้าม BU + bu_code param)"
+```
 
 ---
 
@@ -995,9 +1036,9 @@ Expected: ทุกไฟล์ `✅` — ไม่มี flat หลงเห�
 
 ```bash
 cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
-bunx jest apps/backend-gateway --silent 2>&1 | grep -E "^(FAIL|Tests:|Test Suites:)" \
+(cd apps/backend-gateway && bunx jest --silent) 2>&1 | grep -E "^(FAIL|Tests:|Test Suites:)" \
   > /tmp/carmen-contract-baseline/tests-after-response.txt
-diff /tmp/carmen-contract-baseline/tests-red.txt \
+diff /tmp/carmen-contract-baseline/gateway-red.txt \
      /tmp/carmen-contract-baseline/tests-after-response.txt
 ```
 
@@ -1019,16 +1060,16 @@ expect(result.vendor).toEqual({ id: 'v1', name: 'Daew' });
 - [ ] **Step 3: ยืนยันว่าไม่มีของแดงใหม่เหลือ**
 
 ```bash
-bunx jest apps/backend-gateway --silent 2>&1 | grep -E "^(FAIL|Tests:)" \
+(cd apps/backend-gateway && bunx jest --silent) 2>&1 | grep -E "^(FAIL|Tests:)" \
   > /tmp/carmen-contract-baseline/tests-after-fix.txt
-diff /tmp/carmen-contract-baseline/tests-red.txt /tmp/carmen-contract-baseline/tests-after-fix.txt \
+diff /tmp/carmen-contract-baseline/gateway-red.txt /tmp/carmen-contract-baseline/tests-after-fix.txt \
   && echo "✅ ไม่มีของแดงใหม่"
 ```
 
 - [ ] **Step 4: ยืนยันว่า micro-business ยังเขียวเท่าเดิม**
 
 ```bash
-bunx jest apps/micro-business --silent 2>&1 | grep -E "^(Tests:|Test Suites:)"
+(cd apps/micro-business && bunx jest --silent) 2>&1 | grep -E "^(Tests:|Test Suites:)"
 ```
 Expected: ตัวเลขเท่ากับตอน baseline เป๊ะ — **ถ้าเปลี่ยนแปลว่าแก้ผิดชั้น**
 
@@ -1205,9 +1246,9 @@ Expected: `✅ ไม่มี flat reference หลงเหลือ`
 - [ ] **Step 3: รันเทสต์ gateway เทียบ baseline อีกรอบ**
 
 ```bash
-bunx jest apps/backend-gateway --silent 2>&1 | grep -E "^(FAIL|Tests:)" \
+(cd apps/backend-gateway && bunx jest --silent) 2>&1 | grep -E "^(FAIL|Tests:)" \
   > /tmp/carmen-contract-baseline/tests-after-request.txt
-diff /tmp/carmen-contract-baseline/tests-red.txt \
+diff /tmp/carmen-contract-baseline/gateway-red.txt \
      /tmp/carmen-contract-baseline/tests-after-request.txt
 ```
 
