@@ -73,6 +73,12 @@ export function ListToolbar({
   beforeViewSelector,
   variant = "wrap",
 }: ListToolbarProps) {
+  // `table` เป็น TanStack instance ที่ ref คงที่แต่ state ข้างในเปลี่ยนเอง —
+  // คอมไพเลอร์เห็น props ไม่เปลี่ยนเลยแช่ JSX ของ DataGridSortMenu /
+  // DataGridColumnVisibility ไว้ ลูกจึงไม่ re-render: ติ๊ก Toggle Columns แล้ว
+  // คอลัมน์หายจริงแต่เครื่องหมายถูกในเมนูค้างอยู่ที่เดิม (directive เป็นระดับ
+  // ฟังก์ชัน ใส่ที่ลูกไม่ช่วยเพราะลูกไม่ถูกเรียกเลย)
+  "use no memo";
   const tc = useTranslations("common");
   const showRight = !!table;
   const isRow = variant === "row";
