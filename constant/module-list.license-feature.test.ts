@@ -37,7 +37,7 @@ function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
 const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
   {
     path: "/procurement/approval",
-    why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-approve ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
+    why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-pending ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
   },
   {
     path: "/config/chart-of-accounts",

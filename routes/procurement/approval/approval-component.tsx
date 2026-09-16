@@ -92,10 +92,9 @@ export default function ApprovalComponent() {
     useApprovalPendingSummary();
 
   const items = data?.data ?? [];
-
-  const totalRecords = search
-    ? items.length
-    : (summary?.[activeType as keyof ApprovalPendingSummary] ?? items.length);
+  // จำนวนจริงของรายการที่เข้าเงื่อนไข มาจาก backend ที่กรองและแบ่งหน้าให้แล้ว
+  // เดิมต้องเดาจากการ์ดสรุปหรือ items.length เพราะรายการไม่ได้ถูกแบ่งหน้าจริง
+  const totalRecords = data?.paginate.total ?? 0;
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
@@ -107,11 +106,9 @@ export default function ApprovalComponent() {
         <ListToolbar
           variant="bare"
           search={search}
-          onSearch={(value) => {
-            // เลือกคำค้น = ล้าง filter สถานะที่ค้างไว้ ไม่งั้นค้นแล้วไม่เจออะไรเลย
-            if (value) setFilter("");
-            setSearch(value);
-          }}
+          // ค้นหาและ filter ประเภทเอกสารทำที่ SQL ทั้งคู่ จึงใช้ร่วมกันได้ตรง ๆ
+          // เดิมต้องล้าง filter ทิ้งตอนค้น เพราะทั้งสองทำฝั่ง client บนข้อมูลหน้าแรก
+          onSearch={setSearch}
           lf={lf}
           fields={APPROVAL_FILTER_FIELDS}
           onSaveViewClick={() => setSaveViewDialogOpen(true)}
