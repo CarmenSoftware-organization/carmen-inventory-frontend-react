@@ -2183,6 +2183,46 @@
         "send": "Send test",
         "invalidEmail": "Enter a valid email address"
       }
+    },
+    "emailTemplate": {
+      "title": "Email Messages",
+      "desc": "Reusable subject and message templates for emailing purchase orders and pricing requests to vendors.",
+      "entity": "Email message",
+      "add": "Add message",
+      "empty": "No email messages yet. Add one so the send dialog starts from your own wording.",
+      "loadError": "Could not load email messages",
+      "table": {
+        "name": "Name",
+        "docType": "Document",
+        "subject": "Subject",
+        "status": "Status"
+      },
+      "docType": {
+        "po": "Purchase order",
+        "rfp": "Request for pricing"
+      },
+      "defaultBadge": "Default",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "\"{name}\" is now the default message",
+      "deleteTitle": "Delete email message",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "dialog": {
+        "templateName": "Message name",
+        "docType": "Document type",
+        "subject": "Subject",
+        "subjectPlaceholder": "e.g. Purchase order PO-2026-000123",
+        "body": "Message",
+        "insertVariable": "Insert variable",
+        "preview": "Preview",
+        "backToEdit": "Back to editing",
+        "defaultCc": "Default CC",
+        "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
+        "note": "Note",
+        "enabled": "Enabled",
+        "insertIntoSubject": "Insert into subject"
+      }
     }
   },
   "vendorManagement": {
@@ -2500,7 +2540,16 @@
         "remove": "Remove {email}",
         "duplicateEmail": "Already added",
         "send": "Send",
-        "unavailable": "Not available yet"
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
+        "toRequired": "At least one recipient is required",
+        "sending": "Sending...",
+        "sendSuccess": "Price list request sent",
+        "sendFailed": "Could not send the price list request",
+        "sendPartial": "Sent, but these addresses were rejected: {emails}",
+        "unsavedRfp": "Save the request first, then send it to vendors",
+        "subjectBodyRequired": "Subject and message cannot be empty"
       }
     }
   },
@@ -3818,6 +3867,9 @@
         "desc": "Email {poNo} to the vendor with the PO attached as a PDF.",
         "profile": "Sender profile",
         "profilePlaceholder": "Select a sender profile",
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
         "noProfiles": "No enabled email profile is set up for this business unit yet.",
         "goToSettings": "Go to email profile settings",
         "loadError": "Could not load email profiles",
@@ -4585,6 +4637,7 @@
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
     "emailProfile": "Email Profiles",
+    "emailTemplate": "Email Messages",
     "inventoryPeriod": "Inventory Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",

@@ -188,7 +188,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/notifications/${toSafePathSegment(id)}/read`,
   NOTIFICATION_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/notification-templates`,
-  INVENTORY_PERIODS: (buCode: string) => `/api/proxy/api/${buCode}/inventory-periods`,
+  INVENTORY_PERIODS: (buCode: string) =>
+    `/api/proxy/api/${buCode}/inventory-periods`,
   PERIOD_ENDS: (buCode: string) => `/api/proxy/api/${buCode}/period-ends`,
   PERIOD_END_CURRENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/current`,
@@ -196,7 +197,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/period-ends/review`,
   PERIOD_END_START_COUNTING: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/start-counting`,
-  INVENTORY_PERIOD_NEXT: (buCode: string) => `/api/proxy/api/${buCode}/inventory-periods/next`,
+  INVENTORY_PERIOD_NEXT: (buCode: string) =>
+    `/api/proxy/api/${buCode}/inventory-periods/next`,
   PERMISSIONS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/permissions`,
   PHYSICAL_COUNT: (buCode: string) =>
@@ -367,6 +369,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/reports/schedules/${id}`,
   REQUEST_PRICE_LISTS: (buCode: string) =>
     `/api/proxy/api/${buCode}/request-for-pricings`,
+  REQUEST_PRICE_LIST_SEND_EMAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/request-for-pricings/${id}/send-email`,
   RUNNING_CODES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/running-codes`,
   RUNNING_CODES_INIT: (buCode: string) =>

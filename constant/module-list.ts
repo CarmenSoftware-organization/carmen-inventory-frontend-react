@@ -58,6 +58,7 @@ import {
   Award,
   Leaf,
   Mail,
+  MailOpen,
 } from "lucide-react";
 
 export interface ModuleDto {
@@ -639,6 +640,13 @@ export const moduleList: ModuleDto[] = [
         path: "/system-admin/email-profile",
         licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
         icon: Mail,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
+        name: "emailTemplate",
+        path: "/system-admin/email-template",
+        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        icon: MailOpen,
         permission: PERMISSIONS.system_configuration.view,
       },
       {

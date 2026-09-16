@@ -720,6 +720,11 @@ export const router = createBrowserRouter([
                   import("./system-admin/email-profile/email-profile.route"),
               },
               {
+                path: "email-template",
+                lazy: () =>
+                  import("./system-admin/email-template/email-template.route"),
+              },
+              {
                 path: "business-setting",
                 element: (
                   <Navigate to="/system-admin/company-profile" replace />

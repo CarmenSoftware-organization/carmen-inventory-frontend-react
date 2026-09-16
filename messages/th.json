@@ -2183,6 +2183,46 @@
         "send": "ส่งทดสอบ",
         "invalidEmail": "กรอกอีเมลให้ถูกรูปแบบ"
       }
+    },
+    "emailTemplate": {
+      "title": "ข้อความอีเมล",
+      "desc": "หัวเรื่องและเนื้อความสำเร็จรูปสำหรับส่งใบสั่งซื้อและคำขอราคาให้ผู้ขายทางอีเมล",
+      "entity": "ข้อความอีเมล",
+      "add": "เพิ่มข้อความ",
+      "empty": "ยังไม่มีข้อความอีเมล เพิ่มไว้เพื่อให้กล่องส่งเอกสารเริ่มจากข้อความของคุณเอง",
+      "loadError": "โหลดข้อความอีเมลไม่สำเร็จ",
+      "table": {
+        "name": "ชื่อ",
+        "docType": "เอกสาร",
+        "subject": "หัวเรื่อง",
+        "status": "สถานะ"
+      },
+      "docType": {
+        "po": "ใบสั่งซื้อ",
+        "rfp": "คำขอรายการราคา"
+      },
+      "defaultBadge": "ค่าเริ่มต้น",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "setDefault": "ตั้งเป็นค่าเริ่มต้น",
+      "setDefaultSuccess": "ตั้ง \"{name}\" เป็นข้อความเริ่มต้นแล้ว",
+      "deleteTitle": "ลบข้อความอีเมล",
+      "deleteConfirm": "ลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
+      "dialog": {
+        "templateName": "ชื่อข้อความ",
+        "docType": "ชนิดเอกสาร",
+        "subject": "หัวเรื่อง",
+        "subjectPlaceholder": "เช่น ใบสั่งซื้อเลขที่ PO-2026-000123",
+        "body": "เนื้อความ",
+        "insertVariable": "แทรกตัวแปร",
+        "preview": "ดูตัวอย่าง",
+        "backToEdit": "กลับไปแก้ไข",
+        "defaultCc": "สำเนาถึง (ค่าเริ่มต้น)",
+        "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
+        "note": "หมายเหตุ",
+        "enabled": "เปิดใช้งาน",
+        "insertIntoSubject": "แทรกในหัวเรื่อง"
+      }
     }
   },
   "vendorManagement": {
@@ -2495,7 +2535,16 @@
         "remove": "ลบ {email}",
         "duplicateEmail": "เพิ่มไว้แล้ว",
         "send": "ส่ง",
-        "unavailable": "ยังใช้งานไม่ได้"
+        "template": "ข้อความสำเร็จรูป",
+        "templatePlaceholder": "เลือกข้อความ",
+        "insertVariable": "แทรกตัวแปร",
+        "toRequired": "ต้องมีผู้รับอย่างน้อยหนึ่งราย",
+        "sending": "กำลังส่ง...",
+        "sendSuccess": "ส่งคำขอรายการราคาแล้ว",
+        "sendFailed": "ส่งคำขอรายการราคาไม่สำเร็จ",
+        "sendPartial": "ส่งแล้ว แต่ที่อยู่เหล่านี้ถูกปฏิเสธ: {emails}",
+        "unsavedRfp": "บันทึกคำขอก่อน จึงจะส่งให้ผู้ขายได้",
+        "subjectBodyRequired": "หัวเรื่องและเนื้อความต้องไม่ว่าง"
       }
     }
   },
@@ -3813,6 +3862,9 @@
         "desc": "ส่งอีเมล {poNo} ให้ผู้ขาย พร้อมแนบไฟล์ใบสั่งซื้อเป็น PDF",
         "profile": "โปรไฟล์ผู้ส่ง",
         "profilePlaceholder": "เลือกโปรไฟล์ผู้ส่ง",
+        "template": "ข้อความสำเร็จรูป",
+        "templatePlaceholder": "เลือกข้อความ",
+        "insertVariable": "แทรกตัวแปร",
         "noProfiles": "หน่วยธุรกิจนี้ยังไม่มีโปรไฟล์อีเมลที่เปิดใช้งานอยู่",
         "goToSettings": "ไปตั้งค่าโปรไฟล์อีเมล",
         "loadError": "โหลดโปรไฟล์อีเมลไม่สำเร็จ",
@@ -4575,6 +4627,7 @@
     "workflowStoreRequisition": "ใบเบิกของ",
     "interface": "การเชื่อมต่อระบบภายนอก",
     "emailProfile": "โปรไฟล์อีเมล",
+    "emailTemplate": "ข้อความอีเมล",
     "inventoryPeriod": "รอบสินค้าคงคลัง",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",
