@@ -48,6 +48,29 @@ def flatten(node, out=None, prefix=''):
     return out
 
 
+def reconcile_null_refs(fb, fa):
+    """<base>_<suffix> ที่เป็น null ใน baseline (fb) ต้องถือว่า "ตรงกัน" กับฝั่ง live (fa)
+    ถ้า reference นั้นบนฝั่ง live ก็ null อยู่ดี (ยุบเป็น `<base>: null` หรือหาย key
+    `<base>` ไปทั้งก้อนเพราะไม่มี reference ให้ resolve ตั้งแต่ต้น) — สังเคราะห์
+    fa[k] = None ให้ตรงกับ fb[k] เพื่อไม่ให้ขึ้น false positive
+
+    สำคัญ: เงื่อนไขนี้ทำงานเฉพาะตอนค่า baseline เป็น None เท่านั้น (`if v is not None:
+    continue`) ถ้า baseline มีค่าจริง (เช่น `credit_term_id: 'abc'`) ฟังก์ชันนี้จะไม่แตะ
+    เลย ปล่อยให้ตกไปเทียบตามปกติ — เพื่อให้ reference ที่หลุดจริง (มีค่าจริงใน baseline
+    แต่ live กลับเป็น null หรือหาย key ไปทั้งก้อน) ยังโดนจับเป็น missing/changed เหมือนเดิม
+    ไม่ special-case ชื่อ field หรือ endpoint ใด ๆ ใช้ SUFFIXES ชุดเดียวกับ leftover_flat()
+    """
+    for k, v in fb.items():
+        if v is not None or k in fa:
+            continue
+        for s in SUFFIXES:
+            suf = f'_{s}'
+            if k.endswith(suf):
+                base = k[: -len(suf)]
+                if fa.get(base, None) is None:
+                    fa[k] = None
+
+
 def leftover_flat(node, path=''):
     """หาคีย์ flat ที่ยังไม่ถูกแปลง"""
     bad = []
@@ -88,6 +111,7 @@ for snap in sorted((BASE_DIR / 'api').glob('*.json')):
         problems.append(('ยังมี flat หลงเหลือ', left[:10]))
 
     fb, fa = flatten(before.get('data')), flatten(after.get('data'))
+    reconcile_null_refs(fb, fa)
     changed = [f'{k}: {v!r} → {fa[k]!r}' for k, v in fb.items() if k in fa and fa[k] != v]
     missing = [f'หายไป: {k}' for k in fb if k not in fa]
     if changed or missing:
