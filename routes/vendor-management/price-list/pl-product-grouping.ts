@@ -12,7 +12,6 @@ export interface GroupableDetail {
   readonly product_code?: string | null;
   readonly unit_name?: string | null;
   readonly moq_qty: number | string;
-  /** ราคารวมภาษี (gross) — authoritative amount */
   readonly price?: number | string;
   readonly price_without_tax: number | string;
   readonly tax_rate: number | string;
@@ -26,7 +25,6 @@ export type DetailRef = GroupableDetail;
 export interface ProductGroup {
   readonly productId: string;
   readonly groupNumber: number;
-  /** tiers ของ product นี้ เรียงตาม MOQ น้อย→มาก */
   readonly tiers: readonly GroupableDetail[];
 }
 

@@ -4,33 +4,28 @@ import { Dialog as SheetPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Sheet root component (shadcn) */
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
-/** Trigger ของ sheet (shadcn) */
 function SheetTrigger({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
-/** ปุ่มปิด sheet (shadcn) */
 function SheetClose({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
-/** Portal สำหรับ render sheet ออกจาก DOM tree (shadcn) */
 function SheetPortal({
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
-/** Overlay มืดด้านหลัง sheet */
 function SheetOverlay({
   className,
   ...props
@@ -47,7 +42,6 @@ function SheetOverlay({
   );
 }
 
-/** Sheet content container รองรับเปิดจาก 4 ด้าน (top/right/bottom/left) */
 function SheetContent({
   className,
   children,
@@ -91,7 +85,6 @@ function SheetContent({
   );
 }
 
-/** Header section ของ sheet */
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -102,7 +95,6 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** Footer section ของ sheet */
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -113,7 +105,6 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** Title ของ sheet */
 function SheetTitle({
   className,
   ...props
@@ -127,7 +118,6 @@ function SheetTitle({
   );
 }
 
-/** Description ของ sheet */
 function SheetDescription({
   className,
   ...props

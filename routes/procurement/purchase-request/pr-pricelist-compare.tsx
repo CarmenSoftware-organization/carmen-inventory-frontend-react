@@ -29,10 +29,6 @@ interface Props {
   readonly isDisabled: boolean;
 }
 
-/**
- * ปุ่มเทียบราคา (pricelist compare) + dialog — self-contained อ่านค่าจาก form เอง
- * วางใน gutter ซ้ายของแถว expanded (คอลัมน์ chevron/checkbox) ให้ตรงแถว Pricelist
- */
 export function PrPricelistCompare({
   control,
   form,

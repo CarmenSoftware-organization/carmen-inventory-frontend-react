@@ -47,7 +47,6 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
   discount_amount: number;
   is_tax_adjustment?: boolean;
   is_discount_adjustment?: boolean;
-  /** ลำดับแถวที่ backend กำหนด (เดิม FE เรียกฟิลด์นี้ว่า `sequence` ใน payload) */
   sequence_no?: number;
   /**
    * แถวหนึ่ง = คลังเดียว ตั้งแต่ backend เลิก group location (2026-09-09)
@@ -65,33 +64,27 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
    */
   comment?: string | null;
   foc_qty: number;
-  /** หน่วยของของแถม — แยกจากหน่วยสั่งซื้อ เหมือน PR/GRN */
   foc_unit_id?: string | null;
   foc_unit_name?: string | null;
-  /** ยอดสกุลฐาน — คู่กับ sub_total_price / net_amount / total_price ของสกุลใบ */
   base_sub_total_price?: number;
   base_net_amount?: number;
   base_total_price?: number;
-  /** สถานะราย stage (map) — ต่างจาก `current_stage_status` ที่เป็นสถานะปัจจุบัน */
   stages_status?: Record<string, unknown>;
   info?: Record<string, unknown>;
   pr_details: PrDetailRef[];
   history?: PoItemHistoryEntry[];
 }
 
-/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบสั่งซื้อ */
 export interface PoItemHistoryEntry {
   at: string;
   seq: number;
   name: string;
-  /** บาง entry หลังบ้านส่งมาแค่ id ไม่มีชื่อ */
   user: { id: string; name?: string };
   status: string;
   message?: string | null;
 }
 
 export interface PrDetailRef {
-  /** null ได้ — แถวที่ไม่ได้มาจาก PR (สร้างเองหรือมาจาก price list) */
   pr_detail_id: string | null;
   order_qty: number;
   order_base_qty: number;
@@ -183,10 +176,6 @@ export interface PurchaseOrder {
   workflow_previous_stage: string | null;
   workflow_next_stage: string | null;
   workflow_history?: WorkflowHistoryEntry[];
-  /**
-   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
-   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
-   */
   last_action?: LastAction | null;
   vendor_id: string;
   vendor_name: string;
@@ -204,7 +193,6 @@ export interface PurchaseOrder {
   email: string;
   remarks: string;
   approval_date: string | null;
-  /** ออบเจกต์ย่อของผู้ขาย/สกุลเงิน — ซ้ำกับ *_id/*_name/*_code ที่แบนอยู่ข้างบน */
   vendor?: { id: string; name: string };
   currency?: { id: string; code: string };
   user_action?: Record<string, unknown>;
@@ -235,10 +223,6 @@ interface PoGrnDetailLocation {
   request_base_unit_id?: string | null;
   request_base_unit_name?: string | null;
   received_qty?: number;
-  /**
-   * คลังนี้เอาไปตั้งเป็นรายการรับของได้ไหม — หลังบ้านตัดสินให้ `false` = ใช้ไม่ได้
-   * · **ไม่ส่งมา = ถือว่าใช้ได้** (หลังบ้านรุ่นเก่ายังไม่มีฟิลด์นี้)
-   */
   can_use?: boolean;
 }
 
@@ -262,7 +246,6 @@ export interface PoGrnDetail {
   net_amount: number;
   is_foc: boolean;
   locations: PoGrnDetailLocation[];
-  /** รายการนี้รับของได้ไหม — `false` = ทุกคลังใต้รายการนี้ใช้ไม่ได้ */
   can_use?: boolean;
 }
 
@@ -279,7 +262,6 @@ export interface PoForGrn {
   currency_code: string;
   exchange_rate: number;
   po_detail: PoGrnDetail[];
-  /** ทั้งใบรับของได้ไหม — `false` = ทุกรายการในใบนี้ใช้ไม่ได้ */
   can_use?: boolean;
 }
 

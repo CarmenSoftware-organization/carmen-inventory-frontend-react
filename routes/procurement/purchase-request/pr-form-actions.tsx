@@ -26,40 +26,6 @@ interface PrFormActionsProps {
   readonly onComment: () => void;
 }
 
-/**
- * แถบปุ่ม action ด้านบนของฟอร์มใบขอซื้อ โดยเปลี่ยนชุดปุ่มตาม `FormMode`
- * (view/edit), `role` ของผู้ใช้ และสถานะ `prStatus` รองรับปุ่ม edit, save
- * (submit ของฟอร์ม `purchase-request-form`), cancel, delete (เฉพาะ draft)
- * ซ่อนปุ่ม edit เมื่อ voided หรือผู้ใช้เป็น view-only role
- *
- * ของที่ไม่ได้ใช้ทุกครั้ง (duplicate/comment/activity/print) ยุบอยู่ในเมนู ⋯
- * (`DocActionsMenu` ตัวเดียวกับ PO/GRN/CN/SR)
- * @param props - คุณสมบัติของแถบปุ่ม
- * @param props.mode - โหมดฟอร์ม view หรือ edit (`FormMode`)
- * @param props.role - stage role ปัจจุบันของผู้ใช้
- * @param props.prStatus - สถานะของ PR ใช้ตรวจ draft/voided
- * @param props.isPending - สถานะกำลังบันทึก (disable ปุ่ม)
- * @param props.isDeletePending - สถานะกำลังลบ (disable ปุ่ม delete)
- * @param props.hasRecord - มี record แล้วหรือยัง ควบคุมการแสดงเมนู ⋯
- * @param props.onEdit - callback เปลี่ยนเป็นโหมด edit
- * @param props.onCancel - callback ยกเลิกการแก้ไข
- * @param props.onDelete - callback ลบ PR
- * @param props.onComment - callback เปิด comment sheet
- * @returns React element ของแถบปุ่ม action สำหรับฟอร์ม PR
- * @example
- * <PrFormActions
- *   mode={mode}
- *   role={role}
- *   prStatus={pr.pr_status}
- *   hasRecord
- *   isPending={saving}
- *   isDeletePending={deleting}
- *   onEdit={() => setMode("edit")}
- *   onCancel={handleCancel}
- *   onDelete={handleDelete}
- *   onComment={() => setCommentOpen(true)}
- * />
- */
 export function PrFormActions({
   mode,
   role,

@@ -24,65 +24,14 @@ const crud = createConfigCrud<PriceList, CreatePriceListDto>({
   cacheProfile: CACHE_NORMAL,
 });
 
-/**
- * Hook ดึงรายการ price list แบบแบ่งหน้า
- *
- * Re-export จาก factory ใช้ใน vendor-management > price list
- * และ `LookupPriceList` ใน PR/PO
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<PriceList>
- * @example
- * ```ts
- * const { data } = usePriceList({ page: 1, perpage: 20 });
- * ```
- */
 export const usePriceList = crud.useList;
 
-/**
- * Hook ดึง price list ตาม id
- *
- * @param id - id ของ price list
- * @returns UseQueryResult ของ PriceList
- * @example
- * ```ts
- * const { data } = usePriceListById(params.id);
- * ```
- */
 export const usePriceListById = crud.useById;
 
-/**
- * Hook สำหรับสร้าง price list ใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreatePriceList().mutate({ code: "PL01", vendor_id: "..." });
- * ```
- */
 export const useCreatePriceList = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไข price list
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdatePriceList().mutate({ id, code: "PL02" });
- * ```
- */
 export const useUpdatePriceList = crud.useUpdate;
 
-/**
- * Hook สำหรับลบ price list
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeletePriceList().mutate(pl.id);
- * ```
- */
 export const useDeletePriceList = crud.useDelete;
 
 // --- Export ---
@@ -92,11 +41,6 @@ interface ExportPriceListArgs {
   columns: XlsxColumn<PriceList>[];
 }
 
-/**
- * Hook ส่งออก Price List เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportPriceList, isExporting }
- */
 export function useExportPriceList() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();
@@ -120,36 +64,6 @@ export function useExportPriceList() {
   return { exportPriceList, isExporting };
 }
 
-/**
- * Hook ดึง vendor ที่มี price list active ในวันที่ระบุ ผ่าน
- * `GET /{buCode}/pricelists/active-vendors/{date}`
- *
- * Date คาดว่าอยู่ในรูป `yyyy-MM-dd` — caller responsible แปลงจาก ISO ก่อนส่งเข้า
- * Query disable เมื่อ `date` ว่างหรือ buCode ยังไม่พร้อม
- *
- * @param date - วันที่ในรูป `yyyy-MM-dd` (ถ้าว่างจะปิด query)
- * @returns UseQueryResult ของ `PriceListActiveVendor[]`
- * @example
- * const { data: vendors = [] } = usePriceListActiveVendors("2026-06-01");
- */
-/**
- * Hook ดึง price list ที่ active ของ vendor หนึ่งราย ในวันที่ระบุ ผ่าน
- * `GET /{buCode}/pricelists/active/{vendorId}/{date}?workflow_id={workflowId}`
- *
- * Response อาจคืน `data: PriceList[]` ตรงๆ หรือ `PaginatedResponse<PriceList>`
- * ตามสไตล์ของ BE — hook handle ทั้งสองรูปแบบ
- *
- * @param vendorId - vendor id (ถ้าว่างจะปิด query)
- * @param date - วันที่ในรูป `yyyy-MM-dd` (ถ้าว่างจะปิด query)
- * @param workflowId - workflow ที่ใช้กรองรายการ (ถ้าว่างจะปิด query)
- * @returns UseQueryResult ของ `PriceList[]`
- * @example
- * const { data: priceLists = [] } = useActivePriceListsByVendor(
- *   vendorId,
- *   "2026-06-01",
- *   workflowId,
- * );
- */
 export function useActivePriceListsByVendor(
   vendorId: string | null | undefined,
   date: string | undefined,

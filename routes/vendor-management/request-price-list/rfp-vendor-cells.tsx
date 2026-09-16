@@ -19,7 +19,6 @@ const EMPTY = (
   <span className="text-muted-foreground text-micro italic">—</span>
 );
 
-/** Vendor name (semibold) + code (muted micro) stacked in one cell */
 export function VendorNameCell({
   name,
   code,
@@ -32,7 +31,6 @@ export function VendorNameCell({
   return <NameWithSubtext primary={name} secondary={code || undefined} />;
 }
 
-/** Plain contact value — optional mailto/tel link, em-dash when empty */
 export function ContactValue({
   value,
   href,
@@ -58,11 +56,6 @@ export function ContactValue({
   );
 }
 
-/**
- * Email cell — reads as an actionable "send email" link at rest (mail icon +
- * primary tint), not plain text like phone/contact. Opens the user's mail
- * client via `mailto:`. Em-dash when empty.
- */
 export function EmailValue({ value }: { readonly value?: string | null }) {
   "use no memo";
   if (!value) return EMPTY;
@@ -103,7 +96,6 @@ export function SubmissionStatusBadge({
   );
 }
 
-/** Submitted-pricelist cell — no (+ name) with an open-in-new-tab action */
 export function PricelistCell({
   pricelist,
 }: {
@@ -129,7 +121,6 @@ export function PricelistCell({
   );
 }
 
-/** Row actions — copy/open/email the vendor URL + remove (with confirm) */
 export function VendorActionsCell({
   urlToken,
   email,
@@ -139,7 +130,6 @@ export function VendorActionsCell({
   onRemove,
 }: {
   readonly urlToken?: string;
-  /** อีเมลผู้ติดต่อของผู้ขาย — เติมเป็นผู้รับตั้งต้นใน dialog */
   readonly email?: string | null;
   readonly vendorName: string;
   readonly rfpName: string;

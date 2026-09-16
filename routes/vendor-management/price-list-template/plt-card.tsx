@@ -13,16 +13,6 @@ interface PltCardProps {
   readonly onDelete: (item: PriceListTemplate) => void;
 }
 
-/**
- * การ์ด price list template 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product/vendor/price-list —
- * ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง
- *
- * @param props.item - ข้อมูล template
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function PltCard({ item, onEdit, onDelete }: PltCardProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");

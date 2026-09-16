@@ -21,7 +21,6 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** ส่วน header ของ Card */
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -35,7 +34,6 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** หัวเรื่องของ Card */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -46,7 +44,6 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** คำอธิบายรองของ Card */
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -57,7 +54,6 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** ช่อง action ใน header ของ Card (มุมขวาบน) */
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -71,7 +67,6 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** ส่วนเนื้อหาหลักของ Card */
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -82,7 +77,6 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** ส่วน footer ของ Card */
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

@@ -29,7 +29,6 @@ interface ChoiceCardProps {
   readonly onClick: () => void;
 }
 
-/** การ์ดตัวเลือกหนึ่งใบใน dialog เลือก scope */
 function ChoiceCard({
   icon: Icon,
   iconClassName,
@@ -61,19 +60,6 @@ function ChoiceCard({
   );
 }
 
-/**
- * Dialog ให้ผู้ใช้เลือก scope ของ bulk action — premium ERP design
- *
- * ผู้ใช้กดว่าจะทำงานกับทุกรายการ หรือเฉพาะรายการที่ pending
- * ใช้เมื่อกด select-all checkbox ในตารางรายการ PR
- *
- * @param props - allCount, pendingCount, open, callbacks
- * @returns React element ของ dialog
- * @example
- * <PrSelectDialog open={open} onOpenChange={setOpen}
- *   allCount={20} pendingCount={8}
- *   onSelectAll={handleAll} onSelectPending={handlePending} />
- */
 export function PrSelectDialog({
   open,
   onOpenChange,

@@ -27,21 +27,6 @@ interface UsePdInfoColumnsOptions {
   readonly onDelete: (index: number) => void;
 }
 
-/**
- * Hook สร้าง column definitions ของตาราง "Additional info / Attributes"
- * ใน General tab ของ Product detail
- *
- * แยกออกจาก `pd-tab-general.tsx` ตาม pattern `use-{module}-table.tsx`
- * ของโปรเจกต์ caller ป้อนผลลัพธ์เข้า `useReactTable({ data, columns })` ต่อ
- *
- * @param options.form - RHF instance ของ product form (ใช้ control + register + formState)
- * @param options.isDisabled - read-only mode ปิด input + ซ่อน action column
- * @param options.onDelete - callback ตอนกดปุ่ม X บนแถว (ส่ง row index ให้)
- * @returns array ของ `ColumnDef<InfoField>`
- * @example
- * const columns = usePdInfoColumns({ form, isDisabled, onDelete: setDeleteIdx });
- * const table = useReactTable({ data: infoFields, columns, getCoreRowModel: getCoreRowModel() });
- */
 export function usePdInfoColumns({
   form,
   isDisabled,

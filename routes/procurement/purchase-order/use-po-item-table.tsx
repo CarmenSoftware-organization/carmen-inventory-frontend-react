@@ -31,10 +31,8 @@ import type { PoItemHistoryEntry } from "@/types/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 import type { FieldArrayWithId } from "react-hook-form";
 
-/** แถวหนึ่งของตารางสินค้า — เดิม type นี้อยู่ใน po-item-expanded ที่ถูกลบไปแล้ว */
 export type PoItemField = FieldArrayWithId<PoFormValues, "items", "id">;
 
-/** Product cell — watch is_foc + คุม status badge แล้ว render ProductHeaderCell */
 const ProductCol = memo(function ProductCol({
   form,
   index,
@@ -70,7 +68,6 @@ const PoItemActionCell = memo(function PoItemActionCell({
   onDelete,
 }: {
   index: number;
-  /** โหมดอ่านยังเห็นคอลัมน์นี้ได้ถ้ามีประวัติ — แต่ห้ามมีปุ่มลบ */
   canDelete: boolean;
   history?: PoItemHistoryEntry[];
   productName?: string;
@@ -121,7 +118,6 @@ interface UsePoItemTableOptions {
   onDelete: (index: number) => void;
 }
 
-/** ความกว้างของช่องเล็กหัวแถว (expand · # · checkbox) — ต้องเท่ากันทั้งสาม */
 const PO_LEADING_COL = 33;
 
 export function usePoItemTable({

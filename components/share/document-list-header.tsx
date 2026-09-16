@@ -4,10 +4,6 @@ import { ModuleTileIcon } from "@/components/ui/module-tile";
 interface DocumentListHeaderProps {
   readonly title: string;
   readonly description: string;
-  /**
-   * จำนวนรายการทั้งหมด — render เป็น badge ข้าง title เมื่อ > 0
-   * ไม่ส่ง/0 = ไม่แสดง (หน้าที่ backend ไม่คืน total หรือยังโหลดไม่เสร็จ)
-   */
   readonly count?: number;
 }
 

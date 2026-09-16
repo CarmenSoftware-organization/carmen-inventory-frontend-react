@@ -14,14 +14,6 @@ interface ProductHeaderCellProps extends CellProps {
   readonly isFoc: boolean;
 }
 
-/**
- * Product cell — name (ProductCell) + ป้าย FOC + local name + code/SKU
- *
- * จุดสถานะย้ายไปอยู่ท้ายคอลัมน์คลังแล้ว (ตำแหน่งเดียวกับ PR) — คอลัมน์นี้ยาว
- * ที่สุดในตาราง สถานะจึงไปกองอยู่กลางแถวคนละที่กับที่ตาไล่หาใน PR
- *
- * Font ของทุก line ใช้ inherit จาก parent (`text-xs` บน table) — ไม่ override
- */
 export function ProductHeaderCell({
   form,
   index,

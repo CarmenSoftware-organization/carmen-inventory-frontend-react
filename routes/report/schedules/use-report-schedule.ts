@@ -12,14 +12,6 @@ import type {
   ReportSchedule,
 } from "@/types/report-schedule";
 
-/**
- * Hook ดึงรายการ report schedules ของ BU
- * Cache profile = DYNAMIC (schedule run state เปลี่ยนได้ทุกนาที)
- *
- * @returns UseQueryResult ของ `ReportSchedule[]`
- * @example
- * const { data: schedules = [] } = useReportSchedules();
- */
 export function useReportSchedules() {
   const buCode = useBuCode();
   return useQuery<ReportSchedule[], ApiError>({
@@ -69,15 +61,6 @@ export function useCreateReportSchedule() {
   });
 }
 
-/**
- * Mutation สำหรับลบ report schedule
- * Invalidate `REPORT_SCHEDULES` หลังสำเร็จ
- *
- * @returns UseMutationResult — ส่ง schedule id คืน void
- * @example
- * const remove = useDeleteReportSchedule();
- * await remove.mutateAsync(scheduleId);
- */
 export function useDeleteReportSchedule() {
   const buCode = useBuCode();
   const queryClient = useQueryClient();
@@ -98,16 +81,6 @@ export function useDeleteReportSchedule() {
   });
 }
 
-/**
- * Hook ดึง lookup options ที่ใช้กับ dynamic filter ของ template
- * รับ array ของ DataSource names (เช่น `["product", "location"]`) แล้ว
- * คืน map `{ source: [{ label, value }] }` cache STATIC
- *
- * @param sources - DataSource names ที่ต้องการ — ไม่ส่งหรือว่างจะ skip ทั้ง query
- * @returns UseQueryResult ของ `ReportLookupMap`
- * @example
- * const { data: lookups = {} } = useReportLookups(["product", "location"]);
- */
 export function useReportLookups(sources: readonly string[]) {
   const buCode = useBuCode();
   const types = [...new Set(sources)].sort().join(",");

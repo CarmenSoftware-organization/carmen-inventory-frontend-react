@@ -33,14 +33,10 @@ import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
 interface PoItemFieldsProps {
   form: UseFormReturn<PoFormValues>;
-  /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand row ที่ location error */
   disabled: boolean;
-  /** disabled แยกสำหรับ location editor — ปกติเท่ากับ `disabled` แต่ PO
-   *  จาก price list จะล็อก field อื่นหมดแล้วปล่อยให้แก้ location ได้ */
   locationsDisabled?: boolean;
   role?: string;
   poStatus?: string;
-  /** อยู่โหมดแก้ไขไหม — checkbox ตัดสินรายการโผล่เฉพาะตอนแก้ได้ */
   isEditMode?: boolean;
   onApprove?: () => void;
   onReject?: () => void;

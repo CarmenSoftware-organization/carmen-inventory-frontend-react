@@ -11,32 +11,23 @@ import { ListFilter } from "@/components/list-filter/list-filter";
 import type { useListFilters } from "@/hooks/use-list-filters";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/** table ของ TanStack — รับเป็น unknown-ish เพราะแต่ละหน้าใส่ row type ของตัวเอง */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyTable = any;
 
 interface ListToolbarProps {
-  /** ค่าที่อยู่ในช่องค้นตอนนี้ (มาจาก useDataGridState) */
   readonly search: string;
   readonly onSearch: (value: string) => void;
   readonly lf: ReturnType<typeof useListFilters>;
   readonly fields: readonly FilterFieldDef[];
   readonly onSaveViewClick: () => void;
-  /** ไม่ส่ง = หน้านี้ไม่มีปุ่มเรียง/เลือกคอลัมน์/สลับ list-grid */
   readonly table?: AnyTable;
   readonly displayMode?: "list" | "grid";
   readonly onDisplayModeChange?: (mode: "list" | "grid") => void;
-  /** แทรกระหว่างช่องค้นกับ ViewSelector — PR/PO ใช้วาง toggle my-pending */
   readonly beforeViewSelector?: ReactNode;
   /**
    * ทรงของแถบซ้าย — `"wrap"` (ค่าตั้งต้น) ให้ช่องค้นกว้างเต็มบนจอแคบแล้วขึ้น
    * บรรทัดใหม่ ใช้กับหน้าที่มีปุ่มฝั่งขวาเยอะ · `"row"` บีบทุกอย่างไว้แถวเดียว
    * ช่องค้นยืดตามที่เหลือ ใช้กับหน้าที่ไม่มีปุ่มฝั่งขวา
-   */
-  /**
-   * `"bare"` = render เฉพาะของข้างใน ไม่ห่อ div และไม่ต่อ ActiveFilterBar —
-   * ใช้กับ `DisplayTemplate` ที่แยก slot `toolbar` กับ `filterBar` เป็นคนละ prop
-   * ตามดีไซน์ (หน้านั้นส่ง ActiveFilterBar เข้า filterBar เอง)
    */
   readonly variant?: "wrap" | "row" | "bare";
 }

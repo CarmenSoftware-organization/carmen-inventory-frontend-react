@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
-/** mutation ที่ template เรียก — ตรงกับ shape ของ TanStack `useMutation` */
 interface MutationLike<TVars> {
   mutate: (
     vars: TVars,
@@ -35,14 +34,10 @@ export interface ConfigEntityDialogProps<
 > {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** entity ที่กำลังแก้ไข — `null`/`undefined` = โหมดสร้างใหม่ */
   readonly entity?: TEntity | null;
-  /** view-only: disable form + ซ่อนปุ่ม submit */
   readonly readOnly?: boolean;
 
-  /** ไอคอนหัว dialog */
   readonly icon: LucideIcon;
-  /** namespace ของโมดูล เช่น `"config.businessType"` (ต้องมี key `entity`) */
   readonly translationNamespace: string;
 
   readonly useCreate: () => MutationLike<TPayload>;
@@ -50,29 +45,16 @@ export interface ConfigEntityDialogProps<
     TPayload & { id: string; doc_version?: number }
   >;
 
-  /** factory สร้าง zod schema จาก translator (validation/field) */
   readonly buildSchema: (
     tv: TranslationFn,
     tfl: TranslationFn,
   ) => ZodType<TFormValues>;
-  /** map entity → ค่าเริ่มต้นฟอร์ม (เรียกตอน reset; `null` = ค่าเปล่าสำหรับสร้างใหม่) */
   readonly toFormValues: (entity?: TEntity | null) => TFormValues;
-  /** map ค่าฟอร์ม → payload ที่ส่งเข้า create/update */
   readonly toPayload: (values: TFormValues) => TPayload;
 
-  /** class เพิ่มของ DialogContent (เช่น `sm:max-w-lg` สำหรับฟอร์มกว้าง) */
   readonly contentClassName?: string;
-  /**
-   * เรียกหลังสร้างสำเร็จ พร้อมผลลัพธ์ดิบจาก create mutation —
-   * ใช้กับ flow "สร้าง inline แล้วเลือกทันที" (เช่น unit dialog ส่ง id กลับ)
-   */
   readonly onCreated?: (result: unknown) => void;
-  /**
-   * preventDefault + stopPropagation ตอน submit — จำเป็นเมื่อ dialog ถูก render
-   * อยู่ใน React tree ของ form อื่น (synthetic event จะ bubble ทะลุ portal)
-   */
   readonly stopPropagationOnSubmit?: boolean;
-  /** render fields เฉพาะ entity — รับ `form` + `disabled` */
   readonly children: (ctx: {
     form: UseFormReturn<TFormValues>;
     disabled: boolean;

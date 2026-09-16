@@ -43,14 +43,6 @@ export function usePrt(params?: ParamsDto, options?: { enabled?: boolean }) {
   });
 }
 
-/**
- * Hook ดึงข้อมูล PRT ตาม id
- * Unwrap data จาก response จะไม่ fetch จนกว่า buCode และ id จะพร้อม
- * @param id - รหัส PRT
- * @returns React Query ของ PurchaseRequestTemplate
- * @example
- * const { data: prt } = usePrtById(id);
- */
 export function usePrtById(id: string | undefined) {
   const buCode = useBuCode();
 
@@ -68,14 +60,6 @@ export function usePrtById(id: string | undefined) {
   });
 }
 
-/**
- * Hook สร้าง PRT ใหม่
- * POST payload และ invalidate cache รายการ PRT
- * @returns Mutation ที่ resolve เป็น { data: { id } }
- * @example
- * const create = useCreatePrt();
- * const res = await create.mutateAsync(payload);
- */
 export function useCreatePrt() {
   return useApiMutation<CreatePrtDto, { data: { id: string } }>({
     mutationFn: (data, buCode) =>
@@ -85,14 +69,6 @@ export function useCreatePrt() {
   });
 }
 
-/**
- * Hook แก้ไข PRT ผ่าน PUT โดยระบุ id
- * Invalidate cache รายการ PRT เมื่อสำเร็จ
- * @returns Mutation สำหรับแก้ไข PRT
- * @example
- * const update = useUpdatePrt();
- * update.mutate({ id, ...values });
- */
 export function useUpdatePrt() {
   return useApiMutation<CreatePrtDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -105,14 +81,6 @@ export function useUpdatePrt() {
   });
 }
 
-/**
- * Hook ลบ PRT ตาม id
- * DELETE และ invalidate รายการ PRT
- * @returns Mutation สำหรับลบ PRT
- * @example
- * const del = useDeletePrt();
- * del.mutate(id);
- */
 export function useDeletePrt() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -131,11 +99,6 @@ interface ExportPrtArgs {
   columns: XlsxColumn<PurchaseRequestTemplate>[];
 }
 
-/**
- * Hook ส่งออก PRT เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportPrt, isExporting }
- */
 export function useExportPrt() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

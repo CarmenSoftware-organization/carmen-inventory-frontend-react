@@ -3,7 +3,6 @@ import { Avatar as AvatarPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Root ของ Avatar รองรับขนาด sm/default/lg */
 function Avatar({
   className,
   size = "default",
@@ -24,7 +23,6 @@ function Avatar({
   );
 }
 
-/** รูปภาพหลักของ Avatar */
 function AvatarImage({
   className,
   ...props
@@ -38,7 +36,6 @@ function AvatarImage({
   );
 }
 
-/** Fallback ที่แสดงเมื่อโหลดรูปไม่สำเร็จ (มักใช้แสดงอักษรย่อ) */
 function AvatarFallback({
   className,
   ...props
@@ -55,7 +52,6 @@ function AvatarFallback({
   );
 }
 
-/** Badge ที่แปะมุมของ Avatar สำหรับแสดงสถานะ เช่น online */
 function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -72,7 +68,6 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-/** กลุ่ม Avatar ซ้อนเหลื่อมกันในแนวนอน */
 function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -86,7 +81,6 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** วงกลมแสดงจำนวน Avatar ส่วนเกินใน AvatarGroup */
 function AvatarGroupCount({
   className,
   ...props

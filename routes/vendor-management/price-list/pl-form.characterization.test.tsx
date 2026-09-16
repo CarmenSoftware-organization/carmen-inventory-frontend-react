@@ -66,7 +66,6 @@ beforeEach(() => {
  * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้ ถ้า refactor แล้วเปลี่ยน ต้องเป็นเพราะตั้งใจ
  */
 describe("PriceListForm — characterization", () => {
-  /** ฟอร์มเปิดมาที่โหมด view เสมอเมื่อมี entity — ต้องกด Edit ก่อนถึงจะ submit ได้ */
   async function enterEditMode() {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
   }
@@ -91,11 +90,9 @@ describe("PriceListForm — characterization", () => {
     });
   });
 
-  /** โหมด add ต้องเลือก vendor/currency/ช่วงวันที่ผ่าน lookup+datepicker */
   it.todo("[create] พฤติกรรมหลังสร้าง");
 });
 
-/** ใบที่มีแถวสินค้าซึ่งยังไม่ได้เลือกสินค้า — ติด required ของ product_id */
 const WITH_INVALID_ROW = {
   ...PRICE_LIST,
   pricelist_detail: [
@@ -140,11 +137,6 @@ describe("PriceListForm — แถวสินค้าที่ติด valida
   });
 });
 
-/**
- * UX ของส่วนรายการสินค้า — เขียนไว้ตอนย้าย field array จาก pl-form ไป
- * pl-item-fields เพื่อพิสูจน์ว่าหน้าตา/การกดใช้งานไม่เปลี่ยน (เทสต์ชุดนี้ผ่าน
- * ทั้งก่อนและหลังการย้าย)
- */
 describe("PriceListForm — ส่วนรายการสินค้า", () => {
   const rows = () =>
     screen.queryAllByLabelText(en.vendorManagement.priceList.detail.removeItem);

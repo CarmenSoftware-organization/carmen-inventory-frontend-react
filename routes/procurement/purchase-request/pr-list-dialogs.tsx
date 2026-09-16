@@ -25,7 +25,6 @@ interface PrListDialogsProps {
   batchDeleteOpen: boolean;
   setBatchDeleteOpen: (open: boolean) => void;
   selectedItems: PurchaseRequest[];
-  /** จำนวนแถวในหน้าปัจจุบัน — ใช้รู้ว่า batch delete เคลียร์ทั้งหน้าไหม */
   pageItemCount: number;
   clearSelection: () => void;
   table: ReturnType<typeof usePrTable>;

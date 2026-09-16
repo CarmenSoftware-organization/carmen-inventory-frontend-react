@@ -25,7 +25,6 @@ export function AssignSection({
   readonly count?: number;
   readonly action?: ReactNode;
   readonly first?: boolean;
-  /** Body needs full width (e.g. a dual-panel transfer) — title/desc stack on top */
   readonly wide?: boolean;
   readonly children: ReactNode;
 }) {

@@ -56,8 +56,6 @@ export function IaFormHero({
   const canDelete = !!inventoryAdjustment && !isReadOnly;
   const canPrint = isView && !!inventoryAdjustment?.id;
 
-  /** Save = เซฟเป็นฉบับร่าง — ตั้ง doc_status ก่อน submit ฟอร์ม
-   *  (Commit ไม่ผ่านทางนี้ ฟอร์มตั้ง completed ตอนผู้ใช้ยืนยันใน dialog) */
   const saveAsDraft = () => form.setValue("doc_status", "draft");
 
   const statusConfig = inventoryAdjustment

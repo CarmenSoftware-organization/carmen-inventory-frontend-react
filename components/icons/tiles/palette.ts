@@ -9,22 +9,17 @@
  */
 
 export interface Palette {
-  /** พื้นไทล์ (squircle) — primary-tint อ่อน */
   readonly base: string;
-  /** ไฮไลต์อ่อนในภาพ */
   readonly accent: string;
-  /** เงา/ดีเทลเข้มในภาพ */
   readonly shadow: string;
 }
 
-/** โทน tile เดียวที่ทุก module ใช้ร่วมกัน — ตัวภาพหลัก (เดิม #fff) ใช้ currentColor = var(--tile-ink) */
 const PRIMARY_TILE: Palette = {
   base: "var(--tile-surface)",
   accent: "var(--tile-accent)",
   shadow: "var(--tile-shadow)",
 };
 
-/** Module tile palette — known keys map ไปยังโทน primary เดียวกันทั้งหมด */
 export const APP_TILE_PALETTE: Record<string, Palette> = {
   dashboard: PRIMARY_TILE,
   procurement: PRIMARY_TILE,

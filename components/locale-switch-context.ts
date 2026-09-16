@@ -5,5 +5,4 @@ export const LocaleSwitchContext = createContext<
   (locale: SupportedLocale) => void
 >(() => {});
 
-/** ใช้โดย hooks/use-locale-switch.ts */
 export const useSwitchLocale = () => useContext(LocaleSwitchContext);

@@ -4,7 +4,6 @@ import type { UpdateUserPayload, UserDetail } from "@/types/user";
 export const userAssignedSchema = z.object({
   role_ids: z.array(z.string()),
   location_ids: z.array(z.string()),
-  /** ว่าง = ไม่สังกัดแผนกไหน — ผู้ใช้อยู่ได้แผนกเดียวเท่านั้น */
   department_id: z.string(),
 });
 

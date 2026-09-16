@@ -2,12 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { PriceListTemplate } from "@/types/price-list-template";
 
-/**
- * สร้าง zod schema สำหรับรายการสินค้าของ price list template หนึ่งรายการ
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ detail
- */
 function createPltDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
@@ -18,12 +12,6 @@ function createPltDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema ของ price list template form รวมข้อมูลหลักและรายการสินค้า
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ template form
- */
 export function createPltSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
@@ -48,12 +36,6 @@ const EMPTY_FORM: PltFormValues = {
   details: [],
 };
 
-/**
- * คำนวณค่าเริ่มต้นของ template form จาก template ที่มีอยู่ พร้อม flatten moq เป็นรายการ
- * @param template - template ที่จะใช้ pre-fill (optional)
- * @param options - ตัวเลือกเพิ่มเติมเช่น default currency id
- * @returns ค่า default ของ template form
- */
 export function getDefaultValues(
   template?: PriceListTemplate,
   options?: { defaultCurrencyId?: string },
@@ -107,11 +89,6 @@ export const PLT_DETAIL_EMPTY = {
   note: "",
 } satisfies PltFormValues["details"][number];
 
-/**
- * รวมรายการ detail ที่เป็น flat list ให้กลับมาเป็น product พร้อม moq array สำหรับส่ง API
- * @param details - รายการ detail จาก form
- * @returns array ของ product พร้อม moq ที่ถูก group แล้ว
- */
 export function groupDetailsToProducts(details: PltFormValues["details"]) {
   const map = new Map<
     string,

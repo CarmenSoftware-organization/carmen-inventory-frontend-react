@@ -25,10 +25,6 @@ interface PcEntryNotesDialogProps {
   readonly onSaved?: (payload: SavedNotePayload) => void;
 }
 
-/**
- * Thin adapter — bind PC hooks (load comments + save note) เข้ากับ shared EntryNotesDialog
- * UI ทั้งหมดอยู่ใน `_shared/entry-notes-dialog.tsx`
- */
 export function PcEntryNotesDialog({
   open,
   onOpenChange,

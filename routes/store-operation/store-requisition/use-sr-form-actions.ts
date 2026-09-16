@@ -204,10 +204,6 @@ export function useSrFormActions({
     }
   };
 
-  /**
-   * @param successMsg ข้อความตอนสำเร็จ — ต้องบอกว่า "ทำอะไรสำเร็จ" ไม่ใช่
-   *   "อัปเดตสำเร็จ" เหมือนกันหมดทุกปุ่ม โดยเฉพาะ Issue ที่ตัดของออกจากคลังจริง
-   */
   const runWorkflow = async (
     mutation: typeof submitSr,
     payload: SrActionPayload,
@@ -300,7 +296,6 @@ export function useSrFormActions({
     }
   };
 
-  /** กรอกไม่ครบ → พาไปหาช่องที่ขาด แล้วบอกว่าขาดกี่แถว */
   const revealInvalid = (errors: FieldErrors<SrFormValues>) => {
     scrollToFirstInvalidField();
     const count = countInvalidItems(errors as Record<string, unknown>);

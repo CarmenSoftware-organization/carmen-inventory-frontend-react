@@ -13,10 +13,6 @@ export interface RecipeComputed {
   suggestedPrice: number | null;
 }
 
-/**
- * คำนวณต้นทุนและกำไรอัตโนมัติของสูตรอาหารตามค่าในฟอร์ม
- * และเขียนผลลัพธ์กลับเข้า form fields ที่เกี่ยวข้อง (gross_margin, suggested_price ฯลฯ)
- */
 export function useRecipeCostCalc(
   form: UseFormReturn<RecipeFormValues>,
 ): RecipeComputed {

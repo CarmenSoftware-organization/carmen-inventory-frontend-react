@@ -16,11 +16,8 @@ import { cn } from "@/lib/utils";
 interface DataGridRowActionsProps {
   readonly onEdit?: () => void;
   readonly onDelete?: () => void;
-  /** ถ้า true: Edit item ใน dropdown จะ dim + คลิกแล้วเด้ง permission dialog */
   readonly editDenied?: boolean;
-  /** ถ้า true: Delete item ใน dropdown จะ dim + คลิกแล้วเด้ง permission dialog */
   readonly deleteDenied?: boolean;
-  /** Permission codes สำหรับใช้ใน dispatch event เมื่อ denied */
   readonly editPermission?: Permission;
   readonly deletePermission?: Permission;
   /**
@@ -30,7 +27,6 @@ interface DataGridRowActionsProps {
    * มาก่อน `editDenied`/`deleteDenied` เสมอเมื่อเป็น true พร้อมกัน
    */
   readonly writeDisabled?: boolean;
-  /** Tooltip เมื่อ `writeDisabled` — ข้อความจาก `messages/*.json` namespace `license` */
   readonly writeDisabledTitle?: string;
   /**
    * เปิดเมนู Activity ของแถวนี้ — ไม่ส่ง = ไม่มีเมนู

@@ -15,7 +15,6 @@ export const accountingSchema = z.object({
   enabled: z.boolean(),
   default_account_code: z.string(),
   default_department_code: z.string(),
-  /** free text — ดู "Open question" ใน spec: KB ไม่ได้ระบุว่า value นี้คืออะไร */
   default_invoice_value: z.string(),
   export_format: z.enum(["csv", "xml", "json"]),
   endpoint: z.string(),
@@ -34,7 +33,6 @@ export const EMPTY_ACCOUNTING: AccountingFormValues = {
   posting_frequency: "manual",
 };
 
-/** แปลงค่าจาก app_config เป็นค่า form — key ที่ขาดตกไปใช้ default */
 export function toFormValues(
   value: Record<string, unknown> | undefined,
 ): AccountingFormValues {
@@ -43,7 +41,6 @@ export function toFormValues(
   return parsed.success ? parsed.data : EMPTY_ACCOUNTING;
 }
 
-/** แปลงค่า form เป็น payload ของ app_config */
 export function toApiValue(
   values: AccountingFormValues,
 ): Record<string, unknown> {

@@ -8,18 +8,12 @@ import {
 } from "@/lib/image-upload";
 import type { RecipeImage, RecipeGalleryManifestItem } from "@/types/recipe";
 
-/** Max images per recipe (backend limit). */
 const MAX_IMAGES = 10;
 
-/** One gallery slot — an existing server image (`id`) or a pending upload (`file`). */
 export interface RecipeGalleryItem {
-  /** Stable React key. */
   key: string;
-  /** Existing image id, or null for a new upload. */
   id: string | null;
-  /** New file to upload, or null for an existing image. */
   file: File | null;
-  /** Display URL — presigned (existing) or object URL (new). */
   url: string;
   altText: string | null;
   isPrimary: boolean;
@@ -44,7 +38,6 @@ export interface RecipeGalleryController {
   buildPayload: () => RecipeGalleryPayload;
 }
 
-/** Map server images → gallery items, preserving sort_order (primary flagged, not reordered). */
 function toItems(
   images: readonly RecipeImage[] | undefined,
 ): RecipeGalleryItem[] {
@@ -60,7 +53,6 @@ function toItems(
     }));
 }
 
-/** Guarantee exactly one primary (first item if none flagged). */
 function ensurePrimary(items: RecipeGalleryItem[]): RecipeGalleryItem[] {
   if (items.length === 0) return items;
   let primaryIdx = items.findIndex((i) => i.isPrimary);
@@ -71,16 +63,6 @@ function ensurePrimary(items: RecipeGalleryItem[]): RecipeGalleryItem[] {
   });
 }
 
-/**
- * จัดการสถานะ gallery ของ recipe เป็น "desired state" — รูปเดิม (อ้างด้วย id) + รูปใหม่ (ไฟล์)
- *
- * จับ object URL ของรูปใหม่ใน ref แล้ว revoke ตอน remove/unmount/reset
- * `buildPayload()` คืน `images` (ไฟล์ใหม่ตามลำดับ) + `manifest` (id หรือ file_index) สำหรับส่ง multipart
- * `isDirty` จะ true เมื่อมีการ เพิ่ม/ลบ/เรียง/เปลี่ยน primary — ใช้ตัดสินใจว่าจะส่ง gallery ไหม
- *
- * @param initialImages - รูปจาก GET (จะถูก sort ตาม sort_order)
- * @returns controller สำหรับผูกกับ `RecipeImageGallery` + เรียกตอน submit
- */
 export function useRecipeGallery(
   initialImages?: readonly RecipeImage[],
 ): RecipeGalleryController {

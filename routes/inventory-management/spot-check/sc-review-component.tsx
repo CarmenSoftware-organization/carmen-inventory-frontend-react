@@ -11,12 +11,9 @@ import type {
 import { ReviewComponent } from "../shared/review-component";
 
 interface ScReviewComponentProps {
-  /** ข้อมูลที่ได้จาก PATCH /spot-check/{id}/review */
   readonly review: SpotCheckReviewData;
-  /** Optional: ข้อความ location header (ส่งมาจาก entry component) */
   readonly locationCode?: string;
   readonly locationName?: string;
-  /** Callback กลับไป entry mode (ยกเลิก review state) */
   readonly onBack?: () => void;
 }
 

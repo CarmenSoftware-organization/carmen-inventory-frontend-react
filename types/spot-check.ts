@@ -39,7 +39,6 @@ export interface SpotCheckSaveDto {
   items: SpotCheckSaveItem[];
 }
 
-/** Item ใน review response (PATCH /spot-check/{id}/review) */
 export interface SpotCheckReviewItem {
   id: string;
   sequence_no: number;
@@ -54,7 +53,6 @@ export interface SpotCheckReviewItem {
   diff_qty: number;
 }
 
-/** Response data ของ PATCH /spot-check/{id}/review */
 export interface SpotCheckReviewData {
   id: string;
   total: number;
@@ -116,7 +114,6 @@ export interface SpotCheck {
   info: Record<string, unknown>;
   dimension: unknown[];
   doc_version: number;
-  /** create-only payload fields — ไม่อยู่ใน GET response แต่ optional ไว้ใช้กับ edit form */
   items?: number;
   min_value?: number;
   product_id?: string[];
@@ -128,7 +125,6 @@ export interface SpotCheck {
   tb_spot_check_detail?: SpotCheckDetail[];
 }
 
-/** Latest spot check ที่ฝังใน /spot-check/current ต่อ location */
 export interface SpotCheckLocationLatest {
   id: string;
   spot_check_no: string;
@@ -147,7 +143,6 @@ export interface SpotCheckLocation {
   location_type: LocationType;
   physical_count_type: "yes" | "no";
   spot_check_count: number;
-  /** ถ้าไม่มี = location ยังไม่เคยมี spot check (Start mode) */
   latest_spot_check: SpotCheckLocationLatest | null;
 }
 

@@ -40,13 +40,6 @@ interface PeriodDialogProps {
   readonly period?: Period | null;
 }
 
-/**
- * Dialog สำหรับเพิ่ม/แก้ไขงวดบัญชี (Period) พร้อมตรวจสอบข้อมูลด้วย Zod schema
- * @param props - สถานะ open, callback onOpenChange และข้อมูล period (ถ้าเป็นโหมดแก้ไข)
- * @returns React element ของ Dialog
- * @example
- * <PeriodDialog open={open} onOpenChange={setOpen} period={editPeriod} />
- */
 export function PeriodDialog({
   open,
   onOpenChange,

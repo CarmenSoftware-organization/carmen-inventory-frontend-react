@@ -45,16 +45,13 @@ interface StepSelectItemsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;
 }
 
-/** แถวหนึ่งในตาราง = สินค้าหนึ่งบรรทัดของ price list หนึ่งใบ */
 interface PlRow {
   readonly detail: PriceListDetailItem;
   readonly pricelistNo: string;
   readonly currency: { id: string; code: string; name?: string };
-  /** หลังบ้านอนุญาตให้เอาบรรทัดนี้ไปตั้งเป็นรายการสั่งซื้อไหม */
   readonly canUse: boolean;
 }
 
-/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
 const FILTER_FIELDS: PoFilterField<PlRow>[] = [
   {
     key: "product_id",
@@ -126,7 +123,6 @@ function detailToItem(row: PlRow): FromPriceListSelectedItem {
   };
 }
 
-/** error ของ item รายแถว — RHF เก็บเป็น array ตาม index ของ `items` */
 type RowError =
   | {
       location_id?: { message?: string };
@@ -210,7 +206,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     [activeCurrency],
   );
 
-  /** มีแถวที่หลังบ้านห้ามใช้อยู่ไหม — ใช้ตัดสินว่าต้องอธิบายเหนือตารางไหม */
   const hasUnusableRow = rows.some((r) => !r.canUse);
 
   const totalAmount = items.reduce(
@@ -238,7 +233,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     [form, setItems],
   );
 
-  /** มุมมองของ `items` ในภาษาของ TanStack — ไม่ใช่ state ที่ถือคู่ขนาน */
   const rowSelection = useMemo<RowSelectionState>(
     () => Object.fromEntries(items.map((i) => [i.pricelist_detail_id, true])),
     [items],
@@ -297,7 +291,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   );
 
   const columns = useMemo<ColumnDef<PlRow>[]>(() => {
-    /** แถวที่เลือกไม่ได้ = จางไว้ให้เห็นตั้งแต่กวาดตา ไม่ต้องไปกดถึงจะรู้ */
     const dim = (row: PlRow) => (canSelectRow(row) ? undefined : "opacity-50");
 
     return [

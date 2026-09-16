@@ -22,14 +22,6 @@ interface UseBusinessTypeTableOptions {
   onDelete: (businessType: BusinessType) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Business Type พร้อมคอลัมน์ name
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/business-type
- * const { table } = useBusinessTypeTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useBusinessTypeTable({
   data,
   totalRecords,

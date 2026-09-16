@@ -22,13 +22,6 @@ interface UseRequestPriceListTableOptions {
   onDelete: (item: RequestPriceList) => void;
 }
 
-/**
- * Hook สร้างตาราง RFP list พร้อมคอลัมน์ชื่อ ช่วงวันที่ และสถานะ
- * @param props - items, total, params, tableConfig และ callbacks สำหรับ edit/delete
- * @returns react-table instance ที่ใช้กับ DataGrid
- * @example
- * const { table } = useRequestPriceListTable({ items, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useRequestPriceListTable({
   items,
   totalRecords,

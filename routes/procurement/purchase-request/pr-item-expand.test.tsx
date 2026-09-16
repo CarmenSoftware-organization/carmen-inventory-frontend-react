@@ -20,7 +20,6 @@ type Item = PrFormValues["items"][number];
 
 const money = (n: number) => formatCurrency(n);
 
-/** ค่าใน Field ที่เป็น plain <p> (Subtotal / Net / Total) — ค้นจาก label แล้วอ่าน <p> */
 function fieldValue(labelText: string): string {
   const label = screen
     .getAllByText(labelText)

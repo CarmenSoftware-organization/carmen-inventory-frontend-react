@@ -18,7 +18,6 @@ interface VendorGeneralProps {
   readonly isDisabled: boolean;
 }
 
-/** General section — name, code, business type, description, status */
 export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
   const t = useTranslations("vendorManagement.vendor");
   const tfl = useTranslations("field");

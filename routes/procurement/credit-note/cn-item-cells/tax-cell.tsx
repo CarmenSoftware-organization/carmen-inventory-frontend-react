@@ -10,12 +10,6 @@ import type { CnFormValues } from "../cn-form-schema";
 import type { CnCreditNoteType } from "../cn-item-compute";
 import { useCnItemLine } from "./helpers";
 
-/** Tax — override toggle + tax-profile/amount combo (shared, แบบ GRN/PO) */
-/**
- * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
- *
- * ใช้ของกลางตัวเดียวกับคอลัมน์ชื่อสินค้า/คลัง ทรงบรรทัดรองจะได้เปลี่ยนที่เดียว
- */
 function RateSubtext({
   amount,
   rate,

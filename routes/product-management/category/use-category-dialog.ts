@@ -7,18 +7,6 @@ interface UseCategoryDialogProps {
   onSubmit: (data: Record<string, unknown>) => Promise<void> | void;
 }
 
-/**
- * Hook จัดการสถานะ dialog ของหมวดหมู่สินค้า ครอบคลุมทั้งโหมด add และ edit
- * ทำหน้าที่เก็บ selectedNode, parentNode, mode และคืนค่า handlers ที่พร้อมเชื่อมเข้ากับ CategoryDialog
- * ในโหมด edit จะค้นหา parentNode อัตโนมัติจาก categoryData ตาม product_category_id / product_subcategory_id ของ node ที่เลือก
- * @param props - categoryData (tree ปัจจุบัน) และ onSubmit callback ที่จะถูกเรียกเมื่อ submit form
- * @returns state (open, mode, selectedNode, parentNode) และ handlers (handleOpenChange, handleEdit, handleAdd, handleSubmit)
- * @example
- * const { open, mode, selectedNode, parentNode, handleOpenChange, handleEdit, handleAdd } =
- *   useCategoryDialog({ categoryData, onSubmit: handleFormSubmit });
- * // เปิด dialog สำหรับเพิ่ม subcategory ภายใต้ category
- * handleAdd(categoryNode);
- */
 export function useCategoryDialog({
   categoryData,
   onSubmit,

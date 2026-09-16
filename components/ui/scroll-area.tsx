@@ -3,7 +3,6 @@ import { ScrollArea as ScrollAreaPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Scroll area container พร้อม custom scrollbar (shadcn) */
 function ScrollArea({
   className,
   children,
@@ -27,7 +26,6 @@ function ScrollArea({
   );
 }
 
-/** Custom scrollbar ของ ScrollArea รองรับ orientation แนวตั้ง/นอน */
 function ScrollBar({
   className,
   orientation = "vertical",

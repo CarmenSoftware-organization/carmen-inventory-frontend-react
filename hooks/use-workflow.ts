@@ -41,7 +41,6 @@ export function useWorkflow(
   });
 }
 
-/** ชนิดเอกสารที่มีหน้ารายการ workflow ของตัวเอง — ค่าเป็น slug ใน URL ของ endpoint */
 export const WORKFLOW_DOC_TYPES = [
   "purchase-request",
   "purchase-order",
@@ -102,7 +101,6 @@ const useStoreRequisitionWorkflows = (
   options?: { enabled?: boolean },
 ) => useWorkflowsByDocType("store-requisition", params, options);
 
-/** slug → hook ของชนิดนั้น ใช้เลือก list hook ตามหน้าที่เปิดอยู่ */
 export const WORKFLOW_LIST_HOOKS: Record<
   WorkflowDocType,
   typeof usePurchaseRequestWorkflows

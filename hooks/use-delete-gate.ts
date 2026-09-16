@@ -5,13 +5,9 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { buildPermissionKey, type Permission } from "@/constant/permissions";
 
 export interface DeleteGate {
-  /** ไม่มีสิทธิ์ `<prefix>.delete` — ปุ่มยัง dim แต่กดได้ แล้วเด้ง permission dialog */
   readonly deleteDenied: boolean;
-  /** key ที่จะส่งไปกับ dialog — `undefined` เมื่อ route นี้ไม่มี permission prefix */
   readonly deletePermission: Permission | undefined;
-  /** สัญญาหมดอายุ/ถูกระงับ — ปิดปุ่มจริง ไม่ใช่แค่ dim */
   readonly writeDisabled: boolean;
-  /** Tooltip ของปุ่มที่ถูกปิดด้วย `writeDisabled` */
   readonly writeDisabledTitle: string | undefined;
 }
 

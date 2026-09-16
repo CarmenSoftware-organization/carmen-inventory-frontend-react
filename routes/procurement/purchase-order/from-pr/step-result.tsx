@@ -17,7 +17,6 @@ import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/currency-utils";
 import { formatDate } from "@/lib/date-utils";
 
-/** ใบที่ backend สร้างให้ 1 ใบ (จาก `data.purchase_orders[]` ของ confirm-pr) */
 export interface CreatedPo {
   readonly id: string;
   readonly po_no: string;

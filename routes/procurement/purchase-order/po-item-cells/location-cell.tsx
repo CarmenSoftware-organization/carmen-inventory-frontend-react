@@ -25,7 +25,6 @@ export function LocationCell({
   readonly form: UseFormReturn<PoFormValues>;
   readonly index: number;
   readonly disabled: boolean;
-  /** จุดสถานะของแถว — วางท้ายคลัง ตำแหน่งเดียวกับ PR */
   readonly statusSlot?: ReactNode;
 }) {
   "use no memo";

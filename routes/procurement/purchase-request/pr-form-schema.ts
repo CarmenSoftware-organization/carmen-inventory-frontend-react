@@ -14,12 +14,6 @@ import { addDays, isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 
-/**
- * สร้าง zod schema สำหรับ detail แต่ละรายการของใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns zod object schema ของ PR detail
- */
 function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -116,12 +110,6 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema หลักของฟอร์มใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns zod object schema ของ PR
- */
 export function createPrSchema(
   tv: TranslationFn,
   tf: TranslationFn,
@@ -413,13 +401,6 @@ interface FreshItemSource {
   comment?: string | null;
 }
 
-/**
- * แถว item ตั้งต้นสำหรับใบใหม่จาก source (template หรือใบเดิมตอน duplicate) —
- * เก็บเฉพาะ "ของที่สั่ง" (สินค้า จำนวน หน่วย สถานที่ ภาษี ส่วนลด) แล้วทิ้งของที่
- * ผูกกับเอกสาร/รอบราคาเดิม (vendor, pricelist, approved, stage, delivery_date)
- * ให้เริ่มรอบใหม่ — ราคาใน price list เปลี่ยนได้ทุกสัปดาห์ ลาก pricelist_detail_id
- * เก่ามาคือชี้ราคาที่ตายแล้ว
- */
 function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
   return {
     product_id: d.product_id,
@@ -568,27 +549,6 @@ export function resolveApprovedQty(
   return approved > 0 ? approved : Number(item.requested_qty) || 0;
 }
 
-/**
- * แปลง item ของฟอร์มเป็น payload ที่ส่งไปยัง API ของ PR detail
- * จัดการการแปลง empty string เป็น null สำหรับ foreign key ต่าง ๆ และ normalize stage status
- * ใช้ร่วมกับ buildItemChanges เพื่อสร้าง payload add/update/remove ก่อนเรียก mutation
- * @param item - ค่า item จากฟอร์ม (PrFormValues["items"][number])
- * @returns payload ของ PR detail ชนิด PurchaseRequestDetailPayload สำหรับส่งไป backend
- * @example
- * const changes = buildItemChanges(
- *   values.items,
- *   defaultValues.items,
- *   form.formState.dirtyFields.items,
- *   mapItemToPayload,
- * );
- * await updatePR.mutateAsync({ id: prId, purchase_request_detail: changes });
- */
-/**
- * สร้าง payload สำหรับ workflow stage action แบบ submit/reject
- * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id จะถูกรวม)
- * @param defaultMessage - ข้อความ fallback เมื่อ item ไม่มี stage_message
- * @returns รายการ WorkflowStageDetail สำหรับส่งไป API
- */
 export function prepareStageDetails(
   items: PrFormValues["items"],
   defaultMessage: string = "",
@@ -602,13 +562,6 @@ export function prepareStageDetails(
     }));
 }
 
-/**
- * สร้าง payload สำหรับ workflow action approve/reject ของ PR (stage role approve)
- * รวมข้อมูล qty, pricing, delivery, tax, discount ของแต่ละ item
- * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id)
- * @param purchaseRequestId - id ของ PR สำหรับฝังใน payload
- * @returns รายการ ApproveDetail สำหรับส่งไป API
- */
 export function prepareApproveDetails(
   items: PrFormValues["items"],
   purchaseRequestId?: string,

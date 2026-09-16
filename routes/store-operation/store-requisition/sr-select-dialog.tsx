@@ -18,10 +18,6 @@ interface SrSelectDialogProps {
   readonly onSelectPending: () => void;
 }
 
-/**
- * Dialog ให้ผู้ใช้เลือก scope ของ bulk action สำหรับรายการ SR
- * เลือกทุกรายการ หรือเฉพาะรายการที่ pending
- */
 export function SrSelectDialog({
   open,
   onOpenChange,

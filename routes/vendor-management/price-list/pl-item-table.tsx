@@ -25,7 +25,6 @@ interface PLItemTableProps {
   readonly detailRefs?: PriceList["pricelist_detail"];
   readonly isView: boolean;
   readonly isDisabled: boolean;
-  /** เปิด dialog ยืนยันลบของแถวนั้น — ไม่ได้ลบเอง (เจ้าของ field array ลบให้) */
   readonly onRequestRemove: (idx: number) => void;
 }
 

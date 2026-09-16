@@ -19,13 +19,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/**
- * สร้าง Response object แบบ JSON สำหรับ mock fetch response ในเทส httpClient
- *
- * @param status - HTTP status code
- * @param body - ข้อมูล body ที่จะถูก stringify (default: {})
- * @returns Response instance พร้อม header Content-Type เป็น application/json
- */
 function jsonResponse(status: number, body: unknown = {}) {
   return new Response(JSON.stringify(body), {
     status,
@@ -147,7 +140,6 @@ describe("403 handling", () => {
 // ต้องเขียวเหมือนเดิมทุกประการ ชุดนี้ครอบเพิ่มเฉพาะการแยก reason ของ dialog
 // =========================================================================
 describe("403 handling — license vs permission (C5)", () => {
-  /** ดัก CustomEvent "permission-denied" ที่ dispatch ออกมาจาก handleClientErrors */
   function capturePermissionDenied() {
     const onDetail = vi.fn();
     const handler = (e: Event) => onDetail((e as CustomEvent).detail);

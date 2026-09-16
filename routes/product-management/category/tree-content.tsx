@@ -14,24 +14,6 @@ interface Props {
   search: string;
 }
 
-/**
- * Component แสดงเนื้อหาต้นไม้หมวดหมู่ จัดการสามสถานะหลักในที่เดียว
- * ได้แก่ skeleton ตอน loading, empty state เมื่อไม่พบข้อมูลหรือไม่ตรงกับคำค้นหา และ render TreeNode เป็นรายการ
- * ใช้คู่กับ useCategoryTree + search เพื่อให้ได้ filteredData และ expanded state
- * @param props - isLoading, filteredData, expanded, toggleExpand, onEdit, onAdd, onDelete, search
- * @returns JSX ของเนื้อหาต้นไม้หมวดหมู่ในสถานะที่เหมาะสม
- * @example
- * <TreeContent
- *   isLoading={false}
- *   filteredData={tree}
- *   expanded={expanded}
- *   toggleExpand={toggle}
- *   onEdit={handleEdit}
- *   onAdd={handleAdd}
- *   onDelete={setDeleteTarget}
- *   search=""
- * />
- */
 export default function TreeContent({
   isLoading,
   filteredData,

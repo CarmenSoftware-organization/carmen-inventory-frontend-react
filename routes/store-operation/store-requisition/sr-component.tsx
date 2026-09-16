@@ -54,17 +54,6 @@ import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการใบเบิกสินค้า
- * รองรับโหมด list/grid, my-pending/all-document, filter status, delete dialog
- * และ infinite scroll บนมือถือ
- *
- * @returns คอมโพเนนต์หน้ารายการ SR
- * @example
- * // ใช้ใน app/(root)/store-operation/store-requisition/page.tsx
- * import SrComponent from "./sr-component";
- * export default function Page() { return <SrComponent />; }
- */
 export default function StoreRequisitionComponent() {
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");

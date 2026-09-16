@@ -8,19 +8,6 @@ import { useUnitTable } from "./use-unit-table";
 import { UNIT_FILTER_FIELDS } from "./unit-filter-fields";
 import UnitCard from "./unit-card";
 
-/**
- * Component หลักของหน้ารายการ Unit ใช้ ConfigListTemplate พร้อม dialog
- *
- * ใช้ `ConfigListTemplate` แบบ dialog-based โดยส่ง `renderDialog`
- * เป็น `UnitDialog` สำหรับการเพิ่ม/แก้ไข
- *
- * @returns React element ของหน้ารายการ Unit
- * @example
- * ```tsx
- * // ใช้ใน app/(root)/config/unit/page.tsx
- * <UnitComponent />
- * ```
- */
 export default function UnitComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

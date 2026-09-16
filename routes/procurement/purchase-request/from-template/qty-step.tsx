@@ -26,10 +26,6 @@ import type {
   PurchaseRequestTemplateDetail,
 } from "@/types/purchase-request";
 
-/**
- * คอลัมน์ของตารางกรอกจำนวน — qty เป็น input ที่ไม่ผูกค่ากลับเข้า DOM
- * (`defaultValue` + onChange) แถวจึงไม่ re-render ทุกคีย์ที่พิมพ์
- */
 const buildQtyColumns = (
   tfl: ReturnType<typeof useTranslations>,
   onQtyChange: (id: string, qty: number) => void,
@@ -134,7 +130,6 @@ const buildQtyColumns = (
 interface QtyStepProps {
   readonly template: PurchaseRequestTemplate;
   readonly onBack: () => void;
-  /** แถวที่ขอจริงรอบนี้ (qty > 0) พร้อมจำนวนที่กรอกแล้ว */
   readonly onContinue: (items: PurchaseRequestTemplateDetail[]) => void;
 }
 

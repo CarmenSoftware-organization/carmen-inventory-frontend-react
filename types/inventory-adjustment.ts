@@ -33,7 +33,6 @@ interface InventoryAdjustmentDetail {
   inventory_unit_name?: string;
   cost_per_unit: number;
   total_cost: number;
-  /** เวอร์ชันของ "แถว" ไม่ใช่ของใบ — ตอน save หลังบ้านบังคับให้ส่งกลับทุกแถวที่แก้ */
   doc_version?: number;
   info: unknown;
   dimension: unknown;
@@ -62,7 +61,6 @@ export interface InventoryAdjustment {
 }
 
 export interface AdjustmentDetailItemPayload {
-  /** มีเฉพาะแถวที่มีอยู่แล้ว (update) — แถวที่เพิ่งเพิ่ม (add) ยังไม่มีเวอร์ชัน */
   doc_version?: number;
   product_id: string;
   qty: number;

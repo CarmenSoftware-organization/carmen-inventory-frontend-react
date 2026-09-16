@@ -32,19 +32,6 @@ const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
   consignment: "secondary",
 };
 
-/**
- * Popover filter เลือก from location หลายรายการของหน้า SR
- * แสดงเฉพาะ location ที่ active และมี location_type เป็น inventory หรือ consignment
- * สร้าง filter string รูปแบบ "from_location_id|string:id1,id2"
- *
- * @param props - value ปัจจุบัน, onChange handler และ className
- * @param props.value - filter string ปัจจุบัน
- * @param props.onChange - callback เมื่อเลือก location
- * @param props.className - className เพิ่มเติมของ trigger
- * @returns คอมโพเนนต์ popover filter
- * @example
- * <SrFilterFromLocation value={fromLocation} onChange={setFromLocation} />
- */
 export function SrFilterFromLocation({
   value,
   onChange,

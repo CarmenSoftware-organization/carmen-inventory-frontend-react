@@ -48,14 +48,9 @@ export interface CreateStockReplPrDto {
     request_qty: number;
   }>;
   workflow_id: string;
-  /** คลังที่ของขาด — ทุกบรรทัดของใบใช้คลังนี้ หนึ่งใบจึงผูกได้คลังเดียว */
   location_id: string;
 }
 
-/**
- * ใบเบิกไม่มีหน่วยให้เลือก (ย้ายของในหน่วยคลังของสินค้าอยู่แล้ว) `location_id` กลายเป็น
- * ปลายทาง ส่วน `from_location` คือคลังต้นทางที่จ่ายของ
- */
 export interface CreateStockReplSrDto {
   products: Array<{
     id: string;
@@ -66,13 +61,6 @@ export interface CreateStockReplSrDto {
   from_location: string;
 }
 
-/**
- * Hook สร้าง PR จากรายการที่เลือกในหน้า stock replenishment
- * ยิง `POST /api/{bu}/stock-replenishments/pr` แล้ว invalidate list
- * @returns mutation รับ CreateStockReplPrDto
- * @example
- * useCreateStockReplPr().mutate({ products, workflow_id, location_id });
- */
 export function useCreateStockReplPr() {
   return useApiMutation<CreateStockReplPrDto>({
     mutationFn: (data, buCode) =>
@@ -82,13 +70,6 @@ export function useCreateStockReplPr() {
   });
 }
 
-/**
- * Hook สร้าง SR จากรายการที่เลือกในหน้า stock replenishment
- * ยิง `POST /api/{bu}/stock-replenishments/sr` แล้ว invalidate list
- * @returns mutation รับ CreateStockReplSrDto
- * @example
- * useCreateStockReplSr().mutate({ products, workflow_id, location_id, from_location });
- */
 export function useCreateStockReplSr() {
   return useApiMutation<CreateStockReplSrDto>({
     mutationFn: (data, buCode) =>

@@ -27,7 +27,6 @@ function BuAvatar({
   readonly avatarUrl: string | null | undefined;
   readonly alt: string;
   readonly isActive: boolean;
-  /** Hint browser ว่ารูปนี้อยู่ above-the-fold (ใช้กับ navbar trigger only) */
   readonly eager?: boolean;
 }) {
   return (

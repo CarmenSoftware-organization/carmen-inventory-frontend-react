@@ -3,7 +3,6 @@ import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CommentButtonProps {
-  /** จำนวน comment — `undefined` (ยังโหลดไม่เสร็จ/โหลดไม่สำเร็จ) หรือ `0` จะไม่แสดงเลข */
   readonly count?: number;
   readonly onClick: () => void;
 }

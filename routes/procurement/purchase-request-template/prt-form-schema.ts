@@ -5,12 +5,6 @@ import type {
   PrtDetailPayload,
 } from "@/types/purchase-request";
 
-/**
- * สร้าง Zod schema สำหรับรายการสินค้าใน PRT
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema ของรายการ PRT
- */
 function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -56,12 +50,6 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง Zod schema สำหรับฟอร์มเทมเพลตใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod object schema ของฟอร์ม PRT
- */
 export function createPrtSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
@@ -107,11 +95,6 @@ export const EMPTY_FORM: PrtFormValues = {
 
 // --- Helpers ---
 
-/**
- * สร้างค่าเริ่มต้นของฟอร์ม PRT จากข้อมูลที่มีอยู่หรือเริ่มต้นใหม่
- * @param template - ข้อมูลเทมเพลตเดิม (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม PRT
- */
 export function getDefaultValues(
   template?: PurchaseRequestTemplate,
 ): PrtFormValues {
@@ -145,11 +128,6 @@ export function getDefaultValues(
   return EMPTY_FORM;
 }
 
-/**
- * แปลงรายการสินค้าในฟอร์ม PRT เป็น payload สำหรับส่ง API
- * @param item - รายการสินค้าในฟอร์ม PRT
- * @returns payload รายการ PRT
- */
 export function mapItemToPayload(
   item: PrtFormValues["items"][number],
 ): PrtDetailPayload {

@@ -29,9 +29,6 @@ interface RecipeCategoryFormProps {
   readonly category?: RecipeCategory;
 }
 
-/**
- * ฟอร์มสร้างและแก้ไขหมวดหมู่สูตรอาหาร พร้อมการคำนวณระดับและต้นทุนเริ่มต้น
- */
 const LIST_PATH = "/operation-plan/category";
 
 export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {

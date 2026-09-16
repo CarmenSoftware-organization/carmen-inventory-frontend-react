@@ -25,10 +25,6 @@ export interface ProductLocation {
   par_qty: number | null;
 }
 
-/**
- * รูปแบบดิบที่ endpoint `config/:bu/workflows/:wf/products/:product/locations` คืนมา
- * — คนละ field กับ `Location` ปกติ (prefix `location_` หมด)
- */
 export interface WorkflowProductLocationRaw {
   location_id: string;
   location_code: string;
@@ -37,10 +33,6 @@ export interface WorkflowProductLocationRaw {
   is_active: boolean;
 }
 
-/**
- * ส่วนของ location ที่ lookup ใช้จริง — `Location` เต็มใบใส่ตรงนี้ได้เลย
- * และ response ของ endpoint แบบ workflow-scoped ก็ map มาลงรูปนี้
- */
 export interface LocationOption {
   id: string;
   code: string;

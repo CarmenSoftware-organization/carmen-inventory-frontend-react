@@ -46,12 +46,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-/**
- * บันทึกพฤติกรรมปัจจุบันของ CuisineForm ไว้ก่อนยุบเข้า hook กลาง
- * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้
- */
 describe("CuisineForm — characterization", () => {
-  /** ฟอร์มเปิดมาที่โหมด view เสมอเมื่อมี entity — ต้องกด Edit ก่อนถึงจะ submit ได้ */
   async function enterEditMode() {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
   }

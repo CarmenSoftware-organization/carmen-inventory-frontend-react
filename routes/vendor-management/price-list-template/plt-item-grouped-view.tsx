@@ -9,12 +9,6 @@ interface PltItemGroupedViewProps {
   readonly products: readonly ProductRef[];
 }
 
-/**
- * View-mode grouped table ของ PLT — product ที่มีหลาย MOQ tier โชว์ชื่อครั้งเดียว
- * แล้ว span ทั้งกลุ่มด้วย rowspan (แบบ price-list) tier เรียง MOQ น้อย→มาก
- * ขับด้วย `priceListTemplate.products` ที่ group มาให้แล้ว (product → moq[])
- * product ที่ไม่มี moq โชว์ 1 แถวด้วยหน่วยสั่งซื้อ (default_order)
- */
 export function PltItemGroupedView({ products }: PltItemGroupedViewProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tf = useTranslations("field");

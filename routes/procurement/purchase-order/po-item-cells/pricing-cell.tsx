@@ -4,7 +4,6 @@ import { formatCurrency } from "@/lib/currency-utils";
 import type { PoFormValues } from "../po-form-schema";
 import { computeItemPricing } from "../po-item-pricing";
 
-/** Read-only display ของ sub/disc/net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */
 export const ComputedPricingCell = function ComputedPricingCell({
   control,
   index,

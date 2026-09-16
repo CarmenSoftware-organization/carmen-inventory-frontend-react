@@ -39,12 +39,6 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * คอมโพเนนต์หลักของหน้า User list รองรับ DataGrid (desktop), infinite card (mobile) และตัวกรองแผนก
- * @returns JSX element ของหน้ารายการผู้ใช้
- * @example
- * <UserComponent />
- */
 export default function UserComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);

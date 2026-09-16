@@ -27,7 +27,6 @@ interface SrItemFieldsProps {
   readonly disableAdd?: boolean;
   readonly fromLocationId: string;
   readonly toLocationId: string;
-  /** workflow ของใบ — ร่วมเป็นเกณฑ์กรองสินค้ากับคู่คลัง */
   readonly workflowId: string;
   readonly role?: string;
 }

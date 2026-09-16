@@ -24,21 +24,6 @@ interface PrCardProps {
   readonly isMyPending?: boolean;
 }
 
-/**
- * การ์ดใบขอซื้อ 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ด SR/IA — ไฟล์นี้เหลือแค่ "ข้อมูลอะไรอยู่แถวไหน"
- * กับปุ่มพิเศษของ PR (approve/reject ใน view my-pending)
- *
- * @param props.item - ข้อมูลใบขอซื้อ
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onApprove - callback เมื่อกด approve
- * @param props.onReject - callback เมื่อกด reject
- * @param props.onDelete - callback เมื่อกด delete (เฉพาะ draft ใน my-pending)
- * @param props.isMyPending - flag ว่าอยู่ใน view my-pending
- * @example
- * <PrCard item={pr} onEdit={handleEdit} isMyPending />
- */
 export default function PrCard({
   item,
   onEdit,

@@ -22,9 +22,7 @@ type ItemPricingField =
   | "tax_amount"
   | "total_price";
 
-/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
 
-/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
 function useItemLine(
   form: UseFormReturn<PoFormValues>,
   itemIndex: number,
@@ -60,9 +58,7 @@ function useItemLine(
   });
 }
 
-/** ยอดเงินของแถว (plain text) — honor override */
 
-/** ยอดเงินของแถว (plain text) — honor override */
 export function ItemAmountCell({
   form,
   itemIndex,
@@ -88,9 +84,7 @@ export function ItemAmountCell({
   );
 }
 
-/** Unit price ของ location = ราคาระดับ item (read-only text) */
 
-/** Unit price ของ location = ราคาระดับ item (read-only text) */
 export function ItemPriceText({
   form,
   itemIndex,
@@ -132,7 +126,6 @@ function RateSubtext({
   );
 }
 
-/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
 export function ItemDiscountCell({
   form,
   itemIndex,
@@ -202,9 +195,7 @@ export function ItemDiscountCell({
   );
 }
 
-/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
 
-/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
 export function ItemTaxCell({
   form,
   itemIndex,

@@ -20,14 +20,6 @@ const configItemSchema = z.object({
   value: z.string(),
 });
 
-/**
- * สร้าง Zod schema ของฟอร์ม Business Setting พร้อมข้อความแปลจาก i18n
- *
- * text field ที่ nullable เก็บเป็น "" ในฟอร์ม (แปลงกลับเป็น null ตอน build patch)
- *
- * @param tv - ฟังก์ชันแปลข้อความ validation (namespace `validation`)
- * @param tf - ฟังก์ชันแปลชื่อ field (namespace `companyProfile.fields`)
- */
 export function createBusinessSettingSchema(
   tv: TranslationFn,
   tf: TranslationFn,
@@ -97,7 +89,6 @@ export type BusinessSettingFormValues = z.infer<
   ReturnType<typeof createBusinessSettingSchema>
 >;
 
-/** normalize `config` จาก GET (อาจเป็น `{}`) ให้เป็น array เสมอ */
 export function normalizeConfig(
   config: BusinessUnitDetail["config"],
 ): BusinessUnitConfigItem[] {
@@ -131,7 +122,6 @@ const emptyFormat: BusinessUnitNumberFormat = {
   minimumIntegerDigits: 0,
 };
 
-/** แปลง response เป็นค่าเริ่มต้นของฟอร์ม (null → "" / 0 / {} ตามชนิด) */
 export function toFormValues(
   data: BusinessUnitDetail,
 ): BusinessSettingFormValues {
@@ -238,17 +228,6 @@ const NUMBER_FORMAT_FIELDS = [
   "recipe_format",
 ] as const;
 
-/**
- * สร้าง PATCH payload จาก diff ระหว่างค่าฟอร์มปัจจุบันกับค่าเดิม — ส่งเฉพาะที่เปลี่ยน
- *
- * - text field ว่าง ("") แปลงกลับเป็น null (code/name required จึงไม่ว่าง)
- * - number-format ส่งทั้ง object เมื่อส่วนใดเปลี่ยน
- * - config ส่งทั้ง array เมื่อ item ใดเปลี่ยน
- *
- * @param values - ค่าฟอร์มปัจจุบัน
- * @param original - ค่าฟอร์มเดิม (จาก `toFormValues(data)`)
- * @returns partial payload (ว่างถ้าไม่มีอะไรเปลี่ยน)
- */
 export function buildPatch(
   values: BusinessSettingFormValues,
   original: BusinessSettingFormValues,

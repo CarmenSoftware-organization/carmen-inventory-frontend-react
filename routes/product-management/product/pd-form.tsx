@@ -211,7 +211,6 @@ const GENERAL_FIELDS = [
   "is_sold_directly",
 ] as const;
 
-/** แท็บที่กรอกฟอร์มได้ เรียงตามที่แสดงบนจอ — eco-labels ไม่ได้อยู่ในฟอร์มนี้ */
 const FORM_TABS = ["general", "units", "locations"] as const;
 type FormTab = (typeof FORM_TABS)[number];
 
@@ -288,7 +287,6 @@ export function ProductForm({ product }: ProductFormProps) {
   const hasUnitsError = hasErrorInTab(fieldErrors, "units");
   const hasLocationsError = hasErrorInTab(fieldErrors, "locations");
 
-  /** อัปโหลดรูปที่ค้างอยู่ (ถ้ามี) — ต้องมี id ของ product แล้วเท่านั้น */
   const flushPendingImages = async (id: string) => {
     if (pendingImages.length === 0) return;
     await uploadImages.mutateAsync({ product_id: id, images: pendingImages });

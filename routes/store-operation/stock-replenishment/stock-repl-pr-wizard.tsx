@@ -30,7 +30,6 @@ import { useCreateStockReplPr } from "./use-stock-replenishment";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 
-/** แถวที่ผู้ใช้ติ๊กไว้ พร้อมคลังต้นสังกัด — ProductLocation เองไม่ได้พกคลังมาด้วย */
 export interface StockReplPrRow {
   readonly location: Location;
   readonly product: ProductLocation;
@@ -40,11 +39,9 @@ interface StockReplPrWizardProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly rows: readonly StockReplPrRow[];
-  /** สร้างสำเร็จ — หน้าแม่ใช้ล้าง selection */
   readonly onCreated?: () => void;
 }
 
-/** สินค้าตัวเดียวกันโผล่ได้หลายคลัง — คีย์จึงต้องมีคลังด้วย */
 const rowKey = (row: StockReplPrRow) =>
   `${row.location.location_id}:${row.product.id}`;
 
@@ -53,8 +50,6 @@ interface RowDraft {
   unitId: string;
 }
 
-/** แถวที่ส่งเข้าตาราง — พก draft มาด้วยเพื่อให้ cell อ่านค่าปัจจุบันได้โดยที่
- *  `columns` ไม่ต้อง recreate ทุกคีย์ที่พิมพ์ (recreate = cell remount = focus หาย) */
 type PrTableRow = StockReplPrRow & { readonly draft: RowDraft };
 
 /**

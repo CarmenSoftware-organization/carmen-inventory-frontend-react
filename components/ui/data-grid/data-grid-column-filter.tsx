@@ -23,26 +23,6 @@ interface DataGridColumnFilterProps<TData, TValue> {
   }[];
 }
 
-/**
- * Column filter แบบ multi-select popover
- *
- * Render ปุ่ม trigger พร้อม badges ของค่าที่เลือก เปิด popover ที่มี search
- * input, รายการ options พร้อม checkbox และ faceted counts (จำนวนแถวที่ตรง),
- * และปุ่ม Clear filters เมื่อมีตัวเลือก ใช้ `column.setFilterValue` เป็น
- * array ของค่า
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @typeParam TValue - ประเภทค่า column
- * @param props - props ของ filter
- * @param props.column - TanStack Table column instance
- * @param props.title - ชื่อ filter ที่แสดงบนปุ่ม
- * @param props.options - รายการตัวเลือก พร้อม label/value/icon
- * @returns JSX element ของ filter popover
- * @example
- * ```tsx
- * <DataGridColumnFilter column={column} title="Status" options={STATUS_OPTIONS} />
- * ```
- */
 function DataGridColumnFilter<TData, TValue>({
   column,
   title,

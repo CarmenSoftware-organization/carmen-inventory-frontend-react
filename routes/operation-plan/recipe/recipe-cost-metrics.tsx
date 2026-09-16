@@ -11,7 +11,6 @@ interface RecipeCostMetricsProps {
   readonly computed: RecipeComputed;
 }
 
-/** Other metrics — labor%, overhead%, carbon footprint */
 export function RecipeCostMetrics({
   form,
   isDisabled,

@@ -22,14 +22,6 @@ interface UseCreditTermTableOptions {
   onDelete: (creditTerm: CreditTerm) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Credit Term พร้อมคอลัมน์ name, value, description
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/credit-term
- * const { table } = useCreditTermTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useCreditTermTable({
   data,
   totalRecords,

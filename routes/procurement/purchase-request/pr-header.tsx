@@ -16,19 +16,12 @@ interface PrHeaderProps {
   readonly reqName: string;
   readonly departmentName: string;
   readonly prDateDisplay: string;
-  /** ชื่อ workflow — ใช้ตอนอ่านอย่างเดียว (แก้ได้ให้ส่ง workflowField มาแทน) */
   readonly workflowName?: string;
-  /** ช่องเลือก workflow ตอนแก้ได้ — วางในเซลล์เดียวกับตอนอ่านอย่างเดียว */
   readonly workflowField?: ReactNode;
-  /** คำอธิบายใบ — ใช้ตอนอ่านอย่างเดียว */
   readonly description?: string;
-  /** ช่องกรอกคำอธิบายตอนแก้ได้ — วางในเซลล์เดียวกับตอนอ่านอย่างเดียว */
   readonly descriptionField?: ReactNode;
-  /** ปุ่ม action (PrFormActions) — caller ประกอบเอง */
   readonly actions: ReactNode;
-  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 

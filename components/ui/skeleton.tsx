@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/** Placeholder skeleton แบบ animate-pulse สำหรับแสดงตอนโหลด (shadcn) */
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

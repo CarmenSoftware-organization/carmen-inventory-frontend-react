@@ -6,7 +6,6 @@ export interface StatusVisual {
   variant: BadgeProps["variant"];
   dotClass: string;
   pulse: boolean;
-  /** className เสริมให้ Badge — สำหรับ override text color เป็นต้น */
   className?: string;
 }
 

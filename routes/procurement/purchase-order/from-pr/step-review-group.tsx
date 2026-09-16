@@ -18,7 +18,6 @@ import { formatDate } from "@/lib/date-utils";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import type { GroupPrPo, GroupPrProduct } from "@/types/purchase-order";
 
-/** สินค้าของใบสั่งซื้อที่จะเกิดขึ้น — กางจากแถวใบ */
 function ExpandedProducts({
   products,
   currencyCode,

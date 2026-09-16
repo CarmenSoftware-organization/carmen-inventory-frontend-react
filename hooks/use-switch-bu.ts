@@ -12,11 +12,6 @@ interface SwitchBuContext {
   previousProfile: UserProfile | undefined;
 }
 
-/**
- * ลบ cache ทั้งหมดที่ผูกกับ BU ปัจจุบัน ยกเว้น profile
- *
- * @param queryClient - instance ของ react-query client
- */
 function removeAllBuData(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.removeQueries({
     predicate: (query) => query.queryKey[0] !== profileQueryKey[0],

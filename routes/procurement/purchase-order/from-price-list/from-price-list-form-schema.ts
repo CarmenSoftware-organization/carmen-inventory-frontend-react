@@ -44,23 +44,12 @@ export type FromPriceListSelectedItem = PoFormValues["items"][number] & {
   pricelist_no: string;
 };
 
-/** Re-export ของ PO_ITEM ให้ wizard ใช้เป็น template เริ่มต้นของ item */
 export const WIZARD_ITEM_TEMPLATE: FromPriceListSelectedItem = {
   ...PO_ITEM,
   pricelist_detail_id: "",
   pricelist_no: "",
 };
 
-/**
- * คืน default values ของ form โดย seed:
- * - order_date = today (ISO)
- * - buyer_id / buyer_name / email = จาก profile
- * - currency_id/code/exchange_rate = "" / 1 (set ใน Step 3 ตอน pick PL)
- * - field อื่น ๆ จาก `EMPTY_FORM` ของ PO
- *
- * @param profile - subset ของผลลัพธ์จาก useProfile() (optional)
- * @returns PoFormValues พร้อมใช้กับ useForm
- */
 export function getDefaultValues(
   profile: FromPriceListProfileSeed = {},
 ): FromPriceListFormValues {

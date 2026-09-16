@@ -25,16 +25,6 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/**
- * หน้ารายการ lot สินค้าหมดอายุ/ใกล้หมดอายุ (wastage reporting) — read-only
- * มี search, filter สถานะ, summary มูลค่าเสี่ยง และ DataGrid กด GRN no
- * ไปหน้า GRN ต้นทางได้
- *
- * @returns คอมโพเนนต์หน้ารายการ wastage reporting
- * @example
- * import WrComponent from "./wr-component";
- * export function Component() { return <WrComponent />; }
- */
 export default function WrComponent() {
   const navigate = useNavigate();
   const t = useTranslations("storeOperation.wastageReporting");

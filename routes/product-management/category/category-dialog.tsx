@@ -41,13 +41,6 @@ const getCategoryType = (
   return "itemgroup";
 };
 
-/**
- * Dialog สร้าง/แก้ไข Category / Subcategory / Item Group — premium ERP design
- *
- * มี icon-beside-title header + primary accent strip + gradient overlay
- * Title แปรผันตาม type (category / subcategory / itemgroup) และ mode
- * (add / edit) รองรับ parentNode สำหรับระบุลำดับชั้น
- */
 export function CategoryDialog({
   open,
   onOpenChange,

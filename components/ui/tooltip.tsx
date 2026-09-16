@@ -3,7 +3,6 @@ import { Tooltip as TooltipPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Tooltip provider ครอบ root เพื่อ share delayDuration (shadcn) */
 function TooltipProvider({
   delayDuration = 0,
   ...props
@@ -17,14 +16,12 @@ function TooltipProvider({
   );
 }
 
-/** Tooltip root (shadcn) */
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }
 
-/** Tooltip trigger (shadcn) */
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {

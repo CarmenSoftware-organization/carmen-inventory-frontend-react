@@ -19,7 +19,6 @@ export const AmountCell = memo(function AmountCell({
   control: Control<PrFormValues>;
   index: number;
   baseCurrencyCode?: string;
-  /** currency control วางแนวนอนข้างยอด (บรรทัดเดียวกัน) */
   currencySlot?: ReactNode;
   isDisabled?: boolean;
 }) {

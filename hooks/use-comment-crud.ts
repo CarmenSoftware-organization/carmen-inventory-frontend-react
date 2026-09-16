@@ -11,30 +11,12 @@ import type {
 
 interface CommentCrudOptions {
   queryKey: string;
-  /** `(bu, id?) => …/{entity}-comments/{id}` — ไม่ส่ง id = path สำหรับอ้าง comment id */
   commentEndpoint: (buCode: string, entityId?: string) => string;
-  /** ชื่อฟิลด์ id ของ entity ใน payload ตอนสร้าง เช่น `purchase_request_id` */
   idFieldName: string;
   label: string;
-  /** cache profile ของ useComments — ไม่ระบุ = ค่า default ของ react-query */
   cacheProfile?: CacheProfile;
 }
 
-/**
- * Factory สร้างชุด hook สำหรับจัดการ comment ของ entity แต่ละประเภท (PR/PO/GRN ฯลฯ)
- * คืนชุด hook useComments/useCreate/useUpdate/useDelete และ uploadAttachment
- * ทุก mutation จะ invalidate queryKey ที่กำหนดเพื่อ refresh รายการหลัง mutate
- * @param options - ตัวเลือก queryKey, endpoint และ label ของ entity
- * @returns object ของ hook สำหรับใช้ใน component comment sheet
- * @example
- * const prCommentCrud = createCommentCrud({
- *   queryKey: QUERY_KEYS.PURCHASE_REQUEST_COMMENTS,
- *   commentEndpoint: API_ENDPOINTS.PURCHASE_REQUEST_COMMENT,
- *   idFieldName: "purchase_request_id",
- *   label: "purchase request",
- * });
- * const { data: comments } = prCommentCrud.useComments(prId);
- */
 export function createCommentCrud({
   queryKey,
   commentEndpoint,
@@ -42,11 +24,6 @@ export function createCommentCrud({
   label,
   cacheProfile,
 }: CommentCrudOptions) {
-  /**
-   * Hook ดึงรายการ comment ของ entity ตาม id
-   * @param entityId - id ของ entity
-   * @returns UseQueryResult ของ CommentItem[]
-   */
   function useComments(
     entityId: string | undefined,
   ): UseQueryResult<CommentItem[]> {
@@ -70,10 +47,6 @@ export function createCommentCrud({
     });
   }
 
-  /**
-   * Hook สำหรับสร้าง comment ใหม่บน entity
-   * @returns UseMutationResult สำหรับส่ง comment พร้อม attachments
-   */
   function useCreate() {
     return useApiMutation<{
       [key: string]: unknown;
@@ -95,10 +68,6 @@ export function createCommentCrud({
     });
   }
 
-  /**
-   * Hook สำหรับแก้ไข comment ที่มีอยู่
-   * @returns UseMutationResult สำหรับอัพเดต comment
-   */
   function useUpdate() {
     return useApiMutation<{
       id: string;
@@ -118,10 +87,6 @@ export function createCommentCrud({
     });
   }
 
-  /**
-   * Hook สำหรับลบ comment ตาม id
-   * @returns UseMutationResult สำหรับลบ comment
-   */
   function useDelete() {
     return useApiMutation<string | { id: string; entityId?: string }>({
       mutationFn: (payload, buCode) => {
@@ -140,7 +105,6 @@ export function createCommentCrud({
     useCreate,
     useUpdate,
     useDelete,
-    /** The entity ID field name for create payloads */
     idFieldName,
   };
 }

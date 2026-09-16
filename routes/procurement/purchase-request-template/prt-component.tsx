@@ -39,10 +39,6 @@ import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * คอมโพเนนต์หลักหน้ารายการเทมเพลต PR รองรับค้นหา กรอง และสลับมุมมอง
- * @returns React element ของหน้ารายการ PRT
- */
 export default function PrtComponent() {
   const t = useTranslations("procurement.purchaseRequestTemplate");
   const tc = useTranslations("common");

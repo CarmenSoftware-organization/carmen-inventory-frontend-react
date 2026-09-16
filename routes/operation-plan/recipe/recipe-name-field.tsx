@@ -10,11 +10,6 @@ export interface RecipeNameFieldLabels {
   readonly requiredField: string;
 }
 
-/**
- * Premium hero name input — large font, hairline underline,
- * pencil icon affordance, hover/focus state transitions.
- * Mirrors the price-list NameField pattern.
- */
 export function RecipeNameField({
   value,
   onChange,

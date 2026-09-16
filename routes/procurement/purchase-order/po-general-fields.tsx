@@ -22,9 +22,7 @@ interface PoGeneralFieldsProps {
   readonly disabled: boolean;
   readonly isManual: boolean;
   readonly readOnly?: boolean;
-  /** ใบยังเป็น draft ไหม — ไม่ draft แล้ว workflow แก้ไม่ได้ (แต่ยังแสดงอยู่) */
   readonly isDraft?: boolean;
-  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
   readonly isAdd?: boolean;
 }
 

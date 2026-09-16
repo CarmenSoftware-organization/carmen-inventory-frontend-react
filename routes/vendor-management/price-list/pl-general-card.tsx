@@ -33,7 +33,6 @@ interface PLGeneralCardProps {
   readonly ts: (key: PlStatus) => string;
 }
 
-/** General section — name, vendor, currency, effective dates, description, status */
 export function PLGeneralCard({
   form,
   priceList,

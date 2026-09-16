@@ -34,13 +34,6 @@ import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
 import type { ProductLookupItem } from "@/types/product";
 import type { PrtFormValues } from "./prt-form-schema";
 
-/**
- * กำหนดข้อมูลสินค้าลงในรายการ PRT พร้อม sync unit
- * @param form - form instance ของ PRT
- * @param index - ตำแหน่งรายการ
- * @param value - product id
- * @param product - object สินค้า (optional)
- */
 const setProductToItem = (
   form: UseFormReturn<PrtFormValues>,
   index: number,
@@ -262,11 +255,6 @@ interface UsePrtItemTableOptions {
   onDelete: (index: number) => void;
 }
 
-/**
- * Hook สร้างตารางรายการสินค้าในเทมเพลต PR พร้อมคอลัมน์และ action ลบ
- * @param options - form, itemFields, disabled, readOnly และ callback ลบ
- * @returns table instance ของ react-table
- */
 export function usePrtItemTable({
   form,
   itemFields,

@@ -11,11 +11,7 @@ declare module "@tanstack/react-table" {
     cellClassName?: string;
     skeleton?: ReactNode;
     expandedContent?: (row: TData) => ReactNode;
-    /** column index ที่ให้ expanded content เริ่ม (วาง `<td colSpan>` เว้นซ้าย
-     *  ให้ตรงขอบ column นั้นโดยอาศัยความกว้าง column จริงของ table-fixed) */
     expandedColStart?: number;
-    /** เนื้อหาใน gutter ซ้าย (colSpan ที่เว้นไว้) ของแถว expanded — top-aligned
-     *  ให้ตรงแถวแรกของ content เช่นปุ่ม compare pricelist */
     expandedLeading?: (row: Row<TData>) => ReactNode;
     footerContent?: (row: TData) => ReactNode;
     footerColSpan?: number;
@@ -119,22 +115,6 @@ function useDataGrid() {
   return context;
 }
 
-/**
- * Provider context ของ DataGrid
- *
- * ครอบ children ด้วย `DataGridContext.Provider` ที่บรรจุ props, table,
- * recordCount และ isLoading ปกติเรียกผ่าน `<DataGrid>` ไม่ได้ใช้โดยตรง
- *
- * @typeParam TData - ประเภทข้อมูลแถวของ table
- * @param props - DataGridProps พร้อม `table` instance ของ TanStack Table
- * @returns JSX element ของ context provider
- * @example
- * ```tsx
- * <DataGridProvider table={table} recordCount={total}>
- *   <DataGridTable />
- * </DataGridProvider>
- * ```
- */
 function DataGridProvider<TData extends object>({
   children,
   table,
@@ -157,27 +137,6 @@ function DataGridProvider<TData extends object>({
   );
 }
 
-/**
- * Top-level component ของ DataGrid
- *
- * Merge default props (loadingMode, tableLayout, tableClassNames) เข้ากับ
- * props ของผู้ใช้ และส่งเข้า `DataGridProvider` ตรวจว่ามี `table` prop เสมอ
- * (throw ถ้าไม่มี) ใช้เป็น root component ของทุก ๆ DataGrid ในระบบ
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - DataGridProps ต้องระบุ `table` instance
- * @returns JSX element ของ DataGridProvider พร้อม children
- * @throws Error เมื่อไม่ได้ส่ง `table` prop
- * @example
- * ```tsx
- * <DataGrid table={table} recordCount={total} isLoading={isLoading}
- *   tableLayout={{ dense: true, headerSticky: true }}>
- *   <DataGridContainer>
- *     <DataGridTable />
- *   </DataGridContainer>
- * </DataGrid>
- * ```
- */
 function DataGrid<TData extends object>({
   children,
   table,
@@ -242,28 +201,6 @@ function DataGrid<TData extends object>({
   );
 }
 
-/**
- * Container wrapper ของ DataGrid
- *
- * Render `<div>` ครอบ DataGridTable + DataGridPagination พร้อม border, shadow,
- * rounded และ overflow-auto ใช้ className เพื่อกำหนด max-height สำหรับ scroll
- * area และ flex layout ของแถวเนื้อหา + pagination ด้านล่าง
- *
- * @param props - props ของ container
- * @param props.children - เนื้อหาภายใน (DataGridTable, pagination, ฯลฯ)
- * @param props.className - className เพิ่มเติม
- * @param props.border - แสดงเส้นขอบและ shadow (default true)
- * @returns JSX element ของ div container
- * @param props.scroll - กล่องนี้เป็นตัวที่เลื่อนเอง (ตาราง item ในหน้าฟอร์ม ที่ไม่มี
- *                       pagination ต่อท้าย) — ใส่สไตล์แถบเลื่อนให้ ดู `SCROLLER`
- * @example
- * ```tsx
- * <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
- *   <DataGridScrollArea><DataGridTable /></DataGridScrollArea>
- *   <DataGridPagination />
- * </DataGridContainer>
- * ```
- */
 function DataGridContainer({
   children,
   className,

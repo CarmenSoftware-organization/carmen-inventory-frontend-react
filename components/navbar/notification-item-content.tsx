@@ -15,22 +15,12 @@ import type { Notification } from "@/types/notification";
 interface NotificationItemContentProps {
   readonly notification: Notification;
   readonly isUnread: boolean;
-  /** Active locale — drives a single, shared timestamp format across navbar + page */
   readonly locale: string;
-  /** Accessible label for the unread state (e.g. t("unread")) — pairs with the color dot */
   readonly unreadLabel: string;
-  /** ป้ายกำกับตราคอมเมนต์ (เช่น tRoot("notifications.commentLabel")) — คู่กับไอคอน */
   readonly commentLabel: string;
-  /** Clamp message to 2 lines (page list) vs single dense line (navbar dropdown) */
   readonly clampMessage?: boolean;
 }
 
-/**
- * Presentational row content shared by the navbar dropdown and the notifications
- * page. Renders as flex children (dot + content block) — the caller supplies the
- * flex wrapper and any interaction (overlay link, mark-as-read button, etc.).
- * Title underlines on `group-hover`, so the wrapper must carry the `group` class.
- */
 export function NotificationItemContent({
   notification,
   isUnread,

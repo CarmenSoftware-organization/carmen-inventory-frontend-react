@@ -8,11 +8,6 @@ import {
 } from "./grn-po-usable";
 import { mapPoDetailToItems } from "./grn-item-table";
 
-/**
- * ตัดตามรูปร่างจริงของ `GET .../purchase-order/grn/vendor/{id}` — `can_use` มา
- * **สามชั้น** (ใบสั่งซื้อ · รายการ · คลัง) และ `locations[]` ยังซ้อนอยู่ในรายการ
- * ต่างจากฝั่งฟอร์ม PO ที่แบนไปแล้ว
- */
 const loc = (
   id: string,
   over: { can_use?: boolean; order_qty?: number } = {},

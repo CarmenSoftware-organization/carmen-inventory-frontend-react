@@ -18,12 +18,10 @@ import type {
   NotificationSource,
 } from "@/types/notification";
 
-/** แท็บของหน้ารายการ — กำหนด endpoint และ cache key ที่ใช้ */
 export type NotificationTab = "all" | "unread";
 
 const PAGE_SIZE = 20;
 const POPOVER_SIZE = 10;
-/** หน่วงก่อน invalidate เพื่อรวบสัญญาณ WS ที่มาเป็นชุด — ดู `useNotificationRealtime` */
 const INVALIDATE_DEBOUNCE_MS = 300;
 
 /**
@@ -47,10 +45,6 @@ export const notificationKeys = {
   detail: (id: string) => [QUERY_KEYS.NOTIFICATION_DETAIL, id] as const,
 };
 
-/**
- * อ่าน WS_URL จาก runtime config แบบ lazy — ห้ามอ่านระดับ module
- * (config ยังไม่โหลดตอน module evaluate เช่นใน unit test)
- */
 const getWsUrl = (): string | undefined => {
   try {
     return getRuntimeConfig().WS_URL;
@@ -97,7 +91,6 @@ type InfiniteShape = {
   pageParams: unknown[];
 };
 
-/** แยกแคชแบบ infinite ออกจากแคชหน้าเดียว — ทั้งสองอยู่ใต้ prefix `unreadAll` */
 function isInfinite(value: unknown): value is InfiniteShape {
   return (
     !!value &&
@@ -106,7 +99,6 @@ function isInfinite(value: unknown): value is InfiniteShape {
   );
 }
 
-/** ตัดแถวตาม id ออกจากหนึ่งหน้า พร้อมลด total ให้สอดคล้อง */
 function dropRows(
   page: NotificationListResponse,
   ids: Set<string> | "all",
@@ -179,7 +171,6 @@ export function useNotificationRealtime(userId: string | undefined) {
     let activeWs: WebSocket | null = null;
     reconnectAttempt.current = 0;
 
-    /** รวบสัญญาณที่มาติด ๆ กันให้เหลือ invalidate ครั้งเดียวต่อชุด */
     function scheduleInvalidate() {
       clearTimeout(invalidateTimer.current);
       invalidateTimer.current = setTimeout(() => {
@@ -187,7 +178,6 @@ export function useNotificationRealtime(userId: string | undefined) {
       }, INVALIDATE_DEBOUNCE_MS);
     }
 
-    /** สร้างการเชื่อมต่อและผูก handler พร้อม reconnect */
     function connect() {
       const ws = new WebSocket(wsUrl);
       activeWs = ws;
@@ -355,14 +345,6 @@ export function useMarkNotificationRead() {
   });
 }
 
-/**
- * ทำเครื่องหมายว่าอ่านแล้วทั้งหมดของผู้ใช้ปัจจุบัน
- *
- * @returns mutation ที่ไม่รับ argument
- * @example
- * const markAll = useMarkAllNotificationsRead();
- * markAll.mutate();
- */
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient();
   return useMutation<
@@ -401,15 +383,6 @@ export function useMarkAllNotificationsRead() {
   });
 }
 
-/**
- * รายละเอียดการแจ้งเตือนตาม id ผ่าน `GET /api/notifications/:id`
- * เปิด query เฉพาะเมื่อ id ไม่ว่าง — caller ส่ง null ได้ตอน dialog ปิด
- *
- * @param id - notification id (undefined/null = ปิด query)
- * @returns UseQueryResult ของ `Notification`
- * @example
- * const { data: detail, isLoading, error } = useNotificationDetail(detailId);
- */
 export function useNotificationDetail(id: string | null | undefined) {
   return useQuery<Notification, ApiError>({
     queryKey: notificationKeys.detail(id ?? ""),

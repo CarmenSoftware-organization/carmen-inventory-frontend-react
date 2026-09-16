@@ -2,13 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import { createPasswordSchema } from "@/lib/password-schema";
 
-/**
- * สร้าง Zod schema สำหรับฟอร์มเปลี่ยนรหัสผ่าน
- * รวมการตรวจสอบความเข้มแข็งของรหัสผ่านและการยืนยันที่ตรงกัน
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema ของฟอร์มเปลี่ยนรหัสผ่าน
- */
 export function createChangePasswordSchema(
   tv: TranslationFn,
   tf: TranslationFn,

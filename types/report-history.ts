@@ -5,7 +5,6 @@ export type ReportStatus =
   | "failed"
   | "cancelled";
 
-/** Backend's prefixed enum values (raw values from API response) */
 export type ReportStatusRaw =
   | "JOB_STATUS_QUEUED"
   | "JOB_STATUS_PROCESSING"

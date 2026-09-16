@@ -5,7 +5,6 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { FilterFieldDef } from "@/types/list-filter";
 import type { PrFormValues } from "./pr-form-schema";
 
-/** คีย์ของตัวกรอง = ชื่อฟิลด์ใน item ตรง ๆ ค่าที่เก็บคือ id คั่นด้วย `,` */
 const FILTER_KEYS = [
   "location_id",
   "product_id",
@@ -29,7 +28,6 @@ interface Option {
   readonly value: string;
 }
 
-/** id + ชื่อที่จะโชว์ ของ field หนึ่งในทุกแถว — ตัดซ้ำ ตัดค่าว่าง เรียงตามชื่อ */
 function optionsOf(
   items: readonly Record<string, unknown>[],
   idField: string,
@@ -54,12 +52,7 @@ export interface PrItemFilter {
   readonly setValue: (key: string, value: string) => void;
   readonly clearAll: () => void;
   readonly activeCount: number;
-  /**
-   * ค่าที่ส่งเข้า `globalFilter` ของ table — ว่าง = ไม่กรอง (TanStack ข้าม
-   * filter model ไปเลย) เปลี่ยนเมื่อไรตารางคำนวณใหม่
-   */
   readonly signature: string;
-  /** แถว index นี้ผ่านตัวกรองไหม (index = ตำแหน่งใน field array ของฟอร์ม) */
   readonly matches: (index: number) => boolean;
 }
 

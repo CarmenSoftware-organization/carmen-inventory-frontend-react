@@ -52,24 +52,6 @@ export class ApiError extends Error {
    */
   public readonly appCode?: string;
 
-  /**
-   * สร้าง instance ของ ApiError พร้อมกำหนด code, message และข้อมูลประกอบ
-   *
-   * ใช้สำหรับ throw error ที่มีการจำแนกประเภทชัดเจน
-   * สามารถ catch แล้วตรวจ code เพื่อแสดง UI ที่เหมาะสม
-   *
-   * @param code - รหัส error สำหรับจำแนกประเภท
-   * @param message - ข้อความ error
-   * @param statusCode - HTTP status code (ถ้ามี)
-   * @param retryable - ระบุว่า request นี้สามารถ retry ได้หรือไม่
-   * @param details - ข้อมูลเพิ่มเติม
-   * @param serverMessage - message ที่อ่านได้จาก error body ของ backend
-   * @returns instance ของ ApiError
-   * @example
-   * ```ts
-   * throw new ApiError(ERROR_CODES.VALIDATION_ERROR, "Invalid payload", 400, false, { field: "name" });
-   * ```
-   */
   constructor(
     public readonly code: ErrorCode,
     message: string,

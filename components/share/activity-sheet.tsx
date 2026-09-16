@@ -84,7 +84,6 @@ const HIDDEN_FIELDS = new Set([
   "workflow_history",
 ]);
 
-/** ฟิลด์ที่ใช้เรียกชื่อแถวลูก ไล่ตามลำดับความชัดเจน */
 const ROW_NAME_FIELDS = [
   "product_name",
   "product_local_name",
@@ -94,7 +93,6 @@ const ROW_NAME_FIELDS = [
   "description",
 ];
 
-/** snake_case → คำอ่านได้ เช่น `pr_status` → `Pr Status` */
 function humanize(value: string): string {
   return value
     .split("_")
@@ -120,7 +118,6 @@ function relationLabel(relation: string, entityType: string): string {
   return humanize(stripped || name);
 }
 
-/** ค่าจาก snapshot → ข้อความสั้นพอจะอ่านในบรรทัดเดียว */
 function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
   if (typeof value === "object") return JSON.stringify(value);
@@ -150,7 +147,6 @@ function rowLabelOf(
   return parts.length ? parts.join(" · ") : fallbackId.slice(0, 8);
 }
 
-/** แถวลูกของ relation หนึ่ง จาก snapshot ทั้งก้อน จัดดัชนีด้วย id */
 function indexRows(
   snapshot: Record<string, unknown> | null,
   relation: string,
@@ -165,7 +161,6 @@ function indexRows(
   return byId;
 }
 
-/** ชื่อเต็มของผู้กระทำ ถ้าไม่มีค่อยตกไปที่ username */
 function actorNameOf(log: ActivityLog): string {
   const fullName = [
     log.actor_firstname,
@@ -177,7 +172,6 @@ function actorNameOf(log: ActivityLog): string {
   return fullName || log.actor_username || "—";
 }
 
-/** แถวเดียวของ field ที่เปลี่ยน: ชื่อฟิลด์ + ค่าเดิม → ค่าใหม่ */
 function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
   return (
     <div className="text-micro grid grid-cols-[minmax(0,9rem)_1fr] gap-2 py-0.5">
@@ -195,7 +189,6 @@ function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
   );
 }
 
-/** แถวที่ถูกเพิ่มหรือลบ — บอกชื่อรายการอย่างเดียว ไม่ต้องกางทุกฟิลด์ */
 function RowMarkLine({ mark, label }: { mark: string; label: string }) {
   return (
     <p className="text-micro py-0.5">
@@ -205,7 +198,6 @@ function RowMarkLine({ mark, label }: { mark: string; label: string }) {
   );
 }
 
-/** สรุปสิ่งที่เกิดกับตารางลูกหนึ่งตาราง (เช่น รายการสินค้าของ PR) */
 function ChildChangeBlock({
   child,
   label,
@@ -269,7 +261,6 @@ function ChildChangeBlock({
   );
 }
 
-/** เนื้อหาที่กางออกของ log หนึ่งรายการ — โหลด diff ตอนกางเท่านั้น */
 function ActivityChanges({ logId }: { logId: string }) {
   const t = useTranslations("activity");
   const { data, isLoading, isError } = useActivityLogDetail(logId);
@@ -314,7 +305,6 @@ function ActivityChanges({ logId }: { logId: string }) {
 
 interface ActivitySheetProps {
   readonly entityId: string | undefined;
-  /** เลขที่เอกสารหรือชื่อรายการ — ขึ้นในคำอธิบายหัว sheet */
   readonly label?: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;

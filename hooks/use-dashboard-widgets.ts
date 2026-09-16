@@ -10,18 +10,6 @@ import type {
   SystemWidgetConfigListResponse,
 } from "@/types/dashboard-widget";
 
-/**
- * Fallback สำหรับ gateway ที่ยังไม่มี route `/{module}/config`
- *
- * endpoint รวมตัวเดิมคืน items ที่พ่วง `meta`/`data` มาแล้ว — `LazyWidget` ตรวจเจอ
- * เองแล้วข้าม query ต่อใบ หน้าจอจึงยังครบ (แค่กลับไปรอตัวช้าสุดเหมือนเดิม)
- *
- * ลบทิ้งได้เมื่อ gateway ที่มี route `/config` ขึ้นครบทุก environment แล้ว
- *
- * @param buCode - รหัส business unit ปัจจุบัน
- * @param module - ชื่อ module ของ dashboard
- * @returns รายการ widget พร้อมค่าที่ gateway exec มาให้
- */
 async function fetchBundledWidgets(
   buCode: string,
   module: string,

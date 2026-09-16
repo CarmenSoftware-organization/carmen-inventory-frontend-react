@@ -19,24 +19,6 @@ interface LookupItemGroupProps {
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกกลุ่มสินค้า (Item Group)
- *
- * ดึงข้อมูลผ่าน `useItemGroup({ perpage: -1 })` filter เฉพาะ `is_active = true`
- * รองรับ cascading จาก `filterSubCategoryId` (กรองตาม product_subcategory_id)
- * มีปุ่ม "none" สำหรับล้างค่า และ onValueChange ส่ง object `ItemGroupDto` เต็ม
- *
- * @param value - id ของ item group ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object ItemGroupDto
- * @returns JSX popover element ของ item group lookup
- * @example
- * ```tsx
- * const subCategoryId = useWatch({ control, name: "product_subcategory_id" });
- * <Controller name="item_group_id" control={control} render={({ field }) => (
- *   <LookupItemGroup value={field.value} onValueChange={field.onChange} filterSubCategoryId={subCategoryId} />
- * )} />
- * ```
- */
 export function LookupItemGroup({
   value,
   onValueChange,

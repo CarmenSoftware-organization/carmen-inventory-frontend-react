@@ -33,13 +33,8 @@ import type { Location, ProductLocation } from "@/types/stock-replenishment";
 interface StockReplSrWizardProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /**
-   * คลังที่ของขาด = คลังปลายทางของใบเบิก — SR ผูกคลังทั้งใบ ไม่ใช่รายแถว
-   * หน้าแม่จึงกันไว้แล้วว่าติ๊กข้ามคลังเปิด wizard นี้ไม่ได้
-   */
   readonly location?: Location;
   readonly products: readonly ProductLocation[];
-  /** สร้างสำเร็จ — หน้าแม่ใช้ล้าง selection */
   readonly onCreated?: () => void;
 }
 
@@ -106,8 +101,6 @@ export function StockReplSrWizard({
     setRemoved((prev) => new Set(prev).add(product.id));
   }, []);
 
-  /** พก qty ปัจจุบันมากับแถว — cell จะได้อ่านค่าได้โดยที่ `columns` ไม่ต้อง recreate
-   *  ทุกคีย์ที่พิมพ์ (recreate = cell remount = focus หาย) */
   const tableRows = activeProducts.map((product) => ({
     product,
     qty: qtyOf(product),

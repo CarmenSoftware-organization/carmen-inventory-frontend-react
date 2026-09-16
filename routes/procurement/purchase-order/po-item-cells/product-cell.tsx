@@ -9,10 +9,6 @@ import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-l
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import type { PoFormValues } from "../po-form-schema";
 
-/**
- * Read-only display ของชื่อสินค้า — watch แค่ 2 field (name, description)
- * ไม่แตะ `items` array ทั้งก้อน จึงไม่ re-render ตอน field อื่นเปลี่ยน
- */
 const ProductCellDisplay = memo(function ProductCellDisplay({
   control,
   index,

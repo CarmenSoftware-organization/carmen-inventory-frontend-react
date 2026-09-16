@@ -141,7 +141,6 @@ const ItemsArrayError = memo(function ItemsArrayError({
 
 interface GrnItemTableProps {
   readonly form: UseFormReturn<GrnFormValues>;
-  /** ทั้งใบแก้ไม่ได้ — โหมดอ่าน หรือกำลังบันทึกอยู่ (เกณฑ์เดียวกับ PO) */
   readonly disabled: boolean;
 }
 
@@ -219,7 +218,6 @@ export function GrnItemTable({ form, disabled }: GrnItemTableProps) {
     [],
   );
 
-  /** เลือกสินค้าเสร็จ → โฟกัสช่องราคาต่อ */
   const handleProductPicked = useCallback((rowId: string) => {
     setOpenProductId(null);
     setAutoFocusPriceId(rowId);

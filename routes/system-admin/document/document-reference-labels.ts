@@ -46,7 +46,6 @@ export const DOCUMENT_REFERENCE_MODULE_KEY: Record<string, string> = {
   workflow: "workflow",
 };
 
-/** ตัวแปล i18n ที่รับ key เป็นสตริง — แบบเดียวกับ `routes/system-admin/landing-types.ts:149` */
 type TFn = (key: string) => string;
 
 /**

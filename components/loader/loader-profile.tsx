@@ -1,19 +1,6 @@
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
 
-/**
- * Skeleton ของหน้า profile
- *
- * Render 2 section: ข้อมูลผู้ใช้ (6 field) และ business unit (7 field + badge)
- * แต่ละ section มี header และ separator ใช้สำหรับสถานะ loading ของหน้า
- * profile ก่อน `useProfile` resolve
- *
- * @returns JSX element ของ profile skeleton
- * @example
- * ```tsx
- * {isLoading ? <LoaderProfile /> : <ProfileContent />}
- * ```
- */
 export default function LoaderProfile() {
   return (
     <div className="space-y-4">

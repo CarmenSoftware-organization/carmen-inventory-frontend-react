@@ -8,7 +8,6 @@ import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 interface DepartmentsSectionProps {
   readonly form: UseFormReturn<UserAssignedFormValues>;
   readonly isDisabled: boolean;
-  /** ชื่อแผนกที่สังกัดอยู่ตอนเปิดหน้า — มากับตัวผู้ใช้แล้ว */
   readonly departmentName: string | undefined;
 }
 

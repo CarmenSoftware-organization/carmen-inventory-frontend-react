@@ -34,14 +34,6 @@ interface PermissionDeniedDetail {
   reason?: DeniedReason;
 }
 
-/**
- * Dispatch event ให้ `PermissionDeniedDialog` แสดง — ใช้กับ click handler
- * ของ menu/link ที่ไม่มีสิทธิ์ หรือ guard ใน useCan/useLicense
- *
- * @param permission - permission ที่ขาด (ถ้าเกี่ยวกับสิทธิ์)
- * @param message - ข้อความแทน default
- * @param reason - สาเหตุที่เข้าไม่ได้ — default `"permission"` (พฤติกรรมเดิมเมื่อไม่ส่งมา)
- */
 export function dispatchPermissionDenied(
   permission?: Permission,
   message?: string,
@@ -55,15 +47,6 @@ export function dispatchPermissionDenied(
   );
 }
 
-/**
- * Dialog แจ้งเตือนเมื่อผู้ใช้พยายามทำ action ที่ไม่มีสิทธิ์
- *
- * สัญญาณสีแดงมีจุดเดียวคือตัวไอคอน — กล่องรอบไอคอนเป็น `bg-muted` กลางๆ ตาม
- * default ของ `AlertDialogMedia` (ดู docs/DESIGN.md: "error state = red icon
- * only; neutral box, muted label, neutral border") โครงเดียวกับ `DeleteDialog`
- *
- * รับฟัง CustomEvent `"permission-denied"` จาก `dispatchPermissionDenied`
- */
 export function PermissionDeniedDialog() {
   const [detail, setDetail] = useState<PermissionDeniedDetail | null>(null);
   const t = useTranslations("permissionDenied");

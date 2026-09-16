@@ -120,17 +120,6 @@ export function safeImageSrc(input: string | null | undefined): string | null {
   return safeNavigationHref(candidate);
 }
 
-/**
- * Returns a navigation-safe href, or null if the input is unsafe.
- *
- * Accepts:
- * - Absolute URLs with http(s) protocol (validated + canonicalized via sanitizeUrl)
- * - Internal paths that start with a single "/" (not "//" protocol-relative)
- *   and contain no backslash anywhere (mangled / traversal-like forms)
- *
- * Trims input and rejects control characters first. Rejects javascript:, data:,
- * vbscript:, file:, and protocol-relative URLs.
- */
 export function safeNavigationHref(
   input: string | null | undefined,
 ): string | null {

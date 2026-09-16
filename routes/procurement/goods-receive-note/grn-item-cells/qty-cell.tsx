@@ -18,7 +18,6 @@ import { useProductUnits, useUnitDecimals } from "@/hooks/use-product-units";
 import type { GrnFormValues } from "../grn-form-schema";
 import type { GrnQtyField, GrnUnitField } from "./types";
 
-/** unit lookup (borderless) — ฝังในกล่อง qty เดียวกัน, sync ตาม product_id ของแถว */
 const WatchedProductUnit = memo(function WatchedProductUnit({
   control,
   index,
@@ -48,7 +47,6 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
   );
 });
 
-/** qty + unit เป็น plain text (view mode) — resolve ชื่อหน่วยจาก product units */
 const QtyUnitPlain = memo(function QtyUnitPlain({
   control,
   index,
@@ -186,7 +184,6 @@ export const OverReceiptWarning = memo(function OverReceiptWarning({
   );
 });
 
-/** จำนวนที่รับ + คำเตือนรับเกิน — แยกเป็นคอมโพเนนต์เพราะต้อง subscribe error ของแถว */
 export function ReceivedQtyCell({
   form,
   index,

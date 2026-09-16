@@ -39,7 +39,6 @@ interface UnitDialogProps {
   readonly onOpenChange: (open: boolean) => void;
   readonly unit?: Unit | null;
   readonly onSuccess?: (id: string) => void;
-  /** view-only mode: disable form + hide save */
   readonly readOnly?: boolean;
 }
 

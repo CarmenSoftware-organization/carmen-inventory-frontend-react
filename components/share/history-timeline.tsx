@@ -9,27 +9,17 @@ import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 
-/**
- * จุด marker ของแต่ละก้าว — สีมาจาก token ล้วน จึงสลับ dark mode ได้เอง
- * ไม่ต้องเขียน variant แยก
- */
 const MARKER_CLASS = {
-  /** เหตุการณ์ล่าสุด (แถวบนสุด) */
   current: "bg-primary",
-  /** ก้าวที่ผ่านมาแล้ว */
   default: "bg-border",
-  /** จุดกำเนิดเอกสาร เช่น แถวผู้ร้องขอ — วงกลมกลวง */
   origin: "bg-background border-2 border-border",
 } as const;
 
 export type HistoryTimelineMarker = keyof typeof MARKER_CLASS;
 
 interface HistoryTimelineContextValue {
-  /** `date_format` ของ BU ปัจจุบัน (จาก `useProfile()`) */
   readonly dateFormat: string;
-  /** true ถ้า `dateFormat` มี token เวลาอยู่แล้ว (`HH`/`hh`) */
   readonly hasTime: boolean;
-  /** true = วันที่อยู่ในหัวข้อคั่นแล้ว รางซ้ายจึงเหลือแต่เวลา */
   readonly groupByDay: boolean;
 }
 
@@ -58,7 +48,6 @@ function useHistoryTimelineContext() {
 
 interface HistoryTimelineProps {
   readonly children: ReactNode;
-  /** true เมื่อผู้เรียกแทรก `HistoryTimelineDay` คั่นเอง — รางซ้ายจะเหลือแต่เวลา */
   readonly groupByDay?: boolean;
 }
 
@@ -135,19 +124,12 @@ export function HistoryTimelineDay({ children }: HistoryTimelineDayProps) {
 }
 
 export interface HistoryTimelineItemProps {
-  /** ISO datetime — ใช้ทั้งข้อความในรางซ้ายและ attribute `dateTime` */
   readonly at: string;
-  /** ชนิดของจุด marker (ค่าเริ่มต้น `default`) */
   readonly marker?: HistoryTimelineMarker;
-  /** `alert` = ก้าวที่ผิดจากทางปกติ (ตีกลับ/ปฏิเสธ) — ย้อมจุดเป็นสีเตือน */
   readonly tone?: "default" | "alert";
-  /** Badge สถานะ — ตั้งใจให้ส่งมาเฉพาะก้าวที่ผิดปกติ ก้าวปกติปล่อยว่าง */
   readonly badge?: ReactNode;
-  /** หัวข้อของก้าว (ในระดับเอกสารคือการเปลี่ยน stage) */
   readonly title?: ReactNode;
-  /** บรรทัดรองใต้หัวข้อ (ในระดับเอกสารคือชื่อผู้กระทำ) */
   readonly children?: ReactNode;
-  /** ระยะเวลาที่ค้างอยู่ก่อนถึงก้าวนี้ แสดงในช่องว่างของราง */
   readonly elapsed?: ReactNode;
   /**
    * เนื้อหาที่กางออก — ส่งมาเมื่อไหร่ แถวจะกลายเป็น accordion

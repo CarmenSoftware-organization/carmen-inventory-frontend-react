@@ -27,7 +27,6 @@
  * เป็นด่านตรวจความสดได้: diff ว่าง = fixture ตรงกับ backend ณ ตอนนั้นจริง
  */
 
-/** feature key ทั้งหมดใน catalog (module + resource) */
 export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "accounting",
   "accounting.ap",
@@ -136,7 +135,6 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "vendor_management.vendor_product",
 ];
 
-/** เฉพาะ module-level key (entry ที่ `parent_key: null` ใน catalog) */
 export const LICENSE_MODULE_KEYS: readonly string[] = [
   "accounting",
   "configuration",

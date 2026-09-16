@@ -125,12 +125,7 @@ interface RfpSendEmailDialogProps {
   readonly onOpenChange: (open: boolean) => void;
   readonly vendorName: string;
   readonly vendorEmail?: string | null;
-  /** ชื่อใบขอราคา — ใช้ในหัวเรื่องกับข้อความตั้งต้น */
   readonly rfpName: string;
-  /**
-   * ลิงก์ของผู้ขายรายนี้ — สร้างจาก token ของแถวนั้น ไม่ใช่ค่าคงที่ ว่างได้ถ้าใบ
-   * ยังไม่ถูกบันทึก (ผู้ขายยังไม่มี token)
-   */
   readonly vendorUrl: string;
 }
 

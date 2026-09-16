@@ -20,64 +20,14 @@ const crud = createConfigCrud<Period, CreatePeriodDto>({
   updateMethod: "PATCH",
 });
 
-/**
- * Hook ดึงรายการ Period (งวดการเงิน) แบบแบ่งหน้า
- *
- * Re-export จาก factory ใช้ใน period end module และ reports
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<Period>
- * @example
- * ```ts
- * const { data } = usePeriod({ page: 1, perpage: 20 });
- * ```
- */
 export const usePeriod = crud.useList;
 
-/**
- * Hook ดึง Period ตาม id
- *
- * @param id - id ของ period
- * @returns UseQueryResult ของ Period
- * @example
- * ```ts
- * const { data } = usePeriodById(params.id);
- * ```
- */
 export const usePeriodById = crud.useById;
 
-/**
- * Hook สำหรับสร้าง Period ใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreatePeriod().mutate({ code: "2026-01", start_date: "...", end_date: "..." });
- * ```
- */
 export const useCreatePeriod = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไข Period
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdatePeriod().mutate({ id, code: "2026-02" });
- * ```
- */
 export const useUpdatePeriod = crud.useUpdate;
 
-/**
- * Hook สำหรับลบ Period
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeletePeriod().mutate(p.id);
- * ```
- */
 export const useDeletePeriod = crud.useDelete;
 
 /**
@@ -109,11 +59,6 @@ interface ExportPeriodArgs {
   columns: XlsxColumn<Period>[];
 }
 
-/**
- * Hook ส่งออก Period เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportPeriod, isExporting }
- */
 export function useExportPeriod() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

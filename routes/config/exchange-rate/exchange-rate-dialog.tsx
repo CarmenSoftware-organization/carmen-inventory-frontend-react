@@ -255,9 +255,6 @@ function EditForm({
   );
 }
 
-/**
- * ฟอร์มสร้าง Exchange Rate ใหม่แบบ manual โดยเลือกสกุลเงินและวันที่
- */
 function CreateForm({
   onOpenChange,
   onPendingChange,
@@ -384,12 +381,6 @@ function CreateForm({
   );
 }
 
-/**
- * Dialog หลักของ Exchange Rate — premium ERP design
- *
- * รองรับทั้ง create (manual) และ edit โดย render sub-form ตาม mode
- * มี primary accent strip + icon-beside-title header
- */
 export function ExchangeRateDialog({
   mode,
   open,

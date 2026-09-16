@@ -14,7 +14,6 @@ const BU = "BLAVG";
 const DOC_ID = "bf5aefa7-bb4d-45c8-bf11-3ed12782f91f";
 const VIEWER_URL = "https://report.example.com/viewer/abc";
 
-/** A dedicated print endpoint's success response. */
 function okViewer() {
   return {
     ok: true,

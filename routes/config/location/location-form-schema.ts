@@ -4,20 +4,6 @@ import { transferPayloadSchema } from "@/lib/transfer-handler";
 import { INVENTORY_TYPE } from "@/constant/location";
 import type { Location } from "@/types/location";
 
-/**
- * สร้าง Zod schema สำหรับฟอร์ม Location พร้อมข้อความแปลจาก i18n
- *
- * เรียกภายใน `LocationForm` เพื่อใช้กับ `zodResolver`
- *
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns Zod schema สำหรับตรวจสอบฟอร์ม Location
- * @example
- * ```ts
- * const schema = createLocationSchema(tv, tf);
- * useForm({ resolver: zodResolver(schema) });
- * ```
- */
 export function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     code: z.string().min(1, tv("required", { field: tf("code") })),
@@ -58,18 +44,6 @@ export const EMPTY_FORM: LocationFormValues = {
   products: { ...emptyTransfer },
 };
 
-/**
- * คืนค่าเริ่มต้นของฟอร์ม Location จาก entity ที่มี หรือค่าว่างหากไม่มี
- *
- * ใช้ใน `useForm({ defaultValues: getDefaultValues(location) })`
- *
- * @param location - ข้อมูล Location ที่ต้องการนำมาเป็นค่าเริ่มต้น (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม
- * @example
- * ```ts
- * const defaults = getDefaultValues(location);
- * ```
- */
 export function getDefaultValues(location?: Location): LocationFormValues {
   if (!location) return { ...EMPTY_FORM };
   return {

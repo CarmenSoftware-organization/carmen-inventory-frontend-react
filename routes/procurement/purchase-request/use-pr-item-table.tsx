@@ -61,7 +61,6 @@ const NARROW_COL_SIZE = 35;
 const INPUT_COL_SIZE = 150;
 const INPUT_COL_SIZE_VIEW = 120;
 
-/** คอลัมน์ action — edit มีปุ่มลบคู่กับปุ่มประวัติ view เหลือปุ่มประวัติปุ่มเดียว */
 const ACTION_COL_SIZE = 60;
 const ACTION_COL_SIZE_VIEW = 40;
 
@@ -81,7 +80,6 @@ function liveItem(
   return form.getValues(`items.${index}`);
 }
 
-/** ยอดที่เทียบกันได้ข้ามสกุลเงิน — ยอดในสกุลของแถว × เรต = ยอดสกุลฐาน */
 function baseAmountOf(item: PrItem | undefined): number {
   return Number(item?.total_price ?? 0) * Number(item?.exchange_rate ?? 1);
 }
@@ -96,7 +94,6 @@ interface UsePrItemTableOptions {
   buCode?: string;
   baseCurrencyCode?: string;
   onDelete: (index: number) => void;
-  /** ตัวกรองฝั่ง client — ดู use-pr-item-filter.tsx */
   filter: PrItemFilter;
 }
 

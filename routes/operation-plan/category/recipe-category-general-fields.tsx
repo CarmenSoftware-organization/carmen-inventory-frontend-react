@@ -18,7 +18,6 @@ interface RecipeCategoryGeneralFieldsProps {
   readonly onParentChange: (parentId: string) => void;
 }
 
-/** General info section — code · name · parent · description */
 export function RecipeCategoryGeneralFields({
   form,
   isDisabled,

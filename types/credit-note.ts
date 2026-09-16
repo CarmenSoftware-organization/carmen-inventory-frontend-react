@@ -129,7 +129,6 @@ export interface CreditNote {
   total_amount?: number;
   base_total_amount?: number;
   is_active?: boolean;
-  /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
   audit?: AuditInfo;
   credit_note_detail: CreditNoteItem[];
 }
@@ -172,13 +171,6 @@ interface CreditNoteDetailItem {
   note?: string | null;
 }
 
-/**
- * Detail-view (findOne) shape of a credit note with relations collapsed into
- * nested objects. Distinct from `CreditNote` (flat, list). `reference_number`/
- * `tax_amount`/`discount_amount` are optional (not returned by findOne; form
- * defaults them).
- * รูปแบบ detail-view (findOne) ของใบลดหนี้ที่ยุบ relation เป็น object ซ้อน
- */
 export interface CreditNoteDetail {
   id: string;
   doc_version?: number;
@@ -214,7 +206,6 @@ export interface CreditNoteDetail {
     name: string | null;
     description: string | null;
   } | null;
-  /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
   audit?: AuditInfo;
   credit_note_detail: CreditNoteDetailItem[];
 }

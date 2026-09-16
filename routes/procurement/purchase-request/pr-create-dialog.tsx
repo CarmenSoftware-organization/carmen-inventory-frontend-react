@@ -16,13 +16,6 @@ interface CreatePRDialogProps {
 
 const PR_BASE_PATH = "/procurement/purchase-request";
 
-/**
- * ถามว่าจะเริ่มใบขอซื้อจากอะไร — ใบเปล่า หรือ เทมเพลต
- *
- * เลือกเทมเพลตไม่ได้ทำในกล่องนี้แล้ว: ส่งไปหน้า /from-template ซึ่งมีที่ให้
- * ค้นหาและกวาดตาดูรายการสินค้าในแต่ละเทมเพลตได้เต็ม ๆ (กล่องกลางจอที่ scroll
- * ในตัวเองคับเกินไปเมื่อเทมเพลตเยอะ)
- */
 export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const navigate = useNavigate();

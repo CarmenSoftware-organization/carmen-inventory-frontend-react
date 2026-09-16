@@ -22,7 +22,6 @@ export interface Role {
   audit?: Audit;
 }
 
-/** Detail shape from Get By ID — uses `application_role_name` instead of `name` */
 export interface RoleDetail {
   id: string;
   doc_version?: number;

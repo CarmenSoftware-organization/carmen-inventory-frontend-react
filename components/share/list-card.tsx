@@ -22,12 +22,6 @@ import { formatDate } from "@/lib/date-utils";
 import type { AuditEntry } from "@/types/audit";
 import type { LastAction } from "@/types/last-action";
 
-/**
- * Skeleton ที่ mirror โครง `ListCard` — ใช้ตอนโหลดให้ความสูงใกล้ของจริง
- *
- * @param rows - จำนวนแถวข้อมูลที่จะโชว์เป็นโครง (default 5)
- * @param hasFooter - การ์ดจริงมี footer action หรือไม่
- */
 export function ListCardSkeleton({
   rows = 5,
   hasFooter = true,
@@ -66,11 +60,8 @@ export function ListCardSkeleton({
 }
 
 interface ListCardProps {
-  /** เลขที่เอกสาร/ชื่อรายการ — หัวการ์ด */
   readonly title: ReactNode;
-  /** badge สถานะมุมขวาบน (แต่ละโมดูลมี config สีของตัวเอง) */
   readonly badge?: ReactNode;
-  /** คลิกการ์ด/กด Enter — เข้าหน้ารายละเอียด */
   readonly onOpen: () => void;
   /**
    * ส่งมาแล้วได้ปุ่มลบมาตรฐานท้าย footer; ไม่ส่ง = ลบไม่ได้
@@ -79,9 +70,7 @@ interface ListCardProps {
    * ไม่ต้องห่อ guard เอง (ไม่มีสิทธิ์ = ไม่ถูกเรียก เด้ง dialog แทน)
    */
   readonly onDelete?: () => void;
-  /** ปุ่มอื่นใน footer (วางก่อนปุ่มลบ) เช่น approve/reject ของ PR */
   readonly actions?: ReactNode;
-  /** แถวข้อมูล — ใช้ `ListCardRow` */
   readonly children: ReactNode;
 }
 

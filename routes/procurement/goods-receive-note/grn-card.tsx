@@ -19,17 +19,6 @@ interface GrnCardProps {
   readonly onDelete: (item: GoodsReceiveNote) => void;
 }
 
-/**
- * การ์ดใบรับสินค้า 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/PO/SR/IA/PRT — ไฟล์นี้เหลือแค่ว่าข้อมูล
- * อะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง GRN · ยอดเงินใช้ `currency_code` ของ
- * ใบนั้น (GRN มีสกุลเงินต่อใบเหมือน PO)
- *
- * @param props.item - ข้อมูลใบรับสินค้า
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();

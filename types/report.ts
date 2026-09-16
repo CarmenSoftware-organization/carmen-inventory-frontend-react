@@ -14,7 +14,6 @@ export interface Report {
   _templateType?: "form" | "list";
 }
 
-/** ข้อมูล raw จาก BE endpoint `/reports/templates` */
 export interface ReportTemplate {
   id: string;
   name: string;
@@ -28,25 +27,21 @@ export interface ReportTemplate {
   template_type?: "form" | "list";
 }
 
-/** Payload สำหรับ POST `/reports/viewer` */
 export interface RunReportPayload {
   template_id: string;
   filters: Record<string, string>;
 }
 
-/** Response จาก POST `/reports/viewer` — มี viewer URL ให้เปิด tab ใหม่ */
 export interface RunReportResponse {
   url: string;
 }
 
-/** Period record ที่ backend ส่งกลับใน lookup response */
 export interface ReportPeriodInfo {
   period: string;
   start_at: string;
   end_at: string;
 }
 
-/** Lookup item สำหรับหน้า list (code + composite "code - name") */
 export interface ReportListLookupItem {
   code: string;
   name: string;

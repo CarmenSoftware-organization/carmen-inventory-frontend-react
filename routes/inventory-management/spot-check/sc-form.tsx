@@ -44,11 +44,8 @@ import {
 const FORM_ID = "sc-form";
 
 interface ScFormProps {
-  /** location_id locked — required เสมอ (SC ต้องเริ่มจาก location) */
   readonly defaultLocationId: string;
-  /** ชื่อ location ที่ pre-fill — ใช้แสดงใน title/meta แทน placeholder */
   readonly defaultLocationName?: string;
-  /** Products ใน location สำหรับ Transfer UI ใน manual mode */
   readonly availableProducts?: ProductLocation[];
 }
 

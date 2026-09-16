@@ -35,13 +35,6 @@ const RecipeEquipmentCategoryDialog = lazy(() =>
   })),
 );
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการหมวดหมู่อุปกรณ์สูตรอาหาร แสดง DataGrid พร้อม dialog
- * @returns React element ของรายการหมวดหมู่อุปกรณ์สูตรอาหาร
- * @example
- * // ใช้ภายใน page.tsx ของโมดูล recipe-equipment-category
- * <RecipeEquipmentCategoryComponent />
- */
 export default function RecipeEquipmentCategoryComponent() {
   const [deleteTarget, setDeleteTarget] =
     useState<RecipeEquipmentCategory | null>(null);

@@ -24,7 +24,6 @@ interface GrnFormHeaderProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   readonly fromWizard?: boolean;
-  /** view mode → แสดงทุก field เป็น plain text แทน input (เหมือน CN) */
 }
 
 export function GrnFormHeader({

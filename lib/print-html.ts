@@ -21,29 +21,15 @@ export const escapeHtml = (s: string) =>
     .replaceAll("'", "&#39;");
 
 export interface PrintHtmlDocumentParts {
-  /** ชื่อเอกสาร (title ของหน้า print) */
   title: string;
-  /** บรรทัด BU มุมซ้ายหัวกระดาษ เช่น "Grand Hotel (GH01)" */
   buLine: string;
-  /** ประเภทเอกสาร มุมขวาหัวกระดาษ เช่น "Role · Permissions" */
   docType: string;
-  /** หัวเรื่องใหญ่ใต้หัวกระดาษ */
   heading: string;
-  /** รายการ meta ใต้หัวเรื่อง (จำนวน/พิมพ์โดย/พิมพ์เมื่อ) — escape ให้แล้ว */
   metaItems: string[];
-  /** เนื้อเอกสาร — caller ประกอบ (และ escape ข้อความ) เอง */
   bodyHtml: string;
-  /** พิมพ์แนวนอน — สำหรับตาราง matrix ที่คอลัมน์เยอะ */
   landscape?: boolean;
 }
 
-/**
- * ประกอบเอกสารตาม chrome มาตรฐาน (หัว BU/ประเภท · meta · footer brand)
- * แล้วสั่งพิมพ์ผ่าน iframe ซ่อน
- * @param parts - ส่วนประกอบเอกสาร ดู PrintHtmlDocumentParts
- * @example
- * printHtmlDocument({ title, buLine, docType, heading, metaItems, bodyHtml });
- */
 export function printHtmlDocument(parts: PrintHtmlDocumentParts) {
   const esc = escapeHtml;
   const meta = parts.metaItems

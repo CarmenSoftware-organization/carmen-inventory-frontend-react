@@ -39,10 +39,6 @@ describe("normalizeWorkflowProductLocation", () => {
 });
 
 describe("LOCATIONS_BY_WORKFLOW_PRODUCT", () => {
-  /**
-   * ลำดับ argument สลับกันแล้ว URL ยังถูก type — ทั้งสามตัวเป็น string
-   * ต้องมีเทสต์ตรึงรูป path ไว้
-   */
   it("เรียง bu → workflow → product ตามสัญญาของ backend", () => {
     expect(
       API_ENDPOINTS.LOCATIONS_BY_WORKFLOW_PRODUCT("BU1", "WF2", "P3"),

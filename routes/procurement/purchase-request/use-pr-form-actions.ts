@@ -198,10 +198,6 @@ export function usePrFormActions({
       stage_message: "",
     }));
 
-  /**
-   * @param docVersion - เลขเวอร์ชันที่จะใส่ใน payload ไม่ส่ง = ใช้ค่าในฟอร์ม
-   *   (ใบใหม่ยังไม่มี id ให้ไป GET จึงไม่มีอะไรให้ resolve)
-   */
   const buildCreateDetails = (
     values: PrFormValues,
     docVersion?: number,

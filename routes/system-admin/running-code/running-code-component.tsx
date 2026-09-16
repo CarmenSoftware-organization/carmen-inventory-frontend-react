@@ -38,12 +38,6 @@ import { Loader2 } from "lucide-react";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * Component หลักของหน้า Running Code รองรับเพิ่ม/แก้ไข/ลบ และ initialize ข้อมูลเริ่มต้น
- * @returns React element ของหน้า Running Code
- * @example
- * <RunningCodeComponent />
- */
 export default function RunningCodeComponent() {
   const [deleteTarget, setDeleteTarget] = useState<RunningCode | null>(null);
   const deleteRunningCode = useDeleteRunningCode();

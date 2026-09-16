@@ -58,14 +58,6 @@ import { useExchangeRateTable } from "./use-exchange-rate-table";
 import ExchangeRateCard from "./exchange-rate-card";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * Component หลักของหน้ารายการ Exchange Rate รองรับ list/grid view, การอัปเดตแบบ bulk จาก external API
- * รวมถึงการเพิ่ม/แก้ไข/ลบรายการและแสดงผลบนมือถือ
- * @returns React element ของหน้ารายการ Exchange Rate
- * @example
- * // route: /config/exchange-rate
- * <ExchangeRateComponent />
- */
 export default function ExchangeRateComponent() {
   const { defaultCurrencyCode, defaultCurrencyDecimalPlaces, dateFormat } =
     useProfile();

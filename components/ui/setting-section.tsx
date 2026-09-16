@@ -34,11 +34,8 @@ export function SettingSection({
   readonly title: string;
   readonly description?: string;
   readonly first?: boolean;
-  /** optional count shown after the title (e.g. rows in a dynamic section) */
   readonly count?: number;
-  /** optional control shown under the description (e.g. an Add button) */
   readonly action?: React.ReactNode;
-  /** body needs full width (e.g. a wide table) — title/desc stack on top */
   readonly wide?: boolean;
   /**
    * body ไม่ต้องเป็น grid 2 คอลัมน์ — ปล่อยเป็นบล็อกเปล่าให้ caller จัด layout เอง
@@ -130,17 +127,11 @@ export function SettingSection({
   );
 }
 
-/**
- * Skeleton ที่ mirror โครง `SettingSection` เป๊ะ — ใช้ตอน loading ให้ความสูง
- * เท่ากับเนื้อหาจริง โดยรับ `fields` เป็น layout ของแต่ละช่อง ("full" กินเต็มแถว
- * เหมือน field ที่ `sm:col-span-2`, "half" = ครึ่งแถว, "tall" = textarea) reuse ได้
- */
 export function SettingSectionSkeleton({
   first,
   fields,
 }: {
   readonly first?: boolean;
-  /** "half" = one grid cell · "full" = whole row · "tall" = full-row textarea */
   readonly fields: ReadonlyArray<"full" | "half" | "tall">;
 }) {
   return (

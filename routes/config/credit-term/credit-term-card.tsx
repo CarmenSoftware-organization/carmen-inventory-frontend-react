@@ -13,7 +13,6 @@ interface Props {
   readonly onDelete?: (item: CreditTerm) => void;
 }
 
-/** การ์ดเครดิตเทอม สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function CreditTermCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 

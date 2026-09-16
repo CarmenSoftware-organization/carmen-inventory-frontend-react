@@ -27,7 +27,6 @@ interface SortableStageItemProps {
   readonly userCount?: number;
   readonly isHod?: boolean;
   readonly hasWarning?: boolean;
-  /** Disable dragging outside edit mode (view mode) */
   readonly dragDisabled?: boolean;
   readonly onDelete?: () => void;
 }

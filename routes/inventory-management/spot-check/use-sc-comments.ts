@@ -7,10 +7,6 @@ import type { CommentItem } from "@/components/ui/comment-sheet";
 
 /* ── Spot Check Detail (per-item) comments ───────────────────────── */
 
-/**
- * Hook ดึง comments ของ Spot Check detail (per-item)
- * GET /api/{buCode}/spot-check-detail-comment/{detailId}
- */
 export function useSpotCheckDetailComments(detailId: string | undefined) {
   const buCode = useBuCode();
 
@@ -30,11 +26,6 @@ export function useSpotCheckDetailComments(detailId: string | undefined) {
   });
 }
 
-/**
- * Hook สร้าง comment + อัปโหลด files ของ Spot Check detail
- * POST /api/{buCode}/spot-check-detail-comment/{detailId} (multipart)
- * fields: message, type ("user"), files[]
- */
 export function useSaveSpotCheckDetailComment(detailId: string) {
   const buCode = useBuCode();
   const queryClient = useQueryClient();

@@ -10,13 +10,6 @@ import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "../grn-form-schema";
 import { useGrnItemLine } from "./use-grn-item-line";
 
-/** Discount cell ต่อแถว — override toggle + rate/amount combo (shared กับ PO) */
-/**
- * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
- *
- * ใช้ของกลางตัวเดียวกับคอลัมน์ชื่อสินค้า/คลัง ทรงบรรทัดรองจะได้เปลี่ยนที่เดียว
- * — ที่นั่นมี leading/padding ที่เผื่อวรรณยุกต์ไทยไว้แล้วด้วย
- */
 function RateSubtext({
   amount,
   rate,
@@ -94,7 +87,6 @@ export function GrnItemDiscountCell({
   );
 }
 
-/** Tax cell ต่อแถว — override toggle + tax-profile/amount combo (shared กับ PO) */
 export function GrnItemTaxCell({
   form,
   index,

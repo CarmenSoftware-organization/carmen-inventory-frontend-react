@@ -7,7 +7,6 @@ export type CnCreditNoteType = CnFormValues["credit_note_type"];
 export interface CnItemAmountInput {
   quantity: number;
   unit_price: number;
-  /** CN amount — entered directly for amount_discount, computed for quantity_return */
   net_amount: number;
   discount_rate: number;
   discount_amount: number;

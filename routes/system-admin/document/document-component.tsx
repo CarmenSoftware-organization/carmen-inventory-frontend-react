@@ -64,12 +64,6 @@ const TYPE_OPTIONS: { label: string; value: FileTypeKey }[] = [
   { label: "Code", value: "code" },
 ];
 
-/**
- * Component หลักของหน้าเอกสาร (Document) รองรับ upload, delete และ filter ประเภทไฟล์
- * @returns React element ของหน้า Document
- * @example
- * <DocumentComponent />
- */
 export default function DocumentComponent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deleteTarget, setDeleteTarget] = useState<DocumentFile | null>(null);

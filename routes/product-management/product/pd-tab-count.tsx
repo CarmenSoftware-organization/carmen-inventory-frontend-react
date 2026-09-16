@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { useProductEcoLabels } from "./use-product-eco-label";
 import type { ProductFormInstance } from "@/types/product";
 
-/** ป้ายตัวเลขบนแท็บ — ซ่อนเมื่อยังไม่มีอะไร ไม่โชว์เลข 0 */
 function CountBadge({ count }: { readonly count: number }) {
   if (count === 0) return null;
   return (

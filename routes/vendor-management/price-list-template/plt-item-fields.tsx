@@ -22,14 +22,6 @@ interface PltItemFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/**
- * ส่วนสินค้าในเทมเพลต — view: ตารางรวมกลุ่ม · edit/add: ซ้าย tree เลือกสินค้า
- * ขวาการ์ดกรอก MOQ tier
- *
- * ถือ field array, ตัวเลือกสินค้าทั้งหมด, handler เพิ่ม/ลบ และ dialog ยืนยันลบ
- * ไว้เองครบ แบบเดียวกับ `*-item-fields.tsx` ของ PR/PO/SR/GRN — ฟอร์มส่งมาแค่
- * form กับโหมด
- */
 export function PltItemFields({
   form,
   priceListTemplate,

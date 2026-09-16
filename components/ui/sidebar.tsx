@@ -148,12 +148,6 @@ function SidebarProvider({
   );
 }
 
-/**
- * Sidebar component รองรับหลาย variant (sidebar/floating/inset) และ collapsible mode
- * แสดงเป็น Sheet บน mobile, เป็น fixed panel บน desktop
- * @param props - side, variant, collapsible
- * @returns React element ของ sidebar
- */
 function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -262,7 +256,6 @@ function Sidebar({
   );
 }
 
-/** ปุ่ม toggle เปิด/ปิด sidebar */
 function SidebarTrigger({
   className,
   onClick,
@@ -289,7 +282,6 @@ function SidebarTrigger({
   );
 }
 
-/** Rail สำหรับคลิกด้านข้าง sidebar เพื่อ toggle */
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const { toggleSidebar, open } = useSidebar();
 
@@ -316,7 +308,6 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   );
 }
 
-/** Main content wrapper ที่อยู่ข้าง sidebar */
 function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   return (
     <main
@@ -331,7 +322,6 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   );
 }
 
-/** Input component ใน sidebar (ค้นหา ฯลฯ) */
 function SidebarInput({
   className,
   ...props
@@ -346,7 +336,6 @@ function SidebarInput({
   );
 }
 
-/** Header section ของ sidebar */
 function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -358,7 +347,6 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** Footer section ของ sidebar */
 function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -370,7 +358,6 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** เส้นคั่นภายใน sidebar */
 function SidebarSeparator({
   className,
   ...props
@@ -385,7 +372,6 @@ function SidebarSeparator({
   );
 }
 
-/** Content area เลื่อนได้ของ sidebar */
 function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -400,7 +386,6 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** กลุ่ม menu ใน sidebar */
 function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -412,7 +397,6 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** Label ของ sidebar group */
 function SidebarGroupLabel({
   className,
   asChild = false,
@@ -434,7 +418,6 @@ function SidebarGroupLabel({
   );
 }
 
-/** ปุ่ม action ที่มุมขวาของ sidebar group */
 function SidebarGroupAction({
   className,
   asChild = false,
@@ -458,7 +441,6 @@ function SidebarGroupAction({
   );
 }
 
-/** Content ของ sidebar group */
 function SidebarGroupContent({
   className,
   ...props
@@ -473,7 +455,6 @@ function SidebarGroupContent({
   );
 }
 
-/** Menu list (ul) ของ sidebar */
 function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
   return (
     <ul
@@ -485,7 +466,6 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
   );
 }
 
-/** Menu item (li) ของ sidebar */
 function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
@@ -519,11 +499,6 @@ const sidebarMenuButtonVariants = cva(
   },
 );
 
-/**
- * ปุ่ม menu ใน sidebar รองรับ variants, sizes, active state และ tooltip เมื่อ collapsed
- * @param props - asChild, isActive, variant, size, tooltip
- * @returns React element ของ menu button (มี tooltip wrap เมื่อ collapsed)
- */
 function SidebarMenuButton({
   asChild = false,
   isActive = false,
@@ -574,7 +549,6 @@ function SidebarMenuButton({
   );
 }
 
-/** ปุ่ม action ที่อยู่ข้าง menu button */
 function SidebarMenuAction({
   className,
   asChild = false,
@@ -607,7 +581,6 @@ function SidebarMenuAction({
   );
 }
 
-/** Badge แสดงตัวเลข/สถานะข้าง menu button */
 function SidebarMenuBadge({
   className,
   ...props
@@ -630,7 +603,6 @@ function SidebarMenuBadge({
   );
 }
 
-/** Skeleton placeholder สำหรับ sidebar menu ตอนโหลด */
 function SidebarMenuSkeleton({
   className,
   showIcon = false,
@@ -669,7 +641,6 @@ function SidebarMenuSkeleton({
   );
 }
 
-/** Sub menu list ภายใน menu item */
 function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
   return (
     <ul
@@ -685,7 +656,6 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
   );
 }
 
-/** Sub menu item */
 function SidebarMenuSubItem({
   className,
   ...props
@@ -700,7 +670,6 @@ function SidebarMenuSubItem({
   );
 }
 
-/** ปุ่มใน sub menu item รองรับ size sm/md และ active state */
 function SidebarMenuSubButton({
   asChild = false,
   size = "md",

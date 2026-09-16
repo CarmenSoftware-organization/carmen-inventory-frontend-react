@@ -15,12 +15,6 @@ import {
  */
 export const LANDING_FALLBACK_PATH = "/profile";
 
-/**
- * leaf ตัวแรกที่เข้าได้จริง ตามลำดับที่ sidebar แสดง (depth-first)
- *
- * คืน `undefined` เมื่อไม่เจอ — แยกจาก `firstAccessiblePath` เพื่อให้การ recurse
- * ลง subModules ไม่เผลอคืนค่า fallback ออกมาจากกลางต้นไม้
- */
 function findFirst(modules: ModuleWithAccess[]): string | undefined {
   for (const mod of modules) {
     if (mod.subModules && mod.subModules.length > 0) {

@@ -440,7 +440,6 @@ function MonitorViz() {
   );
 }
 
-/** ภาพจำลอง: สามระบบภายนอกต่อเข้าหากล่องกลาง */
 function InterfaceViz() {
   return (
     <div className={VIZ_WRAP}>

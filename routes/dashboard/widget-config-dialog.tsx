@@ -27,16 +27,11 @@ interface WidgetConfigDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly dataset: DashboardDataset;
-  /** ค่าเดิมของ widget ที่ save แล้ว — ไม่ส่ง = ใช้ default จาก descriptor */
   readonly initialParams?: WidgetParams | null;
   readonly isPending?: boolean;
   readonly onSubmit: (params: WidgetParams) => void;
 }
 
-/**
- * ตั้งค่า param ของ widget — ใช้ทั้งตอน add และตอนแก้ของที่ save แล้ว
- * มี live preview ที่ยิง exec ตามค่าที่กรอกอยู่ ทำให้เห็นผลก่อนกด save
- */
 export function WidgetConfigDialog({
   open,
   onOpenChange,

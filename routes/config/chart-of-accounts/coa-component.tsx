@@ -9,14 +9,6 @@ import { COA_FILTER_FIELDS } from "./coa-filter-fields";
 import CoaCard from "./coa-card";
 import { CoaImportCarmenGlButton } from "./coa-import-carmen-gl-button";
 
-/**
- * หน้ารายการรหัสบัญชี — master data ของรหัสบัญชีที่ระบบบัญชีปลายทางใช้ลงรายการ
- *
- * @returns React element ของหน้ารายการรหัสบัญชี
- * @example
- * // route: /config/chart-of-accounts
- * <CoaComponent />
- */
 export default function CoaComponent() {
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");

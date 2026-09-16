@@ -41,11 +41,8 @@ export interface CommentAttachment {
 }
 
 export interface CommentAudit {
-  /** ISO timestamp ของ action */
   at: string;
-  /** user id ของผู้กระทำ (มีเฉพาะ created) */
   id?: string;
-  /** ชื่อเต็มที่ backend format มาแล้ว เช่น "สมชาย ใจดี" (มีเฉพาะ created) */
   name?: string;
 }
 
@@ -81,10 +78,6 @@ interface CommentSheetProps {
   readonly onDelete: (id: string) => Promise<void>;
   readonly isDeleting: boolean;
   readonly onUploadFile?: (file: File) => Promise<CommentAttachment>;
-  /**
-   * เมื่อ true จะไม่อัปโหลดไฟล์แยก แต่เก็บ File[] ดิบไว้และส่งให้ onSubmit
-   * ผ่าน field `files` (สำหรับ endpoint ที่รับ multipart ในคำขอเดียว)
-   */
   readonly directFileUpload?: boolean;
 }
 
@@ -204,10 +197,6 @@ interface AttachmentImageProps {
   readonly size?: "sm" | "md";
 }
 
-/**
- * แสดง thumbnail ของ attachment แบบรูปภาพ
- * ถ้าโหลดไม่สำเร็จจะ fallback เป็นกล่อง gradient พร้อม icon และชื่อไฟล์
- */
 function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   const [errored, setErrored] = useState(false);
   const dimension = size === "sm" ? "size-14" : "size-16";

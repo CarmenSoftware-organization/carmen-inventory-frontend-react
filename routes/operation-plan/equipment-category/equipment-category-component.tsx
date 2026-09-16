@@ -46,13 +46,6 @@ const EquipmentCategoryDialog = lazy(() =>
   })),
 );
 
-/**
- * คอมโพเนนต์หลักของหน้ารายการหมวดหมู่อุปกรณ์ รองรับ list/grid view และ dialog
- * @returns React element ของรายการหมวดหมู่อุปกรณ์
- * @example
- * // ใช้ภายใน page.tsx ของโมดูล equipment-category
- * <EquipmentCategoryComponent />
- */
 export default function EquipmentCategoryComponent() {
   const t = useTranslations("operationPlan.equipmentCategory");
   const tc = useTranslations("common");

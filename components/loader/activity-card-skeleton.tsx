@@ -1,18 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/**
- * Skeleton 1 รายการ activity card
- *
- * Render placeholder สำหรับ activity card ขณะ loading ประกอบด้วย header
- * (badge + timestamp), body (icon + labels หลายบรรทัด) และ footer
- * ใช้ `aria-hidden` เพื่อไม่ให้ screen reader อ่าน
- *
- * @returns JSX element ของ skeleton item
- * @example
- * ```tsx
- * <ActivityCardSkeletonItem />
- * ```
- */
 function ActivityCardSkeletonItem() {
   return (
     <div className="bg-card space-y-2 rounded-lg border p-3" aria-hidden="true">
@@ -51,21 +38,6 @@ interface ActivityCardSkeletonGridProps {
   readonly count?: number;
 }
 
-/**
- * Grid ของ activity card skeleton
- *
- * Render grid responsive (1/2/3/4 คอลัมน์ตามขนาดจอ) ของ
- * `ActivityCardSkeletonItem` จำนวน `count` รายการ ใช้ `aria-busy` และ
- * `aria-live="polite"` เพื่อแจ้ง screen reader ว่ากำลัง loading
- *
- * @param props - props ของ grid
- * @param props.count - จำนวน skeleton items (default 8)
- * @returns JSX element ของ grid skeleton
- * @example
- * ```tsx
- * <ActivityCardSkeletonGrid count={12} />
- * ```
- */
 export function ActivityCardSkeletonGrid({
   count = 8,
 }: ActivityCardSkeletonGridProps) {

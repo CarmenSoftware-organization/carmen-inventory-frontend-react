@@ -56,10 +56,6 @@ function renderDialog(props: Partial<Parameters<typeof CoaDialog>[0]> = {}) {
 const input = (id: string) =>
   document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
 
-/**
- * ข้อความบนปุ่ม dropdown ตามลำดับที่ render (0 = ด้านบัญชี, 1 = ประเภท)
- * ค้นด้วย getByText ไม่ได้ — Radix ใส่ค่าไว้ทั้งบนปุ่มและใน select ที่ซ่อนอยู่
- */
 const selectValues = () =>
   Array.from(document.querySelectorAll('[data-slot="select-trigger"]')).map(
     (el) => el.textContent?.trim(),

@@ -66,7 +66,6 @@ export function SubtotalCell({
   );
 }
 
-/** ยอดรวมย่อยของฝั่งคืน (read-only) — qty × price หรือยอดที่กรอกเองแล้วแต่ประเภทใบ */
 export function LineSubtotalText({
   form,
   index,

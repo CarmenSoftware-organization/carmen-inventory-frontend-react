@@ -34,7 +34,6 @@ import { PeStartBlockedDialog } from "./pe-start-blocked-dialog";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { StartCountingBlockers } from "@/types/period-end";
 
-/** true เมื่อ payload หน้าตาเหมือนรายการเอกสารที่บล็อกจริง ๆ ไม่ใช่ error body อื่นที่บังเอิญมี data */
 const isStartCountingBlockers = (
   value: unknown,
 ): value is StartCountingBlockers =>

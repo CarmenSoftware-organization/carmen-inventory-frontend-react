@@ -191,7 +191,6 @@ const objectToText = (
 export function getDefaultValues(
   grn?: GoodsReceiveNote,
   options?: {
-    /** currency default ของ BU — set เป็น currency เริ่มต้นตอนสร้าง GRN ใหม่ (mirror PO) */
     defaultCurrencyId?: string;
     defaultCurrencyCode?: string;
   },

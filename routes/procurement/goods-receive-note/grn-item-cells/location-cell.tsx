@@ -25,9 +25,7 @@ export function LocationCell({
   form: UseFormReturn<GrnFormValues>;
   index: number;
   disabled: boolean;
-  /** แถวนี้ไม่ได้อ้างใบสั่งซื้อ — สินค้าเลือกเองได้ จึงล้างได้เมื่อเปลี่ยนคลัง */
   isManual: boolean;
-  /** เลือกคลังเสร็จแล้ว — ใช้พาไปเปิดตัวเลือกสินค้าต่อ */
   onPicked?: () => void;
 }) {
   "use no memo";

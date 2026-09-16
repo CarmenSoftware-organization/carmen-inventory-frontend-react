@@ -17,8 +17,6 @@ const SOURCE = readFileSync(
   "utf8",
 );
 
-/** ยุบช่องว่างให้เหลือช่องเดียว — prettier จัดบรรทัดใหม่ตอนอาร์กิวเมนต์เพิ่ม
- *  แต่ invariant ที่เทสต์นี้ดูคือ "เรียกด้วยค่าอะไร" ไม่ใช่ "ขึ้นบรรทัดตรงไหน" */
 const FLAT = SOURCE.replace(/\s+/g, " ");
 
 describe("PR — ทุก mutation ต้องได้ doc_version สดก่อนยิง", () => {

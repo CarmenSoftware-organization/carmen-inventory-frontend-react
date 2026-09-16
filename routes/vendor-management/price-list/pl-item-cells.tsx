@@ -217,10 +217,6 @@ export function PriceCell({
   );
 }
 
-/**
- * ดึง price (gross) + tax_rate ของ row (view=detailRef · edit=watch สด) แล้ว
- * derive PWT (ก่อนภาษี) + tax amount กลับ — input คือ price รวมภาษี
- */
 function useRowPriceParts(
   form: UseFormReturn<PriceListFormValues>,
   index: number,
@@ -250,7 +246,6 @@ function useRowPriceParts(
   };
 }
 
-/** PWT — ราคาก่อนภาษี (computed จาก price ÷ (1+rate), read-only) */
 export function PWTCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
   const { pwt } = useRowPriceParts(form, index, isView, detailRef);
@@ -261,7 +256,6 @@ export function PWTCell({ form, index, isView, detailRef }: CellProps) {
   );
 }
 
-/** Amount — ราคารวมภาษี (= price gross, read-only) ทั้ง view/edit */
 export function AmountCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
   const { amount } = useRowPriceParts(form, index, isView, detailRef);
@@ -272,7 +266,6 @@ export function AmountCell({ form, index, isView, detailRef }: CellProps) {
   );
 }
 
-/** Preferred — view: Crown เมื่อ preferred · edit: checkbox toggle ต่อ item */
 export function PreferredCell({
   form,
   index,

@@ -6,11 +6,6 @@ const UNIT_TO_MINUTES: Record<SlaUnit, number> = {
   days: 60 * 24,
 };
 
-/**
- * รวม SLA ของทุก stage (ยกเว้น stage สุดท้ายที่เป็น Completed) เป็นนาที
- * @param stages - array ของ Stage
- * @returns จำนวนนาทีรวม
- */
 export function totalSlaMinutes(stages: Stage[]): number {
   if (!stages || stages.length === 0) return 0;
   const middle = stages.slice(0, -1);
@@ -22,11 +17,6 @@ export function totalSlaMinutes(stages: Stage[]): number {
   }, 0);
 }
 
-/**
- * แปลงจำนวนนาทีเป็นข้อความสรุป cycle time แบบกระชับ เช่น "3d 8h" หรือ "45m"
- * @param minutes - จำนวนนาทีรวม
- * @returns ข้อความสรุป (สูงสุด 2 หน่วย) หรือ empty string ถ้า <= 0
- */
 export function formatCycleTime(minutes: number): string {
   if (!minutes || minutes <= 0) return "";
   const days = Math.floor(minutes / (60 * 24));

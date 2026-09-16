@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** ค่า sentinel ของตัวเลือก "ไม่ระบุชั้นวาง" — Radix Select ห้าม value ว่าง */
 const NONE = "__none__";
 
 interface LookupShelfProps {

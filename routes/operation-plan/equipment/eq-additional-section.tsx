@@ -11,7 +11,6 @@ interface EqAdditionalSectionProps {
   readonly isDisabled: boolean;
 }
 
-/** Additional — note + active/portable toggles */
 export function EqAdditionalSection({
   form,
   isDisabled,

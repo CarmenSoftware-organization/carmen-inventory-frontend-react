@@ -77,24 +77,6 @@ function buildPageRange(
   return pages;
 }
 
-/**
- * Pagination bar ของ DataGrid
- *
- * Render แถบ pagination ด้านล่าง DataGrid ประกอบด้วย showing X-Y of Z,
- * dropdown rows per page และปุ่ม navigation (first/prev/page numbers/next/last)
- * ใช้ `useDataGrid` เพื่ออ่าน table state ซ่อนตัวเองเมื่อ recordCount = 0
- * และแสดง skeleton ระหว่าง loading รวมถึง `aria-live` สำหรับ screen reader
- *
- * @param props - props ของ pagination
- * @param props.sizes - ตัวเลือก rows per page (default [5,10,25,50,100])
- * @param props.className - className เพิ่มเติม
- * @param props.siblings - จำนวนเลขหน้าข้างเคียง current page (default 1)
- * @returns JSX element ของ pagination toolbar
- * @example
- * ```tsx
- * <DataGridPagination sizes={[10, 20, 50]} siblings={2} />
- * ```
- */
 function DataGridPagination({
   sizes = [5, 10, 25, 50, 100],
   className,

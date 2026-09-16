@@ -136,7 +136,6 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   errorMessage?: string;
   excludeIds?: string[];
-  /** แถวที่เพิ่งกดเพิ่ม — เปิดช่องเลือกสินค้าให้เลย ไม่ต้องกดซ้ำ */
   autoOpen?: boolean;
   onPicked?: () => void;
 }) {
@@ -147,10 +146,6 @@ const ProductCell = memo(function ProductCell({
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   if (disabled) {
-    // View mode: do NOT mount the cost probe. Its effect writes cost_per_unit /
-    // total_cost with shouldDirty:true from the live cost API, which would
-    // silently overwrite the saved costs of an existing adjustment (and mark
-    // untouched rows dirty). The probe is only for auto-filling during add/edit.
     return (
       <div className="flex items-center justify-between gap-1.5 text-xs">
         <div className="min-w-0 flex-1">
@@ -211,7 +206,6 @@ const ProductCell = memo(function ProductCell({
   );
 });
 
-/** หน่วยนับของแถว — แสดงผลอย่างเดียว มาจากสินค้าที่เลือก */
 const UnitCell = memo(function UnitCell({
   control,
   index,
@@ -234,7 +228,6 @@ interface UseAdjItemTableOptions {
   disabled: boolean;
   onDelete: (index: number) => void;
   adjustmentType: InventoryAdjustmentType;
-  /** true = แถวบนสุดเพิ่งถูกเพิ่ม ให้เปิดช่องเลือกสินค้าเอง */
   autoOpenFirst?: boolean;
   onProductPicked?: () => void;
 }

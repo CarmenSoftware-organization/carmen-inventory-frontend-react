@@ -20,7 +20,6 @@ import {
   type ChartOfAccountsImportResult,
 } from "./use-coa";
 
-/** จำนวนแถวผิดที่แสดงใน toast — ที่เหลือสรุปเป็นจำนวน */
 const MAX_SHOWN_ERRORS = 5;
 
 /**

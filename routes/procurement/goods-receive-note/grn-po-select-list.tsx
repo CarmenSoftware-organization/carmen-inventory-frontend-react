@@ -15,7 +15,6 @@ import type { INVENTORY_TYPE } from "@/constant/location";
 import { selectableDetailIds, usableLocations } from "./grn-po-usable";
 
 interface GrnPoSelectListProps {
-  /** ใบสั่งซื้อของผู้ขายที่เลือก — หน้าแม่เป็นคนโหลด เพราะต้องใช้ตอนกดยืนยันด้วย */
   readonly poList: readonly PoForGrn[];
   readonly isLoading: boolean;
   readonly selected: ReadonlySet<string>;

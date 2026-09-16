@@ -83,7 +83,6 @@ interface PurchaseRequestDetail
   doc_version: number;
 }
 
-/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบขอซื้อ */
 interface PrItemHistoryEntry {
   at: string;
   seq: number;
@@ -178,10 +177,6 @@ export interface PurchaseRequest {
   workflow_next_stage: string;
   workflow_previous_stage: string;
   workflow_history: WorkflowHistoryEntry[];
-  /**
-   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
-   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
-   */
   last_action?: LastAction | null;
   requestor_id: string;
   requestor_name: string;
@@ -236,7 +231,6 @@ export enum PR_ITEM_PRICELIST_COMPARE_TYPE {
 }
 
 export interface PrtDetailPayload {
-  /** บังคับเฉพาะแถวที่ update — backend เช็ค optimistic lock ราย row แยกจากหัวเอกสาร */
   doc_version?: number;
   location_id: string | null;
   delivery_point_id: string | null;

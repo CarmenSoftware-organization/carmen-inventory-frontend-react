@@ -16,7 +16,6 @@ interface Props {
   readonly images: MockImage[];
   readonly index: number | null;
   readonly onIndexChange: (next: number | null) => void;
-  /** ไม่ส่ง = read-only (ซ่อนปุ่ม upload + ปิด drag-drop) */
   readonly onAddFiles?: (files: FileList | File[]) => void;
 }
 

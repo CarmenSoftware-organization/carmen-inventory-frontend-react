@@ -34,10 +34,6 @@ const APPROVAL_FILTER_FIELDS: FilterFieldDef[] = [
   },
 ];
 
-/**
- * คอมโพเนนต์หลักหน้าอนุมัติ แสดงสรุปจำนวนรายการรออนุมัติและคิวเอกสาร
- * @returns React element ของหน้า Approval
- */
 export default function ApprovalComponent() {
   const t = useTranslations("procurement.approval");
   const { dateFormat } = useProfile();

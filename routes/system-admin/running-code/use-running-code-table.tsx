@@ -17,13 +17,6 @@ interface UseRunningCodeTableOptions {
   onDelete: (runningCode: RunningCode) => void;
 }
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตาราง Running Code
- * @param options - อาร์เรย์ runningCodes, totalRecords, params, tableConfig, onEdit และ onDelete
- * @returns TanStack Table instance สำหรับ Running Code
- * @example
- * const table = useRunningCodeTable({ runningCodes, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useRunningCodeTable({
   runningCodes,
   totalRecords,

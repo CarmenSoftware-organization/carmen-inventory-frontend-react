@@ -1,11 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 
-/**
- * สร้าง ActivityLog จำลองสำหรับทดสอบ โดย override ได้บางฟิลด์
- * @param overrides - ฟิลด์ที่ต้องการเขียนทับค่าเริ่มต้น
- * @returns ActivityLog object สำหรับใช้ในเทสต์
- */
 function makeLog(overrides: Partial<ActivityLog> = {}): ActivityLog {
   return {
     id: "log-1",

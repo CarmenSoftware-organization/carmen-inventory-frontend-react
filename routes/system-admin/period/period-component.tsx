@@ -52,12 +52,6 @@ import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * Component หลักของหน้ารายการงวดบัญชี (Period) รองรับ desktop/mobile, filter, และการสร้างงวดถัดไป
- * @returns React element ของหน้า Period
- * @example
- * <PeriodComponent />
- */
 export default function PeriodComponent() {
   const generateNext = useGenerateNextPeriod();
   const { exportPeriod, isExporting } = useExportPeriod();

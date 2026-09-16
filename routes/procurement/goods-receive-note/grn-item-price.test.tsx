@@ -83,14 +83,12 @@ function Harness() {
   );
 }
 
-/** แถวข้อมูลของตาราง (ตัดแถวหัวคอลัมน์ออก) */
 function dataRows() {
   return screen
     .getAllByRole("row")
     .filter((row) => within(row).queryAllByRole("textbox").length > 0);
 }
 
-/** ช่องราคาของแถวนั้น — InputAmount ตัวเดียวที่เหลือในแถว (inputMode decimal) */
 function priceInputIn(row: HTMLElement) {
   return within(row)
     .getAllByRole("textbox")

@@ -117,10 +117,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
   }, [cnSyncKey, creditNote?.id]);
 
-  /**
-   * @param docVersion - เลขที่ GET สดมาแล้ว ไม่ส่ง = ใช้ค่าในฟอร์ม ซึ่งถูกเฉพาะใบใหม่
-   *   ที่ยังไม่มี id ให้ GET (ดู lib/doc-version.ts)
-   */
   const buildPayload = (
     values: CnFormValues,
     docVersion?: number,

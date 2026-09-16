@@ -19,13 +19,6 @@ interface UsePeriodTableOptions {
   onEdit: (period: Period) => void;
 }
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตารางงวดบัญชี (Period)
- * @param options - อาร์เรย์ periods, totalRecords, params, tableConfig และ callback onEdit
- * @returns TanStack Table instance สำหรับ Period
- * @example
- * const table = usePeriodTable({ periods, totalRecords, params, tableConfig, onEdit });
- */
 export function usePeriodTable({
   periods,
   totalRecords,

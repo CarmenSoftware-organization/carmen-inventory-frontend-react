@@ -31,7 +31,6 @@ interface LookupCurrencyProps {
   readonly excludeIds?: Set<string>;
   readonly error?: string;
   readonly readOnly?: boolean;
-  /** fill the container width instead of the default content-width (w-fit) */
   readonly fullWidth?: boolean;
 }
 

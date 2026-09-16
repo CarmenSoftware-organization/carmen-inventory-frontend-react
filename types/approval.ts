@@ -2,7 +2,6 @@ import type { LastAction } from "./last-action";
 
 export type ApprovalDocType = "pr" | "po" | "sr";
 
-/** A normalized approval item that can represent PR, PO, or SR */
 export interface ApprovalItem {
   id: string;
   doc_type: ApprovalDocType;
@@ -29,7 +28,6 @@ export interface ApprovalItem {
   currency_code: string;
 }
 
-/** Summary count returned from the pending-summary endpoint */
 export interface ApprovalPendingSummary {
   total: number;
   sr: number;
@@ -62,7 +60,6 @@ export interface RawApprovalUnified {
   requestor_name: string | null;
   department_id: string | null;
   department_name: string | null;
-  /** ผู้ขายของใบสั่งซื้อ หรือ "ต้นทาง -> ปลายทาง" ของใบเบิกสินค้า */
   counterparty_name: string | null;
   currency_code: string | null;
   net_amount: number | null;

@@ -2,13 +2,11 @@ import { Files, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** มุมมองของ list ที่มีคิวอนุมัติ — ของฉันที่ยังค้าง หรือทั้งหมด */
 export type ListViewMode = "my-pending" | "all-document";
 
 interface ViewModeToggleProps {
   readonly value: ListViewMode;
   readonly onChange: (next: ListViewMode) => void;
-  /** ข้อความปุ่มมาจาก namespace ของแต่ละโมดูล (`t("myPending")`) */
   readonly myPendingLabel: string;
   readonly allDocumentsLabel: string;
   /**
@@ -19,23 +17,6 @@ interface ViewModeToggleProps {
   readonly className?: string;
 }
 
-/**
- * ปุ่มสลับ "รอดำเนินการของฉัน / เอกสารทั้งหมด"
- *
- * ใช้ที่ PR · PO · SR หน้าละสองที่ (toolbar บนจอกว้าง + ในชีตกรองบนมือถือ) —
- * สามโมดูลนี้คือทั้งหมดที่เดินผ่านลำดับขั้นอนุมัติ GRN/CN บันทึกแล้วจบจึงไม่มี
- *
- * @example
- * ```tsx
- * <ViewModeToggle
- *   value={viewMode}
- *   onChange={setViewMode}
- *   myPendingLabel={t("myPending")}
- *   allDocumentsLabel={t("allDocuments")}
- *   className="hidden sm:flex"
- * />
- * ```
- */
 export function ViewModeToggle({
   value,
   onChange,

@@ -10,19 +10,6 @@ interface SrCardListProps {
   readonly onDelete: (item: StoreRequisition) => void;
 }
 
-/**
- * แสดงรายการใบเบิกสินค้าแบบ grid ของการ์ด พร้อม skeleton และ empty state
- * ใช้ใน sr-component เมื่ออยู่ในโหมด grid หรือบน mobile
- *
- * @param props - items, isLoading, onEdit/onDelete handler
- * @param props.items - รายการ StoreRequisition
- * @param props.isLoading - สถานะกำลังโหลด
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบในการ์ด
- * @returns คอมโพเนนต์ list ของการ์ด SR
- * @example
- * <SrCardList items={items} isLoading={false} onEdit={(it) => navigate(`/.../${it.id}`)} onDelete={setDeleteTarget} />
- */
 export default function SrCardList({
   items,
   isLoading,

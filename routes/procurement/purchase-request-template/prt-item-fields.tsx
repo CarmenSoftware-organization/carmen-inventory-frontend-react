@@ -25,11 +25,6 @@ interface PrtItemFieldsProps {
   readonly defaultBu?: BusinessUnit;
 }
 
-/**
- * ส่วนจัดการรายการสินค้าในเทมเพลต PR รองรับเพิ่ม/ลบรายการ
- * @param props - form, disabled, readOnly state และ defaultBu
- * @returns React element ของรายการสินค้า PRT
- */
 export function PrtItemFields({
   form,
   disabled,

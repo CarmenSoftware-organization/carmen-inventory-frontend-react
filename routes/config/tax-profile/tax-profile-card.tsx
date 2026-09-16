@@ -13,7 +13,6 @@ interface Props {
   readonly onDelete?: (item: TaxProfile) => void;
 }
 
-/** การ์ดโปรไฟล์ภาษี สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function TaxProfileCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 

@@ -28,7 +28,6 @@ interface VendorContactTabProps {
   readonly removeContact: (index: number) => void;
 }
 
-/** Vendor contacts — Soft Sheet card list (replaces DataGrid table) */
 export function VendorContact({
   form,
   isDisabled,

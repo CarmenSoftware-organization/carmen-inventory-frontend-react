@@ -35,7 +35,6 @@ import { usePoSendEmail } from "./use-po-send-email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** แทน `{{po_no}}` `{{vendor_name}}` `{{bu_name}}` `{{total}}` `{{delivery_date}}` ด้วยค่าจริงของ PO */
 function fillTemplate(
   template: string,
   values: {

@@ -1,6 +1,5 @@
 import type { FilterFieldDef } from "@/types/list-filter";
 
-/** ตัวกรองของหน้ารายการ Tax Profile — status ใช้ค่า clause เต็มใน URL param "filter" */
 export const TAX_PROFILE_FILTER_FIELDS: FilterFieldDef[] = [
   {
     key: "filter",

@@ -24,12 +24,6 @@ interface CreateItem {
 
 const endpoint = (buCode: string) => `/api/proxy/api/config/${buCode}/items`;
 
-/**
- * สร้าง config CRUD API instance สำหรับใช้ในเทส
- *
- * @param updateMethod - HTTP method สำหรับ update (PUT หรือ PATCH), ไม่ระบุจะใช้ค่า default
- * @returns config API instance ที่มี method สำหรับ getList, getById, create, update, remove
- */
 function createApi(updateMethod?: "PUT" | "PATCH") {
   return createConfigApi<Item, CreateItem>({
     endpoint,
@@ -38,13 +32,6 @@ function createApi(updateMethod?: "PUT" | "PATCH") {
   });
 }
 
-/**
- * สร้าง Response object แบบ JSON สำหรับ mock fetch response
- *
- * @param status - HTTP status code
- * @param body - ข้อมูล body ที่จะถูก stringify เป็น JSON
- * @returns Response instance พร้อม header Content-Type เป็น application/json
- */
 function jsonRes(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
     status,

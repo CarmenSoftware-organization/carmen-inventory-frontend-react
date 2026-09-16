@@ -7,7 +7,6 @@ import type {
 } from "@/types/dashboard-widget";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 
-/** Shapes ที่ frontend render ได้ (มี Card component) — `matrix` ยังไม่มี */
 export const SUPPORTED_SHAPES = [
   "scalar",
   "scalar_delta",
@@ -29,7 +28,6 @@ export function defaultWidgetTypeFor(dataset: DashboardDataset): WidgetType {
   return defaultRenderFor(dataset.shape, dataset.supported_renders);
 }
 
-/** ค่าเริ่มต้นของ params จาก descriptor (`default`) */
 export function defaultParamsFor(
   params: readonly DatasetParam[] = [],
 ): WidgetParams {
@@ -57,14 +55,12 @@ export function shouldShowAllOption(p: DatasetParam): boolean {
   return !p.required && (p.default === undefined || p.default === "");
 }
 
-/** module ของ dataset — ใช้เลือกสี/ไอคอน AppTile */
 export function inferModuleName(datasetId: string): string {
   const prefix = datasetId.split(".")[0];
   if (prefix === "inventory") return "inventoryManagement";
   return "procurement";
 }
 
-/** เดา sub-tile จากชื่อ dataset — ใช้เลือกไอคอนบนการ์ด */
 export function inferSubTile(datasetId: string): string {
   if (datasetId.includes("physical-count")) return "physicalCount";
   if (datasetId.includes("spot-check")) return "spotCheck";

@@ -40,7 +40,6 @@ import type { PurchaseRequest } from "@/types/purchase-request";
 import type { PaginatedResponse } from "@/types/params";
 import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
 
-/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
 const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
   {
     key: "requestor_id",
@@ -120,7 +119,6 @@ export function StepSelectPr({
     [allRows, filter.matches],
   );
 
-  /** มีของให้กรองจริงหรือยัง — ยังไม่เลือก workflow / กำลังโหลด / ไม่มีใบเลย */
   const canFilter = !!workflowId && !isLoading && allRows.length > 0;
 
   const columns = useMemo<ColumnDef<PurchaseRequest>[]>(
@@ -147,7 +145,6 @@ export function StepSelectPr({
     [t, tfl, dateFormat],
   );
 
-  /** workflow ของใบที่ติ๊กไว้ — ใช้ตัดสินว่าการติ๊กครั้งถัดไปข้าม workflow ไหม */
   const workflowOf = useMemo(() => {
     const m = new Map<string, { id: string; name: string }>();
     for (const pr of allRows) {
@@ -156,7 +153,6 @@ export function StepSelectPr({
     return m;
   }, [allRows]);
 
-  /** การติ๊กที่ข้าม workflow — ค้างไว้รอผู้ใช้ยืนยันก่อนทิ้งใบที่เลือกไว้เดิม */
   const [crossWorkflow, setCrossWorkflow] = useState<{
     next: RowSelectionState;
     workflowId: string;

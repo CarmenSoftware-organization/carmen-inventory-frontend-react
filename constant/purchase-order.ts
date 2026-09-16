@@ -1,6 +1,5 @@
 import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
-/** Badge variant + label for PO document-level status */
 export const PO_STATUS_CONFIG = createStatusConfig([
   "draft",
   "in_progress",
@@ -11,7 +10,6 @@ export const PO_STATUS_CONFIG = createStatusConfig([
   "completed",
 ] as const);
 
-/** Badge className + label for PO type */
 export const PO_TYPE_CONFIG = createStatusConfig(
   ["purchase_request", "manual", "pricelist"] as const,
   {
@@ -21,19 +19,16 @@ export const PO_TYPE_CONFIG = createStatusConfig(
   },
 );
 
-/** ตัวเลือก filter สถานะเอกสาร PO ใน list sheet (ค่าเป็น clause เต็มต่อตัว) */
 export const PURCHASE_ORDER_STATUS_OPTIONS = createStatusFilterOptions(
   "po_status",
   PO_STATUS_CONFIG,
 );
 
-/** ตัวเลือก filter ประเภท PO ใน list sheet (ค่าเป็น clause เต็มต่อตัว) */
 export const PURCHASE_ORDER_TYPE_OPTIONS = createStatusFilterOptions(
   "po_type",
   PO_TYPE_CONFIG,
 );
 
-/** Badge className + label for PO item-level status */
 export const PO_ITEM_STATUS_CONFIG = createStatusConfig([
   "pending",
   "approved",

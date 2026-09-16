@@ -2,7 +2,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-/** Container สำหรับ empty state ใช้แสดงเมื่อไม่มีข้อมูล */
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -16,7 +15,6 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** ส่วน header (ไอคอน/ชื่อ/คำอธิบาย) ของ Empty */
 function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -45,7 +43,6 @@ const emptyMediaVariants = cva(
   },
 );
 
-/** ช่องสำหรับไอคอน/รูปของ Empty รองรับ variant icon */
 function EmptyMedia({
   className,
   variant = "default",
@@ -61,7 +58,6 @@ function EmptyMedia({
   );
 }
 
-/** หัวเรื่องของ Empty */
 function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -72,7 +68,6 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/** คำอธิบายของ Empty */
 function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <div
@@ -86,7 +81,6 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-/** ส่วนเนื้อหา/ปุ่ม action ของ Empty */
 function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

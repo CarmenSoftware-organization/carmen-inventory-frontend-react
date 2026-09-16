@@ -216,7 +216,6 @@ const StatusCell = memo(function StatusCell({
   index: number;
   translate: (value?: string) => string | undefined;
   role?: string;
-  /** ฟอร์มอยู่โหมดอ่าน — ปุ่มล้างสถานะต้องหายไป ไม่ใช่แค่จางลง */
   disabled?: boolean;
 }) {
   "use no memo";
@@ -298,7 +297,6 @@ const QtyUnitCell = memo(function QtyUnitCell({
   form: UseFormReturn<SrFormValues>;
   index: number;
   field: SrQtyField;
-  /** แถวนี้แก้ไม่ได้ — ตัวหนังสือล้วน ไม่ใช่ช่องกรอกสีเทา */
   readOnly: boolean;
 }) {
   "use no memo";
@@ -348,7 +346,6 @@ const QtyUnitCell = memo(function QtyUnitCell({
   );
 });
 
-/** ความกว้างช่องแคบหัวตาราง (checkbox / #) — พอดีตัว checkbox 16px + px-2 สองข้าง */
 const SR_NARROW_COL = 28;
 
 /**

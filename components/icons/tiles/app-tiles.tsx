@@ -1,6 +1,3 @@
-/**
- * Carmen Tile System — AppTiles (10 module tiles, Google Workspace style)
- */
 
 import {
   BarChart,

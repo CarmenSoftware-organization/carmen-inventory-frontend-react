@@ -4,7 +4,6 @@ import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Radio group container (shadcn) */
 function RadioGroup({
   className,
   ...props
@@ -18,7 +17,6 @@ function RadioGroup({
   );
 }
 
-/** Radio group item แต่ละตัวเลือก (shadcn) */
 function RadioGroupItem({
   className,
   ...props

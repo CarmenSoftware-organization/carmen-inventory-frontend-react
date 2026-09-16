@@ -5,11 +5,6 @@ import { useVendor } from "@/hooks/use-vendor";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useCreditNote } from "./use-credit-note";
 
-/**
- * ตัวกรองของหน้ารายการใบลดหนี้ — ดึง vendor กับเลข invoice มาเองเพราะไม่มีใคร
- * นอกตัวกรองใช้ทั้งสองชุด
- * @returns FilterFieldDef ที่ส่งเข้าได้ทั้ง `useListFilters` และ `<ListFilter>`
- */
 export function useCnFilterFields(): FilterFieldDef[] {
   const { data: vendorData } = useVendor({ perpage: -1 });
   // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array

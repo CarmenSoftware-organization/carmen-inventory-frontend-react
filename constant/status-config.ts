@@ -2,17 +2,13 @@ import type { BadgeProps } from "@/components/ui/badge";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
-/** Reusable badge variant type derived from the Badge component */
 export type BadgeVariant = NonNullable<BadgeProps["variant"]>;
 
-/** Shape of a single status config entry */
 export interface StatusConfigEntry {
-  /** Tailwind classes referencing CSS variables from badge-status.css */
   className: string;
   label: string;
 }
 
-/** A full status config record (keys are lowercase status strings) */
 export type StatusConfig<S extends string = string> = Record<
   string,
   StatusConfigEntry
@@ -30,11 +26,6 @@ export type StatusConfig<S extends string = string> = Record<
 // reads as a glowing/clustered block. `DOT` holds the shared neutral chip +
 // dot geometry; each entry only appends `before:bg-[var(--status-X)]`.
 
-/**
- * Flat dotted-chip base (DESIGN.md "avoid neon"): a neutral `bg-muted` box with
- * a single `::before` dot. Append `before:bg-…` for the dot color. Reusable for
- * any status/flag chip — not only doc statuses.
- */
 export const STATUS_DOT_CHIP =
   "bg-muted text-foreground border-transparent px-2 gap-1.5 before:size-1.5 before:shrink-0 before:rounded-full before:content-['']";
 const DOT = STATUS_DOT_CHIP;
@@ -100,24 +91,6 @@ const STATUS_CLASSNAMES: Record<string, string> = {
 
 // ── Factory functions ──────────────────────────────────────────────────
 
-/**
- * สร้าง StatusConfig สำหรับ module หนึ่ง ๆ โดยแต่ละ status จะได้ className (Tailwind) และ label อัตโนมัติ
- *
- * - className: Tailwind classes ที่อ้างถึง CSS variables จาก badge-status.css
- * - label: generate อัตโนมัติเป็น `STATUS.toUpperCase().replace(/_/g, " ")`
- * - สามารถ override ต่อ status ผ่าน parameter `overrides`
- *
- * @param statuses - readonly array ของ status string
- * @param overrides - object override className หรือ label ต่อ status (optional)
- * @returns StatusConfig object ที่มี key เป็น status และ value เป็น { className, label }
- * @example
- * ```ts
- * const PR_STATUS_CONFIG = createStatusConfig(
- *   ["draft", "approved"] as const,
- *   { draft: { label: "Draft" } },
- * );
- * ```
- */
 export function createStatusConfig<S extends string>(
   statuses: readonly S[],
   overrides?: Partial<Record<S, Partial<StatusConfigEntry>>>,
@@ -155,13 +128,10 @@ export function unknownStatusEntry(status: string): StatusConfigEntry {
   };
 }
 
-/** Filter option shape for list page status dropdowns */
 export interface StatusFilterOption {
   label: string;
   value: string;
-  /** ค่า status ดิบ — ตัวกรองใช้เลือกไอคอนของสถานะนั้น */
   statusKey?: string;
-  /** สี dot สถานะ (ค่า CSS var) — MultiSelectFilter ใช้วาดจุดหน้า label */
   dotColor?: string;
 }
 
@@ -174,21 +144,6 @@ function extractDotColor(className: string): string | undefined {
   return match?.[1];
 }
 
-/**
- * สร้าง array ของ filter options จาก StatusConfig สำหรับใช้ใน dropdown ของหน้า list
- *
- * value จะอยู่ในรูปแบบ `${fieldName}|string:${status}` ตามมาตรฐานของ filter string
- *
- * @param fieldName - ชื่อ field ของ API ที่จะ filter (เช่น "pr_status", "doc_status")
- * @param config - StatusConfig ที่ใช้ดึงรายการ
- * @param include - subset ของ status ที่ต้องการ (default: ทั้งหมด)
- * @returns array ของ { label, value } สำหรับ MultiSelectFilter
- * @example
- * ```ts
- * const options = createStatusFilterOptions("pr_status", PR_STATUS_CONFIG);
- * // [{ label: "DRAFT", value: "pr_status|string:draft" }, ...]
- * ```
- */
 export function createStatusFilterOptions<S extends string>(
   fieldName: string,
   config: StatusConfig<S>,

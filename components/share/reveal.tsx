@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * Global animation styles — keyframes for ping/bar/reveal และ class definitions
- * Mount ครั้งเดียวต่อหน้า (วางใน root component หรือ section ใหญ่)
- */
 export function AnimationStyles() {
   return (
     <style>{`
@@ -32,12 +28,6 @@ export function AnimationStyles() {
   );
 }
 
-/**
- * Scroll-triggered reveal wrapper — fade-in + translate-y เมื่อเข้า viewport
- * ใช้ IntersectionObserver, รองรับ prefers-reduced-motion
- *
- * @param delay - หน่วง animation (ms) สำหรับ stagger entrance
- */
 export function Reveal({
   children,
   delay = 0,
@@ -88,10 +78,6 @@ function useInViewRef() {
   return [setNode, visible] as const;
 }
 
-/**
- * Animated number counter — ease-out cubic จาก 0 → target
- * รักษา decimal precision ที่ frame สุดท้าย (สำคัญสำหรับ currency)
- */
 export function useCountUp(target: number, duration = 600) {
   const [val, setVal] = useState(0);
   useEffect(() => {

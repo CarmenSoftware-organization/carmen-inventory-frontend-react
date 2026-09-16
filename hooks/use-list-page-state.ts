@@ -5,22 +5,6 @@ interface UseListPageStateOptions {
   defaultPage?: number;
 }
 
-/**
- * Hook จัดการ state ของหน้า list (search, filter, sort, page, perpage ฯลฯ) ผ่าน URL query
- *
- * รวมการจัดการ URL params ทั้งหมดของ list page ไว้ในที่เดียว
- * รีเซ็ต page กลับเป็น "" (= 1) เมื่อเปลี่ยน search/filter/stage/userId
- * เพื่อไม่ให้ค้างบน page ที่ไม่มีข้อมูลแล้ว ใช้ภายใน `ConfigListTemplate`
- * และ custom list pages
- *
- * @param options - ค่าเริ่มต้นของ perpage และ page
- * @returns state และ handler สำหรับใช้ในหน้า list
- * @example
- * ```ts
- * const { search, setSearch, pageNumber, perpageNumber } = useListPageState();
- * const { data } = useVendor({ search, page: pageNumber, perpage: perpageNumber });
- * ```
- */
 export function useListPageState(options: UseListPageStateOptions = {}) {
   const { defaultPerpage = 10, defaultPage = 1 } = options;
 

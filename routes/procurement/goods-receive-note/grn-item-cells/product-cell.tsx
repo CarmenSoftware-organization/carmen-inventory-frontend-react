@@ -4,12 +4,6 @@ import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-l
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import type { GrnFormValues } from "../grn-form-schema";
 
-/**
- * Product lookup ของแถวที่กรอกเอง — **รายการกรองตามคลังของแถว**
- *
- * ยังไม่เลือกคลัง = ยังไม่รู้ว่ารับสินค้าอะไรเข้าได้บ้าง ตัว lookup จึงกดไม่ได้เอง
- * (`LookupProductInLocation` disable ตัวเองเมื่อไม่มี locationId)
- */
 const ManualProductCell = memo(function ManualProductCell({
   form,
   index,
@@ -63,7 +57,6 @@ const ManualProductCell = memo(function ManualProductCell({
   );
 });
 
-/** Product cell — แถวที่กรอกเอง: lookup · แถวที่มาจาก PO: ชื่ออย่างเดียว */
 export function ProductCell({
   form,
   index,
@@ -75,7 +68,6 @@ export function ProductCell({
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
-  /** แถวนี้ไม่ได้อ้าง PO — สินค้าเลือกเองได้ */
   isManual: boolean;
   disabled: boolean;
   open?: boolean;

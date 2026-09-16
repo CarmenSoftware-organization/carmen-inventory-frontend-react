@@ -98,11 +98,6 @@ const TONE: Record<
   },
 };
 
-/**
- * Dialog ใช้ร่วมสำหรับ workflow actions ของ SR — premium ERP design
- * รองรับ approve/reject/send-back/issue พร้อม per-item message และ stage picker
- * โครงสร้างเดียวกับ PrActionDialog ของฝั่ง procurement
- */
 export function SrActionDialog({
   open,
   onOpenChange,

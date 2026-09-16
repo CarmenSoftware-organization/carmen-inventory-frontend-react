@@ -37,13 +37,6 @@ interface RecipeEquipmentCategoryDialogProps {
   readonly category?: RecipeEquipmentCategory | null;
 }
 
-/**
- * Dialog สำหรับสร้างและแก้ไขหมวดหมู่อุปกรณ์สูตรอาหาร
- * @param props - open, onOpenChange และ category เดิม (ถ้ามี)
- * @returns React element ของ Dialog
- * @example
- * <RecipeEquipmentCategoryDialog open={open} onOpenChange={setOpen} category={selected} />
- */
 export function RecipeEquipmentCategoryDialog({
   open,
   onOpenChange,

@@ -9,15 +9,12 @@ import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductInLocationProps {
   readonly locationId: string;
-  /** ส่งมาเมื่อต้องกรองสินค้าตาม workflow ด้วย (products-location-workflow) —
-   * ส่งมาแต่ยังว่าง = รอเลือก workflow ก่อน จะยังไม่ fetch */
   readonly workflowId?: string;
   readonly value: string;
   readonly onValueChange: (value: string, product?: ProductLookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
@@ -25,10 +22,7 @@ interface LookupProductInLocationProps {
   readonly disableTooltip?: boolean;
   readonly error?: string;
   readonly readOnly?: boolean;
-  /** เปิด popover ทันทีตอน mount — ใช้ตอนกดเพิ่มรายการแล้วให้เลือกสินค้าต่อเลย */
   readonly defaultOpen?: boolean;
-  /** คุมการเปิด/ปิดจากข้างนอก — ใช้ตอนพากรอกทีละช่องหลังเลือกคลังเสร็จ
-   *  (`defaultOpen` ยิงแค่ตอน mount ซึ่งเซลล์ในตาราง mount ไปตั้งแต่แถวเกิดแล้ว) */
   readonly open?: boolean;
   readonly onOpenChange?: (open: boolean) => void;
 }

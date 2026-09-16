@@ -12,14 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/**
- * ช่องกรอกข้อความของ interface form
- *
- * @param props.field - ผลของ `form.register("...")`
- * @param props.hint - ข้อความช่วยใต้ช่อง (เช่นบอกว่า api_key ที่เป็น mask ไม่ต้องพิมพ์ใหม่)
- * @param props.revealLabels - ป้าย aria ของปุ่มแสดง/ซ่อน จำเป็นเมื่อ `type="password"`
- * @returns React element ของ text field
- */
 export function TextField({
   label,
   field,
@@ -37,7 +29,6 @@ export function TextField({
   readonly type?: "text" | "password";
   readonly hint?: string;
   readonly className?: string;
-  /** ป้าย aria ของปุ่มแสดง/ซ่อน — ต้องส่งเมื่อ `type="password"` */
   readonly revealLabels?: { readonly show: string; readonly hide: string };
 }) {
   const id = useId();
@@ -129,11 +120,6 @@ export function EnumField<T extends string>({
   );
 }
 
-/**
- * สวิตช์เปิด/ปิดของ interface form — กินความกว้างเต็มแถว
- *
- * @returns React element ของ toggle field
- */
 export function ToggleField({
   label,
   checked,

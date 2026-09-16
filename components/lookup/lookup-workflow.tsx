@@ -29,7 +29,6 @@ interface LookupWorkflowProps {
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
-  /** โหมดสร้างเอกสารใหม่ — โชว์เฉพาะ workflow ที่ผู้ใช้เริ่มเอกสารได้ */
   readonly creatableOnly?: boolean;
 }
 

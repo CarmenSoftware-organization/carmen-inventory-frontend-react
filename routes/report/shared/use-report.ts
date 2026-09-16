@@ -17,17 +17,6 @@ import type {
 } from "@/types/report";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 
-/**
- * Hook ดึงรายการ report templates จาก endpoint `/reports/templates`
- * (แยกจาก `useReport` ซึ่งเป็น CRUD ของ report master)
- *
- * @param params - page/perpage/search/filter/sort → ส่งเป็น query string
- * @returns UseQueryResult ของ `PaginatedResponse<ReportTemplate>`
- * @example
- * const { data } = useReportTemplates({ page: 1, perpage: 10 });
- * const items = data?.data ?? [];
- * const total = data?.paginate?.total ?? 0;
- */
 export function useReportTemplates(params?: ParamsDto) {
   const buCode = useBuCode();
   return useQuery<PaginatedResponse<ReportTemplate>, ApiError>({
@@ -54,9 +43,7 @@ export function useReportTemplates(params?: ParamsDto) {
 }
 
 interface ReportListLookupsOptions {
-  /** XML DataSource names — สงวน case เดิมไว้สำหรับ key ของ result */
   readonly sources: readonly string[];
-  /** ต้องการดึง period info เพิ่ม (สำหรับ keyword `@current_period` / `@previous_period`) */
   readonly includePeriods?: boolean;
 }
 
@@ -65,22 +52,6 @@ interface ReportListLookupsResult {
   periods: ReportPeriodMap;
 }
 
-/**
- * Hook ดึง lookup data + period ของ report list page (XML-driven dialog)
- *
- * - Query lowercase ของ source name ส่งไป BE แล้ว map กลับเป็น key ดั้งเดิม
- * - แต่ละ item แปลงเป็น `{ code, name }` โดย name = "code - name" ถ้ามีทั้งคู่
- * - ถ้า `includePeriods=true` จะดึง `current-period` + `previous-period` มาด้วย
- * - Cache STATIC (lookup data ไม่ค่อยเปลี่ยน)
- *
- * @param options - sources + includePeriods flag
- * @returns `{ data, periods }`
- * @example
- * const { data: lookups, periods } = useReportListLookups({
- *   sources: ["product", "location"],
- *   includePeriods: true,
- * });
- */
 export function useReportListLookups({
   sources,
   includePeriods = false,
@@ -143,14 +114,6 @@ export function useReportListLookups({
   });
 }
 
-/**
- * Mutation สำหรับ generate report viewer URL ผ่าน POST `/reports/viewer`
- *
- * @returns UseMutationResult — ส่ง `{ template_id, filters }` คืน `{ url }`
- * @example
- * const run = useRunReportMutation();
- * const { url } = await run.mutateAsync({ template_id, filters });
- */
 export function useRunReportMutation() {
   const buCode = useBuCode();
   return useMutation<RunReportResponse, ApiError, RunReportPayload>({

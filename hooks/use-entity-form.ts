@@ -12,20 +12,12 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type { FormMode } from "@/types/form";
 
 interface UseEntityFormOptions<TValues extends FieldValues> {
-  /** entity ที่โหลดมา — ไม่มี = โหมด add */
   entity: unknown;
   resolver: Resolver<TValues>;
   defaultValues: DefaultValues<TValues>;
-  /** path ของหน้ารายการ — ปุ่ม Back กับ Cancel ตอน add เด้งไปที่นี่ */
   listPath: string;
-  /** mutation ที่กำลังทำงานอยู่ (create/update) */
   isPending: boolean;
-  /**
-   * dirty ที่ไม่ได้มาจาก RHF — รูปที่เลือกไว้แต่ยังไม่อัปโหลด, gallery, transfer
-   * ปล่อยว่างได้ถ้าฟอร์มไม่มี state นอก RHF
-   */
   extraDirty?: boolean;
-  /** เรียกตอนกด Cancel ในโหมด edit — รีเซ็ต state นอก RHF กลับค่าเดิม */
   onResetExtra?: () => void;
 }
 

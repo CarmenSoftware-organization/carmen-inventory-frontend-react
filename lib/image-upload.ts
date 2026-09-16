@@ -1,14 +1,6 @@
-/**
- * Shared client-side image-upload validation. Two families of constraints:
- * - `IMAGE_*` — profile images (user avatar, BU logo, BU avatar): jpeg/png/webp, no gif, 2 MB.
- * - `ALLOWED_IMAGE_*` — content images (product, recipe): jpeg/png/webp/gif, per-consumer max
- *   size (products 5 MB, recipes 8 MB) passed to `validateImageFiles`.
- */
 
-/** Max upload size for profile images — user avatar, BU logo, BU avatar. */
 export const IMAGE_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
-/** Accepted MIME types for profile images. Backend `UploadLogoBodyDto` allows jpeg/png/webp (no gif). */
 export const IMAGE_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
 export const IMAGE_ACCEPT_ATTR = IMAGE_MIME_TYPES.join(",");
 
@@ -48,7 +40,6 @@ export interface FileValidationResult {
   rejected: { name: string; reason: FileRejectReason }[];
 }
 
-/** แปลงเหตุผลเป็นประโยคของผู้ใช้ — ส่ง `useTranslations("validation")` เข้ามา */
 export function fileRejectMessage(
   reason: FileRejectReason,
   tv: (key: string, values?: Record<string, string>) => string,

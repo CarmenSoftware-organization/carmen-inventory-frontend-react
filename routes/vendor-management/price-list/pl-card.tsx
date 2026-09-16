@@ -15,16 +15,6 @@ interface PriceListCardProps {
   readonly onDelete: (item: PriceList) => void;
 }
 
-/**
- * การ์ด price list 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product/vendor — ไฟล์นี้เหลือ
- * แค่ว่าข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง price list
- *
- * @param props.item - ข้อมูล price list
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function PriceListCard({
   item,
   onEdit,
@@ -34,7 +24,6 @@ export default function PriceListCard({
   const ts = useTranslations("status");
   const { dateFormat } = useProfile();
 
-  /** effectivePeriod มาเป็น string "from - to" — จัดรูปแบบวันที่ตาม BU ทั้งสองฝั่ง */
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
     if (parts.length !== 2) return period;

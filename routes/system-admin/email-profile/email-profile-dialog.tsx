@@ -38,9 +38,7 @@ import {
 interface EmailProfileDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** โปรไฟล์ที่กำลังแก้ไข — ไม่ใส่/null = โหมดสร้างใหม่ */
   readonly profile?: EmailProfile | null;
-  /** คืนโปรไฟล์ที่แก้เสร็จแล้วหนึ่งรายการ — ตัวเรียกเป็นคนประกอบเข้ากับ `profiles[]` ทั้งชุด */
   readonly onSave: (profile: EmailProfile) => void;
   readonly isSaving: boolean;
 }

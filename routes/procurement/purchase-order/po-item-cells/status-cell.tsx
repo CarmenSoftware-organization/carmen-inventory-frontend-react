@@ -17,7 +17,6 @@ export const StatusCell = memo(function StatusCell({
   control: Control<PoFormValues>;
   form?: UseFormReturn<PoFormValues>;
   index: number;
-  /** ผู้อนุมัติในโหมดแก้ไขเท่านั้นที่ล้างสถานะกลับเป็นรอได้ */
   canReset?: boolean;
 }) {
   "use no memo";
@@ -57,7 +56,3 @@ export const StatusCell = memo(function StatusCell({
   );
 });
 
-/**
- * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
- * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
- */

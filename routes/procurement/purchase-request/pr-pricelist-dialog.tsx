@@ -44,12 +44,6 @@ export interface PricelistEntry {
   is_preferred?: boolean;
 }
 
-/**
- * สร้าง column definitions สำหรับตารางเปรียบเทียบราคา — premium ERP design
- *
- * เพิ่ม highlight ราคาต่ำสุด (best deal), badge เมื่อ preferred vendor,
- * ปุ่ม Select variant success เมื่อเลือกได้
- */
 const buildColumns = (
   dateFormat: string,
   tfl: ReturnType<typeof useTranslations>,
@@ -195,12 +189,6 @@ interface PrPricelistDialogProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Dialog แสดงรายการราคาของสินค้าให้เลือกเพื่อใช้ในรายการ PR — premium ERP
- *
- * โหลดราคาจาก API price-compare แสดงตาราง + highlight best price + preferred
- * vendor badge + คลิก row เพื่อเลือก (หรือปุ่ม Select)
- */
 export function PrPricelistDialog({
   open,
   onOpenChange,

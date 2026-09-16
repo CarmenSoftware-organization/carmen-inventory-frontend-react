@@ -44,13 +44,6 @@ interface RunningCodeDialogProps {
   readonly runningCode?: RunningCode | null;
 }
 
-/**
- * Dialog สำหรับเพิ่ม/แก้ไข Running Code พร้อมช่องกรอก JSON config และปุ่ม format JSON
- * @param props - สถานะ open, callback onOpenChange และข้อมูล runningCode สำหรับโหมดแก้ไข
- * @returns React element ของ Dialog
- * @example
- * <RunningCodeDialog open={open} onOpenChange={setOpen} runningCode={editRc} />
- */
 export function RunningCodeDialog({
   open,
   onOpenChange,

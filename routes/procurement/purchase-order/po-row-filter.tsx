@@ -4,11 +4,8 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { FilterFieldDef } from "@/types/list-filter";
 import type { LucideIcon } from "lucide-react";
 
-/** ช่องกรองหนึ่งช่อง — บอกว่าจะดึง "ค่าที่ใช้กรอง" กับ "ชื่อที่โชว์" มาจากไหน */
 export interface PoFilterField<TRow> {
-  /** คีย์ของช่อง — ใช้เป็น key ของค่าที่เก็บ ต้องไม่ซ้ำกันในชุดเดียวกัน */
   readonly key: string;
-  /** i18n key ของป้ายกำกับ (คีย์เต็มจาก root เช่น `field.product`) */
   readonly labelKey: string;
   /**
    * ไอคอนหน้าแถวในเมนูตัวกรอง — ไม่ระบุแล้ว ListFilterMenu จะหาให้จาก labelKey
@@ -16,7 +13,6 @@ export interface PoFilterField<TRow> {
    * ระบุเมื่อ labelKey ของช่องนั้นยังไม่มีในตารางของ ListFilterMenu
    */
   readonly icon?: LucideIcon;
-  /** ค่าของแถวนี้ในช่องนี้ — `[ค่าที่ใช้กรอง, ชื่อที่โชว์]` */
   readonly of: (row: TRow) => readonly [string, string];
 }
 
@@ -31,11 +27,9 @@ export interface PoRowFilter<TRow> {
   readonly setValue: (key: string, value: string) => void;
   readonly clearAll: () => void;
   readonly activeCount: number;
-  /** แถวนี้ผ่านตัวกรองไหม */
   readonly matches: (row: TRow) => boolean;
 }
 
-/** ตัดซ้ำ ตัดค่าว่าง เรียงตามชื่อ */
 function toOptions(pairs: readonly (readonly [string, string])[]): Option[] {
   const seen = new Map<string, string>();
   for (const [value, label] of pairs) {

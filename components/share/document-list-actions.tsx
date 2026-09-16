@@ -11,21 +11,13 @@ import {
 import { cn } from "@/lib/utils";
 
 interface DocumentListActionsProps {
-  /** เรียกเมื่อกดเพิ่มรายการใหม่ (เมื่อ `addDisabled` ก็ยังถูกเรียก — ใช้ dispatch permission-denied) */
   onAdd: () => void;
-  /** ป้ายปุ่มเพิ่ม — ส่งจาก namespace ของแต่ละโมดูล เช่น `t("add")` */
   addLabel: string;
-  /** เรียกเมื่อกด export (ไม่ส่ง = ไม่มีปุ่ม export) */
   onExport?: () => void;
-  /** กำลัง export อยู่ (disable ปุ่ม + แสดง spinner) */
   isExporting?: boolean;
-  /** แสดงปุ่ม export หรือไม่ — default = มี `onExport`; ใช้ซ่อน export แต่คง print (เช่น config ที่ไม่มี exportColumns) */
   showExport?: boolean;
-  /** ซ่อน export + print ทั้งหมด (รวม overflow ของมือถือ) */
   hideExportPrint?: boolean;
-  /** ปุ่ม Add ถูก gate ด้วย permission — แสดงจาง + aria-disabled (`onAdd` ยังถูกเรียกเพื่อ dispatch denied dialog) */
   addDisabled?: boolean;
-  /** ปุ่ม action เพิ่มเติม วางก่อนปุ่ม Add */
   extraActions?: ReactNode;
 }
 

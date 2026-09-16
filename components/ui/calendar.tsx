@@ -13,11 +13,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
-/**
- * Calendar component ห่อ DayPicker ของ react-day-picker ตามธีมของระบบ
- * @param props - props ของ DayPicker + buttonVariant
- * @returns React element ปฏิทิน
- */
 function Calendar({
   className,
   classNames,
@@ -182,11 +177,6 @@ function Calendar({
   );
 }
 
-/**
- * ปุ่มวันหนึ่งวันใน Calendar พร้อมจัดการ focus และสถานะ selected/range
- * @param props - props ของ DayButton
- * @returns React element ปุ่มวัน
- */
 function CalendarDayButton({
   className,
   day,

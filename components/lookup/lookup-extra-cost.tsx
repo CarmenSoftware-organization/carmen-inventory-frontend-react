@@ -27,22 +27,6 @@ interface LookupExtraCostProps {
   readonly error?: string;
 }
 
-/**
- * Lookup Select สำหรับเลือกประเภทค่าใช้จ่ายเพิ่มเติม (Extra Cost)
- *
- * ดึงข้อมูลผ่าน `useExtraCost({ perpage: 30 })` filter เฉพาะ `is_active = true`
- * แสดงเป็น shadcn Select สำหรับกรอกค่าใช้จ่ายอื่น ๆ ใน GRN/PO
- *
- * @param value - id ของ extra cost ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX select element ของ extra cost lookup
- * @example
- * ```tsx
- * <Controller name="extra_cost_id" control={form.control} render={({ field }) => (
- *   <LookupExtraCost value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupExtraCost({
   value,
   onValueChange,

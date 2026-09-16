@@ -11,28 +11,10 @@ interface LookupPrtProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือก Price List Template (PRT)
- *
- * ดึงข้อมูลผ่าน `usePriceListTemplate` hook พร้อม server-side search และ infinite scroll
- * (perpage 30) filter เฉพาะ `status === "active"` onValueChange ส่งทั้ง id และ
- * object `PriceListTemplate` เต็มสำหรับ side effects
- *
- * @param value - template id ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object PriceListTemplate
- * @returns JSX popover element ของ PRT lookup
- * @example
- * ```tsx
- * <Controller name="template_id" control={control} render={({ field }) => (
- *   <LookupPrt value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupPrt({
   value,
   onValueChange,

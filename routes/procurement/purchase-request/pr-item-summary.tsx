@@ -11,11 +11,6 @@ interface Props {
   readonly baseCurrencyCode?: string;
 }
 
-/**
- * แถว base-currency ของ PR item summary — render เป็น grid cells (fragment) วาง
- * เรียงใต้คอลัมน์ Subtotal · Discount · Net · Tax · Total ของ grid แถว Vendor
- * (ค่า × exchange rate) ไม่มี label · โชว์เฉพาะสกุลต่างประเทศ
- */
 export function PrItemSummary({
   subtotal,
   discountAmount,

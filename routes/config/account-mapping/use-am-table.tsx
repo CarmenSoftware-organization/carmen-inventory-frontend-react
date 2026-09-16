@@ -13,7 +13,6 @@ import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import type { AccountMappingRow, CodeName } from "@/types/account-mapping";
 
-/** เซลล์ code+name — รหัสเป็นตัวหลัก ชื่อเป็นบรรทัดรอง (ว่างทั้งคู่ = ยังไม่ผูก) */
 const codeNameCell = (value: CodeName) =>
   value.code || value.name ? (
     <NameWithSubtext primary={value.code} secondary={value.name} />

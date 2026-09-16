@@ -11,13 +11,6 @@ import { useCreditNoteReasonTable } from "./use-credit-note-reason-table";
 import { CREDIT_NOTE_REASON_FILTER_FIELDS } from "./credit-note-reason-filter-fields";
 import CreditNoteReasonCard from "./credit-note-reason-card";
 
-/**
- * Component หลักของหน้ารายการ Credit Note Reason ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Credit Note Reason
- * @example
- * // route: /config/credit-note-reason
- * <CreditNoteReasonComponent />
- */
 export default function CreditNoteReasonComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

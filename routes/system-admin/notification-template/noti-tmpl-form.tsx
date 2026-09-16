@@ -47,7 +47,6 @@ interface NotificationTemplateFormProps {
   readonly template?: NotificationTemplate;
 }
 
-/** ฟอร์มสร้าง/ดู/แก้ไข Notification Template รองรับโหมด add/view/edit */
 export function NotificationTemplateForm({
   template,
 }: NotificationTemplateFormProps) {
@@ -344,7 +343,6 @@ export function NotificationTemplateForm({
   );
 }
 
-/** Loading skeleton that mirrors the form's real layout (header + 2 sections). */
 export function NotificationTemplateFormSkeleton() {
   return (
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">

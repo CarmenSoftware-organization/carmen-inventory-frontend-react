@@ -1,16 +1,6 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 
-/**
- * สร้าง Zod schema สำหรับรายการสินค้า (detail item) ของใบเบิก
- * ใช้ภายใน createSrSchema สำหรับ items array
- *
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns Zod object schema ของ SR detail
- * @example
- * const detailSchema = createSrDetailSchema(tv, tf);
- */
 function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),

@@ -35,7 +35,6 @@ const { PriceListTemplateForm } = await import("./plt-form");
 
 const tpl = en.vendorManagement.priceListTemplate;
 
-/** template ที่มีสินค้า 1 ตัว 2 MOQ tier */
 const TEMPLATE = {
   id: "plt-1",
   name: "Fresh Produce",
@@ -65,10 +64,6 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-/**
- * UX ของส่วนสินค้าใน PLT — เขียนไว้ก่อนย้าย field array/handler/dialog ออกจาก
- * plt-form ไป plt-item-fields เพื่อพิสูจน์ว่าหน้าตาและการกดใช้งานไม่เปลี่ยน
- */
 describe("PriceListTemplateForm — ส่วนสินค้าในเทมเพลต", () => {
   const tierBtns = () => screen.queryAllByLabelText(tpl.removeTier);
   const productBtns = () => screen.queryAllByLabelText(tpl.removeProduct);

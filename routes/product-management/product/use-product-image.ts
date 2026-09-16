@@ -14,12 +14,6 @@ import type {
 
 const PRODUCT_IMAGE_KEYS = [QUERY_KEYS.PRODUCT_IMAGES];
 
-/**
- * รายการรูปของ product หนึ่งราย (เรียงตาม sort_order)
- * GET `/api/config/{bu}/products/{productId}/images`
- *
- * @param productId - id ของ product (query disabled จนกว่าจะมีค่า)
- */
 export function useProductImages(productId: string | undefined) {
   const buCode = useBuCode();
   return useQuery<ProductImagesResponse, ApiError>({
@@ -53,12 +47,6 @@ function buildProductImageFormData(data: UploadProductImagesDto): FormData {
   return form;
 }
 
-/**
- * อัปโหลดรูปใต้ product (multipart/form-data)
- * POST `/api/config/{bu}/products/{productId}/images`
- *
- * @returns mutation รับ `{ product_id, images, alt_texts?, captions? }`
- */
 export function useUploadProductImages() {
   const buCode = useBuCode();
   const queryClient = useQueryClient();
@@ -96,12 +84,6 @@ export function useUploadProductImages() {
   });
 }
 
-/**
- * แก้ไขเมทาดาทาของรูป (alt_text/caption/is_primary)
- * PATCH `/api/config/{bu}/products/{productId}/images/{imageId}`
- *
- * @returns mutation รับ `{ product_id, imageId, ...UpdateProductImageDto }`
- */
 export function useUpdateProductImage() {
   return useApiMutation<
     UpdateProductImageDto & { product_id: string; imageId: string }
@@ -116,12 +98,6 @@ export function useUpdateProductImage() {
   });
 }
 
-/**
- * ลบรูปของ product
- * DELETE `/api/config/{bu}/products/{productId}/images/{imageId}`
- *
- * @returns mutation รับ `{ product_id, imageId }`
- */
 export function useDeleteProductImage() {
   return useApiMutation<{ product_id: string; imageId: string }>({
     mutationFn: ({ product_id, imageId }, buCode) =>
@@ -133,13 +109,6 @@ export function useDeleteProductImage() {
   });
 }
 
-/**
- * จัดเรียงลำดับรูปใหม่
- * PUT `/api/config/{bu}/products/{productId}/images/order`
- * body `{ image_ids: string[] }` — ลำดับใน array = ลำดับใหม่
- *
- * @returns mutation รับ `{ product_id, image_ids }`
- */
 export function useReorderProductImages() {
   return useApiMutation<{ product_id: string; image_ids: string[] }>({
     mutationFn: ({ product_id, image_ids }, buCode) =>

@@ -16,13 +16,6 @@ interface UseUserActivityTableOptions {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตาราง User Activity (เวลา, action, user, IP, user agent)
- * @param options - อาร์เรย์ logs, totalRecords, params และ tableConfig
- * @returns TanStack Table instance สำหรับ User Activity
- * @example
- * const table = useUserActivityTable({ logs, totalRecords, params, tableConfig });
- */
 export function useUserActivityTable({
   logs,
   totalRecords,

@@ -27,10 +27,8 @@ import { VirtualCommandList } from "@/components/ui/virtual-command-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import EmptyComponent from "@/components/empty-component";
 
-/** ความกว้างแถว skeleton แบบสุ่มกว้างต่างกันให้ดูเป็นธรรมชาติ (ค่า unique ใช้เป็น key ได้) */
 const SKELETON_WIDTHS = ["w-3/4", "w-2/3", "w-1/2", "w-4/5", "w-3/5", "w-5/6"];
 
-/** Skeleton list จำลองโครงรายการระหว่างโหลด (label ซ้าย + badge ขวา) */
 const LookupSkeletonList = () => {
   return (
     <div className="space-y-1 p-1" aria-hidden="true">
@@ -79,9 +77,7 @@ interface LookupComboboxProps<T> {
   readonly isLoadingMore?: boolean;
   readonly disableTooltip?: boolean;
   readonly error?: string;
-  /** แจ้ง caller เมื่อ popover เปิด/ปิด — ใช้คู่กับ lazy mode เพื่อ trigger fetch ตอนเปิด */
   readonly onOpenChange?: (open: boolean) => void;
-  /** เริ่มต้นเปิด popover ทันทีที่ mount (ใช้คู่กับ lazy mode ของ caller) */
   readonly defaultOpen?: boolean;
   /**
    * ปิดแล้วให้ focus ไปที่ element นี้แทนที่จะเด้งกลับปุ่มเดิม
@@ -97,19 +93,11 @@ interface LookupComboboxProps<T> {
    * ส่งมาแล้วต้องคุมปิดเองด้วยผ่าน `onOpenChange`
    */
   readonly open?: boolean;
-  /** Render plain text แทน popover (สำหรับ view mode) — ไม่กระทบ submit pending */
   readonly readOnly?: boolean;
-  /** ความสูงโดยประมาณของแต่ละ item — ส่งต่อไป virtualizer (default 32) */
   readonly estimateSize?: number;
-  /** ความสูงสูงสุดของ list panel (default 300) */
   readonly maxHeight?: number;
 }
 
-/**
- * Combobox ทั่วไปสำหรับใช้เป็นฐานของ lookup component ต่าง ๆ รองรับการค้นหา, virtual list, โหลดเพิ่ม และ tooltip
- * @param props - props ของ LookupCombobox (ภาษาไทย)
- * @returns React element ของ lookup component
- */
 export function LookupCombobox<T>({
   value,
   onValueChange,

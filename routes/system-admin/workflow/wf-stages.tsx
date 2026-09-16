@@ -12,9 +12,7 @@ interface WfStagesProps {
   readonly fieldArray: UseFieldArrayReturn<WorkflowCreateModel, "data.stages">;
   readonly users: User[];
   readonly isDisabled: boolean;
-  /** ปิดเฉพาะการเพิ่ม ลบ สลับลำดับ และเปลี่ยนชื่อ stage — ที่เหลือของ stage ยังแก้ได้ */
   readonly isStructureDisabled: boolean;
-  /** จำนวนเอกสารที่ยังดำเนินการอยู่ ใช้บอกเหตุผลตอนโครงถูกล็อก */
   readonly inProgressCount: number;
   readonly selectedIndex?: number;
   readonly onSelectIndex?: (index: number) => void;

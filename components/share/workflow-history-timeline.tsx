@@ -13,11 +13,9 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate, formatElapsed } from "@/lib/date-utils";
 
-/** ประวัติ workflow ระดับเอกสาร 1 ก้าว — โครงเดียวกันทั้ง PR / PO / SR */
 export interface WorkflowHistoryTimelineEntry {
   user: { id: string; name: string };
   action: string;
-  /** ชื่อฟิลด์เวลาไม่ตรงกันระหว่างโมดูล — PR/PO ส่ง `datetime`, SR ส่ง `at` */
   at?: string;
   datetime?: string;
   current_stage?: string;
@@ -32,15 +30,12 @@ export interface WorkflowHistoryTimelineEntry {
  */
 const ALERT_ACTIONS = new Set(["rejected", "sent_back", "voided", "cancelled"]);
 
-/** backend ส่ง "-" มาเมื่อไม่มี stage ถัดไป — เป็น sentinel ไม่ใช่ข้อความให้คนอ่าน */
 const NO_STAGE = "-";
 
-/** เวลาของ entry — PR/PO ใช้ `datetime`, SR ใช้ `at` */
 function entryAt(entry: WorkflowHistoryTimelineEntry): string {
   return entry.at ?? entry.datetime ?? "";
 }
 
-/** stage ที่เหลือหลังตัด sentinel "-" ทิ้ง — 2 ตัวคือมีการเคลื่อน 1 ตัวคือก้าวสุดท้าย */
 function stagesOf(entry: WorkflowHistoryTimelineEntry): string[] {
   return [entry.current_stage, entry.next_stage].filter(
     (stage): stage is string => !!stage && stage !== NO_STAGE,
@@ -49,9 +44,7 @@ function stagesOf(entry: WorkflowHistoryTimelineEntry): string[] {
 
 interface WorkflowHistoryTimelineProps {
   readonly history: WorkflowHistoryTimelineEntry[];
-  /** map action → สี/ป้ายของโมดูลนั้น (เช่น `PR_WORKFLOW_ACTION_CONFIG`) */
   readonly statusConfig: Record<string, StatusConfigEntry>;
-  /** ข้อความเมื่อยังไม่มีประวัติ (เช่น `t("noWorkflowHistory")`) */
   readonly emptyLabel: string;
   readonly requestorName?: string;
   readonly createdAt?: string;

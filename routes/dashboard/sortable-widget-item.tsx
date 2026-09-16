@@ -62,19 +62,12 @@ interface SortableWidgetItemProps {
   readonly detail: DashboardDatasetDetail | undefined;
   readonly isLoading: boolean;
   readonly onDelete: () => void;
-  /** descriptor ของ dataset — ใช้ตัดสินว่าจะโชว์ปุ่มตั้งค่า param ไหม */
   readonly dataset?: DashboardDataset;
   readonly onConfigure?: () => void;
-  /**
-   * บอก parent ว่าการ์ดใบนี้เลื่อนถึงแล้ว — parent ถึงจะ enable query ของมัน
-   * (ดู `SavedWidgetsSection`) เรียกครั้งเดียวต่อการ์ด
-   */
   readonly onVisible: (widgetId: string) => void;
-  /** สลับชนิดกราฟ — ปุ่มจะโผล่เมื่อ dataset นี้วาดได้มากกว่าหนึ่งแบบ */
   readonly onChangeType?: (widgetType: WidgetType) => void;
 }
 
-/** ไอคอนประจำชนิดกราฟ — ใช้ทั้งบนปุ่มและในเมนู */
 const RENDER_ICON: Record<string, LucideIcon> = {
   kpi: Hash,
   pie: PieChart,
@@ -84,7 +77,6 @@ const RENDER_ICON: Record<string, LucideIcon> = {
   table: Table,
 };
 
-/** col-span ตาม widget_type — match procurement/inventory dashboards */
 function getColSpan(widgetType: string): string {
   if (widgetType === "kpi") return "lg:col-span-1";
   if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";

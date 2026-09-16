@@ -23,7 +23,6 @@ import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { getProductStatusLabel } from "@/constant/product-status";
 
-/** เซลล์ข้อความ truncate … เมื่อยาวเกิน column · hover โชว์ค่าเต็มด้วย Tooltip */
 const truncCell = (value: string) =>
   value ? (
     <Tooltip>
@@ -45,20 +44,6 @@ interface UseProductTableOptions {
   onDelete: (product: Product) => void;
 }
 
-/**
- * Hook สร้าง TanStack Table สำหรับรายการสินค้า
- *
- * สร้างคอลัมน์ code, name, local_name, inventory_unit, category, sub_category,
- * item_group, status (badge active/inactive) พร้อม select/index/action columns
- * ส่งคืน table instance ของ `@tanstack/react-table` พร้อม pageCount จาก totalRecords/perpage
- *
- * @param options - `products`, `totalRecords`, `params`, `tableConfig`, `onEdit`, `onDelete`
- * @returns Table instance ของ react-table พร้อมใช้กับ DataGrid
- * @example
- * ```tsx
- * const table = useProductTable({ products, totalRecords, params, tableConfig, onEdit, onDelete });
- * ```
- */
 export function useProductTable({
   products,
   totalRecords,

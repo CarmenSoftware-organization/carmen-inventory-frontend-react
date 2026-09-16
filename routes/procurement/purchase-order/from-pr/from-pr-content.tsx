@@ -67,13 +67,11 @@ export function FromPrContent() {
   const [step, setStep] = useState<Step>(1);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [groupedData, setGroupedData] = useState<GroupPrPo[]>([]);
-  /** workflow ที่หลังบ้านผูกให้ทั้งชุดตอนจัดกลุ่ม (`data.workflow.name`) */
   const [groupWorkflowName, setGroupWorkflowName] = useState("");
   const [workflowId, setWorkflowId] = useState("");
   const [isGrouping, setIsGrouping] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  /** ผลลัพธ์จาก confirm-pr — มีค่าเมื่อไรคือจบงานแล้ว หน้าเปลี่ยนเป็นสรุป */
   const [result, setResult] = useState<ConfirmPrResult | null>(null);
 
   const isPending = isGrouping || isConfirming;

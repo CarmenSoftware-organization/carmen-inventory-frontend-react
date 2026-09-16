@@ -74,15 +74,6 @@ export function usePurchaseOrderWorkflowStages() {
   });
 }
 
-/**
- * Hook ดึงรายการ PO ที่รอให้ผู้ใช้ปัจจุบันดำเนินการใน workflow
- * Unwrap section แรกจาก response เป็น paginated แบบมาตรฐาน
- * @param params - พารามิเตอร์ filter/sort/pagination
- * @param options - ตัวเลือกเสริม เช่น enabled
- * @returns React Query ของ PaginatedResponse<PurchaseOrder>
- * @example
- * const { data } = useMyPendingPurchaseOrder();
- */
 export function useMyPendingPurchaseOrder(
   params?: ParamsDto,
   options?: { enabled?: boolean },
@@ -241,14 +232,6 @@ const PO_INVALIDATE_KEYS = [
   QUERY_KEYS.MY_PENDING_PURCHASE_ORDERS,
 ];
 
-/**
- * Hook สร้าง PO ใหม่ผ่าน POST
- * Invalidate PURCHASE_ORDERS และ MY_PENDING_PURCHASE_ORDERS เมื่อสำเร็จ
- * @returns Mutation สำหรับสร้าง PO
- * @example
- * const create = useCreatePurchaseOrder();
- * create.mutate(payload);
- */
 export function useCreatePurchaseOrder() {
   return useApiMutation<CreatePoDto>({
     mutationFn: (data, buCode) =>
@@ -258,14 +241,6 @@ export function useCreatePurchaseOrder() {
   });
 }
 
-/**
- * Hook บันทึก (save) การแก้ไข PO ผ่าน PATCH /{id}/save
- * ใช้สำหรับแก้ไข draft และ invalidate cache ที่เกี่ยวข้อง
- * @returns Mutation สำหรับบันทึก PO
- * @example
- * const update = useUpdatePurchaseOrder();
- * update.mutate({ id, ...values });
- */
 export function useUpdatePurchaseOrder() {
   return useApiMutation<CreatePoDto & { id: string }>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -278,14 +253,6 @@ export function useUpdatePurchaseOrder() {
   });
 }
 
-/**
- * Hook ลบ PO พร้อม optimistic update
- * ลบ item ออกจาก list cache ทันทีและ rollback หาก API ล้มเหลว
- * @returns Mutation สำหรับลบ PO
- * @example
- * const del = useDeletePurchaseOrder();
- * del.mutate(poId);
- */
 export function useDeletePurchaseOrder() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -299,14 +266,6 @@ export function useDeletePurchaseOrder() {
   });
 }
 
-/**
- * Hook ส่ง (submit) PO เพื่อเข้าสู่ workflow อนุมัติ
- * ส่ง PATCH /{id}/submit พร้อม stage_role และ details ของรายการที่ผ่าน
- * @returns Mutation สำหรับ submit PO
- * @example
- * const submit = useSubmitPurchaseOrder();
- * submit.mutate({ id, stage_role, details });
- */
 export function useSubmitPurchaseOrder() {
   return useApiMutation<{
     id: string;
@@ -328,14 +287,6 @@ export function useSubmitPurchaseOrder() {
   });
 }
 
-/**
- * Hook อนุมัติ (approve) PO ในขั้นตอน workflow ปัจจุบัน
- * ส่ง PATCH /{id}/approve พร้อม stage_role และ details
- * @returns Mutation สำหรับอนุมัติ PO
- * @example
- * const approve = useApprovePurchaseOrder();
- * approve.mutate({ id, stage_role, details });
- */
 export function useApprovePurchaseOrder() {
   return useApiMutation<{
     id: string;
@@ -357,14 +308,6 @@ export function useApprovePurchaseOrder() {
   });
 }
 
-/**
- * Hook ปฏิเสธ (reject) PO ในขั้นตอน workflow ปัจจุบัน
- * ส่ง PATCH /{id}/reject พร้อม stage_role, details และ stage_message
- * @returns Mutation สำหรับปฏิเสธ PO
- * @example
- * const reject = useRejectPurchaseOrder();
- * reject.mutate({ id, stage_role, details });
- */
 export function useRejectPurchaseOrder() {
   return useApiMutation<{
     id: string;
@@ -391,14 +334,6 @@ export interface PoPreviousStage {
   name: string;
 }
 
-/**
- * Hook ดึงรายการขั้นตอน workflow ก่อนหน้าของ PO (สำหรับ send-back)
- * API คืน object map แล้ว transform เป็น array ของ { key, name }
- * @param poId - รหัส PO
- * @returns React Query ของรายการ PoPreviousStage[]
- * @example
- * const { data: stages } = usePoPreviousStages(poId);
- */
 export function usePoPreviousStages(poId: string | undefined) {
   const buCode = useBuCode();
 
@@ -423,14 +358,6 @@ export function usePoPreviousStages(poId: string | undefined) {
   });
 }
 
-/**
- * Hook ส่งกลับ (review/send-back) PO ไปยัง stage ก่อนหน้า
- * ส่ง PATCH /{id}/review พร้อม des_stage ปลายทาง
- * @returns Mutation สำหรับ review PO
- * @example
- * const review = useReviewPurchaseOrder();
- * review.mutate({ id, stage_role, des_stage: "1", details });
- */
 export function useReviewPurchaseOrder() {
   return useApiMutation<{
     id: string;
@@ -453,14 +380,6 @@ export function useReviewPurchaseOrder() {
   });
 }
 
-/**
- * Hook ยกเลิก (cancel) PO ตาม id
- * POST /{id}/cancel และ invalidate cache PO
- * @returns Mutation สำหรับยกเลิก PO
- * @example
- * const cancel = useCancelPurchaseOrder();
- * cancel.mutate(poId);
- */
 export function useCancelPurchaseOrder() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -470,14 +389,6 @@ export function useCancelPurchaseOrder() {
   });
 }
 
-/**
- * Hook ปิด (close) PO ตาม id
- * POST /{id}/close เมื่อ GRN ครบและต้องการปิดเอกสาร
- * @returns Mutation สำหรับปิด PO
- * @example
- * const close = useClosePurchaseOrder();
- * close.mutate(poId);
- */
 export function useClosePurchaseOrder() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -489,7 +400,6 @@ export function useClosePurchaseOrder() {
 
 // --- Comments ---
 
-/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
 export const poCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.PURCHASE_ORDER_COMMENTS,
   commentEndpoint: API_ENDPOINTS.PURCHASE_ORDER_COMMENT,
@@ -497,14 +407,10 @@ export const poCommentCrud = createCommentCrud({
   label: "purchase order",
 });
 
-/** ดึงความคิดเห็นของ PO จาก `/api/{buCode}/purchase-order-comment/{poId}` */
 export const usePurchaseOrderComments = poCommentCrud.useComments;
-/** สร้างความคิดเห็นใน PO ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
 export const useCreatePurchaseOrderComment = poCommentCrud.useCreate;
 
-/** แก้ไขความคิดเห็นใน PO */
 export const useUpdatePurchaseOrderComment = poCommentCrud.useUpdate;
-/** ลบความคิดเห็นใน PO */
 export const useDeletePurchaseOrderComment = poCommentCrud.useDelete;
 
 // --- Export ---
@@ -515,11 +421,6 @@ interface ExportPurchaseOrderArgs {
   columns: XlsxColumn<PurchaseOrder>[];
 }
 
-/**
- * Hook ส่งออก PO เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list (เลือกตาม viewMode) — caller กำหนด columns พร้อม translation
- * @returns { exportPurchaseOrder, isExporting }
- */
 export function useExportPurchaseOrder() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

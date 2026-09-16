@@ -10,7 +10,6 @@ interface ScDocStatusRowProps {
   readonly docNo: string;
   readonly docStatus: SpotCheckStatus;
   readonly method: SpotCheckMethod;
-  /** sm = location-card resume panel header, md = history-card top header */
   readonly size?: "sm" | "md";
 }
 

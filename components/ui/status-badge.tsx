@@ -2,9 +2,7 @@ import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 
 interface StatusBadgeProps {
-  /** สถานะ active/inactive ของ entity (อ่านจาก `is_active`) */
   active: boolean;
-  /** ขนาด badge — default `"sm"` สำหรับ list/grid; `"xs"` สำหรับหัวฟอร์มที่กระชับ */
   size?: "xs" | "sm";
   className?: string;
 }

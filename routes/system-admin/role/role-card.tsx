@@ -9,12 +9,6 @@ interface Props {
   readonly onDelete?: (item: Role) => void;
 }
 
-/**
- * การ์ด role 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดทุกโมดูล · role ไม่มีสถานะ active/inactive
- * มุมขวาบนจึงเป็นจำนวนสิทธิ์ที่ role นี้ถืออยู่
- */
 export default function RoleCard({ item, onEdit, onDelete }: Props) {
   const t = useTranslations("systemAdmin.role");
   const tfl = useTranslations("field");

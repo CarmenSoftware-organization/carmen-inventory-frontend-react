@@ -36,7 +36,6 @@ const workflow = {
   description: null,
 } as unknown as Workflow;
 
-/** ตัวเลขชุดนี้มาจาก BL01 ของจริง — เคสที่ tester แจ้งเข้ามา */
 const counts = (in_progress: number) => ({
   data: {
     workflow_id: "wf-1",

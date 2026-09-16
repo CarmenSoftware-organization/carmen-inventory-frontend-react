@@ -6,17 +6,6 @@ interface UsePullToRefreshOptions {
   disabled?: boolean;
 }
 
-/**
- * Hook รองรับท่า pull-to-refresh บนมือถือ
- * ตรวจจับ touch event บน window และเรียก onRefresh เมื่อผู้ใช้ดึงเกิน threshold
- * ทำงานเฉพาะเมื่อ scrollY = 0 และคืน progress 0..1 สำหรับ animation feedback
- * @param options - object รวม onRefresh, threshold (default 80px), disabled
- * @returns object ที่มี containerRef, distance, isRefreshing, progress
- * @example
- * const { containerRef, progress, isRefreshing } = usePullToRefresh({
- *   onRefresh: () => refetch(),
- * });
- */
 export function usePullToRefresh({
   onRefresh,
   threshold = 80,

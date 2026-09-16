@@ -18,7 +18,6 @@ interface UseNotiTmplTableOptions {
   readonly tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-/** ชื่อช่องทางที่อ่านออก — ค่าดิบจาก API เป็น `app` ตัวเล็กล้วน */
 const CHANNEL_LABEL: Record<NotificationTemplateType, string> = {
   app: "App",
 };

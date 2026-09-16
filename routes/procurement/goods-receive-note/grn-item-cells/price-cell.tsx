@@ -10,7 +10,6 @@ import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import type { GrnFormValues } from "../grn-form-schema";
 
-/** ราคาในโหมดอ่าน */
 const UnitPricePlain = memo(function UnitPricePlain({
   control,
   index,
@@ -51,9 +50,7 @@ export const UnitPriceCell = memo(function UnitPriceCell({
   form: UseFormReturn<GrnFormValues>;
   index: number;
   disabled: boolean;
-  /** เพิ่งเลือกสินค้าเสร็จ — ให้เคอร์เซอร์มาลงที่ช่องนี้ต่อ */
   autoFocus?: boolean;
-  /** กรอกราคาเสร็จ (Enter) — ไปเปิดตัวเลือกคลังต่อ */
   onCommit?: () => void;
 }) {
   "use no memo";

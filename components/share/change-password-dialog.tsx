@@ -30,18 +30,6 @@ interface ChangePasswordDialogProps {
   readonly onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Dialog สำหรับให้ผู้ใช้เปลี่ยนรหัสผ่าน เมื่อเปลี่ยนสำเร็จจะ logout อัตโนมัติ
- *
- * @param props - รับ open และ onOpenChange สำหรับควบคุมการแสดง dialog
- * @returns React element ของ dialog เปลี่ยนรหัสผ่าน
- * @example
- * ```tsx
- * const [open, setOpen] = useState(false);
- *
- * <ChangePasswordDialog open={open} onOpenChange={setOpen} />
- * ```
- */
 export default function ChangePasswordDialog({
   open,
   onOpenChange,

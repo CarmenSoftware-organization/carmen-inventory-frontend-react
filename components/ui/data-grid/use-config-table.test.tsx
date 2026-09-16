@@ -59,7 +59,6 @@ function renderTable(onDelete: (item: Row) => void) {
   );
 }
 
-/** Render the "action" column's cell for the first row so we can assert on the DOM it produces. */
 function renderActionCell(onDelete: (item: Row) => void) {
   const { result } = renderTable(onDelete);
   const actionColumn = result.current

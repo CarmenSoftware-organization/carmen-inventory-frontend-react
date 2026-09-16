@@ -21,11 +21,8 @@ import { formatCurrency, round2 } from "@/lib/currency-utils";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 
-/** 1 บรรทัดที่เลือกได้ = product+location+received-line ของ GRN */
 export interface CnGrnLine {
-  /** key เฉพาะของบรรทัด = detailId:itemId */
   key: string;
-  /** key กันซ้ำระดับ product+location */
   dedupeKey: string;
   product_id: string;
   product_name: string;
@@ -41,7 +38,6 @@ export interface CnGrnLine {
   tax_profile_id: string | null;
   tax_profile_name: string;
   tax_rate: number;
-  /** ยอดของบรรทัด GRN ตามที่รับจริง — ตารางเอาไปโชว์เทียบกับยอดที่จะคืน */
   grn_sub_total: number;
   grn_discount_amount: number;
   grn_net_amount: number;
@@ -49,7 +45,6 @@ export interface CnGrnLine {
   grn_total_amount: number;
 }
 
-/** flatten GRN detail → บรรทัดที่เลือกได้ (unit_price = sub_total/received_qty เหมือน GRN form) */
 function toLines(grn: GoodsReceiveNote | undefined): CnGrnLine[] {
   if (!grn?.good_received_note_detail) return [];
   const lines: CnGrnLine[] = [];
@@ -101,7 +96,6 @@ interface Props {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly grnId: string | undefined;
-  /** product:location ที่อยู่ใน form แล้ว — แสดง disabled ป้องกันซ้ำ */
   readonly existingKeys: ReadonlySet<string>;
   readonly onAdd: (lines: CnGrnLine[]) => void;
 }

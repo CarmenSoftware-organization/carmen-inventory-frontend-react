@@ -27,7 +27,6 @@ function walk(dir: string): string[] {
   });
 }
 
-/** ไฟล์ที่ hook อยู่คนละไฟล์กับ JSX — guard อยู่ใน use-*-actions/handlers ข้าง ๆ */
 function guardedBySibling(file: string): boolean {
   const dir = join(file, "..");
   return readdirSync(dir).some(

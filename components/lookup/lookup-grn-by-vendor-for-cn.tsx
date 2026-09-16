@@ -15,35 +15,11 @@ interface LookupGrnByVendorForCnProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
 }
 
-/**
- * Lookup Popover สำหรับเลือก GRN ของ vendor ที่ใช้ออก Credit Note ได้
- *
- * ใช้ `useGoodsReceiveNoteByVendorForCn(vendorId)` เรียก endpoint
- * `/good-received-note/vendor/:vendor_id/cn` ซึ่งคืนเฉพาะ GRN ที่ออก CN ได้
- * (commit/saved + ยังไม่ credit เต็มจำนวน) พร้อม server-side search และ
- * infinite scroll (perpage 30) disabled เมื่อไม่มี `vendorId`
- *
- * @param value - id ของ GRN ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX popover element ของ GRN-for-CN lookup
- * @example
- * ```tsx
- * const vendorId = useWatch({ control, name: "vendor_id" });
- * <Controller name="grn_id" control={control} render={({ field }) => (
- *   <LookupGrnByVendorForCn
- *     value={field.value}
- *     onValueChange={field.onChange}
- *     vendorId={vendorId}
- *   />
- * )} />
- * ```
- */
 export function LookupGrnByVendorForCn({
   value,
   onValueChange,

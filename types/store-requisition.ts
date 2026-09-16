@@ -12,7 +12,6 @@ export interface WorkflowHistoryEntry {
   current_stage?: string;
 }
 
-/** ประวัติ workflow ระดับรายการ (per-item) — backend ส่งมากับแต่ละ detail */
 interface SrItemHistoryEntry {
   seq: number;
   name: string;
@@ -62,10 +61,6 @@ export interface StoreRequisition {
   workflow_previous_stage?: string;
   workflow_next_stage?: string;
   workflow_history: WorkflowHistoryEntry[];
-  /**
-   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
-   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
-   */
   last_action?: LastAction | null;
   requestor_id: string;
   requestor_name: string;
@@ -123,7 +118,6 @@ export interface CreateStoreRequisitionDto {
  */
 export interface SrStockMovementItem {
   id: string;
-  /** null = ยังไม่ได้ post เป็น inventory transaction จริง (ดู `is_posted` ของก้อนใหญ่) */
   inventory_transaction_id: string | null;
   store_requisition_detail_id: string;
   sequence_no: number;

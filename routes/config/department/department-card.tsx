@@ -13,7 +13,6 @@ interface Props {
   readonly onDelete?: (item: Department) => void;
 }
 
-/** การ์ดแผนก สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function DepartmentCard({ item, onEdit, onDelete }: Props) {
   const t = useTranslations("config.department");
   const tfl = useTranslations("field");

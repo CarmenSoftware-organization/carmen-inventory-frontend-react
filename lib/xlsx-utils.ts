@@ -1,12 +1,9 @@
 export interface XlsxColumn<T> {
-  /** Sheet column header text (already translated) */
   header: string;
-  /** Cell value extractor — return primitive that Excel can store */
   value: (
     row: T,
     index: number,
   ) => string | number | boolean | null | undefined;
-  /** Column width in characters (xlsx `wch`). Default 16 */
   width?: number;
 }
 
@@ -17,11 +14,6 @@ interface DownloadXlsxOptions<T> {
   fileName: string;
 }
 
-/**
- * Build an xlsx workbook from rows + column definitions and trigger browser download.
- * XLSX is loaded lazily — only pulled into the bundle when this function is called.
- * @returns Promise<void> (file is downloaded via XLSX.writeFile)
- */
 export async function downloadXlsx<T>({
   rows,
   columns,
@@ -49,20 +41,11 @@ export async function downloadXlsx<T>({
   XLSX.writeFile(wb, finalName);
 }
 
-/**
- * Build a date-suffixed file name like `purchase-request_2026-04-30`
- */
 export function buildXlsxFileName(prefix: string, date = new Date()): string {
   const dateStr = date.toISOString().slice(0, 10);
   return `${prefix}_${dateStr}`;
 }
 
-/**
- * Read the first sheet of an uploaded xlsx/xls file into plain row objects
- * keyed by header text (first row). XLSX is loaded lazily like {@link downloadXlsx}.
- * Empty cells become "" (defval) so downstream code can keep existing values.
- * @returns array of row objects — one per data row
- */
 export async function readXlsxFirstSheet(
   file: File,
 ): Promise<Record<string, unknown>[]> {

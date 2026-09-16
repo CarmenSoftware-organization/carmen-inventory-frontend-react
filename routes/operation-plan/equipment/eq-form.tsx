@@ -30,9 +30,6 @@ interface EquipmentFormProps {
   readonly equipment?: Equipment;
 }
 
-/**
- * ฟอร์มสร้างและแก้ไขข้อมูลอุปกรณ์ รองรับโหมด view/edit/add
- */
 const LIST_PATH = "/operation-plan/equipment";
 
 export function EquipmentForm({ equipment }: EquipmentFormProps) {

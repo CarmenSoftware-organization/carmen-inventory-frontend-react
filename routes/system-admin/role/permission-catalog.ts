@@ -27,7 +27,6 @@ const EXTENDED_ACTIONS = [
   "manage_bu",
 ] as const;
 
-/** ลำดับการเรียง action ในแต่ละแถว — CRUD ก่อน แล้วค่อย scope/workflow */
 export const MAIN_ACTIONS = [...STANDARD_ACTIONS, ...EXTENDED_ACTIONS] as const;
 
 export const ACTION_TKEY: Record<string, string> = {
@@ -74,14 +73,10 @@ const CATEGORY_ORDER = Object.keys(CATEGORY_META);
  */
 export const MODULE_RESOURCE_KEY = "";
 
-/** แถวหนึ่งในตาราง = resource หนึ่งตัว พร้อม action ที่ backend มีจริงเท่านั้น */
 export interface GroupedResource {
-  /** ค่า resource เต็มจาก API เช่น `procurement.credit_note` */
   resource: string;
-  /** ส่วนหลังจุด — ค่าว่างแปลว่าเป็นสิทธิ์ระดับโมดูล */
   resourceKey: string;
   category: string;
-  /** action → permission id */
   actions: Map<string, string>;
 }
 
@@ -90,7 +85,6 @@ export interface PermissionGroup {
   resources: GroupedResource[];
 }
 
-/** รูปร่างเท่าที่หน้าจอนี้ต้องใช้จาก `GET /permissions` */
 export interface PermissionRecord {
   id: string;
   resource: string;
@@ -105,10 +99,6 @@ export function titleCase(value: string): string {
     .join(" ");
 }
 
-/**
- * ลำดับ key ที่ใช้หา label ของ resource — ตัวเจาะจง category ก่อน แล้วค่อยตัวกลาง
- * (`category` มีทั้งใน product_management และ operation_plan แต่คนละความหมาย)
- */
 export function resourceLabelKeys(
   category: string,
   resourceKey: string,
@@ -116,13 +106,11 @@ export function resourceLabelKeys(
   return [`${category}_${resourceKey}`, resourceKey];
 }
 
-/** เรียง action ตามลำดับบนจอ — ตัวที่ไม่รู้จักไปต่อท้าย ไม่ถูกทิ้ง */
 export function actionOrder(action: string): number {
   const i = (MAIN_ACTIONS as readonly string[]).indexOf(action);
   return i === -1 ? MAIN_ACTIONS.length : i;
 }
 
-/** action ของ resource นั้นเรียงตามลำดับบนจอ (รวมตัวที่ไม่อยู่ใน MAIN_ACTIONS) */
 export function sortedActions(resource: GroupedResource): string[] {
   return Array.from(resource.actions.keys()).sort(
     (a, b) => actionOrder(a) - actionOrder(b),

@@ -4,7 +4,6 @@ import { ApiError } from "@/lib/api-error";
 export type UseInterfaceConfigResult = {
   readonly value: Record<string, unknown> | undefined;
   readonly isLoading: boolean;
-  /** ยังไม่เคยตั้งค่า interface นี้ — form โชว์ค่า default ไม่ใช่ error */
   readonly isNew: boolean;
   readonly isError: boolean;
   readonly refetch: () => void;

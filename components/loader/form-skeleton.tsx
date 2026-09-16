@@ -1,8 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/**
- * Skeleton row ของ toolbar — back + entity pill + status pill + action buttons
- */
 function ToolbarSkeleton() {
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between">
@@ -19,9 +16,6 @@ function ToolbarSkeleton() {
   );
 }
 
-/**
- * Skeleton ของ hero section — large name + descriptor + meta chips + hero stat card
- */
 function HeroSkeleton() {
   return (
     <section className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
@@ -50,9 +44,6 @@ function HeroSkeleton() {
   );
 }
 
-/**
- * Skeleton ของ glass card section — label + content placeholder
- */
 function GlassCardSkeleton({ children }: { children?: React.ReactNode }) {
   return (
     <div className="bg-card rounded-xl border p-4">
@@ -67,9 +58,6 @@ function GlassCardSkeleton({ children }: { children?: React.ReactNode }) {
   );
 }
 
-/**
- * Skeleton 1 field (label + input)
- */
 function FieldSkeleton() {
   return (
     <div className="space-y-1.5">
@@ -79,9 +67,6 @@ function FieldSkeleton() {
   );
 }
 
-/**
- * Skeleton ของ items section — header + 2 cards
- */
 function ItemsSectionSkeleton() {
   return (
     <div>
@@ -100,9 +85,6 @@ function ItemsSectionSkeleton() {
   );
 }
 
-/**
- * Skeleton ของ sidebar — vendor card + summary card + tip box
- */
 function SidebarSkeleton() {
   return (
     <aside className="hidden flex-col gap-3 self-start lg:flex">
@@ -139,19 +121,6 @@ function SummaryRowSkeleton() {
   );
 }
 
-/**
- * Skeleton ของหน้าฟอร์ม — Soft Sheet layout
- *
- * Mirrors the redesigned Soft Sheet forms (price-list, plt, rfp, vendor):
- * hero section with name + chips + hero stat card, then 1fr/22rem body grid
- * containing 2 glass cards + 1 items section on the left, and sidebar on right.
- *
- * @returns JSX element ของ form skeleton
- * @example
- * ```tsx
- * {isLoading ? <FormSkeleton /> : <EntityForm ... />}
- * ```
- */
 export function FormSkeleton() {
   return (
     <div className="relative isolate -mx-3 -my-3" aria-busy="true">

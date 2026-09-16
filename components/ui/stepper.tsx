@@ -51,36 +51,12 @@ const StepItemContext = createContext<StepItemContextValue | undefined>(
   undefined,
 );
 
-/**
- * Hook เข้าถึง StepperContext ภายใน Stepper compound
- *
- * Throw error ถ้าถูกเรียกนอก <Stepper> ให้ sub-component เช่น StepperItem,
- * StepperTrigger ใช้อ่าน activeStep และควบคุม navigation
- *
- * @returns context { activeStep, setActiveStep, orientation, indicators, ... }
- * @example
- * ```tsx
- * const { activeStep } = useStepper();
- * ```
- */
 function useStepper() {
   const ctx = useContext(StepperContext);
   if (!ctx) throw new Error("useStepper must be used within a Stepper");
   return ctx;
 }
 
-/**
- * Hook เข้าถึง StepItemContext ของ StepperItem ปัจจุบัน
- *
- * Throw error ถ้าถูกเรียกนอก <StepperItem> ใช้โดย StepperTrigger,
- * StepperIndicator ฯลฯ เพื่ออ่าน state (active/completed/inactive/loading)
- *
- * @returns context { step, state, isDisabled, isLoading }
- * @example
- * ```tsx
- * const { state } = useStepItem();
- * ```
- */
 function useStepItem() {
   const ctx = useContext(StepItemContext);
   if (!ctx) throw new Error("useStepItem must be used within a StepperItem");
@@ -95,26 +71,6 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   indicators?: StepIndicators;
 }
 
-/**
- * Root component ของ Stepper compound แสดง wizard/multi-step form
- *
- * จัดการ active step, keyboard navigation (arrow/home/end/enter/space),
- * orientation (horizontal/vertical) และ custom indicators ต่อ state
- * รองรับทั้ง controlled (value + onValueChange) และ uncontrolled
- * (defaultValue) role="tablist" เพื่อ a11y
- *
- * @param props - defaultValue, value, onValueChange, orientation, indicators, children
- * @returns JSX element ของ stepper พร้อม context provider
- * @example
- * ```tsx
- * <Stepper defaultValue={1}>
- *   <StepperNav>
- *     <StepperItem step={1}><StepperTrigger><StepperIndicator /></StepperTrigger></StepperItem>
- *   </StepperNav>
- *   <StepperPanel><StepperContent value={1}>Step 1 content</StepperContent></StepperPanel>
- * </Stepper>
- * ```
- */
 function Stepper({
   defaultValue = 1,
   value,
@@ -193,28 +149,6 @@ interface StepperItemProps extends React.HTMLAttributes<HTMLDivElement> {
   loading?: boolean;
 }
 
-/**
- * Stepper item แต่ละขั้นของ wizard
- *
- * คำนวณ state จาก activeStep ของ context:
- * - completed: step < activeStep หรือ prop completed=true
- * - active: step === activeStep
- * - inactive: step > activeStep
- * - loading: loading=true และ step === activeStep
- * Provide StepItemContext ให้ children ใช้
- *
- * @param props - step (required), completed, disabled, loading, children
- * @returns JSX element พร้อม context provider
- * @example
- * ```tsx
- * <StepperItem step={2}>
- *   <StepperTrigger>
- *     <StepperIndicator>2</StepperIndicator>
- *     <StepperTitle>Details</StepperTitle>
- *   </StepperTrigger>
- * </StepperItem>
- * ```
- */
 function StepperItem({
   step,
   completed = false,
@@ -259,27 +193,6 @@ interface StepperTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
   asChild?: boolean;
 }
 
-/**
- * ปุ่ม trigger (role="tab") ของ StepperItem
- *
- * รองรับ keyboard navigation:
- * - ArrowRight/Down: focus next
- * - ArrowLeft/Up: focus prev (wrap)
- * - Home/End: focus first/last
- * - Enter/Space: activate step
- * auto register/unregister node ใน stepper context เพื่อจัดการ focus
- * รองรับ asChild สำหรับ render เป็น span (non-interactive)
- *
- * @param props - asChild, children, tabIndex และ props ของ button
- * @returns JSX element button หรือ span
- * @example
- * ```tsx
- * <StepperTrigger>
- *   <StepperIndicator />
- *   <StepperTitle>Review</StepperTitle>
- * </StepperTrigger>
- * ```
- */
 function StepperTrigger({
   asChild = false,
   className,
@@ -431,19 +344,6 @@ function StepperIndicator({
   );
 }
 
-/**
- * เส้นแบ่งระหว่าง StepperItem ในแนว orientation
- *
- * Horizontal: h-0.5 flex-1, Vertical: w-0.5 h-12 สีตาม data-state ของ
- * item (active/completed เปลี่ยนสี primary)
- *
- * @param props - className
- * @returns JSX element ของ separator
- * @example
- * ```tsx
- * <StepperItem step={1}>...<StepperSeparator /></StepperItem>
- * ```
- */
 function StepperSeparator({ className }: React.ComponentProps<"div">) {
   const { state } = useStepItem();
 
@@ -459,19 +359,6 @@ function StepperSeparator({ className }: React.ComponentProps<"div">) {
   );
 }
 
-/**
- * Title ของ StepperItem เป็น h3 สไตล์ text-sm font-semibold
- *
- * ใช้ภายใน StepperTrigger เพื่อเป็นชื่อขั้นตอน reflect state ผ่าน
- * data-state attribute
- *
- * @param props - children, className
- * @returns JSX element ของ title
- * @example
- * ```tsx
- * <StepperTitle>Basic Info</StepperTitle>
- * ```
- */
 function StepperTitle({ children, className }: React.ComponentProps<"h3">) {
   const { state } = useStepItem();
 
@@ -486,18 +373,6 @@ function StepperTitle({ children, className }: React.ComponentProps<"h3">) {
   );
 }
 
-/**
- * Description ย่อยของ StepperItem (text-sm muted)
- *
- * ใช้ใต้ StepperTitle เพื่ออธิบายรายละเอียดของขั้นตอน
- *
- * @param props - children, className
- * @returns JSX element ของ description
- * @example
- * ```tsx
- * <StepperDescription>กรอกข้อมูลพื้นฐาน</StepperDescription>
- * ```
- */
 function StepperDescription({
   children,
   className,
@@ -515,22 +390,6 @@ function StepperDescription({
   );
 }
 
-/**
- * Nav container (role="tablist") ของ stepper items
- *
- * จัด layout ของ StepperItem ตาม orientation จาก context ครอบทุก item
- * เพื่อเป็น tablist ของ ARIA
- *
- * @param props - children, className
- * @returns JSX element nav
- * @example
- * ```tsx
- * <StepperNav>
- *   <StepperItem step={1}>...</StepperItem>
- *   <StepperItem step={2}>...</StepperItem>
- * </StepperNav>
- * ```
- */
 function StepperNav({ children, className }: React.ComponentProps<"nav">) {
   const { activeStep, orientation } = useStepper();
 
@@ -549,22 +408,6 @@ function StepperNav({ children, className }: React.ComponentProps<"nav">) {
   );
 }
 
-/**
- * Panel wrapper เก็บ StepperContent ทั้งหมด
- *
- * render ใต้ StepperNav ทำหน้าที่เป็น container ของ content แต่ละ step
- * data-state reflect activeStep
- *
- * @param props - children, className
- * @returns JSX element panel
- * @example
- * ```tsx
- * <StepperPanel>
- *   <StepperContent value={1}>...</StepperContent>
- *   <StepperContent value={2}>...</StepperContent>
- * </StepperPanel>
- * ```
- */
 function StepperPanel({ children, className }: React.ComponentProps<"div">) {
   const { activeStep } = useStepper();
 

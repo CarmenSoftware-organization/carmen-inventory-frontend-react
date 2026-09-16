@@ -15,7 +15,6 @@ import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { PoFormValues } from "../po-form-schema";
 import { WatchedProductUnit } from "./unit-cell";
 
-/** decimal_place ของหน่วยสั่งซื้อในแถวนั้น — เซลล์ในไฟล์นี้ต้องการชุดเดียวกัน */
 function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
@@ -115,7 +114,6 @@ export const QtyUnitCell = function QtyUnitCell({
   );
 };
 
-/** จำนวนสั่งของแถว (อ่านอย่างเดียว) + หน่วย */
 export const OrderSummaryCell = function OrderSummaryCell({
   control,
   index,

@@ -22,14 +22,6 @@ interface UseShelfTableOptions {
   onDelete: (shelf: Shelf) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Shelf พร้อมคอลัมน์ name
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/shelf
- * const { table } = useShelfTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useShelfTable({
   data,
   totalRecords,

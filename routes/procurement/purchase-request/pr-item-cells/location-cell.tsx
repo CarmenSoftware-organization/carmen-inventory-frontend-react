@@ -32,7 +32,6 @@ export const LocationCell = memo(function LocationCell({
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
-  /** badge สถานะ (StatusCell) — วางบรรทัดล่างคู่กับ location code */
   statusSlot?: ReactNode;
 }) {
   "use no memo";

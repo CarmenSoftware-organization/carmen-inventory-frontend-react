@@ -34,7 +34,6 @@ import { PrHeader } from "./pr-header";
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
   readonly template?: PurchaseRequestTemplate;
-  /** ใบเดิมที่ผู้ใช้กด Duplicate — ทำหน้าที่เหมือน template (prefill แล้วนับ dirty) */
   readonly duplicateFrom?: PurchaseRequest;
 }
 

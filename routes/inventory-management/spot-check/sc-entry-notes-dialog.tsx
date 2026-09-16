@@ -24,10 +24,6 @@ interface ScEntryNotesDialogProps {
   readonly onSaved?: (payload: SavedNotePayload) => void;
 }
 
-/**
- * Thin adapter — bind SC hooks (load comments + save comment) เข้ากับ shared EntryNotesDialog
- * UI ทั้งหมดอยู่ใน `_shared/entry-notes-dialog.tsx`
- */
 export function ScEntryNotesDialog({
   open,
   onOpenChange,

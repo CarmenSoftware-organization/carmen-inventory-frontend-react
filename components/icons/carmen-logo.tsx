@@ -7,14 +7,6 @@ type CarmenLogoProps = {
   readonly title?: string;
 };
 
-/**
- * โลโก้ Carmen — render จากไฟล์ SVG ของแบรนด์ (`./carmen-logo.svg`)
- *
- * - `mark` (default): ไอคอนล้วน
- * - `lockup`: ไอคอน + ตัวอักษร "Carmen"
- *
- * ไม่มี CSS/className ใดๆ นอกจาก `size` (กว้าง/สูงของไอคอน)
- */
 export function CarmenLogo({
   variant = "mark",
   size = 32,

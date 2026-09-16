@@ -12,7 +12,6 @@ interface CellProps {
   readonly readOnly: boolean;
 }
 
-/** ราคาในโหมดอ่าน — แยกเป็นคอมโพเนนต์ของตัวเองเพื่อกัน `useWatch` ไปโผล่ในโหมดแก้ */
 const PricePlain = memo(function PricePlain({
   form,
   index,

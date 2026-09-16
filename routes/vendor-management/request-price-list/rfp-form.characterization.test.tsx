@@ -102,7 +102,6 @@ beforeEach(() => {
  * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้ ถ้า refactor แล้วเปลี่ยน ต้องเป็นเพราะตั้งใจ
  */
 describe("RequestPriceListForm — characterization", () => {
-  /** ฟอร์มเปิดมาที่โหมด view เสมอเมื่อมี entity — ต้องกด Edit ก่อนถึงจะ submit ได้ */
   async function enterEditMode() {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
   }
@@ -127,13 +126,11 @@ describe("RequestPriceListForm — characterization", () => {
     });
   });
 
-  /** โหมด add ต้องเลือก template/vendor ผ่าน lookup ซึ่งขับใน jsdom ไม่คุ้ม */
   it.todo("[create] พฤติกรรมหลังสร้าง");
 });
 
 const rv = en.vendorManagement.requestPriceList.vendors;
 
-/** ใบที่มีผู้ขายเดิมอยู่แล้วหนึ่งราย พร้อม url_token ที่ส่งให้ผู้ขายไปแล้ว */
 const RFP_WITH_VENDOR = {
   ...RFP,
   vendor_count: 1,
@@ -162,7 +159,6 @@ async function removeFirstVendor() {
   await userEvent.click(screen.getByRole("button", { name: en.common.delete }));
 }
 
-/** ติ๊กผู้ขายตามชื่อใน dialog — แถวของ dialog คือแถวเดียวที่มี checkbox */
 async function pickVendor(name: string) {
   const row = screen
     .getAllByRole("row")
@@ -292,7 +288,6 @@ describe("RequestPriceListForm — ผู้ขายใหม่กับกา
   });
 });
 
-/** ใบเดียวกันหลัง save — ผู้ขายที่เพิ่งเพิ่มได้ id จาก server แล้ว */
 const AFTER_SAVE = {
   ...RFP_WITH_VENDOR,
   vendors: [

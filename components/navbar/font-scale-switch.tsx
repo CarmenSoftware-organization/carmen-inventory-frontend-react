@@ -29,7 +29,6 @@ const PREVIEW_PX: Record<FontScale, number> = {
   biggest: 16.5,
 };
 
-/** `as const` เพื่อให้ `t()` ได้ literal key ไม่ใช่ string กว้างๆ */
 const LABEL_KEY = {
   small: "fontSizeSmall",
   normal: "fontSizeNormal",

@@ -36,7 +36,6 @@ interface UseGrnFormActionsParams {
   defaultValues: GrnFormValues;
   mode: FormMode;
   setMode: (mode: FormMode) => void;
-  /** validation ไม่ผ่าน → auto-expand group ที่ error + scroll หา field แรก */
   revealErrors?: (errors?: Record<string, unknown>) => void;
 }
 

@@ -43,20 +43,10 @@ const EMPTY = (
 
 interface RfpVendorFieldsProps {
   readonly form: UseFormReturn<RfpFormValues>;
-  /** ใบที่โหลดมา — ใช้อ่านข้อมูลฝั่ง server ที่แก้ไม่ได้ (ลิงก์ผู้ขาย/สถานะ/ใบราคา) */
   readonly requestPriceList?: RequestPriceList;
   readonly isDisabled: boolean;
 }
 
-/**
- * ส่วนผู้ขายของใบขอราคา — หัวข้อ (+ จำนวน + ปุ่มเพิ่ม) + ตาราง/กล่องว่าง
- *
- * ถือ field array, dialog เลือกผู้ขาย และ handler เพิ่ม/ลบไว้เองครบ แบบเดียวกับ
- * `*-item-fields.tsx` ของ PR/PO/SR/GRN — ฟอร์มส่งมาแค่ form กับโหมด
- *
- * แถวแก้ไม่ได้ (ข้อมูลติดต่อเติมจากผู้ติดต่อหลักของผู้ขายให้เอง) โหมดแก้ไขเพิ่ม
- * แค่ปุ่มลบกับปุ่มเพิ่มผู้ขาย
- */
 export function RfpVendorFields({
   form,
   requestPriceList,

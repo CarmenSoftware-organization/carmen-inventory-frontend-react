@@ -1,8 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/**
- * Skeleton 1 field (label + control) — สูงเท่า `Field` + control size sm ของจริง
- */
 function FieldSkeleton({ className }: { className?: string }) {
   return (
     <div className={className}>
@@ -14,10 +11,6 @@ function FieldSkeleton({ className }: { className?: string }) {
   );
 }
 
-/**
- * Skeleton ของ header ฟอร์มเอกสาร — mirror `DocFormHeader`
- * (title + badge + version, subtitle ผู้สร้าง/วันที่, ปุ่มขวา)
- */
 function HeaderSkeleton() {
   return (
     <div className="px-4">
@@ -40,9 +33,6 @@ function HeaderSkeleton() {
   );
 }
 
-/**
- * Skeleton ของตารางรายการ — header row + แถวข้อมูล ความสูงเท่า DataGrid ของจริง
- */
 function ItemTableSkeleton({ rows }: { rows: number }) {
   return (
     <div className="overflow-hidden rounded-md border">
@@ -72,9 +62,7 @@ function ItemTableSkeleton({ rows }: { rows: number }) {
 }
 
 interface DocFormSkeletonProps {
-  /** จำนวนช่องในส่วนหัวใบ (grid 6 คอลัมน์เหมือนของจริง) */
   readonly fields?: number;
-  /** จำนวนแถวรายการที่แสดงตอนโหลด */
   readonly rows?: number;
 }
 

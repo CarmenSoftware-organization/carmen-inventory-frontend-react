@@ -13,7 +13,6 @@ const tv = ((k: string, p?: Record<string, string>) =>
 const tf = ((k: string) => k) as never;
 const schema = createGrnSchema(tv, tf);
 
-/** แถวที่กรอกครบพอจะผ่าน — รับของจริงจึงต้องมีราคา */
 const item = (over: Partial<GrnFormValues["items"][number]> = {}) => ({
   ...EMPTY_DETAIL,
   product_id: "prod-1",
@@ -214,11 +213,6 @@ describe("สินค้าตัวเดียวกันเข้าสอ�
   });
 });
 
-/**
- * แถวเดียวจาก response จริงของ `GET /{bu}/good-received-notes/{id}` (GRN260900005)
- * — ครบทุกฟิลด์ที่ `getDefaultValues` อ่าน เพื่อปักการต่อสายระหว่าง detail กับ
- * item ข้างใน ซึ่งอยู่คนละชั้นและใช้ชื่อฟิลด์คนละแบบกับฟอร์ม
- */
 const detailFromResponse = {
   id: "ec38f32c",
   good_received_note_id: "grn-1",

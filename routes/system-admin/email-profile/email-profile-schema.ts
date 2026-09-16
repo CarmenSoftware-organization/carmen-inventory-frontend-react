@@ -37,7 +37,6 @@ export const EMPTY_EMAIL_PROFILE_FORM: EmailProfileFormValues = {
   note: "",
 };
 
-/** ตัวแยกชุดเดียวกับ `config-email-component.tsx` เดิม — คั่นด้วย comma/semicolon/ช่องว่าง */
 function splitEmailList(s: string): string[] {
   return s
     .split(/[,;\s]+/)

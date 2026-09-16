@@ -26,10 +26,6 @@ interface Props {
   readonly disabled: boolean;
 }
 
-/**
- * รายการสินค้าของ CN — flat data grid (1 row = 1 product + location + qty/unit).
- * เพิ่มรายการผ่าน dialog เลือกจาก GRN อ้างอิง (pre-fill price/tax/unit/qty)
- */
 export function CnItem({ form, disabled }: Props) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");

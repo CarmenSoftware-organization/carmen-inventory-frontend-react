@@ -152,9 +152,7 @@ export function lookupIcon(key: string) {
 }
 
 interface StatusIconLabelProps {
-  /** ค่า status ดิบจาก API (lowercase, snake_case) */
   readonly status: string;
-  /** ป้ายที่แสดง — ตัวเรียกส่งมาจาก config ของโมดูลตัวเอง */
   readonly label: string;
   readonly className?: string;
 }

@@ -18,12 +18,6 @@ interface GrnSummaryFooterProps {
   readonly onVoid: () => void;
 }
 
-/**
- * แถบสรุปยอด + ปุ่ม commit/void ท้ายฟอร์ม — watch `items` เองในนี้ (mirror
- * po-footer-action) เพื่อ**ไม่ให้ GrnForm root re-render ทุก keystroke**: การ watch
- * ทั้ง items array ที่ระดับ form ทำให้ item table subtree churn → product lookup ของ
- * row ที่เพิ่งเพิ่ม (defaultOpen) remount แล้วเด้ง focus ออกจากช่องที่กำลังพิมพ์
- */
 export function GrnSummaryFooter({
   form,
   isActionPending,

@@ -35,31 +35,9 @@ interface UsePoFormHandlersOptions {
   role: string | undefined;
   setShowReject: Dispatch<SetStateAction<boolean>>;
   setShowClose: Dispatch<SetStateAction<boolean>>;
-  /** เรียกเมื่อ validation ไม่ผ่าน — auto-expand row ที่ error + scroll + บอกว่าขาดอะไร */
   revealErrors: (errors?: Record<string, unknown>) => void;
 }
 
-/**
- * Hook รวม mutations และ handler ทั้งหมดของฟอร์ม PO
- * จัดการ create/update/delete และ workflow actions submit/approve/reject/review/close
- * คืน isPending รวมจากทุก mutation, onSubmit สำหรับ react-hook-form และ handler ต่าง ๆ
- *
- * @param options - ตัวเลือกของ hook
- * @param options.purchaseOrder - PO ปัจจุบัน (undefined = โหมดสร้างใหม่)
- * @param options.form - UseFormReturn ของ PoFormValues
- * @param options.defaultValues - ค่าเริ่มต้นของฟอร์ม (ใช้ diff items)
- * @param options.mode - โหมดฟอร์มปัจจุบัน (add/view/edit)
- * @param options.setMode - setter ของ mode
- * @param options.role - stage role ของผู้ใช้ปัจจุบัน
- * @param options.setShowReject - setter ของ reject dialog
- * @param options.setShowClose - setter ของ close dialog
- * @returns mutations, isPending และ handlers
- * @example
- * const { onSubmit, handleApprovePo, handleRejectConfirm, isPending } = usePoFormHandlers({
- *   purchaseOrder, form, defaultValues, mode, setMode, role, setShowReject, setShowClose,
- * });
- * <form onSubmit={form.handleSubmit(onSubmit)}> ... </form>
- */
 export function usePoFormHandlers({
   purchaseOrder,
   form,
@@ -245,10 +223,6 @@ export function usePoFormHandlers({
   // GET PO สดจาก DB ก่อนยิง workflow event ทุกตัว — /save bump doc_version
   // ระหว่างทาง ทำให้ค่าใน form/prop ค้างเก่า → 409 optimistic lock
   // (tb_purchase_order / tb_purchase_order_detail)
-  /**
-   * @param id - ใบที่จะดึง ไม่ส่ง = ใบที่เปิดอยู่ · ส่งมาเมื่อเพิ่งสร้างใบใหม่
-   *   ซึ่ง `purchaseOrder` prop ยังเป็น undefined อยู่
-   */
   const fetchFreshPo = async (
     id?: string,
   ): Promise<{

@@ -65,14 +65,6 @@ export function useExchangeRateMutation() {
   });
 }
 
-/**
- * Hook สำหรับแก้ไขอัตราแลกเปลี่ยนรายการเดียวตาม id (PATCH)
- * Invalidate ทั้ง EXCHANGE_RATES และ CURRENCIES
- * @returns UseMutationResult รับ { id, exchange_rate }
- * @example
- * const update = useExchangeRateUpdate();
- * update.mutate({ id: rate.id, exchange_rate: 36.0 });
- */
 export function useExchangeRateUpdate() {
   return useApiMutation<{
     id: string;
@@ -86,14 +78,6 @@ export function useExchangeRateUpdate() {
   });
 }
 
-/**
- * Hook สำหรับสร้างอัตราแลกเปลี่ยนใหม่ (wrap เป็น array แล้ว POST)
- * Invalidate ทั้ง EXCHANGE_RATES และ CURRENCIES
- * @returns UseMutationResult รับ ExchangeRateDto
- * @example
- * const create = useExchangeRateCreate();
- * create.mutate({ currency_id: "EUR", exchange_rate: 38.2 });
- */
 export function useExchangeRateCreate() {
   return useApiMutation<ExchangeRateDto>({
     mutationFn: (data, buCode) =>
@@ -103,14 +87,6 @@ export function useExchangeRateCreate() {
   });
 }
 
-/**
- * Hook สำหรับลบอัตราแลกเปลี่ยนตาม id
- * Invalidate ทั้ง EXCHANGE_RATES และ CURRENCIES
- * @returns UseMutationResult รับ { id }
- * @example
- * const del = useExchangeRateDelete();
- * del.mutate({ id: rate.id });
- */
 export function useExchangeRateDelete() {
   return useApiMutation<{ id: string }>({
     mutationFn: ({ id }, buCode) =>
@@ -120,16 +96,6 @@ export function useExchangeRateDelete() {
   });
 }
 
-/**
- * Hook ดึงอัตราแลกเปลี่ยนจาก API ภายนอก เทียบกับสกุลเงินฐาน
- * ไม่ refetch เมื่อ focus window และ retry สูงสุด 3 ครั้งด้วย exponential backoff
- * ใช้ CACHE_NORMAL (staleTime 5 นาที)
- * @param baseCurrency - รหัสสกุลเงินฐาน เช่น "USD", "THB"
- * @returns UseQueryResult ของ Record<string, number> (เช่น { THB: 35.5, EUR: 0.92 })
- * @example
- * const { data: rates } = useExternalExchangeRates("USD");
- * const thbRate = rates?.THB;
- */
 export function useExternalExchangeRates(baseCurrency: string) {
   return useQuery<Record<string, number>>({
     queryKey: ["exchangeRates", baseCurrency],

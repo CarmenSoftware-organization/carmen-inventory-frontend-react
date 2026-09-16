@@ -13,13 +13,10 @@ interface LookupProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly error?: string;
-  /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม item ใหม่) */
   readonly defaultOpen?: boolean;
-  /** เลือกเสร็จแล้วเด้งโฟกัสไปช่องถัดไปของแถวเดียวกัน (ดู `fieldFocusRef`) */
   readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 

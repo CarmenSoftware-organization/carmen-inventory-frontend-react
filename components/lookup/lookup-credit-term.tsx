@@ -28,23 +28,6 @@ interface LookupCreditTermProps {
   readonly error?: string;
 }
 
-/**
- * Lookup Select สำหรับเลือกเงื่อนไขการชำระเงิน (Credit Term)
- *
- * ดึงข้อมูลผ่าน `useCreditTerm({ perpage: 30 })` และ filter เฉพาะ `is_active = true`
- * แสดงเป็น shadcn Select พร้อม Tooltip แสดงชื่อเต็มเมื่อ hover
- * onValueChange ส่งทั้ง id และ object `CreditTerm` เต็มสำหรับ side effects
- *
- * @param value - id ของ credit term ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object CreditTerm
- * @returns JSX select element ของ credit term lookup
- * @example
- * ```tsx
- * <Controller name="credit_term_id" control={form.control} render={({ field }) => (
- *   <LookupCreditTerm value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupCreditTerm({
   value,
   onValueChange,

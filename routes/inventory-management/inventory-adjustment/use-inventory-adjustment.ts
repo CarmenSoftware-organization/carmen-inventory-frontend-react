@@ -14,11 +14,6 @@ import type {
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
-/**
- * เลือก API endpoint ตามประเภทการปรับปรุง stock
- * @param type - ประเภท stock-in หรือ stock-out
- * @returns ฟังก์ชัน endpoint ที่รับ buCode
- */
 function getEndpoint(type: InventoryAdjustmentType) {
   return type === "stock-in" ? API_ENDPOINTS.STOCK_IN : API_ENDPOINTS.STOCK_OUT;
 }
@@ -86,14 +81,6 @@ export function useInventoryAdjustmentById(
   });
 }
 
-/**
- * Hook สำหรับสร้าง Inventory Adjustment ใหม่
- * เลือก endpoint ตาม type ภายใน mutationFn และ invalidate cache เมื่อสำเร็จ
- * @returns mutation object จาก useApiMutation
- * @example
- * const create = useCreateInventoryAdjustment();
- * create.mutate({ type: "stock-in", ...payload });
- */
 export function useCreateInventoryAdjustment() {
   return useApiMutation<
     CreateInventoryAdjustmentDto & { type: InventoryAdjustmentType },
@@ -208,14 +195,6 @@ export function useCommitInventoryAdjustment() {
   });
 }
 
-/**
- * Hook สำหรับลบ Inventory Adjustment ตาม id และ type
- * เลือก endpoint ตาม type แล้ว DELETE และ invalidate cache
- * @returns mutation object จาก useApiMutation
- * @example
- * const del = useDeleteInventoryAdjustment();
- * del.mutate({ id, type: "stock-out" });
- */
 export function useDeleteInventoryAdjustment() {
   return useApiMutation<{ id: string; type: InventoryAdjustmentType }>({
     mutationFn: ({ id, type }, buCode) => {
@@ -234,11 +213,6 @@ interface ExportInventoryAdjustmentArgs {
   columns: XlsxColumn<InventoryAdjustment>[];
 }
 
-/**
- * Hook ส่งออก IA เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportInventoryAdjustment, isExporting }
- */
 export function useExportInventoryAdjustment() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

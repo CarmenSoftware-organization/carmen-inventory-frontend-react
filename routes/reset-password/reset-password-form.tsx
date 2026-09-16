@@ -15,15 +15,6 @@ import {
   type ResetPasswordValues,
 } from "./reset-password-schema";
 
-/**
- * ฟอร์มตั้งรหัสผ่านใหม่ — รหัสใหม่กับช่องยืนยัน
- *
- * state ของฟอร์มอยู่ในคอมโพเนนต์นี้เอง เมื่อ submit ล้มเหลวสิ่งที่กรอกไว้จึงยังอยู่ครบ
- *
- * @param props.onSubmit - เรียกเมื่อฟอร์มผ่าน validation แล้ว
- * @param props.isPending - กำลังส่งอยู่ ใช้ปิดปุ่ม
- * @param props.errorMessage - ข้อความผิดพลาดจากผู้เรียก หรือ null เมื่อไม่มี
- */
 export default function ResetPasswordForm({
   onSubmit,
   isPending,

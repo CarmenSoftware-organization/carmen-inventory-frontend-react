@@ -8,7 +8,6 @@ import type { MyDashboardWidget, WidgetParams } from "@/types/dashboard-widget";
 
 export const GROUP_PREFIX = "group@";
 
-/** สถานะยืนพื้นของ group (4 ตัว — ไม่มี voided) */
 export const DEFAULT_GROUP_STATUSES = [
   "draft",
   "in_progress",
@@ -16,7 +15,6 @@ export const DEFAULT_GROUP_STATUSES = [
   "completed",
 ] as const;
 
-/** ตัวเลือกช่วงเวลา (ตรงกับ time_range ของ document.* dataset ฝั่ง backend) */
 export const TIME_RANGE_OPTIONS = [
   "@today",
   "@3days",
@@ -26,9 +24,6 @@ export const TIME_RANGE_OPTIONS = [
 
 const GROUP_MINE_SUFFIX = "#mine";
 
-/** นิยาม group ต่อ doc type — statuses = stage ของ workflow เอกสารนั้นจริงๆ
- * (ไม่ลอก PR: PO มี approved/sent_or_print แยกกัน, SR สั้นกว่า) สีของแต่ละ status มาจาก
- * --status-* canonical ผ่าน statusMeta อยู่แล้ว */
 interface GroupDef {
   readonly doc: string; // pr | po | sr
   readonly label: string; // PR | PO | SR
@@ -48,8 +43,6 @@ const GROUP_DEFS: readonly GroupDef[] = [
   { doc: "sr", label: "SR", statuses: ["draft", "in_progress", "completed"] },
 ];
 
-/** synthetic datasets สำหรับ dropdown "+ Add Widget" — 2 preset (everyone/mine)
- * ต่อ doc. id ลงท้าย #mine = @current_user (owner axis), นอกนั้น = @everyone. */
 export const GROUP_DATASETS: readonly DashboardDataset[] = GROUP_DEFS.flatMap(
   (d): DashboardDataset[] => {
     const baseId = `${GROUP_PREFIX}document.${d.doc}-count`;
@@ -65,7 +58,6 @@ export const GROUP_DATASETS: readonly DashboardDataset[] = GROUP_DEFS.flatMap(
   },
 );
 
-/** statuses (pipeline stages) ของ preset — จาก doc type ใน id (ของ doc นั้นเอง) */
 export function groupStatusesOfPreset(presetId: string): string[] {
   const doc = normalizeGroupDatasetId(presetId)
     .slice(GROUP_PREFIX.length)
@@ -75,12 +67,10 @@ export function groupStatusesOfPreset(presetId: string): string[] {
   return def ? [...def.statuses] : [...DEFAULT_GROUP_STATUSES];
 }
 
-/** owner_visibility จาก preset id: #mine → @current_user (ฉันสร้าง), นอกนั้น @everyone */
 export function groupVisibilityOfPreset(presetId: string): string {
   return presetId.endsWith(GROUP_MINE_SUFFIX) ? "@current_user" : "@everyone";
 }
 
-/** id ที่เก็บจริง (ตัด suffix #mine ออก → base group id) */
 export function normalizeGroupDatasetId(presetId: string): string {
   return presetId.endsWith(GROUP_MINE_SUFFIX)
     ? presetId.slice(0, -GROUP_MINE_SUFFIX.length)
@@ -95,7 +85,6 @@ export function isGroupWidget(w: { readonly dataset_id: string }): boolean {
   return isGroupDatasetId(w.dataset_id);
 }
 
-/** params เริ่มต้นตอนสร้าง group widget จาก dropdown */
 export function groupCreateParams(
   ownerVisibility: string,
   statuses: readonly string[],
@@ -107,7 +96,6 @@ export function groupCreateParams(
   };
 }
 
-/** ถอด config จาก group widget ที่ save แล้ว */
 export function parseGroupWidget(w: MyDashboardWidget): {
   baseDatasetId: string;
   statuses: string[];

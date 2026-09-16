@@ -6,7 +6,6 @@ import type {
   PurchaseRequestTemplate,
 } from "@/types/purchase-request";
 
-/** ใบต้นทางเท่าที่ getDuplicateValues อ่านจริง */
 const source = {
   description: "ของประจำสัปดาห์",
   workflow_id: "wf-1",
@@ -23,7 +22,6 @@ const source = {
   ],
 } as unknown as PurchaseRequest;
 
-/** เทมเพลตเท่าที่ getDefaultValues อ่านจริง */
 const template = {
   workflow_id: "wf-1",
   department_id: "dept-1",

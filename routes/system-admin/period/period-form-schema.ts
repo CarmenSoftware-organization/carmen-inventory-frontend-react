@@ -2,12 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { Period } from "@/types/period";
 
-/**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์มงวดบัญชี (Period)
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema สำหรับ Period form
- */
 export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
@@ -41,11 +35,6 @@ export const EMPTY_FORM: PeriodFormValues = {
   status: "open",
 };
 
-/**
- * คืนค่าเริ่มต้นของฟอร์มจาก entity Period (หากไม่มีจะคืน EMPTY_FORM)
- * @param period - ข้อมูล Period ที่ต้องการใช้เป็นค่าเริ่มต้น
- * @returns ค่าเริ่มต้นของ PeriodFormValues
- */
 export function getDefaultValues(period?: Period | null): PeriodFormValues {
   if (!period) return EMPTY_FORM;
   return {

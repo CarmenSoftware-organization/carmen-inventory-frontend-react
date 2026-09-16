@@ -1,8 +1,3 @@
-/**
- * Carmen Tile System — SubTiles (submodule tiles)
- *
- * Each tile inherits its parent module palette.
- */
 
 import {
   BarChart,

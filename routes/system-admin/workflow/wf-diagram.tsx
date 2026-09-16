@@ -38,7 +38,6 @@ interface WfDiagramProps {
   readonly onMoveStage?: (from: number, to: number) => void;
   readonly className?: string;
   readonly headerActions?: React.ReactNode;
-  /** Node flow direction — "vertical" stacks stages top→bottom (default horizontal) */
   readonly orientation?: "horizontal" | "vertical";
 }
 
@@ -164,7 +163,6 @@ const VERTICAL_BASE = 80;
 const VERTICAL_GAP = 96;
 const LG_BREAKPOINT = 1024;
 
-/** True when viewport ≥ Tailwind's `lg` (1024px) — matches the wf-detail grid. */
 function useIsLargeScreen() {
   const [isLarge, setIsLarge] = useState(
     () =>

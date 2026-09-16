@@ -4,16 +4,12 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
 
-/** คำตอบของ endpoint edit-availability — โครงเดียวกับที่ backend ส่งมา */
 export interface WorkflowEditAvailability {
   readonly workflow_id: string;
   readonly workflow_type: string;
-  /** เข้าโหมดแก้ได้ไหม — ชื่อ ผู้อนุมัติ และสินค้าแก้ได้เสมอ ค่านี้จึงเป็น true ตลอด */
   readonly can_edit: boolean;
-  /** แก้รายการ stage กับเส้นทางระหว่าง stage ได้ไหม — false เมื่อยังมีเอกสารเดินอยู่บนโครงนั้น */
   readonly can_edit_stages: boolean;
   readonly can_delete: boolean;
-  /** รหัสจาก error catalog ที่บอกว่าติดอะไรอยู่ (null เมื่อไม่มีอะไรถูกล็อก) */
   readonly blocked_reason: string | null;
   readonly documents: {
     readonly draft: number;

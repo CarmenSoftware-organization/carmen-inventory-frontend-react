@@ -2,29 +2,16 @@ import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import { BookOpen, Hotel, ShoppingCart } from "lucide-react";
 import type { LucideIcon } from "../landing-types";
 
-/**
- * brand หนึ่งตัวใต้ category — เช่น Micros ใต้ POS
- *
- * แต่ละ brand ตั้งค่าแยกกัน มี row ของตัวเองใน app_config
- */
 export type BrandDef = {
-  /** route param — `/system-admin/interface/:category/:brand` */
   readonly key: string;
-  /** key ของ row ใน app_config — `interface_<category>_<brand>` */
   readonly configKey: string;
-  /** form เฉพาะ brand — ถ้าไม่กำหนด ใช้ form ของ category (ดู interface-detail.route.tsx) */
   readonly form?: LazyExoticComponent<ComponentType>;
 };
 
-/**
- * category ที่รวม brand หลายตัวที่ใช้ form เดียวกัน — เช่น POS ที่มี Micros / Infrasys / Square
- */
 export type InterfaceCategoryDef = {
-  /** route param — `/system-admin/interface/:category` */
   readonly key: string;
   readonly icon: LucideIcon;
   readonly brands: readonly BrandDef[];
-  /** form เดียวต่อ category — brand มาจาก route param ไม่ใช่ dropdown */
   readonly form: LazyExoticComponent<ComponentType>;
 };
 
@@ -77,25 +64,12 @@ export const INTERFACE_CATEGORIES: readonly InterfaceCategoryDef[] = [
   },
 ];
 
-/**
- * หา category จาก route param
- *
- * @param key - ค่าจาก `useParams().category`
- * @returns InterfaceCategoryDef หรือ undefined ถ้าไม่รู้จัก (caller ควรโชว์ NotFound)
- */
 export function findCategory(
   key: string | undefined,
 ): InterfaceCategoryDef | undefined {
   return INTERFACE_CATEGORIES.find((def) => def.key === key);
 }
 
-/**
- * หา brand จาก route param ทั้งคู่
- *
- * @param categoryKey - ค่าจาก `useParams().category`
- * @param brandKey - ค่าจาก `useParams().brand`
- * @returns BrandDef หรือ undefined ถ้า category/brand ไม่รู้จัก
- */
 export function findBrand(
   categoryKey: string | undefined,
   brandKey: string | undefined,

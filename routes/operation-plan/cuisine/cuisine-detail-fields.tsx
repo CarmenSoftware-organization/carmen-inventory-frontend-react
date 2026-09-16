@@ -10,7 +10,6 @@ interface CuisineDetailFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/** Cuisine details — popular dishes · key ingredients · info · dimension */
 export function CuisineDetailFields({
   form,
   isDisabled,

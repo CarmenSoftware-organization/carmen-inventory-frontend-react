@@ -4,9 +4,7 @@ import { moduleList, type ModuleDto } from "@/constant/module-list";
 import type { Permission } from "@/constant/permissions";
 
 export interface ModuleWithAccess extends ModuleDto {
-  /** ผู้ใช้ปัจจุบันไม่มีสิทธิ์เข้า leaf นี้ — UI ควรกด แล้วเด้ง dialog แทน */
   denied: boolean;
-  /** BU ปัจจุบันไม่ได้ซื้อ feature นี้ — คนละเรื่องกับ denied และแก้ด้วยเงินไม่ใช่สิทธิ์ */
   locked: boolean;
   subModules?: ModuleWithAccess[];
 }

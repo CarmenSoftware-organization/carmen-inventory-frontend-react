@@ -46,12 +46,6 @@ const ACTION_OPTIONS = [
   { label: "Logout", value: "logout" },
 ];
 
-/**
- * Component หลักของหน้า User Activity รองรับ list/grid view, filter ตาม action และ user
- * @returns React element ของหน้า User Activity
- * @example
- * <UserActivityComponent />
- */
 export default function UserActivityComponent() {
   const isMobile = useIsMobile();
   const [displayMode, setDisplayMode] = useState<DisplayMode>("list");

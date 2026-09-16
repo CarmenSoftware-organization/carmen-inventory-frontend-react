@@ -26,23 +26,6 @@ interface TreeNodeProps {
   readonly search?: string;
 }
 
-/**
- * Component แสดงผล node ของต้นไม้หมวดหมู่แบบ recursive (เรียก TreeNode ซ้อนใน children)
- * รองรับ expand/collapse, ไฮไลต์คำค้นหา, icon ตาม node type และปุ่มจัดการ (add child, edit, delete)
- * ปุ่มจะถูกซ่อนและแสดงเฉพาะตอน hover บน row เพื่อลดสัญญาณรบกวนทางสายตา
- * @param props - node, level (ระดับชั้น), expanded, toggleExpand, onEdit, onAdd, onDelete และ search
- * @returns JSX ของ node พร้อม children (หากมีและถูก expand)
- * @example
- * <TreeNode
- *   node={categoryNode}
- *   expanded={{ [categoryNode.id]: true }}
- *   toggleExpand={(id) => toggle(id)}
- *   onEdit={(n) => openEdit(n)}
- *   onAdd={(parent) => openAdd(parent)}
- *   onDelete={(n) => setDeleteTarget(n)}
- *   search="milk"
- * />
- */
 export function TreeNode({
   node,
   level = 0,

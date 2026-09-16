@@ -117,10 +117,6 @@ interface ConversionPreviewProps {
   readonly unitMap: Map<string, string>;
 }
 
-/**
- * แสดงตัวอย่างการแปลงหน่วยสด ๆ เช่น "1 Box = 12 EA"
- * ใช้ useWatch กับ field เฉพาะของ row เพื่อ re-render ขั้นต่ำ
- */
 export function ConversionPreview({
   control,
   name,

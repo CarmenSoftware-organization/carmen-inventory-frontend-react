@@ -3,7 +3,6 @@ import { Separator as SeparatorPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** เส้นคั่นแนวนอนหรือแนวตั้งสำหรับแบ่ง section (shadcn) */
 function Separator({
   className,
   orientation = "horizontal",

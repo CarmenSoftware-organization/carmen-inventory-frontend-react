@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-/** Card container — flat surface, neutral border */
 export function GlassCard({
   children,
 }: {
@@ -14,7 +13,6 @@ export function GlassCard({
   );
 }
 
-/** Uppercase tracking label สำหรับ section header ภายใน GlassCard */
 export function CardLabel({
   children,
 }: {
@@ -66,7 +64,6 @@ export function PlainText({
   );
 }
 
-/** Status pill — wrap Badge ด้วย style เดียวกัน รองรับขนาด large/inline */
 export function StatusPill({
   statusConfig,
   large,
@@ -93,7 +90,6 @@ export function StatusPill({
   );
 }
 
-/** Meta chip ใน hero — pill มี icon + label, ตอน empty ใช้ dashed border */
 export function MetaChip({
   icon: Icon,
   label,
@@ -123,7 +119,6 @@ export function MetaChip({
   );
 }
 
-/** Date input wrapper card — มี calendar icon + label, dashed ตอน empty */
 export function DateCard({
   label,
   value,
@@ -161,7 +156,6 @@ export function DateCard({
   );
 }
 
-/** Key-value row สำหรับ Summary card */
 export function InfoRow({
   k,
   v,

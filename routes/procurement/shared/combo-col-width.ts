@@ -13,10 +13,7 @@
  * เงื่อนไข · ปุ่มใน action คนละจำนวน) และไม่เคยต้อง align ข้ามหน้ากันอยู่แล้ว
  */
 export const COMBO_COL = {
-  /** [override] rate% | amount */
   discount: 176,
-  /** [override] tax-profile | amount */
   tax: 196,
-  /** โหมดอ่าน — เท่าคอลัมน์เงินตัวเลขล้วน */
   readOnly: 96,
 } as const;

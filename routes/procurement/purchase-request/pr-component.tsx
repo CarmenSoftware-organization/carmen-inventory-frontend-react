@@ -53,14 +53,6 @@ const CreatePRDialog = lazy(() =>
   import("./pr-create-dialog").then((mod) => ({ default: mod.CreatePRDialog })),
 );
 
-/**
- * คอมโพเนนต์หน้ารายการ PR หลัก รวม toolbar, filters, table/card view,
- * batch approve/reject, delete dialog และ create dialog เชื่อมกับ URL state ผ่าน `useDataGridState`
- * @returns React element ของหน้ารายการใบขอซื้อ
- * @example
- * // ใช้ใน app/(root)/procurement/purchase-request/page.tsx
- * <PurchaseRequestComponent />
- */
 export default function PurchaseRequestComponent() {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
@@ -202,7 +194,6 @@ export default function PurchaseRequestComponent() {
   const selection = usePrSelection(items);
   const { selectedItems, hasSelection, selectedGroup } = selection;
 
-  /** ลบหลายใบ — มีใบของคนอื่นปนแม้ใบเดียวก็ไม่เปิดกล่องยืนยัน */
   const requestBatchDelete = () => {
     if (!selectedItems.every((item) => canDeletePr(item, userId, isAdmin))) {
       dispatchPermissionDenied(undefined, t("batchDeleteNotOwner"));

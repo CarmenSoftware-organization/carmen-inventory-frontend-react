@@ -65,7 +65,6 @@ export interface ModuleDto {
   path: string;
   icon: LucideIcon;
   subModules?: ModuleDto[];
-  /** When true, render a visual separator before this module */
   separatorBefore?: boolean;
   /**
    * Permission code required to see this module

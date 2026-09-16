@@ -45,7 +45,6 @@ export function toFormValues(
   return parsed.success ? parsed.data : EMPTY_POS;
 }
 
-/** แปลงค่า form เป็น payload ของ app_config */
 export function toApiValue(values: PosFormValues): Record<string, unknown> {
   return { ...values };
 }

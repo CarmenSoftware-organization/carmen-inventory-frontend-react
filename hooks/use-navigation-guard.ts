@@ -9,18 +9,6 @@ interface UseNavigationGuardReturn {
   readonly leave: (href: string) => void;
 }
 
-/**
- * Block in-app navigation (link clicks + browser back) when `enabled` is true.
- * Caller renders its own confirm dialog using the returned isOpen / confirm / cancel.
- *
- * Notes:
- * - Browser-level events (refresh, close tab) are NOT covered — pair this with
- *   `useUnsavedChanges` for those (they get the browser-native dialog).
- * - Programmatic `navigate()` calls are NOT intercepted — only <a> clicks +
- *   browser back/forward. A programmatic back still trips the popstate listener
- *   though, so callers that already confirmed with the user must use the
- *   returned `back()` instead of `navigate(-1)`.
- */
 export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
   const navigate = useNavigate();
   const [pendingHref, setPendingHref] = useState<string | null>(null);

@@ -12,39 +12,16 @@ interface LookupPhysicalCountPeriodProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
-/**
- * ฟังก์ชันช่วยเหลือ formatPeriodLabel สำหรับ Lookup สำหรับเลือกรอบการนับสต็อก (Physical Count Period)
- * @param props - props ของ formatPeriodLabel (ภาษาไทย)
- * @returns ผลลัพธ์ของฟังก์ชัน
- */
 function formatPeriodLabel(period: PhysicalCountPeriod): string {
   const from = formatDate(period.counting_period_from_date, "DD MMM YYYY");
   const to = formatDate(period.counting_period_to_date, "DD MMM YYYY");
   return `${from} — ${to}`;
 }
 
-/**
- * Lookup Popover สำหรับเลือกรอบการนับสต็อก (Physical Count Period)
- *
- * ดึงข้อมูลผ่าน `usePhysicalCountPeriod({ perpage: -1 })` และ filter เฉพาะรอบที่เริ่มแล้ว
- * (counting_period_from_date <= today) เรียงจากใหม่ไปเก่า แสดงเป็นช่วงวันที่
- * มี `onItemChange` ส่ง object `PhysicalCountPeriod` เต็ม
- *
- * @param value - id ของ period ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX popover element ของ physical count period lookup
- * @example
- * ```tsx
- * <Controller name="period_id" control={form.control} render={({ field }) => (
- *   <LookupPhysicalCountPeriod value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupPhysicalCountPeriod({
   value,
   onValueChange,

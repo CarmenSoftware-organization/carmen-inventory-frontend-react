@@ -14,10 +14,6 @@ interface PrFilterFieldsArgs {
   onViewModeChange: (next: string) => void;
 }
 
-/**
- * ตัวกรองของหน้ารายการ PR — ดึงรายชื่อขั้นตอน workflow มาเองเพราะไม่มีใครนอกตัวกรองใช้
- * @returns FilterFieldDef ที่ส่งเข้าได้ทั้ง `useListFilters` และ `<ListFilter>`
- */
 export function usePrFilterFields({
   viewMode,
   onViewModeChange,

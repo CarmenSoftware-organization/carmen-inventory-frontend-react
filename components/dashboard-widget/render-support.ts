@@ -25,15 +25,6 @@ const RENDERERS: readonly {
   { type: "table", reads: ["table"] },
 ];
 
-/**
- * ชนิดกราฟที่ dataset นี้เลือกได้จริง
- *
- * @param shape - data kind ของ dataset
- * @param supportedRenders - ชุดที่ backend ประกาศไว้ (`supported_renders` จาก
- *   catalogue) ถ้าไม่มี (gateway/micro-data รุ่นเก่า) จะใช้แค่ความสามารถของการ์ด
- * @returns ชนิดกราฟที่เลือกได้ เรียงตามลำดับความชอบ — ว่างได้ เช่น shape `matrix`
- *   ที่ยังไม่มีการ์ดรองรับ
- */
 export function availableRenders(
   shape: string | undefined,
   supportedRenders?: readonly string[],
@@ -59,13 +50,6 @@ const PREFERRED_DEFAULT: Record<string, WidgetType> = {
   ranked: "bar",
 };
 
-/**
- * ชนิดกราฟเริ่มต้นตอนสร้าง widget ใหม่
- *
- * @param shape - data kind ของ dataset
- * @param supportedRenders - ชุดที่ backend ประกาศไว้
- * @returns ชนิดกราฟเริ่มต้น (`kpi` เมื่อไม่มีอะไรวาดได้ ให้ยัง POST ได้เหมือนเดิม)
- */
 export function defaultRenderFor(
   shape: string | undefined,
   supportedRenders?: readonly string[],
