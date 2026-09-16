@@ -116,7 +116,7 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "system_admin",
   "system_admin.activity_log",
   "system_admin.document",
-  "system_admin.period",
+  "system_admin.inventory_period",
   "system_admin.query_dataset",
   "system_admin.role",
   "system_admin.running_code",

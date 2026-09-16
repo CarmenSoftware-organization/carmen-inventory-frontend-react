@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import type { Period } from "@/types/period";
+import type { InventoryPeriod } from "@/types/inventory-period";
 
-export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createInventoryPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
       fiscal_year: z.coerce
@@ -25,9 +25,9 @@ export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
     );
 }
 
-export type PeriodFormValues = z.infer<ReturnType<typeof createPeriodSchema>>;
+export type InventoryPeriodFormValues = z.infer<ReturnType<typeof createInventoryPeriodSchema>>;
 
-export const EMPTY_FORM: PeriodFormValues = {
+export const EMPTY_FORM: InventoryPeriodFormValues = {
   fiscal_year: new Date().getFullYear(),
   fiscal_month: 1,
   start_at: "",
@@ -35,7 +35,7 @@ export const EMPTY_FORM: PeriodFormValues = {
   status: "open",
 };
 
-export function getDefaultValues(period?: Period | null): PeriodFormValues {
+export function getDefaultValues(period?: InventoryPeriod | null): InventoryPeriodFormValues {
   if (!period) return EMPTY_FORM;
   return {
     fiscal_year: period.fiscal_year,

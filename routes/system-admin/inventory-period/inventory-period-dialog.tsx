@@ -26,39 +26,39 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/ui/date-picker";
-import { useCreatePeriod, useUpdatePeriod } from "./use-period";
-import type { Period } from "@/types/period";
+import { useCreateInventoryPeriod, useUpdateInventoryPeriod } from "./use-inventory-period";
+import type { InventoryPeriod } from "@/types/inventory-period";
 import {
-  createPeriodSchema,
+  createInventoryPeriodSchema,
   getDefaultValues,
-  type PeriodFormValues,
-} from "./period-form-schema";
+  type InventoryPeriodFormValues,
+} from "./inventory-period-form-schema";
 
-interface PeriodDialogProps {
+interface InventoryInventoryPeriodDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly period?: Period | null;
+  readonly period?: InventoryPeriod | null;
 }
 
-export function PeriodDialog({
+export function InventoryPeriodDialog({
   open,
   onOpenChange,
   period,
-}: PeriodDialogProps) {
+}: InventoryInventoryPeriodDialogProps) {
   const isEdit = !!period;
-  const createPeriod = useCreatePeriod();
-  const updatePeriod = useUpdatePeriod();
-  const isPending = createPeriod.isPending || updatePeriod.isPending;
-  const t = useTranslations("systemAdmin.period");
+  const createInventoryPeriod = useCreateInventoryPeriod();
+  const updateInventoryPeriod = useUpdateInventoryPeriod();
+  const isPending = createInventoryPeriod.isPending || updateInventoryPeriod.isPending;
+  const t = useTranslations("systemAdmin.inventoryPeriod");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
 
-  const periodSchema = createPeriodSchema(tv, tfl);
-  const form = useForm<PeriodFormValues>({
-    resolver: zodResolver(periodSchema) as Resolver<PeriodFormValues>,
+  const inventoryPeriodSchema = createInventoryPeriodSchema(tv, tfl);
+  const form = useForm<InventoryPeriodFormValues>({
+    resolver: zodResolver(inventoryPeriodSchema) as Resolver<InventoryPeriodFormValues>,
     defaultValues: getDefaultValues(),
   });
 
@@ -68,7 +68,7 @@ export function PeriodDialog({
     }
   }, [open, period, form]);
 
-  const onSubmit = (values: PeriodFormValues) => {
+  const onSubmit = (values: InventoryPeriodFormValues) => {
     const payload = {
       fiscal_year: values.fiscal_year,
       fiscal_month: values.fiscal_month,
@@ -78,7 +78,7 @@ export function PeriodDialog({
     };
 
     if (isEdit) {
-      updatePeriod.mutate(
+      updateInventoryPeriod.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
         { id: period.id, doc_version: period.doc_version, ...payload },
         {
@@ -89,7 +89,7 @@ export function PeriodDialog({
         },
       );
     } else {
-      createPeriod.mutate(payload, {
+      createInventoryPeriod.mutate(payload, {
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           onOpenChange(false);

@@ -20,7 +20,7 @@ export type LucideIcon = ComponentType<
 export type VisualKey =
   | "roles"
   | "assign"
-  | "period"
+  | "inventoryPeriod"
   | "workflows"
   | "docs"
   | "userActivity"
@@ -68,9 +68,9 @@ export const CHAPTERS: readonly ChapterDef[] = [
     key: "process",
     modules: [
       {
-        key: "period",
-        visualKey: "period",
-        href: "/system-admin/period",
+        key: "inventoryPeriod",
+        visualKey: "inventoryPeriod",
+        href: "/system-admin/inventory-period",
         icon: Calendar,
       },
       {
