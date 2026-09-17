@@ -66,7 +66,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
   // Department users source: users without department + users already in this department
   const currentDeptUserIds = new Set(
-    department?.department_users.map((u) => u.user_id) ?? [],
+    department?.department_users.map((u) => u.user?.id ?? "") ?? [],
   );
   const departmentUserSource: TransferItem[] = allUsers
     .filter(
@@ -87,19 +87,19 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
   const emailMap = new Map(allUsers.map((u) => [u.user_id, u.email]));
   const enrichedDeptUsers = (department?.department_users ?? []).map((u) => ({
     ...u,
-    email: emailMap.get(u.user_id) ?? "",
+    email: emailMap.get(u.user?.id ?? "") ?? "",
   }));
   const enrichedHodUsers = (department?.hod_users ?? []).map((u) => ({
     ...u,
-    email: emailMap.get(u.user_id) ?? "",
+    email: emailMap.get(u.user?.id ?? "") ?? "",
   }));
 
   // Target keys state
   const [deptUserTargetKeys, setDeptUserTargetKeys] = useState<string[]>(
-    () => department?.department_users.map((u) => u.user_id) ?? [],
+    () => department?.department_users.map((u) => u.user?.id ?? "") ?? [],
   );
   const [hodUserTargetKeys, setHodUserTargetKeys] = useState<string[]>(
-    () => department?.hod_users.map((u) => u.user_id) ?? [],
+    () => department?.hod_users.map((u) => u.user?.id ?? "") ?? [],
   );
 
   const f = useEntityForm<DepartmentFormValues>({
@@ -131,9 +131,11 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     // transfer สองชุดถือ state นอก RHF — กด Cancel ต้องคืนค่าเดิมให้ด้วย
     onResetExtra: () => {
       setDeptUserTargetKeys(
-        department?.department_users.map((u) => u.user_id) ?? [],
+        department?.department_users.map((u) => u.user?.id ?? "") ?? [],
       );
-      setHodUserTargetKeys(department?.hod_users.map((u) => u.user_id) ?? []);
+      setHodUserTargetKeys(
+        department?.hod_users.map((u) => u.user?.id ?? "") ?? [],
+      );
     },
   });
   const { form, isView, isAdd, isEdit, isDisabled } = f;
