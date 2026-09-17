@@ -85,6 +85,20 @@ export interface PrDetailRef {
   foc_qty: number;
 }
 
+/**
+ * เวอร์ชันฝั่งเขียนของ `PrDetailRef` — payload ที่ frontend ส่งขึ้นยังเป็น
+ * `pr_detail_id` แบบ flat เหมือนเดิม (ไม่ได้แตะฝั่งเขียนตาม contract ของ task นี้)
+ * แยกจาก `PrDetailRef` (ฝั่งอ่าน object) เพราะสอง endpoint คนละทิศ ใช้ชื่อ field
+ * เดียวกัน (`pr_details`) แต่คนละ shape
+ */
+export interface PrDetailRefPayload {
+  pr_detail_id: string | null;
+  order_qty: number;
+  order_base_qty: number;
+  received_qty: number;
+  foc_qty: number;
+}
+
 export interface PoDetailPayload {
   doc_version?: number;
   sequence: number;
@@ -114,7 +128,7 @@ export interface PoDetailPayload {
   is_discount_adjustment: boolean;
   is_foc: boolean;
   foc_qty: number;
-  pr_details: PrDetailRef[];
+  pr_details: PrDetailRefPayload[];
   description: string;
   // แถวหนึ่ง = คลังเดียว — ของเดิมส่ง `locations[]` ซ้อนในแถว
   location_id: string | null;

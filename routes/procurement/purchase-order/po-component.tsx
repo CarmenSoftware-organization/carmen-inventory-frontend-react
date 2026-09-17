@@ -302,7 +302,7 @@ export default function PoComponent() {
         viewMode,
         columns: [
           { header: tfl("poNo"), value: (r) => r.po_no, width: 18 },
-          { header: tfl("vendor"), value: (r) => r.vendor_name, width: 26 },
+          { header: tfl("vendor"), value: (r) => r.vendor?.name, width: 26 },
           { header: tfl("poType"), value: (r) => r.po_type, width: 12 },
           { header: tfl("orderDate"), value: (r) => r.order_date, width: 12 },
           {
@@ -318,7 +318,7 @@ export default function PoComponent() {
           },
           {
             header: tfl("currency"),
-            value: (r) => r.currency_code ?? "",
+            value: (r) => r.currency?.code ?? "",
             width: 10,
           },
           {

@@ -4,7 +4,7 @@ import type { TranslationFn } from "@/lib/i18n-schema";
 import type {
   PurchaseOrder,
   PoDetailPayload,
-  PrDetailRef,
+  PrDetailRefPayload,
 } from "@/types/purchase-order";
 
 const prDetailSchema = z.object({
@@ -156,7 +156,7 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   current_stage_status: "pending",
   stage_status: "",
   stage_message: "",
-  pr_details: [] as PrDetailRef[],
+  pr_details: [] as PrDetailRefPayload[],
   // แถวหนึ่ง = คลังเดียว — แถวใหม่เริ่มด้วยคลังว่าง ให้ validate แดงเองตอน save
   // (location_id ว่าง = required) ไม่ใช่ปล่อยผ่านแล้วไปตายที่ backend
   location_id: null as string | null,
@@ -206,20 +206,20 @@ export function getDefaultValues(
   if (po) {
     return {
       doc_version: po.doc_version,
-      workflow_id: po.workflow_id ?? "",
-      vendor_id: po.vendor_id ?? "",
-      vendor_name: po.vendor_name ?? "",
+      workflow_id: po.workflow?.id ?? "",
+      vendor_id: po.vendor?.id ?? "",
+      vendor_name: po.vendor?.name ?? "",
       delivery_date: po.delivery_date ?? "",
-      currency_id: po.currency_id ?? "",
-      currency_code: po.currency_code ?? "",
+      currency_id: po.currency?.id ?? "",
+      currency_code: po.currency?.code ?? "",
       exchange_rate: po.exchange_rate ?? 1,
       description: po.description ?? "",
       order_date: po.order_date ?? "",
-      credit_term_id: po.credit_term_id ?? "",
-      credit_term_name: po.credit_term_name ?? "",
+      credit_term_id: po.credit_term?.id ?? "",
+      credit_term_name: po.credit_term?.name ?? "",
       credit_term_value: po.credit_term_value ?? 0,
-      buyer_id: po.buyer_id ?? "",
-      buyer_name: po.buyer_name ?? "",
+      buyer_id: po.buyer?.id ?? "",
+      buyer_name: po.buyer?.name ?? "",
       email: po.email ?? "",
       remarks: po.remarks ?? "",
       // response ใหม่ไม่มี `note` ที่หัวเอกสารแล้ว — ฟอร์มยังมีช่องนี้อยู่
@@ -230,17 +230,17 @@ export function getDefaultValues(
           id: d.id,
           doc_version: d.doc_version,
           description: d.description ?? "",
-          product_id: d.product_id,
-          product_code: d.product_code ?? "",
-          product_name: d.product_name,
-          product_local_name: d.product_local_name ?? "",
+          product_id: d.product?.id ?? null,
+          product_code: d.product?.code ?? "",
+          product_name: d.product?.name ?? "",
+          product_local_name: d.product?.local_name ?? "",
           product_sku: d.product_sku ?? "",
-          order_unit_id: d.order_unit_id ?? null,
-          order_unit_name: d.order_unit_name ?? "",
+          order_unit_id: d.order_unit?.id ?? null,
+          order_unit_name: d.order_unit?.name ?? "",
           order_unit_conversion_factor: d.order_unit_conversion_factor ?? 1,
           order_qty: d.order_qty,
-          base_unit_id: d.base_unit_id ?? null,
-          base_unit_name: d.base_unit_name ?? "",
+          base_unit_id: d.base_unit?.id ?? null,
+          base_unit_name: d.base_unit?.name ?? "",
           base_qty: d.base_qty ?? d.order_qty,
           price:
             d.price ??
@@ -250,8 +250,8 @@ export function getDefaultValues(
           sub_total_price: d.sub_total_price ?? 0,
           net_amount: d.net_amount ?? 0,
           total_price: d.total_price ?? 0,
-          tax_profile_id: d.tax_profile_id ?? null,
-          tax_profile_name: d.tax_profile_name ?? "",
+          tax_profile_id: d.tax_profile?.id ?? null,
+          tax_profile_name: d.tax_profile?.name ?? "",
           tax_rate: d.tax_rate ?? 0,
           tax_amount: d.tax_amount ?? 0,
           discount_rate: d.discount_rate ?? 0,
@@ -260,18 +260,28 @@ export function getDefaultValues(
           current_stage_status: d.current_stage_status ?? "pending",
           stage_status: "",
           stage_message: "",
-          pr_details: d.pr_details ?? [],
+          // pr_details ของแถวนี้เป็น object (pr_detail: EntityRef|null) จาก detail
+          // endpoint — ฟอร์มเก็บฟิลด์เดิม (pr_detail_id แบบ flat) เพราะ payload ที่
+          // ส่งกลับก็ยังเป็น flat เหมือนเดิม (ดู mapItemToPayload/PrDetailRefPayload)
+          pr_details: (d.pr_details ?? []).map((pr) => ({
+            pr_detail_id: pr.pr_detail?.id ?? null,
+            order_qty: pr.order_qty,
+            order_base_qty: pr.order_base_qty,
+            received_qty: pr.received_qty,
+            foc_qty: pr.foc_qty,
+          })),
           history: d.history,
           // แถวหนึ่ง = คลังเดียว — ค่าพวกนี้เคยอยู่ใน locations[0] ตอน backend ยัง group
-          location_id: d.location_id ?? null,
-          location_code: d.location_code ?? "",
-          location_name: d.location_name ?? "",
-          delivery_point_id: d.delivery_point_id ?? null,
-          delivery_point_name: d.delivery_point_name ?? "",
+          location_id: d.location?.id ?? null,
+          location_code: d.location?.code ?? "",
+          location_name: d.location?.name ?? "",
+          delivery_point_id: d.delivery_point?.id ?? null,
+          delivery_point_name: d.delivery_point?.name ?? "",
           comment: d.comment ?? "",
           foc_qty: d.foc_qty ?? 0,
-          foc_unit_id: d.foc_unit_id ?? null,
-          foc_unit_name: d.foc_unit_name ?? "",
+          // ไม่มี foc_unit บน wire เลย (ดูคอมเมนต์ที่ PurchaseOrderDetail) — ตั้งว่างไว้
+          foc_unit_id: null as string | null,
+          foc_unit_name: "",
           // ยอดที่รับแล้วอยู่ใน pr_details ไม่ได้อยู่บนแถว — รวมทุกใบ PR ที่อ้างถึง
           received_qty: (d.pr_details ?? []).reduce(
             (sum, pr) => sum + (pr.received_qty ?? 0),

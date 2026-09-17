@@ -65,8 +65,8 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
           />
         </ListCardRow>
       )}
-      {item.vendor_name && (
-        <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>
+      {item.vendor?.name && (
+        <ListCardRow label={tfl("vendor")}>{item.vendor.name}</ListCardRow>
       )}
       {item.delivery_date && (
         <ListCardRow label={tfl("deliveryDate")}>
@@ -89,9 +89,9 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
         <ListCardRow label={tfl("totalAmount")}>
           <span className="font-semibold tabular-nums">
             {formatCurrency(Number(amount))}
-            {item.currency_code && (
+            {item.currency?.code && (
               <span className="text-muted-foreground ml-1 font-normal">
-                {item.currency_code}
+                {item.currency.code}
               </span>
             )}
           </span>
