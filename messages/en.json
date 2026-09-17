@@ -3980,6 +3980,8 @@
       "tabPayment": "Payment",
       "tabExtraCost": "Extra Cost",
       "tabStock": "Stock Movement",
+      "refDocs": "Source documents",
+      "refDocsComingSoon": "Source documents for this line are not available yet",
       "stockComingSoon": "Stock movement is not available yet",
       "stockNeedsCommitted": "Stock movement shows after this receipt is committed",
       "docInfo": "Document Information",
