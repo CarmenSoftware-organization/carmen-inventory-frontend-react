@@ -1,4 +1,5 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
@@ -14,18 +15,13 @@ export interface PriceListActiveVendor {
 export interface PriceListDetailItem {
   id: string;
   sequence_no: number;
-  product_id: string;
-  product_name: string;
-  product_local_name: string;
-  product_code?: string;
+  product: EntityRef | null;
   product_sku?: string;
-  unit_id: string;
-  unit_name: string | null;
+  unit: EntityRef | null;
   moq_qty: number;
   price: number;
   price_without_tax: number;
-  tax_profile_id: string;
-  tax_profile_name: string | null;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   tax_amt: number;
   lead_time_days: number;
@@ -47,9 +43,9 @@ export interface PriceList {
   name: string;
   status: PriceListStatus;
   description: string;
-  vendor: { id: string; name: string };
+  vendor: EntityRef | null;
   // backend GET-by-id returns only { id, code } — name is not sent
-  currency: { id: string; code: string; name?: string };
+  currency: EntityRef | null;
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];

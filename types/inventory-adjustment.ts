@@ -1,4 +1,5 @@
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 export type InventoryAdjustmentType = "stock-in" | "stock-out";
 export type InventoryAdjustmentStatus =
@@ -17,10 +18,7 @@ export const getAdjustmentType = (
 interface InventoryAdjustmentDetail {
   id: string;
   sequence_no: number;
-  product_id: string;
-  product_name: string;
-  product_code: string;
-  product_local_name: string;
+  product: EntityRef | null;
   product_sku: string;
   description: string | null;
   qty: number;
@@ -45,13 +43,10 @@ export interface InventoryAdjustment {
   si_date?: string;
   so_date?: string;
   description: string;
-  adjustment_type_id: string;
-  adjustment_type_code: string;
-  adjustment_type_name: string;
+  adjustment_type: EntityRef | null;
   doc_status: InventoryAdjustmentStatus;
   doc_version: number;
-  location_id?: string;
-  location_name?: string;
+  location?: EntityRef | null;
   stock_in_detail?: InventoryAdjustmentDetail[];
   stock_out_detail?: InventoryAdjustmentDetail[];
   item_count?: number;

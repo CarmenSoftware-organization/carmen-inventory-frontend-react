@@ -4,6 +4,7 @@ import type { Audit } from "./audit";
 import { lastActionSchema } from "./last-action";
 import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
+import type { EntityRef } from "./entity-ref";
 
 type PurchaseRequestStatus =
   | "draft"
@@ -35,44 +36,33 @@ export enum PR_ITEM_STAGE_STATUS {
 interface PurchaseRequestDetail
   extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
-  purchase_request_id: string;
+  purchase_request: EntityRef | null;
   sequence_no: number;
-  location_id: string;
-  location_code: string;
-  location_name: string;
+  location: EntityRef | null;
   location_type?: string;
-  delivery_point_id: string;
-  delivery_point_name: string;
+  delivery_point: EntityRef | null;
   delivery_date: string | null;
-  product_id: string;
-  product_code?: string;
-  product_name: string;
-  product_local_name: string | null;
-  inventory_unit_id: string;
-  inventory_unit_name: string;
+  product_sku?: string;
+  product: EntityRef | null;
+  inventory_unit: EntityRef | null;
   description: string | null;
   comment: string | null;
-  vendor_id: string | null;
-  vendor_name: string | null;
-  pricelist_detail_id: string | null;
+  vendor: EntityRef | null;
+  pricelist_detail: EntityRef | null;
   pricelist_no: string | null;
   pricelist_unit: string | null;
   pricelist_price: number;
   pricelist_type: string;
-  currency_id: string;
-  currency_code: string | null;
+  currency: EntityRef | null;
   currency_decimal_places?: number;
   exchange_rate: number;
   exchange_rate_date: string | null;
   requested_qty: number;
-  requested_unit_id: string;
-  requested_unit_name: string;
+  requested_unit: EntityRef | null;
   approved_qty: number;
-  approved_unit_id: string;
-  approved_unit_name: string;
+  approved_unit: EntityRef | null;
   foc_qty: number;
-  foc_unit_id: string;
-  foc_unit_name: string;
+  foc_unit: EntityRef | null;
   unit_price: number;
   state_status: string;
   current_stage_status: string;
@@ -95,33 +85,24 @@ interface PrItemHistoryEntry {
 export interface PurchaseRequestTemplateDetail
   extends TaxFields, DiscountFields {
   id: string;
-  purchase_request_template_id: string;
-  location_id: string;
-  location_code: string;
-  location_name: string;
+  purchase_request_template: EntityRef | null;
+  location: EntityRef | null;
   location_type?: string;
-  delivery_point_id: string;
-  delivery_point_name: string;
-  product_id: string;
-  product_code: string;
-  product_name: string;
-  product_local_name: string;
-  inventory_unit_id: string;
-  inventory_unit_name: string;
+  delivery_point: EntityRef | null;
+  product_sku?: string | null;
+  product: EntityRef | null;
+  inventory_unit: EntityRef | null;
   description: string | null;
   comment: string | null;
-  currency_id: string;
-  currency_code: string | null;
+  currency: EntityRef | null;
   exchange_rate: number;
   exchange_rate_date: string | null;
   requested_qty: number;
-  requested_unit_id: string;
-  requested_unit_name: string;
+  requested_unit: EntityRef | null;
   requested_unit_conversion_factor: number;
   requested_base_qty: number;
   foc_qty: number;
-  foc_unit_id: string;
-  foc_unit_name: string;
+  foc_unit: EntityRef | null;
   foc_unit_conversion_factor: number;
   foc_base_qty: number;
   base_tax_amount: number;
@@ -136,10 +117,9 @@ export interface PurchaseRequestTemplate {
   id: string;
   name: string;
   description: string;
-  department_id: string;
-  department_name: string;
-  workflow_id: string;
-  workflow_name: string;
+  // ยืนยันจาก payload จริง (findOne) ว่า header มีแค่ workflow — ไม่มี department
+  // เลย (ของเดิม department_id/department_name เป็นฟิลด์ที่ไม่เคยมีจริงบน wire)
+  workflow: EntityRef | null;
   info: Record<string, unknown>;
   is_active: boolean;
   doc_version?: number;
@@ -171,21 +151,17 @@ export interface PurchaseRequest {
   description: string;
   doc_status: PurchaseRequestStatus;
   role: string;
-  workflow_id: string;
-  workflow_name: string;
+  workflow: EntityRef | null;
   workflow_current_stage: string;
   workflow_next_stage: string;
   workflow_previous_stage: string;
   workflow_history: WorkflowHistoryEntry[];
   last_action?: LastAction | null;
-  requestor_id: string;
-  requestor_name: string;
-  department_id: string;
-  department_code: string;
-  department_name: string;
-  vendor_id: string;
-  vendor_code: string;
-  vendor_name: string;
+  requestor: EntityRef | null;
+  department: EntityRef | null;
+  // ยืนยันจาก payload จริง (findOne) ว่า header ไม่มี vendor เลย (ของเดิม
+  // vendor_id/vendor_code/vendor_name เป็นฟิลด์ที่ไม่เคยมีจริงบน wire — vendor
+  // อยู่ระดับ line item เท่านั้น ดู PurchaseRequestDetail.vendor)
   purchase_request_detail: PurchaseRequestDetail[];
   base_total_amount: number;
   info: Record<string, unknown>;

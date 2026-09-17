@@ -2,6 +2,7 @@ import type { ItemMoneyFields } from "./shared-item";
 import type { WorkflowHistoryEntry } from "./purchase-request";
 import type { Audit } from "./audit";
 import type { LastAction } from "./last-action";
+import type { EntityRef } from "./entity-ref";
 
 export enum PO_STATUS {
   DRAFT = "draft",
@@ -25,21 +26,15 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
   stage_status: string | null;
   current_stage_status: string;
   description: string;
-  product_id: string;
-  product_code: string;
-  product_name: string;
-  product_local_name: string;
+  product: EntityRef | null;
   product_sku: string;
-  order_unit_id: string;
-  order_unit_name: string;
+  order_unit: EntityRef | null;
   order_unit_conversion_factor: number;
   order_qty: number;
-  base_unit_id: string;
-  base_unit_name: string;
+  base_unit: EntityRef | null;
   base_qty: number;
   price: number;
-  tax_profile_id: string | null;
-  tax_profile_name: string;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   tax_amount: number;
   is_foc: boolean;
@@ -53,19 +48,15 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
    * ของเดิมเป็น `locations: PoDetailLocation[]` ซ้อนอยู่ในแถว แล้ว `order_qty`
    * ระดับแถวคือผลรวมของทุก location — ตอนนี้ค่าพวกนี้อยู่บนแถวตรง ๆ
    */
-  location_id: string | null;
-  location_code: string | null;
-  location_name: string | null;
-  delivery_point_id: string | null;
-  delivery_point_name: string | null;
+  location: EntityRef | null;
+  delivery_point: EntityRef | null;
   /**
    * ฟิลด์ที่ frontend ส่งขึ้นแล้วแต่ response ยังไม่ส่งกลับมา — ประกาศเป็น optional
    * ตามความจริง ไม่ใช่ตามที่อยากให้เป็น (`getDefaultValues` เติมค่าว่างให้อยู่แล้ว)
    */
   comment?: string | null;
   foc_qty: number;
-  foc_unit_id?: string | null;
-  foc_unit_name?: string | null;
+  foc_unit: EntityRef | null;
   base_sub_total_price?: number;
   base_net_amount?: number;
   base_total_price?: number;
@@ -85,7 +76,7 @@ export interface PoItemHistoryEntry {
 }
 
 export interface PrDetailRef {
-  pr_detail_id: string | null;
+  pr_detail: EntityRef | null;
   order_qty: number;
   order_base_qty: number;
   received_qty: number;
@@ -170,31 +161,29 @@ export interface PurchaseOrder {
   po_no: string;
   po_status: PO_STATUS;
   po_type: string;
-  workflow_id: string | null;
-  workflow_name: string;
+  // list endpoint: display-only string, ไม่มี workflow_id คู่กัน (ยืนยันจาก payload จริง)
+  workflow_name?: string;
   workflow_current_stage: string | null;
   workflow_previous_stage: string | null;
   workflow_next_stage: string | null;
   workflow_history?: WorkflowHistoryEntry[];
   last_action?: LastAction | null;
-  vendor_id: string;
-  vendor_name: string;
+  vendor: EntityRef | null;
   delivery_date: string;
-  currency_id: string;
-  currency_code: string;
+  currency: EntityRef | null;
   exchange_rate: number;
   description: string;
   order_date: string;
-  credit_term_id: string | null;
-  credit_term_name: string | null;
+  credit_term: EntityRef | null;
   credit_term_value: number;
-  buyer_id: string;
-  buyer_name: string;
+  // list endpoint: display-only string, ไม่มี buyer_id คู่กัน (ยืนยันจาก payload จริง)
+  buyer_name?: string;
   email: string;
   remarks: string;
   approval_date: string | null;
-  vendor?: { id: string; name: string };
-  currency?: { id: string; code: string };
+  // detail endpoint เท่านั้น — list ไม่ส่งมาเลย (ไม่มี buyer_name คู่กันแบบ object)
+  buyer?: EntityRef | null;
+  workflow?: EntityRef | null;
   user_action?: Record<string, unknown>;
   info?: Record<string, unknown>;
   doc_version: number;
