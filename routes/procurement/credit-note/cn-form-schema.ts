@@ -119,7 +119,7 @@ export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
             ctx.addIssue({
               code: "custom",
               path: ["items", index, "net_amount"],
-              message: tv("positive", { field: tf("cnAmount") }),
+              message: tv("positive", { field: tf("netAmount") }),
             });
           }
           return;

@@ -1071,7 +1071,6 @@
     "receivedQty": "จำนวนรับ",
     "received": "รับ",
     "returnQty": "คืน",
-    "cnAmount": "ยอดลดหนี้",
     "receivedAt": "วันที่รับ",
     "remaining": "คงเหลือ",
     "receivedUnit": "หน่วยรับ",
@@ -3838,6 +3837,7 @@
       }
     },
     "creditNote": {
+      "netOrCnAmount": "สุทธิ/ยอดลดหนี้",
       "entity": "ใบลดหนี้",
       "title": "ใบลดหนี้",
       "desc": "การคืนของหรือขอเงินคืนจากผู้ขายหลังรับของ ทั้งคืนของและปรับราคา",
@@ -3890,10 +3890,8 @@
       "selectGrnFirst": "เลือกใบรับของ (GRN) ก่อน รายการที่คืนได้มาจากของที่รับเข้าตามใบนั้น",
       "nItemsSelected": "เลือก {count} รายการ",
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
-      "cnAmount": "จำนวนลดหนี้",
       "submitTitle": "ส่งใบลดหนี้",
-      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?",
-      "returnLine": "คืน"
+      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",

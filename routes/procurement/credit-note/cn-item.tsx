@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { BoxIcon, Plus } from "lucide-react";
+import { BoxIcon, ChevronsDownUp, ChevronsUpDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -29,6 +29,7 @@ interface Props {
 export function CnItem({ form, disabled }: Props) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");
+  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const grnId =
     useWatch({ control: form.control, name: "grn_id" }) || undefined;
@@ -184,6 +185,25 @@ export function CnItem({ form, disabled }: Props) {
     setAddOpen(true);
   };
 
+  const expandAction = itemFields.length > 0 && (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() => table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())}
+    >
+      {table.getIsAllRowsExpanded() ? (
+        <>
+          <ChevronsDownUp /> {tc("collapseAll")}
+        </>
+      ) : (
+        <>
+          <ChevronsUpDown /> {tc("expandAll")}
+        </>
+      )}
+    </Button>
+  );
+
   const addAction = !disabled && (
     <Button
       type="button"
@@ -199,7 +219,10 @@ export function CnItem({ form, disabled }: Props) {
 
   return (
     <div className="space-y-2 pt-2">
-      <div className="flex items-center justify-end">{addAction}</div>
+      <div className="flex items-center justify-end gap-2">
+        {expandAction}
+        {addAction}
+      </div>
       {itemsError && (
         <p className="text-destructive text-xs" role="alert">
           {itemsError}

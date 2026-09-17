@@ -25,3 +25,23 @@ export function GrnAmountCell({
     </span>
   );
 }
+
+/** คอลัมน์ Tax แถวหลัก — โชว์ชื่อโปรไฟล์ภาษีอย่างเดียว (โปรไฟล์ยึดตาม GRN แก้ที่ CN ไม่ได้) */
+export function GrnTaxCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const profileName = useWatch({
+    control,
+    name: `items.${index}.tax_profile_name`,
+  });
+  return (
+    <span className="text-muted-foreground block truncate text-xs">
+      {profileName || "—"}
+    </span>
+  );
+}

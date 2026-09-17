@@ -137,7 +137,8 @@ export function CnForm({ creditNote }: CnFormProps) {
       grn_id: values.grn_id,
       grn_date: values.grn_date,
       vendor_id: values.vendor_id,
-      credit_note_number: values.cn_no,
+      // ใบใหม่ยังไม่มีเลขที่ — backend ออกให้ตอน create สำเร็จ ส่ง "" ไปไม่ได้
+      ...(values.cn_no ? { credit_note_number: values.cn_no } : {}),
       cn_date: values.cn_date,
       cn_reason_id: values.reason,
       reference_number: values.reference_number,

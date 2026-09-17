@@ -7,13 +7,6 @@ import {
   type CnItemAmounts,
 } from "../cn-item-compute";
 
-/**
- * ความกว้าง (px) ของคอลัมน์ — ใช้ร่วมกันระหว่างแถวหลัก (ยอดตาม GRN) กับแถวที่
- * กางออก (ฝั่งคืน) สองแถวจึงตรงคอลัมน์กัน วันไหนปรับก็ปรับที่นี่ที่เดียว
- *
- * discount/tax กว้างตาม combo ของฝั่งคืนเสมอ แม้แถวหลักจะเป็นตัวเลขล้วน —
- * ถ้าย่อตามแถวหลัก แถวกางจะไม่มีที่พอให้ [rate | ยอด | override]
- */
 export const CN_COL = {
   leading: 36,
   product: 200,
@@ -22,7 +15,7 @@ export const CN_COL = {
   price: 100,
   sub: 110,
   discount: COMBO_COL.discount,
-  net: 96,
+  net: 140,
   tax: COMBO_COL.tax,
   amount: 120,
   action: 40,
