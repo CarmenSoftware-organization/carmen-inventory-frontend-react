@@ -151,14 +151,28 @@ export interface PurchaseRequest {
   description: string;
   doc_status: PurchaseRequestStatus;
   role: string;
-  workflow: EntityRef | null;
+  // list endpoint (`GET /api/purchase-requests`): แถวจริงอยู่ที่ `data[].data[]`
+  // (multi-BU envelope) — `@CollapseRefs({'': PR_HEADER_REFS})` เดินจาก path ''
+  // ไปไม่ถึงแถวที่ซ้อนอยู่ **บั๊กเดียวกับที่ CLAUDE.md เอกสารไว้กับ audit
+  // enrichment** (`@EnrichAuditUsers()` เจอปัญหาเดียวกัน) ยืนยัน live 2/2 แถว
+  // (2026-09-17): ยังเป็นคู่ flat `_id`/`_name` แบบเดิมทั้งคู่ ไม่มี object เลย
+  workflow_id?: string;
+  workflow_name?: string;
   workflow_current_stage: string;
   workflow_next_stage: string;
   workflow_previous_stage: string;
   workflow_history: WorkflowHistoryEntry[];
   last_action?: LastAction | null;
-  requestor: EntityRef | null;
-  department: EntityRef | null;
+  // list: flat requestor_id/name, department_id/name (บั๊กเดียวกับ workflow ข้างบน)
+  requestor_id?: string;
+  requestor_name?: string;
+  department_id?: string;
+  department_name?: string;
+  // detail endpoint (`GET /api/{bu}/purchase-requests/{id}`) เท่านั้น — object
+  // จริง ยืนยัน live: ไม่มี requestor_id/department_name/workflow_id คู่กันเลย
+  workflow?: EntityRef | null;
+  requestor?: EntityRef | null;
+  department?: EntityRef | null;
   // ยืนยันจาก payload จริง (findOne) ว่า header ไม่มี vendor เลย (ของเดิม
   // vendor_id/vendor_code/vendor_name เป็นฟิลด์ที่ไม่เคยมีจริงบน wire — vendor
   // อยู่ระดับ line item เท่านั้น ดู PurchaseRequestDetail.vendor)
