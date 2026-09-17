@@ -1,0 +1,156 @@
+{
+  "_url": "/api/T02/purchase-orders/0301f3d6-0150-415e-a52d-de5b29db71e2",
+  "data": {
+    "approval_date": "2026-03-26T06:30:26.771Z",
+    "audit": {
+      "created": {
+        "at": "2026-03-26T06:30:11.544Z",
+        "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+        "name": "ณัฐพงษ์ ศรีสุข"
+      }
+    },
+    "buyer_id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+    "buyer_name": "ณัฐพงษ์ (FC) ศรีสุข",
+    "credit_term_id": null,
+    "credit_term_name": null,
+    "credit_term_value": 0,
+    "currency": {
+      "code": "THB",
+      "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+    },
+    "currency_code": "THB",
+    "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+    "delivery_date": "2026-03-30T17:00:00.000Z",
+    "description": "",
+    "doc_version": 3,
+    "email": "fc@zebra.com",
+    "exchange_rate": 1,
+    "id": "0301f3d6-0150-415e-a52d-de5b29db71e2",
+    "info": {},
+    "last_action": {
+      "at": "2026-03-26T06:30:26.771Z",
+      "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+      "name": "ณัฐพงษ์ (FC)  ศรีสุข",
+      "state": "approved"
+    },
+    "order_date": "2026-03-26T06:29:25.154Z",
+    "po_no": "PO20260300046",
+    "po_status": "approved",
+    "po_type": "manual",
+    "purchase_order_detail": [
+      {
+        "base_net_amount": 0,
+        "base_qty": 12,
+        "base_sub_total_price": 0,
+        "base_total_price": 0,
+        "base_unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+        "base_unit_name": "BTL",
+        "current_stage_status": "",
+        "delivery_point_id": null,
+        "delivery_point_name": null,
+        "description": "Oishi Green Tea 180ml 8854698002011",
+        "discount_amount": 0,
+        "discount_rate": 0,
+        "doc_version": 3,
+        "foc_qty": 0,
+        "history": [
+          {
+            "message": "submit for approval",
+            "name": "Create Request",
+            "seq": 1,
+            "status": "submit",
+            "user": {
+              "id": "462a3bca-d0cd-4206-81de-db7b05f262d0"
+            }
+          },
+          {
+            "action": "approved",
+            "at": "2026-03-26T06:30:26.921Z",
+            "seq": 2,
+            "status": "approve",
+            "user": {
+              "id": "462a3bca-d0cd-4206-81de-db7b05f262d0"
+            }
+          }
+        ],
+        "id": "fc4f8145-e5bc-4736-9e12-32ce60404863",
+        "info": {},
+        "is_foc": false,
+        "location_code": "2FO03",
+        "location_id": "0731acf1-e04d-4648-b64d-cfbd34fa5d08",
+        "location_name": "Rooms-Front Office",
+        "net_amount": 120,
+        "order_qty": 12,
+        "order_unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+        "order_unit_name": "BTL",
+        "pr_details": [
+          {
+            "foc_qty": 0,
+            "order_base_qty": 0,
+            "order_qty": 12,
+            "pr_detail_id": null,
+            "received_qty": 0
+          }
+        ],
+        "price": 10,
+        "product_code": "11050028",
+        "product_id": "00ed6539-814a-4728-b033-15c5ff79d37d",
+        "product_local_name": "โออิชิ กรีนที 180ml  8854698002011",
+        "product_name": "Oishi Green Tea 180ml 8854698002011",
+        "product_sku": "11050028",
+        "sequence_no": 1,
+        "stages_status": [
+          {
+            "message": "submit for approval",
+            "name": "Create Request",
+            "seq": 1,
+            "status": "submit"
+          },
+          {
+            "message": "",
+            "name": "FC",
+            "seq": 2,
+            "status": "approve"
+          }
+        ],
+        "sub_total_price": 120,
+        "tax_amount": 0,
+        "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+        "tax_profile_name": "None",
+        "tax_rate": 0,
+        "total_price": 120
+      }
+    ],
+    "remarks": "",
+    "role": "view_only",
+    "total_amount": 120,
+    "user_action": [],
+    "vendor": {
+      "id": "01c7cfd5-3546-4b01-8f2a-2f04c8c285fc",
+      "name": "ปิยะ ขาวเล็ก"
+    },
+    "vendor_id": "01c7cfd5-3546-4b01-8f2a-2f04c8c285fc",
+    "vendor_name": "ปิยะ ขาวเล็ก",
+    "workflow_current_stage": "Completed",
+    "workflow_history": [
+      {
+        "action": "approved",
+        "at": "2026-03-26T06:30:26.771Z",
+        "current_stage": "FC",
+        "next_stage": "-",
+        "user": {
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ (FC)  ศรีสุข"
+        }
+      }
+    ],
+    "workflow_id": "0e90eca7-dba7-43da-ad09-f710b17827a7",
+    "workflow_name": "General",
+    "workflow_next_stage": "-",
+    "workflow_previous_stage": "FC"
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:44.187Z"
+}

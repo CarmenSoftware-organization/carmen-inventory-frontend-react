@@ -1,0 +1,147 @@
+{
+  "_url": "/api/T02/stock-outs?perpage=5",
+  "data": [
+    {
+      "adjustment_type_code": "O001",
+      "adjustment_type_id": "74b308a0-1249-4f9c-9b47-eb4ba3398659",
+      "adjustment_type_name": "โอนออก",
+      "audit": {
+        "created": {
+          "at": "2026-04-24T06:57:37.529Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-04-24T06:57:37.529Z"
+        }
+      },
+      "base_total_cost": 31,
+      "description": "",
+      "doc_status": "completed",
+      "id": "21f7aee4-3b83-4874-8ed6-464314f4af6c",
+      "item_count": 1,
+      "location_code": "1FB02",
+      "location_id": "3ad9d3e6-ca78-44de-9812-1f62adf26600",
+      "location_name": "F&B Main Kitchen",
+      "location_type": "inventory",
+      "so_date": "2026-03-30T23:59:59.000Z",
+      "so_no": "SO20260400001"
+    },
+    {
+      "adjustment_type_code": "cccc",
+      "adjustment_type_id": "3dacf434-32df-4ce3-9de2-a74db5dc7c2a",
+      "adjustment_type_name": "หาย",
+      "audit": {
+        "created": {
+          "at": "2026-08-31T06:26:37.629Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-08-31T06:26:38.053Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        }
+      },
+      "base_total_cost": 54.2,
+      "description": "rerun so (งวดปัจจุบัน)",
+      "doc_status": "completed",
+      "id": "2d62c168-886d-4f12-ab64-5eed01f95406",
+      "item_count": 1,
+      "location_code": "1AG01",
+      "location_id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+      "location_name": "A&G-Accounting",
+      "location_type": "inventory",
+      "so_date": "2026-05-15T00:00:00.000Z",
+      "so_no": "SO260500001"
+    },
+    {
+      "adjustment_type_code": "O001",
+      "adjustment_type_id": "74b308a0-1249-4f9c-9b47-eb4ba3398659",
+      "adjustment_type_name": "โอนออก",
+      "audit": {
+        "created": {
+          "at": "2026-04-24T10:28:10.033Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-04-24T10:28:10.033Z"
+        }
+      },
+      "base_total_cost": 64.02,
+      "description": "",
+      "doc_status": "completed",
+      "id": "3486da68-7826-4084-be9f-a5757d220edd",
+      "item_count": 1,
+      "location_code": "1FB02",
+      "location_id": "3ad9d3e6-ca78-44de-9812-1f62adf26600",
+      "location_name": "F&B Main Kitchen",
+      "location_type": "inventory",
+      "so_date": "2026-03-30T23:59:59.000Z",
+      "so_no": "SO20260400003"
+    },
+    {
+      "adjustment_type_code": "O001",
+      "adjustment_type_id": "74b308a0-1249-4f9c-9b47-eb4ba3398659",
+      "adjustment_type_name": "โอนออก",
+      "audit": {
+        "created": {
+          "at": "2026-06-17T08:51:07.545Z",
+          "id": "d3ba9c08-162f-4e81-8337-75d3d56f6aff",
+          "name": "Armando Ebert"
+        },
+        "updated": {
+          "at": "2026-06-17T08:51:07.545Z"
+        }
+      },
+      "base_total_cost": 550,
+      "description": "COST-SCENARIO P1 SO 5 @avg110",
+      "doc_status": "completed",
+      "id": "4e236936-f34f-4418-a522-df6d45c6b655",
+      "item_count": 1,
+      "location_code": "1AG01",
+      "location_id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+      "location_name": "A&G-Accounting",
+      "location_type": "inventory",
+      "so_date": null,
+      "so_no": "SO20260600001"
+    },
+    {
+      "adjustment_type_code": "O001",
+      "adjustment_type_id": "74b308a0-1249-4f9c-9b47-eb4ba3398659",
+      "adjustment_type_name": "โอนออก",
+      "audit": {
+        "created": {
+          "at": "2026-06-18T03:07:35.412Z",
+          "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+          "name": "Admin Fernando Torres"
+        },
+        "updated": {
+          "at": "2026-06-18T03:07:35.412Z"
+        }
+      },
+      "base_total_cost": 1200,
+      "description": "COST-SCEN T02 c3 out",
+      "doc_status": "completed",
+      "id": "6ced27df-d7db-4422-b81b-425f194d8cee",
+      "item_count": 1,
+      "location_code": "1AG01",
+      "location_id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+      "location_name": "A&G-Accounting",
+      "location_type": "inventory",
+      "so_date": "2026-06-18T00:00:00.000Z",
+      "so_no": "SO20260600007"
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 3,
+    "perpage": 5,
+    "total": 13
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:45.507Z"
+}

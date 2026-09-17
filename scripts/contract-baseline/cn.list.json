@@ -1,0 +1,160 @@
+{
+  "_url": "/api/T02/credit-notes?perpage=5",
+  "data": [
+    {
+      "audit": {
+        "created": {
+          "at": "2026-07-14T07:24:21.032Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-07-17T07:37:57.831Z",
+          "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+          "name": "Admin Fernando Torres"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "cn_date": "2026-07-14T07:07:47.637Z",
+      "cn_no": "CN26070001",
+      "cn_reason_description": "แตกแล้วแตกอีก",
+      "cn_reason_name": "จานแตก",
+      "credit_note_type": "quantity_return",
+      "currency_code": "THB",
+      "description": "",
+      "doc_status": "completed",
+      "exchange_rate": 1,
+      "id": "2494f2ea-e5e8-4dac-9333-67e94a3d5b1f",
+      "net_amount": 20,
+      "total_amount": 20,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-08-04T10:49:57.093Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-08-04T11:10:30.835Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "cn_date": "2026-08-04T10:47:33.529Z",
+      "cn_no": "CN26080004",
+      "cn_reason_description": "Items received were damaged during transit",
+      "cn_reason_name": "Damaged goods",
+      "credit_note_type": "quantity_return",
+      "currency_code": "THB",
+      "description": "",
+      "doc_status": "completed",
+      "exchange_rate": 1,
+      "id": "39221a9a-6964-43cc-a5ed-b437288472b9",
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-08-04T10:54:34.248Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-08-04T10:54:34.248Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "cn_date": "2026-08-04T10:54:11.764Z",
+      "cn_no": "CN26080005",
+      "cn_reason_description": "Items received were damaged during transit",
+      "cn_reason_name": "Damaged goods",
+      "credit_note_type": "amount_discount",
+      "currency_code": "THB",
+      "description": "",
+      "doc_status": "draft",
+      "exchange_rate": 1,
+      "id": "3a7ddb51-ee59-43d5-94d7-586869b3f6a0",
+      "net_amount": 44,
+      "total_amount": 44,
+      "vendor_name": "Daew"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-04-30T04:21:01.529Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-04-30T04:44:27.248Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "cn_date": "2026-04-30T04:20:02.803Z",
+      "cn_no": "CN26040001",
+      "cn_reason_description": "แตกแล้วแตกอีก",
+      "cn_reason_name": "จานแตก",
+      "credit_note_type": "quantity_return",
+      "currency_code": "THB",
+      "description": "",
+      "doc_status": "completed",
+      "exchange_rate": 1,
+      "id": "3b5cee0f-d836-4bce-a8fb-42a123345208",
+      "net_amount": 176,
+      "total_amount": 176,
+      "vendor_name": "NOK Work Permit&Visa (นาง รัตนา วิมาณ)"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-05-31T08:18:11.558Z",
+          "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+          "name": "Admin Fernando Torres"
+        },
+        "updated": {
+          "at": "2026-05-31T08:18:17.885Z",
+          "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+          "name": "Admin Fernando Torres"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "cn_date": "2026-05-31T08:15:35.728Z",
+      "cn_no": "CN26050001",
+      "cn_reason_description": "Items received were damaged during transit",
+      "cn_reason_name": "Damaged goods",
+      "credit_note_type": "quantity_return",
+      "currency_code": "THB",
+      "description": "",
+      "doc_status": "completed",
+      "exchange_rate": 1,
+      "id": "5b1ee504-b8b5-48f9-859e-54cc81f7196a",
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 3,
+    "perpage": 5,
+    "total": 14
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:44.754Z"
+}

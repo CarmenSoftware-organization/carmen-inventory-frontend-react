@@ -1,0 +1,319 @@
+{
+  "_url": "/api/config/T02/products?perpage=5",
+  "data": [
+    {
+      "account_codes": [
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "inventory"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "cogs"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "revenue"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "purchase"
+        }
+      ],
+      "audit": {
+        "created": {
+          "at": "2026-04-22T03:35:41.352Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-04-22T03:35:41.352Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "code": "010010001",
+      "default_ingredient_unit": {
+        "id": "fc24d582-b677-462c-a216-e65eebdbabb8",
+        "name": "CASE"
+      },
+      "default_order_unit": {
+        "id": "800a443c-225d-47be-b4fb-fa27650e65a1",
+        "name": "CAN"
+      },
+      "description": "เรือดำน้ำขนาดกลางสำหรับภารกิจลาดตระเวนและการสำรวจใต้ทะเล ระบบขับเคลื่อนไฟฟ้า เครื่องยนต์ดีเซล ความลึกสูงสุด 2,500 เมตร",
+      "doc_version": 0,
+      "id": "f7a2ede2-a468-4b90-b079-c563c8a4fbb0",
+      "inventory_unit_id": "ee8ab660-e48b-45b1-ba50-675acd9b2ed5",
+      "inventory_unit_name": "BOOK",
+      "local_name": "เรือดำน้ำนักล่า",
+      "name": "Submarine Hunter Class",
+      "primary_image": null,
+      "product_category": {
+        "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+        "name": "FOOD"
+      },
+      "product_item_group": {
+        "id": "e8575c8e-c7a9-476a-9275-8f6a60be39c0",
+        "name": "FOOD CAN & PICKLES"
+      },
+      "product_status_type": "active",
+      "product_sub_category": {
+        "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+        "name": "DRY FOOD"
+      }
+    },
+    {
+      "account_codes": [
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "inventory"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "cogs"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "revenue"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "purchase"
+        }
+      ],
+      "audit": {
+        "created": {
+          "at": "2026-03-02T08:58:05.810Z"
+        },
+        "updated": {
+          "at": "2026-03-02T08:58:05.810Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "code": "11000001",
+      "default_ingredient_unit": {
+        "id": "770bf762-72c1-4b16-97e9-4c5a4238d80e",
+        "name": "spoon"
+      },
+      "default_order_unit": {
+        "id": "9ab8e2a3-b9db-4d3b-a139-d275015c9e34",
+        "name": "LT"
+      },
+      "description": "",
+      "doc_version": 0,
+      "id": "37a9ac81-b0d8-4f77-a727-41ad5ae9144c",
+      "inventory_unit_id": "9ab8e2a3-b9db-4d3b-a139-d275015c9e34",
+      "inventory_unit_name": "LT",
+      "local_name": "เหล้าสาเก โอเซกิ 1.8 ลิตร",
+      "name": "Oseki Sake 1.8L",
+      "primary_image": null,
+      "product_category": {
+        "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+        "name": "FOOD"
+      },
+      "product_item_group": {
+        "id": "ab9da622-cfb8-4bfd-ac8c-a0c4042548ac",
+        "name": "SAUCE & SEASONING"
+      },
+      "product_status_type": "active",
+      "product_sub_category": {
+        "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+        "name": "DRY FOOD"
+      }
+    },
+    {
+      "account_codes": [
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "inventory"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "cogs"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "revenue"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "purchase"
+        }
+      ],
+      "audit": {
+        "created": {
+          "at": "2026-03-02T08:58:06.673Z"
+        },
+        "updated": {
+          "at": "2026-03-02T08:58:06.673Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        }
+      },
+      "code": "11000002",
+      "default_ingredient_unit": {},
+      "default_order_unit": {},
+      "description": null,
+      "doc_version": 0,
+      "id": "8d591a10-d4f7-4644-8640-61c5fcf88a78",
+      "inventory_unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+      "inventory_unit_name": "BTL",
+      "local_name": "น้ำมันงาใหญ่ 8851985315014",
+      "name": "Sesame oil 8851985315014",
+      "primary_image": null,
+      "product_category": {
+        "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+        "name": "FOOD"
+      },
+      "product_item_group": {
+        "id": "ab9da622-cfb8-4bfd-ac8c-a0c4042548ac",
+        "name": "SAUCE & SEASONING"
+      },
+      "product_status_type": "active",
+      "product_sub_category": {
+        "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+        "name": "DRY FOOD"
+      }
+    },
+    {
+      "account_codes": [
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "inventory"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "cogs"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "revenue"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "purchase"
+        }
+      ],
+      "audit": {
+        "created": {
+          "at": "2026-03-02T08:58:06.683Z"
+        },
+        "updated": {
+          "at": "2026-03-02T08:58:06.683Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        }
+      },
+      "code": "11000003",
+      "default_ingredient_unit": {},
+      "default_order_unit": {},
+      "description": null,
+      "doc_version": 0,
+      "id": "bab0c0fd-773a-4938-8204-e0f98582df37",
+      "inventory_unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+      "inventory_unit_name": "KG",
+      "local_name": "น้ำพริกเผา+ต้มยำ แม่ประนอม 3กก 8850487003108",
+      "name": "Grilled chili paste + Tom Yum Mae Pranom 3kg 8850487003108",
+      "primary_image": null,
+      "product_category": {
+        "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+        "name": "FOOD"
+      },
+      "product_item_group": {
+        "id": "ab9da622-cfb8-4bfd-ac8c-a0c4042548ac",
+        "name": "SAUCE & SEASONING"
+      },
+      "product_status_type": "active",
+      "product_sub_category": {
+        "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+        "name": "DRY FOOD"
+      }
+    },
+    {
+      "account_codes": [
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "inventory"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "cogs"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "revenue"
+        },
+        {
+          "account_code": null,
+          "account_name": null,
+          "account_type": "purchase"
+        }
+      ],
+      "audit": {
+        "created": {
+          "at": "2026-03-02T08:58:06.694Z"
+        },
+        "updated": {
+          "at": "2026-03-02T08:58:06.694Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        }
+      },
+      "code": "11000004",
+      "default_ingredient_unit": {},
+      "default_order_unit": {},
+      "description": null,
+      "doc_version": 0,
+      "id": "da314774-b97a-4402-b1b9-2c767accc282",
+      "inventory_unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+      "inventory_unit_name": "BTL",
+      "local_name": "น้ำมันน้ำพริกเผาแม่ประนอม 750cc.8850487050102",
+      "name": "Chili Oil 750cc.8850487050102",
+      "primary_image": null,
+      "product_category": {
+        "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+        "name": "FOOD"
+      },
+      "product_item_group": {
+        "id": "ab9da622-cfb8-4bfd-ac8c-a0c4042548ac",
+        "name": "SAUCE & SEASONING"
+      },
+      "product_status_type": "active",
+      "product_sub_category": {
+        "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+        "name": "DRY FOOD"
+      }
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 519,
+    "perpage": 5,
+    "total": 2594
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:47.026Z"
+}

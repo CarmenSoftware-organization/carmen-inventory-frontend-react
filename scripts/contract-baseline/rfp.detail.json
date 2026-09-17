@@ -1,0 +1,150 @@
+{
+  "_url": "/api/T02/request-for-pricings/08f6805a-7ccf-47b8-8b05-f19a0ffab770",
+  "data": {
+    "audit": {
+      "created": {
+        "at": "2026-07-27T08:39:27.334Z"
+      },
+      "updated": {
+        "at": "2026-07-27T08:39:27.334Z"
+      }
+    },
+    "custom_message": "",
+    "dimension": {},
+    "doc_version": 0,
+    "email_template_id": null,
+    "end_date": "2026-08-30T17:00:00.000Z",
+    "id": "08f6805a-7ccf-47b8-8b05-f19a0ffab770",
+    "info": {},
+    "name": "xxx",
+    "pricelist_template": {
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "id": "f0cc0158-260b-4ca2-b879-a4ca5148ba22",
+      "name": "ของสด",
+      "products": [
+        {
+          "id": "5238ec0f-9623-4fda-8266-b905362f7664",
+          "moq": [
+            {
+              "note": "",
+              "qty": 1,
+              "unit_id": "800a443c-225d-47be-b4fb-fa27650e65a1",
+              "unit_name": "CAN"
+            },
+            {
+              "note": "",
+              "qty": 100,
+              "unit_id": "800a443c-225d-47be-b4fb-fa27650e65a1",
+              "unit_name": "CAN"
+            }
+          ],
+          "product_code": "11090001",
+          "product_id": "49d7abca-2f39-4731-9c2e-96226523f56b",
+          "product_name": "Anchovies in Olive Oil 1"
+        },
+        {
+          "id": "23df2145-10df-4de0-8a31-5451d3498752",
+          "moq": [
+            {
+              "note": "",
+              "qty": 1,
+              "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+              "unit_name": "KG"
+            }
+          ],
+          "product_code": "11110005",
+          "product_id": "7ca94a95-19f3-4821-ace6-09bd6b45a9d3",
+          "product_name": "Pork loin"
+        },
+        {
+          "id": "29e35a30-d62a-446c-8336-43324c7d8c69",
+          "moq": [
+            {
+              "note": "",
+              "qty": 1,
+              "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+              "unit_name": "KG"
+            },
+            {
+              "note": "",
+              "qty": 2,
+              "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+              "unit_name": "KG"
+            }
+          ],
+          "product_code": "11110003",
+          "product_id": "6901a1c3-fb2e-47f7-af6b-f2270e7e226e",
+          "product_name": "Australian Sirloin"
+        }
+      ],
+      "status": "active",
+      "validity_period": 14,
+      "vendor_instructions": null
+    },
+    "start_date": "2026-07-26T17:00:00.000Z",
+    "vendors": [
+      {
+        "contact_email": "",
+        "contact_person": "",
+        "contact_phone": "",
+        "dimension": "",
+        "doc_version": 0,
+        "id": "5be22bcf-2840-4f56-850d-bcc21c08ae6e",
+        "info": {},
+        "pricelist": {
+          "id": "bfcf5d4b-6cab-49f5-a618-8a9956e4bbd4",
+          "name": "ของสด",
+          "no": "PL260700011",
+          "status": "draft"
+        },
+        "sequence_no": 1,
+        "url_token": "REDACTED",
+        "vendor_code": "K027",
+        "vendor_id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+        "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+      },
+      {
+        "contact_email": "daew@emai.com",
+        "contact_person": "Thitiphong Srisavat",
+        "contact_phone": "+998790864",
+        "dimension": "",
+        "doc_version": 0,
+        "id": "28fd6b5b-a858-4ef4-935a-03a67223ee42",
+        "info": {},
+        "pricelist": {
+          "id": "99b3cc51-8779-4eef-8ef4-245bf45b3c81",
+          "name": "ของสด",
+          "no": "PL260800003",
+          "status": "draft"
+        },
+        "sequence_no": 2,
+        "url_token": "REDACTED",
+        "vendor_code": "D001",
+        "vendor_id": "020e3662-4991-4346-a683-7a2a1abfb772",
+        "vendor_name": "Daew"
+      },
+      {
+        "contact_email": "",
+        "contact_person": "",
+        "contact_phone": "",
+        "dimension": "",
+        "doc_version": 0,
+        "id": "d09888e9-ea2b-47cc-ab90-c3253758a59c",
+        "info": {},
+        "pricelist": null,
+        "sequence_no": 3,
+        "url_token": "REDACTED",
+        "vendor_code": "R022",
+        "vendor_id": "07693177-c8cc-4f87-9796-c16b3aec48a3",
+        "vendor_name": "ริปู คงผลาญ นาย"
+      }
+    ]
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:46.766Z"
+}

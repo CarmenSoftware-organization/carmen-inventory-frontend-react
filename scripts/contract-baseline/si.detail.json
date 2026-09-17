@@ -1,0 +1,35 @@
+{
+  "_url": "/api/T02/stock-ins/02b1caaa-97c6-48b7-82dc-a652c03c0ba6",
+  "data": {
+    "adjustment_type_code": "I001",
+    "adjustment_type_id": "bcce2834-9202-4ed4-a8d5-e5019596286b",
+    "audit": {
+      "created": {
+        "at": "2026-03-16T05:29:39.431Z",
+        "id": "d3ba9c08-162f-4e81-8337-75d3d56f6aff",
+        "name": "Armando Ebert"
+      },
+      "updated": {
+        "at": "2026-03-16T05:29:39.431Z"
+      }
+    },
+    "description": "SI มาแล้วจ๊ะ",
+    "dimension": [],
+    "doc_status": "draft",
+    "doc_version": 0,
+    "id": "02b1caaa-97c6-48b7-82dc-a652c03c0ba6",
+    "info": {},
+    "location_code": null,
+    "location_id": "0731acf1-e04d-4648-b64d-cfbd34fa5d08",
+    "location_name": null,
+    "location_type": "direct",
+    "note": "test note SI",
+    "si_date": null,
+    "si_no": "SI20260300001",
+    "stock_in_detail": []
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:45.372Z"
+}

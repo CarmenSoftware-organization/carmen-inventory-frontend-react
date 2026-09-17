@@ -1,0 +1,354 @@
+{
+  "_url": "/api/config/T02/pricelists?perpage=5",
+  "data": [
+    {
+      "audit": {
+        "created": {
+          "at": "2026-07-21T02:13:35.989Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-07-21T02:13:35.989Z"
+        }
+      },
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "description": "",
+      "effectivePeriod": "Tue Jul 21 2026 00:00:00 GMT+0700 (Indochina Time) - Tue Jul 21 2026 00:00:00 GMT+0700 (Indochina Time)",
+      "id": "08bf57a1-1054-4831-8e17-8794c783e2d2",
+      "name": "aaaaa",
+      "no": "PL260700003",
+      "note": "",
+      "pricelist_detail": [
+        {
+          "description": null,
+          "dimension": [],
+          "id": "17f4aeae-dd61-48d6-8def-cc08e1713cef",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 4,
+          "moq_qty": 1,
+          "note": null,
+          "price": 22,
+          "price_without_tax": 22,
+          "product_code": "66070032",
+          "product_id": "00e6b852-1c65-4dce-963e-30f3ea928742",
+          "product_local_name": "ถุงดำ 30*40 บาง(10-12ถุง/กก)",
+          "product_name": "Black Garbage Bag – 30x40\", Thin Type (10–12 Bags/kg)",
+          "product_sku": "66070032",
+          "sequence_no": 1,
+          "tax_amt": 0,
+          "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+          "tax_profile_name": "None",
+          "tax_rate": 0,
+          "unit_id": "9c0efca8-4d7f-4b05-8da4-92adc6adc9ce",
+          "unit_name": "PACK"
+        }
+      ],
+      "status": "active",
+      "vendor": {
+        "id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+        "name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+      }
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-09-11T02:49:24.251Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-09-11T02:49:24.251Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "description": "",
+      "effectivePeriod": "Tue Sep 01 2026 00:00:00 GMT+0700 (Indochina Time) - Fri Sep 11 2026 00:00:00 GMT+0700 (Indochina Time)",
+      "id": "abed876f-eb8b-4c2a-b997-bf46b481f481",
+      "name": "adasdas",
+      "no": "PL260900007",
+      "note": "",
+      "pricelist_detail": [
+        {
+          "description": null,
+          "dimension": [],
+          "id": "069e7185-7079-41a9-8ef1-6f39de21349f",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 0,
+          "moq_qty": 1,
+          "note": null,
+          "price": 322,
+          "price_without_tax": 292.73,
+          "product_code": "11050028",
+          "product_id": "00ed6539-814a-4728-b033-15c5ff79d37d",
+          "product_local_name": "โออิชิ กรีนที 180ml  8854698002011",
+          "product_name": "Oishi Green Tea 180ml 8854698002011",
+          "product_sku": "11050028",
+          "sequence_no": 2,
+          "tax_amt": 29.27,
+          "tax_profile_id": "b52f12af-8a49-4b96-a03d-41691d53a38e",
+          "tax_profile_name": "VAT 10%",
+          "tax_rate": 10,
+          "unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+          "unit_name": "BTL"
+        },
+        {
+          "description": null,
+          "dimension": [],
+          "id": "06710190-ecd0-4f96-a500-e1c1686bb48d",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 0,
+          "moq_qty": 2,
+          "note": null,
+          "price": 233,
+          "price_without_tax": 233,
+          "product_code": "11050028",
+          "product_id": "00ed6539-814a-4728-b033-15c5ff79d37d",
+          "product_local_name": "โออิชิ กรีนที 180ml  8854698002011",
+          "product_name": "Oishi Green Tea 180ml 8854698002011",
+          "product_sku": "11050028",
+          "sequence_no": 1,
+          "tax_amt": 0,
+          "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+          "tax_profile_name": "None",
+          "tax_rate": 0,
+          "unit_id": "b5b22dba-fff4-4662-8e43-b25566402461",
+          "unit_name": "BTL"
+        }
+      ],
+      "status": "draft",
+      "vendor": {
+        "id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+        "name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+      }
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-03-06T09:21:55.339Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-03-06T09:21:55.339Z"
+        }
+      },
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "description": "",
+      "effectivePeriod": "Fri Mar 06 2026 00:00:00 GMT+0700 (Indochina Time) - Fri Mar 13 2026 00:00:00 GMT+0700 (Indochina Time)",
+      "id": "8753daf1-826d-4acc-89da-41c28f4fe05d",
+      "name": "Ahaha",
+      "no": "PL20260300002",
+      "note": "",
+      "pricelist_detail": [
+        {
+          "description": null,
+          "dimension": [],
+          "id": "a2548b9d-4aa7-44d5-b5f4-bbb48f47f0c1",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 12,
+          "moq_qty": 1,
+          "note": null,
+          "price": 0,
+          "price_without_tax": 0,
+          "product_code": "11110003",
+          "product_id": "6901a1c3-fb2e-47f7-af6b-f2270e7e226e",
+          "product_local_name": "เนื้อสันนอกออสเตรเลีย",
+          "product_name": "Australian Sirloin",
+          "product_sku": "11110003",
+          "sequence_no": 1,
+          "tax_amt": 0,
+          "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+          "tax_profile_name": "None",
+          "tax_rate": 0,
+          "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+          "unit_name": "KG"
+        }
+      ],
+      "status": "draft",
+      "vendor": {
+        "id": "43356a6d-9dc2-46e8-a85c-1d90b5ee8697",
+        "name": "แอดวานซ์ ไวร์เลส เน็ทเวอร์ค บจก."
+      }
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-03-03T10:38:45.922Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-03-03T10:38:45.922Z"
+        }
+      },
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "description": "",
+      "effectivePeriod": "Tue Mar 03 2026 00:00:00 GMT+0700 (Indochina Time) - Sat Mar 07 2026 00:00:00 GMT+0700 (Indochina Time)",
+      "id": "5437c106-f132-491c-aa78-a692fe078e83",
+      "name": "Avanched",
+      "no": "PL20260300001",
+      "note": "",
+      "pricelist_detail": [
+        {
+          "description": null,
+          "dimension": [],
+          "id": "a127ca61-35fd-424d-9d32-c70c6ce4edb2",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 5,
+          "moq_qty": 3,
+          "note": null,
+          "price": 131.61,
+          "price_without_tax": 123,
+          "product_code": "11110007",
+          "product_id": "afc96864-d7f4-478c-8a68-ec48e3a4f638",
+          "product_local_name": "หมูสันใน",
+          "product_name": "Pork tenderloin",
+          "product_sku": "11110007",
+          "sequence_no": 3,
+          "tax_amt": 8.61,
+          "tax_profile_id": "337d3a49-f9de-497d-af33-acf2b4cfc731",
+          "tax_profile_name": "Vat 7%",
+          "tax_rate": 7,
+          "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+          "unit_name": "KG"
+        },
+        {
+          "description": null,
+          "dimension": [],
+          "id": "75aeb0b9-51b8-47cb-89ce-d9d47e9be80b",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 5,
+          "moq_qty": 2,
+          "note": null,
+          "price": 111,
+          "price_without_tax": 111,
+          "product_code": "11110006",
+          "product_id": "6383cd94-6bd6-421d-8f40-e8192035af98",
+          "product_local_name": "หมูสามชั้น",
+          "product_name": "Pork belly",
+          "product_sku": "11110006",
+          "sequence_no": 2,
+          "tax_amt": 0,
+          "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+          "tax_profile_name": "None",
+          "tax_rate": 0,
+          "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+          "unit_name": "KG"
+        },
+        {
+          "description": null,
+          "dimension": [],
+          "id": "79fd3955-ac5a-4728-b1f3-2647794215cc",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 5,
+          "moq_qty": 1,
+          "note": null,
+          "price": 356.31,
+          "price_without_tax": 333,
+          "product_code": "11110006",
+          "product_id": "6383cd94-6bd6-421d-8f40-e8192035af98",
+          "product_local_name": "หมูสามชั้น",
+          "product_name": "Pork belly",
+          "product_sku": "11110006",
+          "sequence_no": 1,
+          "tax_amt": 23.31,
+          "tax_profile_id": "337d3a49-f9de-497d-af33-acf2b4cfc731",
+          "tax_profile_name": "Vat 7%",
+          "tax_rate": 7,
+          "unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+          "unit_name": "KG"
+        }
+      ],
+      "status": "active",
+      "vendor": {
+        "id": "43356a6d-9dc2-46e8-a85c-1d90b5ee8697",
+        "name": "แอดวานซ์ ไวร์เลส เน็ทเวอร์ค บจก."
+      }
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-07-21T02:14:17.614Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-07-21T02:14:17.614Z"
+        }
+      },
+      "currency": {
+        "code": "THB",
+        "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+      },
+      "description": "bbbbbb",
+      "effectivePeriod": "Tue Jul 21 2026 00:00:00 GMT+0700 (Indochina Time) - Thu Jul 23 2026 00:00:00 GMT+0700 (Indochina Time)",
+      "id": "77e3d711-b938-4bf0-9508-43e308d5f995",
+      "name": "bbbbb",
+      "no": "PL260700004",
+      "note": "",
+      "pricelist_detail": [
+        {
+          "description": null,
+          "dimension": [],
+          "id": "fb8abc23-1d8a-464b-932d-196ac8edb27d",
+          "info": {},
+          "is_active": true,
+          "lead_time_days": 4,
+          "moq_qty": 1,
+          "note": null,
+          "price": 22,
+          "price_without_tax": 22,
+          "product_code": "66070032",
+          "product_id": "00e6b852-1c65-4dce-963e-30f3ea928742",
+          "product_local_name": "ถุงดำ 30*40 บาง(10-12ถุง/กก)",
+          "product_name": "Black Garbage Bag – 30x40\", Thin Type (10–12 Bags/kg)",
+          "product_sku": "66070032",
+          "sequence_no": 1,
+          "tax_amt": 0,
+          "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+          "tax_profile_name": "None",
+          "tax_rate": 0,
+          "unit_id": "9c0efca8-4d7f-4b05-8da4-92adc6adc9ce",
+          "unit_name": "PACK"
+        }
+      ],
+      "status": "active",
+      "vendor": {
+        "id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+        "name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+      }
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 9,
+    "perpage": 5,
+    "total": 41
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:47.802Z"
+}

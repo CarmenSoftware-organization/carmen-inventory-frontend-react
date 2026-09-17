@@ -1,0 +1,92 @@
+{
+  "_url": "/api/T02/credit-notes/2494f2ea-e5e8-4dac-9333-67e94a3d5b1f",
+  "data": {
+    "audit": {
+      "created": {
+        "at": "2026-07-14T07:24:21.032Z",
+        "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+        "name": "ศิริวรรณ Purchase k ทองดี"
+      },
+      "updated": {
+        "at": "2026-07-17T07:37:57.831Z",
+        "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+        "name": "Admin Fernando Torres"
+      }
+    },
+    "cn_date": "2026-07-14T07:07:47.637Z",
+    "cn_no": "CN26070001",
+    "cn_reason": {
+      "description": "แตกแล้วแตกอีก",
+      "id": "2a3cd7f9-8a1e-414f-85dc-43fe3da71d2c",
+      "name": "จานแตก"
+    },
+    "credit_note_detail": [
+      {
+        "cn_amount": 0,
+        "description": null,
+        "discount_amount": 0,
+        "discount_rate": 0,
+        "doc_version": 0,
+        "id": "82baceb3-e126-47e3-9b60-1811a97a0f5a",
+        "is_discount_adjustment": false,
+        "is_tax_adjustment": false,
+        "location": {
+          "code": null,
+          "id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+          "name": "A&G-Accounting"
+        },
+        "net_amount": 20,
+        "note": null,
+        "price": 2,
+        "product": {
+          "code": "66070049",
+          "id": "00ee1962-98d2-45b4-a9a2-0af3444f2bc3",
+          "local_name": "หัวม็อบอลูมิเนียม 40cm./Norwex Mop Base Aluminium",
+          "name": "Aluminum Mop Base – 40 cm / Norwex",
+          "sku": "66070049"
+        },
+        "return_qty": 10,
+        "return_unit": {
+          "id": "18e9adef-351a-4923-9060-10d7c49ba6a6",
+          "name": "PCS"
+        },
+        "sequence_no": 1,
+        "tax_amount": 0,
+        "tax_profile": {
+          "id": null,
+          "name": null
+        },
+        "tax_rate": 0,
+        "total_price": 20
+      }
+    ],
+    "credit_note_type": "quantity_return",
+    "currency": {
+      "code": "THB",
+      "exchange_rate": 1,
+      "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+    },
+    "description": "",
+    "doc_status": "completed",
+    "doc_version": 1,
+    "grn": {
+      "date": "2026-03-02T03:00:00.000Z",
+      "id": "35228dcc-a52a-4fe0-bacd-03ffee1c2c41",
+      "no": "GRN20260300043"
+    },
+    "id": "2494f2ea-e5e8-4dac-9333-67e94a3d5b1f",
+    "invoice_date": null,
+    "invoice_no": "INV-PO-2603-02-9129",
+    "note": "",
+    "tax_invoice_date": "2026-07-13T17:00:00.000Z",
+    "tax_invoice_no": "TAX-TEST-001",
+    "vendor": {
+      "id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+      "name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    }
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:44.985Z"
+}

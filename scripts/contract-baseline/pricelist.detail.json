@@ -1,0 +1,54 @@
+{
+  "_url": "/api/config/T02/pricelists/08bf57a1-1054-4831-8e17-8794c783e2d2",
+  "data": {
+    "currency": {
+      "code": "THB",
+      "id": "93dabe25-1668-4c5b-bceb-3e0b83b78002"
+    },
+    "description": "",
+    "doc_version": 0,
+    "effectivePeriod": "Mon, 20 Jul 2026 17:00:00 GMT - Mon, 20 Jul 2026 17:00:00 GMT",
+    "id": "08bf57a1-1054-4831-8e17-8794c783e2d2",
+    "name": "aaaaa",
+    "no": "PL260700003",
+    "note": "",
+    "pricelist_detail": [
+      {
+        "description": null,
+        "dimension": [],
+        "doc_version": 0,
+        "id": "17f4aeae-dd61-48d6-8def-cc08e1713cef",
+        "info": {},
+        "is_active": true,
+        "is_preferred": true,
+        "lead_time_days": 4,
+        "moq_qty": 1,
+        "note": null,
+        "price": 22,
+        "price_without_tax": 22,
+        "product_code": "66070032",
+        "product_id": "00e6b852-1c65-4dce-963e-30f3ea928742",
+        "product_local_name": "ถุงดำ 30*40 บาง(10-12ถุง/กก)",
+        "product_name": "Black Garbage Bag – 30x40\", Thin Type (10–12 Bags/kg)",
+        "product_sku": "66070032",
+        "rating": 0,
+        "sequence_no": 1,
+        "tax_amt": 0,
+        "tax_profile_id": "8c21a430-6ae5-4a95-9545-dcb230b7f944",
+        "tax_profile_name": "None",
+        "tax_rate": 0,
+        "unit_id": "9c0efca8-4d7f-4b05-8da4-92adc6adc9ce",
+        "unit_name": "PACK"
+      }
+    ],
+    "status": "active",
+    "vendor": {
+      "id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+      "name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    }
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:48.043Z"
+}
