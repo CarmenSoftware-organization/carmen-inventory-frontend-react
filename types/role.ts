@@ -1,4 +1,5 @@
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 interface RolePermission {
   permission_id: string;
@@ -15,7 +16,9 @@ interface RolePermission {
  */
 export interface Role {
   id: string;
-  business_unit_id: string;
+  // ยืนยันจาก live `/application-roles` (list เท่านั้น — detail ไม่มีฟิลด์นี้เลย):
+  // business_unit เป็น object {id} ไม่มี name คู่กัน ยังไม่มี call site อ่านจริง
+  business_unit: EntityRef | null;
   name: string;
   description: string | null;
   permissions: { count: number };

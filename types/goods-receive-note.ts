@@ -125,7 +125,12 @@ export interface GoodsReceiveNote {
   credit_term_days: number | null;
   payment_due_date: string | null;
   is_active: boolean;
-  vendor: EntityRef | null;
+  // list endpoint: display-only string, ไม่มี vendor_id คู่กัน (ยืนยันจาก live
+  // 20/20 แถว — GRN_LIST_REFS ประกาศ vendor:['id','name'] ไว้จริงแต่ collapse
+  // ไม่มีวันทำงานเพราะไม่มี vendor_id ให้ trigger เหมือนเคส PO buyer_name)
+  vendor_name?: string;
+  // detail endpoint เท่านั้น
+  vendor?: EntityRef | null;
   currency: EntityRef | null;
   exchange_rate: number | null;
   exchange_rate_date: string | null;

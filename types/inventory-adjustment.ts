@@ -27,7 +27,7 @@ interface InventoryAdjustmentDetail {
    * flat string (แบบเดียวกับ product ดู types/product.ts) จึงประกาศไว้ทั้งสองทาง
    * และตอนอ่านต้อง fallback ให้ครบ ไม่งั้นคอลัมน์ Unit ว่างเปล่า
    */
-  inventory_unit?: { id: string; name: string };
+  inventory_unit?: EntityRef;
   inventory_unit_name?: string;
   cost_per_unit: number;
   total_cost: number;
@@ -43,9 +43,19 @@ export interface InventoryAdjustment {
   si_date?: string;
   so_date?: string;
   description: string;
-  adjustment_type: EntityRef | null;
+  // list endpoint (`/inventory-adjustments`, used by useInventoryAdjustment) — controller
+  // ไม่มี @CollapseRefs เลย (ยืนยันจาก live 20/20 แถว: flat ทุกแถว ไม่มี object เลย
+  // ต่างจาก stock-ins/stock-outs' own findOne ที่แปลงแล้ว) คงไว้ flat ตามจริง
+  adjustment_type_id: string;
+  adjustment_type_code: string;
+  adjustment_type_name: string;
   doc_status: InventoryAdjustmentStatus;
   doc_version: number;
+  location_id?: string;
+  location_name?: string;
+  // stock-ins/{id} · stock-outs/{id} เท่านั้น (ยืนยันจาก live) — ยังไม่มี call site
+  // ในแอปอ่านผ่าน field นี้จริง ประกาศไว้เผื่ออนาคต ไม่บังคับใคร
+  adjustment_type?: EntityRef | null;
   location?: EntityRef | null;
   stock_in_detail?: InventoryAdjustmentDetail[];
   stock_out_detail?: InventoryAdjustmentDetail[];
