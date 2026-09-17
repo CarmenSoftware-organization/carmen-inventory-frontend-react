@@ -1161,71 +1161,87 @@ git commit -m "refactor(dto): ย้าย DTO ที่เป็น plain class
 
 ---
 
-### Task 13: แปลง DTO กลุ่มเอกสาร
+### Task 13: กลไกฝั่งเขียน — `@ExpandRefs` + interceptor (เขียนใหม่ทั้ง task)
 
 **Files:**
-- Modify: DTO ของ purchase-order, purchase-request, purchase-request-template, good-received-note, store-requisition, stock-in, stock-out, credit-note ใน `apps/backend-gateway/src/common/dto/`
+- Create: `apps/backend-gateway/src/common/decorators/expand-refs.decorator.ts`
+- Create: `apps/backend-gateway/src/common/decorators/expand-refs.apply.ts`
+- Create: `apps/backend-gateway/src/common/context/expand-refs.context.ts` (ถ้าจำเป็น)
+- Create: `apps/backend-gateway/src/common/interceptors/expand-refs.interceptor.ts`
+- Modify: `apps/backend-gateway/src/app.module.ts` (ลงทะเบียน interceptor)
+- Modify: controller ของเอกสารหลัก (ติด `@ExpandRefs`)
 
-**Interfaces:**
-- Consumes: `expandRefs`, `entityRef`, `RefMap` จาก Task 3 · DTO ที่ย้ายไป createZodDto แล้วจาก Task 12
-- Produces: DTO ที่รับ object แล้วคลี่เป็น flat ก่อนส่งต่อ — micro-business ได้ payload หน้าตาเดิม
+**ทำไมต้องเขียนใหม่ — แผนเดิมใช้ไม่ได้**
 
-- [ ] **Step 1: แปลงทีละไฟล์**
+แผนเดิมให้ใส่ `expandRefs` เป็น `.transform()` ใน zod DTO แล้วพึ่ง `ZodValidationPipe`
+แต่ Task 12 พิสูจน์แล้วว่า **pipe มองเห็นเฉพาะ DTO ที่สร้างด้วย `createZodDto`** และยังเหลือ
+**146 binding ที่มองไม่เห็นโดยโครงสร้าง** (`@Body(): Record<string, unknown>` 112 จุด +
+inline literal/union/intersection อีก 34) ซึ่ง **75 จุดอยู่บน entity ที่เราแปลงพอดี** —
+PR save (`purchase-requests.controller.ts:1452`), RFP create/update, SI/SO/GRN update, PO
 
-```ts
-import { expandRefs, entityRef, type RefMap } from '../entity-ref';
+ถ้าทำตามแผนเดิม transform จะ **no-op เงียบบนเส้นทางเขียนหลักของระบบ** — บั๊กชนิดเดียวกับที่
+โปรเจกต์นี้เจอมาแล้ว 5 ครั้ง
 
-const DETAIL_REFS = {
-  delivery_point: ['id'],
-  location: ['id'],
-  order_unit: ['id'],
-  product: ['id'],
-  tax_profile: ['id'],
-} satisfies RefMap;
+**กลไกใหม่: ทำแบบเดียวกับฝั่งอ่านเป๊ะ**
 
-const PoDetailPayloadSchema = expandRefs(
-  DETAIL_REFS,
-  z.object({
-    delivery_point: entityRef(['id']),
-    location: entityRef(['id']),
-    order_unit: entityRef(['id']),
-    product: entityRef(['id']),
-    tax_profile: entityRef(['id']),
-    order_qty: z.number(),
-    // ...ฟิลด์อื่นคงเดิม
-  }).passthrough(),
-);
-```
+ฝั่งอ่านแก้ปัญหาเดียวกันนี้ด้วย `@CollapseRefs({path: RefMap})` + interceptor ที่ทำงานที่
+`respond()` โดยไม่สนว่า route ประกาศ schema ไว้อย่างไร ฝั่งเขียนทำสมมาตรกัน:
 
-**หมายเหตุ:** ฝั่ง request ส่วนใหญ่เป็น `{ id }` เดี่ยว ๆ (140 จาก 174 group) ตามที่ตกลงกันไว้ — ห่อเปล่าแบบนี้ถูกต้องแล้ว ไม่ต้องเติม `name` ให้
+- `@ExpandRefs({path: RefMap})` ติดที่ route
+- interceptor อ่าน metadata แล้ว **แก้ `req.body` ในที่** คลี่ `<base>: {id, name}` กลับเป็น
+  `<base>_id` / `<base>_name` **ก่อน pipe ทำงาน**
+- ผลคือ pipe, DTO, `req.body` ที่อ่านตรง ๆ และ micro-business **เห็น flat เหมือนเดิมทุกประการ**
+- **ไม่ต้องแตะ binding ทั้ง 146 จุด** เพราะกลไกไม่ได้พึ่ง DTO เลย
 
-- [ ] **Step 2: Type-check + ตรวจความครบ**
+ใช้ `expandRefs` ใน `entity-ref.ts` เป็นฐาน (มีเทสต์ครอบแล้ว รวมกติกา `k in obj` ที่กัน
+การล้างคีย์พี่น้อง) แต่ทำเป็นฟังก์ชันบริสุทธิ์แบบเดียวกับ `collapseRefsInPlace`
+
+- [ ] **Step 1: พิสูจน์ลำดับการทำงานก่อนสร้างอะไรทับ**
+
+NestJS รันตามลำดับ: middleware → **guard** → **interceptor (ขาเข้า)** → **pipe** → handler
+
+ต้องพิสูจน์ด้วยของจริงว่า interceptor แก้ `req.body` แล้ว **pipe เห็นค่าที่แก้แล้ว**:
+แปะ interceptor ชั่วคราวที่ใส่คีย์สังเกตได้ลง `req.body` → ยิง route ที่มี zod DTO →
+ดูว่า DTO ได้รับคีย์นั้นไหม → revert
+
+**ถ้า pipe ไม่เห็นค่าที่แก้ ให้หยุดแล้วรายงาน BLOCKED ทันที** ทั้ง task ยืนอยู่บนข้อนี้
+
+- [ ] **Step 2: กับดัก guard — ต้องจัดการก่อน ไม่ใช่หลัง**
+
+**guard รันก่อน interceptor** จึงเห็น body ที่ยังไม่ถูกคลี่ · มี 2 จุด:
+
+- `common/guards/business-unit-scope.guard.ts:191` อ่าน `req.body?.business_unit_id`
+  — **security-adjacent** ถ้า `business_unit` ถูกใส่ใน RefMap ฝั่งเขียนเมื่อไหร่
+  guard จะได้ `undefined` แล้ว**ผ่านเงียบ**
+- `auth/guards/url-token.guard.ts:35` อ่าน `request.body?.url_token` — scalar ไม่กระทบ
+
+**ทางที่ปลอดภัยที่สุด: อย่าใส่ `business_unit` ลง RefMap ฝั่งเขียนเลย** ตรวจให้แน่ว่าไม่มี
+แล้วบันทึกไว้ · ถ้าจำเป็นต้องใส่จริง ต้องแก้ guard ให้อ่านทั้งสองรูปก่อน
+
+- [ ] **Step 3: สร้างกลไก แล้วติดที่เอกสารหลักก่อน**
+
+ทำ PO ให้จบก่อนไฟล์อื่น แล้วยิงของจริง:
 
 ```bash
-cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
+TOKEN=$(cat /tmp/carmen-contract-baseline/token.txt)
+curl -s -X POST "http://localhost:4000/api/T02/purchase-orders" \
+  -H "Authorization: Bearer $TOKEN" -H 'x-app-id: 9c83fd4b-ce3f-4de2-a522-349ad1280b10' \
+  -H 'Content-Type: application/json' \
+  -d '{"stage_role":"create","details":{"vendor":{"id":"<uuid>"},"currency":{"id":"<uuid>"},...}}'
+```
+
+Expected: บันทึกสำเร็จ · **จดเลขที่เอกสารแล้วลบทิ้งทุกครั้ง** (`:4000` ใช้ DB ร่วมกัน)
+
+- [ ] **Step 4: ยืนยัน**
+
+```bash
 bunx tsc --noEmit -p apps/backend-gateway/tsconfig.json
-bun run scripts/check-flat-refs.ts 2>&1 | tail -3
+cd apps/backend-gateway && bunx jest --silent 2>&1 | grep -E "^(Tests:|Test Suites:)"
+cd ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react && \
+  python3 scripts/probe-contract.py /tmp/carmen-contract-baseline
 ```
 
-- [ ] **Step 3: ยืนยันว่า micro-business ได้ payload หน้าตาเดิม — ด่านสำคัญที่สุดของ Phase 3**
-
-gateway controller มี `this.logger.debug({ function: 'create', createDto })` อยู่แล้ว สร้าง PO จากเบราว์เซอร์แล้วดู log ของ gateway
-
-Expected ใน log: เห็น `vendor_id` / `vendor_name` (flat)
-**ถ้าเห็น `vendor: { id: ... }`** แปลว่า `expandRefs` ไม่ทำงาน — micro-business จะได้ของผิดและ**เขียน null ลง DB** ห้ามไปต่อจนกว่าจะแก้
-
-- [ ] **Step 4: ตรวจว่า partial update ไม่ล้างค่าอื่น**
-
-เปิดใบ PO ที่มี `credit_term` อยู่แล้ว → แก้แค่ช่อง remarks → Save → เปิดใหม่
-Expected: `credit_term` ยังอยู่ ไม่กลายเป็นว่าง
-
-- [ ] **Step 5: Commit**
-
-```bash
-git status --short
-git add apps/backend-gateway/src/common/dto
-git commit -m "feat(api): DTO กลุ่มเอกสารรับ entity เป็น object แล้วคลี่เป็น flat ก่อนส่งต่อ"
-```
+ฝั่งอ่านต้องไม่ถอยหลัง: ค่าไม่ตรง baseline ต้องยังเป็น 0
 
 ---
 
