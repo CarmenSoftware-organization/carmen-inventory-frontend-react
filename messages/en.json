@@ -793,6 +793,7 @@
     "workflowInProgress": "Only the stages and their routing are locked while documents are in progress — approvers, products and the rest of the form can still be saved.",
     "workflowStageNoActor": "That stage would be left with nobody able to approve, and documents are waiting there. Assign at least one person before saving.",
     "dateOutsideOpenPeriod": "The receipt date is outside every open accounting period. Change the date, or ask accounting to open that period.",
+    "checkFields": "Check these fields again: {fields}",
     "srDateOutsideOpenPeriod": "The requisition date is outside every open accounting period. Change the date, or ask accounting to open that period."
   },
   "validation": {
