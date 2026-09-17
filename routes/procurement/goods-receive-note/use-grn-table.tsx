@@ -164,7 +164,7 @@ export function useGrnTable({
       ),
       cell: ({ row }) => {
         const amount = row.getValue<number>("total_amount");
-        const currency = row.original.currency_code;
+        const currency = row.original.currency?.code;
         if (amount == null) return <span></span>;
         return (
           <span className="font-medium tabular-nums">
