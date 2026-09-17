@@ -107,7 +107,8 @@ export function useProductTable({
       meta: { headerTitle: tfl("localName"), skeleton: columnSkeletons.text },
     },
     {
-      accessorKey: "inventory_unit_name",
+      id: "inventory_unit_name",
+      accessorFn: (row) => row.inventory_unit?.name ?? "",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("unit")} />
       ),

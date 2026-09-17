@@ -49,7 +49,10 @@ export interface Product {
   local_name: string;
   product_status_type: ProductStatusType;
   inventory_unit: EntityRef | null;
-  // list endpoint คืนหน่วยเป็น flat string (detail ใช้ inventory_unit object)
+  // ยืนยันสดอีกครั้ง (50/50 แถว): list endpoint ส่ง inventory_unit เป็น object
+  // เหมือนกับ detail ทุกแถว ไม่มี inventory_unit_name แบนคู่กันเลย — คอมเมนต์เดิม
+  // ที่บอกว่า list เป็น flat string นั้นผิด (ไม่มีหลักฐาน สร้างบั๊กคอลัมน์ Unit
+  // ว่างที่ use-product-table.tsx และ product-table.tsx ทั้งคู่มาก่อนหน้านี้)
   inventory_unit_name?: string;
   product_item_group: EntityRef | null;
   product_sub_category: EntityRef | null;

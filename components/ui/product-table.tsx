@@ -22,7 +22,7 @@ interface ProductTableRow {
   code: string | null;
   name: string | null;
   local_name?: string | null;
-  inventory_unit_name?: string | null;
+  inventory_unit?: { name?: string | null } | null;
 }
 
 interface ProductTableProps {
@@ -44,7 +44,7 @@ export function ProductTable({ products, className }: ProductTableProps) {
         (p.code ?? "").toLowerCase().includes(q) ||
         (p.name ?? "").toLowerCase().includes(q) ||
         (p.local_name ?? "").toLowerCase().includes(q) ||
-        (p.inventory_unit_name ?? "").toLowerCase().includes(q),
+        (p.inventory_unit?.name ?? "").toLowerCase().includes(q),
     );
   }, [products, search]);
 
@@ -87,12 +87,13 @@ export function ProductTable({ products, className }: ProductTableProps) {
         ),
       },
       {
-        accessorKey: "inventory_unit_name",
+        id: "inventory_unit_name",
+        accessorFn: (row) => row.inventory_unit?.name ?? "",
         header: "Inventory Unit",
         cell: ({ row }) => (
           <span className="text-muted-foreground">
             <HighlightText
-              text={row.original.inventory_unit_name ?? ""}
+              text={row.original.inventory_unit?.name ?? ""}
               query={search}
             />
           </span>
