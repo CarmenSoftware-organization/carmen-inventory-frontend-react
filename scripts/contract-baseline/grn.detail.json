@@ -1,0 +1,159 @@
+{
+  "_url": "/api/T02/good-received-notes/036c7857-dd77-41c4-8a92-c19395d6f21b",
+  "data": {
+    "audit": {
+      "created": {
+        "at": "2026-07-24T03:40:40.297Z",
+        "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+        "name": "Admin Fernando Torres"
+      },
+      "updated": {
+        "at": "2026-07-24T03:40:40.685Z",
+        "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+        "name": "Admin Fernando Torres"
+      }
+    },
+    "base_net_amount": 0,
+    "base_total_amount": 0,
+    "credit_term_days": null,
+    "credit_term_id": null,
+    "credit_term_name": null,
+    "currency_code": "THB",
+    "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+    "description": null,
+    "dimension": [],
+    "doc_status": "saved",
+    "doc_type": "manual",
+    "doc_version": 1,
+    "exchange_rate": 1,
+    "exchange_rate_date": "2026-07-24T03:38:48.012Z",
+    "extra_cost": {
+      "allocate_extra_cost_type": null,
+      "extra_cost_detail": [],
+      "id": "6ffea5bf-3c47-450a-9421-4bcfb12ae81b"
+    },
+    "good_received_note_detail": [
+      {
+        "audit": {
+          "created": {
+            "at": "2026-07-24T03:40:40.316Z",
+            "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+            "name": "Admin Fernando Torres"
+          },
+          "updated": {
+            "at": "2026-07-24T03:40:40.316Z"
+          }
+        },
+        "doc_version": 0,
+        "good_received_note_id": "036c7857-dd77-41c4-8a92-c19395d6f21b",
+        "id": "4b548cda-da26-4bae-8204-90175fbf005b",
+        "items": [
+          {
+            "audit": {
+              "created": {
+                "at": "2026-07-24T03:40:40.327Z",
+                "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+                "name": "Admin Fernando Torres"
+              },
+              "updated": {
+                "at": "2026-07-24T03:40:40.327Z"
+              }
+            },
+            "base_discount_amount": 0,
+            "base_net_amount": 0,
+            "base_price": 0,
+            "base_sub_total_price": 0,
+            "base_tax_amount": 0,
+            "base_total_price": 0,
+            "comment": null,
+            "discount_amount": 0,
+            "discount_rate": 0,
+            "doc_version": 0,
+            "expired_at": null,
+            "foc_base_qty": 0,
+            "foc_qty": 0,
+            "foc_unit_conversion_factor": 0,
+            "foc_unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+            "foc_unit_name": "KG",
+            "good_received_note_detail_id": "4b548cda-da26-4bae-8204-90175fbf005b",
+            "id": "2c95e116-6221-405b-b30b-7ebf85594840",
+            "inventory_transaction_id": null,
+            "is_discount_adjustment": false,
+            "is_tax_adjustment": false,
+            "net_amount": 0,
+            "note": null,
+            "order_base_qty": 0,
+            "order_price": null,
+            "order_qty": 0,
+            "order_unit_conversion_factor": 0,
+            "order_unit_id": null,
+            "order_unit_name": null,
+            "purchase_order_detail_purchase_request_detail_id": null,
+            "received_base_qty": 0,
+            "received_price": 0,
+            "received_qty": 5,
+            "received_unit_conversion_factor": 0,
+            "received_unit_id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+            "received_unit_name": "KG",
+            "sub_total_price": 0,
+            "tax_amount": 0,
+            "tax_profile_id": null,
+            "tax_profile_name": null,
+            "tax_rate": 0,
+            "total_price": 0
+          }
+        ],
+        "location_code": "1AG02",
+        "location_id": "08772f79-c21b-4a86-8d31-b0fea144111e",
+        "location_name": "IT",
+        "location_type": "consignment",
+        "po_no": null,
+        "product_code": "11140012",
+        "product_id": "00b9bdf3-b6dd-4745-b486-c78bb707e7d1",
+        "product_local_name": "กระเจี๊ยบแห้ง 1กก. 26412252",
+        "product_name": "Dried Roselle 1 kg – 26412252",
+        "product_sku": "11140012",
+        "purchase_order_detail_id": null,
+        "purchase_order_id": null,
+        "sequence_no": 1
+      }
+    ],
+    "grn_date": "2026-07-24T03:38:48.012Z",
+    "grn_no": "GRN260700013",
+    "id": "036c7857-dd77-41c4-8a92-c19395d6f21b",
+    "info": {},
+    "invoice_date": "2026-07-23T17:00:00.000Z",
+    "invoice_no": "INV-BACK-2",
+    "is_active": true,
+    "last_action": {
+      "at": null,
+      "id": null,
+      "name": null,
+      "state": "submitted"
+    },
+    "last_action_at_date": null,
+    "last_action_by_id": null,
+    "last_action_by_name": null,
+    "net_amount": 0,
+    "note": null,
+    "payment_due_date": null,
+    "post_type": "ap",
+    "received_by_id": null,
+    "received_by_name": null,
+    "signature_url": null,
+    "total_amount": 0,
+    "user_action": {},
+    "vendor_id": "020e3662-4991-4346-a683-7a2a1abfb772",
+    "vendor_name": "Daew",
+    "workflow_current_stage": null,
+    "workflow_history": {},
+    "workflow_id": null,
+    "workflow_name": null,
+    "workflow_next_stage": null,
+    "workflow_previous_stage": null
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:44.628Z"
+}

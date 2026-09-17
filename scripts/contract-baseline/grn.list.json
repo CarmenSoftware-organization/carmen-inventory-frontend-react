@@ -1,0 +1,170 @@
+{
+  "_url": "/api/T02/good-received-notes?perpage=5",
+  "data": [
+    {
+      "audit": {
+        "created": {
+          "at": "2026-07-24T03:40:40.297Z"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "description": null,
+      "doc_status": "saved",
+      "doc_type": "manual",
+      "exchange_rate": 1,
+      "exchange_rate_date": "2026-07-24T03:38:48.012Z",
+      "grn_date": "2026-07-24T03:38:48.012Z",
+      "grn_no": "GRN260700013",
+      "id": "036c7857-dd77-41c4-8a92-c19395d6f21b",
+      "invoice_date": "2026-07-23T17:00:00.000Z",
+      "invoice_no": "INV-BACK-2",
+      "is_active": true,
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "Daew"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-03-25T06:46:10.986Z"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "description": null,
+      "doc_status": "draft",
+      "doc_type": "manual",
+      "exchange_rate": 1,
+      "exchange_rate_date": "2026-03-25T06:45:19.560Z",
+      "grn_date": "2026-03-25T06:45:19.560Z",
+      "grn_no": "GRN19700100003",
+      "id": "04e065de-03d0-4f33-baee-3ca3f7823eea",
+      "invoice_date": "2026-03-24T17:00:00.000Z",
+      "invoice_no": "ฟหฟsA",
+      "is_active": true,
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-07-01T14:21:01.170Z"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "description": null,
+      "doc_status": "committed",
+      "doc_type": "manual",
+      "exchange_rate": 1,
+      "exchange_rate_date": "2026-07-01T14:11:03.429Z",
+      "grn_date": "2026-07-01T14:11:03.429Z",
+      "grn_no": "GRN20260700003",
+      "id": "0b8f98ed-1b5b-415e-b56b-99c906e743c7",
+      "invoice_date": "2026-06-30T17:00:00.000Z",
+      "invoice_no": "0617002",
+      "is_active": true,
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-06-26T11:32:51.994Z"
+        }
+      },
+      "base_net_amount": 72,
+      "base_total_amount": 0,
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "description": "claude seed manual",
+      "doc_status": "committed",
+      "doc_type": "manual",
+      "exchange_rate": 1,
+      "exchange_rate_date": null,
+      "grn_date": "2026-03-23T03:00:00.000Z",
+      "grn_no": "GRN20260300040",
+      "id": "0bf562db-bf63-449e-a897-f9e328827f19",
+      "invoice_date": null,
+      "invoice_no": "INV-2603-72-23",
+      "is_active": true,
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 72,
+      "total_amount": 0,
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก."
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-06-22T07:20:45.027Z"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "description": null,
+      "doc_status": "draft",
+      "doc_type": "purchase_order",
+      "exchange_rate": 1,
+      "exchange_rate_date": "2026-06-22T07:20:44.360Z",
+      "grn_date": "2026-06-22T07:18:57.936Z",
+      "grn_no": "GRN20260600010",
+      "id": "0c4db31f-c4d2-487f-826f-6b61cbea954f",
+      "invoice_date": "2026-06-22T07:19:00.000Z",
+      "invoice_no": "D22222222",
+      "is_active": true,
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 0,
+      "total_amount": 0,
+      "vendor_name": "ปิยะ ขาวเล็ก"
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 27,
+    "perpage": 5,
+    "total": 132
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:44.311Z"
+}

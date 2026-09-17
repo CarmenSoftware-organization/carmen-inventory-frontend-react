@@ -1,11 +1,26 @@
 # scripts/probe-contract.py
 """ยิง API จริงหลังแปลง แล้วเทียบกับ golden snapshot ที่เก็บไว้ก่อนแก้
-ใช้: python3 scripts/probe-contract.py /tmp/carmen-contract-baseline
-"""
-import json, pathlib, subprocess, sys
 
-BASE_DIR = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/carmen-contract-baseline')
-TOKEN = (BASE_DIR / 'token.txt').read_text().strip()
+ใช้:  CARMEN_TOKEN=$(cat /path/to/token) python3 scripts/probe-contract.py
+      python3 scripts/probe-contract.py <baseline-dir>   # ถ้าจะใช้ชุดอื่น
+
+snapshot ชุดที่ commit ไว้อยู่ที่ scripts/contract-baseline/ — ถ่ายไว้ "ก่อน" แปลง contract
+จาก flat เป็น object ห้ามอัปเดตทับด้วย response หลังแปลง ไม่งั้นตาข่ายนี้จะวัดอะไรไม่ได้เลย
+
+token ไม่อยู่ในรีโปโดยตั้งใจ — มันเป็น access token จริงของ DB dev ที่ใช้ร่วมกัน
+ส่งผ่าน env CARMEN_TOKEN เท่านั้น
+"""
+import json, os, pathlib, subprocess, sys
+
+BASE_DIR = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else
+                        pathlib.Path(__file__).parent / 'contract-baseline')
+TOKEN = os.environ.get('CARMEN_TOKEN', '').strip()
+if not TOKEN:
+    legacy = BASE_DIR / 'token.txt'
+    if legacy.exists():
+        TOKEN = legacy.read_text().strip()
+if not TOKEN:
+    sys.exit('ต้องตั้ง CARMEN_TOKEN ก่อน — ดู docstring ด้านบน')
 APPID = '9c83fd4b-ce3f-4de2-a522-349ad1280b10'
 SUFFIXES = ('id', 'name', 'local_name', 'code', 'symbol')
 ALLOW = {'created_by', 'updated_by', 'deleted_by', 'po', 'pr', 'grn', 'sr', 'si', 'so',
@@ -92,7 +107,8 @@ def leftover_flat(node, path=''):
 
 
 fail = 0
-for snap in sorted((BASE_DIR / 'api').glob('*.json')):
+SNAP_DIR = BASE_DIR / 'api' if (BASE_DIR / 'api').is_dir() else BASE_DIR
+for snap in sorted(SNAP_DIR.glob('*.json')):
     before = json.loads(snap.read_text())
     url = before.get('_url')
     if not url:
@@ -112,7 +128,9 @@ for snap in sorted((BASE_DIR / 'api').glob('*.json')):
 
     fb, fa = flatten(before.get('data')), flatten(after.get('data'))
     reconcile_null_refs(fb, fa)
-    changed = [f'{k}: {v!r} → {fa[k]!r}' for k, v in fb.items() if k in fa and fa[k] != v]
+    # ค่าที่ถูกลบออกตอน commit snapshot (token จริง) เทียบไม่ได้โดยตั้งใจ
+    changed = [f'{k}: {v!r} → {fa[k]!r}' for k, v in fb.items()
+               if k in fa and fa[k] != v and v != 'REDACTED']
     missing = [f'หายไป: {k}' for k in fb if k not in fa]
     if changed or missing:
         problems.append(('ค่าไม่ตรง baseline', (changed + missing)[:10]))
