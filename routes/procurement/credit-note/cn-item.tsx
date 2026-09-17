@@ -126,7 +126,7 @@ export function CnItem({ form, disabled }: Props) {
       }
     >();
     for (const detail of grn.good_received_note_detail ?? []) {
-      const key = `${detail.product_id}:${detail.location_id ?? ""}`;
+      const key = `${detail.product?.id ?? ""}:${detail.location?.id ?? ""}`;
       // บรรทัดแรกที่ match ชนะ — ตรงกับที่ dialog หยิบไปตอนเพิ่มรายการ
       if (grnByLine.has(key)) continue;
       const line = detail.items?.[0];
