@@ -102,6 +102,22 @@ describe("app code mapping", () => {
     expect(getUserErrorMessage(err, t)).toBe("workflowInProgress");
   });
 
+  // 422 ก็ต้องเข้าทางเดียวกับ 400 — statusToCode() โยนทั้งคู่ไป VALIDATION_ERROR
+  // (ใบเบิกนอกงวดบัญชีเป็น 422 ของจริงจาก backend)
+  it("maps an app code that arrives with a 422", () => {
+    const err = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "The requisition date does not fall inside any open period",
+      422,
+      false,
+      undefined,
+      "The requisition date does not fall inside any open period",
+      "SR_DATE_OUTSIDE_OPEN_PERIOD",
+    );
+
+    expect(getUserErrorMessage(err, t)).toBe("srDateOutsideOpenPeriod");
+  });
+
   // รหัสที่ยังไม่ได้ map ต้องตกไปที่ข้อความกลางตามเดิม ไม่ใช่พังหรือโชว์รหัสดิบ
   it("falls back to the generic message for a code that is not mapped", () => {
     const err = new ApiError(

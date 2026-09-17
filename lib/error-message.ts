@@ -32,6 +32,8 @@ const APP_CODE_TO_KEY: Record<string, string> = {
   // บัญชีเปิดงวด) ปล่อยตกไปข้อความกลางจะกลายเป็น "กรอกไม่ถูกต้อง" แล้วไล่ตรวจ
   // ทั้งฟอร์มโดยไม่มีอะไรผิดสักช่อง
   GRN_DATE_OUTSIDE_OPEN_PERIOD: "dateOutsideOpenPeriod",
+  // เรื่องเดียวกับ GRN แต่คนละคำในประโยค — ใบเบิกพูดถึง "วันที่เบิก" ไม่ใช่ "วันที่รับของ"
+  SR_DATE_OUTSIDE_OPEN_PERIOD: "srDateOutsideOpenPeriod",
 };
 
 function fallbackKey(code: ErrorCode, statusCode?: number): string {
