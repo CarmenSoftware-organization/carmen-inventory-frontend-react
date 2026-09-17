@@ -118,9 +118,9 @@ export function getDefaultValues(
       items: details.map((d) => ({
         id: d.id,
         doc_version: d.doc_version,
-        product_id: d.product_id,
-        product_name: d.product_name,
-        product_local_name: d.product_local_name,
+        product_id: d.product?.id ?? "",
+        product_name: d.product?.name ?? "",
+        product_local_name: d.product?.local_name ?? "",
         unit_name: d.inventory_unit?.name ?? d.inventory_unit_name ?? "",
         qty: d.qty,
         cost_per_unit: d.cost_per_unit,
