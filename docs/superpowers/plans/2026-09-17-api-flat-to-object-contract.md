@@ -1245,46 +1245,57 @@ cd ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react && \
 
 ---
 
-### Task 14: แปลง DTO กลุ่ม config/master ที่เหลือ
+### Task 14: ขยาย `@ExpandRefs` ให้ฝั่งเขียนตามฝั่งอ่านให้ทัน (เขียนใหม่ทั้ง task)
 
 **Files:**
-- Modify: DTO ที่เหลือทั้งหมดที่ `check-flat-refs.ts` ยังรายงาน
+- Modify: controller ที่มี `@CollapseRefs` แล้วแต่ยังไม่มี `@ExpandRefs`
 
 **Interfaces:**
-- Consumes: `expandRefs`, `entityRef`, `RefMap` จาก Task 3
-- Produces: `bun run scripts/check-flat-refs.ts` ผ่าน (exit 0)
+- Consumes: `@ExpandRefs` + interceptor จาก Task 13
+- Produces: ฝั่งเขียนรับรูป object ได้ทุก entity ที่ฝั่งอ่านแปลงแล้ว
 
-- [ ] **Step 1: ดูรายชื่อที่เหลือแล้วแปลงทีละไฟล์**
+**ทำไมต้องเขียนใหม่:** แผนเดิมให้ใส่ `expandRefs` เป็น `.transform()` ใน DTO ซึ่ง Task 13
+พิสูจน์แล้วว่าใช้ไม่ได้ (pipe มองไม่เห็น 146 binding) กลไกจริงคือ `@ExpandRefs` ที่ route
+
+**ช่องว่างที่วัดได้: ฝั่งอ่านติด `@CollapseRefs` แล้ว 21 controller · ฝั่งเขียนมี `@ExpandRefs` แค่ 6**
+
+เหลือ 15 controller เรียงตามความสำคัญ:
+
+1. **`application/store-requisitions`** — เอกสารหลัก ฝั่งอ่านแปลงครบ 7 reference แล้ว
+   แต่ฝั่งเขียนยังไม่ถูกแตะเลย **ทำตัวนี้ก่อน**
+2. `application/` ที่เหลือ: `products`, `pricelists`, `pricelist-templates`,
+   `purchase-request-templates`, `inventory-transactions`
+3. `config/` 9 ตัว: `config_products`, `config_pricelists`, `config_vendors`,
+   `config_departments`, `config_application-roles`, `config_chart-of-accounts`,
+   `config_exchange-rates`, `config_product-sub-categories`, `config_recipe-categories`
+
+**เหตุผลที่ต้องให้ทัน ไม่ใช่ปล่อยไว้:** ถ้า endpoint หนึ่งอ่านเป็น object แต่เขียนรับแค่ flat
+ฝั่ง FE ต้องจำเป็นราย endpoint ว่าอันไหนรับรูปไหน ซึ่งเป็นสัญญาที่ใช้งานจริงไม่ได้
+
+- [ ] **Step 1: ทำ store-requisitions ให้จบก่อน แล้วยิงจริงทั้งสองรูป**
+
+ต้องผ่านทั้งสองแบบ: payload รูป object ใหม่ **และ** payload รูป flat เดิม (FE ยังไม่แปลง
+ถ้า flat พังคือแอปที่รันอยู่พังทันที) อ่านกลับมาเทียบต้องเหมือนกันทุกฟิลด์
+
+- [ ] **Step 2: ที่เหลือทีละ controller ตามลำดับข้างบน**
+
+กติกาเดียวกับ Task 13 ทุกข้อ:
+- **curl endpoint จริงมาสร้าง RefMap ห้ามเดาจาก schema** (schema ล้าสมัยจริง เจอมาแล้วหลายรอบ)
+- **ตรวจว่า decorator ติดถูก controller** — เคยพลาดมาแล้วเพราะมี controller คู่แฝดใน `config/`
+- **ห้ามใส่ `business_unit`** — ตอนนี้มีตัวบังคับเชิงกลแล้ว จะ throw ตอน import
+- ถ้า endpoint ไหนยิงไม่ได้จริง **ให้ข้ามแล้วบันทึก อย่าเดา RefMap แล้วติด decorator**
+
+- [ ] **Step 3: ยืนยัน**
 
 ```bash
 cd ~/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
-bun run scripts/check-flat-refs.ts 2>&1 | grep '\.dto\.ts' | sort -u
-```
-
-- [ ] **Step 2: ยืนยันว่าสะอาดทั้งระบบ**
-
-```bash
 bunx tsc --noEmit -p apps/backend-gateway/tsconfig.json
-bun run scripts/check-flat-refs.ts
-```
-Expected: `✅ ไม่มี flat reference หลงเหลือ`
-
-- [ ] **Step 3: รันเทสต์ gateway เทียบ baseline อีกรอบ**
-
-```bash
-(cd apps/backend-gateway && bunx jest --silent) 2>&1 | grep -E "^(FAIL|Tests:)" \
-  > /tmp/carmen-contract-baseline/tests-after-request.txt
-diff /tmp/carmen-contract-baseline/gateway-red.txt \
-     /tmp/carmen-contract-baseline/tests-after-request.txt
+(cd apps/backend-gateway && bunx jest --silent) 2>&1 | grep -E "^(Tests:|Test Suites:)"
+cd ~/GitHub/carmensoftware-organize/carmen-inventory-frontend-react
+python3 scripts/probe-contract.py /tmp/carmen-contract-baseline
 ```
 
-- [ ] **Step 4: Commit**
-
-```bash
-git status --short
-git add apps/backend-gateway/src
-git commit -m "feat(api): DTO กลุ่ม config/master รับ entity เป็น object"
-```
+ฝั่งอ่านต้องไม่ถอยหลัง: ค่าไม่ตรง baseline ต้องยังเป็น 0
 
 ---
 
