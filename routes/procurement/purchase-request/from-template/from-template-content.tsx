@@ -35,8 +35,7 @@ export function FromTemplateContent() {
     : (templates ?? []).filter(
         (template) =>
           template.name?.toLowerCase().includes(term) ||
-          template.department_name?.toLowerCase().includes(term) ||
-          template.workflow_name?.toLowerCase().includes(term),
+          template.workflow?.name?.toLowerCase().includes(term),
       );
 
   const hasTemplates = !isLoading && !!templates && templates.length > 0;

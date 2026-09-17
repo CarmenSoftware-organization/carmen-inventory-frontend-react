@@ -104,12 +104,7 @@ export default function PrtComponent() {
           { header: tfl("name"), value: (r) => r.name, width: 28 },
           {
             header: tfl("workflow"),
-            value: (r) => r.workflow_name,
-            width: 22,
-          },
-          {
-            header: tfl("department"),
-            value: (r) => r.department_name,
+            value: (r) => r.workflow?.name,
             width: 22,
           },
           {

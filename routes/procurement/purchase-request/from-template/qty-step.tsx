@@ -42,37 +42,39 @@ const buildQtyColumns = (
     cell: ({ row }) => row.index + 1,
   },
   {
-    accessorKey: "location_name",
+    id: "location_name",
+    accessorFn: (row) => row.location?.name,
     header: ({ column }) => (
       <DataGridColumnHeader column={column} title={tfl("location")} />
     ),
     // ชื่อคลังเป็นข้อความ — localeCompare ให้ไทย/อังกฤษเรียงตามภาษา ไม่ใช่ code point
     sortingFn: (a, b) =>
-      (a.original.location_name ?? "").localeCompare(
-        b.original.location_name ?? "",
+      (a.original.location?.name ?? "").localeCompare(
+        b.original.location?.name ?? "",
       ),
     size: 180,
     cell: ({ row }) => (
       <NameWithSubtext
-        primary={row.original.location_name || "—"}
-        secondary={row.original.location_code ?? undefined}
+        primary={row.original.location?.name || "—"}
+        secondary={row.original.location?.code ?? undefined}
       />
     ),
   },
   {
-    accessorKey: "product_name",
+    id: "product_name",
+    accessorFn: (row) => row.product?.name,
     header: ({ column }) => (
       <DataGridColumnHeader column={column} title={tfl("product")} />
     ),
     sortingFn: (a, b) =>
-      (a.original.product_name ?? "").localeCompare(
-        b.original.product_name ?? "",
+      (a.original.product?.name ?? "").localeCompare(
+        b.original.product?.name ?? "",
       ),
     size: 320,
     cell: ({ row }) => (
       <NameWithSubtext
-        primary={row.original.product_name}
-        secondary={row.original.product_local_name ?? undefined}
+        primary={row.original.product?.name || "—"}
+        secondary={row.original.product?.local_name ?? undefined}
       />
     ),
   },
@@ -87,7 +89,7 @@ const buildQtyColumns = (
       return (
         <InputSuffixField>
           <InputSuffixQty
-            aria-label={`${tfl("requested")} ${d.product_name}`}
+            aria-label={`${tfl("requested")} ${d.product?.name ?? ""}`}
             defaultValue={d.requested_qty ?? 0}
             className="tabular-nums"
             onChange={(e) => {
@@ -99,7 +101,7 @@ const buildQtyColumns = (
             {/* flex-1 ก่อน ไม่งั้น span กว้างเท่าตัวอักษร แล้ว text-right ไม่มีที่ให้จัด
                 (addon เป็น flex container ที่ w-16 อยู่กับกล่องนอก ไม่ใช่ตัว span) */}
             <span className="text-muted-foreground flex-1 px-2 text-right text-xs">
-              {d.requested_unit_name}
+              {d.requested_unit?.name}
             </span>
           </InputSuffixAddon>
         </InputSuffixField>
@@ -107,7 +109,8 @@ const buildQtyColumns = (
     },
   },
   {
-    accessorKey: "currency_code",
+    id: "currency_code",
+    accessorFn: (row) => row.currency?.code,
     header: tfl("currency"),
     enableSorting: false,
     size: 90,
@@ -115,15 +118,16 @@ const buildQtyColumns = (
       headerClassName: "text-center",
       cellClassName: "text-center text-muted-foreground",
     },
-    cell: ({ row }) => row.original.currency_code || "—",
+    cell: ({ row }) => row.original.currency?.code || "—",
   },
   {
-    accessorKey: "delivery_point_name",
+    id: "delivery_point_name",
+    accessorFn: (row) => row.delivery_point?.name,
     header: tfl("deliveryPoint"),
     enableSorting: false,
     size: 160,
     meta: { cellClassName: "text-muted-foreground" },
-    cell: ({ row }) => row.original.delivery_point_name || "—",
+    cell: ({ row }) => row.original.delivery_point?.name || "—",
   },
 ];
 
@@ -194,9 +198,9 @@ export function QtyStep({ template, onBack, onContinue }: QtyStepProps) {
           {/* workflow นำหน้าชื่อเทมเพลต — ใบที่กำลังจะเกิดเดินตาม workflow นี้
               และเปลี่ยนทีหลังไม่ได้ ต้องเห็นก่อนกรอกจำนวน ไม่ใช่ไปรู้ในฟอร์ม */}
           <h1 className="text-foreground flex min-w-0 items-baseline gap-1.5 text-lg font-semibold tracking-tight">
-            {template.workflow_name && (
+            {template.workflow?.name && (
               <>
-                <span>{template.workflow_name}</span>
+                <span>{template.workflow.name}</span>
                 <span className="text-muted-foreground/60 shrink-0 font-normal">
                   ·
                 </span>

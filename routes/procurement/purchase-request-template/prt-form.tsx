@@ -186,7 +186,7 @@ export function PrtForm({ template }: PrtFormProps) {
             form={form}
             readOnly={isView}
             disabled={isPending}
-            workflowName={template?.workflow_name}
+            workflowName={template?.workflow?.name ?? undefined}
             isAdd={isAdd}
           />
           <PrtItemFields
