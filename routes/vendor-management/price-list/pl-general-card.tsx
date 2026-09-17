@@ -86,7 +86,7 @@ export function PLGeneralCard({
                 onValueChange={field.onChange}
                 disabled={isDisabled}
                 className="w-full"
-                defaultLabel={priceList?.vendor?.name}
+                defaultLabel={priceList?.vendor?.name ?? undefined}
                 error={form.formState.errors.vendor_id?.message}
               />
             )}

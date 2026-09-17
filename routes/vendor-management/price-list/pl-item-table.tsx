@@ -18,6 +18,7 @@ import type { PriceListFormValues } from "./pl-form-schema";
 import { buildPlItemColumns } from "./pl-item-columns";
 import type { DetailField } from "./pl-item-cells";
 import { PLItemGroupedView } from "./pl-item-grouped-view";
+import { toGroupableDetail } from "./pl-product-grouping";
 
 interface PLItemTableProps {
   readonly form: UseFormReturn<PriceListFormValues>;
@@ -35,7 +36,12 @@ interface PLItemTableProps {
  */
 export function PLItemTable(props: PLItemTableProps) {
   if (props.isView)
-    return <PLItemGroupedView detailRefs={props.detailRefs ?? []} showNote />;
+    return (
+      <PLItemGroupedView
+        detailRefs={(props.detailRefs ?? []).map(toGroupableDetail)}
+        showNote
+      />
+    );
   return <PLItemEditTable {...props} />;
 }
 
