@@ -792,7 +792,9 @@
     "buSwitchFailed": "Could not switch business unit. Please try again.",
     "workflowInProgress": "Only the stages and their routing are locked while documents are in progress — approvers, products and the rest of the form can still be saved.",
     "workflowStageNoActor": "That stage would be left with nobody able to approve, and documents are waiting there. Assign at least one person before saving.",
-    "dateOutsideOpenPeriod": "The receipt date is outside every open accounting period. Change the date, or ask accounting to open that period."
+    "dateOutsideOpenPeriod": "The receipt date is outside every open accounting period. Change the date, or ask accounting to open that period.",
+    "checkFields": "Check these fields again: {fields}",
+    "srDateOutsideOpenPeriod": "The requisition date is outside every open accounting period. Change the date, or ask accounting to open that period."
   },
   "validation": {
     "required": "{field} is required",
@@ -988,6 +990,8 @@
     "voidReason": "Void Reason",
     "voidReasonPlaceholder": "Enter reason for voiding this document",
     "unitCost": "Unit Cost",
+    "balance": "Balance",
+    "avgCost": "Avg Cost",
     "lossValue": "Loss Value",
     "totalQty": "Total Qty",
     "totalTime": "Total Time",
@@ -1051,6 +1055,8 @@
     "discPercent": "Disc %",
     "discAmt": "Disc Amt",
     "foc": "FOC",
+    "orderGrn": "Order / GRN",
+    "focGrn": "FOC / GRN",
     "focQty": "FOC Qty",
     "details": "Details",
     "expand": "Expand",
@@ -1071,7 +1077,6 @@
     "receivedQty": "Received Qty",
     "received": "Received",
     "returnQty": "Return",
-    "cnAmount": "CN Amount",
     "receivedAt": "Received At",
     "remaining": "Remaining",
     "receivedUnit": "Received Unit",
@@ -3671,6 +3676,8 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
+      "lots": "Lots",
+      "movements": "Movements",
       "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
@@ -3886,6 +3893,11 @@
       }
     },
     "creditNote": {
+      "tabItems": "Items",
+      "tabStock": "Stock Movement",
+      "stockComingSoon": "Stock movement is not available yet",
+      "stockNeedsCompleted": "Stock movement shows after this credit note is completed",
+      "netOrCnAmount": "Net/CN amount",
       "entity": "Credit Note",
       "title": "Credit Note",
       "desc": "Goods or money claimed back from a vendor after delivery — returns and price corrections.",
@@ -3938,10 +3950,8 @@
       "selectGrnFirst": "Select a GRN first — items are picked from its received lines.",
       "nItemsSelected": "{count} selected",
       "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
-      "cnAmount": "CN Amount",
       "submitTitle": "Submit Credit Note",
-      "submitConfirm": "This will submit the credit note for approval. Are you sure?",
-      "returnLine": "Return"
+      "submitConfirm": "This will submit the credit note for approval. Are you sure?"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",
@@ -3977,6 +3987,11 @@
       "tabDetail": "Detail",
       "tabPayment": "Payment",
       "tabExtraCost": "Extra Cost",
+      "tabStock": "Stock Movement",
+      "refDocs": "Source documents",
+      "refDocsComingSoon": "Source documents for this line are not available yet",
+      "stockComingSoon": "Stock movement is not available yet",
+      "stockNeedsCommitted": "Stock movement shows after this receipt is committed",
       "docInfo": "Document Information",
       "docType": "Document Type",
       "purchaseOrder": "Purchase Order",

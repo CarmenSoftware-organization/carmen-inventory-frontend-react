@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
+import { GitBranch, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -270,6 +270,8 @@ export function useGrnItemTable({
       },
     ];
 
+    // โหมดอ่าน = ปุ่มดูเอกสารต้นทาง (PO/CN ที่บรรทัดนี้อ้างถึง) · โหมดแก้ = ปุ่มลบ
+    // สองอย่างนี้ไม่มีวันอยู่ด้วยกัน จึงใช้คอลัมน์เดียวกันสลับกันไป
     const actionColumn: ColumnDef<GrnItemField> = {
       id: "action",
       header: () => "",
@@ -277,18 +279,31 @@ export function useGrnItemTable({
         <div className="flex items-center justify-center">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                aria-label={t("deleteProductLine")}
-                onClick={() => onDeleteItem(row.index)}
-              >
-                <Trash2 className="size-3.5" aria-hidden="true" />
-              </Button>
+              {isView ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={t("refDocs")}
+                >
+                  <GitBranch className="size-3.5" aria-hidden="true" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  aria-label={t("deleteProductLine")}
+                  onClick={() => onDeleteItem(row.index)}
+                >
+                  <Trash2 className="size-3.5" aria-hidden="true" />
+                </Button>
+              )}
             </TooltipTrigger>
-            <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+            <TooltipContent>
+              {isView ? t("refDocsComingSoon") : t("deleteProductLine")}
+            </TooltipContent>
           </Tooltip>
         </div>
       ),
@@ -301,11 +316,7 @@ export function useGrnItemTable({
       },
     };
 
-    const baseCols = [
-      indexColumn,
-      ...dataColumns,
-      ...(disabled ? [] : [actionColumn]),
-    ];
+    const baseCols = [indexColumn, ...dataColumns, actionColumn];
 
     return baseCols.map((col) => ({
       ...col,

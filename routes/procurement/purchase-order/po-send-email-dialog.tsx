@@ -174,7 +174,7 @@ export function PoSendEmailDialog({
   } = useEmailProfiles();
   const { value: emailTemplates, isLoading: templatesLoading } =
     useEmailTemplates();
-  const vendorQuery = useVendorById(purchaseOrder.vendor?.id);
+  const vendorQuery = useVendorById(purchaseOrder.vendor?.id ?? "");
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);

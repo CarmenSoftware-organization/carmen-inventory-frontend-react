@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
+import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -73,7 +73,7 @@ const ProductCell = memo(function ProductCell({
   // เปิด dialog รายละเอียดต่อได้) SR ไม่มีคลังรายแถว ยอดจึงอ้างคลังต้นทางของใบ
   const inventory = (
     <>
-      <InventoryTooltip
+      <InventoryDialog
         buCode={buCode}
         locationId={fromLocationId}
         productId={productId}

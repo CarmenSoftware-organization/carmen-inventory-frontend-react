@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import en from "@/messages/en.json";
 import th from "@/messages/th.json";
 import { ApiError, ERROR_CODES } from "./api-error";
-import { getUserErrorMessage } from "./error-message";
+import { FIELD_TO_KEY, getUserErrorMessage } from "./error-message";
 
 // t(key) → key, so assertions read as the i18n key that would be shown
 const t = (key: string) => key;
@@ -102,6 +102,22 @@ describe("app code mapping", () => {
     expect(getUserErrorMessage(err, t)).toBe("workflowInProgress");
   });
 
+  // 422 ก็ต้องเข้าทางเดียวกับ 400 — statusToCode() โยนทั้งคู่ไป VALIDATION_ERROR
+  // (ใบเบิกนอกงวดบัญชีเป็น 422 ของจริงจาก backend)
+  it("maps an app code that arrives with a 422", () => {
+    const err = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "The requisition date does not fall inside any open period",
+      422,
+      false,
+      undefined,
+      "The requisition date does not fall inside any open period",
+      "SR_DATE_OUTSIDE_OPEN_PERIOD",
+    );
+
+    expect(getUserErrorMessage(err, t)).toBe("srDateOutsideOpenPeriod");
+  });
+
   // รหัสที่ยังไม่ได้ map ต้องตกไปที่ข้อความกลางตามเดิม ไม่ใช่พังหรือโชว์รหัสดิบ
   it("falls back to the generic message for a code that is not mapped", () => {
     const err = new ApiError(
@@ -121,5 +137,50 @@ describe("app code mapping", () => {
     const err = new ApiError(ERROR_CODES.VALIDATION_ERROR, "boom", 400);
 
     expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+});
+
+// 400 validation ของ backend บอกชื่อ field มาด้วย แต่เป็น path ดิบ
+// (`good_received_note_detail.add.0.received_price`) — ต้องแปลงเป็นชื่อช่องบนจอเสมอ
+describe("field errors", () => {
+  const tField = (key: string) => `field.${key}`;
+  const withFields = (fields: string[]) =>
+    new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "Validation failed",
+      400,
+      false,
+      undefined,
+      "Validation failed",
+      undefined,
+      fields,
+    );
+
+  it("names the fields the backend rejected", () => {
+    const err = withFields([
+      "good_received_note_detail.add.0.received_price",
+      "good_received_note_detail.add.1.received_qty",
+    ]);
+
+    expect(getUserErrorMessage(err, t, tField)).toBe("checkFields");
+  });
+
+  // ชื่อที่ยังไม่ได้ map ต้องไม่หลุดออกไปหน้าจอในรูป snake_case
+  it("falls back to the generic message when no field is recognised", () => {
+    const err = withFields(["tb_internal.some_column"]);
+
+    expect(getUserErrorMessage(err, t, tField)).toBe("invalidForm");
+  });
+
+  // ไม่มีตัวแปลชื่อช่องส่งมา (call site เก่า) ต้องได้พฤติกรรมเดิมเป๊ะ
+  it("keeps the old behaviour without a field translator", () => {
+    const err = withFields(["good_received_note_detail.add.0.received_price"]);
+
+    expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+
+  it.each(Object.entries(FIELD_TO_KEY))("%s maps to a key both locales define", (_field, key) => {
+    expect(en.field, `en.field.${key}`).toHaveProperty(key);
+    expect(th.field, `th.field.${key}`).toHaveProperty(key);
   });
 });

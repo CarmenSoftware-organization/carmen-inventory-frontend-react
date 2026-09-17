@@ -17,7 +17,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
+import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
 import { useProductCostByLocationQty } from "@/hooks/use-product-cost";
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
 
-const ProductInventoryTooltip = memo(function ProductInventoryTooltip({
+const ProductInventoryDialog = memo(function ProductInventoryDialog({
   control,
   index,
 }: {
@@ -38,7 +38,7 @@ const ProductInventoryTooltip = memo(function ProductInventoryTooltip({
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   return (
-    <InventoryTooltip
+    <InventoryDialog
       buCode={buCode}
       locationId={locationId}
       productId={productId}
@@ -141,7 +141,7 @@ const ProductCell = memo(function ProductCell({
             secondary={productLocalName}
           />
         </div>
-        <ProductInventoryTooltip control={control} index={index} />
+        <ProductInventoryDialog control={control} index={index} />
       </div>
     );
   }
@@ -182,7 +182,7 @@ const ProductCell = memo(function ProductCell({
           )}
         />
       </div>
-      <ProductInventoryTooltip control={control} index={index} />
+      <ProductInventoryDialog control={control} index={index} />
       <CostProbe form={form} index={index} />
     </div>
   );

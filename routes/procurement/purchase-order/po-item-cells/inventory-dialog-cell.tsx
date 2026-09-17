@@ -1,12 +1,12 @@
 import { memo, useState } from "react";
 import { useWatch, type Control } from "react-hook-form";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
+import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
 import type { PoFormValues } from "../po-form-schema";
 
-export const PoInventoryTooltip = memo(function PoInventoryTooltip({
+export const PoInventoryDialog = memo(function PoInventoryDialog({
   control,
   index,
 }: {
@@ -26,7 +26,7 @@ export const PoInventoryTooltip = memo(function PoInventoryTooltip({
 
   return (
     <>
-      <InventoryTooltip
+      <InventoryDialog
         buCode={buCode}
         locationId={locationId}
         productId={productId}

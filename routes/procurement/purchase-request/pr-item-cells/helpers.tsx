@@ -3,7 +3,7 @@ import { createContext, memo, useContext, type ReactNode } from "react";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { useProductUnits } from "@/hooks/use-product-units";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
+import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { PrFormValues } from "../pr-form-schema";
@@ -127,7 +127,7 @@ export function useIsRowLocked(
   );
 }
 
-export const InventoryTooltipCell = memo(function InventoryTooltipCell({
+export const InventoryDialogCell = memo(function InventoryDialogCell({
   control,
   index,
   buCode,
@@ -149,7 +149,7 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
     useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
 
   return (
-    <InventoryTooltip
+    <InventoryDialog
       buCode={buCode}
       locationId={locationId}
       productId={productId}

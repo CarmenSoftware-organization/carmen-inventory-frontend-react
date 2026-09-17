@@ -52,6 +52,14 @@ export class ApiError extends Error {
    */
   public readonly appCode?: string;
 
+  /**
+   * ชื่อ field ที่ backend บอกว่าไม่ผ่าน validation (`body.error.errors[].field`)
+   *
+   * เป็น path ดิบของฝั่ง backend เช่น `good_received_note_detail.add.0.received_price`
+   * — คนอ่านไม่รู้เรื่อง ต้องผ่านตารางแปลงชื่อที่ `lib/error-message.ts` ก่อนโชว์เสมอ
+   */
+  public readonly fieldErrors?: readonly string[];
+
   constructor(
     public readonly code: ErrorCode,
     message: string,
@@ -60,11 +68,13 @@ export class ApiError extends Error {
     public readonly details?: unknown,
     serverMessage?: string,
     appCode?: string,
+    fieldErrors?: readonly string[],
   ) {
     super(message);
     this.name = "ApiError";
     this.serverMessage = serverMessage;
     this.appCode = appCode;
+    this.fieldErrors = fieldErrors;
   }
 
   /**
@@ -107,7 +117,12 @@ export class ApiError extends Error {
     sanitize?: (message: string | undefined, fallback: string) => string,
   ): Promise<ApiError> {
     const code = statusToCode(res.status);
-    const { message: raw, data, appCode } = await readErrorBody(res);
+    const {
+      message: raw,
+      data,
+      appCode,
+      fieldErrors,
+    } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
     const cleaned = sanitize ? sanitize(raw, fallbackMessage) : raw;
@@ -120,6 +135,7 @@ export class ApiError extends Error {
       data,
       serverMessage,
       appCode,
+      fieldErrors,
     );
   }
 }
@@ -200,7 +216,12 @@ export function isTransportError(error: unknown): boolean {
  */
 const readErrorBody = async (
   res: Response,
-): Promise<{ message: string | undefined; data: unknown; appCode?: string }> => {
+): Promise<{
+  message: string | undefined;
+  data: unknown;
+  appCode?: string;
+  fieldErrors?: readonly string[];
+}> => {
   try {
     const body = await res.clone().json();
     return {
@@ -214,6 +235,15 @@ const readErrorBody = async (
       // — status กับ message บอกไม่ได้ ตัวหลังยังเปลี่ยนตามภาษาด้วย
       appCode:
         typeof body?.error?.code === "string" ? body.error.code : undefined,
+      // `error.errors[]` ของ 400 validation — เก็บแค่ชื่อ field ส่วน message ข้างใน
+      // เป็นอังกฤษของ backend ("received_price is required when...") ไม่เอามาโชว์
+      fieldErrors: Array.isArray(body?.error?.errors)
+        ? body.error.errors
+            .map((e: { field?: unknown }) =>
+              typeof e?.field === "string" ? e.field : undefined,
+            )
+            .filter((f: string | undefined): f is string => !!f)
+        : undefined,
     };
   } catch {
     return { message: undefined, data: undefined };
