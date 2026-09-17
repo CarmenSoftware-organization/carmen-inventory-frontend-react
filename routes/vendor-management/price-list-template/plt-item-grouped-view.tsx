@@ -34,12 +34,12 @@ export function PltItemGroupedView({ products }: PltItemGroupedViewProps) {
                 : [
                     {
                       qty: 0,
-                      unit_id: product.default_order?.unit_id ?? "",
-                      unit_name: product.default_order?.unit_name ?? "",
+                      unit_id: product.default_order.unit?.id ?? "",
+                      unit_name: product.default_order.unit?.name ?? "",
                       note: "",
                     },
                   ];
-            const orderUnitId = product.default_order?.unit_id;
+            const orderUnitId = product.default_order.unit?.id;
 
             return tiers.map((tier, ti) => {
               const isFirst = ti === 0;
@@ -50,7 +50,7 @@ export function PltItemGroupedView({ products }: PltItemGroupedViewProps) {
               );
               const qty = Number(tier.qty) || 0;
               return (
-                <tr key={`${product.product_id}-${ti}`}>
+                <tr key={`${product.id}-${ti}`}>
                   {isFirst && (
                     <>
                       <Td
@@ -64,10 +64,10 @@ export function PltItemGroupedView({ products }: PltItemGroupedViewProps) {
                         className="border-border/50 border-b align-middle"
                       >
                         <NameWithSubtext
-                          primary={product.product_name ?? ""}
+                          primary={product.product?.name ?? ""}
                           secondary={
-                            product.product_local_name ??
-                            product.product_code ??
+                            product.product?.local_name ??
+                            product.product?.code ??
                             undefined
                           }
                         />
