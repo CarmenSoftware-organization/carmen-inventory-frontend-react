@@ -1,7 +1,7 @@
 import { type FieldArrayWithId, type UseFormReturn } from "react-hook-form";
 import { memo } from "react";
 import { Input } from "@/components/ui/input";
-import { PoInventoryTooltip } from "./inventory-tooltip-cell";
+import { PoInventoryDialog } from "./inventory-dialog-cell";
 import type { PoFormValues } from "../po-form-schema";
 
 export const CommentFooterRow = memo(function CommentFooterRow({
@@ -33,7 +33,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
         disabled={isDisabled}
         {...form.register(`items.${index}.comment`)}
       />
-      <PoInventoryTooltip control={form.control} index={index} />
+      <PoInventoryDialog control={form.control} index={index} />
     </div>
   );
 });

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
-import { FileText } from "lucide-react";
+import { FileText, Handshake, Truck, Warehouse } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -14,8 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import EmptyComponent from "@/components/empty-component";
+import { NameWithSubtext } from "./name-with-sub-text";
 import {
   DataGrid,
   DataGridContainer,
@@ -26,6 +26,13 @@ import {
   useProductOnHand,
   type OnHandLocationRow,
 } from "@/hooks/use-product-on-hand";
+import { INVENTORY_TYPE, inventoryTypeLabelKey } from "@/constant/location";
+
+const LOCATION_TYPE_ICON = {
+  [INVENTORY_TYPE.INVENTORY]: Warehouse,
+  [INVENTORY_TYPE.DIRECT]: Truck,
+  [INVENTORY_TYPE.CONSIGNMENT]: Handshake,
+} as const;
 
 interface Props {
   readonly open: boolean;
@@ -37,6 +44,7 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
+  const tloc = useTranslations("config.location");
 
   const { data, isLoading } = useProductOnHand(open ? productId : undefined);
 
@@ -57,32 +65,29 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
         },
       },
       {
-        accessorKey: "location_code",
-        header: () => tfl("code"),
-        cell: ({ row }) => (
-          <span className="text-micro">
-            {row.original.location_code ?? "—"}
-          </span>
-        ),
-        size: 120,
-      },
-      {
         accessorKey: "location_name",
         header: () => tfl("location"),
+        // รหัสคลังเป็นบรรทัดรองของชื่อ ไม่ต้องมีคอลัมน์ของตัวเอง — สองอย่างนี้
+        // อ่านคู่กันเสมอ และ dialog กว้างจำกัด
         cell: ({ row }) => {
-          const name = row.original.location_name ?? "—";
-          if (!row.original.location_id) return <span>{name}</span>;
+          const label = (
+            <NameWithSubtext
+              primary={row.original.location_name ?? "—"}
+              secondary={row.original.location_code ?? undefined}
+            />
+          );
+          if (!row.original.location_id) return label;
           return (
             <Link
               to={`/config/location/${row.original.location_id}`}
               onClick={() => onOpenChange(false)}
-              className="hover:text-primary focus-visible:text-primary inline-flex items-center hover:underline focus-visible:underline"
+              className="hover:text-primary focus-visible:text-primary block hover:underline focus-visible:underline"
             >
-              {name}
+              {label}
             </Link>
           );
         },
-        size: 220,
+        size: 300,
       },
       {
         accessorKey: "location_type",
@@ -90,13 +95,30 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
         cell: ({ row }) => {
           const type = row.original.location_type;
           if (!type) return <span className="text-muted-foreground">—</span>;
+          // ประเภทที่ไม่รู้จัก = โชว์คำที่ backend ส่งมาดิบ ๆ ไม่มีไอคอนนำ ดีกว่า
+          // เดาไอคอนมั่วหรือทิ้งช่องว่าง
+          const key = type.toLowerCase() as INVENTORY_TYPE;
+          const Icon = LOCATION_TYPE_ICON[key];
+          const labelKey = inventoryTypeLabelKey(key);
           return (
-            <Badge variant="outline" size="xs" className="capitalize">
-              {type.toLowerCase().replace(/_/g, " ")}
-            </Badge>
+            // data-slot กัน `rowClamp` ของ DataGrid ที่ยัด line-clamp-2
+            // (display:-webkit-box) ให้ลูกทุกตัวของเซลล์ — มันทับ flex ทิ้ง
+            // ไอคอนเลยตกไปอยู่คนละบรรทัดกับข้อความ (ตัว badge/checkbox ของ
+            // design system รอดมาได้เพราะมี data-slot ติดมาเอง)
+            <div data-slot="location-type" className="flex items-center gap-1.5">
+              {Icon && (
+                <Icon
+                  className="text-muted-foreground size-3.5 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="truncate whitespace-nowrap">
+                {labelKey ? tloc(labelKey) : type.replace(/_/g, " ")}
+              </span>
+            </div>
           );
         },
-        size: 140,
+        size: 200,
       },
       {
         accessorKey: "on_hand_qty",
@@ -112,7 +134,7 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
         },
       },
     ],
-    [tfl, onOpenChange],
+    [tfl, tloc, onOpenChange],
   );
 
   const table = useReactTable({

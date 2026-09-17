@@ -16,7 +16,7 @@ import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import type { PrFormValues } from "../pr-form-schema";
-import { InventoryTooltipCell, useIsRowLocked } from "./helpers";
+import { InventoryDialogCell, useIsRowLocked } from "./helpers";
 
 export const ProductCell = memo(function ProductCell({
   control,
@@ -53,7 +53,7 @@ export const ProductCell = memo(function ProductCell({
   // ทรงเดียวกับ SR (sr-item-table.tsx) และแถบ inventory ใต้แถว (pr-inventory-row)
   const inventoryTooltip = (
     <>
-      <InventoryTooltipCell
+      <InventoryDialogCell
         control={control}
         index={index}
         buCode={buCode}
