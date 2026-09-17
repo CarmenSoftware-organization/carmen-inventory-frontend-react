@@ -15,6 +15,7 @@ import {
   type ProductDetail,
   type ProductFormValues,
   type ProductUnitConversion,
+  type ProductUnitConversionDetail,
   type CreateProductDto,
   createProductSchema,
 } from "@/types/product";
@@ -64,12 +65,12 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
     code: product.code,
     local_name: product.local_name ?? "",
     description: product.description ?? "",
-    inventory_unit_id: product.inventory_unit.id ?? "",
+    inventory_unit_id: product.inventory_unit?.id ?? "",
     product_category_id: product.product_category?.id ?? "",
     product_sub_category_id: product.product_sub_category?.id ?? "",
     product_item_group_id: product.product_item_group?.id ?? "",
     product_status_type: product.product_status_type,
-    tax_profile_id: product.tax_profile_id ?? "",
+    tax_profile_id: product.tax_profile?.id ?? "",
     is_used_in_recipe: product.is_used_in_recipe ?? false,
     is_sold_directly: product.is_sold_directly ?? false,
     barcode: product.barcode ?? "",
@@ -78,11 +79,46 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
     price_deviation_limit: product.price_deviation_limit ?? 0,
     qty_deviation_limit: product.qty_deviation_limit ?? 0,
     info: product.info ?? [],
-    locations: product.locations ?? [],
-    order_units: product.order_units ?? [],
-    ingredient_units: product.ingredient_units ?? [],
+    locations: (product.locations ?? []).map(toFormLocation),
+    order_units: (product.order_units ?? []).map(toFormUnit),
+    ingredient_units: (product.ingredient_units ?? []).map(toFormUnit),
   };
 };
+
+// ฝั่งอ่าน (detail) ส่ง location/shelf/from_unit/to_unit เป็น object แล้ว แต่
+// ฟอร์มยังแก้เป็น flat id เดิม (lookup ผูกกับ id ตรง ๆ ไม่ต้องมีชื่อคู่กันใน
+// form state — LookupShelf/LookupLocation/LookupUnit resolve ชื่อเองจาก id) จึง
+// ต้อง "แบน" object กลับเป็น flat ทั้งตอน hydrate ฟอร์ม และตอนเทียบ diff กับของเดิม
+const toFormLocation = (
+  loc: ProductDetail["locations"][number],
+): ProductFormValues["locations"][number] => ({
+  id: loc.id,
+  location_id: loc.location?.id ?? "",
+  location_code: loc.location?.code ?? null,
+  location_name: loc.location?.name ?? null,
+  location_type: loc.location_type ?? null,
+  is_active: loc.is_active ?? null,
+  shelf_id: loc.shelf?.id ?? null,
+  delivery_point_id: loc.delivery_point_id ?? null,
+  delivery_point: loc.delivery_point ?? null,
+  min_qty: loc.min_qty ?? null,
+  max_qty: loc.max_qty ?? null,
+  re_order_qty: loc.re_order_qty ?? null,
+  par_qty: loc.par_qty ?? null,
+});
+
+const toFormUnit = (
+  unit: ProductUnitConversionDetail,
+): ProductFormValues["order_units"][number] => ({
+  id: unit.id,
+  from_unit_id: unit.from_unit?.id ?? "",
+  from_unit_qty: unit.from_unit_qty,
+  to_unit_id: unit.to_unit?.id ?? "",
+  to_unit_qty: unit.to_unit_qty,
+  description: unit.description,
+  is_default: unit.is_default,
+  is_active: unit.is_active,
+});
 
 const mapUnitToPayload = (unit: ProductUnitConversion) => ({
   from_unit_id: unit.from_unit_id,
@@ -110,18 +146,18 @@ export const buildPayload = (
 ): CreateProductDto => {
   const locationDiff = buildItemChanges(
     values.locations,
-    product?.locations ?? [],
+    (product?.locations ?? []).map(toFormLocation),
     mapLocationToPayload,
   );
 
   const orderDiff = buildItemChanges(
     values.order_units,
-    product?.order_units ?? [],
+    (product?.order_units ?? []).map(toFormUnit),
     mapUnitToPayload,
   );
   const ingredientDiff = buildItemChanges(
     values.ingredient_units,
-    product?.ingredient_units ?? [],
+    (product?.ingredient_units ?? []).map(toFormUnit),
     mapUnitToPayload,
   );
 
