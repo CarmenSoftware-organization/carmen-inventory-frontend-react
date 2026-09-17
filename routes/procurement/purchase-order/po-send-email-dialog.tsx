@@ -182,7 +182,7 @@ export function PoSendEmailDialog({
     isLoading: profilesLoading,
     isError: profilesError,
   } = useEmailProfiles();
-  const vendorQuery = useVendorById(purchaseOrder.vendor_id);
+  const vendorQuery = useVendorById(purchaseOrder.vendor?.id ?? "");
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);
@@ -205,11 +205,11 @@ export function PoSendEmailDialog({
 
   const placeholderValues = {
     po_no: purchaseOrder.po_no,
-    vendor_name: purchaseOrder.vendor_name,
+    vendor_name: purchaseOrder.vendor?.name ?? "",
     bu_name: defaultBu?.name ?? "",
     total:
       purchaseOrder.total_amount != null
-        ? `${formatCurrency(purchaseOrder.total_amount)} ${purchaseOrder.currency_code ?? ""}`.trim()
+        ? `${formatCurrency(purchaseOrder.total_amount)} ${purchaseOrder.currency?.code ?? ""}`.trim()
         : "",
     delivery_date: purchaseOrder.delivery_date
       ? formatDate(purchaseOrder.delivery_date, dateFormat)

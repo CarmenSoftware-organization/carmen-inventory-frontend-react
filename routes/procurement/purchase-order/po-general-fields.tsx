@@ -39,6 +39,7 @@ export function PoGeneralFields({
   const { defaultCurrencyId } = useProfile();
 
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const vendorName = useWatch({ control: form.control, name: "vendor_name" });
 
   const { data: currencyData } = useCurrency({ perpage: -1 });
 
@@ -105,6 +106,7 @@ export function PoGeneralFields({
               onItemChange={(vendor) => {
                 form.setValue("vendor_name", vendor.name);
               }}
+              defaultLabel={vendorName || undefined}
               disabled={manualFieldDisabled}
               error={fieldState.error?.message}
               className="text-xs"

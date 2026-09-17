@@ -177,11 +177,9 @@ export interface PurchaseOrder {
   workflow_next_stage: string | null;
   workflow_history?: WorkflowHistoryEntry[];
   last_action?: LastAction | null;
-  vendor_id: string;
-  vendor_name: string;
+  vendor: { id: string; name: string } | null;
   delivery_date: string;
-  currency_id: string;
-  currency_code: string;
+  currency: { id: string; code: string } | null;
   exchange_rate: number;
   description: string;
   order_date: string;
@@ -193,8 +191,6 @@ export interface PurchaseOrder {
   email: string;
   remarks: string;
   approval_date: string | null;
-  vendor?: { id: string; name: string };
-  currency?: { id: string; code: string };
   user_action?: Record<string, unknown>;
   info?: Record<string, unknown>;
   doc_version: number;

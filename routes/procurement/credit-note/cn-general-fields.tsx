@@ -26,9 +26,14 @@ import type { CnFormValues } from "./cn-form-schema";
 interface CnGeneralFieldsProps {
   readonly form: UseFormReturn<CnFormValues>;
   readonly disabled: boolean;
+  readonly vendorName?: string;
 }
 
-export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
+export function CnGeneralFields({
+  form,
+  disabled,
+  vendorName,
+}: CnGeneralFieldsProps) {
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
@@ -95,6 +100,7 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
             <LookupVendor
               value={field.value}
               onValueChange={field.onChange}
+              defaultLabel={vendorName}
               disabled={disabled}
               error={errors.vendor_id?.message}
               className="text-xs"

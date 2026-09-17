@@ -392,7 +392,11 @@ export function CnForm({ creditNote }: CnFormProps) {
         onSubmit={form.handleSubmit(onSubmit, revealInvalid)}
         className="space-y-3 px-4"
       >
-        <CnGeneralFields form={form} disabled={isDisabled || isView} />
+        <CnGeneralFields
+          form={form}
+          disabled={isDisabled || isView}
+          vendorName={creditNote?.vendor?.name ?? undefined}
+        />
         <hr className="border-border" />
 
         <CnItem form={form} disabled={isDisabled} />
