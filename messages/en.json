@@ -3842,6 +3842,10 @@
       }
     },
     "creditNote": {
+      "tabItems": "Items",
+      "tabStock": "Stock Movement",
+      "stockComingSoon": "Stock movement is not available yet",
+      "stockNeedsCompleted": "Stock movement shows after this credit note is completed",
       "netOrCnAmount": "Net/CN amount",
       "entity": "Credit Note",
       "title": "Credit Note",

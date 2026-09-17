@@ -22,6 +22,12 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -35,6 +41,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
 import { CnItem } from "./cn-item";
+import { CnStockTable } from "./cn-stock-table";
 import { CnFooterAction } from "./cn-footer-action";
 import {
   createCnSchema,
@@ -72,6 +79,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const deleteCn = useDeleteCreditNote();
   const submitCn = useSubmitCreditNote();
   const [showDelete, setShowDelete] = useState(false);
+  const [tab, setTab] = useState("items");
   const [showSubmit, setShowSubmit] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const isPending =
@@ -400,7 +408,20 @@ export function CnForm({ creditNote }: CnFormProps) {
         />
         <hr className="border-border" />
 
-        <CnItem form={form} disabled={isDisabled} />
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList variant="line">
+            <TabsTrigger value="items">{t("tabItems")}</TabsTrigger>
+            <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items">
+            <CnItem form={form} disabled={isDisabled} />
+          </TabsContent>
+
+          <TabsContent value="stock">
+            <CnStockTable docStatus={creditNote?.doc_status} />
+          </TabsContent>
+        </Tabs>
       </form>
 
       <CnFooterAction
