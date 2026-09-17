@@ -180,7 +180,10 @@ export function getDefaultValues(vendor?: VendorDetail): VendorFormValues {
       description: vendor.description ?? "",
       is_active: vendor.is_active,
       business_types:
-        vendor.business_type?.map((bt) => ({ id: bt.id, name: bt.name })) ?? [],
+        vendor.business_type?.map((bt) => ({
+          id: bt.id,
+          name: bt.name ?? "",
+        })) ?? [],
       info: vendor.info ?? [],
       vendor_address:
         vendor.vendor_address?.map((a) => ({
