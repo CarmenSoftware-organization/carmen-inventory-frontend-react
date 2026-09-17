@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -19,8 +18,6 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupGrnByVendorForCn } from "@/components/lookup/lookup-grn-by-vendor-for-cn";
 import { LookupCnReason } from "@/components/lookup/lookup-cn-reason";
-import { useProfile } from "@/hooks/use-profile";
-import { useCurrency } from "@/hooks/use-currency";
 import type { CnFormValues } from "./cn-form-schema";
 
 interface CnGeneralFieldsProps {
@@ -38,28 +35,9 @@ export function CnGeneralFields({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
 
-  const { defaultCurrencyId } = useProfile();
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-
   const errors = form.formState.errors;
   const vendorId = useWatch({ control: form.control, name: "vendor_id" });
-  const currencyCode = useWatch({
-    control: form.control,
-    name: "currency_code",
-  });
-
   const invoiceNo = useWatch({ control: form.control, name: "invoice_no" });
-
-  useEffect(() => {
-    const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
-    if (!currencyCode && defaultCurrencyId && currencies.length > 0) {
-      const currency = currencies.find((c) => c.id === defaultCurrencyId);
-      if (currency) {
-        form.setValue("currency_code", defaultCurrencyId);
-        form.setValue("exchange_rate", currency.exchange_rate);
-      }
-    }
-  }, [currencyCode, defaultCurrencyId, currencyData?.data, form]);
 
   return (
     <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
@@ -246,10 +224,9 @@ export function CnGeneralFields({
         <FieldLabel htmlFor="cn-exchange-rate" required>
           {tfl("currency")}
         </FieldLabel>
-        <InputSuffixField
-          disabled={disabled}
-          error={!!errors.currency_code?.message}
-        >
+        {/* สกุลเงินกับเรตมาจากใบรับของที่เลือก แก้เองไม่ได้ — ใบลดหนี้ต้องอยู่
+            สกุลเดียวกับ GRN ต้นทางเสมอ ไม่มี default จากโปรไฟล์อีกแล้ว */}
+        <InputSuffixField disabled error={!!errors.currency_code?.message}>
           <InputSuffixAddon>
             <Controller
               control={form.control}
@@ -258,10 +235,7 @@ export function CnGeneralFields({
                 <LookupCurrency
                   value={field.value}
                   onValueChange={field.onChange}
-                  onItemChange={(currency) => {
-                    form.setValue("exchange_rate", currency.exchange_rate);
-                  }}
-                  disabled={disabled}
+                  disabled
                   className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
                 />
               )}
@@ -274,7 +248,7 @@ export function CnGeneralFields({
               <InputSuffixAmount
                 id="cn-exchange-rate"
                 decimals={5}
-                disabled={disabled}
+                disabled
                 value={Number(field.value) || 0}
                 onValueChange={field.onChange}
               />
