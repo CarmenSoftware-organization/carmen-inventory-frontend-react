@@ -49,7 +49,7 @@ export function getDefaultValues(
     code: category.code,
     name: category.name,
     description: category.description ?? "",
-    parent_id: category.parent_id,
+    parent_id: category.parent?.id ?? null,
     level: category.level,
     cost_labor_percentage: costSettings?.labor_cost_percentage ?? 0,
     cost_overhead_percentage: costSettings?.overhead_percentage ?? 0,
