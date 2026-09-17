@@ -47,7 +47,8 @@ export function usePrtTable({
       meta: { headerTitle: tfl("name") },
     },
     {
-      accessorKey: "workflow_name",
+      id: "workflow_name",
+      accessorFn: (row) => row.workflow?.name,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("workflow")} />
       ),
