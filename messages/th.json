@@ -1055,6 +1055,8 @@
     "discPercent": "ส่วนลด %",
     "discAmt": "จำนวนส่วนลด",
     "foc": "FOC",
+    "orderGrn": "สั่ง / GRN",
+    "focGrn": "FOC / GRN",
     "focQty": "จำนวน FOC",
     "details": "รายละเอียด",
     "expand": "ขยาย",

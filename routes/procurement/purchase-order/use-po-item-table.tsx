@@ -27,7 +27,6 @@ import {
 import { PriceCell, ProductHeaderCell, StatusCell } from "./po-item-cells";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
-import type { PoItemHistoryEntry } from "@/types/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 import type { FieldArrayWithId } from "react-hook-form";
 
@@ -60,49 +59,49 @@ const ProductCol = memo(function ProductCol({
   );
 });
 
-const PoItemActionCell = memo(function PoItemActionCell({
-  index,
-  canDelete,
-  history,
-  productName,
-  onDelete,
+const PoItemHistoryButton = memo(function PoItemHistoryButton({
+  item,
 }: {
-  index: number;
-  canDelete: boolean;
-  history?: PoItemHistoryEntry[];
-  productName?: string;
-  onDelete: (index: number) => void;
+  item?: PoItemField;
 }) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
+  if ((item?.history?.length ?? 0) === 0) return null;
   return (
-    <div className="flex items-center justify-center">
-      {(history?.length ?? 0) > 0 && (
-        <ItemHistorySheet
-          history={history ?? []}
-          productName={productName}
-          statusConfig={ITEM_HISTORY_STATUS_CONFIG}
-          label={t("tabWorkflowHistory")}
-        />
-      )}
-      {canDelete && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              aria-label={t("deleteProductLine")}
-              onClick={() => onDelete(index)}
-            >
-              <Trash2 className="size-3.5" aria-hidden="true" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("deleteProductLine")}</TooltipContent>
-        </Tooltip>
-      )}
-    </div>
+    <ItemHistorySheet
+      history={item?.history ?? []}
+      productName={item?.product_name}
+      statusConfig={ITEM_HISTORY_STATUS_CONFIG}
+      label={t("tabWorkflowHistory")}
+    />
+  );
+});
+
+/** ปุ่มลบแถว — ย้ายมาอยู่แนวคอลัมน์ # ของแถวหมายเหตุ ไม่ใช่คอลัมน์ action ท้ายตาราง */
+const PoItemDeleteButton = memo(function PoItemDeleteButton({
+  index,
+  onDelete,
+}: {
+  index: number;
+  onDelete: (index: number) => void;
+}) {
+  const t = useTranslations("procurement.purchaseOrder");
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          aria-label={t("deleteProductLine")}
+          onClick={() => onDelete(index)}
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+    </Tooltip>
   );
 });
 
@@ -135,10 +134,6 @@ export function usePoItemTable({
   const tfl = useTranslations("field");
   const showAction = !disabled && !readOnly;
 
-  const hasAnyHistory = itemFields.some(
-    (item) => (item.history?.length ?? 0) > 0,
-  );
-  const showActionCol = showAction || hasAnyHistory;
   // แถวแก้ไม่ได้ = ทุกเซลล์เป็นตัวหนังสือ ไม่มี control ให้เผื่อที่
   const viewMode = !showAction;
 
@@ -153,6 +148,28 @@ export function usePoItemTable({
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
+        // แถวหมายเหตุเริ่มที่คอลัมน์ # เพื่อให้ปุ่มของแถว (ลบ/ประวัติ) ยืนตรงแนว
+        // เลขลำดับ แล้วกินความกว้างต่อไปอีก 3 คอลัมน์ให้ช่องหมายเหตุ
+        footerContent: (item: PoItemField) => (
+          <CommentFooterRow
+            form={form}
+            itemFields={itemFields}
+            item={item}
+            isDisabled={viewMode}
+            placeholder={tfl("comment")}
+            leadingWidth={PO_LEADING_COL}
+            renderLeading={(index) =>
+              // โหมดแก้ไข = ปุ่มลบ · โหมดอ่าน = ประวัติของแถว (ถ้ามี)
+              // สองอย่างนี้ไม่มีวันต้องใช้พร้อมกัน จึงใช้ที่เดียวกันสลับกันไป
+              showAction ? (
+                <PoItemDeleteButton index={index} onDelete={onDelete} />
+              ) : (
+                <PoItemHistoryButton item={itemFields[index]} />
+              )
+            }
+          />
+        ),
+        footerColSpan: 4,
       },
     };
 
@@ -183,18 +200,6 @@ export function usePoItemTable({
             }
           />
         ),
-        meta: {
-          footerContent: (item: PoItemField) => (
-            <CommentFooterRow
-              form={form}
-              itemFields={itemFields}
-              item={item}
-              isDisabled={viewMode}
-              placeholder={tfl("comment")}
-            />
-          ),
-          footerColSpan: 3,
-        },
       },
       {
         accessorKey: "product_id",
@@ -211,7 +216,7 @@ export function usePoItemTable({
       },
       {
         id: "order",
-        header: tfl("order"),
+        header: tfl("orderGrn"),
         size: viewMode ? 104 : 140,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -226,7 +231,7 @@ export function usePoItemTable({
       },
       {
         id: "foc",
-        header: tfl("foc"),
+        header: tfl("focGrn"),
         size: viewMode ? 104 : 140,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -323,27 +328,6 @@ export function usePoItemTable({
       },
     ];
 
-    const actionColumn: ColumnDef<PoItemField> = {
-      id: "action",
-      header: () => "",
-      cell: ({ row }) => (
-        <PoItemActionCell
-          index={row.index}
-          canDelete={showAction}
-          history={row.original.history}
-          productName={row.original.product_name}
-          onDelete={onDelete}
-        />
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: 100,
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-      },
-    };
-
     const baseCols = [
       ...(showApproveCheckbox
         ? [
@@ -355,7 +339,6 @@ export function usePoItemTable({
         : []),
       indexColumn,
       ...dataColumns,
-      ...(showActionCol ? [actionColumn] : []),
     ];
 
     return baseCols.map((col) => ({
@@ -382,7 +365,6 @@ export function usePoItemTable({
     onDelete,
     tfl,
     showAction,
-    showActionCol,
   ]);
 
   return useReactTable({

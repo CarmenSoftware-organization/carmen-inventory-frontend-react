@@ -1055,6 +1055,8 @@
     "discPercent": "Disc %",
     "discAmt": "Disc Amt",
     "foc": "FOC",
+    "orderGrn": "Order / GRN",
+    "focGrn": "FOC / GRN",
     "focQty": "FOC Qty",
     "details": "Details",
     "expand": "Expand",
