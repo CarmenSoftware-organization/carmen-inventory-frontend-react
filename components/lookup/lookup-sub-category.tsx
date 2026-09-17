@@ -25,7 +25,7 @@ export function filterActiveSubCategories(
 ): SubCategoryDto[] {
   return items.filter((sc) => {
     if (!sc.is_active) return false;
-    if (filterCategoryId && sc.product_category_id !== filterCategoryId)
+    if (filterCategoryId && sc.product_category?.id !== filterCategoryId)
       return false;
     return true;
   });

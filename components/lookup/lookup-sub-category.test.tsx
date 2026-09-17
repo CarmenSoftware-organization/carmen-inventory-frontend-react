@@ -8,7 +8,7 @@ const items: SubCategoryDto[] = [
     code: "S1",
     name: "Coffee",
     is_active: true,
-    product_category_id: "c1",
+    product_category: { id: "c1" },
     cascade_deviation: true,
   },
   {
@@ -16,7 +16,7 @@ const items: SubCategoryDto[] = [
     code: "S2",
     name: "Tea",
     is_active: true,
-    product_category_id: "c2",
+    product_category: { id: "c2" },
     cascade_deviation: true,
   },
   {
@@ -24,7 +24,7 @@ const items: SubCategoryDto[] = [
     code: "S3",
     name: "Old",
     is_active: false,
-    product_category_id: "c1",
+    product_category: { id: "c1" },
     cascade_deviation: true,
   },
 ];
