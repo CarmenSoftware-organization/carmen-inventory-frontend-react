@@ -78,9 +78,9 @@ export function toVendorRow(
 ): RfpFormValues["vendors"][number] {
   return {
     id: vendor.id,
-    vendor_id: vendor.vendor_id,
-    vendor_name: vendor.vendor_name,
-    vendor_code: vendor.vendor_code,
+    vendor_id: vendor.vendor?.id ?? "",
+    vendor_name: vendor.vendor?.name ?? "",
+    vendor_code: vendor.vendor?.code ?? "",
     contact_person: vendor.contact_person,
     contact_phone: vendor.contact_phone,
     contact_email: vendor.contact_email,

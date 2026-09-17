@@ -73,7 +73,7 @@ export function RfpVendorFields({
   const savedVendors = useMemo(
     () =>
       new Map<string, RequestPriceListVendor>(
-        (requestPriceList?.vendors ?? []).map((v) => [v.vendor_id, v]),
+        (requestPriceList?.vendors ?? []).map((v) => [v.vendor?.id ?? "", v]),
       ),
     [requestPriceList],
   );
