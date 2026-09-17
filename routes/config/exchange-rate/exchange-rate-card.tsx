@@ -27,13 +27,13 @@ export default function ExchangeRateCard({
 
   return (
     <ListCard
-      title={item.currency_code}
+      title={item.currency?.code}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
       <ListCardRow label={tfl("exchangeRate")}>
         <span className="tabular-nums">
-          1 {item.currency_code} = {formatCurrency(item.exchange_rate, 4)}{" "}
+          1 {item.currency?.code} = {formatCurrency(item.exchange_rate, 4)}{" "}
           <span className="text-muted-foreground font-normal">
             {baseCurrency}
           </span>

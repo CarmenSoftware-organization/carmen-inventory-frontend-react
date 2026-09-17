@@ -55,7 +55,8 @@ export function useExchangeRateTable({
         meta: { headerTitle: tfl("date"), skeleton: columnSkeletons.text },
       },
       {
-        accessorKey: "currency_code",
+        id: "currency_code",
+        accessorFn: (row) => row.currency?.code ?? "",
         header: ({ column }) => (
           <DataGridColumnHeader
             column={column}

@@ -130,7 +130,7 @@ function EditForm({
       {/* Metadata strip */}
       <div className="text-muted-foreground bg-muted/40 text-micro flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-2">
         <Badge variant="primary-light" size="xs">
-          {item?.currency_code ?? "—"}
+          {item?.currency?.code ?? "—"}
         </Badge>
         {item?.at_date && (
           <>
