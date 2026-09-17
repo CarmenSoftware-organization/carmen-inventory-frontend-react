@@ -58,6 +58,7 @@ import {
   Award,
   Leaf,
   Mail,
+  MailOpen,
 } from "lucide-react";
 
 export interface ModuleDto {
@@ -601,8 +602,15 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
         permission: PERMISSIONS.system_configuration.view,
-        // เมนูย่อยเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
+        // สามชนิดเอกสารเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
         // (`GET /config/{bu}/workflows/{slug}`) ไม่ใช่กรองจากชุดเดียวกัน
+        //
+        // ตัวที่สี่ไม่ใช่ชนิดเอกสาร — เป็นคลังถ้อยคำที่ workflow เหล่านี้ส่งออกไป
+        // (เทมเพลตทุกอันผูกกับการเปลี่ยนสถานะ: Submitted/Approved/Rejected/Sendback)
+        // จึงอยู่ท้ายสุด: สามอันแรกตอบว่า "เอกสารไหนมี workflow" อันที่สี่ตอบว่า
+        // "แล้วมันพูดว่าอะไร" · ชั้นนี้ไม่ผ่าน `useVisibleModules` (ดู side-main.tsx
+        // ที่กรองแค่ชั้นสอง) `licenseFeature` ของมันจึงไม่ถูกบังคับใน sidebar อีก
+        // ตัวบังคับจริงคือ `LicenseInterceptor` ที่ gateway อยู่แล้ว
         subModules: [
           {
             name: "workflowPurchaseRequest",
@@ -625,6 +633,13 @@ export const moduleList: ModuleDto[] = [
             icon: Store,
             permission: PERMISSIONS.system_configuration.view,
           },
+          {
+            name: "notificationTemplate",
+            path: "/system-admin/notification-template",
+            licenseFeature: "configuration.notification_template", // config:notification-templates
+            icon: BellRing,
+            permission: PERMISSIONS.system_configuration.view,
+          },
         ],
       },
       {
@@ -639,6 +654,13 @@ export const moduleList: ModuleDto[] = [
         path: "/system-admin/email-profile",
         licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
         icon: Mail,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
+        name: "emailTemplate",
+        path: "/system-admin/email-template",
+        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        icon: MailOpen,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
@@ -687,18 +709,13 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.system_configuration.view,
       },
       {
-        name: "notificationTemplate",
-        path: "/system-admin/notification-template",
-        licenseFeature: "configuration.notification_template", // config:notification-templates
-        icon: BellRing,
-        separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
-      },
-      {
         name: "dashboardDataset",
         path: "/system-admin/dashboard-dataset",
         licenseFeature: "dashboard.dataset", // app:dashboard-lab / app:datasets
         icon: Database,
+        // เส้นคั่นเคยมาจาก notificationTemplate ที่เคยอยู่เหนือมัน — ย้ายตัวนั้นไป
+        // ใต้ workflow แล้ว ถ้าไม่ถือเส้นเอง มันจะไหลไปติดกลุ่ม activity
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
     ],

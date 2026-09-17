@@ -124,15 +124,25 @@ export function PricelistCell({
 export function VendorActionsCell({
   urlToken,
   email,
+  rfpId,
+  vendorId,
   vendorName,
+  contactPerson,
   rfpName,
+  startDate,
+  endDate,
   isDisabled,
   onRemove,
 }: {
   readonly urlToken?: string;
   readonly email?: string | null;
+  readonly rfpId?: string;
+  readonly vendorId?: string;
   readonly vendorName: string;
+  readonly contactPerson?: string | null;
   readonly rfpName: string;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
   readonly isDisabled: boolean;
   readonly onRemove: () => void;
 }) {
@@ -218,9 +228,14 @@ export function VendorActionsCell({
         <RfpSendEmailDialog
           open={showEmail}
           onOpenChange={setShowEmail}
+          rfpId={rfpId}
+          vendorId={vendorId}
           vendorName={vendorName}
           vendorEmail={email}
+          contactPerson={contactPerson}
           rfpName={rfpName}
+          startDate={startDate}
+          endDate={endDate}
           vendorUrl={vendorUrl}
         />
       )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { Loader2, Mail, Send, Settings, X } from "lucide-react";
 import {
   Dialog,
@@ -21,9 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useEmailProfiles } from "@/hooks/use-email-profiles";
+import { useEmailTemplates } from "@/hooks/use-email-templates";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
+import {
+  EMAIL_PLACEHOLDERS,
+  fillTemplate,
+  htmlToPlainText,
+  plainTextToHtml,
+  templatesForDocType,
+} from "@/lib/email-template";
 import type { EmailProfile } from "@/types/email-profile";
+import type { EmailTemplate } from "@/types/email-template";
+import { useRfpSendEmail } from "./use-rfp-send-email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -123,48 +136,105 @@ function EmailChipField({
 interface RfpSendEmailDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
+  /** ไม่มี id = คำขอยังไม่ถูกบันทึก ส่งไม่ได้ (ปุ่มส่งปิดพร้อมบอกเหตุผล) */
+  readonly rfpId?: string;
+  readonly vendorId?: string;
   readonly vendorName: string;
   readonly vendorEmail?: string | null;
+  readonly contactPerson?: string | null;
   readonly rfpName: string;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
   readonly vendorUrl: string;
 }
 
 /**
- * Dialog ส่งคำขอรายการราคาให้ผู้ขาย — **UI พร้อม แต่ยังส่งไม่ได้**
+ * Dialog ส่งคำขอรายการราคาให้ผู้ขาย
  *
- * ทรงเดียวกับ `po-send-email-dialog.tsx` ตั้งใจให้เปลี่ยนไปยิง API ได้ทันทีที่
- * หลังบ้านเปิดเส้นให้ (schema ของฟอร์มมี `email_template_id` รออยู่แล้ว) —
- * ตอนนี้ปุ่มส่งปิดไว้พร้อมบอกเหตุผล ไม่ใช่ปล่อยให้กดแล้วได้ 404 เงียบ ๆ
+ * ทรงเดียวกับ `po-send-email-dialog.tsx` ต่างกันสามอย่าง: ไม่มีตัวเลือกแนบไฟล์
+ * (คำขอราคาไม่มี PDF ให้แนบ สิ่งที่ผู้ขายต้องได้คือลิงก์กรอกราคาซึ่งอยู่ในเนื้อความ),
+ * ส่งได้ทีละผู้ขายหนึ่งราย (ลิงก์เป็นของผู้ขายรายนั้น ส่งรวมไม่ได้), และคำขอที่ยัง
+ * ไม่ถูกบันทึกจะไม่มี `rfpId` ให้ยิง — ปุ่มส่งปิดพร้อมบอกเหตุผลแทนที่จะได้ 404
  *
- * ต่างจากของ PO ตรงที่ยังไม่มีตัวเลือกแนบไฟล์ — คำขอราคาไม่มีเอกสาร PDF ให้แนบ
- * สิ่งที่ผู้ขายต้องได้คือลิงก์สำหรับกรอกราคา ซึ่งอยู่ในเนื้อความ
+ * ข้อความตั้งต้นมาจากคลัง `email_templates` (ชนิด `rfp`) ถ้า BU ยังไม่ได้ตั้งไว้
+ * จึงตกไปใช้ข้อความมาตรฐานจากไฟล์แปลเหมือนเดิม
  */
 export function RfpSendEmailDialog({
   open,
   onOpenChange,
+  rfpId,
+  vendorId,
   vendorName,
   vendorEmail,
+  contactPerson,
   rfpName,
+  startDate,
+  endDate,
   vendorUrl,
 }: RfpSendEmailDialogProps) {
   const t = useTranslations("vendorManagement.requestPriceList.sendEmail");
   const tc = useTranslations("common");
-  const { value: emailProfiles, isLoading, isError } = useEmailProfiles();
+  const { defaultBu, dateFormat } = useProfile();
+  const {
+    value: emailProfiles,
+    isLoading: profilesLoading,
+    isError,
+  } = useEmailProfiles();
+  const { value: emailTemplates, isLoading: templatesLoading } =
+    useEmailTemplates();
+  const sendEmail = useRfpSendEmail(rfpId ?? "");
 
+  const isLoading = profilesLoading || templatesLoading;
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);
   const hasNoProfiles = !isLoading && (isError || enabledProfiles.length === 0);
+  const rfpTemplates = templatesForDocType(emailTemplates, "rfp");
+
+  const placeholderValues = {
+    rfp_name: rfpName,
+    vendor_name: vendorName,
+    contact_person: contactPerson ?? "",
+    bu_name: defaultBu?.name ?? "",
+    start_date: startDate ? formatDate(startDate, dateFormat) : "",
+    end_date: endDate ? formatDate(endDate, dateFormat) : "",
+    portal_url: vendorUrl,
+  };
+
+  const defaultTemplate =
+    rfpTemplates.find((x) => x.id === emailTemplates.defaults.rfp) ??
+    rfpTemplates[0];
 
   // ผู้เรียก mount dialog เฉพาะตอนเปิด (ดู VendorActionsCell) — ค่าตั้งต้นจึงทำ
   // ตอน mount ได้เลย ไม่ต้องมี effect คอยเติมค่าเมื่อ `open` เปลี่ยน
   const [to, setTo] = useState<string[]>(vendorEmail ? [vendorEmail] : []);
-  const [subject, setSubject] = useState(() =>
-    t("defaultSubject", { name: rfpName }),
-  );
-  // ลิงก์ถูกเติมลงในข้อความที่เดียว ไม่แสดงซ้ำที่อื่นในกล่องนี้ — ผู้ใช้แก้ข้อความ
-  // ได้เต็มที่ รวมถึงย้าย/ตัดลิงก์ ซึ่งเป็นสิ่งที่จะถูกส่งออกไปจริง
-  const [body, setBody] = useState(() =>
-    t("defaultBody", { vendor: vendorName, name: rfpName, url: vendorUrl }),
-  );
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [subject, setSubject] = useState<string | null>(null);
+  const [body, setBody] = useState<string | null>(null);
+  const [toError, setToError] = useState(false);
+
+  /**
+   * หัวเรื่อง/เนื้อความตั้งต้นของ template หนึ่งอัน — ไม่มี template ในคลัง
+   * จึงใช้ข้อความมาตรฐานจากไฟล์แปล (พฤติกรรมเดิมก่อนมี `email_templates`)
+   */
+  const subjectFrom = (template?: EmailTemplate) =>
+    template
+      ? fillTemplate(
+          template.subject_template,
+          placeholderValues,
+          "text",
+          "rfp",
+        )
+      : t("defaultSubject", { name: rfpName });
+
+  const bodyFrom = (template?: EmailTemplate) =>
+    template
+      ? fillTemplate(template.body_template, placeholderValues, "html", "rfp")
+      : plainTextToHtml(
+          t("defaultBody", {
+            vendor: vendorName,
+            name: rfpName,
+            url: vendorUrl,
+          }),
+        );
 
   // โปรไฟล์กับ CC มาจากข้อมูลที่โหลดทีหลัง — เก็บเฉพาะ "ค่าที่ผู้ใช้เลือกเอง"
   // แล้วค่อยตกไปใช้ค่าตั้งต้นตอน render แทนการ setState ใน effect ซึ่งจะทำให้
@@ -172,25 +242,80 @@ export function RfpSendEmailDialog({
   const [pickedProfileId, setPickedProfileId] = useState<string | null>(null);
   const [pickedCc, setPickedCc] = useState<string[] | null>(null);
 
+  const selectedTemplate =
+    rfpTemplates.find((x) => x.id === templateId) ?? defaultTemplate;
+  // หัวเรื่อง/เนื้อความยึดจาก template จนกว่าผู้ใช้จะพิมพ์ทับ — เก็บเฉพาะสิ่งที่
+  // ผู้ใช้แก้เอง แล้วตกไปใช้ค่าจาก template ตอน render (แทน setState ใน effect)
+  const currentSubject = subject ?? subjectFrom(selectedTemplate);
+  const currentBody = body ?? bodyFrom(selectedTemplate);
+
   const defaultProfile =
     enabledProfiles.find((p) => p.id === emailProfiles.default_profile_id) ??
     enabledProfiles[0];
   const profileId = pickedProfileId ?? defaultProfile?.id ?? "";
-  // CC ผูกกับโปรไฟล์ตรง ๆ — สลับโปรไฟล์แล้วเปลี่ยนตามเสมอ ต่างจากหัวเรื่อง/ข้อความ
-  // ที่เป็นของคำขอใบนี้ ไม่ใช่ค่ามาตรฐานของผู้ส่ง
-  const cc =
-    pickedCc ??
-    enabledProfiles.find((p) => p.id === profileId)?.default_cc ??
-    [];
+  // CC ตั้งต้นมาจากข้อความที่เลือกในคลังเท่านั้น — โปรไฟล์ผู้ส่งไม่ถือ CC ประจำแล้ว
+  const cc = pickedCc ?? selectedTemplate?.default_cc ?? [];
 
-  const handleProfileChange = (nextId: string) => {
-    setPickedProfileId(nextId);
-    // เลือกโปรไฟล์ใหม่ = CC กลับไปตามโปรไฟล์นั้น ทิ้งที่แก้ไว้เอง
-    setPickedCc(null);
+  /**
+   * สลับข้อความสำเร็จรูป — ทับหัวเรื่อง/เนื้อความที่ยังไม่ได้แก้เองเท่านั้น
+   * (`subject`/`body` เป็น null ตราบใดที่ผู้ใช้ยังไม่พิมพ์ทับ)
+   */
+  const handleTemplateChange = (nextId: string) => {
+    setTemplateId(nextId);
+    const template = rfpTemplates.find((x) => x.id === nextId);
+    if (template?.default_cc?.length) setPickedCc(template.default_cc);
+  };
+
+  const handleSend = () => {
+    if (!rfpId) return;
+    // backend บังคับ subject/body ห้ามว่าง (RequestForPricingSendEmailSchema) —
+    // เช็คที่นี่ด้วย ไม่งั้นข้อความที่ถูกลบจนหมดจะได้ 400 ที่ไม่บอกว่าช่องไหนว่าง
+    // เนื้อความเป็น HTML แล้ว `<p></p>` ที่ตัวแก้ไขทิ้งไว้จึงไม่นับว่ามีเนื้อหา
+    const hasSubject = currentSubject.trim().length > 0;
+    const hasBody = htmlToPlainText(currentBody).length > 0;
+    if (to.length === 0 || !hasSubject || !hasBody) {
+      setToError(to.length === 0);
+      if (!hasSubject || !hasBody) toast.error(t("subjectBodyRequired"));
+      return;
+    }
+    sendEmail.mutate(
+      {
+        profile_id: profileId,
+        to,
+        cc,
+        subject: currentSubject,
+        body: currentBody,
+        ...(vendorId && { vendor_id: vendorId }),
+      },
+      {
+        onSuccess: (response) => {
+          // gateway ห่อผลลัพธ์ไว้ใต้ `data` เสมอ และ 200 ไม่ได้แปลว่าถึงผู้รับ
+          const result = response.data;
+          if (!result?.sent) {
+            toast.error(t("sendFailed"));
+            return;
+          }
+          if (result.rejected && result.rejected.length > 0) {
+            toast.warning(
+              t("sendPartial", { emails: result.rejected.join(", ") }),
+            );
+            return;
+          }
+          toast.success(t("sendSuccess"));
+          onOpenChange(false);
+        },
+      },
+    );
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && sendEmail.isPending) return;
+        onOpenChange(next);
+      }}
+    >
       <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-xl">
         <DialogHeader className="gap-0 pb-1">
           <DialogTitle className="flex items-center gap-2 text-sm">
@@ -230,7 +355,7 @@ export function RfpSendEmailDialog({
           <div className="space-y-4">
             <Field>
               <FieldLabel htmlFor="rse-profile">{t("profile")}</FieldLabel>
-              <Select value={profileId} onValueChange={handleProfileChange}>
+              <Select value={profileId} onValueChange={setPickedProfileId}>
                 <SelectTrigger id="rse-profile" className="w-full">
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
@@ -244,14 +369,41 @@ export function RfpSendEmailDialog({
               </Select>
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="rse-to">{t("to")}</FieldLabel>
+            {rfpTemplates.length > 0 && (
+              <Field>
+                <FieldLabel htmlFor="rse-template">{t("template")}</FieldLabel>
+                <Select
+                  value={selectedTemplate?.id ?? ""}
+                  onValueChange={handleTemplateChange}
+                >
+                  <SelectTrigger id="rse-template" className="w-full">
+                    <SelectValue placeholder={t("templatePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rfpTemplates.map((template: EmailTemplate) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+
+            <Field data-invalid={toError}>
+              <FieldLabel htmlFor="rse-to" required>
+                {t("to")}
+              </FieldLabel>
               <EmailChipField
                 id="rse-to"
                 value={to}
-                onChange={setTo}
+                onChange={(next) => {
+                  setTo(next);
+                  if (next.length > 0) setToError(false);
+                }}
                 placeholder={t("toPlaceholder")}
               />
+              {toError && <FieldError>{t("toRequired")}</FieldError>}
             </Field>
 
             <Field>
@@ -268,19 +420,23 @@ export function RfpSendEmailDialog({
               <FieldLabel htmlFor="rse-subject">{t("subject")}</FieldLabel>
               <Input
                 id="rse-subject"
-                value={subject}
+                value={currentSubject}
                 onChange={(e) => setSubject(e.target.value)}
+                disabled={sendEmail.isPending}
               />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="rse-body">{t("body")}</FieldLabel>
-              <Textarea
+              {/* ลิงก์กรอกราคาอยู่ในเนื้อความที่เดียว — ผู้ใช้ย้ายหรือตัดได้
+                  สิ่งที่เห็นตรงนี้คือสิ่งที่ถูกส่งออกไปจริง */}
+              <RichTextEditor
                 id="rse-body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={7}
-                className="min-h-36 text-xs"
+                value={currentBody}
+                onChange={setBody}
+                placeholders={EMAIL_PLACEHOLDERS.rfp}
+                placeholderLabel={t("insertVariable")}
+                disabled={sendEmail.isPending}
               />
             </Field>
           </div>
@@ -292,13 +448,27 @@ export function RfpSendEmailDialog({
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
+            disabled={sendEmail.isPending}
           >
             {tc("cancel")}
           </Button>
-          <Button type="button" size="sm" disabled title={t("unavailable")}>
-            <Send aria-hidden="true" />
-            {t("send")}
-          </Button>
+          {!isLoading && !hasNoProfiles && (
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSend}
+              // คำขอที่ยังไม่ถูกบันทึกไม่มี id ให้ยิง — บอกเหตุผลแทนการปล่อยให้ได้ 404
+              disabled={!rfpId || !profileId || sendEmail.isPending}
+              title={rfpId ? undefined : t("unsavedRfp")}
+            >
+              {sendEmail.isPending ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Send aria-hidden="true" />
+              )}
+              {sendEmail.isPending ? t("sending") : t("send")}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

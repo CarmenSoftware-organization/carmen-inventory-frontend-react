@@ -6,10 +6,8 @@ import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import { columnSkeletons } from "@/components/ui/data-grid/columns";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import type {
-  NotificationTemplate,
-  NotificationTemplateType,
-} from "@/types/noti-tmpl";
+import type { NotificationTemplate } from "@/types/noti-tmpl";
+import { TemplateText } from "./noti-tmpl-preview";
 
 interface UseNotiTmplTableOptions {
   readonly data: NotificationTemplate[];
@@ -17,10 +15,6 @@ interface UseNotiTmplTableOptions {
   readonly params: ParamsDto;
   readonly tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
-
-const CHANNEL_LABEL: Record<NotificationTemplateType, string> = {
-  app: "App",
-};
 
 export function useNotiTmplTable({
   data,
@@ -47,30 +41,19 @@ export function useNotiTmplTable({
       meta: { headerTitle: t("colName"), skeleton: columnSkeletons.text },
     },
     {
-      accessorKey: "type",
+      accessorKey: "body",
       enableSorting: false,
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("colChannel")} />
+        <DataGridColumnHeader column={column} title={t("colMessage")} />
       ),
+      // เดิมคอลัมน์นี้คือ Subject ซึ่งว่างทุกแถวของช่องทางแอป (หัวเรื่องเป็นของ
+      // อีเมลที่เลิกใช้แล้ว) — เนื้อหาข้อความคือสิ่งที่คนมาหน้านี้ตามหาจริง
       cell: ({ row }) => (
-        <span className="capitalize">
-          {CHANNEL_LABEL[row.original.type] ?? row.original.type ?? "—"}
+        <span className="text-muted-foreground block max-w-[36rem]">
+          <TemplateText text={row.original.body || "—"} />
         </span>
       ),
-      meta: { headerTitle: t("colChannel"), skeleton: columnSkeletons.text },
-    },
-    {
-      accessorKey: "subject",
-      enableSorting: false,
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("colSubject")} />
-      ),
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {row.original.subject ?? "—"}
-        </span>
-      ),
-      meta: { headerTitle: t("colSubject"), skeleton: columnSkeletons.text },
+      meta: { headerTitle: t("colMessage"), skeleton: columnSkeletons.text },
     },
   ];
 

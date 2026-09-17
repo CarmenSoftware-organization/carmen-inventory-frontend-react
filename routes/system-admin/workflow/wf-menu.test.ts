@@ -13,33 +13,48 @@ const findLeaf = (path: string) => {
 
 describe("เมนูย่อยของ workflow", () => {
   const workflow = findLeaf("/system-admin/workflow");
+  const children = workflow?.subModules ?? [];
 
-  it("มีเมนูย่อยครบสามชนิดใบ", () => {
-    expect(workflow?.subModules?.map((s) => s.name)).toEqual([
+  // ลูกของ workflow มีสองพันธุ์ ผูกสัญญาคนละชุด — แยกด้วย path เพราะนั่นคือสิ่งที่
+  // ต่างกันจริง: ชนิดเอกสารซ้อนอยู่ใต้ path ของตัวแม่เพราะเป็น route ของ workflow
+  // เอง ส่วนตัวที่ไม่ใช่เป็นหน้าคนละที่ที่เอามาวางไว้ใต้กลุ่มนี้เพราะความหมาย
+  const docTypeChildren = children.filter((s) =>
+    s.path.startsWith("/system-admin/workflow/"),
+  );
+  const guestChildren = children.filter(
+    (s) => !s.path.startsWith("/system-admin/workflow/"),
+  );
+
+  it("มีเมนูชนิดเอกสารครบสามใบ", () => {
+    expect(docTypeChildren.map((s) => s.name)).toEqual([
       "workflowPurchaseRequest",
       "workflowPurchaseOrder",
       "workflowStoreRequisition",
     ]);
   });
 
-  it("path ของเมนูย่อยลงท้ายด้วย slug ที่ endpoint รู้จัก", () => {
+  it("path ของเมนูชนิดเอกสารลงท้ายด้วย slug ที่ endpoint รู้จัก", () => {
     // slug เพี้ยนเมื่อไร = ยิง GET /config/{bu}/workflows/<ผิด> แล้วได้ 404
-    const slugs = (workflow?.subModules ?? []).map((s) =>
+    const slugs = docTypeChildren.map((s) =>
       s.path.replace("/system-admin/workflow/", ""),
     );
     expect(slugs).toEqual([...WORKFLOW_DOC_TYPES]);
   });
 
-  it("เมนูย่อยเป็น route ของตัวเอง ซ้อนอยู่ใต้ path ของตัวแม่", () => {
-    for (const s of workflow?.subModules ?? []) {
-      expect(s.path.startsWith("/system-admin/workflow/")).toBe(true);
+  it("เมนูชนิดเอกสารสืบสิทธิ์และ license feature จากตัวแม่ ไม่ตกหล่น", () => {
+    for (const s of docTypeChildren) {
+      expect(s.permission).toBe(workflow?.permission);
+      expect(s.licenseFeature).toBe(workflow?.licenseFeature);
     }
   });
 
-  it("เมนูย่อยสืบสิทธิ์และ license feature จากตัวแม่ ไม่ตกหล่น", () => {
-    for (const s of workflow?.subModules ?? []) {
-      expect(s.permission).toBe(workflow?.permission);
-      expect(s.licenseFeature).toBe(workflow?.licenseFeature);
+  // ตัวที่ไม่ใช่ชนิดเอกสารต้องระบุชื่อไว้ตรง ๆ — ไม่งั้นช่องนี้กลายเป็นที่ทิ้งของ
+  // ที่ใครเพิ่มอะไรก็ได้แล้วเทสต์ไม่รู้เรื่อง ส่วน licenseFeature ต้อง **ไม่**
+  // เท่าของแม่ เพราะมันเป็นฟีเจอร์คนละตัวที่ backend ขายแยก
+  it("ตัวที่ไม่ใช่ชนิดเอกสารมีแค่คลังข้อความแจ้งเตือน และถือ license feature ของตัวเอง", () => {
+    expect(guestChildren.map((s) => s.name)).toEqual(["notificationTemplate"]);
+    for (const s of guestChildren) {
+      expect(s.licenseFeature).not.toBe(workflow?.licenseFeature);
     }
   });
 

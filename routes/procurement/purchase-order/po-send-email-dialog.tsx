@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,32 +26,22 @@ import {
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useProfile } from "@/hooks/use-profile";
 import { useEmailProfiles } from "@/hooks/use-email-profiles";
+import { useEmailTemplates } from "@/hooks/use-email-templates";
 import { useVendorById } from "@/hooks/use-vendor";
+import {
+  EMAIL_PLACEHOLDERS,
+  fillTemplate,
+  htmlToPlainText,
+  templatesForDocType,
+} from "@/lib/email-template";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { EmailProfile } from "@/types/email-profile";
+import type { EmailTemplate } from "@/types/email-template";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { usePoSendEmail } from "./use-po-send-email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function fillTemplate(
-  template: string,
-  values: {
-    po_no: string;
-    vendor_name: string;
-    bu_name: string;
-    total: string;
-    delivery_date: string;
-  },
-): string {
-  return template
-    .replaceAll("{{po_no}}", values.po_no)
-    .replaceAll("{{vendor_name}}", values.vendor_name)
-    .replaceAll("{{bu_name}}", values.bu_name)
-    .replaceAll("{{total}}", values.total)
-    .replaceAll("{{delivery_date}}", values.delivery_date);
-}
 
 interface PoSendEmailDialogProps {
   readonly open: boolean;
@@ -161,11 +151,11 @@ function EmailChipField({
  * ให้ผู้ขายทางอีเมล
  *
  * - ไม่มีโปรไฟล์ที่เปิดใช้งานเลย → แสดงข้อความ + ลิงก์ไปหน้าตั้งค่า ไม่มีปุ่มส่งให้กด
- * - Subject/Body ตั้งต้นจาก template ของโปรไฟล์ที่เลือก แทน placeholder ด้วยค่าจริงของ PO
- *   — ผู้ใช้แก้ช่องไหนแล้ว สลับโปรไฟล์จะไม่ทับช่องนั้นอีก (เก็บ dirty flag แยกต่อช่อง
- *   ผ่าน ref ไม่ใช้ `formState.isDirty` เพราะฟอร์มนี้ไม่ได้ใช้ react-hook-form)
- * - CC ผูกกับโปรไฟล์ตรง ๆ (`default_cc`) — สลับโปรไฟล์แล้วเปลี่ยนตามเสมอ ต่างจาก
- *   subject/body เพราะเป็นค่ามาตรฐานของผู้ส่งคนนั้น ไม่ใช่ข้อความที่ผู้ใช้พิมพ์เอง
+ * - Subject/Body/CC ตั้งต้นจากข้อความที่เลือกในคลัง (`email_templates`) แทน placeholder
+ *   ด้วยค่าจริงของ PO — ผู้ใช้แก้ช่องไหนแล้ว สลับข้อความจะไม่ทับช่องนั้นอีก (เก็บ dirty flag
+ *   แยกต่อช่องผ่าน ref ไม่ใช้ `formState.isDirty` เพราะฟอร์มนี้ไม่ได้ใช้ react-hook-form)
+ * - โปรไฟล์ผู้ส่งคุมแค่ "ส่งจากใคร/ผ่าน SMTP ไหน" เท่านั้น สลับโปรไฟล์จึงไม่แตะหัวเรื่อง
+ *   เนื้อความ หรือ CC
  * - ส่งเสร็จอ่าน `sent`/`rejected` เสมอ — ไม่ปิด dialog ถ้าส่งไม่ถึงผู้รับบางคน/ทั้งหมด
  *   ให้ผู้ใช้เห็นค่าที่กรอกไว้และลองใหม่ได้ทันที
  */
@@ -182,15 +172,21 @@ export function PoSendEmailDialog({
     isLoading: profilesLoading,
     isError: profilesError,
   } = useEmailProfiles();
+  const { value: emailTemplates, isLoading: templatesLoading } =
+    useEmailTemplates();
   const vendorQuery = useVendorById(purchaseOrder.vendor?.id ?? "");
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
   const enabledProfiles = emailProfiles.profiles.filter((p) => p.enabled);
-  const isLoading = profilesLoading || vendorQuery.isLoading;
+  // คลังข้อความว่าง = ไม่ใช่ข้อผิดพลาด — หัวเรื่อง/เนื้อความเริ่มจากช่องว่างให้ผู้ใช้พิมพ์เอง
+  const poTemplates = templatesForDocType(emailTemplates, "po");
+  const isLoading =
+    profilesLoading || templatesLoading || vendorQuery.isLoading;
   const hasNoProfiles =
     !isLoading && (profilesError || enabledProfiles.length === 0);
 
   const [profileId, setProfileId] = useState("");
+  const [templateId, setTemplateId] = useState("");
   const [to, setTo] = useState<string[]>([]);
   const [cc, setCc] = useState<string[]>([]);
   const [subject, setSubject] = useState("");
@@ -216,6 +212,21 @@ export function PoSendEmailDialog({
       : "",
   };
 
+  /**
+   * หัวเรื่อง/เนื้อความตั้งต้นมาจากคลังข้อความ (`email_templates`) ทางเดียว —
+   * โปรไฟล์ผู้ส่งไม่ถือเทมเพลตอีกแล้ว คลังว่าง = เริ่มจากช่องว่างให้ผู้ใช้พิมพ์เอง
+   */
+  const subjectFrom = (template?: EmailTemplate) =>
+    fillTemplate(
+      template?.subject_template ?? "",
+      placeholderValues,
+      "text",
+      "po",
+    );
+
+  const bodyFrom = (template?: EmailTemplate) =>
+    fillTemplate(template?.body_template ?? "", placeholderValues, "html", "po");
+
   // เติมค่าตั้งต้นครั้งเดียวต่อการเปิด dialog หนึ่งรอบ — รอทั้งโปรไฟล์และผู้ขายโหลด
   // เสร็จก่อน (ไม่งั้น "To" จะว่างเพราะยังไม่รู้อีเมลผู้ขาย) ปิดแล้วเปิดใหม่ = เริ่มนับหนึ่งใหม่
   useEffect(() => {
@@ -231,21 +242,21 @@ export function PoSendEmailDialog({
         ?.id ??
       enabledProfiles[0]?.id ??
       "";
-    const profile = enabledProfiles.find((p) => p.id === defaultId);
 
     const contacts = vendorQuery.data?.vendor_contact ?? [];
     const vendorEmail =
       contacts.find((c) => c.is_primary)?.email || contacts[0]?.email || "";
 
+    const template =
+      poTemplates.find((x) => x.id === emailTemplates.defaults.po) ??
+      poTemplates[0];
+
     setProfileId(defaultId);
+    setTemplateId(template?.id ?? "");
     setTo(vendorEmail ? [vendorEmail] : []);
-    setCc(profile?.default_cc ?? []);
-    setSubject(
-      profile ? fillTemplate(profile.subject_template, placeholderValues) : "",
-    );
-    setBody(
-      profile ? fillTemplate(profile.body_template, placeholderValues) : "",
-    );
+    setCc(template?.default_cc ?? []);
+    setSubject(subjectFrom(template));
+    setBody(bodyFrom(template));
     setAttachPdf(true);
     setToError(false);
     setSubjectError(false);
@@ -261,20 +272,21 @@ export function PoSendEmailDialog({
     isLoading,
     enabledProfiles,
     emailProfiles.default_profile_id,
+    emailTemplates,
     vendorQuery.data,
   ]);
 
-  const handleProfileChange = (nextId: string) => {
-    setProfileId(nextId);
-    const profile = enabledProfiles.find((p) => p.id === nextId);
-    if (!profile) return;
-    setCc(profile.default_cc);
-    if (!isSubjectDirtyRef.current) {
-      setSubject(fillTemplate(profile.subject_template, placeholderValues));
-    }
-    if (!isBodyDirtyRef.current) {
-      setBody(fillTemplate(profile.body_template, placeholderValues));
-    }
+  /**
+   * เลือกข้อความจากคลัง — ทับหัวเรื่อง/เนื้อความที่ผู้ใช้ยังไม่ได้แก้เองเท่านั้น
+   * (แก้แล้วแปลว่าตั้งใจเขียนของใบนี้ ไม่ควรโดนกลืนเพราะเผลอสลับ dropdown)
+   */
+  const handleTemplateChange = (nextId: string) => {
+    setTemplateId(nextId);
+    const template = poTemplates.find((x) => x.id === nextId);
+    if (!template) return;
+    if (template.default_cc?.length) setCc(template.default_cc);
+    if (!isSubjectDirtyRef.current) setSubject(subjectFrom(template));
+    if (!isBodyDirtyRef.current) setBody(bodyFrom(template));
   };
 
   const handleClose = (next: boolean) => {
@@ -283,19 +295,19 @@ export function PoSendEmailDialog({
   };
 
   const handleSend = () => {
-    // Admin-created profiles can leave subject_template/body_template empty (schema doesn't
-    // require them — see email-profile-schema.ts) while the backend's send-email DTO requires
-    // both non-empty (purchase-order.send-email.dto.ts, subject/body: z.string().min(1)).
-    // Without this check the first admin to hit that gap sees a 400 with no explanation of
-    // which field is empty. Checked here, not just "to", for the same reason "to" is checked:
-    // a genuine send attempt should never reach the backend already known to fail.
-    // โปรไฟล์ที่ admin สร้างเองปล่อย subject_template/body_template ว่างได้ (schema ไม่บังคับ)
-    // แต่ backend บังคับทั้งคู่ห้ามว่าง ถ้าไม่เช็คตรงนี้ admin คนแรกที่เจอช่องว่างนี้จะได้ 400
-    // โดยไม่รู้ว่าช่องไหนว่าง จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
+    // A BU with no email message in the store starts with an empty subject/body, while the
+    // backend's send-email DTO requires both non-empty (purchase-order.send-email.dto.ts,
+    // subject/body: z.string().min(1)). Without this check the first user to hit that gap sees
+    // a 400 with no explanation of which field is empty. Checked here, not just "to", for the
+    // same reason "to" is checked: a genuine send attempt should never reach the backend
+    // already known to fail.
+    // BU ที่ยังไม่มีข้อความในคลัง = หัวเรื่อง/เนื้อความเริ่มจากว่าง แต่ backend บังคับทั้งคู่
+    // ห้ามว่าง ถ้าไม่เช็คตรงนี้ผู้ใช้คนแรกที่เจอช่องว่างนี้จะได้ 400 โดยไม่รู้ว่าช่องไหนว่าง
+    // จึงเช็คเหมือนที่เช็ค "to" อยู่แล้ว
     const trimmedSubject = subject.trim();
-    const trimmedBody = body.trim();
+    // เนื้อความเป็น HTML แล้ว — `<p></p>` ที่ตัวแก้ไขทิ้งไว้ไม่ใช่เนื้อหา
     const hasSubjectError = trimmedSubject.length === 0;
-    const hasBodyError = trimmedBody.length === 0;
+    const hasBodyError = htmlToPlainText(body).length === 0;
     if (to.length === 0 || hasSubjectError || hasBodyError) {
       setToError(to.length === 0);
       setSubjectError(hasSubjectError);
@@ -376,7 +388,7 @@ export function PoSendEmailDialog({
               <FieldLabel htmlFor="pse-profile" required>
                 {t("profile")}
               </FieldLabel>
-              <Select value={profileId} onValueChange={handleProfileChange}>
+              <Select value={profileId} onValueChange={setProfileId}>
                 <SelectTrigger id="pse-profile" className="w-full">
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
@@ -389,6 +401,24 @@ export function PoSendEmailDialog({
                 </SelectContent>
               </Select>
             </Field>
+
+            {poTemplates.length > 0 && (
+              <Field>
+                <FieldLabel htmlFor="pse-template">{t("template")}</FieldLabel>
+                <Select value={templateId} onValueChange={handleTemplateChange}>
+                  <SelectTrigger id="pse-template" className="w-full">
+                    <SelectValue placeholder={t("templatePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {poTemplates.map((template: EmailTemplate) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
 
             <Field data-invalid={toError}>
               <FieldLabel htmlFor="pse-to" required>
@@ -440,17 +470,17 @@ export function PoSendEmailDialog({
               <FieldLabel htmlFor="pse-body" required>
                 {t("body")}
               </FieldLabel>
-              <Textarea
+              <RichTextEditor
                 id="pse-body"
                 value={body}
-                onChange={(e) => {
+                onChange={(html) => {
                   isBodyDirtyRef.current = true;
-                  setBody(e.target.value);
-                  if (e.target.value.trim().length > 0) setBodyError(false);
+                  setBody(html);
+                  if (htmlToPlainText(html).length > 0) setBodyError(false);
                 }}
-                rows={6}
-                className="min-h-32 text-xs"
-                aria-invalid={bodyError}
+                placeholders={EMAIL_PLACEHOLDERS.po}
+                placeholderLabel={t("insertVariable")}
+                ariaInvalid={bodyError}
                 disabled={sendEmail.isPending}
               />
               {bodyError && <FieldError>{t("bodyRequired")}</FieldError>}
