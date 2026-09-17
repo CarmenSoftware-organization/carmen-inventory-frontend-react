@@ -137,9 +137,7 @@ const RFP_WITH_VENDOR = {
   vendors: [
     {
       id: "rv-1",
-      vendor_id: "ven-1",
-      vendor_name: "Acme Foods",
-      vendor_code: "V001",
+      vendor: { id: "ven-1", name: "Acme Foods", code: "V001" },
       contact_person: "Som",
       contact_phone: "02-000",
       contact_email: "som@acme.test",
@@ -294,9 +292,7 @@ const AFTER_SAVE = {
     ...(RFP_WITH_VENDOR.vendors ?? []),
     {
       id: "rv-2",
-      vendor_id: "ven-2",
-      vendor_name: "Beta Farms",
-      vendor_code: "V002",
+      vendor: { id: "ven-2", name: "Beta Farms", code: "V002" },
       contact_person: "Lek",
       contact_phone: "02-111",
       contact_email: "lek@beta.test",

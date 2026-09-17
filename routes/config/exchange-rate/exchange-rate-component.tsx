@@ -339,7 +339,7 @@ export default function ExchangeRateComponent() {
         title={t("entity")}
         description={
           deleteItem
-            ? `${deleteItem.currency_code} — ${formatDate(deleteItem.at_date, dateFormat)}`
+            ? `${deleteItem.currency?.code ?? ""} — ${formatDate(deleteItem.at_date, dateFormat)}`
             : undefined
         }
         onConfirm={() => {

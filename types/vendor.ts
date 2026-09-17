@@ -1,4 +1,5 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 interface VendorInfoItem {
   label: string;
@@ -36,7 +37,10 @@ export interface Vendor {
   code: string;
   name: string;
   is_active: boolean;
-  business_type: { id: string; name: string }[];
+  business_type: EntityRef[];
+  // ยืนยันจาก live list+detail: tax_profile เป็น {id,name} เหมือนกันทั้งคู่
+  // (ของเดิมไม่เคยประกาศ tax_profile_id/tax_profile_name แบบ flat ใน type นี้เลย)
+  tax_profile: EntityRef | null;
   contacts?: VendorContact[];
   tb_vendor_contact?: VendorContact[];
   audit?: Audit;

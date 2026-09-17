@@ -1,6 +1,7 @@
+import type { EntityRef } from "./entity-ref";
+
 export interface TaxFields {
-  tax_profile_id: string | null;
-  tax_profile_name: string | null;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   tax_amount: number;
   is_tax_adjustment: boolean;

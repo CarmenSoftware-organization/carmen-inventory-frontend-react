@@ -1,10 +1,13 @@
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
+// ยืนยันจาก live: list (`/exchange-rates`) และ detail (`/exchange-rates/{id}`)
+// ส่ง currency เป็น object เหมือนกันทุกแถว — ไม่มีคู่ flat currency_id/currency_code
+// หลงเหลืออีก ประกาศ type เดียวใช้ร่วมกันได้
 export interface ExchangeRateItem {
   id: string;
   doc_version: number;
-  currency_id: string;
-  currency_code: string;
+  currency: EntityRef | null;
   exchange_rate: number;
   at_date: string;
   // flat fields ยังใช้อยู่ใน exchange-rate-dialog (อ่าน updated_at); list endpoint

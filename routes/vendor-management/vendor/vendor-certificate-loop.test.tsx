@@ -90,6 +90,7 @@ const VENDOR: VendorDetail = {
   name: "Acme Foods",
   description: "",
   is_active: true,
+  tax_profile: null,
   business_type: [],
   info: [],
   vendor_address: [],

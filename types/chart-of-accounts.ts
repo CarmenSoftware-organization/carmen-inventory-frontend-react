@@ -1,4 +1,5 @@
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 export enum ACCOUNT_NATURE {
   DEBIT = "debit",
@@ -37,6 +38,9 @@ export interface ChartOfAccount {
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
   is_active: boolean;
+  // ยืนยันจาก live list+detail (id เท่านั้น ไม่มี name คู่กันบน wire เลย —
+  // null ใน 100/100 แถวที่ตรวจ) ยังไม่มี call site ในแอปอ่านฟิลด์นี้จริง
+  account_group?: EntityRef | null;
   audit?: Audit;
 }
 

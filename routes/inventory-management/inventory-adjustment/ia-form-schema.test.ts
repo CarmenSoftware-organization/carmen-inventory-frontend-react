@@ -14,10 +14,12 @@ const adjustment = {
     {
       id: "6e9ab38b-3174-489f-85e5-70645b206c4a",
       sequence_no: 1,
-      product_id: "101a24a6-d6e5-450f-8ee6-665779eb4210",
-      product_name: "Brushtail Estate Grey Label Sparkling 33033",
-      product_code: "22060006",
-      product_local_name: "Brushtail Estate Grey Label Sparkling 33033",
+      product: {
+        id: "101a24a6-d6e5-450f-8ee6-665779eb4210",
+        name: "Brushtail Estate Grey Label Sparkling 33033",
+        code: "22060006",
+        local_name: "Brushtail Estate Grey Label Sparkling 33033",
+      },
       // หน่วยนับมาเป็น object ไม่ใช่ flat string — จุดที่เคยอ่านพลาด
       inventory_unit: {
         id: "b5b22dba-fff4-4662-8e43-b25566402461",

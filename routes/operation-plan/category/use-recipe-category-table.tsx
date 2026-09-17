@@ -59,16 +59,17 @@ export function useRecipeCategoryTable({
       meta: { headerTitle: tfl("name") },
     },
     {
-      accessorKey: "parent_id",
+      id: "parent_id",
+      accessorFn: (row) => row.parent?.id ?? "",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("parent")} />
       ),
       meta: { headerTitle: t("parent") },
       cell: ({ row }) => {
-        const parentId = row.original.parent_id;
+        const parentId = row.original.parent?.id;
         if (!parentId) return <span className="text-muted-foreground">—</span>;
         const parent = allCategories.find((c) => c.id === parentId);
-        return parent?.name ?? parentId;
+        return parent?.name ?? row.original.parent?.name ?? parentId;
       },
     },
     // Status ก่อน created/updated (hideStatus:true กัน useConfigTable inject ซ้ำ)

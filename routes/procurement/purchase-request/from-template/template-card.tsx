@@ -28,9 +28,9 @@ export default function TemplateCard({ template, onSelect }: Props) {
             <h3 className="text-foreground truncate text-sm font-semibold">
               {template.name}
             </h3>
-            {template.workflow_name && (
+            {template.workflow?.name && (
               <p className="text-muted-foreground text-micro mt-0.5 truncate">
-                {template.workflow_name}
+                {template.workflow.name}
               </p>
             )}
           </div>
@@ -59,13 +59,13 @@ export default function TemplateCard({ template, onSelect }: Props) {
                   size="xs"
                   className="text-micro-legal shrink-0"
                 >
-                  {item.product_code}
+                  {item.product?.code}
                 </Badge>
                 <span className="text-foreground min-w-0 flex-1 truncate">
-                  {item.product_name}
+                  {item.product?.name}
                 </span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
-                  {item.requested_qty} {item.requested_unit_name}
+                  {item.requested_qty} {item.requested_unit?.name}
                 </span>
               </div>
             ))}

@@ -104,8 +104,9 @@ export function PltItemFields({
   // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
   const removeProductName = removeProductId
     ? (allProducts.find((p) => p.id === removeProductId)?.name ??
-      priceListTemplate?.products?.find((p) => p.product_id === removeProductId)
-        ?.product_name ??
+      priceListTemplate?.products?.find(
+        (p) => p.product?.id === removeProductId,
+      )?.product?.name ??
       "")
     : "";
 
@@ -115,16 +116,16 @@ export function PltItemFields({
     const p = allProducts.find((x) => x.id === productId);
     if (p) return `${p.code} — ${p.name}`;
     const ref = priceListTemplate?.products?.find(
-      (x) => x.product_id === productId,
+      (x) => x.product?.id === productId,
     );
-    return ref ? `${ref.product_code ?? ref.code} — ${ref.product_name}` : "";
+    return ref ? `${ref.product?.code ?? ref.code} — ${ref.product?.name}` : "";
   };
 
   // หน่วยสั่งซื้อ (default_order) ของ product — มีเฉพาะ product ที่ save แล้วใน
   // template · product ที่พึ่งติ๊กจาก tree (ยังไม่ save) จะยังไม่มี → ไม่โชว์ badge
   const getOrderUnitName = (productId: string) =>
-    priceListTemplate?.products?.find((x) => x.product_id === productId)
-      ?.default_order?.unit_name ?? "";
+    priceListTemplate?.products?.find((x) => x.product?.id === productId)
+      ?.default_order.unit?.name ?? "";
 
   return (
     <>

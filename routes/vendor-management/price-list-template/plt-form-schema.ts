@@ -46,7 +46,7 @@ export function getDefaultValues(
       if (product.moq && product.moq.length > 0) {
         for (const moq of product.moq) {
           details.push({
-            product_id: product.product_id,
+            product_id: product.product?.id ?? "",
             unit_id: moq.unit_id,
             unit_name: moq.unit_name,
             qty: moq.qty,
@@ -55,9 +55,9 @@ export function getDefaultValues(
         }
       } else {
         details.push({
-          product_id: product.product_id,
-          unit_id: product.default_order?.unit_id ?? "",
-          unit_name: product.default_order?.unit_name ?? "",
+          product_id: product.product?.id ?? "",
+          unit_id: product.default_order.unit?.id ?? "",
+          unit_name: product.default_order.unit?.name ?? "",
           qty: 0,
           note: "",
         });

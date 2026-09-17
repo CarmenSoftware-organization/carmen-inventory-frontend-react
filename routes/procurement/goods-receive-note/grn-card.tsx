@@ -63,9 +63,9 @@ export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
         <ListCardRow label={tfl("totalAmount")}>
           <span className="font-semibold tabular-nums">
             {formatCurrency(totalAmount)}
-            {item.currency_code && (
+            {item.currency?.code && (
               <span className="text-muted-foreground ml-1 font-normal">
-                {item.currency_code}
+                {item.currency.code}
               </span>
             )}
           </span>

@@ -50,7 +50,7 @@ const CATEGORY: RecipeCategory = {
   description: null,
   note: null,
   is_active: true,
-  parent_id: null,
+  parent: null,
   level: 1,
   default_cost_settings: null,
   default_margins: null,

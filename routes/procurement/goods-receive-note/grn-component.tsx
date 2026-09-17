@@ -244,7 +244,7 @@ export default function GrnComponent() {
           },
           {
             header: tfl("currency"),
-            value: (r) => r.currency_code ?? "",
+            value: (r) => r.currency?.code ?? "",
             width: 10,
           },
           {

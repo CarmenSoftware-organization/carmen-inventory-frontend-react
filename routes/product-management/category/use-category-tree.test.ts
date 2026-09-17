@@ -23,7 +23,7 @@ const sub = (
   code,
   name: `sub-${code}`,
   is_active: true,
-  product_category_id,
+  product_category: { id: product_category_id },
   cascade_deviation: false,
 });
 

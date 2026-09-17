@@ -3,6 +3,7 @@ import type { UseFormReturn } from "react-hook-form";
 
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 export type ProductStatusType = "active" | "inactive";
 
@@ -25,12 +26,14 @@ export interface ProductUnitConversion {
 
 interface ProductLocationItem {
   id?: string;
-  location_id: string;
-  shelf_id?: string | null;
-  location_code?: string;
-  location_name?: string;
+  location: EntityRef | null;
+  shelf?: EntityRef | null;
   location_type?: string;
   is_active?: boolean;
+  // ข้อยกเว้นที่ตั้งใจ: delivery_point_id เป็น FK จริง แต่ค่าที่แสดงอยู่ใน
+  // delivery_point (bare string) ไม่มี delivery_point_name คู่กัน — แปลงเป็น
+  // ref ไม่ได้เพราะจะทำชื่อหาย (ยืนยันจาก product.detail.json จริงและคำอธิบาย
+  // ใน backend serializer) คงไว้เป็น flat ทั้งคู่ตามที่ wire ส่งจริง
   delivery_point_id?: string;
   delivery_point?: string;
   min_qty?: number | null;
@@ -45,12 +48,15 @@ export interface Product {
   name: string;
   local_name: string;
   product_status_type: ProductStatusType;
-  inventory_unit: { id: string; name: string };
-  // list endpoint คืนหน่วยเป็น flat string (detail ใช้ inventory_unit object)
+  inventory_unit: EntityRef | null;
+  // ยืนยันสดอีกครั้ง (50/50 แถว): list endpoint ส่ง inventory_unit เป็น object
+  // เหมือนกับ detail ทุกแถว ไม่มี inventory_unit_name แบนคู่กันเลย — คอมเมนต์เดิม
+  // ที่บอกว่า list เป็น flat string นั้นผิด (ไม่มีหลักฐาน สร้างบั๊กคอลัมน์ Unit
+  // ว่างที่ use-product-table.tsx และ product-table.tsx ทั้งคู่มาก่อนหน้านี้)
   inventory_unit_name?: string;
-  product_item_group: { id?: string; name: string } | null;
-  product_sub_category: { id?: string; name: string } | null;
-  product_category: { id?: string; name: string } | null;
+  product_item_group: EntityRef | null;
+  product_sub_category: EntityRef | null;
+  product_category: EntityRef | null;
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
 }
@@ -73,10 +79,26 @@ export interface ProductLookupItem {
   inventory_unit_name?: string;
 }
 
+/**
+ * shape ฝั่งอ่านของ order_units/ingredient_units — ต่างจาก `ProductUnitConversion`
+ * (ฝั่งฟอร์ม/payload ที่ยังส่ง from_unit_id/to_unit_id แบบ flat ตามเดิม เพราะ
+ * backend รับ flat เขียนได้อยู่แล้ว) ห้ามรวมสองตัวนี้เป็นตัวเดียว
+ */
+export interface ProductUnitConversionDetail {
+  id?: string;
+  from_unit: EntityRef | null;
+  from_unit_qty: number;
+  to_unit: EntityRef | null;
+  to_unit_qty: number;
+  unit_type?: string;
+  description: string;
+  is_default: boolean;
+  is_active: boolean;
+}
+
 export interface ProductDetail extends Product {
   description: string;
-  tax_profile_id: string;
-  tax_profile_name: string | null;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   is_used_in_recipe: boolean;
   is_sold_directly: boolean;
@@ -87,8 +109,8 @@ export interface ProductDetail extends Product {
   qty_deviation_limit: number | null;
   info: ProductInfoItem[];
   locations: ProductLocationItem[];
-  order_units: ProductUnitConversion[];
-  ingredient_units: ProductUnitConversion[];
+  order_units: ProductUnitConversionDetail[];
+  ingredient_units: ProductUnitConversionDetail[];
   doc_version?: number;
 }
 

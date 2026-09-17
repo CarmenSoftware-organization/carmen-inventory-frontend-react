@@ -48,19 +48,19 @@ const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
     // สามคีย์นี้ยังไม่มีในตารางของมัน เลยต้องบอกเอง ไม่งั้นได้ไอคอนกลางของ
     // ช่อง custom เหมือนกันหมดทั้งสามช่อง
     icon: UserRound,
-    of: (r) => [r.requestor_id, r.requestor_name],
+    of: (r) => [r.requestor?.id ?? "", r.requestor?.name ?? ""],
   },
   {
     key: "department_id",
     labelKey: "field.department",
     icon: Building2,
-    of: (r) => [r.department_id, r.department_name],
+    of: (r) => [r.department?.id ?? "", r.department?.name ?? ""],
   },
   {
     key: "workflow_id",
     labelKey: "procurement.purchaseOrder.prWorkflow",
     icon: Workflow,
-    of: (r) => [r.workflow_id, r.workflow_name],
+    of: (r) => [r.workflow?.id ?? "", r.workflow?.name ?? ""],
   },
 ];
 
@@ -132,10 +132,20 @@ export function StepSelectPr({
         size: 100,
         meta: { cellClassName: "text-center", headerClassName: "text-center" },
       },
-      { accessorKey: "requestor_name", header: tfl("requester") },
-      { accessorKey: "department_name", header: tfl("department"), size: 180 },
       {
-        accessorKey: "workflow_name",
+        id: "requestor_name",
+        accessorFn: (row) => row.requestor?.name ?? "",
+        header: tfl("requester"),
+      },
+      {
+        id: "department_name",
+        accessorFn: (row) => row.department?.name ?? "",
+        header: tfl("department"),
+        size: 180,
+      },
+      {
+        id: "workflow_name",
+        accessorFn: (row) => row.workflow?.name ?? "",
         header: t("prWorkflow"),
         size: 180,
         meta: { cellClassName: "text-center", headerClassName: "text-center" },
@@ -148,7 +158,11 @@ export function StepSelectPr({
   const workflowOf = useMemo(() => {
     const m = new Map<string, { id: string; name: string }>();
     for (const pr of allRows) {
-      m.set(pr.id, { id: pr.workflow_id, name: pr.workflow_name });
+      // ห้าม `?? ""` ที่ id — ใบที่ไม่มี workflow จริง ๆ ต้องไม่ถูกจัดกลุ่มรวมกับ
+      // ใบอื่นด้วยคีย์ "" เดียวกัน (endpoint นี้ปกติส่ง workflow มาครบทุกใบ)
+      if (pr.workflow) {
+        m.set(pr.id, { id: pr.workflow.id, name: pr.workflow.name ?? "" });
+      }
     }
     return m;
   }, [allRows]);

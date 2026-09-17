@@ -69,7 +69,7 @@ export function CnGeneralFields({
               onValueChange={field.onChange}
               onItemChange={(grn) => {
                 form.setValue("grn_date", grn.grn_date ?? "");
-                form.setValue("currency_code", grn.currency_id ?? "");
+                form.setValue("currency_code", grn.currency?.id ?? "");
                 form.setValue("exchange_rate", grn.exchange_rate ?? 1);
                 form.setValue("invoice_no", grn.invoice_no ?? "");
                 form.setValue("invoice_date", grn.invoice_date ?? "");

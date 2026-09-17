@@ -157,7 +157,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   }, [goodsReceiveNote, defaultValues, form]);
 
   const receivedByName =
-    goodsReceiveNote?.received_by_name ||
+    goodsReceiveNote?.received_by?.name ||
     [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
       .filter(Boolean)
       .join(" ");

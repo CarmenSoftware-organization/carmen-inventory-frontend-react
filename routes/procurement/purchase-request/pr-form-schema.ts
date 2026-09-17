@@ -8,6 +8,7 @@ import type {
   ApproveDetail,
   PurchaseApproveDetail,
 } from "@/types/purchase-request";
+import type { EntityRef } from "@/types/entity-ref";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { addDays, isoToDateInput } from "@/lib/date-utils";
@@ -293,52 +294,52 @@ export function getDefaultValues(
       doc_version: purchaseRequest.doc_version,
       pr_date: isoToDateInput(purchaseRequest.pr_date),
       description: purchaseRequest.description ?? "",
-      workflow_id: purchaseRequest.workflow_id ?? "",
-      requestor_id: purchaseRequest.requestor_id ?? "",
-      department_id: purchaseRequest.department_id ?? "",
+      workflow_id: purchaseRequest.workflow?.id ?? "",
+      requestor_id: purchaseRequest.requestor?.id ?? "",
+      department_id: purchaseRequest.department?.id ?? "",
       items:
         purchaseRequest.purchase_request_detail?.map((d) => ({
           id: d.id,
           doc_version: d.doc_version,
-          product_id: d.product_id,
-          product_code: d.product_code ?? "",
-          product_name: d.product_name,
-          product_local_name: d.product_local_name ?? "",
+          product_id: d.product?.id ?? null,
+          product_code: d.product?.code ?? "",
+          product_name: d.product?.name ?? "",
+          product_local_name: d.product?.local_name ?? "",
           description: d.description ?? "",
           pricelist_price: d.pricelist_price,
-          vendor_id: d.vendor_id ?? null,
-          vendor_name: d.vendor_name ?? "",
+          vendor_id: d.vendor?.id ?? null,
+          vendor_name: d.vendor?.name ?? "",
           stage_status: d.state_status ?? "",
           current_stage_status: d.current_stage_status || "pending",
           _initial_stage_status: d.current_stage_status || "pending",
           stage_message: d.state_message ?? "",
-          location_id: d.location_id ?? null,
-          location_code: d.location_code ?? "",
-          location_name: d.location_name ?? "",
+          location_id: d.location?.id ?? null,
+          location_code: d.location?.code ?? "",
+          location_name: d.location?.name ?? "",
           location_type: d.location_type ?? "",
-          delivery_point_name: d.delivery_point_name ?? "",
+          delivery_point_name: d.delivery_point?.name ?? "",
           requested_qty: d.requested_qty,
-          requested_unit_id: d.requested_unit_id ?? null,
-          requested_unit_name: d.requested_unit_name ?? "",
-          inventory_unit_id: d.inventory_unit_id ?? null,
-          inventory_unit_name: d.inventory_unit_name ?? "",
+          requested_unit_id: d.requested_unit?.id ?? null,
+          requested_unit_name: d.requested_unit?.name ?? "",
+          inventory_unit_id: d.inventory_unit?.id ?? null,
+          inventory_unit_name: d.inventory_unit?.name ?? "",
           foc_qty: d.foc_qty ?? 0,
-          foc_unit_id: d.foc_unit_id ?? null,
-          foc_unit_name: d.foc_unit_name ?? "",
+          foc_unit_id: d.foc_unit?.id ?? null,
+          foc_unit_name: d.foc_unit?.name ?? "",
           approved_qty: d.approved_qty ?? 0,
-          approved_unit_id: d.approved_unit_id ?? null,
-          approved_unit_name: d.approved_unit_name ?? "",
-          currency_id: d.currency_id ?? null,
-          currency_code: d.currency_code ?? null,
+          approved_unit_id: d.approved_unit?.id ?? null,
+          approved_unit_name: d.approved_unit?.name ?? "",
+          currency_id: d.currency?.id ?? null,
+          currency_code: d.currency?.code ?? null,
           currency_decimal_places: d.currency_decimal_places ?? 2,
           exchange_rate: d.exchange_rate ?? 1,
-          delivery_point_id: d.delivery_point_id ?? null,
+          delivery_point_id: d.delivery_point?.id ?? null,
           delivery_date: d.delivery_date ?? "",
-          pricelist_detail_id: d.pricelist_detail_id ?? null,
+          pricelist_detail_id: d.pricelist_detail?.id ?? null,
           pricelist_no: d.pricelist_no ?? null,
           pricelist_type: d.pricelist_type ?? "",
-          tax_profile_id: d.tax_profile_id ?? null,
-          tax_profile_name: d.tax_profile_name ?? "",
+          tax_profile_id: d.tax_profile?.id ?? null,
+          tax_profile_name: d.tax_profile?.name ?? "",
           tax_rate: d.tax_rate ?? 0,
           tax_amount: d.tax_amount ?? 0,
           is_tax_adjustment: d.is_tax_adjustment ?? false,
@@ -355,10 +356,11 @@ export function getDefaultValues(
   if (template) {
     return {
       // ไม่ก็อป description ของ template มา — อันนั้นคือคำอธิบายตัว template
-      // ส่วนช่องนี้คือ Notes ของ PR ใบนี้ ต้องให้ผู้ใช้เขียนเอง
+      // ส่วนช่องนี้คือ Notes ของ PR ใบนี้ ต้องให้ผู้ใช้เขียนเอง — department_id ก็
+      // ไม่ได้มาจาก template เช่นกัน: header ของ PurchaseRequestTemplate ไม่มี
+      // department เลย (phantom field ที่ backend ไม่เคยส่งมา) ผู้ใช้ต้องเลือกเอง
       ...EMPTY_FORM,
-      workflow_id: template.workflow_id ?? "",
-      department_id: template.department_id ?? "",
+      workflow_id: template.workflow?.id ?? "",
       items: template.purchase_request_template_detail?.map(freshItem) ?? [],
     };
   }
@@ -368,30 +370,22 @@ export function getDefaultValues(
 /**
  * source แถว item ที่ freshItem อ่าน — โครงร่วมของ template detail กับ PR detail
  * (field ชื่อเดียวกันทั้งคู่ ประกาศแบบ structural จะได้ไม่ผูกกับ type ใดtype หนึ่ง)
+ * ทั้งสองฝั่ง (PurchaseRequestTemplateDetail / PurchaseRequestDetail) เป็น object
+ * reference แล้วตาม contract ใหม่
  */
 interface FreshItemSource {
-  product_id: string;
-  product_code?: string | null;
-  product_name: string;
-  product_local_name?: string | null;
+  product: EntityRef | null;
   description?: string | null;
-  location_id?: string | null;
-  location_code?: string | null;
-  location_name?: string | null;
+  location: EntityRef | null;
   location_type?: string | null;
   requested_qty: number;
-  requested_unit_id?: string | null;
-  requested_unit_name?: string | null;
-  inventory_unit_id?: string | null;
-  inventory_unit_name?: string | null;
+  requested_unit: EntityRef | null;
+  inventory_unit: EntityRef | null;
   foc_qty?: number | null;
-  foc_unit_id?: string | null;
-  foc_unit_name?: string | null;
-  currency_id?: string | null;
-  delivery_point_id?: string | null;
-  delivery_point_name?: string | null;
-  tax_profile_id?: string | null;
-  tax_profile_name?: string | null;
+  foc_unit: EntityRef | null;
+  currency: EntityRef | null;
+  delivery_point: EntityRef | null;
+  tax_profile: EntityRef | null;
   tax_rate?: number | null;
   tax_amount?: number | null;
   is_tax_adjustment?: boolean | null;
@@ -403,10 +397,10 @@ interface FreshItemSource {
 
 function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
   return {
-    product_id: d.product_id,
-    product_code: d.product_code ?? "",
-    product_name: d.product_name,
-    product_local_name: d.product_local_name ?? "",
+    product_id: d.product?.id ?? null,
+    product_code: d.product?.code ?? "",
+    product_name: d.product?.name ?? "",
+    product_local_name: d.product?.local_name ?? "",
     description: d.description ?? "",
     pricelist_price: 0,
     vendor_id: null,
@@ -414,35 +408,35 @@ function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
     stage_status: "",
     current_stage_status: "",
     stage_message: "",
-    location_id: d.location_id ?? null,
-    location_code: d.location_code ?? "",
-    location_name: d.location_name ?? "",
+    location_id: d.location?.id ?? null,
+    location_code: d.location?.code ?? "",
+    location_name: d.location?.name ?? "",
     location_type: d.location_type ?? "",
     requested_qty: d.requested_qty,
-    requested_unit_id: d.requested_unit_id ?? null,
-    requested_unit_name: d.requested_unit_name ?? "",
-    inventory_unit_id: d.inventory_unit_id ?? null,
-    inventory_unit_name: d.inventory_unit_name ?? "",
+    requested_unit_id: d.requested_unit?.id ?? null,
+    requested_unit_name: d.requested_unit?.name ?? "",
+    inventory_unit_id: d.inventory_unit?.id ?? null,
+    inventory_unit_name: d.inventory_unit?.name ?? "",
     foc_qty: d.foc_qty ?? 0,
-    foc_unit_id: d.foc_unit_id ?? null,
-    foc_unit_name: d.foc_unit_name ?? "",
+    foc_unit_id: d.foc_unit?.id ?? null,
+    foc_unit_name: d.foc_unit?.name ?? "",
     approved_qty: 0,
     approved_unit_id: null,
     approved_unit_name: "",
-    currency_id: d.currency_id ?? null,
+    currency_id: d.currency?.id ?? null,
     currency_code: null,
     currency_decimal_places: 2,
     exchange_rate: 1,
-    delivery_point_id: d.delivery_point_id ?? null,
-    delivery_point_name: d.delivery_point_name ?? "",
+    delivery_point_id: d.delivery_point?.id ?? null,
+    delivery_point_name: d.delivery_point?.name ?? "",
     // วันส่งของต้นทาง (ใบเดิม/รอบที่ตั้งเทมเพลตไว้) เป็นอดีตไปแล้ว ตั้งพรุ่งนี้ให้
     // เป็นค่าเริ่มแทนการทิ้งว่างให้ไล่กรอกทีละแถว — แก้ทับได้ตามปกติ
     delivery_date: addDays(new Date().toISOString(), 1),
     pricelist_detail_id: null,
     pricelist_no: null,
     pricelist_type: "",
-    tax_profile_id: d.tax_profile_id ?? null,
-    tax_profile_name: d.tax_profile_name ?? "",
+    tax_profile_id: d.tax_profile?.id ?? null,
+    tax_profile_name: d.tax_profile?.name ?? "",
     tax_rate: d.tax_rate ?? 0,
     tax_amount: d.tax_amount ?? 0,
     is_tax_adjustment: d.is_tax_adjustment ?? false,
@@ -465,8 +459,8 @@ export function getDuplicateValues(pr: PurchaseRequest): PrFormValues {
   return {
     ...EMPTY_FORM,
     description: pr.description ?? "",
-    workflow_id: pr.workflow_id ?? "",
-    department_id: pr.department_id ?? "",
+    workflow_id: pr.workflow?.id ?? "",
+    department_id: pr.department?.id ?? "",
     items: pr.purchase_request_detail?.map(freshItem) ?? [],
   };
 }

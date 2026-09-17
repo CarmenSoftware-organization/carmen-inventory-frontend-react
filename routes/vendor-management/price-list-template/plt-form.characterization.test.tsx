@@ -46,10 +46,8 @@ const TEMPLATE = {
   products: [
     {
       id: "row-1",
-      product_id: "prod-1",
-      product_code: "P001",
-      product_name: "Tomato",
-      default_order: { unit_id: "u1", unit_name: "KG" },
+      product: { id: "prod-1", code: "P001", name: "Tomato" },
+      default_order: { unit: { id: "u1", name: "KG" } },
       moq: [
         { unit_id: "u1", unit_name: "KG", qty: 10, note: "" },
         { unit_id: "u1", unit_name: "KG", qty: 50, note: "" },

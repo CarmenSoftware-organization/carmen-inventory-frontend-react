@@ -108,9 +108,7 @@ export function LocationForm({ location }: LocationFormProps) {
         p.id,
         {
           local_name: p.local_name,
-          inventory_unit_name:
-            (p as unknown as { inventory_unit_name: string | null })
-              .inventory_unit_name ?? null,
+          inventory_unit: p.inventory_unit ?? null,
         },
       ]),
     );

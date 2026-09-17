@@ -236,7 +236,9 @@ export default function RecipeCategoryComponent() {
                   key={item.id}
                   item={item}
                   parentName={
-                    item.parent_id ? parentMap.get(item.parent_id) : undefined
+                    item.parent?.id
+                      ? parentMap.get(item.parent.id)
+                      : undefined
                   }
                   onEdit={(c) => navigate(`/operation-plan/category/${c.id}`)}
                   onDelete={setDeleteTarget}
