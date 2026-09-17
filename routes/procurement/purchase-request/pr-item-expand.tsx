@@ -183,7 +183,12 @@ export function PrItemExpand({
       {/* ระยะ label→value = gap-0.5 เท่ากับชื่อ→ชื่อรองของเซลล์ Location/Product
           ในตารางข้างบน (ค่า default ของ Field คือ 6px ซึ่งห่างกว่า) เขียนที่กริด
           ที่เดียวไม่ไล่ใส่ราย Field — Field ที่เพิ่มทีหลังจะได้ระยะเดียวกันเอง */}
-      <div className="grid grid-cols-1 gap-x-2 gap-y-3 [&>[data-slot=field]]:gap-0.5 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
+      {/* ไม่มี breakpoint: จอแคบให้เลื่อนไปกับตารางข้างบน ไม่ใช่ยุบเป็นคอลัมน์เดียว
+          แล้วยืดลงล่างจนอ่านคู่กับแถวแม่ไม่ได้ · ห้ามใส่ min-w-max: `<td>` ถ่าง
+          ตารางไม่ได้ (ความกว้างคอลัมน์ล็อกจากหัวตาราง) แถวกางจะล้นออกไปพ้นขอบ
+          ตารางแทน — กว้างเท่า `<td>` พอ ผลรวมความกว้างขั้นต่ำ ~71rem ยังน้อยกว่า
+          ตารางหลักอยู่แล้ว */}
+      <div className="grid grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)] gap-x-2 gap-y-3 [&>[data-slot=field]]:gap-0.5">
         {/* Pricelist */}
         <Field>
           <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
@@ -241,7 +246,7 @@ export function PrItemExpand({
         {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 คือหลัง Pricelist·Vendor)
             คอลัมน์นี้ 5rem ไม่ใช่ 3rem: ป้ายเต็ม "Currency"/"สกุลเงิน" ไม่พอใน 3rem
             แล้วหักบรรทัด ทำให้แถวสูงไม่เท่ากันแล้วแต่ใบ */}
-        <Field className="lg:col-start-3">
+        <Field className="col-start-3">
           <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
             {tfl("currency")}
           </FieldLabel>
@@ -433,7 +438,7 @@ export function PrItemExpand({
             ยัดใน 2 คอลัมน์ (24.5rem) ไม่พอ ใบที่ตัวเลขยาวหน่อยก็ตกบรรทัด กลาย
             เป็นบางใบสูง 1 บรรทัด บางใบ 2 · เต็มแถวแล้วได้ 1 บรรทัดเสมอ และมีแต่
             ใบสกุลต่างประเทศที่เสียความสูงเพิ่ม (PrItemSummary คืน null ถ้าไม่ใช่) */}
-        <div className="lg:col-span-full lg:col-start-1">
+        <div className="col-span-full col-start-1">
           <PrInventoryRow
             control={form.control}
             index={index}
