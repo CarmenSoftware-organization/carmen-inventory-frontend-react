@@ -19,7 +19,6 @@ import {
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useVendor } from "@/hooks/use-vendor";
 import { useCurrency } from "@/hooks/use-currency";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { PriceList } from "@/types/price-list";
@@ -56,21 +55,7 @@ export default function PriceListComponent() {
     defaultSort: "pricelist_no:asc",
   });
 
-  const { data: vendorData } = useVendor({ perpage: -1 });
-  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน priceListFilterFields memo ข้างล่างไม่เคย hit
-  const vendorOptions = useMemo(
-    () =>
-      (vendorData?.data ?? [])
-        .filter((v) => v.is_active)
-        .map((v) => ({
-          label: v.name,
-          value: `vendor_id|string:${v.id}`,
-        })),
-    [vendorData],
-  );
-
-  // vendor เป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
+  // code ของสกุลเงินเป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
   // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
   // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
   // PO_TYPE/CN_TYPE ใน Task 19). filter (status) ใช้ labelKey จริง (status.draft
@@ -146,19 +131,13 @@ export default function PriceListComponent() {
         ),
       },
       {
+        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
+        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
+        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
         key: "vendor",
         section: "listView.sectionPeople",
-        control: "custom",
+        control: "vendor",
         labelKey: "field.vendor",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={vendorOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // กรองที่วันเริ่มมีผล (effective_from_date) — ความหมายเดียวกับคอลัมน์
@@ -170,7 +149,7 @@ export default function PriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [vendorOptions, currencyOptions, statusOptions],
+    [currencyOptions, statusOptions],
   );
 
   const lf = useListFilters({

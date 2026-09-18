@@ -19,7 +19,6 @@ import {
 } from "@/hooks/use-goods-receive-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { useVendor } from "@/hooks/use-vendor";
 import { GRN_STATUS_OPTIONS } from "@/constant/goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -59,20 +58,6 @@ export default function GrnComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "grn_date:desc",
   });
-
-  const { data: vendorData } = useVendor({ perpage: -1 });
-  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน grnFilterFields memo ข้างล่างไม่เคย hit
-  const vendorOptions = useMemo(
-    () =>
-      (vendorData?.data ?? [])
-        .filter((v) => v.is_active)
-        .map((v) => ({
-          label: v.name,
-          value: `vendor_id|string:${v.id}`,
-        })),
-    [vendorData],
-  );
 
   // ตัวเลือกเลข invoice จากใบ GRN ที่มีจริง (distinct, ตัดค่าว่าง) — ดึงทั้งก้อน
   // ครั้งเดียวแชร์ cache กับ list หลัก เลือกหลายใบได้เป็น IN query ฝั่ง backend เดิม
@@ -143,33 +128,13 @@ export default function GrnComponent() {
         toClause: () => "",
       },
       {
+        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
+        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
+        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
         key: "vendor",
-        control: "custom",
+        control: "vendor",
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
-        // chip โชว์ชื่อ vendor จริงแทนจำนวน — mapping อยู่ในมือหน้านี้อยู่แล้ว
-        valueText: (raw) => {
-          const ids = raw
-            .split(",")
-            .map((p) => p.slice(p.lastIndexOf(":") + 1))
-            .filter(Boolean);
-          const names = ids
-            .map(
-              (id) => (vendorData?.data ?? []).find((v) => v.id === id)?.name,
-            )
-            .filter((n): n is string => !!n);
-          if (names.length === 0) return `${ids.length}`;
-          return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
-        },
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={vendorOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // ผู้รับ = คนคีย์ใบรับของ (คอลัมน์ Received By ใน list) — กรองที่ created_by_id
@@ -187,7 +152,7 @@ export default function GrnComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [vendorOptions, vendorData, invoiceOptions],
+    [invoiceOptions],
   );
 
   const lf = useListFilters({
