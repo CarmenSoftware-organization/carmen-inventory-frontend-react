@@ -380,5 +380,10 @@ export function usePoItemTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: showApproveCheckbox,
+    // ไม่ให้ลากขอบหัวคอลัมน์ — ความกว้างที่ลากไม่ถูกจำ ออกจากหน้าแล้วกลับมาได้
+    // ค่าเดิมทุกครั้ง · `columnsResizable` ของ DataGrid ยังต้องเปิดไว้เพราะมัน
+    // คุมอีกเรื่องด้วย: table width = getTotalSize() (คอลัมน์กว้างตาม size px
+    // แล้วเลื่อนแนวนอน) ปิดไปตารางจะกลับเป็น w-full บีบ 11 คอลัมน์ลงในจอ
+    enableColumnResizing: false,
   });
 }
