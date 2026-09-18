@@ -93,6 +93,7 @@ export default function PoComponent() {
         view: next,
         search: "",
         page: "",
+        sort: "",
         workflow_current_stage: "",
       }),
     [],
@@ -104,8 +105,17 @@ export default function PoComponent() {
   const useInfiniteScroll = !!isMobile;
   const deletePo = useDeletePurchaseOrder();
   const { exportPurchaseOrder, isExporting } = useExportPurchaseOrder();
+  /**
+   * ค่าเรียงเริ่มต้นต่างกันตามกลุ่มเอกสาร — "รอฉันดำเนินการ" เป็นคิวงาน ใบที่
+   * ถึงกำหนดก่อนต้องขึ้นก่อน (asc) ส่วน "เอกสารทั้งหมด" เป็นคลังเอกสารที่มีเป็น
+   * ร้อยใบ คนเปิดมาเพื่อหาใบล่าสุด จึงเอาใหม่สุดขึ้นก่อน (desc)
+   * · `handleViewModeChange` ล้าง `sort` ทิ้งตอนสลับกลุ่ม ไม่งั้นทิศที่ผู้ใช้
+   * เคยคลิกไว้ในอีกกลุ่มจะค้างมาทับค่าเริ่มต้นของกลุ่มใหม่
+   */
+  const defaultSort =
+    viewMode === "my-pending" ? "order_date:asc" : "order_date:desc";
   const { params, search, setSearch, tableConfig } = useDataGridState({
-    defaultSort: "po_no:desc",
+    defaultSort,
   });
 
   const { data: stages } = usePurchaseOrderWorkflowStages();
@@ -265,7 +275,7 @@ export default function PoComponent() {
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PURCHASE_ORDER,
     fields: poFilterFields,
-    defaultSort: "po_no:desc",
+    defaultSort,
   });
 
   const queryParams = { ...params, filter: lf.filterParam };
