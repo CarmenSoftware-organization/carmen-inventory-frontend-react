@@ -46,7 +46,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
+import { CellAction } from "@/components/ui/cell-action";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import {
   Sheet,
   SheetContent,
@@ -61,20 +64,22 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   accountingDocumentFromPath,
   accountingDetailInitialMode,
   documentsFor,
-} from "./accounting-documents";
+} from "./accounting-document-model";
 import { BackButton } from "@/components/share/back-button";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useJournalVoucher } from "./journal-voucher/use-journal-voucher";
+import { useJournalVoucher } from "../journal-voucher/use-journal-voucher";
 import {
   isSourceGenerated,
   journalVoucherCapabilities,
   sourceLinksForJournal,
-} from "./journal-voucher/journal-voucher-source";
+} from "../journal-voucher/journal-voucher-source";
 
 const DEPARTMENTS = [
   { id: "100", label: "100 - Admin" },
@@ -138,7 +143,7 @@ interface JournalLine {
 }
 
 type LineDetailSection = "tax" | "budget" | "dimension";
-type UtilityPanel = "attachments" | "log";
+type UtilityPanel = "attachments" | "comments" | "log";
 
 const FORM_ID = "accounting-document-form";
 
@@ -176,7 +181,7 @@ const optionLabel = (
   value: string,
 ) => options.find((option) => option.id === value)?.label ?? value;
 
-export default function AccountingDetail() {
+export default function AccountingDocumentDetail() {
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -184,6 +189,11 @@ export default function AccountingDetail() {
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
   const isJournalVoucher = config.kind === "journalVoucher";
+  const usesVoucherDetailPattern =
+    isJournalVoucher ||
+    config.kind === "templateVoucher" ||
+    config.kind === "recurringVoucher" ||
+    config.kind === "allocationVoucher";
   const journalQuery = useJournalVoucher(isJournalVoucher ? id : undefined);
   const journal = journalQuery.data;
   const sourceGenerated = journal ? isSourceGenerated(journal) : false;
@@ -214,6 +224,10 @@ export default function AccountingDetail() {
     isNew ? "Draft" : document.status,
   );
   const [utilityPanel, setUtilityPanel] = useState<UtilityPanel | null>(null);
+  const [comments, setComments] = useState<string[]>([
+    "Generated from the AP posting source.",
+  ]);
+  const [commentDraft, setCommentDraft] = useState("");
   const [values, setValues] = useState({
     date: document.date,
     description: isNew ? "" : document.description,
@@ -475,174 +489,274 @@ export default function AccountingDetail() {
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
-      <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
-        <div className="flex flex-wrap items-center gap-1">
-          <BackButton onClick={() => navigate(config.path)} label={t("back")} />
-          <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setValues((current) => ({
-                ...current,
-                description: "",
-                party: "",
-              }));
-              setLines(INITIAL_LINES);
-              setSelectedLineIds([]);
-              setDocumentStatus("Draft");
-              setMode("add");
-              navigate(`${config.path}/new`);
-            }}
-          >
-            <FilePlus2 className="size-4" aria-hidden="true" />
-            {t("new")}
-          </Button>
-          {!sourceGenerated && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-            >
-              <Copy className="size-4" aria-hidden="true" />
-              {t("copy")}
-            </Button>
-          )}
-          {!sourceGenerated && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={applyTemplate}
-            >
-              <LayoutTemplate className="size-4" aria-hidden="true" />
-              {t("template")}
-            </Button>
-          )}
-          {!isNew &&
-            documentStatus !== "Voided" &&
-            (!isJournalVoucher || journalCapabilities?.can_void) && (
+      {usesVoucherDetailPattern ? (
+        <DocFormHeader
+          title={number}
+          backLabel={t("back")}
+          onBack={() => navigate(config.path)}
+          actions={
+            isView ? (
+              <>
+                {(!isJournalVoucher ||
+                  journalCapabilities?.can_edit_accounting_fields) && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={documentStatus === "Voided"}
+                    onClick={() => {
+                      editActivatedAtRef.current = performance.now();
+                      setMode("edit");
+                    }}
+                  >
+                    <Pencil className="size-4" aria-hidden="true" />
+                    {tc("edit")}
+                  </Button>
+                )}
+                <DocActionsMenu
+                  onComment={() => setUtilityPanel("comments")}
+                  commentCount={comments.length}
+                  activity={{ id: journal?.id ?? document.id, label: number }}
+                />
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  size="sm"
+                  data-intent="draft"
+                  disabled={!isBalanced}
+                  aria-describedby={
+                    !isBalanced ? "journal-balance-status" : undefined
+                  }
+                >
+                  <Save className="size-4" aria-hidden="true" />
+                  {tc("save")}
+                </Button>
+                {!isNew && (
+                  <DocActionsMenu
+                    onComment={() => setUtilityPanel("comments")}
+                    commentCount={comments.length}
+                    activity={{ id: journal?.id ?? document.id, label: number }}
+                  />
+                )}
+              </>
+            )
+          }
+        />
+      ) : (
+        <header
+          className={
+            isJournalVoucher
+              ? "flex flex-wrap items-center justify-between gap-2"
+              : "bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2"
+          }
+        >
+          <div className="flex flex-wrap items-center gap-1">
+            <BackButton
+              onClick={() => navigate(config.path)}
+              label={t("back")}
+            />
+            {!isJournalVoucher && (
+              <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
+            )}
+            {isJournalVoucher && (
+              <h1 className="max-w-sm min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl">
+                {number}
+              </h1>
+            )}
+            {(!isJournalVoucher || !isView) && (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setValues((current) => ({
+                      ...current,
+                      description: "",
+                      party: "",
+                    }));
+                    setLines(INITIAL_LINES);
+                    setSelectedLineIds([]);
+                    setDocumentStatus("Draft");
+                    setMode("add");
+                    navigate(`${config.path}/new`);
+                  }}
+                >
+                  <FilePlus2 className="size-4" aria-hidden="true" />
+                  {t("new")}
+                </Button>
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopy}
+                  >
+                    <Copy className="size-4" aria-hidden="true" />
+                    {t("copy")}
+                  </Button>
+                )}
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={applyTemplate}
+                  >
+                    <LayoutTemplate className="size-4" aria-hidden="true" />
+                    {t("template")}
+                  </Button>
+                )}
+                {!isNew &&
+                  documentStatus !== "Voided" &&
+                  (!isJournalVoucher || journalCapabilities?.can_void) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => {
+                        setDocumentStatus("Voided");
+                        setMode("view");
+                        toast.success(t("voided"));
+                      }}
+                    >
+                      <Ban className="size-4" aria-hidden="true" />
+                      {t("void")}
+                    </Button>
+                  )}
+                <span
+                  className="bg-border mx-1 hidden h-5 w-px sm:block"
+                  aria-hidden="true"
+                />
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="warning"
+                    size="sm"
+                    onClick={applyAiSuggestion}
+                  >
+                    <WandSparkles className="size-4" aria-hidden="true" />
+                    {t("aiSuggest")}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1">
+            {!isJournalVoucher && sourceLink?.href && (
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="text-destructive hover:text-destructive"
-                onClick={() => {
-                  setDocumentStatus("Voided");
-                  setMode("view");
-                  toast.success(t("voided"));
-                }}
+                onClick={() => navigate(sourceLink.href!)}
               >
-                <Ban className="size-4" aria-hidden="true" />
-                {t("void")}
+                <ExternalLink className="size-4" aria-hidden="true" />
+                Open source
               </Button>
             )}
-          <span className="bg-border mx-1 hidden h-5 w-px sm:block" />
-          {!sourceGenerated && (
-            <Button
-              type="button"
-              variant="warning"
-              size="sm"
-              onClick={applyAiSuggestion}
-            >
-              <WandSparkles className="size-4" aria-hidden="true" />
-              {t("aiSuggest")}
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1">
-          {sourceLink?.href && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(sourceLink.href!)}
-            >
-              <ExternalLink className="size-4" aria-hidden="true" />
-              Open source
-            </Button>
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setUtilityPanel("attachments")}
-          >
-            <Paperclip className="size-4" aria-hidden="true" />
-            {t("attachments")}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setUtilityPanel("log")}
-          >
-            <History className="size-4" aria-hidden="true" />
-            {t("log")}
-          </Button>
-          <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
-          {isView ? (
-            !sourceGenerated &&
-            (!isJournalVoucher ||
-              journalCapabilities?.can_edit_accounting_fields) && (
-              <Button
-                type="button"
-                size="sm"
-                disabled={documentStatus === "Voided"}
-                onClick={() => {
-                  editActivatedAtRef.current = performance.now();
-                  setMode("edit");
-                }}
-              >
-                <Pencil className="size-4" aria-hidden="true" />
-                {tc("edit")}
-              </Button>
-            )
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-              >
-                <X className="size-4" aria-hidden="true" />
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                form={FORM_ID}
-                variant="outline"
-                size="sm"
-                data-intent="draft"
-                disabled={!isBalanced}
-                aria-describedby={
-                  !isBalanced ? "journal-balance-status" : undefined
-                }
-              >
-                <Save className="size-4" aria-hidden="true" />
-                {t("saveDraft")}
-              </Button>
-              <Button
-                type="submit"
-                form={FORM_ID}
-                size="sm"
-                data-intent="submit"
-                disabled={!isBalanced}
-                aria-describedby={
-                  !isBalanced ? "journal-balance-status" : undefined
-                }
-              >
-                <Send className="size-4" aria-hidden="true" />
-                {t("submit")}
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
+            {(!isJournalVoucher || !isView) && (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUtilityPanel("attachments")}
+                >
+                  <Paperclip className="size-4" aria-hidden="true" />
+                  {t("attachments")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUtilityPanel("log")}
+                >
+                  <History className="size-4" aria-hidden="true" />
+                  {t("log")}
+                </Button>
+                <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
+              </>
+            )}
+            {isView ? (
+              !sourceGenerated &&
+              (!isJournalVoucher ||
+                journalCapabilities?.can_edit_accounting_fields) && (
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={documentStatus === "Voided"}
+                  onClick={() => {
+                    editActivatedAtRef.current = performance.now();
+                    setMode("edit");
+                  }}
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                  {tc("edit")}
+                </Button>
+              )
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  variant="outline"
+                  size="sm"
+                  data-intent="draft"
+                  disabled={!isBalanced}
+                  aria-describedby={
+                    !isBalanced ? "journal-balance-status" : undefined
+                  }
+                >
+                  <Save className="size-4" aria-hidden="true" />
+                  {t("saveDraft")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  size="sm"
+                  data-intent="submit"
+                  disabled={!isBalanced}
+                  aria-describedby={
+                    !isBalanced ? "journal-balance-status" : undefined
+                  }
+                >
+                  <Send className="size-4" aria-hidden="true" />
+                  {t("submit")}
+                </Button>
+              </>
+            )}
+            {isJournalVoucher && isView && (
+              <DocActionsMenu
+                onComment={() => setUtilityPanel("comments")}
+                commentCount={comments.length}
+                activity={{ id: journal?.id ?? document.id, label: number }}
+              />
+            )}
+          </div>
+        </header>
+      )}
 
       <form
         id={FORM_ID}
@@ -655,9 +769,17 @@ export default function AccountingDetail() {
           handleSave(intent === "draft" ? "draft" : "submit");
         }}
       >
-        <Card className="gap-3 py-4">
+        <Card
+          className={
+            usesVoucherDetailPattern
+              ? "gap-3 border-0 bg-transparent py-0 shadow-none"
+              : "gap-3 py-4"
+          }
+        >
           <CardContent
-            className={`grid gap-4 px-4 sm:grid-cols-2 ${
+            className={`grid gap-4 sm:grid-cols-2 ${
+              usesVoucherDetailPattern ? "px-0" : "px-4"
+            } ${
               config.kind === "journalVoucher" ||
               config.kind === "financialReports"
                 ? "lg:grid-cols-6"
@@ -760,29 +882,26 @@ export default function AccountingDetail() {
             )}
           </CardContent>
           {config.kind !== "financialReports" && (
-            <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t px-4 pt-3">
+            <CardContent
+              className={`flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3 ${
+                usesVoucherDetailPattern ? "px-0" : "px-4"
+              }`}
+            >
               {config.kind === "journalVoucher" && (
                 <>
                   <div className="flex min-h-8 min-w-52 items-center gap-3">
-                    {isView ? (
-                      <Badge
-                        variant={values.schedulePost ? "secondary" : "outline"}
-                      >
-                        {values.schedulePost ? tc("yes") : tc("no")}
-                      </Badge>
-                    ) : (
-                      <Switch
-                        id="schedule-post"
-                        aria-label={t("schedulePost")}
-                        checked={values.schedulePost}
-                        onCheckedChange={(schedulePost) =>
-                          setValues((current) => ({
-                            ...current,
-                            schedulePost,
-                          }))
-                        }
-                      />
-                    )}
+                    <Checkbox
+                      id="schedule-post"
+                      aria-label={t("schedulePost")}
+                      checked={values.schedulePost}
+                      disabled={isView}
+                      onCheckedChange={(checked) =>
+                        setValues((current) => ({
+                          ...current,
+                          schedulePost: checked === true,
+                        }))
+                      }
+                    />
                     <FieldLabel htmlFor="schedule-post" className="shrink-0">
                       {t("schedulePost")}
                     </FieldLabel>
@@ -805,22 +924,18 @@ export default function AccountingDetail() {
                   />
 
                   <div className="flex min-h-8 min-w-52 items-center gap-3">
-                    {isView ? (
-                      <Badge
-                        variant={values.autoReverse ? "secondary" : "outline"}
-                      >
-                        {values.autoReverse ? tc("yes") : tc("no")}
-                      </Badge>
-                    ) : (
-                      <Switch
-                        id="auto-reverse"
-                        aria-label={t("autoReverse")}
-                        checked={values.autoReverse}
-                        onCheckedChange={(autoReverse) =>
-                          setValues((current) => ({ ...current, autoReverse }))
-                        }
-                      />
-                    )}
+                    <Checkbox
+                      id="auto-reverse"
+                      aria-label={t("autoReverse")}
+                      checked={values.autoReverse}
+                      disabled={isView}
+                      onCheckedChange={(checked) =>
+                        setValues((current) => ({
+                          ...current,
+                          autoReverse: checked === true,
+                        }))
+                      }
+                    />
                     <FieldLabel htmlFor="auto-reverse" className="shrink-0">
                       {t("autoReverse")}
                     </FieldLabel>
@@ -930,9 +1045,15 @@ export default function AccountingDetail() {
 
               <div className="ml-auto flex min-h-8 items-center gap-3 text-xs">
                 <span className="text-muted-foreground">{t("source")}</span>
-                <span className="text-primary font-medium tabular-nums">
-                  {sourceLabel}
-                </span>
+                {sourceLink?.href ? (
+                  <CellAction onClick={() => navigate(sourceLink.href!)}>
+                    {sourceLabel}
+                  </CellAction>
+                ) : (
+                  <span className="font-medium tabular-nums">
+                    {sourceLabel}
+                  </span>
+                )}
                 <span className="bg-border h-4 w-px" aria-hidden="true" />
                 <span className="text-muted-foreground">{t("status")}</span>
                 <Badge
@@ -952,13 +1073,17 @@ export default function AccountingDetail() {
         </Card>
 
         <Card
-          className={`gap-3 py-4 ${
+          className={`gap-3 ${
+            usesVoucherDetailPattern
+              ? "border-0 bg-transparent py-0 shadow-none"
+              : "py-4"
+          } ${
             config.kind === "financialReports"
               ? "h-[calc(100dvh-25rem)] min-h-64"
               : "h-[calc(100dvh-21rem)] min-h-80"
           }`}
         >
-          <CardHeader className="px-4">
+          <CardHeader className={usesVoucherDetailPattern ? "px-0" : "px-4"}>
             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
               <ListTree className="text-primary size-4" aria-hidden="true" />
               {entryTitle}
@@ -1336,44 +1461,78 @@ export default function AccountingDetail() {
                 </tbody>
               </table>
             </div>
-            <div
-              id="journal-balance-status"
-              className={`flex shrink-0 items-center justify-between gap-4 overflow-x-auto border-b px-3 py-2 font-medium ${
-                isBalanced ? "bg-success/10" : "bg-destructive/10"
-              }`}
-              aria-live="polite"
-            >
-              <div className="flex shrink-0 items-center gap-2">
-                <Badge variant="outline" size="sm">
-                  {t("rowCount", { count: lines.length })}
-                </Badge>
-                <Badge
-                  variant={isBalanced ? "success-light" : "destructive-light"}
-                  size="sm"
+            {usesVoucherDetailPattern ? (
+              <div id="journal-balance-status" aria-live="polite">
+                <SummaryFooterBar
+                  hasRecord
+                  items={summaryMetrics.map((metric) => ({
+                    key: metric.label,
+                    label: metric.label,
+                    value: metric.value.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    }),
+                    valueClassName: metric.color,
+                  }))}
                 >
-                  {isBalanced ? t("balanced") : t("unbalanced")}
-                </Badge>
+                  {!isView && (
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        type="submit"
+                        form={FORM_ID}
+                        size="sm"
+                        data-intent="submit"
+                        disabled={!isBalanced}
+                        aria-describedby={
+                          !isBalanced ? "journal-balance-status" : undefined
+                        }
+                      >
+                        <Send className="size-4" aria-hidden="true" />
+                        {t("submit")}
+                      </Button>
+                    </div>
+                  )}
+                </SummaryFooterBar>
               </div>
-              <div className="grid min-w-[40rem] shrink-0 grid-cols-5 divide-x">
-                {summaryMetrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="grid justify-items-end gap-0.5 px-3"
+            ) : (
+              <div
+                id="journal-balance-status"
+                className={`flex shrink-0 items-center justify-between gap-4 overflow-x-auto border-b px-3 py-2 font-medium ${
+                  isBalanced ? "bg-success/10" : "bg-destructive/10"
+                }`}
+                aria-live="polite"
+              >
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge variant="outline" size="sm">
+                    {t("rowCount", { count: lines.length })}
+                  </Badge>
+                  <Badge
+                    variant={isBalanced ? "success-light" : "destructive-light"}
+                    size="sm"
                   >
-                    <span className="text-muted-foreground text-micro-legal font-medium">
-                      {metric.label}
-                    </span>
-                    <span
-                      className={`${metric.color} font-semibold tabular-nums`}
+                    {isBalanced ? t("balanced") : t("unbalanced")}
+                  </Badge>
+                </div>
+                <div className="grid min-w-[40rem] shrink-0 grid-cols-5 divide-x">
+                  {summaryMetrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="grid justify-items-end gap-0.5 px-3"
                     >
-                      {metric.value.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                ))}
+                      <span className="text-muted-foreground text-micro-legal font-medium">
+                        {metric.label}
+                      </span>
+                      <span
+                        className={`${metric.color} font-semibold tabular-nums`}
+                      >
+                        {metric.value.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </form>
@@ -1652,12 +1811,18 @@ export default function AccountingDetail() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
             <SheetTitle>
-              {utilityPanel === "attachments" ? t("attachments") : t("log")}
+              {utilityPanel === "attachments"
+                ? t("attachments")
+                : utilityPanel === "comments"
+                  ? "Comments"
+                  : t("log")}
             </SheetTitle>
             <SheetDescription>
               {utilityPanel === "attachments"
                 ? t("attachmentsDescription")
-                : t("logDescription")}
+                : utilityPanel === "comments"
+                  ? "Notes and discussion for this Journal Voucher."
+                  : t("logDescription")}
             </SheetDescription>
           </SheetHeader>
 
@@ -1703,6 +1868,38 @@ export default function AccountingDetail() {
                   </Button>
                 </div>
               ))}
+            </div>
+          ) : utilityPanel === "comments" ? (
+            <div className="grid gap-4 px-4 pb-6">
+              <div className="grid gap-3">
+                {comments.map((comment, index) => (
+                  <div
+                    key={`${comment}-${index}`}
+                    className="rounded-lg border p-3"
+                  >
+                    <p className="text-sm">{comment}</p>
+                  </div>
+                ))}
+              </div>
+              <Textarea
+                value={commentDraft}
+                placeholder="Add a comment"
+                onChange={(event) => setCommentDraft(event.target.value)}
+              />
+              <Button
+                type="button"
+                size="sm"
+                className="justify-self-end"
+                disabled={!commentDraft.trim()}
+                onClick={() => {
+                  setComments((current) => [...current, commentDraft.trim()]);
+                  setCommentDraft("");
+                  toast.success("Comment added");
+                }}
+              >
+                <Send className="size-4" />
+                Add comment
+              </Button>
             </div>
           ) : (
             <ol className="grid gap-4 px-4 pb-6">

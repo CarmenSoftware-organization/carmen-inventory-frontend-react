@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  ArrowLeft,
   Ban,
   Check,
   FileClock,
@@ -15,6 +14,7 @@ import {
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { DocumentListHeader } from "@/components/share/document-list-header";
+import { BackButton } from "@/components/share/back-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -392,14 +392,10 @@ function ApPaymentEditor({
       )}
       <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
+          <BackButton
             onClick={() => navigate("/accounting/accounts-payable/payment")}
-          >
-            <ArrowLeft className="size-4" />
-            Back
-          </Button>
+            label="Back to AP Payment Directory"
+          />
           <span className="bg-border mx-1 h-5 w-px" />
           <DocumentListHeader
             title={loaded?.pv_no ?? "New Payment Voucher"}
@@ -560,7 +556,10 @@ function ApPaymentEditor({
                 : "Period closed (mock)"}
             </span>
           </Field>
-          <Field label="Exchange rate" className="order-6 lg:col-start-6 lg:row-start-2">
+          <Field
+            label="Exchange rate"
+            className="order-6 lg:col-start-6 lg:row-start-2"
+          >
             <Input
               disabled={!editable || form.currency_code === "THB"}
               value={form.exchange_rate}
@@ -570,7 +569,10 @@ function ApPaymentEditor({
               }
             />
           </Field>
-          <Field label="Method" className="order-7 lg:col-start-1 lg:row-start-2">
+          <Field
+            label="Method"
+            className="order-7 lg:col-start-1 lg:row-start-2"
+          >
             <Select
               disabled={!editable}
               value={form.payment_method}
@@ -588,7 +590,10 @@ function ApPaymentEditor({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Beneficiary account" className="order-8 lg:col-start-2 lg:row-start-2 lg:col-span-2">
+          <Field
+            label="Beneficiary account"
+            className="order-8 lg:col-span-2 lg:col-start-2 lg:row-start-2"
+          >
             <Input
               disabled={!editable}
               value={form.bank_account_masked}
@@ -597,7 +602,10 @@ function ApPaymentEditor({
               }
             />
           </Field>
-          <Field label="Reference" className="order-9 lg:col-start-4 lg:row-start-2">
+          <Field
+            label="Reference"
+            className="order-9 lg:col-start-4 lg:row-start-2"
+          >
             <Input
               disabled={!editable}
               value={form.payment_reference}
@@ -606,7 +614,10 @@ function ApPaymentEditor({
               }
             />
           </Field>
-          <Field label="Description" className="order-10 sm:col-span-2 lg:col-start-5 lg:row-start-2">
+          <Field
+            label="Description"
+            className="order-10 sm:col-span-2 lg:col-start-5 lg:row-start-2"
+          >
             <Input
               disabled={!editable}
               value={form.description}

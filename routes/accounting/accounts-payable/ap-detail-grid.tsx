@@ -1,6 +1,14 @@
-import type { ColumnDef, ExpandedState, OnChangeFn } from "@tanstack/react-table";
+import type {
+  ColumnDef,
+  ExpandedState,
+  OnChangeFn,
+} from "@tanstack/react-table";
 import { useMemo } from "react";
-import { getCoreRowModel, getExpandedRowModel, useReactTable } from "@tanstack/react-table";
+import {
+  getCoreRowModel,
+  getExpandedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import {
   DataGrid,
   DataGridContainer,
@@ -55,7 +63,7 @@ export function ApDetailGrid<T extends object>({
         rowClamp: false,
       }}
     >
-      <DataGridContainer scroll>
+      <DataGridContainer border={false} scroll>
         <DataGridTable />
       </DataGridContainer>
     </DataGrid>

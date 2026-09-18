@@ -26,7 +26,7 @@ import {
   accountingDocumentFromPath,
   documentsFor,
   type AccountingDocument,
-} from "./accounting-documents";
+} from "./accounting-document-model";
 
 const ACCOUNTING_STATUS = createStatusConfig(
   ["draft", "pending", "approved", "posted", "paid", "overdue"] as const,
@@ -47,7 +47,7 @@ function statusConfig(status: AccountingDocument["status"]) {
   return ACCOUNTING_STATUS[status.toLowerCase()];
 }
 
-export default function AccountingList() {
+export default function AccountingDocumentList() {
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const t = useTranslations("accounting.documents");

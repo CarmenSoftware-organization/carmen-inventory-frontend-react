@@ -524,6 +524,16 @@ export const moduleList: ModuleDto[] = [
         icon: BookText,
       },
       {
+        name: "accountGrouping",
+        path: "/config/account-grouping",
+        icon: FolderTree,
+      },
+      {
+        name: "titleMaster",
+        path: "/config/title-master",
+        icon: UserRoundSearch,
+      },
+      {
         // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccounts
         name: "accountMapping",
         path: "/config/account-mapping",

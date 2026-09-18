@@ -3,7 +3,7 @@ import { getModule } from "@/constant/module-list";
 import {
   accountingDetailInitialMode,
   accountingDocumentFromPath,
-} from "./accounting-documents";
+} from "./accounting-document-model";
 
 describe("accounting navigation", () => {
   it("maps nested list and detail paths to the same document type", () => {

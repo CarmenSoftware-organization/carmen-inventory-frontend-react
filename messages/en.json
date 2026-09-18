@@ -4779,6 +4779,8 @@
     "notifications": "Notifications",
     "fromPriceList": "From price list",
     "chartOfAccounts": "Chart of Accounts",
+    "accountGrouping": "Account Code Grouping",
+    "titleMaster": "Title Master",
     "accountMapping": "Account Mapping"
   },
   "commentSheet": {

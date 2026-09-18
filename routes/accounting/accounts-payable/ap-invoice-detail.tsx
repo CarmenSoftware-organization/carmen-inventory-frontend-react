@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
   Ban,
   Check,
   Copy,
@@ -14,11 +13,12 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,6 +38,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type {
   ApInvoice,
   ApInvoiceInput,
@@ -188,6 +189,7 @@ function ApInvoiceEditor({
     "attachments" | "activity" | "line" | null
   >(null);
   const [selectedLine, setSelectedLine] = useState(0);
+  const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
   const [form, setForm] = useState<ApInvoiceInput>(() =>
     initialInvoiceForm(
       loaded ?? copySource ?? undefined,
@@ -333,106 +335,100 @@ function ApInvoiceEditor({
           </div>
         </div>
       )}
-      <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
-        <div className="flex min-w-0 items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/accounting/accounts-payable/invoice")}
-          >
-            <ArrowLeft className="size-4" />
-            Back
-          </Button>
-          <span className="bg-border mx-1 h-5 w-px" />
-          <DocumentListHeader
-            title={loaded?.ap_no ?? "New AP Invoice"}
-            description="Standard supplier invoice"
-          />
-        </div>
-        <div className="flex flex-wrap gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/accounting/accounts-payable/invoice/new")}
-          >
-            <Plus className="size-4" />
-            New
-          </Button>
-          {loaded && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
-                )
-              }
-            >
-              <Copy className="size-4" />
-              Copy
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSheet("attachments")}
-          >
-            <Paperclip className="size-4" />
-            Attachments
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSheet("activity")}
-          >
-            <FileClock className="size-4" />
-            Log
-          </Button>
-          {loaded?.capabilities.can_void && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void runAction("void")}
-            >
-              <Ban className="size-4" />
-              Void
-            </Button>
-          )}
-          {loaded?.capabilities.can_edit && !editing && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              Edit
-            </Button>
-          )}
-          {editing && (
+      <div className="ml-10">
+        <DocFormHeader
+          title={loaded?.ap_no ?? "New AP Invoice"}
+          subtitle="Standard supplier invoice"
+          backLabel="Back to AP Invoice Directory"
+          onBack={() => navigate("/accounting/accounts-payable/invoice")}
+          badges={
+            loaded ? (
+              <>
+                <ApStatusBadge value={loaded.lifecycle} />
+                <ApStatusBadge value={loaded.settlement_status} />
+              </>
+            ) : undefined
+          }
+          flush
+          actions={
             <>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setEditing(false);
-                  if (id === "new")
-                    navigate("/accounting/accounts-payable/invoice");
-                  else setForm(initialInvoiceForm(loaded ?? undefined));
-                }}
+                onClick={() =>
+                  navigate("/accounting/accounts-payable/invoice/new")
+                }
               >
-                Cancel
+                <Plus className="size-4" />
+                New
               </Button>
-              <Button variant="outline" size="sm" onClick={() => void save()}>
-                <Save className="size-4" />
-                Save Draft
+              {loaded && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    navigate(
+                      `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
+                    )
+                  }
+                >
+                  <Copy className="size-4" />
+                  Copy
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSheet("attachments")}
+              >
+                <Paperclip className="size-4" />
+                Attachments
               </Button>
-              <Button size="sm" onClick={() => void runAction("submit")}>
-                <Send className="size-4" />
-                Submit
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSheet("activity")}
+              >
+                <FileClock className="size-4" />
+                Log
               </Button>
+              {loaded?.capabilities.can_void && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void runAction("void")}
+                >
+                  <Ban className="size-4" />
+                  Void
+                </Button>
+              )}
+              {loaded?.capabilities.can_edit && !editing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditing(true)}
+                >
+                  Edit
+                </Button>
+              )}
+              {editing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(false);
+                    if (id === "new")
+                      navigate("/accounting/accounts-payable/invoice");
+                    else setForm(initialInvoiceForm(loaded ?? undefined));
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
             </>
-          )}
-        </div>
-      </header>
+          }
+        />
+      </div>
       {!editable && loaded && (
         <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
           <ApStatusBadge value={loaded.lifecycle} />
@@ -741,51 +737,108 @@ function ApInvoiceEditor({
           </Button>
         </div>
       )}
-      <div className="bg-background/95 fixed inset-x-0 bottom-0 z-20 border-t p-3 backdrop-blur sm:sticky">
-        <div className="mx-auto grid max-w-screen-2xl grid-cols-3 gap-x-3 gap-y-1 sm:flex sm:flex-wrap sm:justify-end sm:gap-x-6">
-          <LabelValue label="Subtotal">
-            <Money value={subtotal} currency={form.currency_code} />
-          </LabelValue>
-          <LabelValue label="Discount">
-            <Money
-              value={discount}
-              currency={form.currency_code}
-              className="text-rose-600 dark:text-rose-400"
-            />
-          </LabelValue>
-          <LabelValue label="Net">
-            <Money value={net} currency={form.currency_code} />
-          </LabelValue>
-          <LabelValue label="VAT">
-            <Money
-              value={vat}
-              currency={form.currency_code}
-              className="text-emerald-600 dark:text-emerald-400"
-            />
-          </LabelValue>
-          <LabelValue label="Est. WHT">
-            <Money
-              value={wht}
-              currency={form.currency_code}
-              className="text-rose-600 dark:text-rose-400"
-            />
-          </LabelValue>
-          <LabelValue label="Total">
-            <Money
-              value={total}
-              currency={form.currency_code}
-              className="text-primary font-semibold"
-            />
-          </LabelValue>
-          <LabelValue label="Open">
-            <Money
-              value={loaded?.open_amount ?? total}
-              currency={form.currency_code}
-              className="font-semibold text-amber-600 dark:text-amber-400"
-            />
-          </LabelValue>
-        </div>
-      </div>
+      <SummaryFooterBar
+        hasRecord
+        className="bg-background/95 fixed inset-x-0 backdrop-blur sm:sticky"
+        items={[
+          {
+            key: "subtotal",
+            label: "Subtotal",
+            value: <Money value={subtotal} currency={form.currency_code} />,
+          },
+          {
+            key: "discount",
+            label: "Discount",
+            value: (
+              <Money
+                value={discount}
+                currency={form.currency_code}
+                className="text-rose-600 dark:text-rose-400"
+              />
+            ),
+          },
+          {
+            key: "net",
+            label: "Net",
+            value: <Money value={net} currency={form.currency_code} />,
+          },
+          {
+            key: "vat",
+            label: "VAT",
+            value: (
+              <Money
+                value={vat}
+                currency={form.currency_code}
+                className="text-emerald-600 dark:text-emerald-400"
+              />
+            ),
+          },
+          {
+            key: "wht",
+            label: "Est. WHT",
+            value: (
+              <Money
+                value={wht}
+                currency={form.currency_code}
+                className="text-rose-600 dark:text-rose-400"
+              />
+            ),
+          },
+          {
+            key: "total",
+            label: "Total",
+            value: <Money value={total} currency={form.currency_code} />,
+            emphasis: true,
+          },
+          {
+            key: "open",
+            label: "Open",
+            value: (
+              <Money
+                value={loaded?.open_amount ?? total}
+                currency={form.currency_code}
+                className="text-amber-600 dark:text-amber-400"
+              />
+            ),
+            emphasis: true,
+          },
+        ]}
+      >
+        {editing && (
+          <div className="flex shrink-0 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void save()}
+              disabled={saveMutation.isPending}
+            >
+              <Save className="size-4" />
+              Save Draft
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setSubmitConfirmOpen(true)}
+              disabled={saveMutation.isPending || actionMutation.isPending}
+            >
+              <Send className="size-4" />
+              Submit
+            </Button>
+          </div>
+        )}
+      </SummaryFooterBar>
+      <ConfirmDialog
+        open={submitConfirmOpen}
+        onOpenChange={setSubmitConfirmOpen}
+        title="Submit AP invoice?"
+        description="The invoice becomes read-only while it is in the approval workflow."
+        confirmText="Submit"
+        confirmIcon={<Send className="size-4" />}
+        isPending={saveMutation.isPending || actionMutation.isPending}
+        onConfirm={() => {
+          setSubmitConfirmOpen(false);
+          void runAction("submit");
+        }}
+      />
       <Sheet
         open={sheet !== null}
         onOpenChange={(open) => !open && setSheet(null)}
