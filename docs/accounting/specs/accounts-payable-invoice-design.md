@@ -4,15 +4,17 @@
 
 รองรับการรับและตรวจ Vendor Invoice, คำนวณยอด/ภาษี, match กับ PO/GRN, ผ่าน optional approval, post เป็น AP liability และติดตาม open amount เพื่อส่งต่อให้ Payment
 
+> Implementation note (2026-09-11): Invoice UI ปัจจุบันเป็น prototype บน mock repository การ validate/match/post ใน browser ใช้เพื่อสาธิต interaction เท่านั้น Backend ต้องเป็น source of truth ตาม [AP Implementation Readiness](accounts-payable-implementation-readiness.md)
+
 Phase 1 เน้น Standard Invoice ทั้ง PO-based และ non-PO ส่วน Deposit, Debit Note และ Credit Note ใช้ domain model ร่วมกันแต่เปิดตาม release decision ใน [AP Module Design](accounts-payable-design.md)
 
 ## 2. Information architecture
 
 ```text
-/accounting/accounts-payable/invoices
-/accounting/accounts-payable/invoices/new
-/accounting/accounts-payable/invoices/:id
-/accounting/accounts-payable/invoices/:id/edit
+/accounting/accounts-payable/invoice
+/accounting/accounts-payable/invoice/new
+/accounting/accounts-payable/invoice/:id
+/accounting/accounts-payable/invoice/:id?mode=edit
 ```
 
 ### Directory columns

@@ -2,7 +2,7 @@
 
 เอกสารชุดนี้กำหนดฐานของโมดูล Accounting ที่จะทำงานร่วมกับ Carmen Inventory โดยไม่สร้าง master data และ infrastructure ซ้ำโดยไม่จำเป็น
 
-> สถานะ: Phase 1 implementation (dev2) — Foundation และ General Ledger/JV มี schema, RPC/HTTP contract และ UI เริ่มต้นแล้ว; migration/runtime deployment และ Strict Staging Workbench ยังเป็นงานถัดไป
+> สถานะ: Phase 1 implementation (dev2) — Foundation และ General Ledger/JV มี backend schema/contract ตามเอกสาร backend แต่ frontend JV/Staging ยังใช้ mock repository ที่แยกผ่าน adapter boundary; Accounts Payable มี interactive UI prototype สำหรับ Dashboard, Invoice และ Payment แต่ยังใช้ browser-local mock repository และยังไม่เชื่อม AP backend; migration/runtime integration verification และ Strict Staging Workbench เต็มรูปแบบยังเป็นงานถัดไป
 
 ## เอกสาร
 
@@ -12,7 +12,9 @@
 | [Accounting Dashboard Framework](specs/accounting-dashboard-framework.md)          | Operational/Management views, role preview, permission, shared states และ drill-down rules                       |
 | [General Ledger — Dashboard](specs/general-ledger-dashboard-design.md)             | Posting health, close readiness, financial position และ Cash Forecast                                            |
 | [General Ledger — Journal Voucher](specs/general-ledger-journal-voucher-design.md) | Functional design ของ GL/JV รวม Schedule Post และ Auto-Reverse                                                   |
+| [General Ledger — Implementation Readiness](specs/general-ledger-implementation-readiness.md) | สถานะ frontend/backend, subledger Accounting Event contract, generated-JV policy, control-account rules และ AP-to-GL reconciliation |
 | [Accounts Payable — Module](specs/accounts-payable-design.md)                      | ขอบเขต AP, shared status, dashboard/aging, integration และ delivery slices                                       |
+| [Accounts Payable — Implementation Readiness](specs/accounts-payable-implementation-readiness.md) | สถานะ UI ปัจจุบัน, canonical routes, frontend/backend boundary, contract requirements, decision defaults และ delivery checklist |
 | [Accounts Payable — Dashboard](specs/accounts-payable-dashboard-design.md)         | Functional design ของ KPI, Aging, Due Date, approval queue, tax exceptions และ drill-down                        |
 | [Accounts Receivable — Dashboard](specs/accounts-receivable-dashboard-design.md)   | AR aging, collection queue, DSO, concentration และ expected collections                                          |
 | [Asset — Dashboard](specs/asset-dashboard-design.md)                               | Depreciation, reconciliation, NBV, asset mix และ Capex/Disposal forecast                                         |

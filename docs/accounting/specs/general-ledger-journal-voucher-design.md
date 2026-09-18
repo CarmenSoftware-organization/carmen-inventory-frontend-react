@@ -6,6 +6,10 @@
 
 เอกสารนี้เป็น functional design ยังไม่ใช่ implementation plan หรือ API contract ฉบับสุดท้าย
 
+> Implementation note (2026-09-11): JV และ Journal Staging frontend ปัจจุบันยังใช้ mock repositories แม้ backend schema/contract จะมีงานเริ่มต้นแล้ว Types/hooks ถูกแยกด้วย repository boundary เพื่อสลับเป็น HTTP adapter ในอนาคต ให้ใช้ [General Ledger — Implementation Readiness](general-ledger-implementation-readiness.md) เป็น source of truth สำหรับ integration status, subledger-generated JV และ AP-to-GL contract
+
+> Canonical UI baseline (2026-09-11): หน้า Journal Voucher ต้อง reuse detail shell และ interaction pattern ของหน้า Template Voucher เป็นหลัก ได้แก่ toolbar, document summary card, accounting-entry grid, line-detail actions, balance summary และ responsive behavior ห้ามสร้าง JV-specific page shell คู่ขนาน ส่วนที่เพิ่มเฉพาะ JV ให้จำกัดอยู่ที่ status/workflow, schedule/auto-reverse, source trace และ capability-based actions
+
 ## 2. Reference UI
 
 อ้างอิงพฤติกรรมและ feature จาก [Carmen 5 GL — Journal Voucher](https://carmen5-gl-jv.netlify.app/) ตรวจเมื่อ 2026-08-10
@@ -67,12 +71,14 @@
 ### Routes ที่เสนอ
 
 ```text
-/general-ledger
-/general-ledger/journal-voucher
-/general-ledger/journal-voucher/new
-/general-ledger/journal-voucher/:id
-/general-ledger/journal-voucher/:id/edit
+/accounting
+/accounting/journal-voucher
+/accounting/journal-voucher/new
+/accounting/journal-voucher/:id
+/accounting/journal-voucher/:id?mode=edit
 ```
+
+ใช้ route ภายใต้ `/accounting` ตาม router ปัจจุบันเป็น canonical frontend route ส่วน backend resource path ใช้ `/api/:bu_code/accounting/journal-vouchers`
 
 Route ต้องอยู่ใต้ `ProtectedShell` และมี section-level `RouteErrorBoundaryAdapter` ตาม convention ของ repository
 
@@ -80,36 +86,60 @@ Route ต้องอยู่ใต้ `ProtectedShell` และมี section
 
 Columns ขั้นต่ำ:
 
-| Column | Sort | Filter |
-| --- | --- | --- |
-| JV No. | yes | prefix/range |
-| JV Date | yes | date range/period |
-| Description | yes | search |
-| Source | yes | source type/no. |
-| Status | yes | multi-select |
-| Total Debit (functional) | yes | amount range |
-| Prepared By | yes | user |
-| Updated | yes | date/user |
+| Column                   | Sort | Filter            |
+| ------------------------ | ---- | ----------------- |
+| JV No.                   | yes  | prefix/range      |
+| JV Date                  | yes  | date range/period |
+| Description              | yes  | search            |
+| Source                   | yes  | source type/no.   |
+| Status                   | yes  | multi-select      |
+| Total Debit (functional) | yes  | amount range      |
+| Prepared By              | yes  | user              |
+| Updated                  | yes  | date/user         |
 
 Saved views/filter sheet ควร reuse framework ของ list pages เมื่อพร้อม
 
 ## 5. JV header
 
-| Field | Rule |
-| --- | --- |
+| Field               | Rule                                                                       |
+| ------------------- | -------------------------------------------------------------------------- |
 | Journal Type/Prefix | required; Phase 1 อย่างน้อย `JV` และ `AD`; config จาก running-code service |
-| JV No. | backend-generated, read-only, unique ต่อ BU/prefix/sequence policy |
-| JV Date | required; กำหนด accounting period |
-| Description | required; รองรับไทย/อังกฤษ |
-| Source | optional สำหรับ manual JV; required สำหรับ system/subledger-generated JV |
-| Schedule Post | optional; เปิดแล้วต้องมี scheduled timestamp |
-| Auto-Reverse | optional; เปิดแล้วต้องมี reverse date |
-| Workflow/Approval | optional; resolve toggle และ workflow ตาม BU+journal type |
-| Status | read-only derived state |
+| JV No.              | backend-generated, read-only, unique ต่อ BU/prefix/sequence policy         |
+| JV Date             | required; กำหนด accounting period                                          |
+| Description         | required; รองรับไทย/อังกฤษ                                                 |
+| Source              | optional สำหรับ manual JV; required สำหรับ system/subledger-generated JV   |
+| Schedule Post       | optional; เปิดแล้วต้องมี scheduled timestamp                               |
+| Auto-Reverse        | optional; เปิดแล้วต้องมี reverse date                                      |
+| Workflow/Approval   | optional; resolve toggle และ workflow ตาม BU+journal type                  |
+| Status              | read-only derived state                                                    |
+
+สำหรับ system/subledger-generated JV ต้องเก็บ `source_system`, `source_type`, `source_id`, `source_no`, `source_version`, `event_type`, `posting_rule_code`, `staging_batch_id`, `staging_attempt_id`, `generated_revision` และ `posting_event_id` เพื่อ trace กลับ source และป้องกัน duplicate/revision drift
 
 Schedule Post และ Auto-Reverse เป็นอิสระต่อกัน แต่เมื่อเปิดทั้งคู่ต้องผ่าน cross-field validation ตาม Accounting Foundation
 
 ทั้งสองค่าเป็น JV-level controls เท่านั้น ไม่รองรับ Batch default หรือ bulk update ผู้ใช้ต้องเปิดและกำหนดค่าภายใน JV ทีละใบ
+
+### Manual vs source-generated JV
+
+| Behavior                     | Manual JV                    | Subledger-generated JV                                                            |
+| ---------------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
+| Edit accounting header/lines | Draft และมี permission       | ห้ามแก้ใน GL ทุกสถานะ                                                             |
+| Workflow                     | GL Optional Workflow         | Source module เป็นเจ้าของ business approval; ห้ามสร้าง GL approval ซ้ำโดย default |
+| Submit/Post                  | ผ่าน GL commands             | Journal Staging/Posting Engine ทำตาม source event และ staging mode                |
+| Copy                         | สร้าง Manual JV draft ได้    | ห้าม copy; ให้ copy/correct ที่ source                                            |
+| Reverse/Correct              | GL สร้าง linked reversal ได้ | เริ่มจาก source owner แล้วส่ง reversal/correction event                           |
+| Schedule/Auto-Reverse        | ตั้งใน Manual JV ทีละใบ      | ไม่รับค่าจาก subledger event โดย default                                          |
+
+Strict Journal Staging release เป็น accounting control gate ไม่ใช่การ approve AP Invoice/Payment รอบที่สอง Generated JV ต้องแสดง source trace และ action `Open source`; capability ทุก action มาจาก backend
+
+### UI composition policy
+
+- `Template Voucher Detail` เป็น visual และ interaction reference ของ `Journal Voucher Detail`
+- ใช้ toolbar ลำดับเดียวกัน: Back/New/Copy/Template/Void/AI Suggest และ Attachments/Log/Edit ตาม capability
+- ใช้ document summary card เดียวกัน โดย JV เพิ่ม Schedule Post, Auto-Reverse, Workflow, Source และ Status ใน metadata row
+- ใช้ accounting-entry grid, line detail, row selection/reorder และ balance summary component/pattern เดียวกัน
+- Source-generated JV ซ่อน Copy/Template/Void/AI Suggest/Edit ตาม capability และเพิ่ม `Open source` กับ compact `Source-generated · Read-only` trace ใน summary card
+- Loading/error/not-found ต้องเกิดก่อน render placeholder document เพื่อไม่ให้ข้อมูลตัวอย่างกระพริบระหว่างโหลด
 
 ## 6. Journal-line editor
 
@@ -204,18 +234,18 @@ Auto-Reverse ใช้ Workflow toggle ของ reversal journal type:
 
 ## 11. Actions and status permissions
 
-| Action | Allowed states | Notes |
-| --- | --- | --- |
-| Edit | draft | ต้องผ่าน ownership/permission และ `doc_version` |
-| Copy | ทุกสถานะที่ดูได้ | สร้าง draft ใหม่ ไม่ copy JV no./approval/posting IDs |
-| Save Draft | draft | validate shape แต่ยังไม่บังคับ balanced ครบทุกกรณี |
-| Submit | draft | ต้อง balanced; Workflow ปิด = post/schedule, Workflow เปิด = submitted |
-| Approve/Return/Reject | submitted | มีเฉพาะเมื่อ Workflow เปิด; Return/Reject ส่ง JV กลับ draft |
-| Post/Retry Post | posting, post_failed | ปกติ backend เรียกอัตโนมัติหลัง Submit/final approval; manual retry ต้องมี permission |
-| Reschedule | draft, submitted, scheduled | ห้ามหลัง post |
-| Void | draft, submitted, scheduled, post_failed | เก็บ reason; ห้ามลบ audit |
-| Reverse | posted | สร้าง linked reversal JV |
-| Delete | ไม่เปิดให้ผู้ใช้ทั่วไป | draft ใช้ void/cancel เพื่อรักษา audit |
+| Action                | Allowed states                           | Notes                                                                                 |
+| --------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| Edit                  | draft                                    | ต้องผ่าน ownership/permission และ `doc_version`                                       |
+| Copy                  | ทุกสถานะที่ดูได้                         | สร้าง draft ใหม่ ไม่ copy JV no./approval/posting IDs                                 |
+| Save Draft            | draft                                    | validate shape แต่ยังไม่บังคับ balanced ครบทุกกรณี                                    |
+| Submit                | draft                                    | ต้อง balanced; Workflow ปิด = post/schedule, Workflow เปิด = submitted                |
+| Approve/Return/Reject | submitted                                | มีเฉพาะเมื่อ Workflow เปิด; Return/Reject ส่ง JV กลับ draft                           |
+| Post/Retry Post       | posting, post_failed                     | ปกติ backend เรียกอัตโนมัติหลัง Submit/final approval; manual retry ต้องมี permission |
+| Reschedule            | draft, submitted, scheduled              | ห้ามหลัง post                                                                         |
+| Void                  | draft, submitted, scheduled, post_failed | เก็บ reason; ห้ามลบ audit                                                             |
+| Reverse               | posted                                   | สร้าง linked reversal JV                                                              |
+| Delete                | ไม่เปิดให้ผู้ใช้ทั่วไป                   | draft ใช้ void/cancel เพื่อรักษา audit                                                |
 
 ## 12. Proposed API surface
 
@@ -224,22 +254,22 @@ Auto-Reverse ใช้ Workflow toggle ของ reversal journal type:
 Phase 1 gateway ใช้ prefix `/api/:bu_code/accounting` และมี Journal Staging endpoints ดังนี้:
 
 ```text
-GET    /api/:bu/gl/journal-vouchers
-POST   /api/:bu/gl/journal-vouchers
-GET    /api/:bu/gl/journal-vouchers/:id
-PATCH  /api/:bu/gl/journal-vouchers/:id
-POST   /api/:bu/gl/journal-vouchers/:id/submit
-POST   /api/:bu/gl/journal-vouchers/:id/approve      # Workflow enabled only
-POST   /api/:bu/gl/journal-vouchers/:id/return       # Workflow enabled only
-POST   /api/:bu/gl/journal-vouchers/:id/reject       # Workflow enabled only
-POST   /api/:bu/gl/journal-vouchers/:id/retry-post
-POST   /api/:bu/gl/journal-vouchers/:id/reschedule
-POST   /api/:bu/gl/journal-vouchers/:id/void
-POST   /api/:bu/gl/journal-vouchers/:id/reverse
-GET    /api/:bu/gl/journal-vouchers/:id/activity
-GET    /api/:bu/gl/accounts/lookup
-POST   /api/:bu/gl/exchange-rates/resolve
-POST   /api/:bu/gl/budget/check
+GET    /api/:bu_code/accounting/journal-vouchers
+POST   /api/:bu_code/accounting/journal-vouchers
+GET    /api/:bu_code/accounting/journal-vouchers/:id
+PATCH  /api/:bu_code/accounting/journal-vouchers/:id
+POST   /api/:bu_code/accounting/journal-vouchers/:id/submit
+POST   /api/:bu_code/accounting/journal-vouchers/:id/approve      # Manual JV + Workflow only
+POST   /api/:bu_code/accounting/journal-vouchers/:id/return       # Manual JV + Workflow only
+POST   /api/:bu_code/accounting/journal-vouchers/:id/reject       # Manual JV + Workflow only
+POST   /api/:bu_code/accounting/journal-vouchers/:id/retry-post
+POST   /api/:bu_code/accounting/journal-vouchers/:id/reschedule
+POST   /api/:bu_code/accounting/journal-vouchers/:id/void
+POST   /api/:bu_code/accounting/journal-vouchers/:id/reverse      # Manual JV only
+GET    /api/:bu_code/accounting/journal-vouchers/:id/activity
+GET    /api/:bu_code/accounting/accounts/lookup
+POST   /api/:bu_code/accounting/exchange-rates/resolve
+POST   /api/:bu_code/accounting/budget/check
 ```
 
 ```text
@@ -290,4 +320,4 @@ Frontend ต้องแสดง field errors ที่ line/header และ�
 5. Tax/WHT และ Budget Check อยู่ใน Phase 1 release แรกหรือ feature flag
 6. Dimension definitions มาจาก service/table ใด และ dimension ใดมีอยู่จริงใน Carmen backend
 7. Manual exchange-rate override ใช้ permission และ approval แบบใด
-8. JV ที่มาจาก AP/AR/Inventory จะแก้ใน GL ได้หรือดูอย่างเดียว
+8. **Decided:** JV ที่มาจาก AP/AR/Inventory/Asset เป็น immutable projection และดูอย่างเดียวใน GL การแก้/Reverse/Correct เริ่มจาก source owner แล้วส่ง source version/event ใหม่ผ่าน Journal Staging

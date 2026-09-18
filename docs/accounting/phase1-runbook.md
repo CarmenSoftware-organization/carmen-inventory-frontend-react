@@ -1,6 +1,8 @@
 # Accounting Phase 1 Runbook
 
-เอกสารนี้ใช้สำหรับ deploy และตรวจสอบ General Ledger / Journal Voucher บน branch `dev2`
+เอกสารนี้ใช้สำหรับ deploy และตรวจสอบ General Ledger / Journal Voucher บน branch `dev2` Backend verification และ frontend integration verification เป็นคนละ gate; frontend JV/Staging ที่ยังใช้ mock repository ห้ามนับว่า runtime API integration สำเร็จ
+
+Accounts Payable ยังเป็น frontend UI prototype ณ 2026-09-11 และยังไม่รวมอยู่ใน migration/runtime smoke test ด้านล่าง ดูสถานะ, target contract และ AP integration checklist ที่ [Accounts Payable — Implementation Readiness](specs/accounts-payable-implementation-readiness.md)
 
 ## 1. Preconditions
 
@@ -45,3 +47,14 @@ bun run ../../scripts/audit-app-api-catalog-drift/run.ts
 ```
 
 ถ้ายังไม่มี database connection ให้หยุดที่ build/test verification และห้ามอ้างว่า migration/runtime deployment สำเร็จ
+
+## 5. Accounts Payable prototype verification
+
+ระหว่างที่ AP backend ยังไม่พร้อม ให้ตรวจเฉพาะ frontend baseline และห้ามอ้างว่า posting, workflow, payment execution หรือ open-item persistence ผ่าน production verification:
+
+```text
+bunx tsc --noEmit
+bunx vitest run routes/accounting/accounts-payable
+```
+
+เมื่อ AP backend พร้อม ต้องเพิ่ม migration/API verification และ smoke sequence จาก AP Implementation Readiness section 13 ลงใน runbook นี้ พร้อม environment, command และ expected evidence ที่ตรวจซ้ำได้

@@ -6,6 +6,8 @@
 
 เอกสารชุดนี้เป็น functional design จาก mockup ที่ได้รับเพิ่มเติม ยังไม่ใช่ implementation plan, schema migration หรือ API contract ฉบับสุดท้าย
 
+> Implementation note (2026-09-11): repository นี้มี AP Dashboard, Invoice และ Payment UI prototype แล้ว แต่ยังใช้ `ap-mock-repository.ts`/browser storage และยังไม่มี AP HTTP adapter หรือ backend persistence/posting จริง ให้ใช้ [Accounts Payable — Implementation Readiness](accounts-payable-implementation-readiness.md) เป็น source of truth สำหรับสถานะ implementation, canonical route, integration boundary และ Definition of Done
+
 เอกสารรายละเอียด:
 
 - [AP Dashboard](accounts-payable-dashboard-design.md)
@@ -77,16 +79,18 @@ Routes ที่เสนอ:
 
 ```text
 /accounting/accounts-payable
-/accounting/accounts-payable/invoices
-/accounting/accounts-payable/invoices/new
-/accounting/accounts-payable/invoices/:id
-/accounting/accounts-payable/invoices/:id/edit
-/accounting/accounts-payable/payments
-/accounting/accounts-payable/payments/new
-/accounting/accounts-payable/payments/:id
-/accounting/accounts-payable/payments/:id/edit
+/accounting/accounts-payable/invoice
+/accounting/accounts-payable/invoice/new
+/accounting/accounts-payable/invoice/:id
+/accounting/accounts-payable/invoice/:id?mode=edit
+/accounting/accounts-payable/payment
+/accounting/accounts-payable/payment/new
+/accounting/accounts-payable/payment/:id
+/accounting/accounts-payable/payment/:id?mode=edit
 /accounting/accounts-payable/payment-approvals
 ```
+
+ใช้ route แบบเอกพจน์ตาม router/frontend ปัจจุบันเป็น canonical route ของ Phase 1 เพื่อไม่สร้าง breaking navigation โดยไม่จำเป็น Backend resource path ยังคงใช้คำนามพหูพจน์ `/invoices` และ `/payments` ตาม REST convention ได้
 
 Dashboard เป็น landing page ของ AP ส่วน Aging, due-date, approval และ tax cards ต้องเปิด directory พร้อม filter context ที่สอดคล้องกัน ไม่สร้างยอด summary คนละนิยามกับ list
 

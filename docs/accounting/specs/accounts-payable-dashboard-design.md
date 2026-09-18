@@ -12,6 +12,8 @@
 
 เอกสารนี้ขยาย Dashboard/Aging section ใน [AP Module Design](accounts-payable-design.md) โดยอ้างอิง mockup Dashboard v4.4.3/v4.4.4 และ Payment Approval mockup
 
+> Implementation note (2026-09-11): Dashboard UI ปัจจุบันอ่าน aggregate จาก mock repository และมี presentation fallback บางส่วน ค่า fallback/trend/vendor concentration ใน mock ห้ามถือเป็น accounting data หรือ backend acceptance baseline ดู integration contract และสถานะ widget ที่ [AP Implementation Readiness](accounts-payable-implementation-readiness.md)
+
 ## 2. Scope
 
 ### Phase 1 must have
@@ -45,8 +47,8 @@
 
 ```text
 /accounting/accounts-payable                         # AP Dashboard
-/accounting/accounts-payable/invoices                # drill-down target
-/accounting/accounts-payable/payments                # drill-down target
+/accounting/accounts-payable/invoice                 # drill-down target
+/accounting/accounts-payable/payment                 # drill-down target
 /accounting/accounts-payable/payment-approvals       # approval dashboard/queue
 ```
 

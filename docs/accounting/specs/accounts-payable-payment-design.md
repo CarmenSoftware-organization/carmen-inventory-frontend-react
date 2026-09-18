@@ -6,13 +6,15 @@
 
 Payment Preparation, Approval, Accounting Posting และ Bank Execution เป็นคนละ responsibility แม้ mockup จะแสดงอยู่ใน flow เดียวกัน
 
+> Implementation note (2026-09-11): Payment UI ปัจจุบันเป็น prototype และจำลอง Release เป็น executed/posted ใน local state พฤติกรรมนี้ไม่ใช่ production contract ห้าม backend รวม Final Approval, Release, Bank Execution และ Posting เป็น action เดียว ให้ใช้ state/command boundary ใน [AP Implementation Readiness](accounts-payable-implementation-readiness.md)
+
 ## 2. Information architecture
 
 ```text
-/accounting/accounts-payable/payments
-/accounting/accounts-payable/payments/new
-/accounting/accounts-payable/payments/:id
-/accounting/accounts-payable/payments/:id/edit
+/accounting/accounts-payable/payment
+/accounting/accounts-payable/payment/new
+/accounting/accounts-payable/payment/:id
+/accounting/accounts-payable/payment/:id?mode=edit
 /accounting/accounts-payable/payment-approvals
 ```
 

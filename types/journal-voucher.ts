@@ -9,6 +9,39 @@ export type JournalVoucherStatus =
   | "reversal_scheduled"
   | "reversed";
 
+export type JournalVoucherSourceType =
+  | "manual"
+  | "ap_invoice"
+  | "ap_payment"
+  | "ap_adjustment"
+  | "inventory"
+  | "accounts_receivable"
+  | "fixed_asset"
+  | (string & {});
+
+export interface JournalVoucherSourceLink {
+  kind: string;
+  label: string;
+  href: string | null;
+}
+
+export interface JournalVoucherCapabilities {
+  can_edit_accounting_fields: boolean;
+  can_submit: boolean;
+  can_approve: boolean;
+  can_return: boolean;
+  can_reject: boolean;
+  can_retry_post: boolean;
+  can_void: boolean;
+  can_reverse: boolean;
+  can_open_source: boolean;
+}
+
+export interface JournalLineDimensionInput {
+  dimension_id: string;
+  dimension_value_id: string;
+}
+
 export interface JournalVoucherLineInput {
   account_id: string;
   department_id: string | null;
@@ -20,7 +53,7 @@ export interface JournalVoucherLineInput {
   rate_source: string | null;
   debit: string;
   credit: string;
-  dimension: unknown[];
+  dimension: JournalLineDimensionInput[];
 }
 
 export interface JournalVoucherInput {
@@ -30,9 +63,13 @@ export interface JournalVoucherInput {
   description: string;
   note: string | null;
   functional_currency_id: string;
-  source_type: string | null;
+  source_system?: string | null;
+  source_type: JournalVoucherSourceType | null;
   source_id: string | null;
   source_no: string | null;
+  source_version?: number | null;
+  event_type?: string | null;
+  posting_rule_code?: string | null;
   schedule_post: boolean;
   scheduled_post_at: string | null;
   auto_reverse: boolean;
@@ -65,6 +102,13 @@ export interface JournalVoucher extends JournalVoucherInput {
   total_debit: string;
   total_credit: string;
   workflow_enabled_snapshot: boolean;
+  is_source_generated?: boolean;
+  posting_event_id?: string | null;
+  staging_batch_id?: string | null;
+  staging_attempt_id?: string | null;
+  generated_revision?: number | null;
+  source_links?: JournalVoucherSourceLink[];
+  capabilities?: JournalVoucherCapabilities;
   lines: JournalVoucherLine[];
 }
 

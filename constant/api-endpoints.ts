@@ -115,10 +115,22 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes`,
   JOURNAL_VOUCHERS: (buCode: string) =>
     `/api/proxy/api/${buCode}/accounting/journal-vouchers`,
+  JOURNAL_VOUCHER: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}`,
+  JOURNAL_VOUCHER_ACTION: (buCode: string, id: string, action: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}/${toSafePathSegment(action)}`,
   JOURNAL_VOUCHER_SETTINGS: (buCode: string) =>
     `/api/proxy/api/${buCode}/accounting/journal-vouchers/settings`,
   JOURNAL_STAGING_BATCHES: (buCode: string) =>
     `/api/proxy/api/${buCode}/accounting/journal-staging/batches`,
+  JOURNAL_STAGING_BATCH: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-staging/batches/${toSafePathSegment(id)}`,
+  JOURNAL_STAGING_BATCH_ACTION: (
+    buCode: string,
+    id: string,
+    action: "process" | "generate",
+  ) =>
+    `/api/proxy/api/${buCode}/accounting/journal-staging/batches/${toSafePathSegment(id)}/${action}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>

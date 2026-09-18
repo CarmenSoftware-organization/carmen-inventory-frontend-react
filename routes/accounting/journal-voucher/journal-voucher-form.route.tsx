@@ -1,4 +1,6 @@
-import AccountingDetail from "../accounting-detail";
+import JournalVoucherForm from "./journal-voucher-form";
 
-/** JV detail intentionally reuses the standard Template Voucher detail shell. */
-export function Component() { return <AccountingDetail />; }
+/** Journal Voucher detail uses its repository-backed source and capability policy. */
+export function Component() {
+  return <JournalVoucherForm />;
+}

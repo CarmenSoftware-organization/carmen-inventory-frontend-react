@@ -638,6 +638,16 @@ idempotency_key
 
 ห้าม AP/AR/Inventory/Asset เขียน ledger entry โดยตรง
 
+### Subledger control-account policy
+
+บัญชีควบคุม เช่น Trade AP, Trade AR, Inventory control, Pending/Input VAT และ WHT Payable ต้องกำหนด metadata อย่างน้อย `control_account_type`, `manual_posting_allowed` และ `allowed_source_types[]`
+
+- Manual JV ลง control account ได้เฉพาะเมื่อ policy และ permission อนุญาต พร้อม reason/audit; default คือไม่อนุญาต
+- Posting engine ตรวจ source type กับ account policy ทุกครั้ง ห้ามเชื่อ account code ที่ UI ส่งมา
+- Reversal ของ source-generated JV ต้องเริ่มจาก source owner เพื่อให้ subledger open item, application และ tax state เปลี่ยนพร้อมกับ ledger
+- GL เก็บ source/posting snapshot และ link แต่ไม่เป็น owner ของ AP open item, payment application หรือ tax filing state
+- ยอด subledger control account ต้องมี reconciliation endpoint/report ที่อธิบาย variance ถึง source event, generated JV และ posting event ได้
+
 ## 10. Schedule Post
 
 Schedule Post คือการกำหนดเวลาที่ระบบจะพยายาม post ไม่ใช่การเปลี่ยน `journal_date`
@@ -702,7 +712,7 @@ Auto-Reverse เป็นคำสั่งระดับ Journal Voucher เ�
 
 1. Accounting ใช้ period เดียวกับ Inventory หรือมี accounting calendar แยก
 2. BU เท่ากับ legal/accounting entity เสมอหรือจำเป็นต้องมี `legal_entity`
-3. Accounting backend อยู่ใน `micro-business` หรือแยก service
+3. **Decided for Phase 1:** Accounting backend อยู่ใน `apps/micro-business` และเปิดผ่าน `apps/backend-gateway`; การแยก service พิจารณาใหม่เมื่อ throughput, ownership หรือ deployment isolation ต้องการ
 4. Workflow เดิมรองรับ auto-approval สำหรับ system-generated reversal หรือไม่
 5. Rate type ที่ต้องรองรับใน Phase 1: daily, month-end, manual หรือทั้งหมด
 6. Tax/WHT master จะ extend `TaxProfile` เดิมหรือแยก accounting tax configuration

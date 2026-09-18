@@ -13,6 +13,7 @@ import {
   ChevronUp,
   CircleDollarSign,
   Copy,
+  ExternalLink,
   FilePlus2,
   History,
   LayoutTemplate,
@@ -23,6 +24,7 @@ import {
   ReceiptText,
   Save,
   Send,
+  ShieldCheck,
   Trash2,
   WandSparkles,
   X,
@@ -65,6 +67,14 @@ import {
   documentsFor,
 } from "./accounting-documents";
 import { BackButton } from "@/components/share/back-button";
+import { ErrorState } from "@/components/ui/error-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useJournalVoucher } from "./journal-voucher/use-journal-voucher";
+import {
+  isSourceGenerated,
+  journalVoucherCapabilities,
+  sourceLinksForJournal,
+} from "./journal-voucher/journal-voucher-source";
 
 const DEPARTMENTS = [
   { id: "100", label: "100 - Admin" },
@@ -78,6 +88,11 @@ const ACCOUNTS = [
   { id: "21100", label: "21100 - Accounts Payable" },
   { id: "61010", label: "61010 - Operating Supplies" },
   { id: "41000", label: "41000 - Room Revenue" },
+  { id: "6100", label: "6100 - Expense" },
+  { id: "1150", label: "1150 - Input VAT" },
+  { id: "2110", label: "2110 - Trade accounts payable" },
+  { id: "6200", label: "6200 - Office supplies" },
+  { id: "1100", label: "1100 - Cash" },
 ];
 
 const TAX_CODES = [
@@ -116,6 +131,10 @@ interface JournalLine {
   budgetControlled: boolean;
   budget: string;
   dimension: string;
+  departmentLabel?: string;
+  accountLabel?: string;
+  currency?: string;
+  exchangeRate?: number;
 }
 
 type LineDetailSection = "tax" | "budget" | "dimension";
@@ -164,8 +183,18 @@ export default function AccountingDetail() {
   const t = useTranslations("accounting.documents");
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
+  const isJournalVoucher = config.kind === "journalVoucher";
+  const journalQuery = useJournalVoucher(isJournalVoucher ? id : undefined);
+  const journal = journalQuery.data;
+  const sourceGenerated = journal ? isSourceGenerated(journal) : false;
+  const journalCapabilities = journal
+    ? journalVoucherCapabilities(journal)
+    : null;
+  const sourceLink = journal
+    ? sourceLinksForJournal(journal).find((link) => link.href)
+    : undefined;
   const hasWorkflowApproval =
-    config.kind === "journalVoucher" ||
+    (config.kind === "journalVoucher" && !sourceGenerated) ||
     config.kind === "arInvoice" ||
     config.kind === "arReceipt";
   const hasInlineApproval =
@@ -173,11 +202,13 @@ export default function AccountingDetail() {
   const documents = useMemo(() => documentsFor(config), [config]);
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
-  const number = isNew ? t("autoNumber") : document.number;
+  const number = isNew
+    ? t("autoNumber")
+    : (journal?.display_no ?? document.number);
   const [mode, setMode] = useState<FormMode>(() =>
     accountingDetailInitialMode(id),
   );
-  const isView = mode === "view";
+  const isView = mode === "view" || sourceGenerated;
   const editActivatedAtRef = useRef(0);
   const [documentStatus, setDocumentStatus] = useState<string>(
     isNew ? "Draft" : document.status,
@@ -197,6 +228,52 @@ export default function AccountingDetail() {
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
+
+  useEffect(() => {
+    if (!journal || isNew) return;
+    setDocumentStatus(
+      journal.jv_status
+        .split("_")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" "),
+    );
+    setValues({
+      date: (journal.jv_date ?? journal.journal_date).slice(0, 10),
+      description: journal.description,
+      party: journal.source_no ?? "",
+      schedulePost: journal.schedule_post,
+      scheduleDate:
+        journal.scheduled_post_at?.slice(0, 10) ??
+        journal.journal_date.slice(0, 10),
+      autoReverse: journal.auto_reverse,
+      reverseDate: journal.reverse_date?.slice(0, 10) ?? "",
+    });
+    setLines(
+      journal.lines.map((line) => ({
+        id: line.id,
+        department: line.department_id ?? "",
+        departmentLabel: line.department_code
+          ? `${line.department_code} - ${line.department_name ?? ""}`
+          : "—",
+        account: line.account_code ?? line.account_id,
+        accountLabel: line.account_code
+          ? `${line.account_code} - ${line.account_name ?? ""}`
+          : line.account_id,
+        comment: line.comment ?? "",
+        debit: Number(line.debit),
+        credit: Number(line.credit),
+        taxCode: "",
+        whtCode: "NONE",
+        budgetControlled: false,
+        budget: "",
+        dimension: "",
+        currency: line.currency_code ?? journal.base_currency_id,
+        exchangeRate: Number(line.exchange_rate),
+      })),
+    );
+    setSelectedLineIds([]);
+    setMode("view");
+  }, [isNew, journal]);
   const selectedLine = lines.find((line) => line.id === selectedLineId);
   const allLinesSelected =
     lines.length > 0 && selectedLineIds.length === lines.length;
@@ -369,15 +446,38 @@ export default function AccountingDetail() {
     config.kind === "journalVoucher"
       ? t("journalEntryDetails")
       : t("entryDetails");
+  const sourceLabel = isJournalVoucher
+    ? journal?.source_type === "manual"
+      ? "Manual"
+      : (journal?.source_no ?? journal?.source_id ?? "—")
+    : "AP-102934";
+
+  if (isJournalVoucher && journalQuery.isLoading) {
+    return <Skeleton className="h-[70vh] rounded-lg" />;
+  }
+  if (isJournalVoucher && journalQuery.isError) {
+    return (
+      <ErrorState
+        error={journalQuery.error}
+        message="Unable to load Journal Voucher"
+        onRetry={() => void journalQuery.refetch()}
+      />
+    );
+  }
+  if (isJournalVoucher && !isNew && !journal) {
+    return (
+      <ErrorState
+        notFoundMessage="Journal Voucher not found"
+        backTo="/accounting/journal-voucher"
+      />
+    );
+  }
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
       <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
         <div className="flex flex-wrap items-center gap-1">
-          <BackButton
-            onClick={() => navigate(config.path)}
-            label={t("back")}
-          />
+          <BackButton onClick={() => navigate(config.path)} label={t("back")} />
           <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
           <Button
             type="button"
@@ -399,53 +499,72 @@ export default function AccountingDetail() {
             <FilePlus2 className="size-4" aria-hidden="true" />
             {t("new")}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-          >
-            <Copy className="size-4" aria-hidden="true" />
-            {t("copy")}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={applyTemplate}
-          >
-            <LayoutTemplate className="size-4" aria-hidden="true" />
-            {t("template")}
-          </Button>
-          {!isNew && documentStatus !== "Voided" && (
+          {!sourceGenerated && (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => {
-                setDocumentStatus("Voided");
-                setMode("view");
-                toast.success(t("voided"));
-              }}
+              onClick={handleCopy}
             >
-              <Ban className="size-4" aria-hidden="true" />
-              {t("void")}
+              <Copy className="size-4" aria-hidden="true" />
+              {t("copy")}
             </Button>
           )}
+          {!sourceGenerated && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={applyTemplate}
+            >
+              <LayoutTemplate className="size-4" aria-hidden="true" />
+              {t("template")}
+            </Button>
+          )}
+          {!isNew &&
+            documentStatus !== "Voided" &&
+            (!isJournalVoucher || journalCapabilities?.can_void) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => {
+                  setDocumentStatus("Voided");
+                  setMode("view");
+                  toast.success(t("voided"));
+                }}
+              >
+                <Ban className="size-4" aria-hidden="true" />
+                {t("void")}
+              </Button>
+            )}
           <span className="bg-border mx-1 hidden h-5 w-px sm:block" />
-          <Button
-            type="button"
-            variant="warning"
-            size="sm"
-            onClick={applyAiSuggestion}
-          >
-            <WandSparkles className="size-4" aria-hidden="true" />
-            {t("aiSuggest")}
-          </Button>
+          {!sourceGenerated && (
+            <Button
+              type="button"
+              variant="warning"
+              size="sm"
+              onClick={applyAiSuggestion}
+            >
+              <WandSparkles className="size-4" aria-hidden="true" />
+              {t("aiSuggest")}
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-1">
+          {sourceLink?.href && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(sourceLink.href!)}
+            >
+              <ExternalLink className="size-4" aria-hidden="true" />
+              Open source
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -466,18 +585,22 @@ export default function AccountingDetail() {
           </Button>
           <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
           {isView ? (
-            <Button
-              type="button"
-              size="sm"
-              disabled={documentStatus === "Voided"}
-              onClick={() => {
-                editActivatedAtRef.current = performance.now();
-                setMode("edit");
-              }}
-            >
-              <Pencil className="size-4" aria-hidden="true" />
-              {tc("edit")}
-            </Button>
+            !sourceGenerated &&
+            (!isJournalVoucher ||
+              journalCapabilities?.can_edit_accounting_fields) && (
+              <Button
+                type="button"
+                size="sm"
+                disabled={documentStatus === "Voided"}
+                onClick={() => {
+                  editActivatedAtRef.current = performance.now();
+                  setMode("edit");
+                }}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                {tc("edit")}
+              </Button>
+            )
           ) : (
             <>
               <Button
@@ -786,10 +909,29 @@ export default function AccountingDetail() {
                 />
               )}
 
+              {sourceGenerated && journal && (
+                <div className="flex min-h-8 flex-wrap items-center gap-2 text-xs">
+                  <ShieldCheck
+                    className="text-primary size-4"
+                    aria-hidden="true"
+                  />
+                  <span className="font-medium">
+                    Source-generated · Read-only
+                  </span>
+                  <span className="text-muted-foreground">
+                    v{journal.source_version ?? "—"} ·{" "}
+                    {journal.event_type ?? "—"}
+                    {journal.posting_rule_code
+                      ? ` · ${journal.posting_rule_code}`
+                      : ""}
+                  </span>
+                </div>
+              )}
+
               <div className="ml-auto flex min-h-8 items-center gap-3 text-xs">
                 <span className="text-muted-foreground">{t("source")}</span>
                 <span className="text-primary font-medium tabular-nums">
-                  AP-102934
+                  {sourceLabel}
                 </span>
                 <span className="bg-border h-4 w-px" aria-hidden="true" />
                 <span className="text-muted-foreground">{t("status")}</span>
@@ -879,7 +1021,7 @@ export default function AccountingDetail() {
                       {t("department")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {t("accountCode")}
+                      {t("chartOfAccount")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
                       {t("comment")}
@@ -927,7 +1069,8 @@ export default function AccountingDetail() {
                           </td>
                           <td className="h-12 px-3">
                             {isView ? (
-                              optionLabel(DEPARTMENTS, line.department)
+                              (line.departmentLabel ??
+                              optionLabel(DEPARTMENTS, line.department))
                             ) : (
                               <LookupCombobox
                                 value={line.department}
@@ -945,7 +1088,8 @@ export default function AccountingDetail() {
                           </td>
                           <td className="h-12 px-3 font-medium">
                             {isView ? (
-                              optionLabel(ACCOUNTS, line.account)
+                              (line.accountLabel ??
+                              optionLabel(ACCOUNTS, line.account))
                             ) : (
                               <LookupCombobox
                                 value={line.account}
@@ -977,9 +1121,11 @@ export default function AccountingDetail() {
                               />
                             )}
                           </td>
-                          <td className="h-12 px-3">THB</td>
+                          <td className="h-12 px-3">
+                            {line.currency ?? "THB"}
+                          </td>
                           <td className="h-12 px-3 text-right tabular-nums">
-                            1
+                            {line.exchangeRate ?? 1}
                           </td>
                           <td className="h-12 px-3 text-right tabular-nums">
                             {isView ? (
@@ -1275,7 +1421,7 @@ export default function AccountingDetail() {
                 )}
               </Field>
               <Field>
-                <FieldLabel>{t("accountCode")}</FieldLabel>
+                <FieldLabel>{t("chartOfAccount")}</FieldLabel>
                 {isView ? (
                   <FieldPlainText>
                     {optionLabel(ACCOUNTS, selectedLine.account)}
