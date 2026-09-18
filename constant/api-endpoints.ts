@@ -190,6 +190,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/notification-templates`,
   INVENTORY_PERIODS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-periods`,
+  // root ของ gateway ไม่ใช่ `/api/...` — endpoint นี้สาธารณะ ไม่ผูก BU ไม่ต้อง auth
+  BACKEND_VERSION: "/api/proxy/version",
   PERIOD_ENDS: (buCode: string) => `/api/proxy/api/${buCode}/period-ends`,
   PERIOD_END_CURRENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/current`,
