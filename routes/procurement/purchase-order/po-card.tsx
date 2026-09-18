@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
 import {
   ListCard,
+  ListCardAuditRows,
   ListCardRow,
   ListCardStatusRow,
   ListCardSendBackRow,
@@ -25,8 +26,8 @@ interface PoCardProps {
  * อยู่แถวไหน ครบเท่าคอลัมน์ของตาราง PO · ยอดเงินใช้ `currency_code` ของใบนั้น
  * (PO มีสกุลเงินต่อใบ ไม่ใช่สกุลของ BU เหมือนโมดูลอื่น)
  *
- * ไม่มีแถว credit term กับแถว audit เพราะ list endpoint เลิกส่ง `credit_term_value`
- * และ `audit` แล้ว (ดู `PurchaseOrder`) — เคยมีทั้งสองแถว
+ * ไม่มีแถว credit term เพราะ list endpoint ไม่ส่ง `credit_term_value` (ดู
+ * `PurchaseOrder`) — เคยมีแถวนี้ตอนที่คิดว่ามันส่งมา
  *
  * @param props.item - ข้อมูลใบสั่งซื้อ
  * @param props.onEdit - callback เมื่อคลิกการ์ด
@@ -67,8 +68,8 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
           />
         </ListCardRow>
       )}
-      {item.vendor_name && (
-        <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>
+      {item.vendor?.name && (
+        <ListCardRow label={tfl("vendor")}>{item.vendor.name}</ListCardRow>
       )}
       {item.delivery_date && (
         <ListCardRow label={tfl("deliveryDate")}>
@@ -81,14 +82,15 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
         <ListCardRow label={tfl("totalAmount")}>
           <span className="font-semibold tabular-nums">
             {formatCurrency(Number(amount))}
-            {item.currency_code && (
+            {item.currency?.code && (
               <span className="text-muted-foreground ml-1 font-normal">
-                {item.currency_code}
+                {item.currency.code}
               </span>
             )}
           </span>
         </ListCardRow>
       )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

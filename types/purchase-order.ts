@@ -185,24 +185,16 @@ export interface PurchaseOrder {
   last_action?: LastAction | null;
   workflow_current_stage: string | null;
   workflow_next_stage: string | null;
-  // list endpoint (`GET /api/{bu}/purchase-orders`): แถวจริงอยู่ที่ `data[].data[]`
-  // (multi-BU envelope) — `@CollapseRefs()` กับ `@EnrichAuditUsers()` เดินจาก path
-  // '' ไปไม่ถึงแถวที่ซ้อนอยู่ บั๊กเดียวกับ PR (ดู `PurchaseRequest`) แถว list จึง
-  // ยังเป็นคู่ flat `_id`/`_name` และมี `created_at` ดิบค้างแทน `audit`
-  // ยืนยันจาก payload จริง 5/5 แถว (2026-09-18)
-  vendor_id?: string;
-  vendor_name?: string;
-  currency_id?: string;
-  currency_code?: string;
+  // ส่งมาทั้ง list (`GET /api/{bu}/purchase-orders` — แถวจริงอยู่ที่ `data[].data[]`
+  // ของ multi-BU envelope) และ detail · `@CollapseRefs()` กับ `@EnrichAuditUsers()`
+  // เดินถึงแถวที่ซ้อนแล้วตั้งแต่ 2026-09-18 จึงเป็น object จริงทั้งคู่ ไม่ใช่คู่ flat
+  // `_id`/`_name` อีก (ยืนยันจาก payload จริง 5/5 แถว)
+  vendor: EntityRef | null;
+  currency: EntityRef | null;
+  audit?: Audit;
   // display-only string ไม่มี workflow_id / buyer_id คู่กัน
   workflow_name?: string;
   buyer_name?: string;
-  created_at?: string;
-  created_by_id?: string | null;
-  updated_at?: string;
-  updated_by_id?: string | null;
-  deleted_at?: string | null;
-  deleted_by_id?: string | null;
   // ยอดรวมระดับหัวเอกสารที่ list คำนวณมาให้ (detail ไม่ส่ง — คิดจาก line item)
   total_qty?: number;
   total_price?: number;
@@ -210,15 +202,11 @@ export interface PurchaseOrder {
   net_amount?: number;
   base_net_amount?: number;
   base_total_amount?: number;
-  // detail endpoint (`GET /api/{bu}/purchase-orders/{id}`) เท่านั้น — object จริง
-  // ที่ผ่าน CollapseRefs/EnrichAuditUsers มาแล้ว list ไม่ส่งสักตัว
-  vendor?: EntityRef | null;
-  currency?: EntityRef | null;
+  // detail endpoint (`GET /api/{bu}/purchase-orders/{id}`) เท่านั้น — list ไม่ส่ง
   buyer?: EntityRef | null;
   workflow?: EntityRef | null;
   credit_term?: EntityRef | null;
   credit_term_value?: number;
-  audit?: Audit;
   role?: string;
   workflow_previous_stage?: string | null;
   workflow_history?: WorkflowHistoryEntry[];
