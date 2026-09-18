@@ -38,6 +38,7 @@ interface PoItemFieldsProps {
   role?: string;
   poStatus?: string;
   isEditMode?: boolean;
+  isViewMode?: boolean;
   onApprove?: () => void;
   onReject?: () => void;
   onClose?: (reason: string) => void;
@@ -51,6 +52,7 @@ export function PoItemFields({
   role,
   poStatus,
   isEditMode = false,
+  isViewMode = false,
   onApprove,
   onReject,
   onClose,
@@ -93,6 +95,7 @@ export function PoItemFields({
     showStatusBadge,
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
+    isViewMode,
     onDelete: setDeleteIndex,
   });
 
