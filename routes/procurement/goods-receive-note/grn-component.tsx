@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
+import { GrnInvoiceFilter } from "./grn-invoice-filter";
 import EmptyComponent from "@/components/empty-component";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { GrnCreateDialog } from "./grn-create-dialog";
@@ -59,20 +60,6 @@ export default function GrnComponent() {
     defaultSort: "grn_date:desc",
   });
 
-  // ตัวเลือกเลข invoice จากใบ GRN ที่มีจริง (distinct, ตัดค่าว่าง) — ดึงทั้งก้อน
-  // ครั้งเดียวแชร์ cache กับ list หลัก เลือกหลายใบได้เป็น IN query ฝั่ง backend เดิม
-  const { data: allGrnData } = useGoodsReceiveNote({ perpage: -1 });
-  const invoiceOptions = useMemo(() => {
-    const seen = new Set<string>();
-    for (const g of allGrnData?.data ?? []) {
-      const no = g.invoice_no?.trim();
-      if (no) seen.add(no);
-    }
-    return [...seen]
-      .sort()
-      .map((no) => ({ label: no, value: `invoice_no|string:${no}` }));
-  }, [allGrnData]);
-
   const grnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -103,16 +90,18 @@ export default function GrnComponent() {
         ],
       },
       {
+        // ตัวเลือกมาจากใบรับของทั้ง BU (distinct invoice_no) ซึ่งเป็นก้อนที่โตตาม
+        // จำนวนใบ — GrnInvoiceFilter ยิงเองตอนเปิด popover เท่านั้น หน้านี้จึงไม่
+        // จ่ายค่านั้นตอน mount (ส่วน chip ไม่ต้องรอ fetch: ค่าที่เก็บคือเลขที่จริง
+        // ไม่ใช่ id chipValueText จึงอ่านออกเองอยู่แล้ว)
         key: "invoice_no",
         control: "custom",
         labelKey: "field.invoiceNo",
         section: "listView.sectionDocument",
         render: (value, onChange) => (
-          <MultiSelectFilter
+          <GrnInvoiceFilter
             value={value}
             onChange={onChange}
-            options={invoiceOptions}
-            searchable
             className="w-full"
           />
         ),
@@ -152,7 +141,7 @@ export default function GrnComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [invoiceOptions],
+    [],
   );
 
   const lf = useListFilters({
