@@ -26,7 +26,6 @@ import {
   PURCHASE_ORDER_STATUS_OPTIONS,
   PURCHASE_ORDER_TYPE_OPTIONS,
 } from "@/constant/purchase-order";
-import { useVendor } from "@/hooks/use-vendor";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
@@ -119,20 +118,6 @@ export default function PoComponent() {
   });
 
   const { data: stages } = usePurchaseOrderWorkflowStages();
-
-  const { data: vendorData } = useVendor({ perpage: -1 });
-  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน poFilterFields memo ข้างล่างไม่เคย hit
-  const vendorOptions = useMemo(
-    () =>
-      (vendorData?.data ?? [])
-        .filter((v) => v.is_active)
-        .map((v) => ({
-          label: v.name,
-          value: `vendor_id|string:${v.id}`,
-        })),
-    [vendorData],
-  );
 
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
   // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
@@ -233,33 +218,13 @@ export default function PoComponent() {
         section: "listView.sectionPeople",
       },
       {
+        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
+        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
+        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
         key: "vendor",
-        control: "custom",
+        control: "vendor",
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
-        // chip โชว์ชื่อ vendor จริงแทนจำนวน — mapping อยู่ในมือหน้านี้อยู่แล้ว
-        valueText: (raw) => {
-          const ids = raw
-            .split(",")
-            .map((p) => p.slice(p.lastIndexOf(":") + 1))
-            .filter(Boolean);
-          const names = ids
-            .map(
-              (id) => (vendorData?.data ?? []).find((v) => v.id === id)?.name,
-            )
-            .filter((n): n is string => !!n);
-          if (names.length === 0) return `${ids.length}`;
-          return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
-        },
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={vendorOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         key: "order_date",
@@ -269,7 +234,7 @@ export default function PoComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [viewMode, stages, vendorOptions, vendorData, handleViewModeChange, t, tc],
+    [viewMode, stages, handleViewModeChange, t, tc],
   );
 
   const lf = useListFilters({
