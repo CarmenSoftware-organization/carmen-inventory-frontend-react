@@ -60,6 +60,7 @@ export const QUERY_KEYS = {
   MY_PENDING_STORE_REQUISITIONS: "my-pending-store-requisitions",
   MY_PENDING_STORE_REQUISITIONS_COUNT: "my-pending-store-requisitions-count",
   INVENTORY_PERIODS: "inventory-periods",
+  BACKEND_VERSION: "backend-version",
   PERIOD_ENDS: "period-ends",
   PERMISSIONS: "permissions",
   PHYSICAL_COUNTS: "physical-counts",

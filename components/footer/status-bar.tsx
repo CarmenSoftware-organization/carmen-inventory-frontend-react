@@ -1,9 +1,16 @@
 import { Clock, Tag, User } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useBackendVersion } from "@/hooks/use-backend-version";
 import { useProfile } from "@/hooks/use-profile";
 import { useServerTime } from "@/hooks/use-server-time";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 import { formatDate } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
 
 // Lazy: changelog.json (ยาวขึ้นเรื่อย ๆ ~57 รายการ/release) ต้องไม่ค้างอยู่ใน
@@ -15,11 +22,67 @@ const WhatsNewDialog = lazy(() =>
 );
 
 /**
+ * สีจุดสถานะรอบบัญชี — สัญญาณอยู่ที่จุดอย่างเดียว ตัวอักษรเป็นสีกลางเสมอ
+ * (เหมือน `StatusDotBadge`) แต่แถบสูง 24px รับ chip เต็ม ๆ ไม่ไหว จึงเหลือแค่จุด
+ *
+ * `enum_period_status` ฝั่ง DB มี 3 ค่า แต่ `CurrentPeriod.status` เป็น `string`
+ * เปล่า ๆ — ค่าที่ไม่รู้จักจึงตกไปที่จุดสีกลางแทนที่จะหายไปทั้งก้อน
+ */
+const PERIOD_STATUS_DOT: Record<string, string> = {
+  open: "bg-success",
+  locked: "bg-warning",
+  closed: "bg-muted-foreground/50",
+};
+
+/**
+ * แปลงรอบบัญชีเป็น `YYYY-MM` เพื่ออ่านออกโดยไม่ต้องแปลในหัว
+ *
+ * ฟิลด์ `period` ที่ backend เก็บเป็น `YYMM` (เช่น `2609`) ซึ่งกำกวมเกินไป
+ * สำหรับป้ายที่ยืนอยู่ลำพัง จึงประกอบจาก `fiscal_year`/`fiscal_month` แทน
+ *
+ * @param period - รอบบัญชีปัจจุบันจาก profile
+ * @returns สตริงรูปแบบ `YYYY-MM`
+ */
+function formatPeriodLabel(period: {
+  fiscal_year: number;
+  fiscal_month: number;
+}): string {
+  return `${period.fiscal_year}-${String(period.fiscal_month).padStart(2, "0")}`;
+}
+
+/**
+ * ตัดเวอร์ชัน backend ให้เหลือแค่ส่วน semver สำหรับแสดงบนแถบ
+ *
+ * ของจริงยาวแบบ `3.0.0-build.20260918.808270486` ซึ่งกินแถบทั้งแถบ —
+ * ส่วนที่ตัดทิ้งไม่ได้หายไปไหน ยังอยู่ครบใน tooltip
+ *
+ * @param version - เวอร์ชันเต็มจาก `GET /version`
+ * @returns เฉพาะส่วนหน้าเครื่องหมาย `-` ตัวแรก
+ */
+function toSemverPrefix(version: string): string {
+  return version.split("-")[0];
+}
+
+/**
  * Footer status bar
  *
- * Render `<footer role="contentinfo">` สูง h-6 แสดงชื่อผู้ใช้ + buCode
- * ด้านซ้าย และเวลา server ปัจจุบัน (`useServerTime`) + ปุ่มเวอร์ชันแอป
- * ด้านขวา เวอร์ชัน (`APP_VERSION`) ฉีดตอน build จาก `package.json` คลิกที่ปุ่ม
+ * Render `<footer role="contentinfo">` สูง h-6 แบ่งเป็นสองกลุ่มตามชนิดของข้อมูล
+ * **ซ้าย = บริบทที่กำลังทำงานอยู่** (ชื่อผู้ใช้ · buCode · รอบบัญชีปัจจุบัน)
+ * **ขวา = ข้อมูลระบบ** (เวลา server จาก `useServerTime` · เวอร์ชันแอปและ backend)
+ * รอบบัญชีอยู่ฝั่งซ้ายเพราะมันตอบคำถามเดียวกับ buCode ว่า "ตอนนี้กำลังบันทึกลง
+ * ที่ไหนของเวลาไหน" ส่วนเวอร์ชัน backend อยู่ฝั่งขวาเพราะเป็นข้อมูลบิลด์
+ * ชุดเดียวกับเวอร์ชันแอป
+ *
+ * **รอบบัญชีไม่ต้องยิง request เพิ่ม** — `useProfile().currentPeriod` แบกมาให้แล้ว
+ * จาก `/user/profile` ที่แถบนี้เรียกอยู่ก่อนแล้ว (ไม่ใช่ `/period-ends/current`
+ * ซึ่งจะเป็นคำขอลูกที่สองของข้อมูลชุดเดียวกัน) แสดงรหัสรอบ + จุดสีสถานะ
+ * ช่วงวันที่เต็มอยู่ใน tooltip
+ *
+ * **เวอร์ชัน backend fail-soft** — `useBackendVersion()` ยิง `GET /version` ที่
+ * root ของ gateway ถ้า backend ยังเป็นรุ่นก่อนหน้า (404) ส่วนนี้หายไปเงียบ ๆ
+ * แถบที่เหลือทำงานปกติ จึงปล่อย frontend ก่อน backend ได้
+ *
+ * เวอร์ชันแอป (`APP_VERSION`) ฉีดตอน build จาก `package.json` คลิกที่ปุ่ม
  * เพื่อเปิด What's New dialog และ dialog จะเด้งอัตโนมัติครั้งเดียวเมื่อมี
  * version ใหม่ (`useWhatsNew`) ใช้ `formatDate` ตาม `dateTimeFormat` จาก
  * profile ใส่ `suppressHydrationWarning` บน `<time>` รองรับ SSR/CSR mismatch
@@ -42,7 +105,15 @@ const WhatsNewDialog = lazy(() =>
  * ```
  */
 export function StatusBar() {
-  const { data: profile, aliasName, buCode, dateTimeFormat } = useProfile();
+  const {
+    data: profile,
+    aliasName,
+    buCode,
+    currentPeriod,
+    dateFormat,
+    dateTimeFormat,
+  } = useProfile();
+  const { data: backend } = useBackendVersion();
   const now = useServerTime();
   const { shouldAutoOpen, markSeen } = useWhatsNew();
   const [manualOpen, setManualOpen] = useState(false);
@@ -60,6 +131,8 @@ export function StatusBar() {
   const formattedTime = now
     ? formatDate(now.toISOString(), dateTimeFormat)
     : "";
+  const periodLabel = currentPeriod ? formatPeriodLabel(currentPeriod) : null;
+  const apiVersion = backend ? toSemverPrefix(backend.version) : null;
 
   const handleOpenChange = (next: boolean) => {
     setManualOpen(next);
@@ -74,20 +147,64 @@ export function StatusBar() {
         data-slot="status-bar"
         className="bg-muted/40 text-muted-foreground text-micro flex h-6 shrink-0 items-center justify-between border-t px-3"
       >
-        <div className="flex items-center gap-1.5 truncate">
-          <User aria-hidden="true" className="h-3 w-3" />
+        <div className="flex min-w-0 items-center gap-1.5">
+          <User aria-hidden="true" className="h-3 w-3 shrink-0" />
           <span className="truncate">{displayName}</span>
+          {/* ซ่อน buCode ต่ำกว่า sm: แถบ 375px มีที่ไม่พอสำหรับทุกอย่าง และ buCode
+              ยังอยู่บนตัวสลับ BU ที่ navbar ตลอดเวลา ต่างจากรอบบัญชีที่ไม่มีที่อื่น
+              ให้ดูเลย — ถ้าปล่อยไว้ ชื่อผู้ใช้จะถูกบีบจนเหลือความกว้างศูนย์ */}
           {buCode && (
             <>
-              <span aria-hidden="true" className="opacity-50">
+              <span aria-hidden="true" className="hidden shrink-0 opacity-50 sm:inline">
                 ·
               </span>
-              <span className="truncate">{buCode}</span>
+              <span className="hidden shrink-0 sm:inline">{buCode}</span>
             </>
+          )}
+          {currentPeriod && periodLabel && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* tabIndex ทำให้ tooltip เปิดด้วยคีย์บอร์ดได้ และ aria-label พูด
+                    สถานะออกมาเป็นคำ — จุดสีอย่างเดียวสื่อกับคนตาบอดสีไม่ได้ */}
+                <span
+                  tabIndex={0}
+                  aria-label={`Inventory period ${periodLabel}, ${currentPeriod.status}`}
+                  className="focus-visible:ring-ring ml-1.5 flex shrink-0 items-center gap-1.5 rounded-sm outline-none focus-visible:ring-2"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      PERIOD_STATUS_DOT[currentPeriod.status] ??
+                        "bg-muted-foreground/50",
+                    )}
+                  />
+                  {/* ป้ายชื่อกำกับ: ตัวเลข `2026-09` ลอย ๆ ไม่บอกว่าเป็นรอบอะไร
+                      ย่อลงตามที่ว่าง — เต็มที่ md, เหลือ "Period" ที่ sm, และหายไป
+                      ต่ำกว่านั้นเพราะบนจอ 375px ป้ายนี้กินที่จนชื่อผู้ใช้เหลือ 33px
+                      (จุดสี + aria-label ยังบอกครบว่าคือรอบอะไร สถานะไหน) */}
+                  <span className="text-muted-foreground/70 hidden sm:inline">
+                    <span className="hidden md:inline">Inventory period</span>
+                    <span className="md:hidden">Period</span>
+                  </span>
+                  <span className="tabular-nums">{periodLabel}</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start">
+                <span className="tabular-nums">
+                  {formatDate(currentPeriod.start_at, dateFormat)} –{" "}
+                  {formatDate(currentPeriod.end_at, dateFormat)}
+                </span>
+                <span aria-hidden="true" className="opacity-50">
+                  {" · "}
+                </span>
+                <span className="capitalize">{currentPeriod.status}</span>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <div className="flex items-center gap-1.5">
             <Clock aria-hidden="true" className="h-3 w-3" />
             <time
@@ -98,15 +215,45 @@ export function StatusBar() {
               {formattedTime}
             </time>
           </div>
-          <button
-            type="button"
-            onClick={() => setManualOpen(true)}
-            aria-label="What's new"
-            className="hover:text-foreground flex items-center gap-1.5 transition-colors"
-          >
-            <Tag aria-hidden="true" className="h-3 w-3" />
-            <span>v{APP_VERSION}</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setManualOpen(true)}
+              aria-label="What's new"
+              className="hover:text-foreground flex items-center gap-1.5 transition-colors"
+            >
+              <Tag aria-hidden="true" className="h-3 w-3" />
+              <span>v{APP_VERSION}</span>
+            </button>
+            {backend && apiVersion && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
+                      และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
+                  <span
+                    tabIndex={0}
+                    aria-label={`Backend API version ${backend.version}, build ${backend.commit}`}
+                    className="focus-visible:ring-ring hidden items-center gap-1.5 rounded-sm outline-none focus-visible:ring-2 sm:flex"
+                  >
+                    <span aria-hidden="true" className="opacity-50">
+                      ·
+                    </span>
+                    <span className="tabular-nums">api {apiVersion}</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="end">
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+                    <dt className="text-muted-foreground">App</dt>
+                    <dd className="tabular-nums">{APP_VERSION}</dd>
+                    <dt className="text-muted-foreground">API</dt>
+                    <dd className="tabular-nums">{backend.version}</dd>
+                    <dt className="text-muted-foreground">Build</dt>
+                    <dd className="tabular-nums">{backend.commit}</dd>
+                  </dl>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </footer>
       {shouldMount && (
