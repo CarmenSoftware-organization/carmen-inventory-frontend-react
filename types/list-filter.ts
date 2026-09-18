@@ -63,6 +63,7 @@ export type FilterFieldDef =
       readonly fieldKey: string;
     })
   | (FilterFieldBase & { readonly control: "department" })
+  | (FilterFieldBase & { readonly control: "vendor" })
   | (FilterFieldBase & {
       readonly control: "requester";
       readonly fieldKey?: string;

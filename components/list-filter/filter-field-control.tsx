@@ -5,6 +5,7 @@ import { FilterAmountRange } from "@/components/filter/filter-amount-range";
 import { FilterDate } from "@/components/filter/filter-date";
 import { FilterDepartment } from "@/components/filter/filter-department";
 import { FilterRequester } from "@/components/filter/filter-requester";
+import { FilterVendor } from "@/components/filter/filter-vendor";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { FilterWorkflow } from "@/components/filter/filter-workflow";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
@@ -69,6 +70,10 @@ export function FilterFieldControl({ field, value, onChange, peer }: Props) {
           onChange={onChange}
           className="w-full"
         />
+      );
+    case "vendor":
+      return (
+        <FilterVendor value={value} onChange={onChange} className="w-full" />
       );
     case "requester":
       return (

@@ -10,6 +10,7 @@ import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
 import { useDepartment } from "@/hooks/use-department";
 import { useUser } from "@/hooks/use-user";
+import { useVendor } from "@/hooks/use-vendor";
 import { useListViews, type UseListViewsResult } from "@/hooks/use-list-views";
 import {
   encodeFilterParam,
@@ -217,12 +218,12 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
-  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
+  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ/ผู้ขาย — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
   // ทะเบียนกลาง ไม่ใช่ในตัว control
   //
   // เงื่อนไขคือ "มี chip ที่ต้องแปลงชื่อจริง ๆ" ไม่ใช่แค่ "หน้านี้มี field ชนิดนั้น" —
   // เปิดหน้าเปล่าโดยไม่มี filter ค้าง (เกือบทุกครั้งที่เข้าหน้า) จะได้ไม่ลากทะเบียน
-  // ผู้ใช้ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester
+  // ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester/FilterVendor
   // ยิงเองตอนเปิดอยู่แล้ว และพอเลือกเสร็จ chip ก็มาขอทะเบียนชุดเดียวกัน
   // (query key เดียวกัน react-query จึงใช้ของที่ cache ไว้ ไม่ยิงซ้ำ)
   const hasDepartmentField = fields.some(
@@ -231,6 +232,9 @@ export function useListFilters(
   const hasRequesterField = fields.some(
     (f) => f.control === "requester" && !!values[f.key]?.trim(),
   );
+  const hasVendorField = fields.some(
+    (f) => f.control === "vendor" && !!values[f.key]?.trim(),
+  );
   const { data: departmentData } = useDepartment(
     { perpage: -1 },
     { enabled: hasDepartmentField },
@@ -238,6 +242,10 @@ export function useListFilters(
   const { data: userData } = useUser(
     { perpage: -1 },
     { enabled: hasRequesterField },
+  );
+  const { data: vendorData } = useVendor(
+    { perpage: -1 },
+    { enabled: hasVendorField },
   );
 
   // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
@@ -278,6 +286,13 @@ export function useListFilters(
                   .map((id) => list.find((d) => d.id === id)?.name)
                   .filter((n): n is string => !!n),
               );
+            } else if (f.control === "vendor") {
+              const list = vendorData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => list.find((v) => v.id === id)?.name)
+                  .filter((n): n is string => !!n),
+              );
             } else if (f.control === "requester") {
               const list = userData?.data ?? [];
               named = firstPlusRest(
@@ -311,7 +326,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue, peer, departmentData, userData],
+    [fields, values, t, setValue, peer, departmentData, userData, vendorData],
   );
 
   const current: SavedView | null = sv
