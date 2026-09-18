@@ -54,8 +54,7 @@ export function usePoTable({
     },
     sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
-      id: "vendor_name",
-      accessorFn: (row) => row.vendor?.name,
+      accessorKey: "vendor_name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
@@ -93,17 +92,17 @@ export function usePoTable({
       },
     },
     {
-      // คนที่เปิดใบสั่งซื้อใบนี้ — ใบเดียวกันคนละคนสั่งคนละเงื่อนไข ต้องรู้ว่าจะไป
-      // ถามใครต่อ · หัวคอลัมน์ใช้คำว่า "ผู้จัดซื้อ" ตามที่หัวเอกสารเรียก ไม่ใช่
-      // "ผู้สร้าง" กลาง ๆ · ไม่เรียงลำดับเพราะ audit เป็น object ซ้อน backend
-      // เรียงให้ไม่ได้
-      id: "created_by",
-      accessorFn: (row) => row.audit?.created?.name ?? "",
+      // ผู้จัดซื้อของใบนี้ — ใบเดียวกันคนละคนสั่งคนละเงื่อนไข ต้องรู้ว่าจะไปถาม
+      // ใครต่อ · อ่าน `buyer_name` ที่ list ส่งมาตรง ๆ (เคยอ่าน audit.created.name
+      // แต่ list เลิกส่ง audit แล้ว) · ไม่เรียงลำดับเพราะเป็นชื่อ denormalize
+      // ยังไม่ยืนยันว่า backend รับ sort คีย์นี้
+      id: "buyer_name",
+      accessorFn: (row) => row.buyer_name ?? "",
       size: 180,
       header: tfl("buyer"),
       cell: ({ row }) => (
         <span className="text-muted-foreground">
-          {row.original.audit?.created?.name || "—"}
+          {row.original.buyer_name || "—"}
         </span>
       ),
       enableSorting: false,
@@ -187,7 +186,7 @@ export function usePoTable({
       ),
       cell: ({ row }) => {
         const amount = row.getValue<number>("total_amount");
-        const currency = row.original.currency?.code;
+        const currency = row.original.currency_code;
         if (amount == null) return <span></span>;
         return (
           <span className="font-medium tabular-nums">
@@ -206,6 +205,8 @@ export function usePoTable({
         cellClassName: "text-right",
       },
     },
+    // list ไม่ส่ง `audit` (EnrichAuditUsers เดินไปไม่ถึงแถวที่ซ้อนใน envelope)
+    // สองคอลัมน์นี้จึงขึ้น "—" จนกว่าหลังบ้านจะแก้ — เหมือน PR ทุกอย่าง
     ...auditColumns<PurchaseOrder>(tfl, dateTimeFormat),
   ];
 

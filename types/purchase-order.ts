@@ -173,41 +173,61 @@ export interface CreatePoDto {
 
 export interface PurchaseOrder {
   id: string;
-  role: string;
   po_no: string;
   po_status: PO_STATUS;
   po_type: string;
-  // list endpoint: display-only string, ไม่มี workflow_id คู่กัน (ยืนยันจาก payload จริง)
-  workflow_name?: string;
-  workflow_current_stage: string | null;
-  workflow_previous_stage: string | null;
-  workflow_next_stage: string | null;
-  workflow_history?: WorkflowHistoryEntry[];
-  last_action?: LastAction | null;
-  vendor: EntityRef | null;
-  delivery_date: string;
-  currency: EntityRef | null;
-  exchange_rate: number;
   description: string;
   order_date: string;
-  credit_term: EntityRef | null;
-  credit_term_value: number;
-  // list endpoint: display-only string, ไม่มี buyer_id คู่กัน (ยืนยันจาก payload จริง)
-  buyer_name?: string;
-  email: string;
-  remarks: string;
-  approval_date: string | null;
-  // detail endpoint เท่านั้น — list ไม่ส่งมาเลย (ไม่มี buyer_name คู่กันแบบ object)
-  buyer?: EntityRef | null;
-  workflow?: EntityRef | null;
-  user_action?: Record<string, unknown>;
-  info?: Record<string, unknown>;
+  delivery_date: string;
+  exchange_rate: number;
   doc_version: number;
   total_amount: number;
-  // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
-  // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
+  last_action?: LastAction | null;
+  workflow_current_stage: string | null;
+  workflow_next_stage: string | null;
+  // list endpoint (`GET /api/{bu}/purchase-orders`): แถวจริงอยู่ที่ `data[].data[]`
+  // (multi-BU envelope) — `@CollapseRefs()` กับ `@EnrichAuditUsers()` เดินจาก path
+  // '' ไปไม่ถึงแถวที่ซ้อนอยู่ บั๊กเดียวกับ PR (ดู `PurchaseRequest`) แถว list จึง
+  // ยังเป็นคู่ flat `_id`/`_name` และมี `created_at` ดิบค้างแทน `audit`
+  // ยืนยันจาก payload จริง 5/5 แถว (2026-09-18)
+  vendor_id?: string;
+  vendor_name?: string;
+  currency_id?: string;
+  currency_code?: string;
+  // display-only string ไม่มี workflow_id / buyer_id คู่กัน
+  workflow_name?: string;
+  buyer_name?: string;
+  created_at?: string;
+  created_by_id?: string | null;
+  updated_at?: string;
+  updated_by_id?: string | null;
+  deleted_at?: string | null;
+  deleted_by_id?: string | null;
+  // ยอดรวมระดับหัวเอกสารที่ list คำนวณมาให้ (detail ไม่ส่ง — คิดจาก line item)
+  total_qty?: number;
+  total_price?: number;
+  total_tax?: number;
+  net_amount?: number;
+  base_net_amount?: number;
+  base_total_amount?: number;
+  // detail endpoint (`GET /api/{bu}/purchase-orders/{id}`) เท่านั้น — object จริง
+  // ที่ผ่าน CollapseRefs/EnrichAuditUsers มาแล้ว list ไม่ส่งสักตัว
+  vendor?: EntityRef | null;
+  currency?: EntityRef | null;
+  buyer?: EntityRef | null;
+  workflow?: EntityRef | null;
+  credit_term?: EntityRef | null;
+  credit_term_value?: number;
   audit?: Audit;
-  purchase_order_detail: PurchaseOrderDetail[];
+  role?: string;
+  workflow_previous_stage?: string | null;
+  workflow_history?: WorkflowHistoryEntry[];
+  email?: string;
+  remarks?: string;
+  approval_date?: string | null;
+  user_action?: Record<string, unknown>;
+  info?: Record<string, unknown>;
+  purchase_order_detail?: PurchaseOrderDetail[];
 }
 
 // --- PO for GRN (from /purchase-order/grn endpoint) ---

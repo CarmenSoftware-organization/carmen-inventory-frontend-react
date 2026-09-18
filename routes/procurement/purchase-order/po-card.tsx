@@ -1,7 +1,6 @@
 import { useTranslations } from "use-intl";
 import {
   ListCard,
-  ListCardAuditRows,
   ListCardRow,
   ListCardStatusRow,
   ListCardSendBackRow,
@@ -25,6 +24,9 @@ interface PoCardProps {
  * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/SR/IA/PRT — ไฟล์นี้เหลือแค่ว่าข้อมูลอะไร
  * อยู่แถวไหน ครบเท่าคอลัมน์ของตาราง PO · ยอดเงินใช้ `currency_code` ของใบนั้น
  * (PO มีสกุลเงินต่อใบ ไม่ใช่สกุลของ BU เหมือนโมดูลอื่น)
+ *
+ * ไม่มีแถว credit term กับแถว audit เพราะ list endpoint เลิกส่ง `credit_term_value`
+ * และ `audit` แล้ว (ดู `PurchaseOrder`) — เคยมีทั้งสองแถว
  *
  * @param props.item - ข้อมูลใบสั่งซื้อ
  * @param props.onEdit - callback เมื่อคลิกการ์ด
@@ -65,8 +67,8 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
           />
         </ListCardRow>
       )}
-      {item.vendor?.name && (
-        <ListCardRow label={tfl("vendor")}>{item.vendor.name}</ListCardRow>
+      {item.vendor_name && (
+        <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>
       )}
       {item.delivery_date && (
         <ListCardRow label={tfl("deliveryDate")}>
@@ -75,29 +77,18 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
           </span>
         </ListCardRow>
       )}
-      {item.credit_term_value != null && (
-        <ListCardRow label={tfl("creditTerm")}>
-          <span className="tabular-nums">
-            {item.credit_term_value}{" "}
-            <span className="text-muted-foreground font-normal">
-              {tfl("creditTermDays")}
-            </span>
-          </span>
-        </ListCardRow>
-      )}
       {hasAmount && (
         <ListCardRow label={tfl("totalAmount")}>
           <span className="font-semibold tabular-nums">
             {formatCurrency(Number(amount))}
-            {item.currency?.code && (
+            {item.currency_code && (
               <span className="text-muted-foreground ml-1 font-normal">
-                {item.currency.code}
+                {item.currency_code}
               </span>
             )}
           </span>
         </ListCardRow>
       )}
-      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }
