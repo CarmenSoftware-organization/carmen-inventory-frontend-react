@@ -1,10 +1,5 @@
 type StorageKind = "session" | "local";
 
-/**
- * Resolve a Web Storage object SSR-safely. Returns undefined on the server or
- * when the API is unavailable/blocked (e.g. private mode), so callers degrade
- * gracefully instead of throwing.
- */
 function getStore(kind: StorageKind): Storage | undefined {
   try {
     // การ "เข้าถึง property" เองก็ throw SecurityError ได้ (Chrome block all

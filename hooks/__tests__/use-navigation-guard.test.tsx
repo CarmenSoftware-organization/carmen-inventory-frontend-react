@@ -14,7 +14,6 @@ function ListPage() {
   );
 }
 
-/** Mirrors a form page: dirty guard + its own toolbar Back that already asked. */
 function DetailPage() {
   const guard = useNavigationGuard(true);
   return (
@@ -123,7 +122,6 @@ describe("useNavigationGuard — teardown แล้ว arm ใหม่ทัน
   });
 });
 
-/** Mirrors the GRN wizard: still dirty, but the user chose to move on. */
 function HandoffPage() {
   const guard = useNavigationGuard(true);
   return (

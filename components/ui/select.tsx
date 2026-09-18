@@ -4,28 +4,24 @@ import { Select as SelectPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Select root (shadcn) */
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
-/** Select group ใช้จัดกลุ่ม items (shadcn) */
 function SelectGroup({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Group>) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
-/** แสดงค่าที่เลือกปัจจุบันใน trigger (shadcn) */
 function SelectValue({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Value>) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
-/** Trigger button ของ Select รองรับ size xs/sm/default */
 function SelectTrigger({
   className,
   // sm (h-8) = ความสูงมาตรฐานของ control ในแอปนี้ ตรงกับ Input /
@@ -58,7 +54,6 @@ function SelectTrigger({
   );
 }
 
-/** Content container ของ Select dropdown (shadcn) */
 function SelectContent({
   className,
   children,
@@ -96,7 +91,6 @@ function SelectContent({
   );
 }
 
-/** Label สำหรับกลุ่มตัวเลือกใน Select */
 function SelectLabel({
   className,
   ...props
@@ -110,7 +104,6 @@ function SelectLabel({
   );
 }
 
-/** ตัวเลือกแต่ละ item ของ Select (shadcn) */
 function SelectItem({
   className,
   children,
@@ -138,7 +131,6 @@ function SelectItem({
   );
 }
 
-/** เส้นคั่นระหว่างกลุ่ม items ใน Select */
 function SelectSeparator({
   className,
   ...props
@@ -152,7 +144,6 @@ function SelectSeparator({
   );
 }
 
-/** ปุ่มเลื่อน Select content ขึ้นเมื่อรายการเกินพื้นที่ */
 function SelectScrollUpButton({
   className,
   ...props
@@ -171,7 +162,6 @@ function SelectScrollUpButton({
   );
 }
 
-/** ปุ่มเลื่อน Select content ลงเมื่อรายการเกินพื้นที่ */
 function SelectScrollDownButton({
   className,
   ...props

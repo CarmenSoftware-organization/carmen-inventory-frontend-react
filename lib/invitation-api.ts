@@ -22,7 +22,6 @@ export interface InvitationPreview {
   cluster_role: string;
   business_units: InvitationBusinessUnit[];
   expires_at: string;
-  /** อีเมลแบบปิดบัง เช่น j•••@example.com — backend ไม่คืนอีเมลเต็มโดยตั้งใจ */
   email_masked: string;
   /**
    * อีเมลของคำเชิญมีบัญชีอยู่แล้วหรือยัง — `true` เสนอเข้าสู่ระบบอย่างเดียว `false` เสนอสมัครอย่างเดียว
@@ -31,17 +30,9 @@ export interface InvitationPreview {
    * โค้ดพิเศษรองรับ และเป็น `null` ได้เมื่อ backend ตอบไม่ทัน — ทั้งสองกรณีต้องแสดงสองทางเลือกเหมือนเดิม
    */
   has_account?: boolean | null;
-  /** สถานะของอีเมลจาก backend — ละเอียดกว่า has_account และใช้แทนมันได้ทุกกรณี */
   account_state?: "free" | "reclaimable" | "owned" | "conflict" | null;
 }
 
-/**
- * อ่านคำเชิญด้วย token — public ไม่ต้องล็อกอิน
- *
- * @param token - token ดิบจากลิงก์ในอีเมล
- * @returns ข้อมูลคำเชิญเท่าที่หน้าจอต้องใช้
- * @throws {ApiError} statusCode 410 เมื่อลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว
- */
 export async function getInvitation(token: string): Promise<InvitationPreview> {
   const res = await httpClient.get(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}`,
@@ -72,12 +63,6 @@ export async function acceptInvitationWithSignup(
   if (!res.ok) throw await ApiError.from(res, "Could not create the account");
 }
 
-/**
- * ยินยอมรับคำเชิญด้วยบัญชีที่ล็อกอินอยู่
- *
- * @param token - token ดิบจากลิงก์ในอีเมล
- * @throws {ApiError} statusCode 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
- */
 export async function acceptInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept`,
@@ -86,12 +71,6 @@ export async function acceptInvitation(token: string): Promise<void> {
     throw await ApiError.from(res, "Could not accept the invitation");
 }
 
-/**
- * ปฏิเสธคำเชิญ
- *
- * @param token - token ดิบจากลิงก์ในอีเมล
- * @throws {ApiError} statusCode 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
- */
 export async function declineInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
     `/api/proxy/api/invitations/${encodeURIComponent(token)}/decline`,

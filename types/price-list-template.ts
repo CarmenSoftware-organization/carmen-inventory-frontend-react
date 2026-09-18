@@ -1,7 +1,10 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 type PriceListTemplateStatus = "draft" | "active" | "inactive";
 
+// ยืนยันจาก /pricelist-templates จริง — endpoint นี้ (ต่างจากตอนถูก embed ใน
+// RFP ซึ่งมี unit object) ยังส่ง moq[] แบบ flat unit_id/unit_name อยู่ ไม่แปลง
 interface PriceListTemplateMoq {
   qty: number;
   note: string;
@@ -11,14 +14,10 @@ interface PriceListTemplateMoq {
 
 interface PriceListTemplateProduct {
   id: string;
-  product_id: string;
-  product_name: string;
-  product_local_name?: string;
-  product_code?: string;
+  product: EntityRef | null;
   code: string;
   default_order: {
-    unit_id: string;
-    unit_name: string;
+    unit: EntityRef | null;
   };
   moq: PriceListTemplateMoq[];
 }
@@ -31,7 +30,7 @@ export interface PriceListTemplate {
   status: PriceListTemplateStatus;
   validity_period: number | null;
   vendor_instructions: string | null;
-  currency: { id: string; code: string };
+  currency: EntityRef | null;
   products: PriceListTemplateProduct[];
   doc_version?: number;
   audit?: Audit;

@@ -47,7 +47,8 @@ export function usePrtTable({
       meta: { headerTitle: tfl("name") },
     },
     {
-      accessorKey: "workflow_name",
+      id: "workflow_name",
+      accessorFn: (row) => row.workflow?.name,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("workflow")} />
       ),
@@ -68,17 +69,19 @@ export function usePrtTable({
     },
     {
       // ใครเป็นคนสร้างแม่แบบ — แม่แบบถูกใช้ซ้ำข้ามแผนก คนที่เปิดมาเจอต้องรู้ว่า
-      // ของใครก่อนจะเอาไปสั่งของจริง · ไม่เรียงลำดับเพราะ backend เรียงตามชื่อ
-      // ผู้สร้างไม่ได้ (audit เป็น object ซ้อน ไม่ใช่คอลัมน์ในตาราง)
+      // ของใครก่อนจะเอาไปสั่งของจริง · เรียงได้ผ่าน `sort=created_by:asc` ซึ่ง
+      // gateway รับไปทำเอง (ดึงทั้งชุด → resolve ชื่อ → เรียง → ตัดหน้า) เพราะ
+      // ชื่อผู้สร้างไม่ใช่คอลัมน์ในตาราง — แถวที่ไม่มีชื่ออยู่ท้ายเสมอทั้งสองทิศ
       id: "created_by",
       accessorFn: (row) => row.audit?.created?.name ?? "",
-      header: tfl("createdBy"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("createdBy")} />
+      ),
       cell: ({ row }) => (
         <span className="text-muted-foreground">
           {row.original.audit?.created?.name || "—"}
         </span>
       ),
-      enableSorting: false,
       meta: {
         headerTitle: tfl("createdBy"),
         skeleton: columnSkeletons.text,

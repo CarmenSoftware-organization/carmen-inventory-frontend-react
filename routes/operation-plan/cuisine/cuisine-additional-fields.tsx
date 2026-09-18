@@ -11,7 +11,6 @@ interface CuisineAdditionalFieldsProps {
   readonly isDisabled: boolean;
 }
 
-/** Additional info — note · is_active */
 export function CuisineAdditionalFields({
   form,
   isDisabled,

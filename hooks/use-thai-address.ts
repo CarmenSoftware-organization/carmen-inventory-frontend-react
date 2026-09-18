@@ -102,15 +102,6 @@ export interface ThaiReverseLookupResult {
   subdistricts: ThaiSubDistrict[];
 }
 
-/**
- * Hook ค้นหาที่อยู่ (จังหวัด/อำเภอ/ตำบล) จากรหัสไปรษณีย์
- * โหลด static JSON ทั้ง 3 ไฟล์ parallel แล้ว lookup จาก postal code
- * จะ fetch เฉพาะเมื่อ postalCode ยาว 5 หลัก
- * @param postalCode - รหัสไปรษณีย์ 5 หลัก
- * @returns ผลลัพธ์ useQuery ของ ThaiReverseLookupResult | null
- * @example
- * const { data } = useThaiReverseLookup(form.watch("postal_code"));
- */
 export function useThaiReverseLookup(postalCode?: string) {
   return useQuery<ThaiReverseLookupResult | null>({
     queryKey: ["thai-reverse-lookup", postalCode],

@@ -8,13 +8,6 @@ import type {
   CreateChartOfAccountDto,
 } from "@/types/chart-of-accounts";
 
-/**
- * ผังบัญชีของ BU — `GET/POST/PATCH/DELETE /api/config/{bu}/chart-of-accounts`
- *
- * คนละของกับ account-code **mapping** ฝั่ง micro-business ซึ่งเป็น sub-resource
- * ของสินค้า/หมวดสินค้า (เขียนผ่าน `accountCodes: {add/update/remove}` ของ endpoint
- * นั้น ๆ) — ตัวนี้คือทะเบียนรหัสบัญชีที่ mapping ฝั่งโน้นเอาไปอ้าง
- */
 const crud = createConfigCrud<ChartOfAccount, CreateChartOfAccountDto>({
   queryKey: QUERY_KEYS.CHART_OF_ACCOUNTS,
   endpoint: API_ENDPOINTS.CHART_OF_ACCOUNTS,
@@ -22,19 +15,14 @@ const crud = createConfigCrud<ChartOfAccount, CreateChartOfAccountDto>({
   updateMethod: "PATCH",
 });
 
-/** รายการผังบัญชีแบบแบ่งหน้า */
 export const useChartOfAccount = crud.useList;
 
-/** ผังบัญชีรายตัวตาม id */
 export const useChartOfAccountById = crud.useById;
 
-/** สร้างผังบัญชีใหม่ */
 export const useCreateChartOfAccount = crud.useCreate;
 
-/** แก้ไขผังบัญชี */
 export const useUpdateChartOfAccount = crud.useUpdate;
 
-/** ลบผังบัญชี */
 export const useDeleteChartOfAccount = crud.useDelete;
 
 /**
@@ -53,7 +41,6 @@ export interface ChartOfAccountsImportResult {
     errors: number;
   };
   errors: { row: number; column?: string; message: string }[];
-  /** รหัสที่ถูก soft-delete เพราะต้นทางไม่มีแล้ว (`sync_policy.on_local_only = "delete"`) สูงสุด 100 ตัวแรก */
   deleted_codes: string[];
 }
 

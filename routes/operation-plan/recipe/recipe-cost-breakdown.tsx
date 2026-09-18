@@ -12,7 +12,6 @@ interface RecipeCostBreakdownProps {
   readonly isDisabled: boolean;
 }
 
-/** Cost breakdown — stacked bar + 3 editable rows + total */
 export function RecipeCostBreakdown({
   form,
   isDisabled,

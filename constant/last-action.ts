@@ -19,7 +19,6 @@ export const SENDBACK_STATE = "reviewed";
  */
 export const SENDBACK_FILTER_CLAUSE = `last_action|string:${SENDBACK_STATE}`;
 
-/** แถวเอกสารใด ๆ ที่มี last-action object ติดมาจาก list/detail endpoint */
 export interface RowWithLastAction {
   last_action?: LastAction | null;
 }

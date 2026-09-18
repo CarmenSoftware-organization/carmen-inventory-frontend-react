@@ -55,7 +55,7 @@ export function usePoTable({
     sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
       id: "vendor_name",
-      accessorFn: (row) => row.vendor_name,
+      accessorFn: (row) => row.vendor?.name,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
@@ -187,7 +187,7 @@ export function usePoTable({
       ),
       cell: ({ row }) => {
         const amount = row.getValue<number>("total_amount");
-        const currency = row.original.currency_code;
+        const currency = row.original.currency?.code;
         if (amount == null) return <span></span>;
         return (
           <span className="font-medium tabular-nums">

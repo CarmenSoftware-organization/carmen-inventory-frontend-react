@@ -14,26 +14,16 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface AvatarCropDialogProps {
-  /** Object URL or data URL of the source image, or null to keep the dialog closed */
   readonly src: string | null;
-  /** Suggested filename used when constructing the cropped File */
   readonly filename: string;
-  /** True while the parent is uploading the crop result — disables actions */
   readonly isSubmitting?: boolean;
   readonly onClose: () => void;
-  /** Called with the cropped image as a File when user confirms */
   readonly onConfirm: (file: File) => void;
 }
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 
-/**
- * Dialog ครอบ avatar + ปรับ zoom 1x–3x ก่อนอัปโหลด — aspect ratio 1:1
- *
- * Flow: parent ส่ง `src` (data URL จาก FileReader) → dialog เปิด → user drag/zoom →
- * confirm → render canvas → คืน File ผ่าน `onConfirm` → parent ยิง API
- */
 export function AvatarCropDialog({
   src,
   filename,
@@ -175,10 +165,6 @@ export function AvatarCropDialog({
   );
 }
 
-/**
- * Load an image source (data URL / object URL) into an HTMLImageElement so we
- * can draw it onto a canvas.
- */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -189,10 +175,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/**
- * Render the user's crop region into a Blob (PNG by default, JPEG if the
- * source was JPEG — keeps file size sensible for photos).
- */
 async function renderCroppedBlob(src: string, area: Area): Promise<Blob> {
   const image = await loadImage(src);
   const canvas = document.createElement("canvas");

@@ -57,12 +57,6 @@ const dataSourceMap: Record<string, string> = {
   "@period_list": "period",
 };
 
-/**
- * แปลงชื่อ DataSource ดิบ (เช่น @product_list) เป็นประเภท lookup
- * ที่ใช้ภายในระบบรายงาน
- * @param raw - ชื่อ DataSource ดิบจาก XML
- * @returns ชื่อ lookup ที่ map แล้ว หรือคืนค่าเดิมถ้าไม่พบ
- */
 function resolveDataSource(raw: string): string {
   if (!raw) return raw;
   const mapped = dataSourceMap[raw.toLowerCase()] ?? dataSourceMap[raw];
@@ -80,17 +74,6 @@ const isToLabel = (node: DialogNode | undefined): boolean => {
   return !node.visible || node.text === "to";
 };
 
-/**
- * แปลง XML ของ Dialog รายงานเป็นโครงสร้าง FormField สำหรับสร้าง UI
- *
- * @param xml - สตริง XML ของ Dialog ที่อธิบายพารามิเตอร์รายงาน
- * @returns อาร์เรย์ของ FormField ที่จัดกลุ่มเป็น single/range แล้ว
- * @example
- * ```ts
- * const fields = parseReportDialog(report.Dialog);
- * // fields = [{ kind: "range", label: "Date", from: {...}, to: {...} }]
- * ```
- */
 export function parseReportDialog(xml: string): FormField[] {
   const doc = new DOMParser().parseFromString(xml, "text/xml");
   const dialogEl = doc.querySelector("Dialog");

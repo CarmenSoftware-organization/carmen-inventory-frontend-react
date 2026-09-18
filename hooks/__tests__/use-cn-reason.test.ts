@@ -53,11 +53,6 @@ const mockPaginatedResponse: PaginatedResponse<CnReason> = {
   paginate: { total: 2, page: 1, perpage: 10, pages: 1 },
 };
 
-/**
- * สร้าง React wrapper สำหรับทดสอบ hook โดยให้ QueryClientProvider ใหม่ต่อการทดสอบ 1 ครั้ง
- * โดยปิด retry ของ query/mutation เพื่อไม่ให้เทสต์รอโดยไม่จำเป็น
- * @returns Wrapper component สำหรับใช้กับ renderHook
- */
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

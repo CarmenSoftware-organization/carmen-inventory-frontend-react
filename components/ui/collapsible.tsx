@@ -1,13 +1,11 @@
 import { Collapsible as CollapsiblePrimitive } from "radix-ui";
 
-/** Root ของ Collapsible — ครอบ state เปิด/ปิด */
 function Collapsible({
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
   return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />;
 }
 
-/** Trigger เปิด/ปิด Collapsible */
 function CollapsibleTrigger({
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
@@ -19,7 +17,6 @@ function CollapsibleTrigger({
   );
 }
 
-/** เนื้อหาที่จะถูกแสดง/ซ่อนของ Collapsible */
 function CollapsibleContent({
   ...props
 }: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {

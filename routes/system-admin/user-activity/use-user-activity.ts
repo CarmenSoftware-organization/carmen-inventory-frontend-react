@@ -50,11 +50,6 @@ interface ExportUserActivityArgs {
   columns: XlsxColumn<ActivityLog>[];
 }
 
-/**
- * Hook ส่งออก User Activity เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบัน
- * และ endpoint เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportUserActivity, isExporting }
- */
 export function useExportUserActivity() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

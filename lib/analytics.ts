@@ -13,14 +13,11 @@ import { getSessionItem, setSessionItem } from "@/lib/safe-storage";
 const SESSION_KEY = "carmen.analytics.session";
 const FLUSH_THRESHOLD = 20;
 const FLUSH_INTERVAL_MS = 10_000;
-/** เพดานต่อ request — payload ของ keepalive fetch จำกัด ~64KB และ backend รับ ≤100 */
 const MAX_BATCH_SIZE = 50;
-/** เพดานคิวในหน่วยความจำ — เกินแล้วทิ้งของเก่าสุด */
 const MAX_QUEUE_SIZE = 500;
 const MAX_ID_LENGTH = 100;
 const MAX_TEXT_LENGTH = 200;
 const CLICKABLE_SELECTOR = '[data-track], button, a, [role="button"]';
-/** โค้ด error ที่ requeue ได้ (ชั่วคราว/เครือข่าย) — 5xx ไม่มาทางนี้ (http-client คืน Response ปกติ → batch ถูกทิ้ง) */
 const RETRYABLE_ERROR_CODES = new Set<string>([
   ERROR_CODES.NETWORK_ERROR,
   ERROR_CODES.TIMEOUT,
@@ -46,10 +43,8 @@ let currentBuCode: string | undefined;
 let flushTimer: ReturnType<typeof setInterval> | undefined;
 let started = false;
 let flushing = false;
-/** ปิดถาวรทั้ง session เมื่อ auth ปฏิเสธ (401/403 เช่น allowlist ไม่ครบตอน deploy) — กัน dialog เด้งวนจาก telemetry เบื้องหลัง */
 let disabled = false;
 
-/** session ต่อแท็บ รอด reload (sessionStorage) — จบเมื่อปิดแท็บ */
 function getSessionId(): string {
   let id = getSessionItem<string>(SESSION_KEY);
   if (!id) {
@@ -59,7 +54,6 @@ function getSessionId(): string {
   return id;
 }
 
-/** ป้อน bu_code ปัจจุบันจาก React (AnalyticsBridge) — module นี้อ่าน TanStack Query เองไม่ได้ */
 export function setAnalyticsBuCode(buCode: string | undefined): void {
   currentBuCode = buCode;
 }
@@ -97,7 +91,6 @@ export function trackPageView(pathname: string, routePattern: string): void {
   });
 }
 
-/** identity ของ element: data-track → id → aria-label → text (ตัด 100 ตัวอักษร) */
 function deriveElementId(el: HTMLElement): string | undefined {
   const explicit = el.dataset.track;
   if (explicit) return explicit.slice(0, MAX_ID_LENGTH);
@@ -108,7 +101,6 @@ function deriveElementId(el: HTMLElement): string | undefined {
   return text ? text.slice(0, MAX_ID_LENGTH) : undefined;
 }
 
-/** เก็บเฉพาะ data-track-* extras (ไม่กวาด dataset ทั้งก้อน — กัน radix state/ข้อมูลไม่เกี่ยวปนเข้ามา) */
 function collectTrackProps(
   el: HTMLElement,
 ): Record<string, unknown> | undefined {
@@ -180,7 +172,6 @@ function handleVisibilityChange(): void {
   if (document.visibilityState === "hidden") void flush(true);
 }
 
-/** เริ่มดัก event — idempotent, เรียกจาก AnalyticsBridge ตอน mount (ใน ProtectedShell เท่านั้น) */
 export function startAnalytics(): void {
   if (disabled || started) return;
   started = true;

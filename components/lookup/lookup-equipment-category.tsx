@@ -10,7 +10,6 @@ interface LookupEquipmentCategoryProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: Set<string>;
   readonly error?: string;

@@ -7,7 +7,6 @@ import {
 
 export const SR_LIST_PATH = "/store-operation/store-requisition";
 
-/** Badge className + label for SR document-level status */
 export const SR_STATUS_CONFIG = createStatusConfig([
   "draft",
   "in_progress",
@@ -16,13 +15,6 @@ export const SR_STATUS_CONFIG = createStatusConfig([
   "voided",
 ] as const);
 
-/** Badge className + label for workflow history actions */
-/**
- * Config dot-badge สำหรับสถานะ stage ระดับรายการ (per-item) — ใช้ทั้งคอลัมน์
- * Status ในตาราง item และ timeline ประวัติ workflow ราย item
- * API ส่ง status เป็นรูปกริยา (pending/submit/approve/reject/review/issue) —
- * chip กลาง (bg-muted) + dot สี นำหน้า ตาม STATUS_DOT_CHIP (issue ใช้สี completed)
- */
 export const SR_ITEM_STATUS_CONFIG: Record<string, StatusConfigEntry> = {
   pending: {
     className: `${STATUS_DOT_CHIP} before:bg-[var(--status-pending)]`,

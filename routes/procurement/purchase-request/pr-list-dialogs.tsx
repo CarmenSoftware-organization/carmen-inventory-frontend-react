@@ -9,7 +9,7 @@ import {
   useBatchRejectPurchaseRequest,
   useBatchDeletePurchaseRequest,
 } from "./use-purchase-request";
-import type { usePurchaseRequestTable } from "./pr-table";
+import type { usePrTable } from "./use-pr-table";
 
 interface PrListDialogsProps {
   deleteTarget: PurchaseRequest | null;
@@ -25,10 +25,9 @@ interface PrListDialogsProps {
   batchDeleteOpen: boolean;
   setBatchDeleteOpen: (open: boolean) => void;
   selectedItems: PurchaseRequest[];
-  /** จำนวนแถวในหน้าปัจจุบัน — ใช้รู้ว่า batch delete เคลียร์ทั้งหน้าไหม */
   pageItemCount: number;
   clearSelection: () => void;
-  table: ReturnType<typeof usePurchaseRequestTable>;
+  table: ReturnType<typeof usePrTable>;
 }
 
 /**

@@ -15,12 +15,14 @@ import type { PurchaseRequest } from "@/types/purchase-request";
  * @param isAdmin - `useCan().isAdmin` — admin ของ BU ข้ามได้เหมือนสิทธิ์อื่นทั้งแอป
  */
 export function canDeletePr(
-  pr: Pick<PurchaseRequest, "requestor_id"> | null | undefined,
+  pr: Pick<PurchaseRequest, "requestor_id" | "requestor"> | null | undefined,
   userId: string | undefined,
   isAdmin: boolean,
 ): boolean {
   if (isAdmin) return true;
-  const requestorId = pr?.requestor_id;
+  // list row: flat requestor_id · detail row: requestor.id (object) — ไม่มีจุดไหน
+  // ส่งมาทั้งคู่พร้อมกัน อ่านให้ครบสองแบบกันเจ้าของใบหลุดจากด่านนี้
+  const requestorId = pr?.requestor_id ?? pr?.requestor?.id;
   // ไม่รู้ว่าใครเป็นเจ้าของ (payload ไม่ได้ส่ง `requestor_id` มา) → ไม่บล็อกเอง
   // ปล่อยให้ backend ตัดสิน ดีกว่าล็อกปุ่มจากข้อมูลที่ไม่มี
   if (!requestorId || !userId) return true;

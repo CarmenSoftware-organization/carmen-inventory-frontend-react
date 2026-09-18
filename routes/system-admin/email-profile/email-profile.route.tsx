@@ -119,7 +119,6 @@ export function Component() {
     );
   };
 
-  /** เปิดกล่องถามอีเมลปลายทางก่อน — ไม่ยิงทันที เพราะผู้ตั้งค่ามักเปิดกล่องจดหมายของ from ไม่ได้ */
   const handleTest = (profile: EmailProfile) => {
     setTestTarget(profile);
   };

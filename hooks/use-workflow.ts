@@ -12,36 +12,6 @@ import {
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import { CACHE_STATIC } from "@/lib/cache-config";
 
-/**
- * Hook ดึงรายการ workflow แบบแบ่งหน้า
- * ใช้ CACHE_STATIC (staleTime 30 นาที) เพราะ workflow config เปลี่ยนไม่บ่อย
- * จะไม่ fetch จนกว่า buCode จะพร้อม
- * @param params - พารามิเตอร์ค้นหา/กรอง/แบ่งหน้า
- * @param options - ตัวเลือกเปิด/ปิด query
- * @returns ผลลัพธ์ useQuery ของ PaginatedResponse<WorkflowDto>
- * @example
- * const { data } = useWorkflow({ page: 1, perpage: 20 });
- */
-export function useWorkflow(
-  params?: ParamsDto,
-  options?: { enabled?: boolean },
-) {
-  const buCode = useBuCode();
-
-  return useQuery<PaginatedResponse<WorkflowDto>>({
-    queryKey: [QUERY_KEYS.WORKFLOWS, buCode, params],
-    queryFn: async () => {
-      const url = buildUrl(API_ENDPOINTS.WORKFLOWS(buCode!), params);
-      const res = await httpClient.get(url);
-      if (!res.ok) throw new Error("Failed to fetch workflows");
-      return res.json();
-    },
-    ...CACHE_STATIC,
-    enabled: !!buCode && (options?.enabled ?? true),
-  });
-}
-
-/** ชนิดเอกสารที่มีหน้ารายการ workflow ของตัวเอง — ค่าเป็น slug ใน URL ของ endpoint */
 export const WORKFLOW_DOC_TYPES = [
   "purchase-request",
   "purchase-order",
@@ -49,6 +19,15 @@ export const WORKFLOW_DOC_TYPES = [
 ] as const;
 
 export type WorkflowDocType = (typeof WORKFLOW_DOC_TYPES)[number];
+
+// slug ของ route ≠ ค่า workflow_type ที่ backend เก็บ (ขีดกลาง vs ขีดล่าง) —
+// แปลงด้วย map ไม่ใช่ replace("-","_") ชนิดใหม่ที่ slug ไม่ตรงจะได้แดงที่ตรงนี้
+export const WORKFLOW_TYPE_BY_DOC_TYPE: Record<WorkflowDocType, WORKFLOW_TYPE> =
+  {
+    "purchase-request": WORKFLOW_TYPE.PR,
+    "purchase-order": WORKFLOW_TYPE.PO,
+    "store-requisition": WORKFLOW_TYPE.SR,
+  };
 
 /**
  * รายการ workflow ของชนิดเอกสารเดียว — `GET /config/{bu}/workflows/{slug}`
@@ -102,7 +81,6 @@ const useStoreRequisitionWorkflows = (
   options?: { enabled?: boolean },
 ) => useWorkflowsByDocType("store-requisition", params, options);
 
-/** slug → hook ของชนิดนั้น ใช้เลือก list hook ตามหน้าที่เปิดอยู่ */
 export const WORKFLOW_LIST_HOOKS: Record<
   WorkflowDocType,
   typeof usePurchaseRequestWorkflows

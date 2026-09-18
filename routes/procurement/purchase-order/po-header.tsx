@@ -22,10 +22,9 @@ import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { PoSendEmailDialog } from "./po-send-email-dialog";
 
-/** สถานะ PO ที่ส่งอีเมลให้ผู้ขายได้ — backend กันซ้ำที่ 422 อยู่แล้ว นี่คือชั้นที่สอง
- * (ซ่อนปุ่มไปเลย ไม่ใช่ปล่อยให้กดแล้วเด้ง error) module scope กันสร้าง array ใหม่ทุก render */
 const SEND_EMAIL_STATUSES: readonly PO_STATUS[] = [
-  PO_STATUS.SENT,
+  PO_STATUS.APPROVED,
+  PO_STATUS.SENT_OR_PRINT,
   PO_STATUS.PARTIAL,
   PO_STATUS.CLOSED,
   PO_STATUS.COMPLETED,
@@ -47,9 +46,7 @@ interface PoHeaderProps {
   readonly onShowClose: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
-  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 
@@ -128,7 +125,9 @@ export function PoHeader({
     <>
       {purchaseOrder && (
         <>
-          {canClose && purchaseOrder.po_status === PO_STATUS.SENT && (
+          {canClose &&
+            (purchaseOrder.po_status === PO_STATUS.APPROVED ||
+              purchaseOrder.po_status === PO_STATUS.SENT_OR_PRINT) && (
             <Button
               size="sm"
               variant="outline"

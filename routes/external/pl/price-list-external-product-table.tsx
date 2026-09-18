@@ -45,7 +45,6 @@ import type {
   PricelistExternalTaxProfileOption,
 } from "@/types/price-list-external";
 
-/** จัดรูปเงิน 2 ตำแหน่ง + คั่นหลักพัน (รองรับ 00,000.00 ตามที่ column กว้างพอ) */
 const fmtMoney = (n: number) =>
   n.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -63,7 +62,6 @@ interface PriceListExternalProductTableProps {
   taxProfiles?: PricelistExternalTaxProfileOption[];
 }
 
-/** PWT (ก่อนภาษี) ของ row — computed สดจาก price (gross) ÷ (1 + rate) */
 function RowPWT({
   form,
   index,
@@ -87,7 +85,6 @@ function RowPWT({
   );
 }
 
-/** Tax profile select ของ row — sync name + rate เมื่อเลือก */
 function TaxProfileCell({
   form,
   index,
@@ -133,7 +130,6 @@ function TaxProfileCell({
   );
 }
 
-/** Tax amount ของ row = price(gross) − pwt = ส่วนต่างภาษี · computed สดจาก rate */
 function RowTaxAmount({
   form,
   index,
@@ -158,24 +154,6 @@ function RowTaxAmount({
   );
 }
 
-/**
- * ตารางแสดงและแก้ไขรายการสินค้าใน price list external
- * รองรับโหมด view (แสดงแบบ group ตาม product) และโหมด edit (แก้ไขราคา/MOQ/tax พร้อม expand ดู MOQ tiers)
- *
- * @param props - form instance, โหมด view, callback สำหรับ save/submit และสถานะ loading
- * @returns element ของตาราง price list
- * @example
- * ```tsx
- * <PriceListExternalProductTable
- *   form={form}
- *   isViewMode={false}
- *   onSave={handleSave}
- *   onSubmit={handleSubmit}
- *   isSaving={saving}
- *   isSubmitting={submitting}
- * />
- * ```
- */
 export default function PriceListExternalProductTable({
   form,
   isViewMode = false,

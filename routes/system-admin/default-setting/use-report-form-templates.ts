@@ -6,7 +6,6 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_STATIC } from "@/lib/cache-config";
 import type { ReportFormTemplate } from "@/types/report-form-template";
 
-/** option ของ dropdown เลือกแบบฟอร์ม — value = template id, label = ชื่อ template */
 export type ReportFormOption = { value: string; label: string };
 
 /**

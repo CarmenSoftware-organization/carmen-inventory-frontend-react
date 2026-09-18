@@ -18,12 +18,10 @@ import {
   type StatusConfigEntry,
 } from "@/constant/status-config";
 
-/** ประวัติ workflow ระดับรายการ 1 ก้าว — โครงเดียวกันทั้ง PR / PO / SR */
 export interface ItemHistoryEntry {
   at: string;
   seq: number;
   name: string;
-  /** name ไม่บังคับ — บาง entry หลังบ้านส่งมาแค่ id (เช่นประวัติของ PO) */
   user: { id: string; name?: string };
   status: string;
   message?: string | null;
@@ -32,9 +30,7 @@ export interface ItemHistoryEntry {
 interface ItemHistorySheetProps {
   readonly history: ItemHistoryEntry[];
   readonly productName?: string;
-  /** map สถานะ → สี/ป้ายของโมดูลนั้น (เช่น `ITEM_HISTORY_STATUS_CONFIG`) */
   readonly statusConfig: Record<string, StatusConfigEntry>;
-  /** ป้ายปุ่ม + หัว sheet (เช่น `t("tabWorkflowHistory")`) */
   readonly label: string;
 }
 

@@ -1,4 +1,3 @@
-/** คู่รหัส-ชื่อ ที่ backend ส่งมาให้ทุกคอลัมน์อ้างอิงของผังการผูกบัญชี */
 export type CodeName = { code: string; name: string };
 
 /**
@@ -15,9 +14,7 @@ export interface AccountMappingRow {
   category: CodeName;
   sub_category: CodeName;
   item_group: CodeName;
-  /** (A1) แผนกที่รับผิดชอบรายการนี้ */
   department: CodeName;
-  /** (A2) รหัสบัญชีปลายทางที่ผูกไว้ */
   account_code: CodeName;
   is_mapped: boolean;
   mapping_type: "AP" | "GL";

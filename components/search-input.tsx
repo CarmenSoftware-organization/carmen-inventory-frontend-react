@@ -14,7 +14,6 @@ interface Props {
   readonly buttonClassName?: string;
   readonly inputClassName?: string;
   readonly onInputChange?: (value: string) => void;
-  /** ข้อความในช่องว่าง — ไม่ส่ง = "ค้นหา" กลาง ๆ ของ common */
   readonly placeholder?: string;
 }
 

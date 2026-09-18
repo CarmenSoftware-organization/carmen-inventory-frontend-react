@@ -13,15 +13,12 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface EqImageChange {
-  /** Newly selected file to upload (replaces existing image), or null. */
   file: File | null;
-  /** Whether the existing server image is marked for removal. */
   removed: boolean;
 }
 
 interface EqImageFieldProps {
   readonly disabled?: boolean;
-  /** Existing image URL from GET (presigned). Shown until replaced or removed. */
   readonly serverImageUrl?: string | null;
   readonly file: File | null;
   readonly removed: boolean;

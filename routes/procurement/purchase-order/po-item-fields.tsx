@@ -33,14 +33,10 @@ import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
 interface PoItemFieldsProps {
   form: UseFormReturn<PoFormValues>;
-  /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand row ที่ location error */
   disabled: boolean;
-  /** disabled แยกสำหรับ location editor — ปกติเท่ากับ `disabled` แต่ PO
-   *  จาก price list จะล็อก field อื่นหมดแล้วปล่อยให้แก้ location ได้ */
   locationsDisabled?: boolean;
   role?: string;
   poStatus?: string;
-  /** อยู่โหมดแก้ไขไหม — checkbox ตัดสินรายการโผล่เฉพาะตอนแก้ได้ */
   isEditMode?: boolean;
   onApprove?: () => void;
   onReject?: () => void;
@@ -175,7 +171,9 @@ export function PoItemFields({
   const canClose =
     !!onClose &&
     !!poStatus &&
-    (poStatus === PO_STATUS.SENT || poStatus === PO_STATUS.PARTIAL);
+    (poStatus === PO_STATUS.APPROVED ||
+      poStatus === PO_STATUS.SENT_OR_PRINT ||
+      poStatus === PO_STATUS.PARTIAL);
 
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedIndices = selectedRows.map((r) => r.index);
@@ -377,6 +375,10 @@ export function PoItemFields({
           tableLayout={{
             rowClamp: false,
             checkbox: showApproveCheckbox,
+            // โหมดอ่านชิดบน — บางเซลล์มีบรรทัดรอง (รหัสคลัง · ชื่อท้องถิ่น ·
+            // เปอร์เซ็นต์ใต้ยอดเงิน) บางเซลล์ไม่มี กึ่งกลางแล้วเซลล์บรรทัดเดียว
+            // จะลอยอยู่ระหว่างสองบรรทัดของเพื่อนบ้าน
+            cellAlign: disabled || readOnly ? "top" : "middle",
             // table กว้างเกิน container → scroll แนวนอน (เหมือน PR): width =
             // getTotalSize(), column กว้างตาม size px ที่กำหนด
             columnsResizable: true,

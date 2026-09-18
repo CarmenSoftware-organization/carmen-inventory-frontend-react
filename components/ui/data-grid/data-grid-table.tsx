@@ -39,21 +39,6 @@ const bodyCellSpacingVariants = cva("", {
   },
 });
 
-/**
- * คำนวณ inline style สำหรับ pinned column
- *
- * คืน CSSProperties ที่ตั้งค่า `position: sticky` และ `left` หรือ `right`
- * ตามที่ column ถูก pin ซ้าย/ขวา รวมถึง `width` และ `zIndex` ใช้ใน
- * `DataGridTableHeadRowCell` และ `DataGridTableBodyRowCell`
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param column - TanStack Table column instance
- * @returns CSSProperties สำหรับ pinned (หรือ relative) column
- * @example
- * ```ts
- * const style = getPinningStyles(column);
- * ```
- */
 function getPinningStyles<TData>(column: Column<TData>): CSSProperties {
   const isPinned = column.getIsPinned();
 
@@ -66,21 +51,6 @@ function getPinningStyles<TData>(column: Column<TData>): CSSProperties {
   };
 }
 
-/**
- * Base `<table>` element ของ DataGrid
- *
- * Render `<table>` พื้นฐานที่อ่าน `tableLayout` จาก context ตั้งค่า
- * `table-auto` หรือ `table-fixed`, รองรับ resize ผ่าน `table.getTotalSize()`
- * และใช้ border-separate เมื่อไม่เปิด columnsDraggable
- *
- * @param props - props ของ component
- * @param props.children - thead/tbody ภายใน
- * @returns JSX element ของ `<table>`
- * @example
- * ```tsx
- * <DataGridTableBase><DataGridTableHead/>...</DataGridTableBase>
- * ```
- */
 function DataGridTableBase({ children }: { children: ReactNode }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
@@ -107,20 +77,6 @@ function DataGridTableBase({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * `<thead>` ของ DataGrid
- *
- * Render thead พร้อม class จาก `tableClassNames.header` และเพิ่ม
- * `headerSticky` class เมื่อเปิดใน `tableLayout`
- *
- * @param props - props ของ component
- * @param props.children - rows ภายใน thead
- * @returns JSX element ของ `<thead>`
- * @example
- * ```tsx
- * <DataGridTableHead>{headerRows}</DataGridTableHead>
- * ```
- */
 function DataGridTableHead({ children }: { children: ReactNode }) {
   const { props } = useDataGrid();
 
@@ -136,22 +92,6 @@ function DataGridTableHead({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Header row (`<tr>`) ของตาราง
- *
- * Render tr ภายใน thead รองรับ border, stripped และ backdrop ตามค่า
- * `tableLayout` พร้อม merge `tableClassNames.headerRow`
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.children - header cells
- * @param props.headerGroup - HeaderGroup จาก TanStack Table
- * @returns JSX element ของ `<tr>` header
- * @example
- * ```tsx
- * <DataGridTableHeadRow headerGroup={hg}>{cells}</DataGridTableHeadRow>
- * ```
- */
 function DataGridTableHeadRow<TData>({
   children,
   headerGroup,
@@ -179,26 +119,6 @@ function DataGridTableHeadRow<TData>({
   );
 }
 
-/**
- * Header cell (`<th>`) ของ DataGrid
- *
- * Render th ที่รองรับ column pinning (sticky), column resize, width แบบ %
- * หรือ fixed, และ dnd ref/style จาก `useSortable` ใช้ class จาก
- * `meta.headerClassName` และ edge cell class
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.children - เนื้อหาภายใน cell
- * @param props.header - Header instance ของ TanStack Table
- * @param props.dndRef - ref จาก `useSortable` (optional)
- * @param props.dndStyle - inline style จาก dnd transform (optional)
- * @param props.widthPercent - กำหนดความกว้างเป็น % ของ table
- * @returns JSX element ของ `<th>`
- * @example
- * ```tsx
- * <DataGridTableHeadRowCell header={header}>{content}</DataGridTableHeadRowCell>
- * ```
- */
 function DataGridTableHeadRowCell<TData>({
   children,
   header,
@@ -269,21 +189,6 @@ function DataGridTableHeadRowCell<TData>({
   );
 }
 
-/**
- * Resize handle ของ header cell
- *
- * Render `<div>` แถบ resize ด้านขวาของ header cell ใช้
- * `header.getResizeHandler()` รองรับ mouse/touch และ double-click reset size
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.header - Header instance ของ TanStack Table
- * @returns JSX element ของ resize handle
- * @example
- * ```tsx
- * <DataGridTableHeadRowCellResize header={header} />
- * ```
- */
 function DataGridTableHeadRowCellResize<TData>({
   header,
 }: {
@@ -304,36 +209,7 @@ function DataGridTableHeadRowCellResize<TData>({
   );
 }
 
-/**
- * Spacer tbody ระหว่าง head และ body
- *
- * Render `<tbody>` สูง 2 (h-2) เพื่อเพิ่มระยะห่างเมื่อเปิด stripped หรือ
- * ไม่ใช้ rowBorder ใช้ `aria-hidden` ไม่ให้ screen reader อ่าน
- *
- * @returns JSX element ของ spacer tbody
- * @example
- * ```tsx
- * <DataGridTableRowSpacer />
- * ```
- */
-function DataGridTableRowSpacer() {
-  return <tbody aria-hidden="true" className="h-2"></tbody>;
-}
 
-/**
- * `<tbody>` ของ DataGrid
- *
- * Render tbody พร้อม styling สำหรับ rounded rows (เมื่อเปิด `rowRounded`)
- * และ merge `tableClassNames.body` ปิด border-bottom ของแถวสุดท้าย
- *
- * @param props - props ของ component
- * @param props.children - rows ภายใน
- * @returns JSX element ของ `<tbody>`
- * @example
- * ```tsx
- * <DataGridTableBody>{rows}</DataGridTableBody>
- * ```
- */
 function DataGridTableBody({ children }: { children: ReactNode }) {
   const { props } = useDataGrid();
 
@@ -353,19 +229,28 @@ function DataGridTableBody({ children }: { children: ReactNode }) {
 }
 
 /**
- * Skeleton row (`<tr>`) แสดงขณะ loading
+ * สีสลับแถวคิดจาก **ลำดับของข้อมูล** ไม่ใช่ `:nth-child(odd)` ของ DOM
  *
- * Render tr ที่มี styling เหมือน data row จริงเพื่อ avoid layout shift
- * รองรับ row border/stripped/cell border ตาม `tableLayout`
+ * ตารางที่มี footer row (หมายเหตุรายแถว) แทรกระหว่างแถวข้อมูล ทำให้ลำดับใน DOM
+ * เป็น data-footer-data-footer… แถวข้อมูลจึงตกอยู่ตำแหน่งคี่หมดทุกแถว = ไม่สลับสี
+ * เลยสักแถว · คิดจาก `row.index` แล้ว footer หยิบสีของแถวแม่ไปใช้ได้ด้วย แถวข้อมูล
+ * กับแถวย่อยของมันจึงเป็นก้อนสีเดียวกัน
  *
- * @param props - props ของ component
- * @param props.children - skeleton cells
- * @returns JSX element ของ `<tr>` skeleton
- * @example
- * ```tsx
- * <DataGridTableBodyRowSkeleton>{skeletonCells}</DataGridTableBodyRowSkeleton>
- * ```
+ * ใช้ token `--accent` ไม่ใช่ `--muted` — บนพื้น card ของโหมดมืด สี muted ห่างจาก
+ * card แค่ขั้นเดียว มองแทบไม่ออก ส่วน accent เป็น "พื้นผิวที่สว่างที่สุดของโหมดมืด /
+ * เข้มที่สุดของโหมดสว่าง" (ดู docs/DESIGN.md) จึงห่างพอในทั้งสองธีม
+ *
+ * โหมดสว่างลดความทึบเหลือ 65% — พื้น card เป็นขาวล้วน แถบ accent เต็มค่าเลยหนัก
+ * เกินไปจนแย่งความสนใจไปจากตัวข้อมูล ส่วนโหมดมืดใช้เต็มค่าเพราะพื้นเข้มกลืนอยู่แล้ว
  */
+function stripeClass(index: number, stripped?: boolean) {
+  // `DataGrid` เติม default ให้แล้ว (เปิด) — ตารางไหนไม่เอาส่ง `stripped: false`
+  if (!stripped) return undefined;
+  return index % 2 === 0
+    ? "bg-accent/65 hover:bg-accent/65 dark:bg-accent dark:hover:bg-accent"
+    : "hover:bg-transparent";
+}
+
 function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, props } = useDataGrid();
@@ -379,8 +264,8 @@ function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
           props.tableLayout?.rowBorder &&
           "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
         props.tableLayout?.cellBorder && "*:last:border-e-0",
-        props.tableLayout?.stripped &&
-          "odd:bg-muted/30 odd:hover:bg-muted/50 hover:bg-transparent",
+        props.tableLayout?.stripped !== false &&
+          "odd:bg-accent/65 dark:odd:bg-accent hover:bg-transparent",
         table.options.enableRowSelection && "*:first:relative",
         props.tableClassNames?.bodyRow,
       )}
@@ -390,25 +275,6 @@ function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Skeleton cell (`<td>`) ของแถว skeleton
- *
- * Render td placeholder สำหรับแต่ละ column ใช้ class จาก
- * `meta.cellClassName` และ width ตาม column ใช้ภายใน
- * `DataGridTableBodyRowSkeleton`
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.children - skeleton element
- * @param props.column - Column instance ของ TanStack Table
- * @returns JSX element ของ `<td>` skeleton
- * @example
- * ```tsx
- * <DataGridTableBodyRowSkeletonCell column={col}>
- *   <Skeleton />
- * </DataGridTableBodyRowSkeletonCell>
- * ```
- */
 function DataGridTableBodyRowSkeletonCell<TData>({
   children,
   column,
@@ -430,7 +296,7 @@ function DataGridTableBodyRowSkeletonCell<TData>({
           : undefined
       }
       className={cn(
-        "align-middle",
+        props.tableLayout?.cellAlign === "top" ? "align-top" : "align-middle",
         bodyCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -451,25 +317,6 @@ function DataGridTableBodyRowSkeletonCell<TData>({
   );
 }
 
-/**
- * Body row (`<tr>`) ของ DataGrid
- *
- * Render data row พร้อม row selection highlight, onRowClick handler,
- * keyboard activation (Enter/Space) เมื่อมี onRowClick, focus ring,
- * stripped/border styling และ dnd ref/style จาก useSortable
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.children - body cells
- * @param props.row - Row instance ของ TanStack Table
- * @param props.dndRef - ref จาก `useSortable` (optional)
- * @param props.dndStyle - inline style จาก dnd transform (optional)
- * @returns JSX element ของ `<tr>` data row
- * @example
- * ```tsx
- * <DataGridTableBodyRow row={row}>{cells}</DataGridTableBodyRow>
- * ```
- */
 function DataGridTableBodyRow<TData>({
   children,
   row,
@@ -514,8 +361,7 @@ function DataGridTableBodyRow<TData>({
           props.tableLayout?.rowBorder &&
           "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
         props.tableLayout?.cellBorder && "*:last:border-e-0",
-        props.tableLayout?.stripped &&
-          "odd:bg-muted/30 odd:hover:bg-muted/50 hover:bg-transparent",
+        stripeClass(row.index, props.tableLayout?.stripped),
         table.options.enableRowSelection && "*:first:relative",
         props.tableClassNames?.bodyRow,
       )}
@@ -525,22 +371,6 @@ function DataGridTableBodyRow<TData>({
   );
 }
 
-/**
- * Expanded content row ของ DataGrid
- *
- * Render `<tr>` ที่อยู่ใต้ data row เมื่อ row อยู่ในสถานะ expanded ใช้
- * `meta.expandedContent` ของ column แรกที่กำหนดไว้ ส่งข้อมูล `row.original`
- * เข้าฟังก์ชัน
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.row - Row instance ของ TanStack Table
- * @returns JSX element ของ expanded row
- * @example
- * ```tsx
- * {row.getIsExpanded() && <DataGridTableBodyRowExpandded row={row} />}
- * ```
- */
 function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
@@ -562,6 +392,8 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
     <tr
       className={cn(
         props.tableLayout?.rowBorder && "[&:not(:last-child)>td]:border-b",
+        // สีเดียวกับแถวแม่ — แถวที่กางออกคือรายละเอียดของรายการเดียวกัน
+        stripeClass(row.index, props.tableLayout?.stripped),
       )}
     >
       {start > 0 && (
@@ -580,22 +412,6 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
   );
 }
 
-/**
- * Footer row ใต้ data row
- *
- * Render `<tr>` footer ใต้ data row โดยอ่าน column ที่มี
- * `meta.footerContent` และจัด colSpan ตาม `meta.footerColSpan` คำนวณ
- * empty td ก่อน/หลังให้พอดีกับ visible columns ทั้งหมด
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.row - Row instance ของ TanStack Table
- * @returns JSX element ของ footer row หรือ null
- * @example
- * ```tsx
- * <DataGridTableBodyRowFooter row={row} />
- * ```
- */
 function DataGridTableBodyRowFooter<TData>({ row }: { row: Row<TData> }) {
   const { props } = useDataGrid();
 
@@ -619,6 +435,8 @@ function DataGridTableBodyRowFooter<TData>({ row }: { row: Row<TData> }) {
         // ที่ว่างของแถบเลื่อน ดูเป็นของเสียมากกว่าของตั้งใจ (PR เป็นหน้าเดียวที่
         // ใช้ footerContent จึงเป็นหน้าเดียวที่มีเส้นนี้ ต่างจาก PO/GRN/CN)
         "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
+        // สีเดียวกับแถวแม่ — แถวหมายเหตุเป็นส่วนหนึ่งของรายการเดียวกัน ไม่ใช่แถวใหม่
+        stripeClass(row.index, props.tableLayout?.stripped),
         props.tableClassNames?.bodyRow,
       )}
     >
@@ -631,24 +449,6 @@ function DataGridTableBodyRowFooter<TData>({ row }: { row: Row<TData> }) {
   );
 }
 
-/**
- * Body cell (`<td>`) ของ DataGrid
- *
- * Render td รองรับ column pinning (sticky), column resize, edge cell class
- * และ dnd ref/style จาก useSortable ใช้ class จาก `meta.cellClassName`
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.children - เนื้อหาภายใน cell
- * @param props.cell - Cell instance ของ TanStack Table
- * @param props.dndRef - ref จาก `useSortable` (optional)
- * @param props.dndStyle - inline style จาก dnd transform (optional)
- * @returns JSX element ของ `<td>`
- * @example
- * ```tsx
- * <DataGridTableBodyRowCell cell={cell}>{content}</DataGridTableBodyRowCell>
- * ```
- */
 function DataGridTableBodyRowCell<TData>({
   children,
   cell,
@@ -691,17 +491,24 @@ function DataGridTableBodyRowCell<TData>({
         isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
       }
       className={cn(
-        "align-middle",
+        props.tableLayout?.cellAlign === "top" ? "align-top" : "align-middle",
         // ทุกแถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ แม้เนื้อหามีบรรทัดเดียว — `h` บน
         // table-cell ทำตัวเป็นความสูงขั้นต่ำ (`2lh` อิง line-height จริงของเซลล์
         // ไม่ผูกกับ font size ที่แต่ละหน้าตั้งไว้) จังหวะแถวจะได้ไม่กระโดดตามความยาวชื่อ
         //
         // ต้องบวก padding แนวตั้งเข้าไปเอง เพราะ box-sizing เป็น border-box ทั้งโปรเจกต์
         // `h-[2lh]` เปล่า ๆ จึงเหลือที่ให้ข้อความแค่ 2lh ลบ padding = ไม่ถึงสองบรรทัด
+        //
+        // เผื่อไว้เกิน 2lh อีกนิด (+0.25rem) เพราะ `lh` คิดจาก line-height ของ **เซลล์**
+        // แต่บรรทัดจริงในเซลล์ไม่ได้ใช้ค่านั้นเสมอ — บรรทัดรองเป็นฟอนต์เล็กกว่า และ
+        // ข้อความไทยต้องการกล่องสูงกว่าเพราะซ้อนได้ถึงสามชั้น (สระบน + วรรณยุกต์)
+        // พอรวมกันเกิน 2lh เมื่อไร `overflow:hidden` ของ line-clamp จะเฉือนทั้งหัว
+        // และท้าย (align-middle ดันเนื้อหาล้นออกสองด้านเท่า ๆ กัน) — เจอจริงที่ชื่อ
+        // สินค้าไทยอย่าง "ลูกชิ้นหมู" วรรณยุกต์หายทั้งคอลัมน์
         props.tableLayout?.rowClamp &&
           (props.tableLayout?.dense
-            ? "h-[calc(2lh+0.25rem)]"
-            : "h-[calc(2lh+0.5rem)]"),
+            ? "h-[calc(2lh+0.5rem)]"
+            : "h-[calc(2lh+0.75rem)]"),
         bodyCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -736,7 +543,12 @@ function DataGridTableBodyRowCell<TData>({
         // ยกเว้นลูกที่เป็น component ของ design system (`data-slot`) — badge/checkbox
         // พวกนี้เป็น inline-flex การเปลี่ยนเป็น -webkit-box ทำให้ของข้างในหาย
         // (จุดสีของ StatusDotBadge หายไปทั้งคอลัมน์มาแล้ว) และมันสั้นอยู่แล้วไม่ต้องตัด
-        <div className="line-clamp-2 [&>*]:max-w-full [&>*:not([data-slot])]:line-clamp-2">
+        // ps-px + -ms-px ขยายกล่อง clip ไปทางซ้าย 1px โดยตำแหน่งข้อความไม่ขยับ
+        // (margin ลบหักล้าง padding พอดี) — `line-clamp` คือ overflow:hidden ที่
+        // ขอบกล่องตรงกับจุดเริ่มข้อความพอดี ส่วนสระหน้าไทย (ไ โ ใ) มี left side
+        // bearing ยื่นซ้ายเกิน advance width หัวสระเลยโดนเฉือนทุกเซลล์ที่ขึ้นต้น
+        // ด้วยสระพวกนี้ · padding ของ `<td>` ช่วยไม่ได้ เพราะ clip เกิดที่ div นี้
+        <div className="line-clamp-2 ps-px -ms-px [&>*]:max-w-full [&>*:not([data-slot])]:ps-px [&>*:not([data-slot])]:-ms-px [&>*:not([data-slot])]:line-clamp-2">
           {children}
         </div>
       ) : (
@@ -746,18 +558,6 @@ function DataGridTableBodyRowCell<TData>({
   );
 }
 
-/**
- * Empty state row ของ DataGrid
- *
- * Render `<tr>` ที่มี td colSpan ครอบทุก column แสดง `props.emptyMessage`
- * จาก context หรือ `EmptyComponent` เมื่อไม่กำหนด ใช้เมื่อ data ว่างเปล่า
- *
- * @returns JSX element ของ empty row
- * @example
- * ```tsx
- * <DataGridTableEmpty />
- * ```
- */
 function DataGridTableEmpty() {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, props } = useDataGrid();
@@ -775,18 +575,6 @@ function DataGridTableEmpty() {
   );
 }
 
-/**
- * Overlay loader ของ DataGrid
- *
- * Render overlay กึ่งกลางตารางที่มี spinner + `props.loadingMessage`
- * (default "Loading...") ใช้สำหรับ loading mode "spinner"
- *
- * @returns JSX element ของ loader overlay
- * @example
- * ```tsx
- * <DataGridTableLoader />
- * ```
- */
 function DataGridTableLoader() {
   const { props } = useDataGrid();
 
@@ -800,22 +588,6 @@ function DataGridTableLoader() {
   );
 }
 
-/**
- * Checkbox เลือกแถวเดียว
- *
- * Render checkbox พร้อม accent bar สีดำซ้ายแสดงเมื่อ row ถูก select
- * เรียก `row.toggleSelected` เมื่อกด รองรับ disabled
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.row - Row instance ของ TanStack Table
- * @param props.disabled - disable checkbox
- * @returns JSX element ของ checkbox + accent bar
- * @example
- * ```tsx
- * <DataGridTableRowSelect row={row} />
- * ```
- */
 function DataGridTableRowSelect<TData>({
   row,
   disabled,
@@ -841,19 +613,6 @@ function DataGridTableRowSelect<TData>({
   );
 }
 
-/**
- * Checkbox เลือก/ยกเลิกทุกแถวในหน้า
- *
- * Render header checkbox ที่แสดง state indeterminate เมื่อบาง row ถูกเลือก
- * เรียก `table.toggleAllPageRowsSelected` เมื่อกด disable เมื่อ loading หรือ
- * recordCount = 0
- *
- * @returns JSX element ของ select-all checkbox
- * @example
- * ```tsx
- * <DataGridTableRowSelectAll />
- * ```
- */
 function DataGridTableRowSelectAll() {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, recordCount, isLoading } = useDataGrid();
@@ -874,23 +633,6 @@ function DataGridTableRowSelectAll() {
   );
 }
 
-/**
- * Main DataGrid table component
- *
- * Render `<table>` พร้อม head + body ครบ ใช้ `useDataGrid` เพื่ออ่าน table
- * instance จัดการ skeleton/spinner ระหว่าง loading, empty state เมื่อ
- * ไม่มีข้อมูล และ expanded/footer rows ให้ทุก data row กรอง column
- * "select" ออกเมื่อ `tableLayout.checkbox = false`
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @returns JSX element ของ `<table>` พร้อม content ทั้งหมด
- * @example
- * ```tsx
- * <DataGrid table={table} recordCount={total}>
- *   <DataGridContainer><DataGridTable /></DataGridContainer>
- * </DataGrid>
- * ```
- */
 function DataGridTable<TData>() {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, isLoading, props } = useDataGrid();
@@ -947,10 +689,6 @@ function DataGridTable<TData>() {
           );
         })}
       </DataGridTableHead>
-
-      {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && (
-        <DataGridTableRowSpacer />
-      )}
 
       <DataGridTableBody>
         {isLoading &&
@@ -1037,5 +775,4 @@ export {
   DataGridTableLoader,
   DataGridTableRowSelect,
   DataGridTableRowSelectAll,
-  DataGridTableRowSpacer,
 };

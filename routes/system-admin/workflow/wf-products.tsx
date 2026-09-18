@@ -98,7 +98,6 @@ interface WfProductsProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
   readonly allProducts: Product[];
   readonly isDisabled: boolean;
-  /** โหมดอ่าน (ยังไม่กด Edit) — ต่างจาก `isDisabled` ที่ true ตอนกำลังบันทึกด้วย */
   readonly readOnly: boolean;
 }
 

@@ -2,12 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { Equipment } from "@/types/equipment";
 
-/**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์มอุปกรณ์พร้อมข้อความแปลภาษา
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema object
- */
 export function createEquipmentSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     code: z.string().min(1, tv("required", { field: tf("code") })),
@@ -48,14 +42,6 @@ export type EquipmentFormValues = z.infer<
   ReturnType<typeof createEquipmentSchema>
 >;
 
-/**
- * แปลงข้อมูลอุปกรณ์เป็นค่าเริ่มต้นของฟอร์ม
- * @param equipment - ข้อมูลอุปกรณ์ที่มีอยู่ (ถ้ามี)
- * @returns ค่าเริ่มต้นของฟอร์มอุปกรณ์
- * @example
- * const defaults = getDefaultValues(equipment);
- * form.reset(defaults);
- */
 export function getDefaultValues(equipment?: Equipment): EquipmentFormValues {
   if (equipment) {
     return {

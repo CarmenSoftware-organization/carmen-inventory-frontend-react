@@ -10,18 +10,6 @@ interface PoCardListProps {
   readonly onDelete: (item: PurchaseOrder) => void;
 }
 
-/**
- * รายการการ์ด PO แบบ grid สำหรับ mobile/card view
- * แสดง skeleton ระหว่าง loading และ EmptyComponent เมื่อไม่มีข้อมูล
- *
- * @param props - props ของ card list
- * @param props.items - รายการ PurchaseOrder ที่จะแสดง
- * @param props.isLoading - สถานะกำลังโหลด
- * @param props.onEdit - callback เมื่อกดแก้ไขการ์ด
- * @returns React element ของ grid การ์ด PO
- * @example
- * <PoCardList items={purchaseOrders} isLoading={isLoading} onEdit={(po) => router.push(`/procurement/purchase-order/${po.id}`)} />
- */
 export default function PoCardList({
   items,
   isLoading,

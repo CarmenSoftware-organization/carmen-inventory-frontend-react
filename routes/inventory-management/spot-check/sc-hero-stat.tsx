@@ -13,11 +13,6 @@ interface ScHeroStatProps {
   readonly labels: ScHeroStatLabels;
 }
 
-/**
- * Hero stat card สำหรับ Spot Check form
- * แสดงจำนวนสินค้าที่ต้องตรวจ + วิธีการ + location
- * (เฉพาะ desktop, ซ่อนใน mobile)
- */
 export function ScHeroStat({
   count,
   methodLabel,

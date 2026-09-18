@@ -8,13 +8,6 @@ import { useCreditTermTable } from "./use-credit-term-table";
 import { CREDIT_TERM_FILTER_FIELDS } from "./credit-term-filter-fields";
 import CreditTermCard from "./credit-term-card";
 
-/**
- * Component หลักของหน้ารายการ Credit Term ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Credit Term
- * @example
- * // route: /config/credit-term
- * <CreditTermComponent />
- */
 export default function CreditTermComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

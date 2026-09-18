@@ -13,10 +13,6 @@ import type { TranslationFn } from "@/lib/i18n-schema";
  */
 export const PASSWORD_MIN_LENGTH = 8;
 
-/**
- * @param tv - ฟังก์ชันแปลข้อความ validation (`useTranslations("validation")`)
- * @returns Zod string schema ของช่องรหัสผ่านใหม่
- */
 export function createPasswordSchema(tv: TranslationFn) {
   return z
     .string()

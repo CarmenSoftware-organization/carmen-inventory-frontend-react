@@ -5,15 +5,12 @@ import type {
   PrtDetailPayload,
 } from "@/types/purchase-request";
 
-/**
- * สร้าง Zod schema สำหรับรายการสินค้าใน PRT
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema ของรายการ PRT
- */
 function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    // เวอร์ชันของ "แถว" ไม่ใช่ของแม่แบบ — backend ล็อกแยกกันคนละชั้น แถวที่เพิ่ง
+    // เพิ่มยังไม่มี (ไม่ต้องส่งตอน add)
+    doc_version: z.coerce.number().optional(),
     location_id: z
       .string()
       .nullable()
@@ -25,6 +22,10 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .string()
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("deliveryPoint") })),
+    // display เท่านั้น — ไม่ส่งเข้า payload · จำเป็นเพราะจุดส่งของที่ถูกปิดใช้งาน
+    // แล้วจะไม่อยู่ใน list ที่ lookup ดึงมา (`is_active: false`) ชื่อที่เก็บไว้กับ
+    // แม่แบบจึงเป็นตัวเดียวที่บอกได้ว่าแถวนี้เลือกอะไรไว้
+    delivery_point_name: z.string(),
     product_id: z
       .string()
       .nullable()
@@ -49,12 +50,6 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง Zod schema สำหรับฟอร์มเทมเพลตใบขอซื้อ
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod object schema ของฟอร์ม PRT
- */
 export function createPrtSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
@@ -76,12 +71,15 @@ export const PRT_ITEM = {
   location_name: "",
   location_code: "",
   delivery_point_id: null,
+  delivery_point_name: "",
   product_id: null,
   product_name: "",
   product_local_name: "",
   inventory_unit_id: null,
   inventory_unit_name: "",
-  requested_qty: 1,
+  // เริ่มที่ 0 — แม่แบบเก็บ "ของชุดนี้" เป็นหลัก จำนวนจริงมากรอกตอนทำใบขอซื้อ
+  // การ default เป็น 1 ทำให้ทุกแถวมีเลขที่ไม่มีใครตั้งใจใส่ติดไปกับแม่แบบ
+  requested_qty: 0,
   requested_unit_id: null,
   requested_unit_name: "",
   currency_id: null,
@@ -97,11 +95,6 @@ export const EMPTY_FORM: PrtFormValues = {
 
 // --- Helpers ---
 
-/**
- * สร้างค่าเริ่มต้นของฟอร์ม PRT จากข้อมูลที่มีอยู่หรือเริ่มต้นใหม่
- * @param template - ข้อมูลเทมเพลตเดิม (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม PRT
- */
 export function getDefaultValues(
   template?: PurchaseRequestTemplate,
 ): PrtFormValues {
@@ -109,39 +102,37 @@ export function getDefaultValues(
     return {
       name: template.name ?? "",
       description: template.description ?? "",
-      workflow_id: template.workflow_id ?? "",
+      workflow_id: template.workflow?.id ?? "",
       is_active: template.is_active ?? true,
       items:
         template.purchase_request_template_detail?.map((d) => ({
           id: d.id,
-          location_id: d.location_id ?? null,
-          location_name: d.location_name ?? "",
-          location_code: d.location_code ?? "",
-          delivery_point_id: d.delivery_point_id ?? null,
-          product_id: d.product_id,
-          product_name: d.product_name,
-          product_local_name: d.product_local_name ?? "",
-          inventory_unit_id: d.inventory_unit_id ?? null,
-          inventory_unit_name: d.inventory_unit_name ?? "",
+          doc_version: d.doc_version,
+          location_id: d.location?.id ?? null,
+          location_name: d.location?.name ?? "",
+          location_code: d.location?.code ?? "",
+          delivery_point_id: d.delivery_point?.id ?? null,
+          delivery_point_name: d.delivery_point?.name ?? "",
+          product_id: d.product?.id ?? null,
+          product_name: d.product?.name ?? "",
+          product_local_name: d.product?.local_name ?? "",
+          inventory_unit_id: d.inventory_unit?.id ?? null,
+          inventory_unit_name: d.inventory_unit?.name ?? "",
           requested_qty: d.requested_qty,
-          requested_unit_id: d.requested_unit_id ?? null,
-          requested_unit_name: d.requested_unit_name ?? "",
-          currency_id: d.currency_id ?? null,
+          requested_unit_id: d.requested_unit?.id ?? null,
+          requested_unit_name: d.requested_unit?.name ?? "",
+          currency_id: d.currency?.id ?? null,
         })) ?? [],
     };
   }
   return EMPTY_FORM;
 }
 
-/**
- * แปลงรายการสินค้าในฟอร์ม PRT เป็น payload สำหรับส่ง API
- * @param item - รายการสินค้าในฟอร์ม PRT
- * @returns payload รายการ PRT
- */
 export function mapItemToPayload(
   item: PrtFormValues["items"][number],
 ): PrtDetailPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     location_id: item.location_id || null,
     delivery_point_id: item.delivery_point_id || null,
     product_id: item.product_id || null,

@@ -23,7 +23,6 @@ function asThemeMode(value: string | undefined): ThemeMode {
   return "light";
 }
 
-/** Compact lucide icon — used in submenu trigger to mirror other menu items */
 function ThemeIcon({ mode }: { readonly mode: ThemeMode }) {
   if (mode === "dark") return <Moon className="size-4" />;
   if (mode === "system") return <Monitor className="size-4" />;
@@ -51,7 +50,6 @@ const DARK: PreviewPalette = {
   accent: "#60a5fa",
 };
 
-/** Full-tile UI mockup (20-wide) — used by light & dark variants */
 function FullPreviewContent({ palette }: { readonly palette: PreviewPalette }) {
   return (
     <>
@@ -99,7 +97,6 @@ function FullPreviewContent({ palette }: { readonly palette: PreviewPalette }) {
   );
 }
 
-/** Half-tile UI mockup (10-wide) — used by system split variant */
 function HalfPreviewContent({
   palette,
   offset,
@@ -133,9 +130,6 @@ function HalfPreviewContent({
   );
 }
 
-/**
- * Jira-style theme preview thumbnail — square 20×20 viewBox, rendered at 2rem
- */
 function ThemePreview({
   mode,
   active = false,

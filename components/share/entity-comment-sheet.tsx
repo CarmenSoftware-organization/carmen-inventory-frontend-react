@@ -5,9 +5,7 @@ import type { createCommentCrud } from "@/hooks/use-comment-crud";
 type CommentCrud = ReturnType<typeof createCommentCrud>;
 
 interface EntityCommentSheetProps {
-  /** ชุด hook ของโมดูลนั้น — ผลลัพธ์จาก `createCommentCrud` */
   readonly crud: CommentCrud;
-  /** id ของเอกสาร — ใบใหม่ที่ยังไม่บันทึกไม่มี id จึงยังไม่มี comment ให้ดึง */
   readonly entityId: string | undefined;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;

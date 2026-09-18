@@ -8,7 +8,6 @@ import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import { AuthFormAlert } from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
 
-/** วินาทีที่ต้องรอก่อนกดส่งลิงก์ซ้ำได้ — ตรงกับที่ backend จำกัดไว้ต่ออีเมล+IP ในเส้นทางสมัคร */
 const RESEND_COOLDOWN_SECONDS = 60;
 
 /**

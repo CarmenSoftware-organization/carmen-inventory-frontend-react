@@ -7,17 +7,14 @@ import type {
   NotificationTemplateType,
 } from "@/types/noti-tmpl";
 import { LookupCombobox } from "./lookup-combobox";
-import { Badge } from "../ui/badge";
 
 interface LookupNotificationTemplateProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  /** channel ที่ใช้ filter ประเภท template (app/email/...) */
   readonly channelType: NotificationTemplateType;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
@@ -58,12 +55,7 @@ export function LookupNotificationTemplate({
       }}
       items={items}
       renderItem={(tpl) => (
-        <>
-          <Badge size="xs" variant="secondary" className="shrink-0">
-            {tpl.type}
-          </Badge>
-          <span className="flex-1 truncate text-left">{tpl.name}</span>
-        </>
+        <span className="flex-1 truncate text-left">{tpl.name}</span>
       )}
       getId={(tpl) => tpl.id}
       getLabel={(tpl) => tpl.name}

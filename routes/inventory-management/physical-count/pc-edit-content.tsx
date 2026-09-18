@@ -5,12 +5,6 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import type { PhysicalCount } from "@/types/physical-count";
 
-/**
- * หน้าดู/แก้ไข Physical Count ตาม id — ดึงข้อมูลผ่าน `usePhysicalCountById`
- *
- * @param props.id - รหัสใบตรวจนับที่ route อ่านมาจาก URL segment (`useParams`)
- * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PcForm` เมื่อได้ข้อมูล
- */
 export function PcEditContent({ id }: Readonly<{ id: string }>) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const {

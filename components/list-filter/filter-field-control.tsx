@@ -5,6 +5,7 @@ import { FilterAmountRange } from "@/components/filter/filter-amount-range";
 import { FilterDate } from "@/components/filter/filter-date";
 import { FilterDepartment } from "@/components/filter/filter-department";
 import { FilterRequester } from "@/components/filter/filter-requester";
+import { FilterVendor } from "@/components/filter/filter-vendor";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { FilterWorkflow } from "@/components/filter/filter-workflow";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
@@ -13,31 +14,9 @@ interface Props {
   readonly field: FilterFieldDef;
   readonly value: string;
   readonly onChange: (value: string) => void;
-  /** ส่งต่อให้ custom control ที่ต้องอ่าน/เขียน key คู่ (ดู FilterPeerAccess) */
   readonly peer?: FilterPeerAccess;
 }
 
-/**
- * Render control ตามชนิดใน FilterFieldDef — ทุก control กว้างเต็ม sheet
- *
- * Map FilterFieldDef ไปยัง concrete control component ที่สอดคล้อง
- * (StatusFilter / MultiSelectFilter / FilterDate / FilterDepartment / FilterRequester / FilterStage / FilterWorkflow / custom)
- * แต่ละ control รับ value (string filter clause) และ onChange callback
- *
- * @param props - props ของ filter control
- * @param props.field - FilterFieldDef ที่กำหนด control type และ config
- * @param props.value - ค่า filter string ปัจจุบัน
- * @param props.onChange - callback เปลี่ยนค่า filter
- * @returns JSX element ของ concrete filter control
- * @example
- * ```tsx
- * <FilterFieldControl
- *   field={filterField}
- *   value={filterValue}
- *   onChange={setFilterValue}
- * />
- * ```
- */
 export function FilterFieldControl({ field, value, onChange, peer }: Props) {
   const t = useTranslations();
 
@@ -91,6 +70,10 @@ export function FilterFieldControl({ field, value, onChange, peer }: Props) {
           onChange={onChange}
           className="w-full"
         />
+      );
+    case "vendor":
+      return (
+        <FilterVendor value={value} onChange={onChange} className="w-full" />
       );
     case "requester":
       return (

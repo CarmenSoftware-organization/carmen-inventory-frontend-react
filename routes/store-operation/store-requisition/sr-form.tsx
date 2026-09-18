@@ -33,7 +33,6 @@ import { SrStockTable } from "./sr-stock-table";
 
 interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
-  /** ใบเดิมที่ผู้ใช้กด Duplicate — prefill แล้วนับ dirty (แบบเดียวกับ PR) */
   readonly duplicateFrom?: StoreRequisition;
 }
 
@@ -60,11 +59,13 @@ export function StoreRequisitionForm({
   const requestorName = profile
     ? `${profile.user_info.firstname} ${profile.user_info.lastname}`
     : "";
-  const reqName = storeRequisition?.requestor_name ?? requestorName;
+  // storeRequisition มาจาก useStoreRequisitionById (detail) เสมอ — endpoint นี้
+  // ส่ง object (requestor/department/to_location) ไม่ใช่ flat _name เหมือน list
+  const reqName = storeRequisition?.requestor?.name ?? requestorName;
   const defaultRequestorId = profile?.id ?? "";
   const departmentName =
-    storeRequisition?.department_name ?? defaultBu?.department?.name ?? "";
-  const departmentCode = storeRequisition?.department_code ?? "";
+    storeRequisition?.department?.name ?? defaultBu?.department?.name ?? "";
+  const departmentCode = storeRequisition?.department?.code ?? "";
   const defaultDepartmentId = defaultBu?.department?.id ?? "";
 
   // ค่าแรกเข้า (duplicate = เติมของจากใบเดิมมาแล้ว) ส่วน baseline เทียบ dirty
@@ -136,8 +137,8 @@ export function StoreRequisitionForm({
   });
 
   const [toLocInfo, setToLocInfo] = useState<LocationInfo>({
-    name: storeRequisition?.to_location_name ?? "",
-    code: storeRequisition?.to_location_code ?? "",
+    name: storeRequisition?.to_location?.name ?? "",
+    code: storeRequisition?.to_location?.code ?? "",
   });
 
   useEffect(() => {

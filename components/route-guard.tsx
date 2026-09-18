@@ -75,7 +75,6 @@ export function RouteGuard({ children }: RouteGuardProps) {
 }
 
 interface AccessDeniedBlockProps {
-  /** แทนคำอธิบาย default ("หน้านี้เข้าไม่ได้") เมื่อเหตุผลเจาะจงกว่านั้น */
   readonly description?: string;
   /**
    * ทำไมถึงเข้าไม่ได้ — ใช้เลือกว่าจะแสดงบรรทัด "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์"
@@ -96,13 +95,6 @@ interface AccessDeniedBlockProps {
   readonly fallbackTo?: string;
 }
 
-/**
- * บล็อกเต็มหน้าเมื่อผู้ใช้เข้าถึงสิ่งที่ไม่มีสิทธิ์
- *
- * สัญญาณสีแดงมีจุดเดียวคือไอคอน กล่องรอบ ๆ เป็น neutral ตาม docs/DESIGN.md
- * ใช้ทั้งจาก `RouteGuard` (สิทธิ์ระดับหน้า) และจากหน้าที่ gate ตัวเองด้วยเงื่อนไข
- * ที่ moduleList ไม่รู้ เช่น หน้าสร้าง PR ที่ไม่มี workflow ให้เริ่มเลยสักตัว
- */
 export function AccessDeniedBlock({
   description,
   reason = "permission",

@@ -87,12 +87,6 @@ const ENTITY_TYPE_OPTIONS = [
   { label: "Auth", value: "auth" },
 ];
 
-/**
- * Component หลักของหน้า Activity Log รองรับ list/grid view พร้อม filter action, entity type และ user
- * @returns React element ของหน้า Activity Log
- * @example
- * <ActivityLogComponent />
- */
 export default function ActivityLogComponent() {
   const isMobile = useIsMobile();
   const [displayMode, setDisplayMode] = useState<DisplayMode>("list");

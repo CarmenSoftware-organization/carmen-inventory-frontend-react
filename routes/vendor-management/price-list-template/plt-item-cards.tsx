@@ -15,10 +15,8 @@ interface PltItemCardsProps {
   readonly form: UseFormReturn<PltFormValues>;
   readonly detailFields: DetailField[];
   readonly isDisabled: boolean;
-  /** เปิด dialog ยืนยันลบ tier — ไม่ได้ลบเอง */
   readonly onRequestRemoveTier: (idx: number) => void;
   readonly onAddTier: (productId: string) => void;
-  /** เปิด dialog ยืนยันลบทั้งสินค้า — ไม่ได้ลบเอง */
   readonly onRequestRemoveProduct: (productId: string) => void;
   readonly getProductName: (productId: string) => string;
   readonly getOrderUnitName: (productId: string) => string;

@@ -9,7 +9,6 @@ const tv = ((k: string) => k) as never;
 const tf = ((k: string) => k) as never;
 const schema = createCoaSchema(tv, tf);
 
-/** ใบที่กรอกครบตามสัญญาใหม่ของ backend */
 const valid = {
   code: "1140-001",
   description_1: "Inventory - Food",

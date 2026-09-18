@@ -5,16 +5,11 @@ import type { PurchaseRequest } from "@/types/purchase-request";
 type TFn = (key: string) => string;
 
 interface PrExportColumnsArgs {
-  /** translator ของ namespace "field" */
   tfl: TFn;
   defaultCurrencyCode: string;
   dateTimeFormat: string;
 }
 
-/**
- * คอลัมน์ไฟล์ xlsx ของหน้ารายการ PR — ลำดับคอลัมน์กับความกว้างตามที่ใช้จริงในไฟล์ที่ส่งออก
- * @returns column def พร้อม header ที่แปลแล้ว ส่งเข้า `exportPurchaseRequest` ได้ตรง ๆ
- */
 export function buildPrExportColumns({
   tfl,
   defaultCurrencyCode,

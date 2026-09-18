@@ -46,7 +46,7 @@ describe("defaultWidgetTypeFor", () => {
     );
   });
 
-  it("only yields widget types that WidgetRenderer has a case for", () => {
+  it("only yields widget types that WidgetRouter has a case for", () => {
     const renderable = new Set(["kpi", "pie", "bar", "line", "area", "table"]);
     for (const shape of SUPPORTED_SHAPES) {
       expect(renderable).toContain(defaultWidgetTypeFor(ds(shape)));

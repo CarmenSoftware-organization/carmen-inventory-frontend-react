@@ -20,7 +20,6 @@ import {
  * สำเนา catalog (`__fixtures__/license-catalog.ts`) — leaf ใหม่ที่ map ผิดจะแดงทันที
  */
 
-/** leaf = node ที่ไม่มี subModules (parent ไม่ถูกตัดสินเอง — ใช้กติกา "ลูกล็อกหมด") */
 function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
   return mods.flatMap((m) =>
     m.subModules && m.subModules.length > 0 ? leaves(m.subModules) : [m],
@@ -37,7 +36,7 @@ function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
 const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
   {
     path: "/procurement/approval",
-    why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-approve ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
+    why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-pending ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
   },
   {
     path: "/config/chart-of-accounts",

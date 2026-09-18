@@ -14,16 +14,6 @@ interface EqCardProps {
   readonly onDelete: (item: Equipment) => void;
 }
 
-/**
- * การ์ดอุปกรณ์ 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดโมดูลอื่น
- *
- * @param props.item - ข้อมูลอุปกรณ์
- * @param props.categoryName - ชื่อหมวดหมู่ (resolve จาก category_id)
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function EqCard({
   item,
   categoryName,

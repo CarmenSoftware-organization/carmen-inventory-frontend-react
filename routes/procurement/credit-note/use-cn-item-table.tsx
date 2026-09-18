@@ -19,11 +19,16 @@ import type { CnFormValues } from "./cn-form-schema";
 import type { CnCreditNoteType } from "./cn-item-compute";
 import {
   CN_COL,
-  CnReturnRow,
-  GrnAmountCell,
+  CnGrnRow,
+  DiscountCell,
+  LineSubtotalText,
   LocationCell,
+  NetCell,
+  PriceCell,
   ProductCell,
-  ReceivedCell,
+  QtyCell,
+  TaxCell,
+  TotalCell,
 } from "./cn-item-cells";
 
 export type CnItemField = FieldArrayWithId<CnFormValues, "items", "id">;
@@ -42,6 +47,7 @@ export function useCnItemTable({
   onDelete,
 }: UseCnItemTableOptions) {
   "use no memo";
+  const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
   const type = useWatch({
     control: form.control,
@@ -54,7 +60,7 @@ export function useCnItemTable({
       cellClassName: "text-right",
     } as const;
 
-    // กางเพื่อกรอกฝั่งคืน — แถวหลักเป็นยอดตาม GRN (ทรงเดียวกับ PO ที่กางดู location)
+    // แถวหลัก = ฝั่งคืน (ช่องกรอกทั้งหมด) · กางออกเพื่อดูยอดตาม GRN ที่รับมาจริง
     const expandColumn: ColumnDef<CnItemField> = {
       id: "expand",
       header: "",
@@ -82,14 +88,12 @@ export function useCnItemTable({
         // เริ่มที่คอลัมน์ Product — ข้าม expand + # ให้ตรงขอบเดียวกับแถวหลัก
         expandedColStart: 2,
         expandedContent: (item: CnItemField) => (
-          <CnReturnRow
+          <CnGrnRow
             form={form}
             index={Math.max(
               itemFields.findIndex((field) => field.id === item.id),
               0,
             )}
-            type={type}
-            disabled={disabled}
             showActionCol={!disabled}
           />
         ),
@@ -113,14 +117,6 @@ export function useCnItemTable({
     // ฝั่งคืน (ช่องกรอกทั้งหมด) อยู่ในแถวที่กางออก ตรงคอลัมน์กันพอดี
     const dataColumns: ColumnDef<CnItemField>[] = [
       {
-        accessorKey: "item_id",
-        header: tfl("product"),
-        size: CN_COL.product,
-        cell: ({ row }) => (
-          <ProductCell control={form.control} index={row.index} />
-        ),
-      },
-      {
         accessorKey: "location_id",
         header: tfl("location"),
         size: CN_COL.location,
@@ -129,90 +125,93 @@ export function useCnItemTable({
         ),
       },
       {
-        id: "received_qty",
+        accessorKey: "item_id",
+        header: tfl("product"),
+        size: CN_COL.product,
+        cell: ({ row }) => (
+          <ProductCell control={form.control} index={row.index} />
+        ),
+      },
+      {
+        id: "return_qty",
         header: tfl("received"),
         size: CN_COL.qty,
         meta: rightMeta,
-        cell: ({ row }) => (
-          <ReceivedCell control={form.control} index={row.index} />
-        ),
+        // amount_discount ตั้งยอดที่คอลัมน์ Net ตรง ๆ จำนวนคืนไม่มีผลต่อยอด
+        // จึงไม่ต้องมีช่องล็อกไว้ให้รก
+        cell: ({ row }) =>
+          type === "amount_discount" ? null : (
+            <QtyCell
+              form={form}
+              index={row.index}
+              disabled={disabled}
+              locked={false}
+            />
+          ),
       },
       {
-        id: "grn_price",
+        id: "price",
         header: tfl("price"),
         size: CN_COL.price,
         meta: rightMeta,
+        // ราคาต่อหน่วยเท่าฝั่งรับเสมอ — คืนของชิ้นเดิมในราคาเดิม
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
-            index={row.index}
-            field="_grn_price"
-          />
+          <PriceCell control={form.control} index={row.index} />
         ),
       },
       {
-        id: "grn_sub_total",
+        id: "sub_total",
         header: tfl("subtotal"),
         size: CN_COL.sub,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
-            index={row.index}
-            field="_grn_sub_total"
-          />
+          <LineSubtotalText form={form} index={row.index} type={type} />
         ),
       },
       {
-        id: "grn_discount",
+        id: "discount",
         header: tfl("discount"),
         size: CN_COL.discount,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
-            index={row.index}
-            field="_grn_discount_amount"
-          />
+          <DiscountCell form={form} index={row.index} type={type} />
         ),
       },
       {
-        id: "grn_net",
-        header: tfl("net"),
+        id: "net",
+        header: t("netOrCnAmount"),
         size: CN_COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
+          <NetCell
+            form={form}
             index={row.index}
-            field="_grn_net_amount"
+            type={type}
+            disabled={disabled}
           />
         ),
       },
       {
-        id: "grn_tax",
+        id: "tax",
         header: tfl("tax"),
         size: CN_COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
+          <TaxCell
+            form={form}
             index={row.index}
-            field="_grn_tax_amount"
+            type={type}
+            disabled={disabled}
           />
         ),
       },
       {
-        id: "grn_total",
-        header: tfl("amount"),
+        id: "total",
+        header: tfl("total"),
         size: CN_COL.amount,
         meta: rightMeta,
         cell: ({ row }) => (
-          <GrnAmountCell
-            control={form.control}
-            index={row.index}
-            field="_grn_total_amount"
-          />
+          <TotalCell control={form.control} index={row.index} />
         ),
       },
     ];
@@ -252,19 +251,15 @@ export function useCnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        // h-11 ตายตัวทั้งแถวหลักและแถวคืน (ดู CnReturnRow) — ปล่อยให้สูงตาม
-        // เนื้อหา แถวหลักจะ 39px เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวคืนบรรทัด
-        // เดียวได้ 24px สองแถบเลยไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่
-        // 40 เพราะช่องสินค้ากินสองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px
-        // ดูอัดแน่นกว่าแถวคืนที่มีบรรทัดเดียว (เท่ากับ PO/GRN)
-        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
+        cellClassName: cn(
+          "py-2.5",
+          !disabled && "min-h-11",
+          col.meta?.cellClassName,
+        ),
       },
     }));
-  }, [form, disabled, type, itemFields, tfl, onDelete]);
+  }, [form, disabled, type, itemFields, t, tfl, onDelete]);
 
-  // กางทุกแถวไว้ตั้งแต่แรกเสมอ — ฝั่งคืนคือสาระของใบลดหนี้ ไม่ใช่รายละเอียดเสริม
-  // (โหมดแก้ต้องกรอกทุกบรรทัดอยู่แล้ว โหมดอ่านก็ต้องเห็นว่าคืนอะไรไปเท่าไหร่)
-  // พับเองได้ถ้าอยากกวาดตาดูเฉพาะยอดตาม GRN
   const [expanded, setExpanded] = useState<ExpandedState>(true);
 
   const table = useReactTable({

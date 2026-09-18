@@ -10,17 +10,10 @@ import { useDashboardDatasetPreview } from "@/hooks/use-dashboard-dataset";
 import { useInViewport } from "@/hooks/use-in-viewport";
 import { TIME_RANGE_OPTIONS } from "./status-group";
 
-/** dataset by-status ของ doc เดียวกัน (document.pr-count → document.pr-by-status) —
- * ตัวนี้ GROUP BY status คืนทุกสถานะใน call เดียว จึงไม่ต้อง loop ยิงทีละสถานะ */
 function byStatusDatasetId(countDatasetId: string): string {
   return countDatasetId.replace(/-count$/, "-by-status");
 }
 
-/**
- * tile ลูก 1 ใบ = 1 pipeline stage (pure — ไม่ยิง API เอง): icon ใหญ่ (สูงเท่า
- * label+เลข) ซ้าย + label(สี status) กับตัวเลขขวา. ทุกสีอ้าง `var(--status-*)` +
- * token `bg-card/muted/foreground` → theme-aware ทั้ง light/dark.
- */
 function StatusFlowTile({
   status,
   value,
@@ -86,10 +79,8 @@ export function StatusGroupCard({
   readonly datasetId: string;
   readonly statuses: readonly string[];
   readonly timeRange?: string;
-  /** @everyone (ทั้งหมด) หรือ @current_user (เอกสารที่ฉันสร้าง) — กรอง count + badge */
   readonly ownerVisibility?: string;
   readonly onDelete?: () => void;
-  /** มี = date มุมขวาบนกลายเป็น dropdown ปรับ time_range ได้ (persist ที่ params) */
   readonly onTimeRangeChange?: (value: string) => void;
 }) {
   const t = useTranslations("dashboard.savedWidget");

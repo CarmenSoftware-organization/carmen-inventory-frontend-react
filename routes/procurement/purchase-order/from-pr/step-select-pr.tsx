@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -27,6 +27,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ListFilter } from "@/components/list-filter/list-filter";
 import { Button } from "@/components/ui/button";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
@@ -39,7 +40,6 @@ import type { PurchaseRequest } from "@/types/purchase-request";
 import type { PaginatedResponse } from "@/types/params";
 import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
 
-/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
 const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
   {
     key: "requestor_id",
@@ -48,19 +48,19 @@ const FILTER_FIELDS: PoFilterField<PurchaseRequest>[] = [
     // สามคีย์นี้ยังไม่มีในตารางของมัน เลยต้องบอกเอง ไม่งั้นได้ไอคอนกลางของ
     // ช่อง custom เหมือนกันหมดทั้งสามช่อง
     icon: UserRound,
-    of: (r) => [r.requestor_id, r.requestor_name],
+    of: (r) => [r.requestor?.id ?? "", r.requestor?.name ?? ""],
   },
   {
     key: "department_id",
     labelKey: "field.department",
     icon: Building2,
-    of: (r) => [r.department_id, r.department_name],
+    of: (r) => [r.department?.id ?? "", r.department?.name ?? ""],
   },
   {
     key: "workflow_id",
     labelKey: "procurement.purchaseOrder.prWorkflow",
     icon: Workflow,
-    of: (r) => [r.workflow_id, r.workflow_name],
+    of: (r) => [r.workflow?.id ?? "", r.workflow?.name ?? ""],
   },
 ];
 
@@ -119,7 +119,6 @@ export function StepSelectPr({
     [allRows, filter.matches],
   );
 
-  /** มีของให้กรองจริงหรือยัง — ยังไม่เลือก workflow / กำลังโหลด / ไม่มีใบเลย */
   const canFilter = !!workflowId && !isLoading && allRows.length > 0;
 
   const columns = useMemo<ColumnDef<PurchaseRequest>[]>(
@@ -133,10 +132,20 @@ export function StepSelectPr({
         size: 100,
         meta: { cellClassName: "text-center", headerClassName: "text-center" },
       },
-      { accessorKey: "requestor_name", header: tfl("requester") },
-      { accessorKey: "department_name", header: tfl("department"), size: 180 },
       {
-        accessorKey: "workflow_name",
+        id: "requestor_name",
+        accessorFn: (row) => row.requestor?.name ?? "",
+        header: tfl("requester"),
+      },
+      {
+        id: "department_name",
+        accessorFn: (row) => row.department?.name ?? "",
+        header: tfl("department"),
+        size: 180,
+      },
+      {
+        id: "workflow_name",
+        accessorFn: (row) => row.workflow?.name ?? "",
         header: t("prWorkflow"),
         size: 180,
         meta: { cellClassName: "text-center", headerClassName: "text-center" },
@@ -146,6 +155,51 @@ export function StepSelectPr({
     [t, tfl, dateFormat],
   );
 
+  const workflowOf = useMemo(() => {
+    const m = new Map<string, { id: string; name: string }>();
+    for (const pr of allRows) {
+      // ห้าม `?? ""` ที่ id — ใบที่ไม่มี workflow จริง ๆ ต้องไม่ถูกจัดกลุ่มรวมกับ
+      // ใบอื่นด้วยคีย์ "" เดียวกัน (endpoint นี้ปกติส่ง workflow มาครบทุกใบ)
+      if (pr.workflow) {
+        m.set(pr.id, { id: pr.workflow.id, name: pr.workflow.name ?? "" });
+      }
+    }
+    return m;
+  }, [allRows]);
+
+  const [crossWorkflow, setCrossWorkflow] = useState<{
+    next: RowSelectionState;
+    workflowId: string;
+    workflowName: string;
+  } | null>(null);
+
+  const applySelection = (next: RowSelectionState) => {
+    const ids = Object.keys(next).filter((id) => next[id]);
+    const workflows = new Set(
+      ids.map((id) => workflowOf.get(id)?.id).filter(Boolean),
+    );
+    // ใบที่รวมเป็นใบสั่งซื้อเดียวกันต้องมาจาก workflow เดียวกัน — ปล่อยให้ติ๊ก
+    // ข้ามได้แล้วไปตกตอน group คือให้ผู้ใช้เสียเวลาเลือกฟรี ๆ ทั้งหน้า
+    if (workflows.size > 1) {
+      // ใบที่เพิ่งติ๊กคือเจตนาล่าสุด ใบเก่าที่ workflow ไม่ตรงคือส่วนที่จะถูกทิ้ง
+      const added = ids.find((id) => !rowSelection[id]);
+      const wf = added ? workflowOf.get(added) : undefined;
+      if (added && wf) {
+        setCrossWorkflow({
+          next: Object.fromEntries(
+            ids
+              .filter((id) => workflowOf.get(id)?.id === wf.id)
+              .map((id) => [id, true]),
+          ),
+          workflowId: wf.id,
+          workflowName: wf.name,
+        });
+        return;
+      }
+    }
+    onRowSelectionChange(next);
+  };
+
   const table = useReactTable({
     data: purchaseRequests,
     columns,
@@ -153,7 +207,7 @@ export function StepSelectPr({
     onRowSelectionChange: (updater) => {
       const next =
         typeof updater === "function" ? updater(rowSelection) : updater;
-      onRowSelectionChange(next);
+      applySelection(next);
     },
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
@@ -242,6 +296,22 @@ export function StepSelectPr({
           </DataGridContainer>
         </DataGrid>
       )}
+      <ConfirmDialog
+        open={!!crossWorkflow}
+        onOpenChange={(open) => {
+          if (!open) setCrossWorkflow(null);
+        }}
+        title={t("crossWorkflowTitle")}
+        description={t("crossWorkflowDesc", {
+          workflow: crossWorkflow?.workflowName ?? "",
+        })}
+        confirmText={tc("confirm")}
+        onConfirm={() => {
+          if (crossWorkflow) onRowSelectionChange(crossWorkflow.next);
+          setCrossWorkflow(null);
+        }}
+      />
     </div>
+
   );
 }

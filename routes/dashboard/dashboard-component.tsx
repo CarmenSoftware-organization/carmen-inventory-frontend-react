@@ -1,11 +1,14 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
 import {
-  closestCenter,
+  closestCorners,
   DndContext,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
@@ -40,6 +43,7 @@ import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,
   MyDashboardWidgetListResponse,
+  WidgetDisplay,
   WidgetParams,
   WidgetType,
 } from "@/types/dashboard-widget";
@@ -62,6 +66,21 @@ const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
   if (hour < 18) return "afternoon";
   return "evening";
+};
+
+/**
+ * หาเป้าหมายของการลากจากตำแหน่ง "ปลายเมาส์" ก่อน แล้วค่อยถอยไปใช้มุมที่ใกล้ที่สุด
+ *
+ * `closestCenter` ที่ใช้เดิมวัดจากจุดกึ่งกลางของการ์ด ซึ่งใช้ได้เมื่อทุกใบขนาดเท่ากัน
+ * พอการ์ดกว้าง 3/4/6/12 ช่องและสูงไม่เท่ากัน จุดกึ่งกลางของใบใหญ่จะอยู่ไกลจากที่
+ * ผู้ใช้เล็งมาก ของเลยไปลงผิดช่อง (ลากไปทับใบขวา แต่ไปโผล่ซ้าย)
+ *
+ * `pointerWithin` แม่นที่สุดเพราะถามว่า "ตอนนี้เมาส์อยู่บนใบไหน" แต่คืนค่าว่างเมื่อ
+ * เมาส์อยู่บนช่องว่างระหว่างการ์ด จึงต้องมี `closestCorners` รับช่วง
+ */
+const dashboardCollision: CollisionDetection = (args) => {
+  const withinPointer = pointerWithin(args);
+  return withinPointer.length > 0 ? withinPointer : closestCorners(args);
 };
 
 const subscribeNoop = () => () => {};
@@ -226,7 +245,10 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleCreateWithParams = (params: WidgetParams) => {
+  const handleCreateWithParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+  ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
@@ -234,6 +256,7 @@ const SavedWidgetsSection = () => {
         widget_type: defaultWidgetTypeFor(pendingAdd),
         title: pendingAdd.name,
         params,
+        display,
       },
       {
         onSuccess: () => {
@@ -244,11 +267,14 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleUpdateParams = (params: WidgetParams) => {
+  const handleUpdateParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params },
+      { id: target.id, params, display },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -361,6 +387,8 @@ const SavedWidgetsSection = () => {
 
   const deleteTitleText =
     pendingDelete?.title || pendingDelete?.dataset_id || "";
+  // dataset ที่ไม่อยู่ใน catalogue (ถูกถอดออกไปแล้ว) เปิด dialog ไม่ได้ เพราะฟอร์ม
+  // param สร้างจาก descriptor ของมัน
   const configDataset = pendingConfig
     ? datasetById.get(pendingConfig.dataset_id)
     : undefined;
@@ -402,7 +430,7 @@ const SavedWidgetsSection = () => {
         <div
           aria-busy="true"
           aria-live="polite"
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid auto-rows-[4rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
         >
           <WidgetSkeletonCards />
         </div>
@@ -436,14 +464,17 @@ const SavedWidgetsSection = () => {
       {renderable.length > 0 && (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={dashboardCollision}
+          // การ์ดขยับตำแหน่ง/ขนาดระหว่างลาก (span ไม่เท่ากัน) ถ้าวัดกรอบแค่ตอนเริ่มลาก
+          // ค่าที่ cache ไว้จะเก่าทันที แล้วปลายทางที่คำนวณได้ก็เพี้ยนตาม
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
             items={renderable.map(({ widget }) => widget.id)}
             strategy={rectSortingStrategy}
           >
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="grid auto-rows-[4rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12">
               {renderable.map(({ widget, query }) => (
                 <SortableWidgetItem
                   key={widget.id}
@@ -487,6 +518,8 @@ const SavedWidgetsSection = () => {
           onOpenChange={(o) => !o && setPendingConfig(null)}
           dataset={configDataset}
           initialParams={pendingConfig.params}
+          initialDisplay={pendingConfig.display}
+          widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleUpdateParams}
         />

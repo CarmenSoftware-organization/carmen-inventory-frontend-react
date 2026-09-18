@@ -42,7 +42,6 @@ export function licenseFeatureOf(mod: ModuleDto): string | undefined {
 }
 
 export interface LicenseInfo {
-  /** false = gateway ยังไม่ส่ง field นี้ ทุกอย่างจึงถือว่าไม่จำกัด */
   hasLicenseData: boolean;
   /**
    * ค่าจริงของสวิตช์ `LICENSE_ENFORCEMENT` (runtime config) ตอนนี้
@@ -53,7 +52,6 @@ export interface LicenseInfo {
   enforced: boolean;
   state: BusinessUnitLicense["state"];
   endDate: string | null;
-  /** เขียนได้เมื่อสัญญายัง active (หรือสวิตช์ปิด/state unresolved) — expired/inactive อ่านได้อย่างเดียว */
   canWrite: boolean;
   /**
    * feature นี้อยู่ในสัญญาไหม
@@ -109,11 +107,8 @@ export interface LicenseInfo {
   expiringSoon: SeatExpiringSoon | null;
 }
 
-/** ที่นั่งกลุ่มหนึ่งที่จะหมดอายุ และวันที่จะหมด — ดู `LicenseInfo.expiringSoon` */
 export interface SeatExpiringSoon {
-  /** จำนวนที่นั่งที่จะหายไปจาก pool ของ cluster เมื่อใบหมดอายุ */
   seats: number;
-  /** ISO 8601 Z — วันที่ใบหมดอายุ */
   date: string;
 }
 

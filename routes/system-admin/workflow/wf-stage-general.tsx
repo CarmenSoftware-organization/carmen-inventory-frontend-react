@@ -27,12 +27,6 @@ interface WfStageGeneralProps {
   readonly index: number;
   readonly isFirst: boolean;
   readonly isDisabled: boolean;
-  /**
-   * ปิดเฉพาะช่องชื่อ stage
-   *
-   * เอกสารที่กำลังเดินอยู่เก็บชื่อ stage ปัจจุบันไว้แล้วใช้ค้นหาใน workflow ทุกครั้งที่ทำ action
-   * เปลี่ยนชื่อเมื่อไร เอกสารเหล่านั้นจะหา stage ไม่เจอและเดินต่อไม่ได้เลย
-   */
   readonly isNameDisabled: boolean;
 }
 

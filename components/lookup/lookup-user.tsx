@@ -5,11 +5,6 @@ import { useAllUsers } from "@/hooks/use-all-users";
 import type { User } from "@/types/workflows";
 import { LookupCombobox } from "./lookup-combobox";
 
-/**
- * ฟังก์ชันช่วยเหลือ getUserFullName สำหรับ Lookup สำหรับเลือกผู้ใช้งานในระบบ
- * @param props - props ของ getUserFullName (ภาษาไทย)
- * @returns ผลลัพธ์ของฟังก์ชัน
- */
 export function getUserFullName(user: User) {
   return [user.firstname, user.middlename, user.lastname]
     .filter(Boolean)
@@ -24,7 +19,6 @@ interface LookupUserProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }

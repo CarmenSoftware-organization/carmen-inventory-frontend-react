@@ -20,14 +20,12 @@ import {
   usePurchaseOrderWorkflowStages,
 } from "../shared/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import {
   PURCHASE_ORDER_STATUS_OPTIONS,
   PURCHASE_ORDER_TYPE_OPTIONS,
 } from "@/constant/purchase-order";
-import { useVendor } from "@/hooks/use-vendor";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
@@ -94,6 +92,7 @@ export default function PoComponent() {
         view: next,
         search: "",
         page: "",
+        sort: "",
         workflow_current_stage: "",
       }),
     [],
@@ -105,25 +104,20 @@ export default function PoComponent() {
   const useInfiniteScroll = !!isMobile;
   const deletePo = useDeletePurchaseOrder();
   const { exportPurchaseOrder, isExporting } = useExportPurchaseOrder();
+  /**
+   * ค่าเรียงเริ่มต้นต่างกันตามกลุ่มเอกสาร — "รอฉันดำเนินการ" เป็นคิวงาน ใบที่
+   * ถึงกำหนดก่อนต้องขึ้นก่อน (asc) ส่วน "เอกสารทั้งหมด" เป็นคลังเอกสารที่มีเป็น
+   * ร้อยใบ คนเปิดมาเพื่อหาใบล่าสุด จึงเอาใหม่สุดขึ้นก่อน (desc)
+   * · `handleViewModeChange` ล้าง `sort` ทิ้งตอนสลับกลุ่ม ไม่งั้นทิศที่ผู้ใช้
+   * เคยคลิกไว้ในอีกกลุ่มจะค้างมาทับค่าเริ่มต้นของกลุ่มใหม่
+   */
+  const defaultSort =
+    viewMode === "my-pending" ? "order_date:asc" : "order_date:desc";
   const { params, search, setSearch, tableConfig } = useDataGridState({
-    defaultSort: "po_no:desc",
+    defaultSort,
   });
 
   const { data: stages } = usePurchaseOrderWorkflowStages();
-
-  const { data: vendorData } = useVendor({ perpage: -1 });
-  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน poFilterFields memo ข้างล่างไม่เคย hit
-  const vendorOptions = useMemo(
-    () =>
-      (vendorData?.data ?? [])
-        .filter((v) => v.is_active)
-        .map((v) => ({
-          label: v.name,
-          value: `vendor_id|string:${v.id}`,
-        })),
-    [vendorData],
-  );
 
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
   // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
@@ -224,33 +218,13 @@ export default function PoComponent() {
         section: "listView.sectionPeople",
       },
       {
+        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
+        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
+        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
         key: "vendor",
-        control: "custom",
+        control: "vendor",
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
-        // chip โชว์ชื่อ vendor จริงแทนจำนวน — mapping อยู่ในมือหน้านี้อยู่แล้ว
-        valueText: (raw) => {
-          const ids = raw
-            .split(",")
-            .map((p) => p.slice(p.lastIndexOf(":") + 1))
-            .filter(Boolean);
-          const names = ids
-            .map(
-              (id) => (vendorData?.data ?? []).find((v) => v.id === id)?.name,
-            )
-            .filter((n): n is string => !!n);
-          if (names.length === 0) return `${ids.length}`;
-          return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
-        },
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={vendorOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         key: "order_date",
@@ -260,13 +234,13 @@ export default function PoComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [viewMode, stages, vendorOptions, vendorData, handleViewModeChange, t, tc],
+    [viewMode, stages, handleViewModeChange, t, tc],
   );
 
   const lf = useListFilters({
     pageKey: LIST_PAGE_KEYS.PURCHASE_ORDER,
     fields: poFilterFields,
-    defaultSort: "po_no:desc",
+    defaultSort,
   });
 
   const queryParams = { ...params, filter: lf.filterParam };
@@ -292,20 +266,6 @@ export default function PoComponent() {
 
   const purchaseOrders = useInfiniteScroll ? grid.items : (data?.data ?? []);
 
-  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav) — my-pending ยิงชุด
-  // เต็ม (perpage: -1) แยกอีกหนึ่ง query เพื่อให้ ↑↓ เดินได้ทุกใบที่รอเราอยู่ ไม่ใช่แค่
-  // หน้าที่เปิดค้างไว้ (คนอนุมัติไล่เคลียร์ได้จบชุดโดยไม่ต้องเด้งกลับ list)
-  // all-document ไม่ทำแบบนี้ — ใบทั้งระบบมีหลักพัน ดึงมาทั้งกองเพื่อเอาแค่ id ไม่คุ้ม
-  // ระหว่างชุดเต็มยังโหลดไม่เสร็จใช้แถวหน้าปัจจุบันไปก่อน ปุ่มจึงไม่หายวับ
-  const docSequenceQuery = useMyPendingPurchaseOrder(
-    { ...queryParams, page: undefined, perpage: -1 },
-    { enabled: viewMode === "my-pending" },
-  );
-  const docSequenceItems =
-    viewMode === "my-pending"
-      ? (docSequenceQuery.data?.data ?? purchaseOrders)
-      : purchaseOrders;
-  useRecordDocSequence(docSequenceItems.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -317,7 +277,7 @@ export default function PoComponent() {
         viewMode,
         columns: [
           { header: tfl("poNo"), value: (r) => r.po_no, width: 18 },
-          { header: tfl("vendor"), value: (r) => r.vendor_name, width: 26 },
+          { header: tfl("vendor"), value: (r) => r.vendor?.name ?? "", width: 26 },
           { header: tfl("poType"), value: (r) => r.po_type, width: 12 },
           { header: tfl("orderDate"), value: (r) => r.order_date, width: 12 },
           {
@@ -333,7 +293,7 @@ export default function PoComponent() {
           },
           {
             header: tfl("currency"),
-            value: (r) => r.currency_code ?? "",
+            value: (r) => r.currency?.code ?? "",
             width: 10,
           },
           {

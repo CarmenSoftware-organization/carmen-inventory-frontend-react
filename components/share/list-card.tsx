@@ -14,6 +14,7 @@ import { dispatchPermissionDenied } from "@/components/permission-denied-dialog"
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { cn } from "@/lib/utils";
 import { isSentBack } from "@/constant/last-action";
 import { useDeleteGate } from "@/hooks/use-delete-gate";
 import { useProfile } from "@/hooks/use-profile";
@@ -21,12 +22,6 @@ import { formatDate } from "@/lib/date-utils";
 import type { AuditEntry } from "@/types/audit";
 import type { LastAction } from "@/types/last-action";
 
-/**
- * Skeleton ที่ mirror โครง `ListCard` — ใช้ตอนโหลดให้ความสูงใกล้ของจริง
- *
- * @param rows - จำนวนแถวข้อมูลที่จะโชว์เป็นโครง (default 5)
- * @param hasFooter - การ์ดจริงมี footer action หรือไม่
- */
 export function ListCardSkeleton({
   rows = 5,
   hasFooter = true,
@@ -65,11 +60,8 @@ export function ListCardSkeleton({
 }
 
 interface ListCardProps {
-  /** เลขที่เอกสาร/ชื่อรายการ — หัวการ์ด */
   readonly title: ReactNode;
-  /** badge สถานะมุมขวาบน (แต่ละโมดูลมี config สีของตัวเอง) */
   readonly badge?: ReactNode;
-  /** คลิกการ์ด/กด Enter — เข้าหน้ารายละเอียด */
   readonly onOpen: () => void;
   /**
    * ส่งมาแล้วได้ปุ่มลบมาตรฐานท้าย footer; ไม่ส่ง = ลบไม่ได้
@@ -78,9 +70,7 @@ interface ListCardProps {
    * ไม่ต้องห่อ guard เอง (ไม่มีสิทธิ์ = ไม่ถูกเรียก เด้ง dialog แทน)
    */
   readonly onDelete?: () => void;
-  /** ปุ่มอื่นใน footer (วางก่อนปุ่มลบ) เช่น approve/reject ของ PR */
   readonly actions?: ReactNode;
-  /** แถวข้อมูล — ใช้ `ListCardRow` */
   readonly children: ReactNode;
 }
 
@@ -158,13 +148,16 @@ export function ListCardAuditRows({
  *
  * @param status - ค่า status ดิบ (ไม่มี = ไม่ render เช่น PO ที่ยังไม่มีสถานะ)
  * @param label - ป้ายสถานะที่แสดง (มาจาก config ของโมดูลเอง)
+ * @param className - class เสริมของโมดูลที่ตกลงกันแล้วว่าสถานะไม่ต้องมีสี
  */
 export function ListCardStatusRow({
   status,
   label,
+  className,
 }: {
   readonly status?: string | null;
   readonly label?: string | null;
+  readonly className?: string;
 }) {
   const tfl = useTranslations("field");
 
@@ -177,7 +170,7 @@ export function ListCardStatusRow({
         label={label}
         // ป้ายของบางโมดูลมาจาก i18n ตรง ๆ ไม่ได้ผ่าน createStatusConfig ที่
         // uppercase ให้ — บังคับที่นี่ทีเดียวจะได้ไม่ต้องจำเป็นราย ๆ ไป
-        className="uppercase"
+        className={cn("uppercase", className)}
       />
     </ListCardRow>
   );

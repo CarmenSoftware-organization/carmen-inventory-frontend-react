@@ -15,17 +15,12 @@ import type { PrtFormValues } from "./prt-form-schema";
 
 interface PrtGeneralFieldsProps {
   readonly form: UseFormReturn<PrtFormValues>;
-  /** view mode → render เป็น plain text */
   readonly readOnly: boolean;
-  /** submit pending → input ยังอยู่แต่กดไม่ได้ */
   readonly disabled: boolean;
-  /** ชื่อ workflow ที่ backend ส่งมา — ใช้แสดงใน view mode */
   readonly workflowName?: string;
-  /** โหมดสร้าง template ใหม่ — กรอง workflow เหลือเฉพาะตัวที่เริ่มเอกสารได้ */
   readonly isAdd?: boolean;
 }
 
-/** General section — workflow, name, description และสถานะของเทมเพลต */
 export function PrtGeneralFields({
   form,
   readOnly,

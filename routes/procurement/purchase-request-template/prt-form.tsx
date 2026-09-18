@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -62,6 +62,16 @@ export function PrtForm({ template }: PrtFormProps) {
     reValidateMode: "onChange",
   });
 
+  // หลังบันทึก ข้อมูลสดไหลกลับมาทาง prop (mutation invalidate แล้ว query refetch)
+  // ต้อง rebase เข้าฟอร์มด้วย ไม่งั้นฟอร์มยังถือ doc_version ราย row ของรอบก่อน
+  // แล้วการบันทึกรอบถัดไปชน 400 "doc_version: expected number, received undefined"
+  // / 409 · เงื่อนไขคือ "ไม่มีของค้าง" ไม่ใช่ "โหมดอ่าน" — ระหว่างผู้ใช้กรอกค้าง
+  // ห้ามทับ แต่หลังบันทึกเสร็จ (dirty ถูกล้าง) ต้อง rebase ให้ได้ (ทรงเดียวกับ GRN)
+  useEffect(() => {
+    if (!template || form.formState.isDirty) return;
+    form.reset(getDefaultValues(template));
+  }, [template, form]);
+
   const discard = useDiscardConfirm({
     isDirty: form.formState.isDirty,
     isPending,
@@ -98,6 +108,10 @@ export function PrtForm({ template }: PrtFormProps) {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
+            // ล้าง dirty ให้ baseline = ค่าที่เพิ่งบันทึก — ต้องทำ ไม่งั้น effect
+            // ที่ rebase จากข้อมูลสด (ข้างบน) ไม่ยอมทำงานเพราะยังเห็นว่ามีของค้าง
+            // แล้ว doc_version ราย row ก็ค้างเป็นเลขรอบก่อนตลอด
+            form.reset(form.getValues());
           },
         },
       );
@@ -129,9 +143,8 @@ export function PrtForm({ template }: PrtFormProps) {
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/purchase-request-template");
   };
@@ -173,7 +186,7 @@ export function PrtForm({ template }: PrtFormProps) {
             form={form}
             readOnly={isView}
             disabled={isPending}
-            workflowName={template?.workflow_name}
+            workflowName={template?.workflow?.name ?? undefined}
             isAdd={isAdd}
           />
           <PrtItemFields

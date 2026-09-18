@@ -10,14 +10,6 @@ const STANDARD_ALLERGEN_VALUES = new Set(
   ALLERGEN_OPTIONS.map((a) => a.value as string),
 );
 
-/**
- * แยกสารก่อภูมิแพ้ออกเป็นรายการมาตรฐานและรายการกำหนดเอง
- * @param allergens - รายการสารก่อภูมิแพ้ทั้งหมด
- * @returns ออบเจ็กต์ที่มี standard (array) และ custom (string)
- * @example
- * splitAllergens(["milk", "eggs", "sesame seed"]);
- * // => { standard: ["milk", "eggs"], custom: "sesame seed" }
- */
 export const splitAllergens = (
   allergens: string[] | null | undefined,
 ): { standard: string[]; custom: string } => {
@@ -38,14 +30,6 @@ export const splitAllergens = (
   return { standard, custom: custom.join(", ") };
 };
 
-/**
- * รวมสารก่อภูมิแพ้มาตรฐานและแบบกำหนดเองเป็นรายการเดียว
- * @param allergens - ออบเจ็กต์ที่มี standard และ custom
- * @returns รายการสารก่อภูมิแพ้ทั้งหมดในรูป array
- * @example
- * mergeAllergens({ standard: ["milk"], custom: "sesame, lupin" });
- * // => ["milk", "sesame", "lupin"]
- */
 export const mergeAllergens = (allergens: {
   standard: string[];
   custom: string;
@@ -59,12 +43,6 @@ export const mergeAllergens = (allergens: {
 
 // ── Schema ──
 
-/**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์มสูตรอาหารพร้อมข้อความแปลภาษา
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema object
- */
 export function createRecipeSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     code: z.string().min(1, tv("required", { field: tf("code") })),
@@ -153,14 +131,6 @@ export const EMPTY_FORM: RecipeFormValues = {
   is_active: true,
 };
 
-/**
- * แปลงข้อมูลสูตรอาหารเป็นค่าเริ่มต้นของฟอร์ม
- * @param recipe - ข้อมูลสูตรอาหารที่มีอยู่ (ถ้ามี)
- * @returns ค่าเริ่มต้นของฟอร์มสูตรอาหาร
- * @example
- * const defaults = getDefaultValues(recipe);
- * const form = useForm({ defaultValues: defaults });
- */
 export function getDefaultValues(recipe?: Recipe): RecipeFormValues {
   if (!recipe) return { ...EMPTY_FORM };
 

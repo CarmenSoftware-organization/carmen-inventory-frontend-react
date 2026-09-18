@@ -4,13 +4,6 @@ import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 
-/**
- * แปลงข้อความ snake_case เป็น Title Case สำหรับการแสดงผลในการ์ด
- * @param value - ข้อความรูปแบบ snake_case ที่ต้องการแปลง
- * @returns ข้อความในรูปแบบ Title Case
- * @example
- * formatEntityType("purchase_request"); // "Purchase Request"
- */
 function formatEntityType(value: string): string {
   if (!value) return "";
   return value
@@ -25,13 +18,6 @@ interface ActivityLogCardProps {
   onClick?: () => void;
 }
 
-/**
- * การ์ดแสดงข้อมูล Activity Log สำหรับ grid/mobile view
- * @param props - ข้อมูล log, ลำดับ index และ callback เมื่อคลิก
- * @returns React element ของการ์ด Activity Log
- * @example
- * <ActivityLogCard log={log} index={0} onClick={() => setSelected(log)} />
- */
 export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
   const { dateFormat } = useProfile();
 

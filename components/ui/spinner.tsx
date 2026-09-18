@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/**
- * SVG spinner หมุนแสดงสถานะกำลังโหลด
- * @param props - className สำหรับปรับขนาด/สี
- * @returns React element ของ svg spinner
- */
 export function Spinner({ className }: { className?: string }) {
   return (
     <svg

@@ -70,7 +70,6 @@ export function formatAmount(
   return formatCurrency(value);
 }
 
-/** จำนวนทศนิยมมาตรฐานสำหรับ exchange rate ทั้งระบบ */
 export const EXCHANGE_RATE_DECIMALS = 5;
 
 export function formatExchangeRate(

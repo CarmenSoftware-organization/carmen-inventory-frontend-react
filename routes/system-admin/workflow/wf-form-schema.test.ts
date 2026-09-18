@@ -6,7 +6,6 @@ import {
 } from "./wf-form-schema";
 import type { Workflow } from "@/types/workflows";
 
-/** stage รูปแบบเก่า — recipients เป็น boolean ล้วน (row ที่บันทึกไว้ก่อน migrate) */
 const legacyStage = {
   name: "Create Request",
   description: "",

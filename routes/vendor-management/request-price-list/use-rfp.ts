@@ -20,64 +20,14 @@ const crud = createConfigCrud<RequestPriceList, CreateRequestPriceListDto>({
   cacheProfile: CACHE_DYNAMIC,
 });
 
-/**
- * Hook ดึงรายการคำขอ price list (request price list) แบบแบ่งหน้า
- *
- * Re-export จาก factory ใช้ใน vendor-management workflow ส่งคำขอใบเสนอราคา
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<RequestPriceList>
- * @example
- * ```ts
- * const { data } = useRequestPriceList({ page: 1, perpage: 20 });
- * ```
- */
 export const useRequestPriceList = crud.useList;
 
-/**
- * Hook ดึงคำขอ price list ตาม id
- *
- * @param id - id ของคำขอ
- * @returns UseQueryResult ของ RequestPriceList
- * @example
- * ```ts
- * const { data } = useRequestPriceListById(params.id);
- * ```
- */
 export const useRequestPriceListById = crud.useById;
 
-/**
- * Hook สำหรับสร้างคำขอ price list ใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreateRequestPriceList().mutate({ vendor_id: "...", template_id: "..." });
- * ```
- */
 export const useCreateRequestPriceList = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไขคำขอ price list
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdateRequestPriceList().mutate({ id, vendor_id: "..." });
- * ```
- */
 export const useUpdateRequestPriceList = crud.useUpdate;
 
-/**
- * Hook สำหรับลบคำขอ price list
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeleteRequestPriceList().mutate(req.id);
- * ```
- */
 export const useDeleteRequestPriceList = crud.useDelete;
 
 // --- Export ---
@@ -87,11 +37,6 @@ interface ExportRequestPriceListArgs {
   columns: XlsxColumn<RequestPriceList>[];
 }
 
-/**
- * Hook ส่งออก RFP เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportRequestPriceList, isExporting }
- */
 export function useExportRequestPriceList() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

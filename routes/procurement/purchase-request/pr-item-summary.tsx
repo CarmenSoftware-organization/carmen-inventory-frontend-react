@@ -11,11 +11,6 @@ interface Props {
   readonly baseCurrencyCode?: string;
 }
 
-/**
- * แถว base-currency ของ PR item summary — render เป็น grid cells (fragment) วาง
- * เรียงใต้คอลัมน์ Subtotal · Discount · Net · Tax · Total ของ grid แถว Vendor
- * (ค่า × exchange rate) ไม่มี label · โชว์เฉพาะสกุลต่างประเทศ
- */
 export function PrItemSummary({
   subtotal,
   discountAmount,
@@ -39,14 +34,14 @@ export function PrItemSummary({
   return (
     <>
       {/* base currency code — คอลัมน์ Currency (col 3) แถวเดียวกับค่า base */}
-      <div className="text-muted-foreground text-micro flex items-center justify-end lg:col-start-3">
+      <div className="text-muted-foreground text-micro flex items-center justify-end col-start-3">
         {baseCurrencyCode}
       </div>
       {metrics.map((m, i) => (
         <div
           key={m.k}
           className={`text-muted-foreground text-micro flex items-center justify-end tabular-nums ${
-            i === 0 ? "lg:col-start-6" : ""
+            i === 0 ? "col-start-6" : ""
           }`}
         >
           {formatCurrency(m.v * exchangeRate)}

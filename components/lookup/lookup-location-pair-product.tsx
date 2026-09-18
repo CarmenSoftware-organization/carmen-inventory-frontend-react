@@ -11,7 +11,6 @@ import { LookupCombobox } from "./lookup-combobox";
 interface LookupLocationPairProductProps {
   readonly fromLocationId: string;
   readonly toLocationId: string;
-  /** workflow ของใบ — เป็นเกณฑ์กรองสินค้าร่วมกับคู่คลัง ไม่ใช่ของประดับ */
   readonly workflowId: string;
   readonly value: string;
   readonly onValueChange: (
@@ -21,14 +20,12 @@ interface LookupLocationPairProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly popoverWidth?: string;
   readonly modal?: boolean;
   readonly defaultLabel?: string;
   readonly error?: string;
-  /** เลือกเสร็จแล้วส่งโฟกัสต่อไปช่องถัดไป — ดู lib/field-focus */
   readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 

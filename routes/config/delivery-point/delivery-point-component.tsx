@@ -11,13 +11,6 @@ import { useDeliveryPointTable } from "./use-delivery-point-table";
 import { DELIVERY_POINT_FILTER_FIELDS } from "./delivery-point-filter-fields";
 import DeliveryPointCard from "./delivery-point-card";
 
-/**
- * Component หลักของหน้ารายการ Delivery Point ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Delivery Point
- * @example
- * // route: /config/delivery-point
- * <DeliveryPointComponent />
- */
 export default function DeliveryPointComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

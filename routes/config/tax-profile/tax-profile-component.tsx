@@ -15,13 +15,6 @@ const TaxProfileDialog = lazy(() =>
   })),
 );
 
-/**
- * Component หลักของหน้ารายการ Tax Profile ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Tax Profile
- * @example
- * // route: /config/tax-profile
- * <TaxProfileComponent />
- */
 export default function TaxProfileComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

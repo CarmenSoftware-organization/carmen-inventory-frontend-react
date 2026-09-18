@@ -9,7 +9,6 @@ interface EqQuantitySectionProps {
   readonly isDisabled: boolean;
 }
 
-/** Quantity & settings — available · total · usage count · avg usage time */
 export function EqQuantitySection({
   form,
   isDisabled,

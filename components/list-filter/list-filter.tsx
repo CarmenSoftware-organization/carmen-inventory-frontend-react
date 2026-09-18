@@ -24,14 +24,7 @@ interface ListFilterProps {
   readonly fields: readonly FilterFieldDef[];
   readonly values: Record<string, string>;
   readonly setValue: (key: string, value: string) => void;
-  /** ล้าง filter ทั้งชุด (จัดการ linked/hidden key ให้ครบ) — ไม่ส่ง = ไล่ล้างรายตัว */
   readonly onClearAll?: () => void;
-  /**
-   * เปิด SaveViewDialog — ไม่ส่ง = ไม่มีปุ่ม "Save Current View"
-   *
-   * saved view ผูกกับหน้า list (เก็บลง app config ราย pageKey) ตัวกรองที่ยืม UI
-   * ชุดนี้ไปใช้ที่อื่น เช่น ตารางรายการสินค้าในฟอร์ม PR ไม่มีอะไรให้เซฟ
-   */
   readonly onSaveClick?: () => void;
   readonly activeCount: number;
 }

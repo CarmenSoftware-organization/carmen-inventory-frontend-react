@@ -3,7 +3,6 @@ import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "../grn-form-schema";
 import { useGrnItemLine } from "./use-grn-item-line";
 
-/** ยอดเงินของแถว (plain text) — honor override */
 export function GrnAmountCell({
   form,
   index,

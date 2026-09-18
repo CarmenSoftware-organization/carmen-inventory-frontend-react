@@ -22,14 +22,6 @@ interface UseTaxProfileTableOptions {
   onDelete: (taxProfile: TaxProfile) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Tax Profile พร้อมคอลัมน์ name และ tax rate
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/tax-profile
- * const { table } = useTaxProfileTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useTaxProfileTable({
   data,
   totalRecords,

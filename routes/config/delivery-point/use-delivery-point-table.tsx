@@ -22,14 +22,6 @@ interface UseDeliveryPointTableOptions {
   onDelete: (deliveryPoint: DeliveryPoint) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Delivery Point พร้อมคอลัมน์ name
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/delivery-point
- * const { table } = useDeliveryPointTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useDeliveryPointTable({
   data,
   totalRecords,

@@ -66,11 +66,6 @@ interface BadgeProps
   asChild?: boolean;
 }
 
-/**
- * Badge component สำหรับแสดงสถานะ/แท็ก มีหลาย variant และขนาด
- * @param props - variant, size, asChild และ props ของ span
- * @returns React element ของ badge
- */
 function Badge({
   className,
   variant,

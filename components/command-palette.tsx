@@ -30,11 +30,9 @@ const CREATE_DOC_PATHS: readonly string[] = [
   "/store-operation/store-requisition",
 ];
 
-/** หัวกลุ่มเป็น micro-eyebrow ตาม ladder ของ DESIGN.md — ใช้ร่วมทุกกลุ่มในไฟล์นี้ */
 const GROUP_HEADING_CLASS =
   "**:[[cmdk-group-heading]]:text-micro-eyebrow **:[[cmdk-group-heading]]:tracking-[0.04em] **:[[cmdk-group-heading]]:uppercase";
 
-/** leaf ทั้งหมดใต้ tree (module ที่ไม่มีลูกก็คือ leaf ของตัวเอง เช่น dashboard) */
 function collectLeaves(mods: ModuleWithAccess[]): ModuleWithAccess[] {
   return mods.flatMap((m) =>
     m.subModules?.length ? collectLeaves(m.subModules) : [m],

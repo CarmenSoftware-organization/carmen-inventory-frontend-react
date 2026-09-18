@@ -1,11 +1,10 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 export interface RequestPriceListVendor {
   id: string;
   sequence_no: number;
-  vendor_id: string;
-  vendor_name: string;
-  vendor_code: string;
+  vendor: EntityRef | null;
   contact_person: string;
   contact_phone: string;
   contact_email: string;
@@ -36,7 +35,7 @@ export interface RequestPriceList {
     id: string;
     name: string;
     status: string;
-    currency: { id: string; code: string };
+    currency: EntityRef | null;
   };
   vendor_count: number;
   vendors: RequestPriceListVendor[];

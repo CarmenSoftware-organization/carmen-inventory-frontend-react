@@ -14,16 +14,6 @@ interface VendorCardProps {
   readonly onDelete: (item: Vendor) => void;
 }
 
-/**
- * การ์ดผู้ขาย 1 ราย สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product — ไฟล์นี้เหลือแค่ว่า
- * ข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตารางผู้ขาย + ผู้ติดต่อหลัก
- *
- * @param props.item - ข้อมูลผู้ขาย
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function VendorCard({
   item,
   onEdit,

@@ -31,7 +31,6 @@ export const EMPTY_PMS: PmsFormValues = {
   post_credit_card: false,
 };
 
-/** แปลงค่าจาก app_config เป็นค่า form — `api_key` ที่เป็น mask ถูกเก็บไว้ตามเดิม */
 export function toFormValues(
   value: Record<string, unknown> | undefined,
 ): PmsFormValues {
@@ -40,7 +39,6 @@ export function toFormValues(
   return parsed.success ? parsed.data : EMPTY_PMS;
 }
 
-/** แปลงค่า form เป็น payload ของ app_config */
 export function toApiValue(values: PmsFormValues): Record<string, unknown> {
   return { ...values };
 }

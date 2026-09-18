@@ -8,27 +8,10 @@ interface LookupCurrencyIsoProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
-/**
- * Lookup Popover สำหรับเลือกสกุลเงินตามมาตรฐาน ISO 4217
- *
- * ใช้ข้อมูลคงที่จาก constant `currenciesIso` (ไม่เรียก API) รองรับค้นหาด้วย code, name
- * หรือชื่อประเทศ แสดงผลในโหมด modal เพื่อใช้ใน dialog ซ้อน
- *
- * @param value - รหัส ISO currency ที่เลือก (เช่น "THB", "USD")
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ code
- * @returns JSX popover element ของ currency ISO lookup
- * @example
- * ```tsx
- * <Controller name="currency_code" control={form.control} render={({ field }) => (
- *   <LookupCurrencyIso value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupCurrencyIso({
   value,
   onValueChange,

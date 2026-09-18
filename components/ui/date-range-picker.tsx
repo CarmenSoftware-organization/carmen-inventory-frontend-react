@@ -27,25 +27,6 @@ interface DateRangePickerProps {
   readonly size?: "xs" | "sm" | "default";
 }
 
-/**
- * ปุ่มเลือกช่วงวันที่ (from/to) ผ่าน Popover + Calendar mode="range"
- *
- * value เก็บเป็น DateRange { from, to } (ISO strings) เพื่อ sync กับ
- * react-hook-form/URL ได้ง่าย ใช้ useProfile() เพื่อฟอร์แมตวันที่ตาม
- * ตั้งค่าของผู้ใช้ Popover เป็น modal และบล็อก pointer-down-outside
- * เพื่อให้ผู้ใช้เลือก range ครบก่อนปิด อัตโนมัติปิดเมื่อเลือกครบทั้ง from + to
- *
- * @param props - value, onValueChange, disabled, placeholder, numberOfMonths, size
- * @returns JSX element ของ date range picker
- * @example
- * ```tsx
- * <DateRangePicker
- *   value={range}
- *   onValueChange={setRange}
- *   numberOfMonths={2}
- * />
- * ```
- */
 export function DateRangePicker({
   value,
   onValueChange,

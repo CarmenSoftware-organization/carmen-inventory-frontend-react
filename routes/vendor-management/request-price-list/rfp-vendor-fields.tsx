@@ -43,20 +43,10 @@ const EMPTY = (
 
 interface RfpVendorFieldsProps {
   readonly form: UseFormReturn<RfpFormValues>;
-  /** ใบที่โหลดมา — ใช้อ่านข้อมูลฝั่ง server ที่แก้ไม่ได้ (ลิงก์ผู้ขาย/สถานะ/ใบราคา) */
   readonly requestPriceList?: RequestPriceList;
   readonly isDisabled: boolean;
 }
 
-/**
- * ส่วนผู้ขายของใบขอราคา — หัวข้อ (+ จำนวน + ปุ่มเพิ่ม) + ตาราง/กล่องว่าง
- *
- * ถือ field array, dialog เลือกผู้ขาย และ handler เพิ่ม/ลบไว้เองครบ แบบเดียวกับ
- * `*-item-fields.tsx` ของ PR/PO/SR/GRN — ฟอร์มส่งมาแค่ form กับโหมด
- *
- * แถวแก้ไม่ได้ (ข้อมูลติดต่อเติมจากผู้ติดต่อหลักของผู้ขายให้เอง) โหมดแก้ไขเพิ่ม
- * แค่ปุ่มลบกับปุ่มเพิ่มผู้ขาย
- */
 export function RfpVendorFields({
   form,
   requestPriceList,
@@ -73,13 +63,17 @@ export function RfpVendorFields({
   } = useFieldArray({ control: form.control, name: "vendors" });
 
   const rfpName = requestPriceList?.name ?? "";
+  // คำขอที่ยังไม่ถูกบันทึกไม่มี id — dialog ส่งอีเมลจะปิดปุ่มส่งพร้อมบอกเหตุผลเอง
+  const rfpId = requestPriceList?.id;
+  const startDate = requestPriceList?.start_date;
+  const endDate = requestPriceList?.end_date;
 
   // ข้อมูลฝั่ง server ที่ไม่ได้อยู่บนฟอร์ม (url_token / has_submitted / pricelist)
   // — หาแบบ by vendor_id ไม่ใช่ index เพราะลำดับแถวขยับได้ระหว่างเพิ่ม-ลบ
   const savedVendors = useMemo(
     () =>
       new Map<string, RequestPriceListVendor>(
-        (requestPriceList?.vendors ?? []).map((v) => [v.vendor_id, v]),
+        (requestPriceList?.vendors ?? []).map((v) => [v.vendor?.id ?? "", v]),
       ),
     [requestPriceList],
   );
@@ -200,8 +194,13 @@ export function RfpVendorFields({
           <VendorActionsCell
             urlToken={savedVendors.get(row.original.vendor_id)?.url_token ?? ""}
             email={row.original.contact_email}
+            rfpId={rfpId}
+            vendorId={row.original.vendor_id}
             vendorName={row.original.vendor_name ?? ""}
+            contactPerson={row.original.contact_person}
             rfpName={rfpName}
+            startDate={startDate}
+            endDate={endDate}
             isDisabled={isDisabled}
             onRemove={() => remove(row.index)}
           />
@@ -209,7 +208,16 @@ export function RfpVendorFields({
         meta: { headerClassName: "text-center", cellClassName: "text-right" },
       },
     ];
-  }, [tfl, isDisabled, remove, rfpName, savedVendors]);
+  }, [
+    tfl,
+    isDisabled,
+    remove,
+    rfpId,
+    rfpName,
+    startDate,
+    endDate,
+    savedVendors,
+  ]);
 
   const table = useReactTable({
     data: vendorRows,
@@ -251,7 +259,11 @@ export function RfpVendorFields({
         <DataGrid
           table={table}
           recordCount={vendorRows.length}
-          tableLayout={{ headerSticky: true }}
+          tableLayout={{
+            headerSticky: true,
+            // โหมดอ่านชิดบน — ชื่อผู้ขายมีรหัสเป็นบรรทัดรอง เซลล์อื่นไม่มี
+            cellAlign: isDisabled ? "top" : "middle",
+          }}
         >
           <DataGridContainer>
             <DataGridTable />

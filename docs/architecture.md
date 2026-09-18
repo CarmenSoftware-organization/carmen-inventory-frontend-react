@@ -103,7 +103,7 @@ fetched as a blob) rather than using an `/api/proxy/...` path.
 
 ## Routing
 
-`routes/router.tsx` is a React Router 7 data router (`createBrowserRouter`, 125 lazy
+`routes/router.tsx` is a React Router 7 data router (`createBrowserRouter`, 162 lazy
 routes). Shape:
 
 ```text
@@ -122,25 +122,37 @@ Sections: `config`, `procurement`, `inventory-management`, `vendor-management`,
 
 Conventions:
 
-- Pages live at `routes/<section>/<leaf>/page.tsx` and **must** `export const Component`.
-- Every section parent carries `RouteErrorBoundaryAdapter` so a thrown error degrades to
-  a scoped error panel, not a white screen.
-- `[id]` directories are detail routes converted to `useParams` (reference:
-  `routes/config/department/[id]/page.tsx`).
-- `next/dynamic` became `lazy()` + `<Suspense fallback={null}>` (reference:
-  `routes/config/currency/_components/currency-component.tsx`).
+- Routes are **colocated**: `routes/<module>/<feature>/<feature>.route.tsx`, which must
+  `export function Component`. Its components, hooks and tests live flat beside it —
+  no `page.tsx`, no `_components/`, no `[id]/` folders.
+- The list/new/edit trio is `<feature>.route.tsx` / `<feature>-new.route.tsx` /
+  `<feature>-edit.route.tsx`; dynamic segments are native React Router
+  (`path: ":id"` + `useParams`). Reference module sets: `routes/config/`,
+  `routes/procurement/`.
+- A module's shared bits sit in a plain `shared/` sub-folder. Large features may keep
+  organizational sub-folders (e.g. `routes/procurement/purchase-request/pr-item-cells/`).
+- **Where a hook lives** — the smallest scope that owns it: one feature →
+  `routes/<module>/<feature>/use-x.ts`; two or more features of one module →
+  `routes/<module>/shared/`; across modules → `hooks/`. No `index.ts` barrels.
+- Every route is covered by an error boundary: section parents and the standalone shell
+  routes carry `RouteErrorBoundaryAdapter` (in-layout), and the root route carries
+  `RootErrorBoundary` (`routes/root-error-boundary.tsx`) as a full-page catch-all, so
+  React Router's default error screen never shows.
+- `next/dynamic` became `lazy()` + `<Suspense fallback={null}>`.
 
-## Next.js compatibility layer
+## Module boundary
 
-The migration kept the source code's import surface and shims it:
+Enforced by ESLint: `routes/<A>/` may not import from `routes/<B>/`, and the shared layer
+(`components/` `hooks/` `lib/` `constant/` `types/`) may not import from `routes/` at all.
+`eslint.config.mjs` reads the module list off disk and emits one `no-restricted-imports`
+block per module, so a new module is covered the moment its folder exists. When two
+modules need the same thing, its home is the shared layer — never the other module.
 
-| Source import     | Shimmed to                                                            |
-| ----------------- | --------------------------------------------------------------------- |
-| `next/navigation` | `@/lib/compat/navigation` (`useRouter`, `usePathname`, `useParams`…)  |
-| `next/link`       | `@/lib/compat/link` (default export, `href` prop → react-router `to`) |
-| `next-intl`       | `use-intl`                                                            |
+## Imports — the compat layer is gone
 
-ESLint blocks direct `next*` imports. New code should import `react-router` directly.
+The `lib/compat/*` shims that the migration originally used (`next/navigation`,
+`next/link`) have been **removed**. Import `react-router` and `use-intl` directly;
+ESLint still blocks direct `next*` imports.
 
 ## i18n
 
@@ -155,17 +167,30 @@ rendering a blank screen. `document.documentElement.lang` tracks the active loca
 `public/config.json` is fetched at boot (`lib/runtime-config.ts`):
 
 ```json
-{ "BACKEND_URL": "https://gateway.example.com", "X_APP_ID": "carmen-inventory" }
+{
+  "BACKEND_URL": "https://gateway.example.com",
+  "X_APP_ID": "carmen-inventory",
+  "WS_URL": "wss://gateway.example.com/ws",
+  "LICENSE_ENFORCEMENT": true,
+  "OTEL_ENABLED": true,
+  "OTEL_ENVIRONMENT": "prod"
+}
 ```
 
+`BACKEND_URL` and `X_APP_ID` are required and validated at boot; the rest are optional
+(see the table in README.md for what each does and what its default is).
 `config.sample.json` is the template. The Docker image rewrites `config.json` from
-environment variables in its entrypoint. Never hardcode backend URLs in the bundle.
+environment variables in its entrypoint — but only the first three keys; the optional
+ones have no entrypoint support today. Never hardcode backend URLs in the bundle.
 
 ## Build & deploy
 
 - `bun run build` → `tsc` + `vite build` → `dist/`.
 - **S3/CloudFront** and **GCS/Cloud CDN**: static hosting; the backend **must** send CORS
   headers (the browser calls it directly). `scripts/deploy-{s3,gcs}.sh`.
+- **Vercel**: `vercel --prod` from a machine holding `public/config.prod.json`.
+  Git-triggered deploys are broken on this repo (webhook deployments come back
+  `CANCELED` before build — as of 2026-09-08).
 - **Docker (nginx)**: `scripts/deploy-docker.sh` builds an image whose nginx proxies
   `/api/*` to the backend itself, so **no backend CORS is required** in this mode. The
   entrypoint also materializes `config.json` from env vars.
@@ -173,14 +198,16 @@ environment variables in its entrypoint. Never hardcode backend URLs in the bund
   non-existent `/api/...` path on static hosting returns `index.html` with HTTP 200, so
   fetches must guard on `Content-Type`/`res.ok` rather than trusting status alone.
 
-See `docs/deploy.md` for the full deploy runbook.
+See [deploy.md](deploy.md) for the full deploy runbook and [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
 
 ## Testing
 
-Vitest (`bun test:run`). Co-located `__tests__/` and `*.test.ts(x)` files; the suite
-covers the http layer, auth, lib utilities, schemas, and selected hooks/components.
-`tsc --noEmit` + `bun run lint` (ESLint, including the `next*`-import guard) round out
-the gate.
+Vitest (`bun test:run`) — **1,522 tests across 195 files**. Co-located `__tests__/` and
+`*.test.ts(x)` files; the suite covers the http layer, auth, lib utilities, schemas,
+security headers/CSP hashes, license gating, and per-module hooks/components.
+`tsc --noEmit` + `bun run lint` (ESLint, including the `next*`-import guard and the
+module-boundary rules) round out the gate. CI (`.github/workflows/ci.yml`) runs
+lint → test → build on every push and PR to `main`.
 
 ## Known deltas from the source app
 
@@ -189,3 +216,4 @@ the gate.
 - Exchange-rate live rates need a backend endpoint (`GET /api/exchange-rate?base=XXX`);
   the panel degrades gracefully until then.
 - `app/` was removed (2026-06-12); `routes/` is the single home for all pages.
+- The `lib/compat/*` Next.js shims were removed; imports are `react-router` / `use-intl`.

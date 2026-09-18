@@ -11,7 +11,6 @@ import type {
 
 interface MoqTiersEditorProps {
   form: UseFormReturn<PricelistExternalDto>;
-  /** index ของ item ใน tb_pricelist_detail ที่ tier พวกนี้สังกัด */
   index: number;
 }
 

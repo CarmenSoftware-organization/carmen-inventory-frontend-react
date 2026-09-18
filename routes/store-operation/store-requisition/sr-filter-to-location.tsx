@@ -27,19 +27,6 @@ const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
   consignment: "secondary",
 };
 
-/**
- * Popover filter เลือก to location หลายรายการของหน้า SR
- * แสดง location ทุก type ที่ active
- * สร้าง filter string รูปแบบ "to_location_id|string:id1,id2"
- *
- * @param props - value ปัจจุบัน, onChange handler และ className
- * @param props.value - filter string ปัจจุบัน
- * @param props.onChange - callback เมื่อเลือก location
- * @param props.className - className เพิ่มเติมของ trigger
- * @returns คอมโพเนนต์ popover filter
- * @example
- * <SrFilterToLocation value={toLocation} onChange={setToLocation} />
- */
 export function SrFilterToLocation({
   value,
   onChange,

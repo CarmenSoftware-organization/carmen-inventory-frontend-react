@@ -47,7 +47,6 @@ export function applyDerivedAmounts(
   form.setValue(`items.${index}.total_price`, amounts.totalPrice);
 }
 
-/** ข้อความที่ auto-allocate ต้องใช้ — caller ส่งมาจาก useTranslations ของตัวเอง */
 export interface AutoAllocateMessages {
   allocating: (count: number) => string;
   allocated: (allocated: number, total: number) => string;

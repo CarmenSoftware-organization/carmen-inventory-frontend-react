@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Resolver } from "react-hook-form";
+import { type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,7 @@ import {
   type ProductDetail,
   type ProductFormValues,
   type ProductUnitConversion,
+  type ProductUnitConversionDetail,
   type CreateProductDto,
   createProductSchema,
 } from "@/types/product";
@@ -64,12 +65,12 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
     code: product.code,
     local_name: product.local_name ?? "",
     description: product.description ?? "",
-    inventory_unit_id: product.inventory_unit.id ?? "",
+    inventory_unit_id: product.inventory_unit?.id ?? "",
     product_category_id: product.product_category?.id ?? "",
     product_sub_category_id: product.product_sub_category?.id ?? "",
     product_item_group_id: product.product_item_group?.id ?? "",
     product_status_type: product.product_status_type,
-    tax_profile_id: product.tax_profile_id ?? "",
+    tax_profile_id: product.tax_profile?.id ?? "",
     is_used_in_recipe: product.is_used_in_recipe ?? false,
     is_sold_directly: product.is_sold_directly ?? false,
     barcode: product.barcode ?? "",
@@ -78,11 +79,46 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
     price_deviation_limit: product.price_deviation_limit ?? 0,
     qty_deviation_limit: product.qty_deviation_limit ?? 0,
     info: product.info ?? [],
-    locations: product.locations ?? [],
-    order_units: product.order_units ?? [],
-    ingredient_units: product.ingredient_units ?? [],
+    locations: (product.locations ?? []).map(toFormLocation),
+    order_units: (product.order_units ?? []).map(toFormUnit),
+    ingredient_units: (product.ingredient_units ?? []).map(toFormUnit),
   };
 };
+
+// ฝั่งอ่าน (detail) ส่ง location/shelf/from_unit/to_unit เป็น object แล้ว แต่
+// ฟอร์มยังแก้เป็น flat id เดิม (lookup ผูกกับ id ตรง ๆ ไม่ต้องมีชื่อคู่กันใน
+// form state — LookupShelf/LookupLocation/LookupUnit resolve ชื่อเองจาก id) จึง
+// ต้อง "แบน" object กลับเป็น flat ทั้งตอน hydrate ฟอร์ม และตอนเทียบ diff กับของเดิม
+const toFormLocation = (
+  loc: ProductDetail["locations"][number],
+): ProductFormValues["locations"][number] => ({
+  id: loc.id,
+  location_id: loc.location?.id ?? "",
+  location_code: loc.location?.code ?? null,
+  location_name: loc.location?.name ?? null,
+  location_type: loc.location_type ?? null,
+  is_active: loc.is_active ?? null,
+  shelf_id: loc.shelf?.id ?? null,
+  delivery_point_id: loc.delivery_point_id ?? null,
+  delivery_point: loc.delivery_point ?? null,
+  min_qty: loc.min_qty ?? null,
+  max_qty: loc.max_qty ?? null,
+  re_order_qty: loc.re_order_qty ?? null,
+  par_qty: loc.par_qty ?? null,
+});
+
+const toFormUnit = (
+  unit: ProductUnitConversionDetail,
+): ProductFormValues["order_units"][number] => ({
+  id: unit.id,
+  from_unit_id: unit.from_unit?.id ?? "",
+  from_unit_qty: unit.from_unit_qty,
+  to_unit_id: unit.to_unit?.id ?? "",
+  to_unit_qty: unit.to_unit_qty,
+  description: unit.description,
+  is_default: unit.is_default,
+  is_active: unit.is_active,
+});
 
 const mapUnitToPayload = (unit: ProductUnitConversion) => ({
   from_unit_id: unit.from_unit_id,
@@ -110,18 +146,18 @@ export const buildPayload = (
 ): CreateProductDto => {
   const locationDiff = buildItemChanges(
     values.locations,
-    product?.locations ?? [],
+    (product?.locations ?? []).map(toFormLocation),
     mapLocationToPayload,
   );
 
   const orderDiff = buildItemChanges(
     values.order_units,
-    product?.order_units ?? [],
+    (product?.order_units ?? []).map(toFormUnit),
     mapUnitToPayload,
   );
   const ingredientDiff = buildItemChanges(
     values.ingredient_units,
-    product?.ingredient_units ?? [],
+    (product?.ingredient_units ?? []).map(toFormUnit),
     mapUnitToPayload,
   );
 
@@ -191,6 +227,51 @@ interface ProductFormProps {
   readonly product?: ProductDetail;
 }
 
+const GENERAL_FIELDS = [
+  "name",
+  "code",
+  "local_name",
+  "description",
+  "barcode",
+  "sku",
+  "price",
+  "inventory_unit_id",
+  "tax_profile_id",
+  "product_category_id",
+  "product_sub_category_id",
+  "product_item_group_id",
+  "product_status_type",
+  "price_deviation_limit",
+  "qty_deviation_limit",
+  "is_used_in_recipe",
+  "is_sold_directly",
+] as const;
+
+const FORM_TABS = ["general", "units", "locations"] as const;
+type FormTab = (typeof FORM_TABS)[number];
+
+/**
+ * แท็บนี้มีช่องที่กรอกผิดไหม — ตัวเดียวที่ทั้งจุดแดงบนแท็บและการเด้งแท็บอัตโนมัติ
+ * ตอน submit ใช้ร่วมกัน แยกสองชุดเมื่อไรก็ได้จุดแดงขึ้นแท็บหนึ่งแต่เด้งไปอีกแท็บ
+ */
+function hasErrorInTab(
+  errors: FieldErrors<ProductFormValues>,
+  tab: FormTab,
+): boolean {
+  if (tab === "general") {
+    return (
+      GENERAL_FIELDS.some((key) => errors[key] !== undefined) ||
+      errors.info !== undefined
+    );
+  }
+  if (tab === "units") {
+    return (
+      errors.order_units !== undefined || errors.ingredient_units !== undefined
+    );
+  }
+  return errors.locations !== undefined;
+}
+
 export function ProductForm({ product }: ProductFormProps) {
   const t = useTranslations("productManagement.product");
   const tt = useTranslations("toast");
@@ -235,36 +316,13 @@ export function ProductForm({ product }: ProductFormProps) {
   });
   const { form, isAdd, isEdit, isDisabled } = f;
 
-  const fieldErrors = form.formState.errors;
-  const GENERAL_FIELDS = [
-    "name",
-    "code",
-    "local_name",
-    "description",
-    "barcode",
-    "sku",
-    "price",
-    "inventory_unit_id",
-    "tax_profile_id",
-    "product_category_id",
-    "product_sub_category_id",
-    "product_item_group_id",
-    "product_status_type",
-    "price_deviation_limit",
-    "qty_deviation_limit",
-    "is_used_in_recipe",
-    "is_sold_directly",
-  ] as const;
-  const hasGeneralError =
-    GENERAL_FIELDS.some(
-      (key) => fieldErrors[key as keyof typeof fieldErrors] !== undefined,
-    ) || fieldErrors.info !== undefined;
-  const hasUnitsError =
-    fieldErrors.order_units !== undefined ||
-    fieldErrors.ingredient_units !== undefined;
-  const hasLocationsError = fieldErrors.locations !== undefined;
+  const [tab, setTab] = useState<string>("general");
 
-  /** อัปโหลดรูปที่ค้างอยู่ (ถ้ามี) — ต้องมี id ของ product แล้วเท่านั้น */
+  const fieldErrors = form.formState.errors;
+  const hasGeneralError = hasErrorInTab(fieldErrors, "general");
+  const hasUnitsError = hasErrorInTab(fieldErrors, "units");
+  const hasLocationsError = hasErrorInTab(fieldErrors, "locations");
+
   const flushPendingImages = async (id: string) => {
     if (pendingImages.length === 0) return;
     await uploadImages.mutateAsync({ product_id: id, images: pendingImages });
@@ -321,20 +379,21 @@ export function ProductForm({ product }: ProductFormProps) {
         }
       }
     } catch {
-      // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ค้างอยู่หน้าเดิมให้แก้ต่อ
-      // เปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty จะออกได้โดยไม่ถาม
       f.setIsSubmitting(false);
     }
   };
 
-  /**
-   * กรอกไม่ครบ → บอกสั้น ๆ ว่าไม่ครบแล้วพาไปที่ช่องแรกที่ผิด (กติกาเดียวกับ PR)
-   *
-   * เดิมไล่ยิงทุก message มาต่อกันเป็นพรืดใน toast เดียว — ยาวจนอ่านไม่ทัน
-   * และซ้ำกับกรอบแดง/ข้อความใต้ช่องที่บอกอยู่แล้วว่าช่องไหนขาด
-   */
-  const onInvalid = () => {
+  const onInvalid = (errs: FieldErrors<ProductFormValues>) => {
     toast.warning(tv("incompleteDocument"));
+    // ช่องที่ผิดอยู่คนละแท็บกับที่เปิดค้างไว้ = ผู้ใช้เห็นแต่ toast แล้วหาไม่เจอว่า
+    // ผิดตรงไหน เด้งไปแท็บแรกที่มีปัญหาก่อน แล้วค่อยเลื่อนไปหาช่อง — ต้องรอให้
+    // TabsContent ของแท็บนั้น mount ก่อน ไม่งั้นเลื่อนไปหา element ที่ยังไม่มี
+    const target = FORM_TABS.find((name) => hasErrorInTab(errs, name));
+    if (target && target !== tab) {
+      setTab(target);
+      requestAnimationFrame(() => scrollToFirstInvalidField());
+      return;
+    }
     scrollToFirstInvalidField();
   };
 
@@ -358,7 +417,7 @@ export function ProductForm({ product }: ProductFormProps) {
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         className="space-y-4"
       >
-        <Tabs defaultValue="general">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList variant="line">
             <TabsTrigger value="general">
               {t("tabGeneral")}

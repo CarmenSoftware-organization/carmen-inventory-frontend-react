@@ -25,18 +25,6 @@ interface UseRecipeTableOptions {
   onDelete: (recipe: Recipe) => void;
 }
 
-/**
- * Hook สร้างคอลัมน์และ instance ของตารางสูตรอาหารสำหรับ DataGrid
- * @param options - ข้อมูล recipes, cuisines, categories, params และ callbacks
- * @returns table instance พร้อมใช้งานกับ DataGrid
- * @example
- * const { table } = useRecipeTable({
- *   recipes, cuisines, categories,
- *   totalRecords, params, tableConfig,
- *   onEdit: (r) => navigate(`/operation-plan/recipe/${r.id}`),
- *   onDelete: (r) => setDeleteTarget(r),
- * });
- */
 export function useRecipeTable({
   recipes,
   cuisines,

@@ -6,7 +6,6 @@ import type { WORKFLOW_TYPE } from "@/types/workflows";
 
 interface CreateWorkflowGateProps {
   readonly workflowType: WORKFLOW_TYPE;
-  /** เหตุผลที่สร้างไม่ได้ ในภาษาของโมดูลนั้น */
   readonly description: string;
   readonly children: ReactNode;
 }

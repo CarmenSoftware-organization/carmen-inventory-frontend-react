@@ -1,6 +1,7 @@
 import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 // --- Workflow ---
 
@@ -30,22 +31,19 @@ export interface GrnLocationItem {
 
 interface GrnDetailItem extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
-  good_received_note_detail_id: string;
-  inventory_transaction_id: string | null;
-  purchase_order_detail_purchase_request_detail_id: string | null;
+  good_received_note_detail: EntityRef | null;
+  inventory_transaction: EntityRef | null;
+  purchase_order_detail_purchase_request_detail: EntityRef | null;
   order_qty: number;
-  order_unit_id: string | null;
-  order_unit_name: string | null;
+  order_unit: EntityRef | null;
   order_unit_conversion_factor: number;
   order_base_qty: number;
   received_qty: number;
-  received_unit_id: string | null;
-  received_unit_name: string | null;
+  received_unit: EntityRef | null;
   received_unit_conversion_factor: number;
   received_base_qty: number;
   foc_qty: number;
-  foc_unit_id: string | null;
-  foc_unit_name: string | null;
+  foc_unit: EntityRef | null;
   foc_unit_conversion_factor: number;
   foc_base_qty: number;
   base_tax_amount: number;
@@ -62,23 +60,16 @@ interface GrnDetailItem extends TaxFields, DiscountFields, ItemMoneyFields {
 
 interface GoodsReceiveNoteDetail {
   id: string;
-  good_received_note_id: string;
+  good_received_note: EntityRef | null;
   sequence_no: number;
-  purchase_order_id: string | null;
+  purchase_order: EntityRef | null;
   po_no?: string | null;
-  purchase_order_detail_id: string | null;
-  location_id: string | null;
-  location_code: string | null;
-  location_name: string;
+  purchase_order_detail: EntityRef | null;
+  location: EntityRef | null;
   location_type: string | null;
-  product_id: string;
-  product_code: string | null;
-  product_name: string;
-  product_local_name: string | null;
+  product: EntityRef | null;
   product_sku: string | null;
   items: GrnDetailItem[];
-  /** optimistic lock ของ "แถวสินค้า" — ตัวที่หลังบ้านเทียบตอน PATCH
-      (ไม่ใช่ doc_version ของ items ข้างในซึ่งเดินคนละเลข) */
   doc_version?: number;
 }
 
@@ -86,13 +77,14 @@ interface GoodsReceiveNoteDetail {
 
 interface ExtraCostDetailItem {
   id?: string;
-  extra_cost_type_id: string;
+  // ยืนยันจาก gen-ref-map.ts เท่านั้น — extra_cost_detail ว่างเปล่าทั้งใน
+  // baseline และ live sample จึงไม่มี payload จริงให้ยืนยัน shape นี้ (ดูรายงาน)
+  extra_cost_type: EntityRef | null;
   note: string;
   info: Record<string, unknown> | null;
   dimension: Record<string, unknown> | null;
   amount: number;
-  tax_profile_id: string | null;
-  tax_profile_name: string;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   tax_amount: number;
   is_tax_adjustment: boolean;
@@ -113,7 +105,6 @@ interface GrnExtraCost {
 
 // --- Main GRN ---
 
-/** GRN posting type — mirrors backend `enum_good_received_note_post_type`. */
 type GrnPostType = "ap" | "consignment" | "cash";
 
 export interface GoodsReceiveNote {
@@ -129,26 +120,25 @@ export interface GoodsReceiveNote {
   doc_type: string;
   post_type: GrnPostType | null;
   signature_image_url: string | null;
-  received_by_id: string | null;
-  received_by_name: string | null;
-  credit_term_id: string | null;
-  credit_term_name: string | null;
+  received_by: EntityRef | null;
+  credit_term: EntityRef | null;
   credit_term_days: number | null;
   payment_due_date: string | null;
   is_active: boolean;
-  vendor_id: string;
-  vendor_name: string;
-  currency_id: string | null;
-  currency_code?: string;
-  currency_name?: string | null;
+  // list endpoint: display-only string, ไม่มี vendor_id คู่กัน (ยืนยันจาก live
+  // 20/20 แถว — GRN_LIST_REFS ประกาศ vendor:['id','name'] ไว้จริงแต่ collapse
+  // ไม่มีวันทำงานเพราะไม่มี vendor_id ให้ trigger เหมือนเคส PO buyer_name)
+  vendor_name?: string;
+  // detail endpoint เท่านั้น
+  vendor?: EntityRef | null;
+  currency: EntityRef | null;
   exchange_rate: number | null;
   exchange_rate_date: string | null;
   total_amount?: number;
   info: Record<string, unknown> | null;
   dimension: unknown[] | Record<string, unknown> | null;
   // Workflow
-  workflow_id: string | null;
-  workflow_name: string | null;
+  workflow: EntityRef | null;
   workflow_history: Record<string, unknown> | WorkflowHistoryEntry[];
   workflow_current_stage: string | null;
   workflow_previous_stage: string | null;
@@ -184,7 +174,6 @@ export interface GrnDetailPayload {
   received_base_qty: number;
   received_base_unit_id?: string | null;
   received_unit_conversion_factor: number;
-  /** ราคาต่อหน่วยที่รับ — backend บังคับเมื่อ received_qty > 0 */
   received_price: number;
   tax_profile_id?: string | null;
   tax_rate: number;

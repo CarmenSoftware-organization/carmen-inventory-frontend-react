@@ -2,19 +2,10 @@ import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 interface SidebarToggleIconProps {
-  /** Reflects sidebar state — fills the left rail + nudges the chevron when open */
   readonly open?: boolean;
   readonly className?: string;
 }
 
-/**
- * Sidebar toggle icon tuned to Apple's SF Symbols `sidebar.left` aesthetic: a
- * tight, lightly rounded panel with a state-aware left rail. When open, the rail
- * fills and the chevron points inward (collapse); when closed it empties and
- * points outward (expand). Geometry is "Apple tight" — thin 1.5 stroke, snug
- * corners — and motion is a quiet fade (no slide flourish). Sized by the parent
- * Button's `[&_svg]` rules — pass `className` to tune.
- */
 export function SidebarToggleIcon({ open, className }: SidebarToggleIconProps) {
   const clipId = useId();
 

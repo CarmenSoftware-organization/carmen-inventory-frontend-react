@@ -3,11 +3,6 @@ import { Label as LabelPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Label component ห่อ Radix Label พร้อมสไตล์มาตรฐาน
- * @param props - props ของ Radix Label
- * @returns React element label
- */
 function Label({
   className,
   ...props

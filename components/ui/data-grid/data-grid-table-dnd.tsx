@@ -13,7 +13,6 @@ import {
   DataGridTableHeadRow,
   DataGridTableHeadRowCell,
   DataGridTableHeadRowCellResize,
-  DataGridTableRowSpacer,
 } from "@/components/ui/data-grid/data-grid-table";
 import {
   closestCenter,
@@ -43,22 +42,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { GripVerticalIcon } from "lucide-react";
 
-/**
- * Sortable header cell สำหรับลาก columns
- *
- * Render header cell ที่รองรับ drag-to-reorder ผ่าน `useSortable` ของ
- * `@dnd-kit/sortable` แสดงปุ่ม GripVertical เป็น drag handle (เมื่อ
- * `enableColumnOrdering !== false`) และ render header content + resize handle
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.header - Header instance ของ TanStack Table
- * @returns JSX element ของ sortable header cell
- * @example
- * ```tsx
- * <DataGridTableDndHeader header={header} />
- * ```
- */
 function DataGridTableDndHeader<TData>({
   header,
 }: {
@@ -128,21 +111,6 @@ function DataGridTableDndHeader<TData>({
   );
 }
 
-/**
- * Sortable body cell ของ DataGrid
- *
- * Render body cell ที่เลื่อนตาม column drag ผ่าน `useSortable` ใช้ id ของ
- * column id เพื่อ sync กับ header drag
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.cell - Cell instance ของ TanStack Table
- * @returns JSX element ของ sortable cell
- * @example
- * ```tsx
- * <DataGridTableDndCell cell={cell} />
- * ```
- */
 function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
   const { isDragging, setNodeRef, transform, transition } = useSortable({
     id: cell.column.id,
@@ -164,23 +132,6 @@ function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
   );
 }
 
-/**
- * DataGrid table variant รองรับลาก columns เพื่อ reorder
- *
- * Render `<table>` ภายใน `DndContext` ของ @dnd-kit รองรับการลาก columns
- * ในแนวนอนและจำกัดไม่ให้ drag เลย container ใช้ `SortableContext` แบบ
- * `horizontalListSortingStrategy` รองรับ skeleton/empty state เหมือน
- * `DataGridTable` ปกติ
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.handleDragEnd - callback เมื่อ drag เสร็จ รับ DragEndEvent
- * @returns JSX element ของ table พร้อม DndContext
- * @example
- * ```tsx
- * <DataGridTableDnd handleDragEnd={(e) => reorderColumns(e)} />
- * ```
- */
 function DataGridTableDnd<TData>({
   handleDragEnd,
 }: {
@@ -249,10 +200,6 @@ function DataGridTableDnd<TData>({
               );
             })}
           </DataGridTableHead>
-
-          {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && (
-            <DataGridTableRowSpacer />
-          )}
 
           <DataGridTableBody>
             {props.loadingMode === "skeleton" &&

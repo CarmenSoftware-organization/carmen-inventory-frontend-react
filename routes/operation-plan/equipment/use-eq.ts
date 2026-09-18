@@ -19,40 +19,10 @@ const crud = createConfigCrud<Equipment, CreateEquipmentDto>({
   updateMethod: "PATCH",
 });
 
-/**
- * Hook ดึงรายการอุปกรณ์ (equipment) ของ recipe module
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<Equipment>
- * @example
- * ```ts
- * const { data } = useEquipment({ page: 1, perpage: 20 });
- * ```
- */
 export const useEquipment = crud.useList;
 
-/**
- * Hook ดึงข้อมูลอุปกรณ์ตาม id
- *
- * @param id - id ของอุปกรณ์
- * @returns UseQueryResult ของ Equipment
- * @example
- * ```ts
- * const { data } = useEquipmentById(params.id);
- * ```
- */
 export const useEquipmentById = crud.useById;
 
-/**
- * Hook สำหรับลบอุปกรณ์
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeleteEquipment().mutate(eq.id);
- * ```
- */
 export const useDeleteEquipment = crud.useDelete;
 
 /**
@@ -70,7 +40,6 @@ function buildEquipmentFormData(
   return form;
 }
 
-/** ส่ง multipart request ผ่าน proxy แล้ว normalize error เป็น ApiError (เหมือน useApiMutation) */
 async function sendEquipmentMultipart(
   url: string,
   method: "POST" | "PATCH",
@@ -94,18 +63,6 @@ async function sendEquipmentMultipart(
   return res.json().catch(() => ({}));
 }
 
-/**
- * Hook สำหรับสร้างอุปกรณ์ใหม่ (multipart: metadata + รูป)
- *
- * ส่ง POST แบบ multipart/form-data ผ่าน proxy แล้ว invalidate list หลังสำเร็จ
- * รูปไม่บังคับ — ถ้าไม่แนบจะสร้างอุปกรณ์โดยไม่มีรูป
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreateEquipment().mutate({ code: "EQ01", name: "Oven", image: file });
- * ```
- */
 export function useCreateEquipment() {
   const buCode = useBuCode();
   const queryClient = useQueryClient();

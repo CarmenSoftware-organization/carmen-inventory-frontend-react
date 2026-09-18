@@ -23,7 +23,6 @@ const HANDLERS: Record<string, string> = {
   SR: "store-operation/store-requisition/use-sr-form-actions.ts",
 };
 
-/** ไฟล์ที่ประกอบ payload แยกจากไฟล์ handler — ตรวจรวมกันเป็นโมดูลเดียว */
 const EXTRA: Record<string, string[]> = {
   PO: ["procurement/purchase-order/build-po-payload.ts"],
 };
@@ -37,7 +36,6 @@ const sources = Object.fromEntries(
   ]),
 );
 
-/** ตัดคอมเมนต์ออกก่อนตรวจ — คอมเมนต์เล่าประวัติบั๊กได้ ไม่ใช่โค้ดที่รัน */
 function code(src: string): string {
   return src
     .replace(/\/\*[\s\S]*?\*\//g, "")

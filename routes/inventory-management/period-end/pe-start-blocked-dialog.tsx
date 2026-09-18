@@ -23,7 +23,6 @@ import type {
 } from "@/types/period-end";
 import { buildDocumentPath } from "./pe-document-paths";
 
-/** ลำดับที่แสดง — เรียงตามความถี่ที่มันเป็นตัวบล็อกจริงหน้างาน */
 const BLOCKER_ORDER: readonly StartCountingBlockerKey[] = [
   "grn",
   "stock_in",
@@ -38,7 +37,6 @@ const STATUS_CONFIGS: Record<StartCountingBlockerKey, StatusConfig> = {
   sr: SR_STATUS_CONFIG,
 };
 
-/** blocker key → key ของ `buildDocumentPath` (si/so ใช้หน้า Inventory Adjustment ร่วมกัน) */
 const DOCUMENT_KEY = {
   grn: "grn",
   stock_in: "si",

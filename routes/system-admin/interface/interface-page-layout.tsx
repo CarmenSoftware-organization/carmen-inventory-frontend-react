@@ -64,7 +64,6 @@ export function InterfacePageLayout({
   readonly isDirty: boolean;
   readonly onRetry: () => void;
   readonly errorMessage: string;
-  /** คืนค่าฟอร์มเป็นค่าที่บันทึกไว้ (ปกติ `form.reset(...)`) — เรียกเมื่อกด Cancel */
   readonly onCancel: () => void;
   readonly saveLabel: string;
   readonly children: React.ReactNode;

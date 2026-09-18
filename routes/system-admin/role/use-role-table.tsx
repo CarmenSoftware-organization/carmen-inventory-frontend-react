@@ -23,13 +23,6 @@ interface UseRoleTableOptions {
   onDelete: (item: Role) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับตาราง Role พร้อมคอลัมน์เลือก/ลำดับ/ชื่อ/จำนวนสิทธิ์/action
- * @param options - items, totalRecords, params, tableConfig, onEdit และ onDelete
- * @returns react-table instance
- * @example
- * const table = useRoleTable({ items, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useRoleTable({
   items,
   totalRecords,

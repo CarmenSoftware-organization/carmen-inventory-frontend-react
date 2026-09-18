@@ -1,50 +1,54 @@
 import { memo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
-import { LookupProduct } from "@/components/lookup/lookup-product";
+import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import type { GrnFormValues } from "../grn-form-schema";
 
-/** Product lookup ของแถวที่กรอกเอง — เลือกแล้วล้างคลังเก่าทิ้ง */
 const ManualProductCell = memo(function ManualProductCell({
   form,
   index,
-  defaultOpen,
+  open,
+  onOpenChange,
   onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
-  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onPicked?: () => void;
 }) {
   "use no memo";
+  const [locationId, productName] = useWatch({
+    control: form.control,
+    name: [`items.${index}.location_id`, `items.${index}.product_name`] as const,
+  });
+
   return (
     <Controller
       control={form.control}
       name={`items.${index}.product_id`}
       render={({ field, fieldState }) => (
-        <LookupProduct
+        <LookupProductInLocation
+          locationId={locationId ?? ""}
           value={field.value ?? ""}
           onValueChange={(value, product) => {
-            const changed = value !== field.value;
             field.onChange(value);
             if (product) {
               form.setValue(`items.${index}.product_name`, product.name, {
                 shouldDirty: true,
               });
-            }
-            // คลังที่เลือกไว้ผูกกับสินค้าตัวเดิม (LookupProductLocation กรองตาม
-            // สินค้า) เปลี่ยนสินค้าแล้วไม่ล้าง = แถวถือคลังที่สินค้าใหม่ไม่มี
-            if (changed) {
-              form.setValue(`items.${index}.location_id`, null, {
-                shouldDirty: true,
-              });
-              form.setValue(`items.${index}.location_name`, "");
-              form.setValue(`items.${index}.location_code`, "");
-              form.setValue(`items.${index}.location_type`, "");
+              form.setValue(
+                `items.${index}.product_local_name`,
+                product.local_name ?? "",
+              );
             }
             if (value) onPicked?.();
           }}
-          defaultOpen={defaultOpen}
+          // ชื่อที่บันทึกไว้กับใบ — ลิสต์ paginate 30 ตัว/หน้า สินค้าที่เลือกไว้
+          // อาจอยู่หน้าอื่น ไม่ส่งไป = ช่องว่างเปล่าทั้งที่แถวมีสินค้าอยู่
+          defaultLabel={productName || undefined}
+          open={open}
+          onOpenChange={onOpenChange}
           className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />
@@ -53,21 +57,21 @@ const ManualProductCell = memo(function ManualProductCell({
   );
 });
 
-/** Product cell — แถวที่กรอกเอง: lookup · แถวที่มาจาก PO: ชื่ออย่างเดียว */
 export function ProductCell({
   form,
   index,
   isManual,
   disabled,
-  autoOpen,
+  open,
+  onOpenChange,
   onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
-  /** แถวนี้ไม่ได้อ้าง PO — สินค้าเลือกเองได้ */
   isManual: boolean;
   disabled: boolean;
-  autoOpen: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onPicked: () => void;
 }) {
   "use no memo";
@@ -83,13 +87,26 @@ export function ProductCell({
   // แก้ไม่ได้ → ชื่อสินค้าเป็นตัวหนังสือ (เกณฑ์เดียวกับ PO) · แถวที่อ้าง PO ก็
   // เปลี่ยนสินค้าไม่ได้แม้ใบจะอยู่โหมดแก้ไข — สินค้าถูกกำหนดมาจากใบสั่งซื้อแล้ว
   if (isManual && !disabled) {
+    // ชื่อท้องถิ่นโชว์ใต้ตัวเลือกด้วย — ของเดิมมีเฉพาะโหมดอ่าน พอกด Edit บรรทัด
+    // ภาษาไทยหายไปทั้งคอลัมน์ ทั้งที่คนกรอกใช้ชื่อนั้นยืนยันว่าเลือกถูกตัว
     return (
-      <ManualProductCell
-        form={form}
-        index={index}
-        defaultOpen={autoOpen}
-        onPicked={onPicked}
-      />
+      <div className="min-w-0">
+        <ManualProductCell
+          form={form}
+          index={index}
+          open={open}
+          onOpenChange={onOpenChange}
+          onPicked={onPicked}
+        />
+        {productLocalName && (
+          <p
+            className="text-muted-foreground text-micro-legal truncate py-0.5 leading-[normal]"
+            title={productLocalName}
+          >
+            {productLocalName}
+          </p>
+        )}
+      </div>
     );
   }
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;

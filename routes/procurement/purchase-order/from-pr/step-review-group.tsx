@@ -15,10 +15,9 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { formatCurrency } from "@/lib/currency-utils";
+import { formatCurrency, round2 } from "@/lib/currency-utils";
 import type { GroupPrPo, GroupPrProduct } from "@/types/purchase-order";
 
-/** สินค้าของใบสั่งซื้อที่จะเกิดขึ้น — กางจากแถวใบ */
 function ExpandedProducts({
   products,
   currencyCode,
@@ -74,22 +73,38 @@ function ExpandedProducts({
   );
 }
 
-/**
- * ตรวจสอบใบสั่งซื้อที่จะถูกสร้าง — หลังบ้านจัดกลุ่มใบขอซื้อตามผู้ขายกับสกุลเงิน
- * มาให้แล้ว หน้านี้แค่แสดงผลลัพธ์ก่อนกดยืนยัน แก้อะไรไม่ได้
- */
-export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
+export function StepReviewGroup({
+  data,
+  workflowName,
+}: {
+  readonly data: GroupPrPo[];
+  readonly workflowName?: string;
+}) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
+  const { dateFormat, defaultCurrencyCode } = useProfile();
   const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  const grandTotal = useMemo(
+    () =>
+      round2(
+        data.reduce((sum, po) => {
+          const docTotal = (po.products ?? []).reduce(
+            (acc, p) => acc + (Number(p.total) || 0),
+            0,
+          );
+          return sum + docTotal * (Number(po.exchange_rate) || 1);
+        }, 0),
+      ),
+    [data],
+  );
 
   const columns = useMemo<ColumnDef<GroupPrPo>[]>(
     () => [
       {
         id: "expander",
-        size: 32,
+        size: 40,
         header: () => null,
         cell: ({ row }) => (
           <button
@@ -112,9 +127,19 @@ export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
           ),
         },
       },
-      { accessorKey: "po_no", header: tfl("poNo") },
-      { accessorKey: "vendor_name", header: tfl("vendor") },
+      {
+        id: "index",
+        header: "#",
+        size: 40,
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground tabular-nums",
+        },
+        cell: ({ row }) => row.index + 1,
+      },
       { accessorKey: "pr", header: t("prRef") },
+      { accessorKey: "vendor_name", header: tfl("vendor") },
       {
         accessorKey: "delivery_date",
         header: tfl("deliveryDate"),
@@ -157,14 +182,31 @@ export function StepReviewGroup({ data }: { data: GroupPrPo[] }) {
   });
 
   return (
-    <DataGrid
-      table={table}
-      recordCount={data.length}
-      tableLayout={{ headerSticky: true, rowBorder: true }}
-    >
-      <DataGridContainer scroll className="max-h-[28rem]">
-        <DataGridTable />
-      </DataGridContainer>
-    </DataGrid>
+    <div className="space-y-2">
+      {workflowName && (
+        <p className="text-muted-foreground text-xs">
+          {t("workflowLabel")}:{" "}
+          <span className="text-foreground font-medium">{workflowName}</span>
+        </p>
+      )}
+      <DataGrid
+        table={table}
+        recordCount={data.length}
+        tableLayout={{ headerSticky: true, rowBorder: true }}
+      >
+        <DataGridContainer scroll className="max-h-112">
+          <DataGridTable />
+        </DataGridContainer>
+        {data.length > 0 && (
+          <div className="border-border/60 flex items-center justify-end gap-2 border-t px-3 py-2 text-xs">
+            <span className="text-muted-foreground">{tfl("grandTotal")}</span>
+            <span className="font-semibold tabular-nums">
+              {formatCurrency(grandTotal)}
+            </span>
+            <span className="text-muted-foreground">{defaultCurrencyCode}</span>
+          </div>
+        )}
+      </DataGrid>
+    </div>
   );
 }

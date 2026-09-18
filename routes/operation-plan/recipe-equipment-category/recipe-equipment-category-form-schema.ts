@@ -1,12 +1,6 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 
-/**
- * สร้าง Zod schema สำหรับตรวจสอบฟอร์มหมวดหมู่อุปกรณ์สูตรอาหารพร้อมข้อความแปลภาษา
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema object
- */
 export function createRecipeEquipmentCategorySchema(
   tv: TranslationFn,
   tf: TranslationFn,

@@ -20,64 +20,14 @@ const crud = createConfigCrud<PriceListTemplate, CreatePriceListTemplateDto>({
   cacheProfile: CACHE_NORMAL,
 });
 
-/**
- * Hook ดึงรายการ price list template แบบแบ่งหน้า
- *
- * Re-export จาก factory ใช้สำหรับ vendor price request workflow
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<PriceListTemplate>
- * @example
- * ```ts
- * const { data } = usePriceListTemplate({ page: 1, perpage: 20 });
- * ```
- */
 export const usePriceListTemplate = crud.useList;
 
-/**
- * Hook ดึง price list template ตาม id
- *
- * @param id - id ของ template
- * @returns UseQueryResult ของ PriceListTemplate
- * @example
- * ```ts
- * const { data } = usePriceListTemplateById(params.id);
- * ```
- */
 export const usePriceListTemplateById = crud.useById;
 
-/**
- * Hook สำหรับสร้าง price list template ใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreatePriceListTemplate().mutate({ code: "TPL01", name: "Monthly" });
- * ```
- */
 export const useCreatePriceListTemplate = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไข price list template
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdatePriceListTemplate().mutate({ id, code: "TPL02" });
- * ```
- */
 export const useUpdatePriceListTemplate = crud.useUpdate;
 
-/**
- * Hook สำหรับลบ price list template
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeletePriceListTemplate().mutate(tpl.id);
- * ```
- */
 export const useDeletePriceListTemplate = crud.useDelete;
 
 // --- Export ---
@@ -87,11 +37,6 @@ interface ExportPriceListTemplateArgs {
   columns: XlsxColumn<PriceListTemplate>[];
 }
 
-/**
- * Hook ส่งออก Price List Template เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบัน
- * และ endpoint เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportPriceListTemplate, isExporting }
- */
 export function useExportPriceListTemplate() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

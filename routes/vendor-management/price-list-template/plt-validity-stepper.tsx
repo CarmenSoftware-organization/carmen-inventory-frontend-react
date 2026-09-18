@@ -18,10 +18,6 @@ interface PltValidityStepperProps {
   };
 }
 
-/**
- * Validity period stepper — tile กลางมี input ใหญ่ + ปุ่ม -/+
- * รองรับ preset chips (7/14/30/60/90) ด้านล่าง
- */
 export function PltValidityStepper({
   value,
   onChange,

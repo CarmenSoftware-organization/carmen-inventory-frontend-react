@@ -19,32 +19,18 @@ interface LookupSubCategoryProps {
   readonly error?: string;
 }
 
-/**
- * กรอง sub-category ให้เหลือเฉพาะที่ active และ (ถ้ามี filterCategoryId) อยู่ใต้ category นั้น
- * แยกออกมาเป็น pure function เพื่อทดสอบ cascade filter ได้โดยตรง
- */
 export function filterActiveSubCategories(
   items: SubCategoryDto[],
   filterCategoryId?: string,
 ): SubCategoryDto[] {
   return items.filter((sc) => {
     if (!sc.is_active) return false;
-    if (filterCategoryId && sc.product_category_id !== filterCategoryId)
+    if (filterCategoryId && sc.product_category?.id !== filterCategoryId)
       return false;
     return true;
   });
 }
 
-/**
- * Lookup Popover สำหรับเลือกหมวดหมู่ย่อย (Sub Category)
- *
- * ดึงข้อมูลผ่าน `useSubCategory({ perpage: -1 })` แบบ lazy (เปิด popover ครั้งแรกหรือมีค่าเลือกไว้)
- * รองรับ cascading จาก `filterCategoryId` (กรองตาม product_category_id) มีปุ่ม "none" ล้างค่า
- *
- * @param value - id ของ sub-category ที่เลือกอยู่
- * @param onValueChange - callback ส่ง id และ object SubCategoryDto
- * @returns JSX popover element ของ sub-category lookup
- */
 export function LookupSubCategory({
   value,
   onValueChange,

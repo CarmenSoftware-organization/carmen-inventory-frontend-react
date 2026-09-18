@@ -13,11 +13,6 @@ export const EMPTY_FORM: RoleFormValues = {
   permissions: [],
 };
 
-/**
- * คืนค่าเริ่มต้นของฟอร์ม Role จากข้อมูล RoleDetail
- * @param role - ข้อมูล Role ที่ต้องการใช้เป็นค่าเริ่มต้น
- * @returns ค่าเริ่มต้นของ RoleFormValues
- */
 export function getDefaultValues(role?: RoleDetail): RoleFormValues {
   if (!role) return EMPTY_FORM;
   return {

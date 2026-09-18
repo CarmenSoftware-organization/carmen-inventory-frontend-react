@@ -11,7 +11,7 @@ import { SelectContent, SelectItem } from "@/components/ui/select";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
+  InputSuffixAmount,
 } from "@/components/ui/input/input-suffix";
 import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
@@ -24,7 +24,6 @@ interface GrnFormHeaderProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   readonly fromWizard?: boolean;
-  /** view mode → แสดงทุก field เป็น plain text แทน input (เหมือน CN) */
 }
 
 export function GrnFormHeader({
@@ -41,26 +40,9 @@ export function GrnFormHeader({
   const vendorName = useWatch({ control: form.control, name: "vendor_name" });
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isPo = docType === "purchase_order";
-  // ใช้จำกัดช่วงของช่องวันครบกำหนด — ต้องเป็น watch ไม่ใช่ getValues ไม่งั้นเปลี่ยน
-  // วันที่ใบแจ้งหนี้แล้วปฏิทินยังล็อกช่วงเดิมอยู่
   const invoiceDate = useWatch({ control: form.control, name: "invoice_date" });
-  // view mode → คู่ label↔value ชิด (gap-1) + label เงียบ (เทา/ปกติ) ให้ value
-  // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน CN)
-  // ระยะ label↔value 4px เท่ากันทั้งสองโหมด — ของเดิมโหมดอ่าน 4px โหมดแก้ 6px
-  // (ค่า default ของ Field) พอสลับโหมดแล้วบล็อกขยับ และไม่ตรงกับแถบ ribbon ข้างบน
   const viewFieldGap = "gap-1";
 
-  /**
-   * วันครบกำหนด = วันที่ใบแจ้งหนี้ + เทอมเครดิต
-   *
-   * คิดตอนผู้ใช้เปลี่ยนค่าเท่านั้น ไม่ทำใน useEffect — setValue ตอน mount จะทำให้
-   * ฟอร์มกลายเป็น dirty เองแล้วเด้ง discard dialog ตอนกดออก และจะไปทับวันครบ
-   * กำหนดที่บันทึกไว้แล้วของใบเก่าด้วย · ช่องยังแก้เองได้ตามปกติ
-   *
-   * ไม่มีเทอมเครดิต = ใบใหม่ยังถือค่า default "วันนี้" อยู่ ถ้าใบแจ้งหนี้ลงวันที่
-   * หลังจากนั้น วันครบกำหนดจะไปอยู่ก่อนวันที่ใบแจ้งหนี้ซึ่งไม่มีอยู่จริง (ปฏิทิน
-   * ของช่องนั้นก็ล็อก `fromDate` ไว้แล้ว) จึงดันตามให้เท่าวันที่ใบแจ้งหนี้
-   */
   const syncDueDate = (invoiceDate?: string | null, days?: number | null) => {
     if (!invoiceDate) return;
     if (days != null) {
@@ -77,9 +59,6 @@ export function GrnFormHeader({
 
   return (
     <div className="space-y-2">
-      {/* 6 คอลัมน์ยืดเต็มความกว้าง track เดียวกับแถบข้อมูลบนหัว (grn-header)
-          โหมดอ่านใช้ช่องชุดเดียวกันแค่ disabled จึงไม่ต้องสลับ grid ให้เลย์เอาต์
-          ขยับตอนเปลี่ยนโหมด */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
           <FieldLabel required>{tfl("vendor")}</FieldLabel>
@@ -99,9 +78,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-        {/* วันที่ใบรับสินค้า — ต่อจากวันที่รับของเพราะอ่านคู่กัน (ของมาถึงวันไหน
-            เปิดใบวันไหน ไม่จำเป็นต้องวันเดียวกัน) เดิมโชว์เป็นข้อความอ่านอย่างเดียว
-            อยู่บนหัวใบ แก้ไม่ได้ทั้งที่ schema บังคับกรอกและรับค่าได้อยู่แล้ว */}
         <Field className={viewFieldGap}>
           <FieldLabel required>{tfl("grnDate")}</FieldLabel>
           <Controller
@@ -129,14 +105,6 @@ export function GrnFormHeader({
             disabled={disabled}
             error={!!errors.currency_id?.message}
           >
-            <InputSuffixInput
-              id="grn-exchange-rate"
-              type="number"
-              inputMode="decimal"
-              step="0.0001"
-              disabled={disabled}
-              {...form.register("exchange_rate")}
-            />
             <InputSuffixAddon>
               <Controller
                 control={form.control}
@@ -155,6 +123,19 @@ export function GrnFormHeader({
                 )}
               />
             </InputSuffixAddon>
+            <Controller
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <InputSuffixAmount
+                  id="grn-exchange-rate"
+                  decimals={5}
+                  disabled={disabled}
+                  value={Number(field.value) || 0}
+                  onValueChange={field.onChange}
+                />
+              )}
+            />
           </InputSuffixField>
         </Field>
 

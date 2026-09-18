@@ -15,18 +15,6 @@ import type {
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
-/**
- * Hook ดึงรายการ Period End แบบแบ่งหน้า
- *
- * เรียก `GET /period-ends` ของ BU ปัจจุบัน
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @returns UseQueryResult ของ PaginatedResponse<PeriodEnd>
- * @example
- * ```ts
- * const { data } = usePeriodEnd({ page: 1, perpage: 20 });
- * ```
- */
 export function usePeriodEnd(params?: ParamsDto) {
   const buCode = useBuCode();
 
@@ -43,17 +31,6 @@ export function usePeriodEnd(params?: ParamsDto) {
   });
 }
 
-/**
- * Hook ดึงงวด Period End ปัจจุบันของ BU
- *
- * เรียก `GET /period-ends/current` ใช้ cache dynamic (1 นาที)
- *
- * @returns UseQueryResult ของ PeriodEnd
- * @example
- * ```ts
- * const { data: current } = usePeriodEndCurrent();
- * ```
- */
 export function usePeriodEndCurrent() {
   const buCode = useBuCode();
 
@@ -72,17 +49,6 @@ export function usePeriodEndCurrent() {
   });
 }
 
-/**
- * Hook ดึงข้อมูล review ก่อนปิดงวด Period End
- *
- * เรียก `GET /period-ends/review` ใช้ cache dynamic (1 นาที)
- *
- * @returns UseQueryResult ของ PeriodEnd
- * @example
- * ```ts
- * const { data: review } = usePeriodEndReview();
- * ```
- */
 type RawTransactionStat = Omit<ReviewTransactionStat, "is_complete"> & {
   is_complete: boolean | "true" | "false";
 };
@@ -130,18 +96,6 @@ export function usePeriodEndReview() {
   });
 }
 
-/**
- * Hook สำหรับปิดงวด (Close Period End)
- *
- * ยิง `POST /period-ends` ของ BU ปัจจุบัน invalidate list/current/review หลังสำเร็จ
- *
- * @returns UseMutationResult รับ `CreatePeriodEndDto` เป็น variable
- * @example
- * ```ts
- * const close = useClosePeriodEnd();
- * close.mutate({ ... });
- * ```
- */
 export function useClosePeriodEnd() {
   return useApiMutation<void>({
     mutationFn: (_data, buCode) =>

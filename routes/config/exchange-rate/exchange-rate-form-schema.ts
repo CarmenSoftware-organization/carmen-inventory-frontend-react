@@ -2,15 +2,6 @@ import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { ExchangeRateItem } from "@/types/exchange-rate";
 
-/**
- * สร้าง Zod schema สำหรับฟอร์มแก้ไข Exchange Rate พร้อมข้อความแปลจาก i18n
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns Zod schema สำหรับตรวจสอบฟอร์ม Exchange Rate
- * @example
- * // route: /config/exchange-rate (edit dialog)
- * const schema = createExchangeRateSchema(tv, tfl);
- */
 export function createExchangeRateSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     exchange_rate: z
@@ -27,14 +18,6 @@ export const EMPTY_FORM: ExchangeRateFormValues = {
   exchange_rate: 0,
 };
 
-/**
- * คืนค่าเริ่มต้นของฟอร์ม Exchange Rate จากรายการที่มี หรือค่าว่างหากไม่มี
- * @param item - ข้อมูล Exchange Rate ที่ต้องการนำมาเป็นค่าเริ่มต้น (optional)
- * @returns ค่าเริ่มต้นของฟอร์ม
- * @example
- * // route: /config/exchange-rate (dialog)
- * const defaults = getDefaultValues(item);
- */
 export function getDefaultValues(
   item?: ExchangeRateItem,
 ): ExchangeRateFormValues {
@@ -44,15 +27,6 @@ export function getDefaultValues(
   };
 }
 
-/**
- * สร้าง Zod schema สำหรับฟอร์มเพิ่ม Exchange Rate แบบ manual
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อ field
- * @returns Zod schema สำหรับตรวจสอบฟอร์ม Manual Exchange Rate
- * @example
- * // route: /config/exchange-rate (manual create dialog)
- * const schema = createManualExchangeRateSchema(tv, tfl);
- */
 export function createManualExchangeRateSchema(
   tv: TranslationFn,
   tf: TranslationFn,

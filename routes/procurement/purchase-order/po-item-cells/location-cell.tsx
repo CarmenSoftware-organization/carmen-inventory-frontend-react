@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
@@ -19,10 +20,12 @@ export function LocationCell({
   form,
   index,
   disabled,
+  statusSlot,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly index: number;
   readonly disabled: boolean;
+  readonly statusSlot?: ReactNode;
 }) {
   "use no memo";
   const control = form.control;
@@ -30,11 +33,21 @@ export function LocationCell({
   const code = useWatch({ control, name: `items.${index}.location_code` });
 
   if (disabled) {
-    return <NameWithSubtext primary={name || "—"} secondary={code ?? ""} />;
+    // จุดสถานะอยู่ **นอก** stack สองบรรทัด จัดกลางเทียบทั้งก้อน — เหมือน PR เป๊ะ
+    return (
+      <div className="flex items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <NameWithSubtext primary={name || "—"} secondary={code ?? ""} />
+        </div>
+        {statusSlot}
+      </div>
+    );
   }
 
   return (
-    <Controller
+    <div className="flex items-center gap-1.5">
+      <div className="min-w-0 flex-1">
+        <Controller
       control={control}
       name={`items.${index}.location_id`}
       render={({ field, fieldState }) => (
@@ -73,6 +86,9 @@ export function LocationCell({
           error={fieldState.error?.message}
         />
       )}
-    />
+        />
+      </div>
+      {statusSlot}
+    </div>
   );
 }

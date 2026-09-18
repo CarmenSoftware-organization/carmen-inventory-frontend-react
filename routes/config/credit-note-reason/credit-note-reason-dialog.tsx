@@ -22,12 +22,6 @@ interface CreditNoteReasonDialogProps {
 
 type CnReasonPayload = { name: string; description: string };
 
-/**
- * Dialog สร้าง/แก้ไข Credit Note Reason — premium ERP design
- *
- * มี icon-beside-title header
- * รองรับทั้ง create (reason ไม่มี) และ edit (มี reason)
- */
 export function CreditNoteReasonDialog({
   open,
   onOpenChange,

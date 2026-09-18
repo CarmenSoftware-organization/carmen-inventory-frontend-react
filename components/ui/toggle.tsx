@@ -13,7 +13,6 @@ const toggleVariants = cva(
           "data-[state=on]:bg-accent data-[state=on]:text-accent-foreground rounded-md bg-transparent",
         outline:
           "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-md border",
-        /** pill toggle สำหรับ dense row — ติดแล้วเป็น primary (selected state) */
         pill: "border-border/60 bg-card text-micro text-muted-foreground hover:border-foreground/30 hover:text-foreground data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-full border",
       },
       size: {
@@ -29,13 +28,6 @@ const toggleVariants = cva(
   },
 );
 
-/**
- * Toggle component ห่อ Radix Toggle (ปุ่มเปิด/ปิดสถานะ aria-pressed)
- * @param props - props ของ Radix Toggle Root + variant/size
- * @returns React element toggle button
- * @example
- * <Toggle variant="pill" size="xs" pressed={on} onPressedChange={setOn}>View</Toggle>
- */
 function Toggle({
   className,
   variant,

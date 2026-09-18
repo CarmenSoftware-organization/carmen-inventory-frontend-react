@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { FieldErrors, UseFormReturn } from "react-hook-form";
@@ -9,10 +9,6 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import {
-  removeFromDocSequence,
-  useDocSequence,
-} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
@@ -67,7 +63,6 @@ export function usePrFormActions({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const navigate = useNavigate();
-  const location = useLocation();
   const buCode = useBuCode();
   const { defaultBu } = useProfile();
 
@@ -189,18 +184,9 @@ export function usePrFormActions({
     onCancel: navGuard.cancel,
   };
 
-  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อ
-  // ใบถัดไปเลยแทนกลับ list ให้คนอนุมัติไล่เคลียร์ my-pending ได้รวดเดียว
-  // (ใบสุดท้าย/เข้าตรงจาก deep link → กลับ list ตามเดิม) — ที่ /new sequence
-  // เป็น null เสมอ (path ไม่ลงท้าย id) create-then-submit จึงกลับ list ปกติ
-  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    // ใบนี้ action จบแล้วหลุดจาก my-pending — ตัดออกจากคิวก่อนเดินต่อ ให้เลข
-    // n/N ของใบถัดไปตรงกับจำนวนที่เหลือใน list จริง (nextPath คำนวณไว้ก่อนตัด
-    // จึงยังชี้ใบถัดไปถูกตัว)
-    removeFromDocSequence(location.pathname);
-    navigate(seq?.nextPath ?? "/procurement/purchase-request");
+    navigate("/procurement/purchase-request");
   };
 
   const toSubmitStageDetails = (
@@ -212,10 +198,6 @@ export function usePrFormActions({
       stage_message: "",
     }));
 
-  /**
-   * @param docVersion - เลขเวอร์ชันที่จะใส่ใน payload ไม่ส่ง = ใช้ค่าในฟอร์ม
-   *   (ใบใหม่ยังไม่มี id ให้ไป GET จึงไม่มีอะไรให้ resolve)
-   */
   const buildCreateDetails = (
     values: PrFormValues,
     docVersion?: number,
@@ -345,9 +327,8 @@ export function usePrFormActions({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/purchase-request");
   };

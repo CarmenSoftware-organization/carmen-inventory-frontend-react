@@ -1,7 +1,6 @@
 import { Plus, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** Empty state สำหรับ products section — flat neutral (dashed muted border) */
 export function EmptyProducts({
   onAdd,
   disabled,
@@ -9,10 +8,6 @@ export function EmptyProducts({
   description,
   addLabel,
 }: {
-  /**
-   * ไม่ส่ง = ไม่มีปุ่มในกล่องว่าง — ใช้กับ section ที่มีปุ่มเพิ่มอยู่ที่หัวข้ออยู่แล้ว
-   * ปุ่มเดียวกันสองที่บนจอเดียวไม่ได้ช่วยอะไร
-   */
   readonly onAdd?: () => void;
   readonly disabled: boolean;
   readonly title: string;

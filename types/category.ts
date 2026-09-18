@@ -1,3 +1,5 @@
+import type { EntityRef } from "./entity-ref";
+
 export const NODE_TYPE = {
   CATEGORY: "category",
   SUBCATEGORY: "subcategory",
@@ -27,7 +29,6 @@ export interface CategoryNode {
   product_subcategory_id?: string;
   itemCount?: number;
   cascade_deviation: boolean;
-  /** Optimistic-concurrency token — backend requires it back on update. */
   doc_version?: number;
 }
 
@@ -44,7 +45,6 @@ export interface CategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
-  /** Optimistic-concurrency token — backend requires it back on update. */
   doc_version?: number;
 }
 
@@ -54,16 +54,19 @@ export interface SubCategoryDto {
   name: string;
   description?: string;
   is_active: boolean;
-  product_category_id: string;
+  // ยืนยันจาก live list+detail `/product-sub-categories`: product_category
+  // เป็น object {id} เท่านั้น (ไม่มี name) — คนละฟิลด์กับ `category` object
+  // {id,code,name} ที่มีอยู่แล้วบน wire แต่ไม่มี call site ไหนอ่าน ไม่ประกาศ
+  product_category: EntityRef | null;
   price_deviation_limit?: number;
   qty_deviation_limit?: number;
   is_used_in_recipe?: boolean;
   is_sold_directly?: boolean;
-  tax_profile_id?: string;
-  tax_profile_name?: string;
+  // ยืนยันจาก live: tax_profile เป็น object {id,name} (null ในตัวอย่างที่ตรวจ)
+  // ของเดิม tax_profile_id/tax_profile_name เป็น phantom ไม่เคยมีจริงบน wire
+  tax_profile?: EntityRef | null;
   tax_rate?: number;
   cascade_deviation: boolean;
-  /** Optimistic-concurrency token — backend requires it back on update. */
   doc_version?: number;
 }
 
@@ -84,7 +87,6 @@ export interface ItemGroupDto {
   cascade_deviation: boolean;
   sub_category?: { id: string; code: string; name: string };
   category?: { id: string; code: string; name: string };
-  /** Optimistic-concurrency token — backend requires it back on update. */
   doc_version?: number;
 }
 
@@ -100,7 +102,6 @@ export interface CreateCategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
-  /** Only sent on update for optimistic concurrency; absent on create. */
   doc_version?: number;
 }
 
@@ -117,7 +118,6 @@ export interface CreateSubCategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
-  /** Only sent on update for optimistic concurrency; absent on create. */
   doc_version?: number;
 }
 
@@ -134,6 +134,5 @@ export interface CreateItemGroupDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
-  /** Only sent on update for optimistic concurrency; absent on create. */
   doc_version?: number;
 }

@@ -3,12 +3,6 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import type { GrnFormValues } from "../grn-form-schema";
 import { useGrnItemLine } from "./use-grn-item-line";
 
-/**
- * เขียน derived amounts (discount/tax auto + net + total) กลับเข้า form เพื่อให้
- * ยอดท้ายใบ + payload อ่านได้ — render-null ติดตั้ง 1 ตัวต่อแถวที่ระดับ grid
- * (mirror PoItemComputedSync) discount_amount/tax_amount เขียนเฉพาะตอนไม่
- * override (auto); override → คงค่าที่ผู้ใช้กรอกไว้
- */
 export const GrnItemComputedSync = memo(function GrnItemComputedSync({
   form,
   index,

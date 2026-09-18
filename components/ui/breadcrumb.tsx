@@ -4,12 +4,10 @@ import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Root ของ Breadcrumb — nav element สำหรับเส้นทางการนำทาง */
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
 }
 
-/** รายการ ol ภายใน Breadcrumb */
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   return (
     <ol
@@ -26,7 +24,6 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   );
 }
 
-/** li item หนึ่งรายการใน Breadcrumb */
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
@@ -37,7 +34,6 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   );
 }
 
-/** ลิงก์ใน Breadcrumb รองรับ asChild */
 function BreadcrumbLink({
   asChild,
   className,
@@ -56,7 +52,6 @@ function BreadcrumbLink({
   );
 }
 
-/** หน้าปัจจุบันใน Breadcrumb (aria-current="page") */
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -72,7 +67,6 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-/** ตัวคั่นระหว่าง BreadcrumbItem — default เป็นลูกศรขวา */
 function BreadcrumbSeparator({
   children,
   className,
@@ -91,7 +85,6 @@ function BreadcrumbSeparator({
   );
 }
 
-/** Ellipsis สำหรับย่อ breadcrumb ที่มีหลายระดับ */
 function BreadcrumbEllipsis({
   className,
   ...props

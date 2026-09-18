@@ -25,10 +25,6 @@ interface FormToolbarProps {
   readonly submitSlot?: React.ReactNode;
   readonly children?: React.ReactNode;
   readonly editTitle?: string;
-  /**
-   * Resource prefix สำหรับ guard ปุ่ม (ไม่ระบุ = ไม่ guard)
-   * จะคำนวณ `{prefix}.create` (Save ใน add mode), `.update` (Edit + Save ใน edit mode), `.delete`
-   */
   readonly permissionPrefix?: string;
   /**
    * ส่งต่อ `DocFormHeader.flush` — default true เพราะ consumer ของ FormToolbar

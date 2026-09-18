@@ -21,13 +21,12 @@
  * ห้ามแก้ไฟล์นี้เพื่อ "ทำให้เทสต์ผ่าน" — ถ้าเทสต์แดง แปลว่า `module-list.ts` ชี้ไป feature
  * ที่ backend ไม่รู้จัก ต้องแก้ที่ `module-list.ts`
  *
- * ขนาด catalog: 103 feature (12 module + 91 resource)
+ * ขนาด catalog: 105 feature (12 module + 93 resource)
  *
  * **ไม่มีวันที่ในไฟล์นี้โดยตั้งใจ** — เพื่อให้ `bun run gen:license-fixture && git diff --exit-code`
  * เป็นด่านตรวจความสดได้: diff ว่าง = fixture ตรงกับ backend ณ ตอนนั้นจริง
  */
 
-/** feature key ทั้งหมดใน catalog (module + resource) */
 export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "accounting",
   "accounting.ap",
@@ -39,6 +38,8 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "accounting.config.asset",
   "accounting.config.gl",
   "accounting.gl",
+  "accounting.gl.budget",
+  "accounting.gl.jv_template",
   "configuration",
   "configuration.adjustment_type",
   "configuration.app_config",
@@ -115,7 +116,7 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "system_admin",
   "system_admin.activity_log",
   "system_admin.document",
-  "system_admin.period",
+  "system_admin.inventory_period",
   "system_admin.query_dataset",
   "system_admin.role",
   "system_admin.running_code",
@@ -134,7 +135,6 @@ export const LICENSE_FEATURE_KEYS: readonly string[] = [
   "vendor_management.vendor_product",
 ];
 
-/** เฉพาะ module-level key (entry ที่ `parent_key: null` ใน catalog) */
 export const LICENSE_MODULE_KEYS: readonly string[] = [
   "accounting",
   "configuration",

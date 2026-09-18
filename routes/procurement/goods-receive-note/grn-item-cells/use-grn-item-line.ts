@@ -2,10 +2,6 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { GrnFormValues } from "../grn-form-schema";
 
-/**
- * อ่านค่าที่ต้องใช้คำนวณของแถวเดียว → computeLineAmounts (honor override)
- * ฐานคิดของ GRN = unit_price × received_qty
- */
 export function useGrnItemLine(
   form: UseFormReturn<GrnFormValues>,
   index: number,

@@ -18,14 +18,6 @@ interface UseEquipmentCategoryTableOptions {
   onDelete: (ec: EquipmentCategory) => void;
 }
 
-/**
- * Hook สร้างคอลัมน์และ instance ของตารางหมวดหมู่อุปกรณ์สำหรับ DataGrid
- * @param options - ข้อมูลหมวดหมู่, params และ callbacks
- * @returns table instance พร้อมใช้งานกับ DataGrid
- * @example
- * const table = useEquipmentCategoryTable({ equipmentCategories, totalRecords, params, tableConfig, onEdit, onDelete });
- * return <DataGrid table={table} />;
- */
 export function useEquipmentCategoryTable({
   equipmentCategories,
   totalRecords,

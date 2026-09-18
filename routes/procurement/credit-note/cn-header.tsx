@@ -20,7 +20,6 @@ interface CnHeaderProps {
   readonly isPending: boolean;
   readonly deleteIsPending: boolean;
   readonly isLocked: boolean;
-  /** display only — ไม่เข้า payload */
   readonly createdByName: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
@@ -29,10 +28,6 @@ interface CnHeaderProps {
   readonly onShowComment: () => void;
 }
 
-/**
- * Header ของฟอร์ม Credit Note — ใช้ `DocFormHeader` กลางร่วมกับ PO/PR/GRN
- * คง permission guard (save/edit/delete ผ่าน useCan) จาก FormToolbar เดิมไว้
- */
 export function CnHeader({
   creditNote,
   mode,

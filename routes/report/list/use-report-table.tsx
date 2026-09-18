@@ -13,25 +13,10 @@ import type { Report } from "@/types/report";
 interface UseReportTableOptions {
   reports: Report[];
   onSelect?: (report: Report) => void;
-  /** จาก `useDataGridState().tableConfig` — รองรับ sort/page state */
   tableConfig?: ReturnType<typeof useDataGridState>["tableConfig"];
-  /** จำนวนหน้าทั้งหมด สำหรับ DataGridPagination */
   pageCount?: number;
 }
 
-/**
- * Hook สร้างตารางรายงาน (TanStack Table) พร้อมคอลัมน์มาตรฐาน
- *
- * @param options - reports และ callback เมื่อเลือกแถว
- * @returns instance ของ React Table
- * @example
- * ```tsx
- * const table = useReportTable({
- *   reports,
- *   onSelect: (report) => setSelected(report),
- * });
- * ```
- */
 export function useReportTable({
   reports,
   onSelect,

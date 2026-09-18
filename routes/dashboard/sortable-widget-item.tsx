@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   AreaChart,
   BarChart3,
+  Gauge,
   Check,
   CircleAlert,
   GripVertical,
@@ -17,15 +18,12 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
-  BarCard,
-  KpiCard,
-  LineCard,
-  PieCard,
-  TableCard,
+  WidgetRouter,
   WidgetSkeleton,
   type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { availableRenders } from "@/components/dashboard-widget/render-support";
+import { gridClasses } from "@/components/dashboard-widget/widget-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -62,34 +60,21 @@ interface SortableWidgetItemProps {
   readonly detail: DashboardDatasetDetail | undefined;
   readonly isLoading: boolean;
   readonly onDelete: () => void;
-  /** descriptor ของ dataset — ใช้ตัดสินว่าจะโชว์ปุ่มตั้งค่า param ไหม */
   readonly dataset?: DashboardDataset;
   readonly onConfigure?: () => void;
-  /**
-   * บอก parent ว่าการ์ดใบนี้เลื่อนถึงแล้ว — parent ถึงจะ enable query ของมัน
-   * (ดู `SavedWidgetsSection`) เรียกครั้งเดียวต่อการ์ด
-   */
   readonly onVisible: (widgetId: string) => void;
-  /** สลับชนิดกราฟ — ปุ่มจะโผล่เมื่อ dataset นี้วาดได้มากกว่าหนึ่งแบบ */
   readonly onChangeType?: (widgetType: WidgetType) => void;
 }
 
-/** ไอคอนประจำชนิดกราฟ — ใช้ทั้งบนปุ่มและในเมนู */
 const RENDER_ICON: Record<string, LucideIcon> = {
   kpi: Hash,
+  gauge: Gauge,
   pie: PieChart,
   bar: BarChart3,
   line: LineChart,
   area: AreaChart,
   table: Table,
 };
-
-/** col-span ตาม widget_type — match procurement/inventory dashboards */
-function getColSpan(widgetType: string): string {
-  if (widgetType === "kpi") return "lg:col-span-1";
-  if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";
-  return "sm:col-span-2 lg:col-span-2";
-}
 
 export function SortableWidgetItem({
   widget,
@@ -123,7 +108,7 @@ export function SortableWidgetItem({
 
   const displayTitle = widget.title || detail?.meta.name || widget.dataset_id;
   const moduleName = inferModuleName(widget.dataset_id);
-  const colSpanClass = getColSpan(widget.widget_type);
+  const gridClass = gridClasses(widget.widget_type, widget.display);
   // shape มาจาก catalogue ก่อน (รู้ตั้งแต่ยังไม่โหลดข้อมูล) แล้วค่อย fallback ไป meta
   // ของ payload สำหรับ widget ที่ dataset ไม่อยู่ใน catalogue
   const renders = availableRenders(
@@ -141,8 +126,8 @@ export function SortableWidgetItem({
       }}
       style={style}
       className={cn(
-        colSpanClass,
-        "group/sortable relative",
+        gridClass,
+        "group/sortable relative h-full",
         isDragging && "z-10 opacity-50",
       )}
     >
@@ -190,7 +175,9 @@ export function SortableWidgetItem({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {!!dataset?.params?.length && onConfigure && (
+        {/* เฟืองโผล่ทุกใบแล้ว — dialog คุมทั้ง param และการแสดงผล ซึ่งตั้งได้แม้
+            dataset จะไม่มี param เลย */}
+        {!!dataset && onConfigure && (
           <Button
             type="button"
             variant="ghost"
@@ -219,7 +206,7 @@ export function SortableWidgetItem({
       ) : SUPPORTED_SHAPES.includes(
           detail.meta.shape as (typeof SUPPORTED_SHAPES)[number],
         ) ? (
-        <WidgetRenderer
+        <WidgetRouter
           widget={buildFullWidget(
             widget,
             detail.meta,
@@ -234,62 +221,6 @@ export function SortableWidgetItem({
       )}
     </li>
   );
-}
-
-export function WidgetRenderer({
-  widget,
-  moduleName,
-  subTileFor,
-}: {
-  readonly widget: ResolvedWidget;
-  readonly moduleName: string;
-  readonly subTileFor: (id: string) => string;
-}) {
-  switch (widget.widget_type) {
-    case "kpi":
-      return (
-        <KpiCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "pie":
-      return (
-        <PieCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "bar":
-      return (
-        <BarCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "line":
-    case "area":
-      return (
-        <LineCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    case "table":
-      return (
-        <TableCard
-          widget={widget}
-          moduleName={moduleName}
-          subTileFor={subTileFor}
-        />
-      );
-    default:
-      return null;
-  }
 }
 
 function UnsupportedCard({
@@ -328,6 +259,7 @@ function buildFullWidget(
 ): ResolvedWidget {
   return {
     id: saved.id,
+    display: saved.display,
     dataset_id: saved.dataset_id,
     widget_type: saved.widget_type,
     title,

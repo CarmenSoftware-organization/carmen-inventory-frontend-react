@@ -18,13 +18,6 @@ const BusinessTypeDialog = lazy(() =>
   })),
 );
 
-/**
- * Component หลักของหน้ารายการ Business Type ใช้ ConfigListTemplate พร้อม dialog
- * @returns React element ของหน้ารายการ Business Type
- * @example
- * // route: /config/business-type
- * <BusinessTypeComponent />
- */
 export default function BusinessTypeComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

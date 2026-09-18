@@ -76,9 +76,6 @@ interface VendorCertificateDialogProps {
   readonly certificate?: VendorCertificate | null;
 }
 
-/**
- * Dialog สร้าง/แก้ไขใบรับรองของ vendor — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน vendor form)
- */
 export function VendorCertificateDialog({
   open,
   onOpenChange,

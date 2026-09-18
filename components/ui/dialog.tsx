@@ -5,35 +5,30 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-/** Root ของ Dialog — ครอบ state เปิด/ปิด */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-/** Trigger สำหรับเปิด Dialog */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-/** Portal ของ Dialog */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-/** ปุ่ม/element ที่สั่งปิด Dialog */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-/** Overlay สีทึบด้านหลัง Dialog */
 function DialogOverlay({
   className,
   ...props
@@ -50,11 +45,6 @@ function DialogOverlay({
   );
 }
 
-/**
- * กล่องเนื้อหาหลักของ Dialog รองรับ showCloseButton
- * @param props - showCloseButton และ props ของ Radix Content
- * @returns React element dialog content
- */
 function DialogContent({
   className,
   children,
@@ -89,7 +79,6 @@ function DialogContent({
   );
 }
 
-/** ส่วน header ของ Dialog (title + description) */
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -100,11 +89,6 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/**
- * ส่วน footer ของ Dialog รองรับปุ่มปิดอัตโนมัติเมื่อ showCloseButton=true
- * @param props - showCloseButton และ props ของ div
- * @returns React element footer
- */
 function DialogFooter({
   className,
   showCloseButton = false,
@@ -132,7 +116,6 @@ function DialogFooter({
   );
 }
 
-/** หัวเรื่องของ Dialog */
 function DialogTitle({
   className,
   ...props
@@ -146,7 +129,6 @@ function DialogTitle({
   );
 }
 
-/** คำอธิบายรองของ Dialog */
 function DialogDescription({
   className,
   ...props

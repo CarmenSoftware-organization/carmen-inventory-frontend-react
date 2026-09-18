@@ -22,15 +22,6 @@ interface UseCoaTableOptions {
   onDelete: (item: ChartOfAccount) => void;
 }
 
-/**
- * ตารางรหัสบัญชี — รหัส · ชื่อบัญชี (สองบรรทัด) · ด้านบัญชี · ประเภท · สถานะ
- *
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/chart-of-accounts
- * const { table } = useCoaTable({ data, ... });
- */
 export function useCoaTable({
   data,
   totalRecords,

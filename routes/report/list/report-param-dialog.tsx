@@ -36,14 +36,6 @@ interface ReportParamDialogProps {
   readonly onRun?: (report: Report, filters: Record<string, string>) => void;
 }
 
-/**
- * แปลง keyword ของวันที่ (เช่น Today, FirstDayOfMonth, @current_period)
- * เป็นค่าวันที่จริงในรูปแบบ ISO string
- *
- * @param value - keyword หรือค่าวันที่ต้นฉบับ
- * @param periods - ข้อมูล period สำหรับ resolve keyword ที่เกี่ยวกับงวด
- * @returns ISO date string
- */
 function resolveDateKeyword(value: string, periods?: ReportPeriodMap): string {
   const now = new Date();
   switch (value) {
@@ -104,19 +96,6 @@ interface LookupOption {
   readonly label: string;
 }
 
-/**
- * Searchable single-select lookup for long, data-source-backed lists
- * (product / location / vendor / category / period ...). Filters on the label
- * ("code - name") so the user can type either the code or the name.
- *
- * Drives a hidden input so the native <form> FormData picks the value up, the
- * same way DateControlInner does. Defaults to the first option ("ALL") to match
- * the previous <select> behaviour.
- *
- * @param options - resolved value/label options (first is the ALL sentinel)
- * @param id - form field name submitted in the filters payload
- * @returns JSX element ของ searchable lookup
- */
 function SearchableLookupControl({
   options,
   id,
@@ -310,9 +289,6 @@ function FieldControl({ field, periods }: FieldControlProps) {
   return <Control node={field.control} periods={periods} />;
 }
 
-/**
- * รวบรวมรายการ DataSource ที่ไม่ซ้ำจาก FormField ทั้งหมด
- */
 function collectDataSources(fields: FormField[]): string[] {
   const sources = new Set<string>();
   for (const field of fields) {
@@ -327,9 +303,6 @@ function collectDataSources(fields: FormField[]): string[] {
   return [...sources];
 }
 
-/**
- * คืนค่า true ถ้ามี date field ที่ใช้ period keyword
- */
 function needsPeriods(fields: FormField[]): boolean {
   for (const field of fields) {
     const ctrls =

@@ -15,11 +15,6 @@ interface ConfigCrudOptions {
   endpoint: (buCode: string) => string;
   label: string;
   updateMethod?: "PUT" | "PATCH";
-  /**
-   * Cache profile สำหรับ useList/useById — default `CACHE_STATIC` (30 นาที)
-   * ตั้งเป็น `CACHE_NORMAL` (vendor/product) หรือ `CACHE_DYNAMIC` (transactional)
-   * ตามความถี่ที่ข้อมูลเปลี่ยน caller ยัง override per-call ผ่าน `options` ของ useList ได้
-   */
   cacheProfile?: CacheProfile;
 }
 
@@ -126,19 +121,6 @@ export function createConfigCrud<T, TCreate>({
     });
   }
 
-  /**
-   * Hook สำหรับสร้าง config entity ใหม่
-   *
-   * invalidate queryKey ของ list โดยอัตโนมัติหลังสร้างสำเร็จ
-   * error ถูก normalize เป็น `ApiError` ผ่าน `useApiMutation`
-   *
-   * @returns UseMutationResult สำหรับสร้าง entity
-   * @example
-   * ```ts
-   * const create = useCreateCurrency();
-   * create.mutate({ code: "THB", name: "Thai Baht" });
-   * ```
-   */
   function useCreate() {
     return useApiMutation<TCreate>({
       mutationFn: (data, buCode) => api.create(buCode, data),
@@ -147,19 +129,6 @@ export function createConfigCrud<T, TCreate>({
     });
   }
 
-  /**
-   * Hook สำหรับแก้ไข config entity
-   *
-   * รับ payload `{ id, ...data }` แล้วส่งเป็น PUT/PATCH ตาม `updateMethod`
-   * invalidate list หลังสำเร็จ
-   *
-   * @returns UseMutationResult สำหรับอัพเดต entity
-   * @example
-   * ```ts
-   * const update = useUpdateCurrency();
-   * update.mutate({ id, code: "USD", name: "US Dollar" });
-   * ```
-   */
   function useUpdate() {
     return useApiMutation<TCreate & { id: string; doc_version?: number }>({
       mutationFn: ({ id, ...data }, buCode) =>
@@ -169,19 +138,6 @@ export function createConfigCrud<T, TCreate>({
     });
   }
 
-  /**
-   * Hook สำหรับลบ config entity ตาม id
-   *
-   * รับ id เป็น string เรียก DELETE แล้ว invalidate list
-   * ใช้ร่วมกับ `DeleteDialog` + `isPending`
-   *
-   * @returns UseMutationResult สำหรับลบ entity
-   * @example
-   * ```ts
-   * const del = useDeleteCurrency();
-   * del.mutate(currency.id);
-   * ```
-   */
   function useDelete() {
     return useApiMutation<string>({
       mutationFn: (id, buCode) => api.remove(buCode, id),

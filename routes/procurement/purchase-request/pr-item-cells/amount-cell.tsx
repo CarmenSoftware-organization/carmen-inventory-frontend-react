@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/input/input-suffix";
 import type { PrFormValues } from "../pr-form-schema";
 import { useIsRowLocked } from "./helpers";
-import { PrPriceAlertBadge } from "../pr-price-alert-badge";
 
 export const AmountCell = memo(function AmountCell({
   control,
@@ -16,15 +15,12 @@ export const AmountCell = memo(function AmountCell({
   baseCurrencyCode,
   currencySlot,
   isDisabled,
-  buCode,
 }: {
   control: Control<PrFormValues>;
   index: number;
   baseCurrencyCode?: string;
-  /** currency control วางแนวนอนข้างยอด (บรรทัดเดียวกัน) */
   currencySlot?: ReactNode;
   isDisabled?: boolean;
-  buCode?: string;
 }) {
   "use no memo";
   const totalPrice =
@@ -59,7 +55,6 @@ export const AmountCell = memo(function AmountCell({
           <span className="text-muted-foreground">{currencySlot}</span>
         </div>
         {baseLine}
-        <PrPriceAlertBadge control={control} index={index} buCode={buCode} />
       </div>
     );
   }
@@ -76,7 +71,6 @@ export const AmountCell = memo(function AmountCell({
         <InputSuffixAddon>{currencySlot}</InputSuffixAddon>
       </InputSuffixField>
       {baseLine}
-      <PrPriceAlertBadge control={control} index={index} buCode={buCode} />
     </div>
   );
 });

@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import type { WorkflowDto } from "@/types/workflows";
 import { formatRelativeTime } from "@/lib/relative-time";
 import { cn } from "@/lib/utils";
-import { WfTypeLabel } from "./wf-type-label";
 import WfFlowStrip from "./wf-flow-strip";
 import WfRowActions from "./wf-row-actions";
 
@@ -89,7 +88,6 @@ export default function WfCard({
                 {item.name || "..."}
               </span>
             </CardTitle>
-            <WfTypeLabel type={item.workflow_type} />
           </div>
         </div>
         <CardAction>

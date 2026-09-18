@@ -1,7 +1,6 @@
 import { useParams } from "react-router";
 import { ScReviewContent } from "./sc-review-content";
 
-/** หน้า Review ของ Spot Check — id มาจาก route param */
 export function Component() {
   const { id } = useParams<{ id: string }>();
   if (!id) return null;

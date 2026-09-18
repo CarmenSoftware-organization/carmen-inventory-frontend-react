@@ -1,4 +1,5 @@
 import type { Audit } from "./audit";
+import type { EntityRef } from "./entity-ref";
 
 export type InventoryAdjustmentType = "stock-in" | "stock-out";
 export type InventoryAdjustmentStatus =
@@ -17,10 +18,7 @@ export const getAdjustmentType = (
 interface InventoryAdjustmentDetail {
   id: string;
   sequence_no: number;
-  product_id: string;
-  product_name: string;
-  product_code: string;
-  product_local_name: string;
+  product: EntityRef | null;
   product_sku: string;
   description: string | null;
   qty: number;
@@ -29,11 +27,10 @@ interface InventoryAdjustmentDetail {
    * flat string (แบบเดียวกับ product ดู types/product.ts) จึงประกาศไว้ทั้งสองทาง
    * และตอนอ่านต้อง fallback ให้ครบ ไม่งั้นคอลัมน์ Unit ว่างเปล่า
    */
-  inventory_unit?: { id: string; name: string };
+  inventory_unit?: EntityRef;
   inventory_unit_name?: string;
   cost_per_unit: number;
   total_cost: number;
-  /** เวอร์ชันของ "แถว" ไม่ใช่ของใบ — ตอน save หลังบ้านบังคับให้ส่งกลับทุกแถวที่แก้ */
   doc_version?: number;
   info: unknown;
   dimension: unknown;
@@ -46,6 +43,9 @@ export interface InventoryAdjustment {
   si_date?: string;
   so_date?: string;
   description: string;
+  // list endpoint (`/inventory-adjustments`, used by useInventoryAdjustment) — controller
+  // ไม่มี @CollapseRefs เลย (ยืนยันจาก live 20/20 แถว: flat ทุกแถว ไม่มี object เลย
+  // ต่างจาก stock-ins/stock-outs' own findOne ที่แปลงแล้ว) คงไว้ flat ตามจริง
   adjustment_type_id: string;
   adjustment_type_code: string;
   adjustment_type_name: string;
@@ -53,6 +53,10 @@ export interface InventoryAdjustment {
   doc_version: number;
   location_id?: string;
   location_name?: string;
+  // stock-ins/{id} · stock-outs/{id} เท่านั้น (ยืนยันจาก live) — ยังไม่มี call site
+  // ในแอปอ่านผ่าน field นี้จริง ประกาศไว้เผื่ออนาคต ไม่บังคับใคร
+  adjustment_type?: EntityRef | null;
+  location?: EntityRef | null;
   stock_in_detail?: InventoryAdjustmentDetail[];
   stock_out_detail?: InventoryAdjustmentDetail[];
   item_count?: number;
@@ -62,7 +66,6 @@ export interface InventoryAdjustment {
 }
 
 export interface AdjustmentDetailItemPayload {
-  /** มีเฉพาะแถวที่มีอยู่แล้ว (update) — แถวที่เพิ่งเพิ่ม (add) ยังไม่มีเวอร์ชัน */
   doc_version?: number;
   product_id: string;
   qty: number;

@@ -2,7 +2,6 @@
 // Dashboard types — canonical schema synced with backend enums
 // =============================================================
 
-/** 7 shapes — backend enum_dataset_shape */
 export type DatasetShape =
   | "scalar"
   | "scalar_delta"
@@ -12,7 +11,6 @@ export type DatasetShape =
   | "matrix"
   | "table";
 
-/** 9 widget types — backend enum_dashboard_widget_type */
 export type WidgetType =
   | "kpi"
   | "line"
@@ -24,7 +22,6 @@ export type WidgetType =
   | "table"
   | "sparkline";
 
-/** Dataset category */
 type DatasetCategory =
   | "inventory"
   | "workflow"
@@ -48,7 +45,6 @@ export interface DatasetMeta {
 // Dataset parameters — descriptors drive the widget param form,
 // values are stored on the widget (`params` jsonb) and sent to exec
 // -------------------------------------------------------------
-/** One parameter a dataset accepts. `options` present → render a dropdown. */
 export interface DatasetParam {
   readonly name: string;
   readonly label: string;
@@ -58,7 +54,6 @@ export interface DatasetParam {
   readonly options?: readonly string[];
 }
 
-/** Config-sourced param values — widget `params` jsonb / exec request body. */
 export type WidgetParams = Record<string, string | number>;
 
 // -------------------------------------------------------------
@@ -98,16 +93,24 @@ interface MatrixData {
   readonly values: readonly (readonly number[])[];
 }
 
-type TableColumnType = "text" | "number" | "currency" | "date" | "icon";
+/**
+ * `id` ไม่ใช่คอลัมน์ที่โชว์ — เป็นค่าที่ client เอาไปทำลิงก์ไปหาเอกสารของแถวนั้น
+ * (label ของมันว่างเสมอ) ตารางต้องข้ามไม่เอาไปวาดเป็นคอลัมน์
+ */
+type TableColumnType =
+  | "text"
+  | "number"
+  | "currency"
+  | "date"
+  | "icon"
+  | "id";
 
-/** One column of a table-shaped dataset (header label + the row key it reads). */
 export interface TableColumn {
   readonly key: string;
   readonly label: string;
   readonly type?: TableColumnType;
 }
 
-/** Arbitrary-column table payload — column metadata + row objects keyed by column key. */
 export interface TableData {
   readonly columns: readonly TableColumn[];
   readonly rows: readonly Record<string, unknown>[];
@@ -142,6 +145,32 @@ type DatasetResponse = {
 // -------------------------------------------------------------
 // Personal saved widget — bound to dataset_id + widget_type
 // -------------------------------------------------------------
+/**
+ * ค่าตั้งการแสดงผลต่อ widget — backend เก็บให้เฉย ๆ ไม่ตีความ (ตรวจแค่ว่าเป็น object
+ * และไม่เกิน 8KB) **frontend เป็นเจ้าของ schema นี้** เพิ่มคีย์ใหม่ได้โดยไม่ต้อง
+ * deploy backend ดู migration 130 ของ micro-data
+ */
+export interface WidgetDisplay {
+  /**
+   * ความกว้างเป็นหน่วยคอลัมน์ของกริด 12 คอลัมน์ (เหมือน grid ของ css framework)
+   * 3=¼ · 4=⅓ · 6=½ · 8=⅔ · 9=¾ · 12=เต็มแถว — ไม่ใส่ = ตามชนิดกราฟ
+   */
+  readonly width?: number;
+  /**
+   * ความสูงเป็นจำนวนแถวของกริด (1 แถว = 4rem) — การ์ดสูงเท่าที่ประกาศ ไม่ยืดตาม
+   * การ์ดที่สูงที่สุดในแถวเดียวกันเหมือนก่อนหน้านี้ เนื้อที่ล้นจะเลื่อนในกล่องเอง
+   */
+  readonly height?: number;
+  /** ทศนิยมของตัวเลขบนการ์ด */
+  readonly decimals?: number;
+  /** ต้นสเกลของ gauge (default 0) */
+  readonly min?: number;
+  /** ปลายสเกลของ gauge — ไม่ใส่ = เดาจากค่าปัจจุบัน ซึ่งอ่านความหมายไม่ได้ */
+  readonly max?: number;
+  /** เปลี่ยนสีเมื่อค่าถึงขีด เรียงจากน้อยไปมาก (UI ปัจจุบันแก้ได้ตัวแรกตัวเดียว) */
+  readonly thresholds?: readonly { readonly value: number; readonly color: string }[];
+}
+
 interface WidgetConfig {
   readonly id: string;
   readonly dataset_id: string;
@@ -149,6 +178,7 @@ interface WidgetConfig {
   readonly title?: string | null;
   readonly order_index: number;
   readonly params?: WidgetParams | null;
+  readonly display?: WidgetDisplay | null;
 }
 
 interface CreateWidgetDto {
@@ -157,14 +187,16 @@ interface CreateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
   readonly params?: WidgetParams;
+  readonly display?: WidgetDisplay;
 }
 
 interface UpdateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
   readonly params?: WidgetParams;
-  /** สลับชนิดกราฟ — backend ปฏิเสธ (400) ถ้า shape ของ dataset วาดแบบนั้นไม่ได้ */
   readonly widget_type?: WidgetType;
+  /** แทนที่ทั้งก้อน (replace ไม่ใช่ merge — เหมือน params) */
+  readonly display?: WidgetDisplay;
 }
 
 interface WidgetConfigListResponse {
@@ -198,7 +230,6 @@ export type SystemWidgetConfigItem = Omit<
   CompositeWidgetItem,
   "id" | "module"
 > & {
-  /** system widget ไม่มีแถวใน DB — ใบที่มาจาก personal/mock ถึงจะมี */
   readonly id?: string;
   readonly module?: string;
 };
@@ -219,7 +250,6 @@ export interface SystemWidgetConfigListResponse {
 // -------------------------------------------------------------
 // Type guards
 // -------------------------------------------------------------
-/** Legacy guard — data has `value` and is not an array (scalar / scalar_delta). */
 export function isScalarDeltaData(data: unknown): data is ScalarDeltaData {
   return (
     !!data &&
@@ -228,7 +258,6 @@ export function isScalarDeltaData(data: unknown): data is ScalarDeltaData {
   );
 }
 
-/** Legacy guard — data is an array of {label, value}. */
 export function isCategoricalData(
   data: unknown,
 ): data is readonly CategoricalPoint[] {
@@ -240,7 +269,6 @@ export function isCategoricalData(
   );
 }
 
-/** Time-series guard — data is an array of {date, value}. */
 export function isTimeSeriesData(
   data: unknown,
 ): data is readonly TimeSeriesPoint[] {
@@ -252,7 +280,6 @@ export function isTimeSeriesData(
   );
 }
 
-/** Table guard — object with array `columns` and `rows` (rejects matrix and array shapes). */
 export function isTableData(data: unknown): data is TableData {
   return (
     !!data &&
@@ -266,15 +293,9 @@ export function isTableData(data: unknown): data is TableData {
 // =============================================================
 // Aliases for migration (deprecated names — keep until consumers refactor)
 // =============================================================
-/** @deprecated use {@link CompositeWidgetListResponse} */
 export type DashboardWidgetListResponse = CompositeWidgetListResponse;
-/** @deprecated use {@link DatasetResponse} */
 export type DashboardDatasetDetail = DatasetResponse;
-/** @deprecated use {@link WidgetConfig} */
 export type MyDashboardWidget = WidgetConfig;
-/** @deprecated use {@link CreateWidgetDto} */
 export type CreateMyDashboardWidgetDto = CreateWidgetDto;
-/** @deprecated use {@link UpdateWidgetDto} */
 export type UpdateMyDashboardWidgetDto = UpdateWidgetDto;
-/** @deprecated use {@link WidgetConfigListResponse} */
 export type MyDashboardWidgetListResponse = WidgetConfigListResponse;

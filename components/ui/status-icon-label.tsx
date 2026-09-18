@@ -1,9 +1,11 @@
+import type { ComponentType } from "react";
 import {
   Archive,
   ArrowLeftRight,
   BadgePercent,
   Ban,
   Check,
+  CircleSmall,
   Clock,
   FileText,
   Flag,
@@ -24,8 +26,18 @@ import {
   Warehouse,
   X,
   type LucideIcon,
+  type LucideProps,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/**
+ * จุดสีทึบขนาดเท่าจุดของชิปเดิม (`CircleSmall` r=6 + fill = 8px ที่กล่อง 14px)
+ * — ใช้แทนไอคอนสำหรับสถานะที่เป็น "เปิด/ปิด" ซึ่งมีแค่สองค่าตรงข้ามกัน ไม่มี
+ * รูปทรงให้แยก ต่างจากสถานะเอกสารที่ไล่เป็นลำดับเจ็ดแปดค่า
+ */
+const FilledDot = (props: LucideProps) => (
+  <CircleSmall {...props} fill="currentColor" />
+);
 
 /**
  * ไอคอนกับสีของแต่ละสถานะ — สัญลักษณ์เปล่า ไม่มีวงกลมกำกับ เพราะวงกลมกินพื้นที่
@@ -42,7 +54,10 @@ import { cn } from "@/lib/utils";
  * สีอ้าง custom property ชุดเดียวกับ dot chip เดิมใน `styles/badge-status.css`
  * ตัวสถานะจึงไม่เปลี่ยนสีเมื่อสลับไปหน้าที่ยังใช้ chip
  */
-const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
+const STATUS_ICON: Record<
+  string,
+  { icon: ComponentType<LucideProps>; color?: string }
+> = {
   draft: { icon: PenLine, color: "var(--status-draft)" },
   in_progress: { icon: Clock, color: "var(--status-in-progress)" },
   approved: { icon: Check, color: "var(--status-approved)" },
@@ -71,6 +86,20 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   review: { icon: Undo2, color: "var(--status-review)" },
   send_back: { icon: Undo2, color: "var(--status-review)" },
   sendback: { icon: Undo2, color: "var(--status-review)" },
+  /* สถานะระดับ "รายการ" (PR/PO/SR) — คำกริยาคือสิ่งที่คนกดส่งไป ส่วนรูปอดีตข้างบน
+     คือสิ่งที่บันทึกแล้ว ทั้งคู่โผล่บนจอได้ทั้งคู่แล้วแต่ว่าอ่านจากฟอร์มหรือจาก
+     server จึงต้องมีไอคอนเหมือนกัน ไม่งั้นแถวที่เพิ่งติ๊กจะกลายเป็นขีดของ FALLBACK
+     ทั้งที่แถวข้าง ๆ ที่โหลดมามีไอคอนปกติ */
+  pending: { icon: Clock, color: "var(--status-pending)" },
+  approve: { icon: Check, color: "var(--status-approved)" },
+  reject: { icon: X, color: "var(--status-rejected)" },
+  submit: { icon: Send, color: "var(--status-submitted)" },
+  submitted: { icon: Send, color: "var(--status-submitted)" },
+  /* price list / template — เปิด/ปิดใช้งานเป็นจุดสี ไม่ใช่รูปทรง (ดู FilledDot)
+     สีตามชิปเดิมใน STATUS_CLASSNAMES: active = เขียวเดียวกับ approved ·
+     inactive = เทาเดียวกับ closed */
+  active: { icon: FilledDot, color: "var(--status-approved)" },
+  inactive: { icon: FilledDot, color: "var(--status-closed)" },
 };
 
 /**
@@ -123,9 +152,7 @@ export function lookupIcon(key: string) {
 }
 
 interface StatusIconLabelProps {
-  /** ค่า status ดิบจาก API (lowercase, snake_case) */
   readonly status: string;
-  /** ป้ายที่แสดง — ตัวเรียกส่งมาจาก config ของโมดูลตัวเอง */
   readonly label: string;
   readonly className?: string;
 }

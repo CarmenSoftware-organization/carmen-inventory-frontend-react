@@ -2,7 +2,6 @@ import { useWatch, type Control } from "react-hook-form";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { CnFormValues } from "../cn-form-schema";
 
-/** ยอดฝั่ง GRN ช่องหนึ่ง — อ่านอย่างเดียว (ไม่เข้า payload) */
 export function GrnAmountCell({
   control,
   index,
@@ -23,6 +22,26 @@ export function GrnAmountCell({
   return (
     <span className="text-muted-foreground text-xs tabular-nums">
       {formatCurrency(Number(value) || 0)}
+    </span>
+  );
+}
+
+/** คอลัมน์ Tax แถวหลัก — โชว์ชื่อโปรไฟล์ภาษีอย่างเดียว (โปรไฟล์ยึดตาม GRN แก้ที่ CN ไม่ได้) */
+export function GrnTaxCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const profileName = useWatch({
+    control,
+    name: `items.${index}.tax_profile_name`,
+  });
+  return (
+    <span className="text-muted-foreground block truncate text-xs">
+      {profileName || "—"}
     </span>
   );
 }

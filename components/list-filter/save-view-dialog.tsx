@@ -16,9 +16,7 @@ import type { ViewScope } from "@/types/list-view";
 interface SaveViewDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** true = แสดงตัวเลือก scope "bu" (มองเห็นได้ทั้งหน่วยธุรกิจ) */
   readonly canManageBu: boolean;
-  /** รายชื่อ view ที่มีอยู่แล้วใน scope นั้น — ใช้เช็คชื่อซ้ำ (case-sensitive) */
   readonly existingNames: (scope: ViewScope) => string[];
   readonly onSave: (name: string, scope: ViewScope) => Promise<void>;
 }

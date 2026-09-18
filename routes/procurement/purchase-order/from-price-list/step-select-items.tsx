@@ -45,26 +45,23 @@ interface StepSelectItemsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;
 }
 
-/** แถวหนึ่งในตาราง = สินค้าหนึ่งบรรทัดของ price list หนึ่งใบ */
 interface PlRow {
   readonly detail: PriceListDetailItem;
   readonly pricelistNo: string;
-  readonly currency: { id: string; code: string; name?: string };
-  /** หลังบ้านอนุญาตให้เอาบรรทัดนี้ไปตั้งเป็นรายการสั่งซื้อไหม */
+  readonly currency: PriceList["currency"];
   readonly canUse: boolean;
 }
 
-/** ช่องกรองของขั้นนี้ — ระดับ module เพื่อให้ตัวตนนิ่ง (ดู usePoRowFilter) */
 const FILTER_FIELDS: PoFilterField<PlRow>[] = [
   {
     key: "product_id",
     labelKey: "field.product",
-    of: (r) => [r.detail.product_id, r.detail.product_name],
+    of: (r) => [r.detail.product?.id ?? "", r.detail.product?.name ?? ""],
   },
   {
     key: "currency_id",
     labelKey: "field.currency",
-    of: (r) => [r.currency.id, r.currency.code],
+    of: (r) => [r.currency?.id ?? "", r.currency?.code ?? ""],
   },
 ];
 
@@ -87,9 +84,9 @@ function filterRows(rows: PlRow[], q: string): PlRow[] {
   const needle = q.toLowerCase();
   return rows.filter(
     ({ detail, pricelistNo }) =>
-      (detail.product_code ?? "").toLowerCase().includes(needle) ||
-      detail.product_name.toLowerCase().includes(needle) ||
-      detail.product_local_name.toLowerCase().includes(needle) ||
+      (detail.product?.code ?? "").toLowerCase().includes(needle) ||
+      (detail.product?.name ?? "").toLowerCase().includes(needle) ||
+      (detail.product?.local_name ?? "").toLowerCase().includes(needle) ||
       pricelistNo.toLowerCase().includes(needle),
   );
 }
@@ -103,30 +100,29 @@ function detailToItem(row: PlRow): FromPriceListSelectedItem {
     ...WIZARD_ITEM_TEMPLATE,
     pricelist_detail_id: detail.id,
     pricelist_no: row.pricelistNo,
-    product_id: detail.product_id,
-    product_code: detail.product_code ?? "",
-    product_name: detail.product_name,
-    product_local_name: detail.product_local_name,
+    product_id: detail.product?.id ?? null,
+    product_code: detail.product?.code ?? "",
+    product_name: detail.product?.name ?? "",
+    product_local_name: detail.product?.local_name ?? "",
     product_sku: detail.product_sku ?? "",
-    order_unit_id: detail.unit_id,
-    order_unit_name: detail.unit_name ?? "",
+    order_unit_id: detail.unit?.id ?? null,
+    order_unit_name: detail.unit?.name ?? "",
     order_unit_conversion_factor: 1,
     order_qty: qty,
-    base_unit_id: detail.unit_id,
-    base_unit_name: detail.unit_name ?? "",
+    base_unit_id: detail.unit?.id ?? null,
+    base_unit_name: detail.unit?.name ?? "",
     base_qty: qty,
     price: detail.price,
     sub_total_price: subTotal,
     net_amount: subTotal,
     total_price: subTotal + taxAmt,
-    tax_profile_id: detail.tax_profile_id,
-    tax_profile_name: detail.tax_profile_name ?? "",
+    tax_profile_id: detail.tax_profile?.id ?? null,
+    tax_profile_name: detail.tax_profile?.name ?? "",
     tax_rate: detail.tax_rate ?? 0,
     tax_amount: taxAmt,
   };
 }
 
-/** error ของ item รายแถว — RHF เก็บเป็น array ตาม index ของ `items` */
 type RowError =
   | {
       location_id?: { message?: string };
@@ -206,11 +202,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   const canSelectRow = useCallback(
     (row: PlRow) =>
       row.canUse &&
-      (activeCurrency == null || row.currency.id === activeCurrency.id),
+      (activeCurrency == null || row.currency?.id === activeCurrency.id),
     [activeCurrency],
   );
 
-  /** มีแถวที่หลังบ้านห้ามใช้อยู่ไหม — ใช้ตัดสินว่าต้องอธิบายเหนือตารางไหม */
   const hasUnusableRow = rows.some((r) => !r.canUse);
 
   const totalAmount = items.reduce(
@@ -238,7 +233,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     [form, setItems],
   );
 
-  /** มุมมองของ `items` ในภาษาของ TanStack — ไม่ใช่ state ที่ถือคู่ขนาน */
   const rowSelection = useMemo<RowSelectionState>(
     () => Object.fromEntries(items.map((i) => [i.pricelist_detail_id, true])),
     [items],
@@ -263,7 +257,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const currency =
       kept.length > 0 ? activeCurrency : (added[0]?.currency ?? null);
     const accepted = currency
-      ? added.filter((r) => r.currency.id === currency.id)
+      ? added.filter((r) => r.currency?.id === currency.id)
       : added;
 
     const nextItems = [...kept, ...accepted.map(detailToItem)];
@@ -279,7 +273,9 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
 
     if (currency && !form.getValues("currency_id")) {
       form.setValue("currency_id", currency.id, { shouldDirty: true });
-      form.setValue("currency_code", currency.code, { shouldDirty: true });
+      form.setValue("currency_code", currency.code ?? "", {
+        shouldDirty: true,
+      });
       const rate = currencies.find((c) => c.id === currency.id)?.exchange_rate;
       if (rate != null) {
         form.setValue("exchange_rate", rate, { shouldDirty: true });
@@ -297,7 +293,6 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   );
 
   const columns = useMemo<ColumnDef<PlRow>[]>(() => {
-    /** แถวที่เลือกไม่ได้ = จางไว้ให้เห็นตั้งแต่กวาดตา ไม่ต้องไปกดถึงจะรู้ */
     const dim = (row: PlRow) => (canSelectRow(row) ? undefined : "opacity-50");
 
     return [
@@ -328,10 +323,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
         cell: ({ row }) => (
           <div className={cn("flex flex-col", dim(row.original))}>
             <span className="font-semibold">
-              {row.original.detail.product_name}
+              {row.original.detail.product?.name}
             </span>
             <span className="text-muted-foreground text-micro-legal">
-              {row.original.detail.product_local_name}
+              {row.original.detail.product?.local_name}
             </span>
           </div>
         ),
@@ -346,7 +341,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
         },
         cell: ({ row }) => (
           <span className={dim(row.original)}>
-            {row.original.detail.unit_name ?? "—"}
+            {row.original.detail.unit?.name ?? "—"}
           </span>
         ),
       },
@@ -363,7 +358,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
           <span className={dim(row.original)}>
             {row.original.detail.price.toLocaleString()}{" "}
             <span className="text-muted-foreground text-micro">
-              {row.original.currency.code}
+              {row.original.currency?.code}
             </span>
           </span>
         ),
@@ -408,7 +403,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
           const selected = selectedByDetail.get(detail.id);
           return (
             <LookupProductLocation
-              productId={detail.product_id}
+              productId={detail.product?.id ?? ""}
               workflowId={workflowId}
               value={selected?.location_id ?? ""}
               onValueChange={(v) => patchItem(detail.id, { location_id: v })}
@@ -502,7 +497,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
             className="text-warning-ink mt-px size-3.5 shrink-0"
           />
           <span>
-            {t("singleCurrencyHint", { currency: activeCurrency.code })}
+            {t("singleCurrencyHint", { currency: activeCurrency.code ?? "" })}
           </span>
         </div>
       )}

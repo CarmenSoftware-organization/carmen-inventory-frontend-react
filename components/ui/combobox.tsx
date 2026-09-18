@@ -13,39 +13,10 @@ import {
 
 const Combobox = ComboboxPrimitive.Root;
 
-/**
- * แสดงค่าที่ถูกเลือกปัจจุบันของ Combobox
- *
- * Wrapper ของ ComboboxPrimitive.Value (base-ui) ติด data-slot
- * "combobox-value" สำหรับ style selector ใช้ภายใน ComboboxTrigger
- * หรือ standalone เพื่อแสดง label ของค่าที่เลือก
- *
- * @param props - props ของ Value primitive จาก base-ui
- * @returns JSX element แสดงค่าปัจจุบัน
- * @example
- * ```tsx
- * <ComboboxTrigger><ComboboxValue placeholder="Pick..." /></ComboboxTrigger>
- * ```
- */
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />;
 }
 
-/**
- * Trigger button ของ Combobox พร้อมไอคอน ChevronDown
- *
- * Wrapper ของ ComboboxPrimitive.Trigger auto-inject ChevronDownIcon
- * ที่ท้ายปุ่มด้วยสี muted-foreground children มักเป็น ComboboxValue
- *
- * @param props - children และ props ของ Trigger primitive
- * @returns JSX element ของปุ่ม trigger
- * @example
- * ```tsx
- * <ComboboxTrigger>
- *   <ComboboxValue placeholder="Select" />
- * </ComboboxTrigger>
- * ```
- */
 function ComboboxTrigger({
   className,
   children,
@@ -66,19 +37,6 @@ function ComboboxTrigger({
   );
 }
 
-/**
- * ปุ่ม X สำหรับล้างค่าที่เลือกใน Combobox
- *
- * Render เป็น InputGroupButton ghost size icon-xs มี data-slot
- * "combobox-clear" เพื่อให้ trigger ซ่อนอัตโนมัติเมื่อมี clear button
- *
- * @param props - props ของ Clear primitive
- * @returns JSX element ของปุ่ม clear
- * @example
- * ```tsx
- * <ComboboxInput showClear showTrigger={false} />
- * ```
- */
 function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   return (
     <ComboboxPrimitive.Clear
@@ -92,23 +50,6 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   );
 }
 
-/**
- * ช่อง search input ของ Combobox ครอบด้วย InputGroup
- *
- * ย้าย ComboboxTrigger และ ComboboxClear เข้า addon align="inline-end"
- * Trigger จะซ่อนอัตโนมัติเมื่อมี Clear (CSS :has selector) เหมาะกับ
- * pattern search + select แบบ single value
- *
- * @param props - props ของ Input primitive + showTrigger, showClear flags
- * @returns JSX element ของ input group
- * @example
- * ```tsx
- * <Combobox items={items}>
- *   <ComboboxInput placeholder="Search..." showClear />
- *   <ComboboxContent><ComboboxList>...</ComboboxList></ComboboxContent>
- * </Combobox>
- * ```
- */
 function ComboboxInput({
   className,
   children,
@@ -146,22 +87,6 @@ function ComboboxInput({
   );
 }
 
-/**
- * Popup container ของ Combobox render ผ่าน Portal + Positioner
- *
- * จัดการ z-index, animation (fade + zoom + slide ตาม side), width ตาม
- * anchor-width และ max-height 24rem ปรับ side/align/offset ผ่าน props
- * ใช้ครอบ ComboboxList + ComboboxEmpty
- *
- * @param props - side, align, sideOffset, alignOffset, anchor และ props ของ Popup
- * @returns JSX element ของ popup
- * @example
- * ```tsx
- * <ComboboxContent side="bottom" align="start">
- *   <ComboboxList>{items.map(...)}</ComboboxList>
- * </ComboboxContent>
- * ```
- */
 function ComboboxContent({
   className,
   side = "bottom",
@@ -199,19 +124,6 @@ function ComboboxContent({
   );
 }
 
-/**
- * Scrollable list ภายใน ComboboxContent
- *
- * Max-height จำกัดโดย available-height ของ popover เพื่อให้ scroll อยู่
- * ภายใน viewport เสมอ รองรับ scroll-py-1 สำหรับ item highlight
- *
- * @param props - props ของ List primitive
- * @returns JSX element ของ list container
- * @example
- * ```tsx
- * <ComboboxList>{items.map((i) => <ComboboxItem key={i.id} value={i.id}>{i.name}</ComboboxItem>)}</ComboboxList>
- * ```
- */
 function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   return (
     <ComboboxPrimitive.List
@@ -225,19 +137,6 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   );
 }
 
-/**
- * รายการหนึ่งของ Combobox พร้อม check indicator เมื่อถูกเลือก
- *
- * รองรับ data-highlighted (highlight ขณะ keyboard navigation) และ
- * data-disabled auto-append CheckIcon ที่ขวาสุดเมื่อ value ถูกเลือก
- *
- * @param props - children และ props ของ Item primitive
- * @returns JSX element ของ item
- * @example
- * ```tsx
- * <ComboboxItem value="usd">USD</ComboboxItem>
- * ```
- */
 function ComboboxItem({
   className,
   children,
@@ -265,21 +164,6 @@ function ComboboxItem({
   );
 }
 
-/**
- * Group wrapper สำหรับจัดกลุ่มรายการใน Combobox
- *
- * Wrapper ของ Group primitive ใช้คู่กับ ComboboxLabel สำหรับหัวข้อกลุ่ม
- *
- * @param props - props ของ Group primitive
- * @returns JSX element ของ group
- * @example
- * ```tsx
- * <ComboboxGroup>
- *   <ComboboxLabel>Fiat</ComboboxLabel>
- *   <ComboboxItem value="usd">USD</ComboboxItem>
- * </ComboboxGroup>
- * ```
- */
 function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
   return (
     <ComboboxPrimitive.Group
@@ -290,19 +174,6 @@ function ComboboxGroup({ className, ...props }: ComboboxPrimitive.Group.Props) {
   );
 }
 
-/**
- * หัวข้อของ ComboboxGroup
- *
- * สไตล์ text-xs text-muted-foreground ปรับขยายเป็น text-sm บน touch device
- * ผ่าน pointer-coarse
- *
- * @param props - props ของ GroupLabel primitive
- * @returns JSX element ของ label
- * @example
- * ```tsx
- * <ComboboxLabel>Fiat Currencies</ComboboxLabel>
- * ```
- */
 function ComboboxLabel({
   className,
   ...props
@@ -340,19 +211,6 @@ function ComboboxCollection({ ...props }: ComboboxPrimitive.Collection.Props) {
   );
 }
 
-/**
- * Empty state ของ Combobox เมื่อไม่มีผลลัพธ์จากการค้นหา
- *
- * แสดงเฉพาะเมื่อ content มี data-empty (group-data selector) จัดกลางหน้า
- * ด้วย text-muted-foreground ขนาด text-sm
- *
- * @param props - props ของ Empty primitive
- * @returns JSX element ของ empty state
- * @example
- * ```tsx
- * <ComboboxEmpty>No results found</ComboboxEmpty>
- * ```
- */
 function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
   return (
     <ComboboxPrimitive.Empty
@@ -366,20 +224,6 @@ function ComboboxEmpty({ className, ...props }: ComboboxPrimitive.Empty.Props) {
   );
 }
 
-/**
- * เส้นแบ่งระหว่างกลุ่มรายการใน Combobox
- *
- * แสดงเป็น border 1px สี border ใช้คั่น ComboboxGroup หลาย ๆ กลุ่ม
- *
- * @param props - props ของ Separator primitive
- * @returns JSX element เส้นคั่น
- * @example
- * ```tsx
- * <ComboboxGroup>...</ComboboxGroup>
- * <ComboboxSeparator />
- * <ComboboxGroup>...</ComboboxGroup>
- * ```
- */
 function ComboboxSeparator({
   className,
   ...props
@@ -393,23 +237,6 @@ function ComboboxSeparator({
   );
 }
 
-/**
- * Container chips สำหรับ Combobox ที่เป็น multi-select
- *
- * render ค่าที่เลือกเป็น chips หลายอันในกล่องเดียว มี focus-within ring
- * ที่รวม chips + input เพื่อให้ดูเหมือน input ปกติ รองรับ aria-invalid
- * แสดง error border
- *
- * @param props - props ของ Chips primitive
- * @returns JSX element ของ chips container
- * @example
- * ```tsx
- * <ComboboxChips>
- *   <ComboboxChip>Tag A</ComboboxChip>
- *   <ComboboxChipsInput placeholder="Add..." />
- * </ComboboxChips>
- * ```
- */
 function ComboboxChips({
   className,
   ...props
@@ -427,19 +254,6 @@ function ComboboxChips({
   );
 }
 
-/**
- * Chip หนึ่งตัวใน ComboboxChips แสดงค่าที่เลือก
- *
- * มีปุ่ม X remove (ซ่อนได้ผ่าน showRemove=false) รองรับ disabled state
- * ที่ทำให้ opacity ต่ำลงและ pointer-events ถูกปิด
- *
- * @param props - children, showRemove และ props ของ Chip primitive
- * @returns JSX element ของ chip
- * @example
- * ```tsx
- * <ComboboxChip>Purchase</ComboboxChip>
- * ```
- */
 function ComboboxChip({
   className,
   children,
@@ -471,21 +285,6 @@ function ComboboxChip({
   );
 }
 
-/**
- * Input ขนาดเล็กภายใน ComboboxChips สำหรับพิมพ์เพิ่ม tag ใหม่
- *
- * ถอด border/outline ออก flex-1 เพื่อให้ขยายเต็มพื้นที่ที่เหลือหลัง chips
- *
- * @param props - props ของ Input primitive
- * @returns JSX element input
- * @example
- * ```tsx
- * <ComboboxChips>
- *   ...chips
- *   <ComboboxChipsInput placeholder="Add tag" />
- * </ComboboxChips>
- * ```
- */
 function ComboboxChipsInput({
   className,
   ...props

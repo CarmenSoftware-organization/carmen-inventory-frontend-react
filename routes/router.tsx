@@ -257,6 +257,13 @@ export const router = createBrowserRouter([
                   import("./procurement/purchase-request/purchase-request-new.route"),
               },
               {
+                path: "purchase-request/from-template",
+                lazy: () =>
+                  import(
+                    "./procurement/purchase-request/from-template/from-template.route"
+                  ),
+              },
+              {
                 path: "purchase-request/:id",
                 lazy: () =>
                   import("./procurement/purchase-request/purchase-request-edit.route"),
@@ -609,8 +616,16 @@ export const router = createBrowserRouter([
                   import("./system-admin/notification-template/notification-template-edit.route"),
               },
               {
+                path: "inventory-period",
+                lazy: () =>
+                  import(
+                    "./system-admin/inventory-period/inventory-period.route"
+                  ),
+              },
+              // เดิมหน้านี้อยู่ที่ /system-admin/period — กัน bookmark เก่าพัง
+              {
                 path: "period",
-                lazy: () => import("./system-admin/period/period.route"),
+                element: <Navigate to="/system-admin/inventory-period" replace />,
               },
               {
                 path: "user-activity",
@@ -636,7 +651,12 @@ export const router = createBrowserRouter([
               },
               {
                 path: "workflow",
-                lazy: () => import("./system-admin/workflow/workflow.route"),
+                element: (
+                  <Navigate
+                    to="/system-admin/workflow/purchase-request"
+                    replace
+                  />
+                ),
               },
               // สามเส้นนี้ต้องมาก่อน `workflow/:id` — react-router จัดลำดับ static
               // เหนือ dynamic ให้อยู่แล้ว แต่เขียนติดกันไว้จะได้เห็นความสัมพันธ์
@@ -698,6 +718,11 @@ export const router = createBrowserRouter([
                 path: "email-profile",
                 lazy: () =>
                   import("./system-admin/email-profile/email-profile.route"),
+              },
+              {
+                path: "email-template",
+                lazy: () =>
+                  import("./system-admin/email-template/email-template.route"),
               },
               {
                 path: "business-setting",

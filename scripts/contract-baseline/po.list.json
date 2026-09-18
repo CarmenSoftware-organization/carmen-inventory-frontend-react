@@ -1,0 +1,233 @@
+{
+  "_url": "/api/T02/purchase-orders?perpage=5",
+  "data": [
+    {
+      "audit": {
+        "created": {
+          "at": "2026-03-26T06:30:11.544Z",
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ ศรีสุข"
+        },
+        "updated": {
+          "at": "2026-03-26T06:30:11.544Z",
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ ศรีสุข"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "buyer_name": "ณัฐพงษ์ (FC) ศรีสุข",
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "delivery_date": "2026-03-30T17:00:00.000Z",
+      "description": "",
+      "doc_version": 3,
+      "exchange_rate": 1,
+      "id": "0301f3d6-0150-415e-a52d-de5b29db71e2",
+      "last_action": {
+        "at": "2026-03-26T06:30:26.771Z",
+        "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+        "name": "ณัฐพงษ์ (FC)  ศรีสุข",
+        "state": "approved"
+      },
+      "net_amount": 120,
+      "order_date": "2026-03-26T06:29:25.154Z",
+      "po_no": "PO20260300046",
+      "po_status": "approved",
+      "po_type": "manual",
+      "total_amount": 120,
+      "total_price": 120,
+      "total_qty": 12,
+      "total_tax": 0,
+      "vendor_id": "01c7cfd5-3546-4b01-8f2a-2f04c8c285fc",
+      "vendor_name": "ปิยะ ขาวเล็ก",
+      "workflow_current_stage": "Completed",
+      "workflow_name": "General",
+      "workflow_next_stage": "-"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-06-01T03:26:10.154Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-06-01T03:26:10.154Z"
+        }
+      },
+      "base_net_amount": 9660,
+      "base_total_amount": 10336.2,
+      "buyer_name": "สมชาย ใจดี",
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "delivery_date": "2026-06-01T17:00:00.000Z",
+      "description": "",
+      "doc_version": 1,
+      "exchange_rate": 1,
+      "id": "03599209-df2a-4cfa-a7a3-897f27e80107",
+      "last_action": {
+        "at": null,
+        "id": null,
+        "name": null,
+        "state": "submitted"
+      },
+      "net_amount": 9660,
+      "order_date": "2026-06-01T03:25:33.813Z",
+      "po_no": "PO20260600004",
+      "po_status": "draft",
+      "po_type": "purchase_request",
+      "total_amount": 10336.2,
+      "total_price": 9660,
+      "total_qty": 30,
+      "total_tax": 676.2,
+      "vendor_id": "006bdc50-056d-4bb6-b795-91292cd6abf9",
+      "vendor_name": "PETTY CASH PURCHASE - DPP",
+      "workflow_current_stage": null,
+      "workflow_name": "General",
+      "workflow_next_stage": null
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-09-10T02:26:18.523Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-09-10T02:26:18.523Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "buyer_name": "ศิริวรรณ Purchase k ทองดี",
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "delivery_date": "2026-09-09T17:00:00.000Z",
+      "description": "",
+      "doc_version": 2,
+      "exchange_rate": 1,
+      "id": "03db2b47-d9c7-4957-b056-2a52e855839c",
+      "last_action": {
+        "at": "2026-09-10T02:26:18.907Z",
+        "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+        "name": "ศิริวรรณ Purchase k ทองดี",
+        "state": "submitted"
+      },
+      "net_amount": 0,
+      "order_date": "2026-09-10T02:16:42.926Z",
+      "po_no": "PO260900006",
+      "po_status": "in_progress",
+      "po_type": "manual",
+      "total_amount": 0,
+      "total_price": 0,
+      "total_qty": 1,
+      "total_tax": 0,
+      "vendor_id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก.",
+      "workflow_current_stage": "FC",
+      "workflow_name": "General",
+      "workflow_next_stage": "Completed"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-06-26T11:35:47.166Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-06-26T11:35:47.898Z",
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ ศรีสุข"
+        }
+      },
+      "base_net_amount": 682,
+      "base_total_amount": 682,
+      "buyer_name": "สมชาย  ใจดี",
+      "currency_code": "THB",
+      "currency_id": "93dabe25-1668-4c5b-bceb-3e0b83b78002",
+      "delivery_date": "2026-06-26T11:35:47.092Z",
+      "description": "PO from PR confirmation",
+      "doc_version": 1,
+      "exchange_rate": 1,
+      "id": "03e41eaf-5e8d-4ea0-a715-0d47c7b4f65a",
+      "last_action": {
+        "at": "2026-06-26T11:35:47.214Z",
+        "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+        "name": "ศิริวรรณ Purchase k ทองดี",
+        "state": "submitted"
+      },
+      "net_amount": 682,
+      "order_date": "2026-06-26T11:35:47.092Z",
+      "po_no": "PO20260600018",
+      "po_status": "completed",
+      "po_type": "purchase_request",
+      "total_amount": 682,
+      "total_price": 682,
+      "total_qty": 31,
+      "total_tax": 0,
+      "vendor_id": "0005206b-4cde-44ed-97f5-9b13d333b025",
+      "vendor_name": "คิงอาร์ต แอดเวอร์ไทซิ่ง บจก.",
+      "workflow_current_stage": "FC",
+      "workflow_name": "General",
+      "workflow_next_stage": "Completed"
+    },
+    {
+      "audit": {
+        "created": {
+          "at": "2026-04-08T03:22:40.601Z",
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ ศรีสุข"
+        },
+        "updated": {
+          "at": "2026-06-26T11:39:11.225Z",
+          "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+          "name": "ณัฐพงษ์ ศรีสุข"
+        }
+      },
+      "base_net_amount": 0,
+      "base_total_amount": 0,
+      "buyer_name": "ณัฐพงษ์ (FC) ศรีสุข",
+      "currency_code": "USD",
+      "currency_id": "ef1953fb-d4c9-4c7d-80c0-74d06997b6f2",
+      "delivery_date": "2026-04-10T17:00:00.000Z",
+      "description": "กกฟssss",
+      "doc_version": 4,
+      "exchange_rate": 0.03119,
+      "id": "05246577-eb98-4d59-8382-1328fc77f9bb",
+      "last_action": {
+        "at": "2026-04-08T07:15:39.874Z",
+        "id": "462a3bca-d0cd-4206-81de-db7b05f262d0",
+        "name": "ณัฐพงษ์ (FC)  ศรีสุข",
+        "state": "reviewed"
+      },
+      "net_amount": 1998,
+      "order_date": "2026-04-08T03:18:23.842Z",
+      "po_no": "PO20260400006",
+      "po_status": "voided",
+      "po_type": "manual",
+      "total_amount": 2197.8,
+      "total_price": 1998,
+      "total_qty": 9,
+      "total_tax": 199.8,
+      "vendor_id": "006bdc50-056d-4bb6-b795-91292cd6abf9",
+      "vendor_name": "PETTY CASH PURCHASE - DPP",
+      "workflow_current_stage": "Create Request",
+      "workflow_name": "General",
+      "workflow_next_stage": "-"
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 31,
+    "perpage": 5,
+    "total": 152
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:43.888Z"
+}

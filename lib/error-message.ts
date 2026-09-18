@@ -1,7 +1,6 @@
 import { ApiError, ERROR_CODES, type ErrorCode } from "@/lib/api-error";
 import type { TranslationFn } from "@/lib/i18n-schema";
 
-/** Map ApiError codes → i18n key under `errors.*` namespace */
 const CODE_TO_KEY: Record<ErrorCode, string> = {
   [ERROR_CODES.UNAUTHORIZED]: "sessionExpired",
   [ERROR_CODES.SESSION_EXPIRED]: "sessionExpired",
@@ -29,9 +28,58 @@ const APP_CODE_TO_KEY: Record<string, string> = {
   WORKFLOW_HAS_IN_PROGRESS_DOCUMENTS: "workflowInProgress",
   WORKFLOW_STAGE_CHANGE_BLOCKED: "workflowInProgress",
   WORKFLOW_STAGE_WOULD_HAVE_NO_ACTOR: "workflowStageNoActor",
+  // วันที่รับของอยู่นอกงวดที่เปิดอยู่ — ผู้ใช้แก้เองได้ (เปลี่ยนวันที่ หรือให้ฝ่าย
+  // บัญชีเปิดงวด) ปล่อยตกไปข้อความกลางจะกลายเป็น "กรอกไม่ถูกต้อง" แล้วไล่ตรวจ
+  // ทั้งฟอร์มโดยไม่มีอะไรผิดสักช่อง
+  GRN_DATE_OUTSIDE_OPEN_PERIOD: "dateOutsideOpenPeriod",
+  // เรื่องเดียวกับ GRN แต่คนละคำในประโยค — ใบเบิกพูดถึง "วันที่เบิก" ไม่ใช่ "วันที่รับของ"
+  SR_DATE_OUTSIDE_OPEN_PERIOD: "srDateOutsideOpenPeriod",
 };
 
-/** ข้อความกลางเมื่อไม่รู้ว่าเกิดอะไร — บอกว่าให้ทำอะไรต่อ ดีกว่าบอกว่าอะไรพัง */
+/**
+ * ชื่อ field ของ backend → คีย์ใน namespace `field` (ชื่อที่คนหน้างานเรียกจริง)
+ *
+ * ใส่เฉพาะ field ที่ฟอร์มของเราส่งไปเองและมีป้ายชื่อบนจอให้อ้างถึงได้ — ตัวที่ไม่รู้จัก
+ * ปล่อยตกไปข้อความกลาง ดีกว่าโชว์ `received_price` ให้พนักงานงงว่าช่องไหน
+ */
+export const FIELD_TO_KEY: Record<string, string> = {
+  received_price: "unitPrice",
+  received_qty: "receivedQty",
+  received_unit_id: "unit",
+  foc_qty: "focQty",
+  approved_qty: "approvedQty",
+  product_id: "product",
+  location_id: "location",
+  vendor_id: "vendor",
+  currency_id: "currency",
+  exchange_rate: "exchangeRate",
+  tax_profile_id: "taxProfile",
+  invoice_no: "invoiceNo",
+  invoice_date: "invoiceDate",
+  delivery_date: "deliveryDate",
+  credit_term_id: "creditTerm",
+  description: "description",
+  note: "note",
+};
+
+/**
+ * `good_received_note_detail.add.0.received_price` → ชื่อช่องที่คนอ่านรู้เรื่อง
+ *
+ * path ของ backend มีชื่อ table/ลำดับแถวปนมาด้วย ซึ่งไม่มีความหมายกับคนกรอก —
+ * เอาแค่ส่วนท้ายที่เป็นชื่อ field จริง แล้วแปลงผ่าน `FIELD_TO_KEY`
+ */
+function fieldLabels(
+  fields: readonly string[],
+  tField: TranslationFn,
+): string[] {
+  const seen = new Set<string>();
+  for (const path of fields) {
+    const key = FIELD_TO_KEY[path.split(".").pop() ?? ""];
+    if (key) seen.add(tField(key));
+  }
+  return [...seen];
+}
+
 function fallbackKey(code: ErrorCode, statusCode?: number): string {
   // 400 ทั่วไปไม่ได้แปลว่า "กรอกไม่ครบ" เสมอไป กรอกครบแต่ค่าผิดก็ 400 —
   // บอกให้ตรวจฟอร์มอีกรอบตรงกว่า ส่วนโค้ดที่บอกชัดว่าขาด field ค่อยใช้ missingField
@@ -60,7 +108,11 @@ function fallbackKey(code: ErrorCode, statusCode?: number): string {
  * try { ... } catch (err) { toast.error(getUserErrorMessage(err, tErr)); }
  * ```
  */
-export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
+export function getUserErrorMessage(
+  err: unknown,
+  t: TranslationFn,
+  tField?: TranslationFn,
+): string {
   if (err instanceof ApiError) {
     if (
       err.code === ERROR_CODES.VALIDATION_ERROR ||
@@ -76,7 +128,16 @@ export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
       // รหัสจาก catalog มาก่อน: มันบอกเหตุผลจริงที่ backend ปฏิเสธ ส่วนข้อความกลางเป็นทางลงเมื่อ
       // ไม่รู้ว่าเป็นเรื่องอะไร ไม่ใช่ค่าเริ่มต้นที่ควรกลบเหตุผลที่รู้อยู่แล้ว
       const mapped = err.appCode ? APP_CODE_TO_KEY[err.appCode] : undefined;
-      return t(mapped ?? fallbackKey(err.code, err.statusCode));
+      if (mapped) return t(mapped);
+      // บอกชื่อช่องที่ backend ตีกลับ ถ้าแปลงเป็นชื่อที่คนอ่านรู้เรื่องได้ทุกตัว —
+      // แปลงไม่ได้สักตัวก็ตกไปข้อความกลาง ไม่ยัด field name ดิบใส่หน้าผู้ใช้
+      if (tField && err.fieldErrors?.length) {
+        const labels = fieldLabels(err.fieldErrors, tField);
+        if (labels.length > 0) {
+          return t("checkFields", { fields: labels.join(", ") });
+        }
+      }
+      return t(fallbackKey(err.code, err.statusCode));
     }
     const key = CODE_TO_KEY[err.code];
     return key ? t(key) : t("unexpected");
@@ -84,10 +145,6 @@ export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
   return t("unexpected");
 }
 
-/**
- * Correlation ID สำหรับให้ user แจ้ง support
- * ใช้ statusCode + เลขสุ่ม timestamp (พอใช้ก่อนมี Sentry/Datadog)
- */
 export function getErrorId(err: unknown): string | undefined {
   if (err instanceof ApiError && err.statusCode) {
     const ts = Date.now().toString(36).slice(-6).toUpperCase();

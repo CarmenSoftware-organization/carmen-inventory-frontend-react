@@ -28,13 +28,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * ไอคอน + สีของ action ในบันทึกกิจกรรม
- *
- * สีอ้าง custom property ชุดเดียวกับชิปเดิมใน `styles/badge-status.css` ค่าจึงไม่
- * ดริฟต์ออกจากที่อื่น — แต่ย้ายไปอยู่ที่ **ไอคอน** ที่เดียวตาม DESIGN.md
- * ("avoid neon") ป้ายเป็นสีกลางเสมอ
- */
 const ACTION_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   view: { icon: Eye, color: "var(--status-draft)" },
   create: { icon: Plus, color: "var(--status-approved)" },

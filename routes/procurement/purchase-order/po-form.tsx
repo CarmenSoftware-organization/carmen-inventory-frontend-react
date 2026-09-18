@@ -73,7 +73,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // ต่างก็ไม่เท่ากับ APPROVE/VIEW_ONLY อยู่แล้ว)
   const role = purchaseOrder?.role ?? STAGE_ROLE.CREATE;
   const terminalStatus =
-    purchaseOrder?.po_status === PO_STATUS.SENT ||
+    purchaseOrder?.po_status === PO_STATUS.APPROVED ||
+    purchaseOrder?.po_status === PO_STATUS.SENT_OR_PRINT ||
     purchaseOrder?.po_status === PO_STATUS.CLOSED ||
     purchaseOrder?.po_status === PO_STATUS.COMPLETED;
   const isReadOnly = role === STAGE_ROLE.APPROVE || terminalStatus;
@@ -87,7 +88,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
   const canClose =
     !!purchaseOrder &&
-    (purchaseOrder.po_status === PO_STATUS.SENT ||
+    (purchaseOrder.po_status === PO_STATUS.APPROVED ||
+      purchaseOrder.po_status === PO_STATUS.SENT_OR_PRINT ||
       purchaseOrder.po_status === PO_STATUS.PARTIAL);
   const { data: previousStages, isLoading: stagesLoading } =
     usePoPreviousStages(purchaseOrder?.id);
@@ -200,7 +202,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // เหตุผลเดียวกับ price list ข้างบน
   const isFromPr = !isManual && !isPoDraft;
   const contentLocked = fieldsDisabled || isFromPr;
-  const locationsDisabled = isDisabled || isFromPr;
+  // `isDisabled` ยกเว้นผู้อนุมัติไว้ (ดูบรรทัดที่ประกาศ) เพื่อให้ตัดสินรายแถวได้
+  // แต่การยกเว้นนั้นรั่วมาถึงช่องคลังด้วย ผู้อนุมัติที่แค่เปิดอ่านใบเลยเจอ
+  // combobox แทนข้อความ ทั้งที่ยังไม่ได้กด Edit — โหมดอ่านคือโหมดอ่านทุก role
+  const locationsDisabled = isDisabled || isFromPr || isView;
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (

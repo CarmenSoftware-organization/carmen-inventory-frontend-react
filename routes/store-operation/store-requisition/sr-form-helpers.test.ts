@@ -6,7 +6,6 @@ import {
 } from "./sr-form-helpers";
 import type { StoreRequisition } from "@/types/store-requisition";
 
-/** ตัดมาจาก response จริงของ GET /store-requisitions/:id (เอาเฉพาะที่ฟอร์มใช้) */
 const sr = {
   id: "5f0b1b3e-2f0a-4a34-9b0a-3d2a1c4e5f60",
   sr_no: "SR260600012",
@@ -16,18 +15,23 @@ const sr = {
   description: "เบิกของเข้าครัว",
   doc_status: "in_progress",
   doc_version: 3,
-  workflow_id: "8c1d6a7e-0000-4d55-9f1a-b0c9d8e7f612",
-  requestor_id: "a1b2c3d4-1111-4222-8333-444455556666",
-  department_id: "d1e2f3a4-7777-4888-8999-000011112222",
-  from_location_id: "loc-from",
-  to_location_id: "loc-to",
+  workflow: { id: "8c1d6a7e-0000-4d55-9f1a-b0c9d8e7f612", name: "General" },
+  requestor: { id: "a1b2c3d4-1111-4222-8333-444455556666", name: "สมชาย" },
+  department: {
+    id: "d1e2f3a4-7777-4888-8999-000011112222",
+    name: "Kitchen",
+  },
+  from_location: { id: "loc-from", name: "From" },
+  to_location: { id: "loc-to", name: "To" },
   store_requisition_detail: [
     {
       id: "detail-1",
       doc_version: 2,
-      product_id: "prod-1",
-      product_name: "Coca-Cola 325ml",
-      product_local_name: "โค้ก 325 มล.",
+      product: {
+        id: "prod-1",
+        name: "Coca-Cola 325ml",
+        local_name: "โค้ก 325 มล.",
+      },
       inventory_unit_name: "CAN",
       description: "",
       requested_qty: 24,
@@ -79,7 +83,7 @@ describe("buildSrDuplicateValues", () => {
 
   it("ก๊อปของที่เบิก แต่ไม่ก๊อปตัวตนของใบเดิม", () => {
     expect(values.description).toBe("เบิกของเข้าครัว");
-    expect(values.workflow_id).toBe(sr.workflow_id);
+    expect(values.workflow_id).toBe(sr.workflow?.id);
     expect(values.from_location_id).toBe("loc-from");
     expect(values.to_location_id).toBe("loc-to");
     expect(values.doc_version).toBeUndefined();

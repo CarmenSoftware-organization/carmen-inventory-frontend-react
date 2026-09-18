@@ -19,18 +19,6 @@ interface ScheduleFiltersFieldProps {
 
 const ALL_VALUE = "ALL";
 
-/**
- * Render dynamic filter inputs จาก parsed template dialog
- * รองรับ 3 type: `date` / `select` (พร้อม lookup source) / `text`
- *
- * Lookup options ดึงผ่าน `useReportLookups` (TanStack Query, CACHE_STATIC)
- * เมื่อ fields ไม่มี source เลย hook จะไม่ fetch
- *
- * @param props.form - RHF instance
- * @param props.fields - field list ที่ parser คืน
- * @param props.disabled - ปิด input ทั้งกลุ่ม
- * @returns JSX หรือ null ถ้า fields ว่าง
- */
 export function ScheduleFiltersField({
   form,
   fields,

@@ -5,10 +5,6 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-/**
- * Floating-label input ของหน้า auth (login / register) — label ลอยขึ้นเป็น
- * eyebrow ตัวเล็กเมื่อ focus หรือมีค่า
- */
 
 const FLOATING_INPUT_CLASS = cn(
   "border-border bg-background hover:border-foreground/40 focus-visible:border-primary",
@@ -124,7 +120,6 @@ export function FloatingFieldPassword({
   readonly hideLabel: string;
   readonly autoComplete?: string;
   readonly dataId?: string;
-  /** ข้อกำหนดรหัสผ่าน — โชว์ไว้ก่อน ไม่ต้องรอให้ผิดแล้วค่อยบอก (ซ่อนตอนมี error) */
   readonly hint?: string;
   readonly register: UseFormRegisterReturn;
   readonly error?: string;
@@ -189,7 +184,6 @@ export function FieldErrorText({
   );
 }
 
-/** กล่องแจ้ง error ของฟอร์ม auth — เส้นขอบแดงบางๆ ตัวหนังสือแดง ไม่มีพื้นจัด */
 export function AuthFormAlert({
   children,
 }: {

@@ -50,41 +50,6 @@ type ConfirmConfig = {
   onConfirm: () => void;
 };
 
-/**
- * แถบ footer แบบ sticky ของฟอร์ม PR แสดงยอดรวม (subtotal / discount / net /
- * tax / total) พร้อมแปลงค่าเป็นสกุลหลักด้วย `exchange_rate` ของแต่ละ item
- * เมื่อมีหลายสกุลเงิน และแสดงปุ่ม workflow actions ที่ผันตาม `role` และ
- * สถานะรวมของ items (submit / approve / reject / send back / purchase approve)
- * รวมถึงเชื่อมกับ `PrActionDialog` สำหรับยืนยันและรับข้อความ/destination stage
- * @param props - คุณสมบัติของ footer
- * @param props.role - stage role ปัจจุบันของผู้ใช้ (CREATE / APPROVE / PURCHASE / VIEW_ONLY)
- * @param props.prStatus - สถานะของ PR ใช้ตรวจเงื่อนไข voided
- * @param props.isPending - สถานะกำลังประมวลผล ปิดการใช้งานปุ่ม
- * @param props.hasRecord - มีเรคคอร์ดที่บันทึกแล้วหรือยัง ใช้ซ่อน/แสดงสรุปยอด
- * @param props.control - control ของ react-hook-form สำหรับอ่านค่า items
- * @param props.currencyCode - สกุลเงินหลักของเอกสารสำหรับแสดงผลรวม
- * @param props.previousStages - รายการ stage ก่อนหน้าสำหรับส่งกลับ (send back)
- * @param props.stagesLoading - สถานะกำลังโหลด previousStages
- * @param props.onSubmitPr - callback เมื่อกดส่งใบ PR (หลังยืนยันแล้ว)
- * @param props.onValidateSubmit - ตรวจก่อนเปิดกล่องยืนยัน false = ไม่เปิด
- * @param props.onApprove - callback เมื่อกดอนุมัติ
- * @param props.onReject - callback เมื่อกดปฏิเสธ
- * @param props.onReview - callback เมื่อกดส่งกลับ (send back) รับ messages และ destination stage
- * @param props.onPurchaseApprove - callback เมื่อกด purchase approve
- * @returns React element ของแถบ footer พร้อม PrActionDialog สำหรับยืนยัน
- * @example
- * <PrFooterAction
- *   role={role}
- *   prStatus={pr.pr_status}
- *   isPending={mutation.isPending}
- *   hasRecord
- *   control={form.control}
- *   currencyCode="THB"
- *   onSubmitPr={handleSubmit}
- *   onApprove={handleApprove}
- *   onReject={handleReject}
- * />
- */
 export function PrFooterAction({
   role,
   prStatus,

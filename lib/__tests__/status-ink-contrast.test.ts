@@ -2,17 +2,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 
-/**
- * The status tokens (`--warning`, `--success`, …) are FILL colours — each has a
- * `-foreground` for the label that sits on it, and its lightness is tuned for
- * that. Used as `text-*` on the light canvas they measure warning 1.93 ·
- * success 1.99 · positive 3.20 · info 4.31, all under WCAG AA's 4.5:1. They all
- * pass on dark, so the light values were effectively tuned for the dark canvas.
- *
- * `--*-ink` are the same hue and chroma at a lightness that clears AA. This test
- * recomputes the ratios from globals.css rather than trusting the numbers in the
- * comment there, so a token tweak cannot quietly drop one below the line.
- */
 const AA_NORMAL_TEXT = 4.5;
 
 const ROOT = join(import.meta.dirname, "../..");
@@ -50,7 +39,6 @@ function contrast(a: Rgb, b: Rgb): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** the `:root` block is everything before `.dark {`; the dark block follows it */
 const lightBlock = css.slice(css.indexOf(":root {"), css.indexOf(".dark {"));
 const darkBlock = css.slice(css.indexOf(".dark {"));
 
@@ -72,13 +60,6 @@ const INKS = [
   "brand-ink",
 ];
 
-/**
- * The worst surface an ink can land on. In light mode that is the DARKEST light
- * surface (dark text loses contrast as the surface darkens); in dark mode the
- * LIGHTEST dark surface. Both happen to be `--accent`. Getting this backwards
- * yields inks that pass on the canvas and fail on every card — which is what a
- * first pass at these values actually did.
- */
 const WORST_SURFACE = ["accent", "card", "popover", "background", "muted"];
 
 describe("status inks clear WCAG AA as text", () => {

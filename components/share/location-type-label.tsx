@@ -7,7 +7,6 @@ import {
 } from "@/constant/location";
 
 interface LocationTypeLabelProps {
-  /** ประเภทคลัง (`location_type`) */
   type: INVENTORY_TYPE;
   className?: string;
 }

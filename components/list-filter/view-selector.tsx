@@ -46,7 +46,6 @@ import type { SavedView, ViewScope } from "@/types/list-view";
 
 interface ViewSelectorProps {
   readonly view: UseListFiltersResult["view"];
-  /** ค่าที่จะ snapshot ตอน save/update view — ตรงกับ `filterParam`/`sortParam` ของหน้า */
   readonly snapshot: {
     readonly filters: Record<string, string>;
     readonly sort?: string;

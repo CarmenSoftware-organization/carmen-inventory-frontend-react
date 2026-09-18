@@ -12,7 +12,6 @@ interface UseLookupPaginationOptions<T> {
   search: string;
   perpage?: number;
   filter?: (item: T) => boolean;
-  /** Extra dependencies that trigger a full reset (e.g. parent filter ID) */
   resetDeps?: unknown[];
   /**
    * ถ้า false จะไม่ fetch (lazy) — ใช้คู่กับ `onOpenChange` ของ lookup เพื่อยิง API
@@ -22,19 +21,6 @@ interface UseLookupPaginationOptions<T> {
   enabled?: boolean;
 }
 
-/**
- * Hook จัดการ pagination สำหรับ lookup/combobox แบบโหลดเพิ่มทีละหน้า
- * รีเซ็ตรายการเมื่อ search หรือ resetDeps เปลี่ยน และต่อหน้าถัดไปเมื่อ loadMore
- * รองรับการกรองรายการหลังโหลดด้วย filter function
- * @param options - useListHook, search, perpage, filter และ resetDeps
- * @returns object ประกอบด้วย items, isLoading, isLoadingMore, hasMore และ loadMore
- * @example
- * const { items, hasMore, loadMore, isLoadingMore } = useLookupPagination({
- *   useListHook: useProduct,
- *   search,
- *   filter: (p) => p.is_active,
- * });
- */
 export function useLookupPagination<T>({
   useListHook,
   search,

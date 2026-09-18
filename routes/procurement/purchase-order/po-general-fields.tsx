@@ -14,7 +14,7 @@ import type { PoFormValues } from "./po-form-schema";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
+  InputSuffixAmount,
 } from "@/components/ui/input/input-suffix";
 
 interface PoGeneralFieldsProps {
@@ -22,9 +22,7 @@ interface PoGeneralFieldsProps {
   readonly disabled: boolean;
   readonly isManual: boolean;
   readonly readOnly?: boolean;
-  /** ใบยังเป็น draft ไหม — ไม่ draft แล้ว workflow แก้ไม่ได้ (แต่ยังแสดงอยู่) */
   readonly isDraft?: boolean;
-  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
   readonly isAdd?: boolean;
 }
 
@@ -41,6 +39,7 @@ export function PoGeneralFields({
   const { defaultCurrencyId } = useProfile();
 
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const vendorName = useWatch({ control: form.control, name: "vendor_name" });
 
   const { data: currencyData } = useCurrency({ perpage: -1 });
 
@@ -107,6 +106,7 @@ export function PoGeneralFields({
               onItemChange={(vendor) => {
                 form.setValue("vendor_name", vendor.name);
               }}
+              defaultLabel={vendorName || undefined}
               disabled={manualFieldDisabled}
               error={fieldState.error?.message}
               className="text-xs"
@@ -172,22 +172,11 @@ export function PoGeneralFields({
         <FieldLabel required htmlFor="po-exchange-rate" className="ml-auto">
           {tfl("currency")}
         </FieldLabel>
-        {/* กล่องเป็นคนแสดงสถานะ disabled — InputSuffixInput ปิดหน้าตา disabled
-            ของตัวเองไว้ (disabled:bg-transparent) ไม่ส่งให้กล่องด้วยก็จะขาว
-            อยู่ช่องเดียวทั้งที่ช่องอื่นเทาหมด */}
         <InputSuffixField
           className="h-8"
           disabled={fieldDisabled}
           error={!!form.formState.errors.currency_id?.message}
         >
-          <InputSuffixInput
-            id="po-exchange-rate"
-            type="number"
-            inputMode="decimal"
-            step="0.0001"
-            disabled={fieldDisabled}
-            {...form.register("exchange_rate")}
-          />
           <InputSuffixAddon>
             <Controller
               control={form.control}
@@ -206,6 +195,21 @@ export function PoGeneralFields({
               )}
             />
           </InputSuffixAddon>
+          {/* เรตแลกเปลี่ยนโชว์ทศนิยม 5 ตำแหน่งเสมอ (1 → 1.00000) — input ตัวเลข
+              ของเบราว์เซอร์โชว์ค่าดิบเสมอ ใส่ step ยังไงก็ไม่ได้ trailing zeros */}
+          <Controller
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <InputSuffixAmount
+                id="po-exchange-rate"
+                decimals={5}
+                disabled={fieldDisabled}
+                value={Number(field.value) || 0}
+                onValueChange={field.onChange}
+              />
+            )}
+          />
         </InputSuffixField>
       </Field>
 

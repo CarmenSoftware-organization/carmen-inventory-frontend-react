@@ -29,7 +29,6 @@ export function LegalPage({
   crossTo,
 }: {
   readonly document: LegalDocument;
-  /** path ของอีกฉบับ ที่ลิงก์ท้ายหน้าจะพาไป */
   readonly crossTo: "/terms" | "/privacy";
 }) {
   return (
@@ -118,7 +117,6 @@ function LegalHeader() {
   );
 }
 
-/** สลับภาษาแบบ segmented เล็กๆ — หน้านี้ไม่มี navbar ให้พึ่ง */
 function LocaleToggle() {
   const locale = useLocale() as SupportedLocale;
   const { switchLocale, isPending } = useLocaleSwitch();

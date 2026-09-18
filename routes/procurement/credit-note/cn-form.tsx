@@ -22,6 +22,12 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -35,6 +41,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
 import { CnItem } from "./cn-item";
+import { CnStockTable } from "./cn-stock-table";
 import { CnFooterAction } from "./cn-footer-action";
 import {
   createCnSchema,
@@ -72,6 +79,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const deleteCn = useDeleteCreditNote();
   const submitCn = useSubmitCreditNote();
   const [showDelete, setShowDelete] = useState(false);
+  const [tab, setTab] = useState("items");
   const [showSubmit, setShowSubmit] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const isPending =
@@ -117,10 +125,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
   }, [cnSyncKey, creditNote?.id]);
 
-  /**
-   * @param docVersion - เลขที่ GET สดมาแล้ว ไม่ส่ง = ใช้ค่าในฟอร์ม ซึ่งถูกเฉพาะใบใหม่
-   *   ที่ยังไม่มี id ให้ GET (ดู lib/doc-version.ts)
-   */
   const buildPayload = (
     values: CnFormValues,
     docVersion?: number,
@@ -141,7 +145,8 @@ export function CnForm({ creditNote }: CnFormProps) {
       grn_id: values.grn_id,
       grn_date: values.grn_date,
       vendor_id: values.vendor_id,
-      credit_note_number: values.cn_no,
+      // ใบใหม่ยังไม่มีเลขที่ — backend ออกให้ตอน create สำเร็จ ส่ง "" ไปไม่ได้
+      ...(values.cn_no ? { credit_note_number: values.cn_no } : {}),
       cn_date: values.cn_date,
       cn_reason_id: values.reason,
       reference_number: values.reference_number,
@@ -215,9 +220,8 @@ export function CnForm({ creditNote }: CnFormProps) {
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/credit-note");
   };
@@ -278,7 +282,10 @@ export function CnForm({ creditNote }: CnFormProps) {
       if (res.ok) {
         const fresh = ((await res.json())?.data ?? null) as FreshCn | null;
         if (import.meta.env.DEV && fresh?.doc_version == null) {
-          console.warn("[CN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน", id);
+          console.warn(
+            "[CN] GET คืน 200 แต่ไม่มี doc_version — ใช้ค่าในฟอร์มแทน",
+            id,
+          );
         }
         return fresh;
       }
@@ -286,7 +293,8 @@ export function CnForm({ creditNote }: CnFormProps) {
         console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", res.status, id);
     } catch (err) {
       // ยังคืน null (ไม่ throw) เพราะ GET ล้มไม่ควรทำให้บันทึกไม่ได้เลย — แต่ต้องไม่เงียบ
-      if (import.meta.env.DEV) console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", err);
+      if (import.meta.env.DEV)
+        console.warn("[CN] ดึง doc_version สดไม่สำเร็จ", err);
     }
     return null;
   };
@@ -393,20 +401,32 @@ export function CnForm({ creditNote }: CnFormProps) {
         onSubmit={form.handleSubmit(onSubmit, revealInvalid)}
         className="space-y-3 px-4"
       >
-        <CnGeneralFields form={form} disabled={isDisabled || isView} />
-
-        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
-            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <CnGeneralFields
+          form={form}
+          disabled={isDisabled || isView}
+          vendorName={creditNote?.vendor?.name ?? undefined}
+        />
         <hr className="border-border" />
 
-        <CnItem form={form} disabled={isDisabled} />
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList variant="line">
+            <TabsTrigger value="items">{t("tabItems")}</TabsTrigger>
+            <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items">
+            <CnItem form={form} disabled={isDisabled} />
+          </TabsContent>
+
+          <TabsContent value="stock">
+            <CnStockTable docStatus={creditNote?.doc_status} />
+          </TabsContent>
+        </Tabs>
       </form>
 
       <CnFooterAction
         control={form.control}
         canSubmit={
-          // โผล่ทุกโหมดของใบร่าง (เหมือน PR) — คนกรอกเสร็จแล้วอยากส่งเลย ไม่ต้อง
-          // กด Save → ออกจากโหมดแก้ → ค่อยกด Submit ให้ครบสามจังหวะ
           isAdd || (!isLocked && creditNote?.doc_status === CN_STATUS.DRAFT)
         }
         isPending={isPending}

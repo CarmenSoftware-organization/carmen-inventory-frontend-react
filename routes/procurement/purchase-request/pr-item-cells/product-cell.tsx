@@ -16,7 +16,7 @@ import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import type { PrFormValues } from "../pr-form-schema";
-import { InventoryTooltipCell, useIsRowLocked } from "./helpers";
+import { InventoryDialogCell, useIsRowLocked } from "./helpers";
 
 export const ProductCell = memo(function ProductCell({
   control,
@@ -53,7 +53,7 @@ export const ProductCell = memo(function ProductCell({
   // ทรงเดียวกับ SR (sr-item-table.tsx) และแถบ inventory ใต้แถว (pr-inventory-row)
   const inventoryTooltip = (
     <>
-      <InventoryTooltipCell
+      <InventoryDialogCell
         control={control}
         index={index}
         buCode={buCode}
@@ -126,6 +126,21 @@ export const ProductCell = memo(function ProductCell({
                           `items.${index}.product_local_name`,
                           product.local_name ?? "",
                         );
+                        // หน่วยนับสต็อกของสินค้า — ไม่ใช่หน่วยที่ขอเบิก แต่เป็น key
+                        // ที่ last-receiving ใช้ถามต้นทุนครั้งก่อน (ดู
+                        // pr-last-receiving-info / pr-price-alert-badge)
+                        // ไม่เซ็ตไว้ = แถวที่เพิ่งเลือกสินค้าไม่มีไอคอนราคาครั้งก่อน
+                        // และไม่มีธงเตือนราคาแพงขึ้นเลย ทั้งที่ของเดิมในใบมี
+                        form.setValue(
+                          `items.${index}.inventory_unit_id`,
+                          product.inventory_unit?.id ?? null,
+                        );
+                        form.setValue(
+                          `items.${index}.inventory_unit_name`,
+                          product.inventory_unit?.name ??
+                            product.inventory_unit_name ??
+                            "",
+                        );
                       }
                       form.setValue(`items.${index}.requested_unit_id`, "");
                       form.setValue(`items.${index}.foc_unit_id`, "");
@@ -139,7 +154,7 @@ export const ProductCell = memo(function ProductCell({
               {(productCode || productName) && (
                 <TooltipContent
                   side="top"
-                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                  className="max-w-[20rem]"
                 >
                   <div className="space-y-1">
                     <p className="text-foreground/60 text-micro font-semibold">

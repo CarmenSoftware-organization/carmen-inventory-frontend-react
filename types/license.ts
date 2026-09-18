@@ -13,7 +13,6 @@
  */
 export interface BusinessUnitSeat {
   used: number;
-  /** ไม่ nullable — ไม่มีค่าไหนแปลว่า "ไม่จำกัด" ศูนย์ที่นั่งคือศูนย์จริง ๆ */
   cap: number;
   pending_invites: number;
 }
@@ -34,9 +33,7 @@ export interface BusinessUnitSeat {
  */
 export interface BusinessUnitLicense {
   state: "active" | "expired" | "inactive" | "none" | "unresolved";
-  /** ISO 8601 Z — null เมื่อ state เป็น "none" หรือ "unresolved" */
   end_date: string | null;
-  /** feature key ที่อยู่ในสัญญา รวม module ระดับบนและ resource ระดับล่าง เรียงตัวอักษรเสมอ */
   features: string[];
   /**
    * feature key ที่ platform ปลดระวางแล้ว (`tb_license_feature.state = "hide"`)
@@ -48,10 +45,6 @@ export interface BusinessUnitLicense {
    * "ไม่ซ่อนอะไรเลย" (fail-open) ไม่ใช่ "ซ่อนทุกอย่าง"
    */
   hidden_features?: string[];
-  /**
-   * คีย์ที่ BU นี้เคยมีแต่สัญญาหมดอายุ — **ไม่ทับกับ `features`**
-   * `undefined` = backend รุ่นเก่ายังไม่ส่ง ตีความว่า "ไม่มีอะไรหมดอายุ"
-   */
   expired_features?: string[];
   seat: BusinessUnitSeat;
 }
@@ -72,7 +65,6 @@ export interface LicenseUnion {
   expired_features: string[];
 }
 
-/** รูปการตอบกลับของ `GET /api/license` — `business_unit` คีย์ด้วย `business_unit_id` */
 export interface UserLicenseResponse {
   union: LicenseUnion;
   business_unit: Record<string, BusinessUnitLicense>;

@@ -18,19 +18,12 @@ import { ImageLightbox } from "./pd-image-lightbox";
 import { EmptyImage } from "./pd-image-empty";
 
 interface ProductImagesProps {
-  /** id ของ product — จำเป็นต่อการโหลด/อัปโหลดรูป (ไม่มี = ยังไม่บันทึก) */
   readonly productId?: string;
-  /** เพิ่ม/อัปโหลดรูปได้เฉพาะตอน edit mode — true = ดูอย่างเดียว */
   readonly readOnly?: boolean;
-  /**
-   * รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลด — ถืออยู่ที่ฟอร์ม แล้วส่งขึ้น backend ตอนกด
-   * Save พร้อมกับข้อมูลอื่น ไม่ยิงทันทีที่เลือกไฟล์
-   */
   readonly pendingFiles?: readonly File[];
   readonly onPendingFilesChange?: (files: File[]) => void;
 }
 
-/** map รูปจาก API → รูปแบบที่ใช้แสดงผล (url + label) */
 function toDisplayImage(
   img: ProductImage,
   index: number,

@@ -6,14 +6,11 @@ import { createPrSchema, findRowsMissingQty, PR_ITEM } from "./pr-form-schema";
 const tv = (key: string) => key;
 const tf = (key: string) => key;
 
-/** PR_ITEM เป็น `as const` — ชนิดของ requested_qty/foc_qty เลยแคบเป็น literal 0
- *  ประกาศเฉพาะสองช่องที่เทสต์นี้เปลี่ยนจริง ให้เป็น number ธรรมดา */
 interface QtyOverrides {
   requested_qty: number;
   foc_qty: number;
 }
 
-/** แถวที่กรอกครบทุกช่องบังคับ ยกเว้นจำนวนที่ให้เทสต์เป็นคนกำหนด */
 function item(overrides: QtyOverrides) {
   return {
     ...PR_ITEM,
@@ -26,7 +23,6 @@ function item(overrides: QtyOverrides) {
   };
 }
 
-/** error ที่ schema (= ตอนกด Save) ออกให้ช่องจำนวนที่ขอ */
 function saveIssues(overrides: QtyOverrides) {
   const result = createPrSchema(tv, tf).safeParse({
     pr_date: "2026-09-09",

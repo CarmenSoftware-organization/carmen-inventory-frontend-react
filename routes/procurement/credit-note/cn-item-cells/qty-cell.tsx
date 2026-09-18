@@ -9,7 +9,6 @@ import { useUnitDecimals } from "@/hooks/use-product-units";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import type { CnFormValues } from "../cn-form-schema";
 
-/** Return qty (+unit) — จำนวนที่คืน = ตัวตั้งของทุกยอดในแถว · amount_discount ล็อก (ref) */
 export function QtyCell({
   form,
   index,
@@ -46,6 +45,7 @@ export function QtyCell({
         className="w-full"
         value={formatQty(quantity ?? 0)}
         suffix={unitName}
+        suffixClassName="text-right"
       />
     );
   }

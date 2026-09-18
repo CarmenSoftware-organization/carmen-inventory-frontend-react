@@ -1,8 +1,3 @@
-/**
- * Carmen Tile System — shared SVG primitives
- *
- * 40×40 viewBox. ใช้ร่วมกันทั้ง AppTiles และ SubTiles.
- */
 
 import type { Palette } from "./palette";
 
@@ -10,11 +5,9 @@ export type TileRenderer = (props: {
   readonly palette: Palette;
 }) => React.JSX.Element;
 
-/** Squircle path (superellipse-ish) — 40×40 viewBox, ~27% rounded */
 const SQ = (size = 40, r = 11) =>
   `M ${r} 0 H ${size - r} Q ${size} 0 ${size} ${r} V ${size - r} Q ${size} ${size} ${size - r} ${size} H ${r} Q 0 ${size} 0 ${size - r} V ${r} Q 0 0 ${r} 0 Z`;
 
-/** Filled base squircle — พื้นไทล์โทน primary-tint (flat, ไม่มี sheen/gradient) */
 export function TileBase({ palette }: { readonly palette: Palette }) {
   return <path d={SQ()} style={{ fill: palette.base }} />;
 }
@@ -211,7 +204,6 @@ export function Lines({
 
 /* ───────── Shared shapes (dedup across tiles) ───────── */
 
-/** Shield outline + accent check — ใช้ใน systemAdmin (AppTile) และ role (SubTile) */
 export function Shield({ palette }: { readonly palette: Palette }) {
   return (
     <>
@@ -231,7 +223,6 @@ export function Shield({ palette }: { readonly palette: Palette }) {
   );
 }
 
-/** White map-marker body — contents (icon ข้างใน) ส่งผ่าน children */
 export function Pin({ children }: { readonly children?: React.ReactNode }) {
   return (
     <>
@@ -244,7 +235,6 @@ export function Pin({ children }: { readonly children?: React.ReactNode }) {
   );
 }
 
-/** Isometric product cube (white body + accent top + shadow edge) */
 export function ProductCube({ palette }: { readonly palette: Palette }) {
   return (
     <>
@@ -268,7 +258,6 @@ export function ProductCube({ palette }: { readonly palette: Palette }) {
   );
 }
 
-/** Rising bar chart + trend line — ใช้ใน report (AppTile) และ reportList (SubTile) */
 export function BarChart({ palette }: { readonly palette: Palette }) {
   return (
     <>
@@ -308,7 +297,6 @@ export function BarChart({ palette }: { readonly palette: Palette }) {
   );
 }
 
-/** Mini dashboard grid (4 cards) — ใช้ใน dashboard tile ทั้ง App/Sub (rx ต่างกัน) */
 export function DashboardGrid({
   palette,
   rx = 1.8,
@@ -341,7 +329,6 @@ export function DashboardGrid({
 }
 
 interface WindowGridProps {
-  /** resolved color string (e.g. palette.base / palette.shadow) */
   readonly fill: string;
   readonly x: number;
   readonly y: number;
@@ -352,7 +339,6 @@ interface WindowGridProps {
   readonly size?: number;
   readonly opacity?: number;
 }
-/** Grid of small square building windows — ใช้ใน vendor/department/vendorManagement */
 export function WindowGrid({
   fill,
   x,
@@ -390,12 +376,10 @@ interface GlyphProps {
   readonly x: number;
   readonly y: number;
   readonly size: number;
-  /** resolved color string (e.g. palette.base / palette.shadow) */
   readonly fill: string;
   readonly anchor?: "start" | "middle";
   readonly opacity?: number;
 }
-/** Bold sans-serif symbol glyph ($, €, %, #) — ใช้ใน config / pricing tiles */
 export function Glyph({
   children,
   x,

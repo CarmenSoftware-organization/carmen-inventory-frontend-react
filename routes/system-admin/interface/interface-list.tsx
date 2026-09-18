@@ -18,7 +18,6 @@ import {
 export type BrandStatus = {
   readonly brand: BrandDef;
   readonly enabled: boolean;
-  /** `expired` = อยู่ในสัญญาที่หมดอายุ ยังแสดงแต่แก้ไม่ได้ · `none` ถูกกรองทิ้งไปแล้วตั้งแต่ interfaceGroups */
   readonly entitlement: InterfaceEntitlement;
 };
 
@@ -60,11 +59,6 @@ export function interfaceGroups(
     .filter((group) => group.brands.length > 0);
 }
 
-/**
- * หน้า list ของ interface ทั้งหมด — จัดกลุ่มตาม category, การ์ดต่อ brand พร้อม badge สถานะ
- *
- * @returns React element ของหน้า interface list
- */
 export default function InterfaceList() {
   const t = useTranslations("systemAdmin.interface");
   const { entitlementOf } = useInterfaceEntitlement();

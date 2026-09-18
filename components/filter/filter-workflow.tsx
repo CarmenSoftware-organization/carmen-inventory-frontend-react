@@ -21,28 +21,6 @@ interface FilterWorkflowProps {
   readonly className?: string;
 }
 
-/**
- * ตัวกรอง workflow แบบ multi-select
- *
- * Render Popover + Command + search + checkbox ของ workflows ที่ดึงผ่าน
- * `useWorkflowTypeQuery(workflowType)` parse/serialize URL filter รูปแบบ
- * `workflow_id|string:id1,id2`
- *
- * @param props - props ของ filter
- * @param props.value - URL filter string ปัจจุบัน
- * @param props.onChange - callback เปลี่ยนค่า filter
- * @param props.workflowType - ประเภท workflow ที่จะ filter
- * @param props.className - className เพิ่มเติม
- * @returns JSX element ของ filter popover
- * @example
- * ```tsx
- * <FilterWorkflow
- *   value={extraFilter}
- *   onChange={setExtraFilter}
- *   workflowType="purchase_request"
- * />
- * ```
- */
 export function FilterWorkflow({
   value,
   onChange,

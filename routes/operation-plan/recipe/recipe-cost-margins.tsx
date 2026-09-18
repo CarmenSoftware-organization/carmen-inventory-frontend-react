@@ -14,7 +14,6 @@ interface RecipeCostMarginsProps {
   readonly computed: RecipeComputed;
 }
 
-/** Margins panel — gross margin tile + food cost tile + signal banner + target editor */
 export function RecipeCostMargins({
   form,
   isDisabled,

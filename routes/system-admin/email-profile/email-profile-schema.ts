@@ -11,11 +11,6 @@ export const emailProfileSchema = z.object({
   smtp_password: z.string().min(1),
   from_email: z.string().email(),
   from_name: z.string(),
-  reply_to: z.union([z.string().email(), z.literal("")]),
-  default_cc: z.string(), // คั่นด้วย , ; หรือช่องว่าง แปลงตอนบันทึก
-  subject_template: z.string(),
-  body_template: z.string(),
-  note: z.string(),
 });
 
 export type EmailProfileFormValues = z.infer<typeof emailProfileSchema>;
@@ -30,20 +25,7 @@ export const EMPTY_EMAIL_PROFILE_FORM: EmailProfileFormValues = {
   smtp_password: "",
   from_email: "",
   from_name: "",
-  reply_to: "",
-  default_cc: "",
-  subject_template: "",
-  body_template: "",
-  note: "",
 };
-
-/** ตัวแยกชุดเดียวกับ `config-email-component.tsx` เดิม — คั่นด้วย comma/semicolon/ช่องว่าง */
-function splitEmailList(s: string): string[] {
-  return s
-    .split(/[,;\s]+/)
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
 
 /**
  * คืนค่าเริ่มต้นของฟอร์มจากโปรไฟล์ที่มีอยู่ (หรือฟอร์มเปล่าถ้าเป็นโปรไฟล์ใหม่)
@@ -69,11 +51,6 @@ export function toEmailProfileFormValues(
     smtp_password: SECRET_MASK,
     from_email: profile.from_email,
     from_name: profile.from_name,
-    reply_to: profile.reply_to,
-    default_cc: profile.default_cc.join(", "),
-    subject_template: profile.subject_template,
-    body_template: profile.body_template,
-    note: profile.note ?? "",
   };
 }
 
@@ -105,10 +82,5 @@ export function fromEmailProfileFormValues(
     },
     from_email: values.from_email,
     from_name: values.from_name,
-    reply_to: values.reply_to,
-    default_cc: splitEmailList(values.default_cc),
-    subject_template: values.subject_template,
-    body_template: values.body_template,
-    note: values.note,
   };
 }

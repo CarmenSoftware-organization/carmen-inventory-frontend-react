@@ -1,11 +1,8 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
-/**
- * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —
- * vendor ที่มี price list active ในวันที่ระบุ
- */
 export interface PriceListActiveVendor {
   id: string;
   code: string;
@@ -18,18 +15,13 @@ export interface PriceListActiveVendor {
 export interface PriceListDetailItem {
   id: string;
   sequence_no: number;
-  product_id: string;
-  product_name: string;
-  product_local_name: string;
-  product_code?: string;
+  product: EntityRef | null;
   product_sku?: string;
-  unit_id: string;
-  unit_name: string | null;
+  unit: EntityRef | null;
   moq_qty: number;
   price: number;
   price_without_tax: number;
-  tax_profile_id: string;
-  tax_profile_name: string | null;
+  tax_profile: EntityRef | null;
   tax_rate: number;
   tax_amt: number;
   lead_time_days: number;
@@ -39,10 +31,6 @@ export interface PriceListDetailItem {
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
-  /**
-   * บรรทัดนี้เอาไปตั้งเป็นรายการสั่งซื้อได้ไหม — หลังบ้านตัดสินให้ (เช่นสิทธิ์ของ
-   * workflow ที่ส่งไปด้วย) `false` = เลือกไม่ได้ · ไม่ส่งมา = ถือว่าเลือกได้
-   */
   can_use?: boolean;
   doc_version?: number;
 }
@@ -55,13 +43,12 @@ export interface PriceList {
   name: string;
   status: PriceListStatus;
   description: string;
-  vendor: { id: string; name: string };
+  vendor: EntityRef | null;
   // backend GET-by-id returns only { id, code } — name is not sent
-  currency: { id: string; code: string; name?: string };
+  currency: EntityRef | null;
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];
-  /** ทั้งใบเอาไปใช้ได้ไหม — `false` = ทุกบรรทัดในใบนี้เลือกไม่ได้ */
   can_use?: boolean;
   doc_version?: number;
   audit?: PriceListAudit;

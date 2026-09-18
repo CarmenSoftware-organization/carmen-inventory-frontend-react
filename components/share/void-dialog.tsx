@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** โชว์ตัวนับเมื่อใกล้เต็มเท่านั้น — ยังพิมพ์ไม่ถึงครึ่งก็ไม่ต้องมีเลขคอยกวน */
 const REASON_MAX = 256;
 const COUNTER_FROM = 200;
 

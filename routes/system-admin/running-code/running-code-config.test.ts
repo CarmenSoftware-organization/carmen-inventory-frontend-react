@@ -7,7 +7,6 @@ import {
   type CodePart,
 } from "./running-code-config";
 
-/** 2026-08-27 — ตรึงไว้ให้ตัวอย่างวันที่คงที่ ไม่ใช่ new Date() ที่พังเดือนหน้า */
 const NOW = new Date(2026, 7, 27);
 
 describe("parseConfig", () => {

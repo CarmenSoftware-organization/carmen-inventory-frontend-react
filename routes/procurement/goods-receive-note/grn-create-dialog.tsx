@@ -14,9 +14,6 @@ interface GrnCreateDialogProps {
   readonly onSelect: (docType: "manual" | "purchase_order") => void;
 }
 
-/**
- * Dialog เลือกวิธีเริ่มสร้าง GRN: กรอกเอง (manual) หรืออ้างอิงจาก Purchase Order
- */
 export function GrnCreateDialog({
   open,
   onOpenChange,

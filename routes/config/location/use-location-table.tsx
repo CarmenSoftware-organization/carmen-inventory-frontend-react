@@ -24,19 +24,6 @@ interface UseLocationTableOptions {
   onDelete: (location: Location) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Location พร้อมคอลัมน์ code, name, type, physical count, delivery point
- *
- * ใช้ภายใน `LocationComponent` โดยส่งผ่าน prop `useTable` ของ
- * `ConfigListTemplate`
- *
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * ```tsx
- * <ConfigListTemplate useTable={useLocationTable} ... />
- * ```
- */
 export function useLocationTable({
   data,
   totalRecords,

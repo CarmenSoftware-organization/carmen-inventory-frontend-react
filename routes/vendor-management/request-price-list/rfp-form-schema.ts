@@ -6,15 +6,8 @@ import type {
   RequestPriceListVendor,
 } from "@/types/request-price-list";
 
-/**
- * สร้าง zod schema สำหรับผู้ขายหนึ่งรายในตารางของ RFP
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของแถวผู้ขาย
- */
 function createVendorRowSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
-    /** id ของแถวฝั่ง server — ว่าง = ผู้ขายที่เพิ่งเพิ่ม ยังไม่เคยถูกบันทึก */
     id: z.string(),
     vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
     vendor_name: z.string(),
@@ -26,12 +19,6 @@ function createVendorRowSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema ของ RFP form พร้อมตรวจสอบช่วงวันที่และ vendors add/remove
- * @param tv - ฟังก์ชัน translation สำหรับ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ RFP form
- */
 export function createRfpSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
@@ -70,11 +57,6 @@ export const EMPTY_FORM: RfpFormValues = {
   vendors: [],
 };
 
-/**
- * คำนวณค่าเริ่มต้นของ RFP form จาก RFP ที่มีอยู่ หรือคืนค่า empty form
- * @param rfp - ข้อมูล RFP สำหรับ pre-fill (optional)
- * @returns ค่า default ของ RFP form
- */
 export function getDefaultValues(rfp?: RequestPriceList): RfpFormValues {
   if (!rfp) return EMPTY_FORM;
   return {
@@ -91,15 +73,14 @@ export function getDefaultValues(rfp?: RequestPriceList): RfpFormValues {
   };
 }
 
-/** แถวผู้ขายที่ backend ส่งมา -> แถวบนฟอร์ม (ตัดข้อมูลอ่านอย่างเดียวออก) */
 export function toVendorRow(
   vendor: RequestPriceListVendor,
 ): RfpFormValues["vendors"][number] {
   return {
     id: vendor.id,
-    vendor_id: vendor.vendor_id,
-    vendor_name: vendor.vendor_name,
-    vendor_code: vendor.vendor_code,
+    vendor_id: vendor.vendor?.id ?? "",
+    vendor_name: vendor.vendor?.name ?? "",
+    vendor_code: vendor.vendor?.code ?? "",
     contact_person: vendor.contact_person,
     contact_phone: vendor.contact_phone,
     contact_email: vendor.contact_email,

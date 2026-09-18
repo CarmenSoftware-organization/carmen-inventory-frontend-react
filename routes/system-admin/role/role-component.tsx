@@ -26,12 +26,6 @@ import RoleCard from "./role-card";
 import { useRoleTable } from "./use-role-table";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 
-/**
- * คอมโพเนนต์หลักของหน้า Role list รองรับทั้ง DataGrid (desktop) และ infinite card (mobile)
- * @returns JSX element ของหน้ารายการ Role
- * @example
- * <RoleComponent />
- */
 export default function RoleComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);

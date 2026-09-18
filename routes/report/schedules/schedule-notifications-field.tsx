@@ -21,12 +21,6 @@ import type { ScheduleFormValues } from "./schedule-form-schema";
  */
 const NOTIFY_GAP_WARNING_MINUTES = 10;
 
-/**
- * แปลง "HH:mm" เป็นจำนวนนาทีนับจากเที่ยงคืน
- *
- * @param value - เวลารูปแบบ "HH:mm"
- * @returns จำนวนนาที หรือ null ถ้ารูปแบบไม่ใช่
- */
 function toMinutes(value: string): number | null {
   const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
   if (!m) return null;

@@ -1,0 +1,57 @@
+{
+  "_url": "/api/T02/stock-outs/21f7aee4-3b83-4874-8ed6-464314f4af6c",
+  "data": {
+    "adjustment_type_code": "O001",
+    "adjustment_type_id": "74b308a0-1249-4f9c-9b47-eb4ba3398659",
+    "audit": {
+      "created": {
+        "at": "2026-04-24T06:57:37.529Z",
+        "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+        "name": "ศิริวรรณ Purchase k ทองดี"
+      },
+      "updated": {
+        "at": "2026-04-24T06:57:37.529Z"
+      }
+    },
+    "description": "",
+    "dimension": [],
+    "doc_status": "completed",
+    "doc_version": 0,
+    "id": "21f7aee4-3b83-4874-8ed6-464314f4af6c",
+    "info": {},
+    "location_code": "1FB02",
+    "location_id": "3ad9d3e6-ca78-44de-9812-1f62adf26600",
+    "location_name": "F&B Main Kitchen",
+    "location_type": "inventory",
+    "note": "",
+    "so_date": "2026-03-30T23:59:59.000Z",
+    "so_no": "SO20260400001",
+    "stock_out_detail": [
+      {
+        "description": null,
+        "dimension": null,
+        "doc_version": 0,
+        "id": "f4e227f7-6822-479b-aef4-256dafbcb4a8",
+        "info": null,
+        "inventory_transaction_id": "02f9e356-4695-4c91-8326-8566ba171a38",
+        "inventory_unit": {
+          "id": "ab5d4de6-95bd-4330-a263-b4578540c517",
+          "name": "KG"
+        },
+        "note": null,
+        "product_code": "11120233",
+        "product_id": "022a0f85-f19f-4530-aa8a-b887aa81d720",
+        "product_local_name": "มะนาว",
+        "product_name": "lemon",
+        "product_sku": "11120233",
+        "qty": 2,
+        "sequence_no": 1,
+        "stock_out_id": "21f7aee4-3b83-4874-8ed6-464314f4af6c"
+      }
+    ]
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:45.987Z"
+}

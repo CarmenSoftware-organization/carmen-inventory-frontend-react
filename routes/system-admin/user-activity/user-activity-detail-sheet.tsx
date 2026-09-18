@@ -14,13 +14,6 @@ import { ActivityActionLabel } from "../shared/activity-action-label";
 import { formatDate } from "@/lib/date-utils";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
 
-/**
- * แถวแสดงข้อมูลคู่ label/value พร้อมไอคอนใน detail sheet
- * @param props - icon component, ข้อความ label และ children ที่จะแสดงเป็น value
- * @returns React element ของแถวข้อมูล
- * @example
- * <InfoRow icon={User} label="User">John</InfoRow>
- */
 function InfoRow({
   icon: Icon,
   label,
@@ -44,13 +37,6 @@ function InfoRow({
   );
 }
 
-/**
- * บล็อกแสดงข้อมูล JSON แบบ pretty-printed ใน detail sheet
- * @param props - ออบเจกต์ data ของ JSON ที่จะแสดง (null หรือว่างจะแสดงขีด)
- * @returns React element ของบล็อก JSON
- * @example
- * <JsonBlock data={{ role: "admin" }} />
- */
 function JsonBlock({ data }: { data: Record<string, unknown> | null }) {
   if (!data || Object.keys(data).length === 0)
     return <span className="text-muted-foreground">—</span>;
@@ -67,13 +53,6 @@ interface UserActivityDetailSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Sheet แสดงรายละเอียดของกิจกรรมผู้ใช้ (User Activity) เมื่อคลิกเลือกรายการ
- * @param props - log ที่เลือก, สถานะ open และ callback onOpenChange
- * @returns React element ของ detail sheet
- * @example
- * <UserActivityDetailSheet log={selected} open={!!selected} onOpenChange={setOpen} />
- */
 export function UserActivityDetailSheet({
   log,
   open,

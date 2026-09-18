@@ -14,15 +14,6 @@ interface ScProductTransferProps {
   readonly availableProducts: ProductLocation[];
 }
 
-/**
- * Multi-select 2-pane (Selected ซ้าย / Available ขวา) — direct toggle UX
- * - Click checkbox → push/pop product_id ใน form ทันที
- * - Header checkbox → toggle all visible (เคารพ search)
- * - Virtualized list (รองรับ 1000+ items)
- *
- * Form field: products: { product_id, product_name }[]
- * Payload (mapFormToPayload) → product_id: string[]
- */
 export function ScProductTransfer({
   form,
   disabled,

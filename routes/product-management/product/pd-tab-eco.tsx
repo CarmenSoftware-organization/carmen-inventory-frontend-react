@@ -32,10 +32,6 @@ interface PdTabEcoProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Section จัดการ eco label ของ product — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน product form)
- * แสดงเฉพาะตอนมี product แล้ว (มี productId)
- */
 export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
   const t = useTranslations("productManagement.product");
   const tc = useTranslations("common");

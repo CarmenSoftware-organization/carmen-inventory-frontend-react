@@ -44,11 +44,8 @@ import {
 const FORM_ID = "sc-form";
 
 interface ScFormProps {
-  /** location_id locked — required เสมอ (SC ต้องเริ่มจาก location) */
   readonly defaultLocationId: string;
-  /** ชื่อ location ที่ pre-fill — ใช้แสดงใน title/meta แทน placeholder */
   readonly defaultLocationName?: string;
-  /** Products ใน location สำหรับ Transfer UI ใน manual mode */
   readonly availableProducts?: ProductLocation[];
 }
 
@@ -135,9 +132,8 @@ export function ScForm({
     discard.confirm(() => navigate("/inventory-management/spot-check"));
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => navigate("/inventory-management/spot-check");
 
   const handleBack = () => discard.confirm(goBack);

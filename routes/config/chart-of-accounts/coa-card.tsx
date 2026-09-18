@@ -13,7 +13,6 @@ interface Props {
   readonly onDelete?: (item: ChartOfAccount) => void;
 }
 
-/** การ์ดรหัสบัญชี สำหรับ `ConfigListTemplate` โหมด grid/mobile */
 export default function CoaCard({ item, onEdit, onDelete }: Props) {
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");

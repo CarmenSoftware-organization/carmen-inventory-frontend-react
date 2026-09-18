@@ -21,14 +21,6 @@ interface UseCreditNoteReasonTableOptions {
   onDelete: (reason: CnReason) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Credit Note Reason (ซ่อนคอลัมน์ status)
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/credit-note-reason
- * const { table } = useCreditNoteReasonTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useCreditNoteReasonTable({
   data,
   totalRecords,

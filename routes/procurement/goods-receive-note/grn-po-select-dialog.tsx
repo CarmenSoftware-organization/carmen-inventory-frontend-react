@@ -20,7 +20,6 @@ interface GrnPoSelectDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly vendorId: string;
-  /** สกุลเงินของใบที่กำลังกรอก — ว่างได้ (ยังไม่ได้ตั้ง) */
   readonly currencyId: string;
   readonly currencyName: string;
   readonly excludeIds: Set<string>;

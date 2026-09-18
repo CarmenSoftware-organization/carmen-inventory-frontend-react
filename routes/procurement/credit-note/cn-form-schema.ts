@@ -70,18 +70,6 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง Zod schema หลักของฟอร์มใบลดหนี้
- * รองรับทั้งประเภท quantity_return และ amount_discount
- * ประกอบด้วย grn, vendor, currency, invoice, tax invoice และ items
- *
- * @param tv - ฟังก์ชันแปลข้อความ validation
- * @param tf - ฟังก์ชันแปลชื่อฟิลด์
- * @returns Zod schema ของฟอร์มใบลดหนี้
- * @example
- * const schema = createCnSchema(tv, tf);
- * const form = useForm<CnFormValues>({ resolver: zodResolver(schema) as Resolver<CnFormValues> });
- */
 export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
@@ -131,7 +119,7 @@ export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
             ctx.addIssue({
               code: "custom",
               path: ["items", index, "net_amount"],
-              message: tv("positive", { field: tf("cnAmount") }),
+              message: tv("positive", { field: tf("netAmount") }),
             });
           }
           return;
@@ -226,17 +214,6 @@ export const EMPTY_FORM: CnFormValues = {
 
 // --- Helpers ---
 
-/**
- * คืนค่าเริ่มต้นของฟอร์มใบลดหนี้
- * กรณีแก้ไข: แปลงจาก CreditNote เป็น CnFormValues (รวม items)
- * กรณีสร้างใหม่: ใช้ EMPTY_FORM + cn_date ปัจจุบัน — currency มาจากการเลือก GRN
- *
- * @param cn - CreditNoteDetail ที่จะแก้ไข (optional)
- * @returns CnFormValues พร้อมใช้กับ useForm
- * @example
- * const defaultValues = getDefaultValues(cn);
- * const form = useForm<CnFormValues>({ defaultValues, resolver });
- */
 export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
   if (cn) {
     return {
@@ -344,16 +321,6 @@ export function keepGrnRefs(
   };
 }
 
-/**
- * แปลง item ของฟอร์ม CN เป็น payload สำหรับส่ง API
- * map field ชื่อ form เป็นชื่อที่ API คาดหวัง (return_qty/return_unit_id/price)
- * ใช้กับ buildItemChanges เพื่อสร้าง add/update/remove arrays
- *
- * @param item - item จากฟอร์ม CnFormValues.items[number]
- * @returns CnItemPayload พร้อมส่ง API
- * @example
- * const details = buildItemChanges(values.items, defaultItems, dirtyItems, mapItemToPayload);
- */
 export function mapItemToPayload(
   item: CnFormValues["items"][number],
 ): CnItemPayload {

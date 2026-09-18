@@ -14,12 +14,6 @@ interface Props {
   readonly onDelete?: (item: Location) => void;
 }
 
-/**
- * การ์ดคลัง/สถานที่ สำหรับ `ConfigListTemplate` โหมด grid/mobile
- *
- * badge มุมขวาบนเป็นสถานะ (เหมือนการ์ดทุกใบ) ส่วนประเภทคลังเป็นแถวข้อมูล —
- * `LocationTypeLabel` มี label แปลแล้วในตัว จึงใช้เป็นค่าในแถวได้เลย
- */
 export default function LocationCard({ item, onEdit, onDelete }: Props) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");

@@ -10,6 +10,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { PoFormValues } from "../po-form-schema";
@@ -21,9 +22,7 @@ type ItemPricingField =
   | "tax_amount"
   | "total_price";
 
-/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
 
-/** อ่านค่าที่ต้องใช้คำนวณของแถว → computeLineAmounts (honor override) */
 function useItemLine(
   form: UseFormReturn<PoFormValues>,
   itemIndex: number,
@@ -59,9 +58,7 @@ function useItemLine(
   });
 }
 
-/** ยอดเงินของแถว (plain text) — honor override */
 
-/** ยอดเงินของแถว (plain text) — honor override */
 export function ItemAmountCell({
   form,
   itemIndex,
@@ -87,9 +84,7 @@ export function ItemAmountCell({
   );
 }
 
-/** Unit price ของ location = ราคาระดับ item (read-only text) */
 
-/** Unit price ของ location = ราคาระดับ item (read-only text) */
 export function ItemPriceText({
   form,
   itemIndex,
@@ -107,9 +102,30 @@ export function ItemPriceText({
   );
 }
 
-/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
+/**
+ * ยอดเงินบรรทัดบน + เปอร์เซ็นต์เป็นบรรทัดรอง (โหมดอ่านของคอลัมน์ส่วนลด/ภาษี)
+ *
+ * ทรงเดียวกับรหัสคลังใต้ชื่อคลัง และชื่อท้องถิ่นใต้ชื่อสินค้า — ตัวเอกของคอลัมน์
+ * เงินคือจำนวนเงิน ส่วนเปอร์เซ็นต์เป็นที่มาของมัน ของเดิมวางเรียงบรรทัดเดียว
+ * (`7% · 35.00`) ซึ่งอ่านเหมือนสองค่าน้ำหนักเท่ากัน แล้วเลขเงินก็ไม่ตรงคอลัมน์
+ * กับแถวอื่นเพราะความยาวเปอร์เซ็นต์ดันมันไปเรื่อย
+ */
+function RateSubtext({
+  amount,
+  rate,
+}: {
+  readonly amount: number;
+  readonly rate: number;
+}) {
+  return (
+    <NameWithSubtext
+      align="end"
+      primary={formatCurrency(amount)}
+      secondary={rate > 0 ? `${rate}%` : undefined}
+    />
+  );
+}
 
-/** Discount cell ของแถว — override toggle + rate/amount combo (shared) */
 export function ItemDiscountCell({
   form,
   itemIndex,
@@ -133,16 +149,10 @@ export function ItemDiscountCell({
   const amount = line.discountAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
-    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
-    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม (ท่าเดียวกับ GRN/CN)
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-col gap-0.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -157,28 +167,35 @@ export function ItemDiscountCell({
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
       />
-      <OverrideToggle
-        checked={isAdj}
-        hint={tfl("overrideHintDiscount")}
-        onCheckedChange={(on) => {
-          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-          if (on) {
-            form.setValue(`${base}.discount_amount`, amount, {
+      {/* แถวล่าง: % ที่ใช้คิด คู่กับสวิตช์ override — ช่องกรอกได้ความกว้างเต็ม
+          เซลล์ และตัวเลข % ไม่หายไปจากสายตาตอน override เปิด (ช่องกลายเป็นยอดเงิน) */}
+      <div className="flex items-center justify-end gap-1.5">
+        {Number(rate) > 0 && (
+          <span className="text-muted-foreground text-micro-legal tabular-nums">
+            {rate}%
+          </span>
+        )}
+        <OverrideToggle
+          checked={isAdj}
+          hint={tfl("overrideHintDiscount")}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
               shouldDirty: true,
             });
-          }
-          form.setValue(`${base}.is_discount_adjustment`, on, {
-            shouldDirty: true,
-          });
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 }
 
-/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
 
-/** Tax cell ของแถว — override toggle + tax-profile/amount combo (shared) */
 export function ItemTaxCell({
   form,
   itemIndex,
@@ -202,21 +219,10 @@ export function ItemTaxCell({
   const amount = line.taxAmount;
 
   if (!editable) {
-    return (
-      <span className="block text-right text-xs tabular-nums">
-        {rate}% · {formatCurrency(amount)}
-      </span>
-    );
+    return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
-          {rate}%
-        </span>
-      )}
-      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
-      <div className="flex items-center gap-1.5">
         <TaxOverrideInput
           taxProfileId={taxProfileId}
           amount={amount}
@@ -233,6 +239,13 @@ export function ItemTaxCell({
             form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
           }
         />
+      {/* แถวล่าง: % คู่กับสวิตช์ override — ตำแหน่งเดียวกับคอลัมน์ส่วนลด */}
+      <div className="flex items-center justify-end gap-1.5">
+        {rate > 0 && (
+          <span className="text-muted-foreground text-micro-legal tabular-nums">
+            {rate}%
+          </span>
+        )}
         <OverrideToggle
           checked={isAdj}
           hint={tfl("overrideHintTax")}

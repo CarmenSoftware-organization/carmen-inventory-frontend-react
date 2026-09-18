@@ -14,20 +14,6 @@ interface UseCategoryTreeProps {
   isLoading: boolean;
 }
 
-/**
- * Hook สร้างโครงสร้างต้นไม้หมวดหมู่จาก categories, subCategories และ itemGroups
- * โดยแปลงข้อมูลเรียบให้เป็น CategoryNode[] แบบ nested และสืบทอดค่า is_used_in_recipe / is_sold_directly จาก parent เมื่อ child ไม่ได้กำหนด
- * พร้อมจัดการ expand state แบบ override ทั้งหมด (expandAll / collapseAll) ควบคู่กับการ toggle รายตัว
- * @param props - categories, subCategories, itemGroups (ข้อมูลดิบ) และ isLoading
- * @returns object ที่มี categoryData (tree), expanded state, และฟังก์ชัน expandAll, collapseAll, toggleExpand
- * @example
- * const { categoryData, expanded, expandAll, collapseAll, toggleExpand } = useCategoryTree({
- *   categories: catData?.data ?? [],
- *   subCategories: subData?.data ?? [],
- *   itemGroups: igData?.data ?? [],
- *   isLoading,
- * });
- */
 export function useCategoryTree({
   categories,
   subCategories,
@@ -78,7 +64,7 @@ export function useCategoryTree({
     const mapSubCategories = (categoryId: string): CategoryNode[] => {
       const parentCat = categories.find((c) => c.id === categoryId);
       return subCategories
-        .filter((sub) => sub.product_category_id === categoryId)
+        .filter((sub) => sub.product_category?.id === categoryId)
         .map((sub) => ({
           id: sub.id,
           code: sub.code,
@@ -86,7 +72,7 @@ export function useCategoryTree({
           description: sub.description,
           type: NODE_TYPE.SUBCATEGORY,
           children: mapItemGroups(sub.id),
-          product_category_id: sub.product_category_id,
+          product_category_id: sub.product_category?.id,
           is_active: sub.is_active,
           price_deviation_limit: sub.price_deviation_limit,
           qty_deviation_limit: sub.qty_deviation_limit,
@@ -94,8 +80,8 @@ export function useCategoryTree({
             sub.is_used_in_recipe ?? parentCat?.is_used_in_recipe ?? false,
           is_sold_directly:
             sub.is_sold_directly ?? parentCat?.is_sold_directly ?? false,
-          tax_profile_id: sub.tax_profile_id,
-          tax_profile_name: sub.tax_profile_name,
+          tax_profile_id: sub.tax_profile?.id,
+          tax_profile_name: sub.tax_profile?.name ?? undefined,
           tax_rate: Number(sub.tax_rate ?? 0),
           cascade_deviation: sub.cascade_deviation,
           doc_version: sub.doc_version,

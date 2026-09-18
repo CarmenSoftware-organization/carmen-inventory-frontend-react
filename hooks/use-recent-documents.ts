@@ -13,9 +13,6 @@ import { useMemo, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "carmen.recent-documents";
 const CHANGE_EVENT = "recent-documents:change";
-/** เก็บ (และโชว์) ต่อ BU ไม่เกินนี้ — ตัดภายใน BU ของตัวเองเท่านั้น: วันที่ทำงาน
- * หนักใน BU เดียวจะไม่ดันรายการของ BU อื่นหลุด (จำนวน BU ต่อ user มีไม่กี่ตัว
- * localStorage ไม่มีทางโตเกิน BU × 3 จึงไม่ต้องมี cap รวม) */
 const MAX_PER_BU = 3;
 
 export interface RecentDocument {
@@ -81,7 +78,6 @@ function getSnapshot(): string {
   return localStorage.getItem(STORAGE_KEY) ?? "[]";
 }
 
-/** เอกสารที่เพิ่งเปิดของ BU ที่ระบุ ใหม่สุดก่อน (ไม่รู้ BU = ว่างไว้ก่อน) */
 export function useRecentDocuments(bu: string | undefined): RecentDocument[] {
   const raw = useSyncExternalStore(subscribe, getSnapshot, () => "[]");
   return useMemo(() => {

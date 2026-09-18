@@ -4,12 +4,6 @@ import { EquipmentForm } from "./eq-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-/**
- * หน้าดู/แก้ไขอุปกรณ์ ตาม id — ดึงข้อมูลผ่าน `useEquipmentById`
- *
- * @param props.id - รหัสอุปกรณ์ที่ route อ่านมาจาก URL segment (`useParams`)
- * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `EquipmentForm` เมื่อได้ข้อมูล
- */
 export function EqEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.equipment");
   const { data: equipment, isLoading, error, refetch } = useEquipmentById(id);

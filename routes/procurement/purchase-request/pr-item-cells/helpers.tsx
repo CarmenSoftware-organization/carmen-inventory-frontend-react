@@ -3,7 +3,7 @@ import { createContext, memo, useContext, type ReactNode } from "react";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { useProductUnits } from "@/hooks/use-product-units";
-import { InventoryTooltip } from "@/components/share/inventory-tooltip";
+import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { PrFormValues } from "../pr-form-schema";
@@ -47,12 +47,6 @@ export function PrStageRoleProvider({
   );
 }
 
-/**
- * แถวนี้ถูกตัดสิน (approve/reject) มาจาก server แล้วหรือยัง
- *
- * ใช้กับ action ที่ไม่ควรทำกับของที่ตัดสินไปแล้วไม่ว่า stage ไหน เช่น ปุ่มลบ —
- * ไม่สนใจ stage role ต่างจาก `useIsRowLocked`
- */
 export function isRowSettled(
   currentStageStatus: string,
   initialStageStatus: string,
@@ -72,8 +66,6 @@ export function isRowSettled(
   );
 }
 
-/** ตรรกะเดียวกับ `useIsRowLocked` แต่รับค่ามาตรง ๆ — ใช้นอก React เช่นตอนบอก
- *  TanStack ว่าแถวไหนติ๊กเลือกได้ */
 export function isRowLocked(
   item: { current_stage_status?: string; _initial_stage_status?: string },
   role?: string,
@@ -135,7 +127,7 @@ export function useIsRowLocked(
   );
 }
 
-export const InventoryTooltipCell = memo(function InventoryTooltipCell({
+export const InventoryDialogCell = memo(function InventoryDialogCell({
   control,
   index,
   buCode,
@@ -145,7 +137,6 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
   control: Control<PrFormValues>;
   index: number;
   buCode?: string;
-  /** กด label ใน tooltip เพื่อเปิด dialog รายละเอียด — ไม่ส่งมาก็เป็นข้อความเฉยๆ */
   onOnHandClick?: () => void;
   onOnOrderClick?: () => void;
 }) {
@@ -158,7 +149,7 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
     useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
 
   return (
-    <InventoryTooltip
+    <InventoryDialog
       buCode={buCode}
       locationId={locationId}
       productId={productId}
@@ -212,10 +203,6 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
   );
 });
 
-/**
- * qty + unit เป็น plain text (view/locked mode) — resolve ชื่อหน่วยจาก product
- * units ให้ล้อ layout ของกล่อง InputSuffix (ค่า ซ้าย + หน่วย ขวา, ชิดขวา)
- */
 export const QtyUnitPlain = memo(function QtyUnitPlain({
   control,
   index,
@@ -235,6 +222,11 @@ export const QtyUnitPlain = memo(function QtyUnitPlain({
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
   return (
-    <InputSuffixPlain className="w-full" value={value} suffix={unitName} />
+    <InputSuffixPlain
+      className="w-full"
+      value={value}
+      suffix={unitName}
+      suffixClassName="text-right"
+    />
   );
 });

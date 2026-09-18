@@ -1,0 +1,115 @@
+{
+  "_url": "/api/config/T02/products/f7a2ede2-a468-4b90-b079-c563c8a4fbb0",
+  "data": {
+    "account_codes": [
+      {
+        "account_code": null,
+        "account_name": null,
+        "account_type": "inventory"
+      },
+      {
+        "account_code": null,
+        "account_name": null,
+        "account_type": "cogs"
+      },
+      {
+        "account_code": null,
+        "account_name": null,
+        "account_type": "revenue"
+      },
+      {
+        "account_code": null,
+        "account_name": null,
+        "account_type": "purchase"
+      }
+    ],
+    "barcode": "8851234567892",
+    "code": "010010001",
+    "description": "เรือดำน้ำขนาดกลางสำหรับภารกิจลาดตระเวนและการสำรวจใต้ทะเล ระบบขับเคลื่อนไฟฟ้า เครื่องยนต์ดีเซล ความลึกสูงสุด 2,500 เมตร",
+    "doc_version": 0,
+    "id": "f7a2ede2-a468-4b90-b079-c563c8a4fbb0",
+    "images": [],
+    "info": [],
+    "ingredient_units": [
+      {
+        "description": "1 submarine for mission",
+        "from_unit_id": "d11e60df-f543-4671-a46b-11053c48276a",
+        "from_unit_name": "DRUM",
+        "from_unit_qty": 1,
+        "id": "3b3aeae8-a43e-459b-968f-c10af7d3b472",
+        "is_active": true,
+        "is_default": true,
+        "to_unit_id": "fc24d582-b677-462c-a216-e65eebdbabb8",
+        "to_unit_name": "CASE",
+        "to_unit_qty": 1,
+        "unit_type": "ingredient_unit"
+      }
+    ],
+    "inventory_unit": {
+      "id": "ee8ab660-e48b-45b1-ba50-675acd9b2ed5",
+      "name": "BOOK"
+    },
+    "is_sold_directly": false,
+    "is_used_in_recipe": true,
+    "local_name": "เรือดำน้ำนักล่า",
+    "locations": [
+      {
+        "delivery_point": "Main",
+        "delivery_point_id": "28ffa38a-1f8d-42f0-a5c2-f347a19e47df",
+        "id": "9a8363cb-a9ed-46bf-8f35-d7f2a033bea6",
+        "is_active": true,
+        "location_id": "08772f79-c21b-4a86-8d31-b0fea144111e",
+        "location_name": "IT",
+        "location_type": "consignment",
+        "max_qty": 0,
+        "min_qty": 0,
+        "on_hand_qty": 0,
+        "par_qty": 0,
+        "re_order_qty": 0,
+        "shelf_code": null,
+        "shelf_id": null,
+        "shelf_name": null
+      }
+    ],
+    "name": "Submarine Hunter Class",
+    "order_units": [
+      {
+        "description": "1 submarine unit",
+        "from_unit_id": "800a443c-225d-47be-b4fb-fa27650e65a1",
+        "from_unit_name": "CAN",
+        "from_unit_qty": 1,
+        "id": "a49ede2b-2857-4b8c-af9d-8aae63cb9be2",
+        "is_active": true,
+        "is_default": true,
+        "to_unit_id": "63efdf4e-7d1d-4511-a3f0-79422b968a2a",
+        "to_unit_name": "CARTON",
+        "to_unit_qty": 1,
+        "unit_type": "order_unit"
+      }
+    ],
+    "price_deviation_limit": 5,
+    "product_category": {
+      "id": "2cc41635-cb88-41ca-a770-becaf9278045",
+      "name": "FOOD"
+    },
+    "product_item_group": {
+      "id": "e8575c8e-c7a9-476a-9275-8f6a60be39c0",
+      "name": "FOOD CAN & PICKLES"
+    },
+    "product_status_type": "active",
+    "product_sub_category": {
+      "id": "4f9ca00a-650d-49a3-9712-c7e2f8d94e45",
+      "name": "DRY FOOD"
+    },
+    "qty_deviation_limit": 1,
+    "sku": "SUB-HC-2500-TH",
+    "standard_cost": 0,
+    "tax_profile_id": null,
+    "tax_profile_name": null,
+    "tax_rate": 0
+  },
+  "message": "Success",
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:47.648Z"
+}

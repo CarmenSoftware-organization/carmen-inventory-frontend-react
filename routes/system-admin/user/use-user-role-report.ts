@@ -10,7 +10,6 @@ import { escapeHtml, printHtmlDocument } from "@/lib/print-html";
 import { formatDate } from "@/lib/date-utils";
 import type { UserApplicationRole } from "@/types/user";
 
-/** escape ค่าใน cell ของ CSV — ครอบ quote เมื่อมี comma/quote/newline */
 const csvCell = (v: string) =>
   /[",\n]/.test(v) ? `"${v.replaceAll('"', '""')}"` : v;
 

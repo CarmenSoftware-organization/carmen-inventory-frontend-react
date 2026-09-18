@@ -16,7 +16,6 @@ interface LookupVendorProps {
   readonly placeholder?: string;
   readonly defaultLabel?: string;
   readonly className?: string;
-  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;

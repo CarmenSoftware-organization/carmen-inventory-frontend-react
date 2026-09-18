@@ -11,9 +11,7 @@ import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
 import { EnumField, TextField, ToggleField } from "./interface-fields";
 
-/** รหัสซ้ำ (มีทั้งสองฝั่ง) จะถูกทำอย่างไรตอนดึงผังบัญชี */
 export const COA_ON_DUPLICATE = ["skip", "upsert", "error"] as const;
-/** รหัสที่มีเฉพาะฝั่ง Carmen Blue (ต้นทางไม่มีแล้ว) จะถูกทำอย่างไร */
 export const COA_ON_LOCAL_ONLY = ["keep", "delete"] as const;
 
 export const syncPolicySchema = z.object({
@@ -53,7 +51,6 @@ export const EMPTY_CARMEN_GL: CarmenGlFormValues = {
   sync_policy: { on_duplicate: "skip", on_local_only: "keep" },
 };
 
-/** แปลงค่าจาก app_config เป็นค่า form — row shape เก่า (generic accounting) parse เป็น default */
 export function toFormValues(
   value: Record<string, unknown> | undefined,
 ): CarmenGlFormValues {
@@ -71,7 +68,6 @@ export function toFormValues(
   return parsed.success ? parsed.data : EMPTY_CARMEN_GL;
 }
 
-/** แปลงค่า form เป็น payload ของ app_config */
 export function toApiValue(
   values: CarmenGlFormValues,
 ): Record<string, unknown> {

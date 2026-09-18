@@ -40,47 +40,10 @@ export const useLocation = crud.useList;
  */
 export const useConfigLocation = crud.useList;
 
-/**
- * Hook ดึง Location ตาม id
- *
- * @param id - id ของ location
- * @returns UseQueryResult ของ Location
- * @example
- * ```ts
- * const { data } = useLocationById(params.id);
- * ```
- */
 export const useLocationById = crud.useById;
 
-/**
- * Hook สำหรับสร้าง Location ใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreateLocation().mutate({ code: "L01", name: "Main Store" });
- * ```
- */
 export const useCreateLocation = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไข Location
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdateLocation().mutate({ id, code: "L02", name: "Kitchen" });
- * ```
- */
 export const useUpdateLocation = crud.useUpdate;
 
-/**
- * Hook สำหรับลบ Location
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeleteLocation().mutate(loc.id);
- * ```
- */
 export const useDeleteLocation = crud.useDelete;

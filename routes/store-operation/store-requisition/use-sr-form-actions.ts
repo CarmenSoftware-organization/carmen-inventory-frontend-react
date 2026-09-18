@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,10 +10,6 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import {
-  removeFromDocSequence,
-  useDocSequence,
-} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
@@ -63,15 +59,9 @@ export function useSrFormActions({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
-  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิวให้เลข n/N ตรงกับที่เหลือจริง
-  // (แบบเดียวกับ onSuccessList ของ PR — ที่ /new sequence เป็น null กลับ list ปกติ)
-  const seq = useDocSequence(location.pathname);
-  const advanceOrList = () => {
-    removeFromDocSequence(location.pathname);
-    navigate(seq?.nextPath ?? SR_LIST_PATH);
+  const goList = () => {
+    navigate(SR_LIST_PATH);
   };
   const queryClient = useQueryClient();
 
@@ -214,10 +204,6 @@ export function useSrFormActions({
     }
   };
 
-  /**
-   * @param successMsg ข้อความตอนสำเร็จ — ต้องบอกว่า "ทำอะไรสำเร็จ" ไม่ใช่
-   *   "อัปเดตสำเร็จ" เหมือนกันหมดทุกปุ่ม โดยเฉพาะ Issue ที่ตัดของออกจากคลังจริง
-   */
   const runWorkflow = async (
     mutation: typeof submitSr,
     payload: SrActionPayload,
@@ -235,7 +221,7 @@ export function useSrFormActions({
         onSuccess: () => {
           toast.success(successMsg);
           options?.onDone?.();
-          advanceOrList();
+          goList();
         },
         onError: () => setIsSubmitting(false),
       },
@@ -303,14 +289,13 @@ export function useSrFormActions({
 
       setShowSubmit(false);
       toast.success(t("submitted"));
-      advanceOrList();
+      goList();
     } catch {
       // error toast มาจาก mutation เอง — แค่เปิด guard กลับให้กรอกต่อได้
       setIsSubmitting(false);
     }
   };
 
-  /** กรอกไม่ครบ → พาไปหาช่องที่ขาด แล้วบอกว่าขาดกี่แถว */
   const revealInvalid = (errors: FieldErrors<SrFormValues>) => {
     scrollToFirstInvalidField();
     const count = countInvalidItems(errors as Record<string, unknown>);
@@ -399,9 +384,8 @@ export function useSrFormActions({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate(SR_LIST_PATH);
   };

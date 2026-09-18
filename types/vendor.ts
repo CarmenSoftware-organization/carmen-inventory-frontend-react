@@ -1,4 +1,5 @@
 import type { Audit } from "@/types/audit";
+import type { EntityRef } from "@/types/entity-ref";
 
 interface VendorInfoItem {
   label: string;
@@ -36,13 +37,13 @@ export interface Vendor {
   code: string;
   name: string;
   is_active: boolean;
-  business_type: { id: string; name: string }[];
+  business_type: EntityRef[];
+  // ยืนยันจาก live list+detail: tax_profile เป็น {id,name} เหมือนกันทั้งคู่
+  // (ของเดิมไม่เคยประกาศ tax_profile_id/tax_profile_name แบบ flat ใน type นี้เลย)
+  tax_profile: EntityRef | null;
   contacts?: VendorContact[];
-  /** @deprecated use `contacts` */
   tb_vendor_contact?: VendorContact[];
-  /** audit ที่ backend enrich มา (created/updated พร้อมชื่อผู้ทำ) — ใช้แสดงคอลัมน์ list/card */
   audit?: Audit;
-  /** Optimistic-concurrency version; required when PATCHing the record. */
   doc_version: number;
 }
 
@@ -58,7 +59,6 @@ interface VendorAddressPayload extends VendorAddressData {
 }
 
 export interface CreateVendorDto {
-  /** Sent on update only — backend requires it for optimistic concurrency. */
   doc_version?: number;
   name: string;
   code: string;

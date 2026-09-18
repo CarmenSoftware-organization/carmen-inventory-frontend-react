@@ -23,12 +23,7 @@ interface UseConfigTableOptions<T> {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
   onDelete?: (item: T) => void;
   hideStatus?: boolean;
-  /** เช่น `"configuration.department"` — เช็ค {prefix}.delete เพื่อ guard ปุ่ม delete ใน row */
   permissionPrefix?: string;
-  /**
-   * initial TanStack state ที่ไม่ถูกคุมแบบ controlled (columnVisibility ฯลฯ)
-   * เช่น ซ่อนคอลัมน์ audit เป็น default: `{ columnVisibility: { created_at: false, updated_at: false } }`
-   */
   initialState?: InitialTableState;
   /**
    * เปิดเมนู Activity ในแถว — ไม่ส่ง = ไม่มีเมนู

@@ -22,14 +22,12 @@ export interface ActivityLog {
   audit: ActivityAudit;
 }
 
-/** ฟิลด์เดียวที่ค่าเปลี่ยนไประหว่าง old_data กับ new_data */
 export interface ActivityFieldChange {
   field: string;
   old: unknown;
   new: unknown;
 }
 
-/** สิ่งที่เกิดกับแถวของตารางลูกหนึ่งตาราง (เช่น รายการสินค้าใน PR) */
 export interface ActivityChildChange {
   relation: string;
   added: Record<string, unknown>[];

@@ -13,12 +13,12 @@ import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { cn } from "@/lib/utils";
 import { RfpSendEmailDialog } from "./rfp-send-email-dialog";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const EMPTY = (
   <span className="text-muted-foreground text-micro italic">—</span>
 );
 
-/** Vendor name (semibold) + code (muted micro) stacked in one cell */
 export function VendorNameCell({
   name,
   code,
@@ -28,19 +28,9 @@ export function VendorNameCell({
 }) {
   "use no memo";
   if (!name) return EMPTY;
-  return (
-    <div className="flex min-w-0 flex-col">
-      <p className="text-foreground truncate text-xs font-semibold">{name}</p>
-      {code && (
-        <p className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
-          {code}
-        </p>
-      )}
-    </div>
-  );
+  return <NameWithSubtext primary={name} secondary={code || undefined} />;
 }
 
-/** Plain contact value — optional mailto/tel link, em-dash when empty */
 export function ContactValue({
   value,
   href,
@@ -66,11 +56,6 @@ export function ContactValue({
   );
 }
 
-/**
- * Email cell — reads as an actionable "send email" link at rest (mail icon +
- * primary tint), not plain text like phone/contact. Opens the user's mail
- * client via `mailto:`. Em-dash when empty.
- */
 export function EmailValue({ value }: { readonly value?: string | null }) {
   "use no memo";
   if (!value) return EMPTY;
@@ -111,7 +96,6 @@ export function SubmissionStatusBadge({
   );
 }
 
-/** Submitted-pricelist cell — no (+ name) with an open-in-new-tab action */
 export function PricelistCell({
   pricelist,
 }: {
@@ -137,20 +121,28 @@ export function PricelistCell({
   );
 }
 
-/** Row actions — copy/open/email the vendor URL + remove (with confirm) */
 export function VendorActionsCell({
   urlToken,
   email,
+  rfpId,
+  vendorId,
   vendorName,
+  contactPerson,
   rfpName,
+  startDate,
+  endDate,
   isDisabled,
   onRemove,
 }: {
   readonly urlToken?: string;
-  /** อีเมลผู้ติดต่อของผู้ขาย — เติมเป็นผู้รับตั้งต้นใน dialog */
   readonly email?: string | null;
+  readonly rfpId?: string;
+  readonly vendorId?: string;
   readonly vendorName: string;
+  readonly contactPerson?: string | null;
   readonly rfpName: string;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
   readonly isDisabled: boolean;
   readonly onRemove: () => void;
 }) {
@@ -236,9 +228,14 @@ export function VendorActionsCell({
         <RfpSendEmailDialog
           open={showEmail}
           onOpenChange={setShowEmail}
+          rfpId={rfpId}
+          vendorId={vendorId}
           vendorName={vendorName}
           vendorEmail={email}
+          contactPerson={contactPerson}
           rfpName={rfpName}
+          startDate={startDate}
+          endDate={endDate}
           vendorUrl={vendorUrl}
         />
       )}

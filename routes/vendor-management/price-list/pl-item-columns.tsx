@@ -28,11 +28,6 @@ interface BuildColumnsOptions {
   readonly confirmDuplicate: (action: () => void, productName?: string) => void;
 }
 
-/**
- * สร้างชุด column ของ price-list product table — column ชุดเดียวใช้ทั้ง view/edit
- * แต่ละ cell branch `isView` เอง (plain text vs inputs/lookups) ส่วน actions
- * column แสดงเฉพาะตอน edit
- */
 export function buildPlItemColumns({
   form,
   detailRefs,

@@ -24,16 +24,6 @@ interface UseWastageReportTableOptions {
   onOpenGrn: (item: WastageItem) => void;
 }
 
-/**
- * Hook สร้างตารางรายการ lot สินค้าหมดอายุ/ใกล้หมดอายุ (wastage reporting)
- * คอลัมน์: GRN no (กดไปหน้า GRN), สินค้า, คลัง, lot, วันหมดอายุ, เหลือ (วัน),
- * สถานะ, จำนวนคงเหลือ, ต้นทุน/หน่วย, มูลค่าคงเหลือ — read-only ไม่มี action
- *
- * @param options - items, totalRecords, params, tableConfig, onOpenGrn
- * @returns react-table instance
- * @example
- * const table = useWastageReportTable({ items, totalRecords, params, tableConfig, onOpenGrn });
- */
 export function useWastageReportTable({
   items,
   totalRecords,

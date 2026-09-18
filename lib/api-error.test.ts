@@ -44,12 +44,6 @@ describe("ApiError", () => {
 });
 
 describe("ApiError.from", () => {
-  /**
-   * Response ปลอมที่รองรับ clone().json() — `from` อ่าน error body จริง
-   *
-   * @param status - HTTP status code
-   * @param body - error body ที่ backend ส่งกลับมา (undefined = parse ไม่ได้)
-   */
   function fakeResponse(status: number, body?: unknown): Response {
     const res = {
       status,

@@ -24,11 +24,9 @@ interface SignatureDialogProps {
   readonly open: boolean;
   readonly isSubmitting?: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** Called with the final PNG File when the user saves */
   readonly onConfirm: (file: File) => void;
 }
 
-/** Convert a data URL (e.g. from canvas.toDataURL) to a File */
 function dataUrlToFile(dataUrl: string, filename: string): File {
   const [head, body] = dataUrl.split(",");
   const mime = /:(.*?);/.exec(head)?.[1] ?? "image/png";
@@ -38,11 +36,6 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([bytes], filename, { type: mime });
 }
 
-/**
- * Dialog for setting a signature via two tabs: Draw (canvas) or Upload (image
- * file). Produces a PNG File and hands it to `onConfirm`; the parent owns the
- * upload mutation.
- */
 export function SignatureDialog({
   open,
   isSubmitting = false,

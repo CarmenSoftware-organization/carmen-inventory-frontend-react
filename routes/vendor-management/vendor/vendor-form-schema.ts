@@ -4,14 +4,6 @@ import type { VendorDetail } from "@/types/vendor";
 
 // --- Zod Schemas ---
 
-/**
- * สร้าง zod schema สำหรับข้อมูลเพิ่มเติมของ vendor (label/value/data_type)
- * ใช้ภายใน createVendorSchema สำหรับ field `info` ที่เป็น array ของข้อมูลแบบ dynamic
- * @returns zod object schema ของ vendor info
- * @example
- * const schema = createVendorInfoSchema();
- * schema.parse({ label: "Tax ID", value: "1234567890", data_type: "string" });
- */
 function createVendorInfoSchema() {
   return z.object({
     label: z.string().max(100),
@@ -20,13 +12,6 @@ function createVendorInfoSchema() {
   });
 }
 
-/**
- * สร้าง zod schema สำหรับที่อยู่ของ vendor — บังคับเฉพาะ address_type
- * field อื่น optional (มีแค่ max length cap)
- * @param tv - ฟังก์ชัน translation สำหรับข้อความ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ vendor address
- */
 function createVendorAddressSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -44,12 +29,6 @@ function createVendorAddressSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema สำหรับข้อมูลผู้ติดต่อของ vendor
- * @param tv - ฟังก์ชัน translation สำหรับข้อความ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ vendor contact
- */
 function createVendorContactSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
@@ -69,12 +48,6 @@ function createVendorContactSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-/**
- * สร้าง zod schema รวมของ vendor form ประกอบด้วยข้อมูลหลัก ที่อยู่ และผู้ติดต่อ
- * @param tv - ฟังก์ชัน translation สำหรับข้อความ validation
- * @param tf - ฟังก์ชัน translation สำหรับชื่อ field
- * @returns zod schema ของ vendor form ทั้งหมด
- */
 export function createVendorSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     code: z
@@ -141,11 +114,6 @@ export const EMPTY_FORM: VendorFormValues = {
 
 // --- Payload Mappers ---
 
-/**
- * แปลงข้อมูลที่อยู่จาก form values ให้อยู่ในรูปแบบ payload ของ API
- * @param a - ข้อมูล vendor address จาก form
- * @returns payload object ของ address สำหรับส่งไป API
- */
 export function mapAddressPayload(
   a: VendorFormValues["vendor_address"][number],
 ) {
@@ -162,11 +130,6 @@ export function mapAddressPayload(
   };
 }
 
-/**
- * แปลงข้อมูลผู้ติดต่อจาก form values ให้อยู่ในรูปแบบ payload ของ API
- * @param c - ข้อมูล vendor contact จาก form
- * @returns payload object ของ contact สำหรับส่งไป API
- */
 export function mapContactPayload(
   c: VendorFormValues["vendor_contact"][number],
 ) {
@@ -178,16 +141,6 @@ export function mapContactPayload(
   };
 }
 
-/**
- * สร้าง payload แบบ nested (add/update/remove) จากค่าของ useFieldArray
- * รายการใหม่ที่ไม่มี id จะเข้า add, รายการเดิมที่ dirty จะเข้า update, และ id ที่ถูกลบจะเข้า remove
- * @param items - รายการปัจจุบันใน form
- * @param dirtyItems - รายการที่ถูกแก้ไขตาม react-hook-form dirtyFields
- * @param removedIds - id ของรายการที่ถูกลบ
- * @param mapFn - ฟังก์ชันแปลง item เป็น payload
- * @param idKey - ชื่อ key ของ id ใน payload
- * @returns object payload ที่มี add/update/remove ตามที่พบ
- */
 export function buildNestedPayload<T extends { id?: string }>(
   items: T[],
   dirtyItems: Record<string, unknown>[] | undefined,
@@ -219,11 +172,6 @@ export function buildNestedPayload<T extends { id?: string }>(
 
 // --- Default Values ---
 
-/**
- * คำนวณค่าเริ่มต้นของ vendor form จากข้อมูล vendor ที่มีอยู่ หรือคืนค่า empty form
- * @param vendor - ข้อมูล vendor ที่จะใช้ pre-fill (optional)
- * @returns ค่า default ของ vendor form
- */
 export function getDefaultValues(vendor?: VendorDetail): VendorFormValues {
   if (vendor) {
     return {
@@ -232,7 +180,10 @@ export function getDefaultValues(vendor?: VendorDetail): VendorFormValues {
       description: vendor.description ?? "",
       is_active: vendor.is_active,
       business_types:
-        vendor.business_type?.map((bt) => ({ id: bt.id, name: bt.name })) ?? [],
+        vendor.business_type?.map((bt) => ({
+          id: bt.id,
+          name: bt.name ?? "",
+        })) ?? [],
       info: vendor.info ?? [],
       vendor_address:
         vendor.vendor_address?.map((a) => ({

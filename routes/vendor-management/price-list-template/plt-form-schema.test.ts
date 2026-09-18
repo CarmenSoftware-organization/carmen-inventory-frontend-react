@@ -89,7 +89,7 @@ describe("getDefaultValues", () => {
       validity_period: null,
       products: [
         {
-          product_id: "p1",
+          product: { id: "p1" },
           moq: [
             { unit_id: "u1", unit_name: "KG", qty: 5, note: "" },
             { unit_id: "u2", unit_name: "BOX", qty: 1, note: "ยกลัง" },
@@ -108,9 +108,9 @@ describe("getDefaultValues", () => {
       validity_period: null,
       products: [
         {
-          product_id: "p1",
+          product: { id: "p1" },
           moq: [],
-          default_order: { unit_id: "u9", unit_name: "PCS" },
+          default_order: { unit: { id: "u9", name: "PCS" } },
         },
       ],
     } as unknown as PriceListTemplate);

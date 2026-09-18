@@ -2,16 +2,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 
-/**
- * docs/DESIGN.md's weight ladder is 300 / 400 / 500 / 600 / 700, where 500 is the
- * data-value tier and 700 is reserved for the one-off display sizes (48px/60px).
- * `{typography.micro-eyebrow}` (9px caps) and `{typography.micro}` (11px numbers)
- * both specify weight 600 — 700 on a 9px chip is louder than a page title.
- *
- * `font-bold` on those has now been swept three times — inventory-management in
- * June, then thirteen more sites across system-admin / vendor-management /
- * report / ui. It keeps coming back because nothing catches it, so: this.
- */
 const ROOT = join(import.meta.dirname, "../..");
 
 /**
@@ -44,7 +34,6 @@ const sources = ["components", "routes"]
   .flatMap(tsxFiles)
   .map((file) => ({ file, src: readFileSync(join(ROOT, file), "utf-8") }));
 
-/** class strings where a 9px size and font-bold sit together */
 const offenders = (): string[] =>
   sources
     .filter(({ src }) =>
@@ -123,11 +112,6 @@ const TOKENISED: Record<string, string> = {
   "14px": "text-sm",
 };
 
-/**
- * Off-ladder sizes that survived the sweep, with the reason each was left. Counts
- * are exact, so this fails both ways — a new literal appears, or one of these is
- * cleaned up and the entry goes stale. Either way somebody has to look.
- */
 const ALLOWED_OFF_LADDER: Record<string, number> = {
   // Badge `default` (13px) and `xl` (15px) size variants — part of the component's
   // public API, chosen deliberately, and they straddle the 12/14 ladder steps.
@@ -173,13 +157,6 @@ describe("arbitrary font sizes do not creep back", () => {
   });
 });
 
-/**
- * Reads the whole `className={…}` expression rather than each string literal
- * inside it. That distinction is the entire reason this helper exists: a
- * `cn("… uppercase", cond ? "text-micro-legal" : "text-micro-eyebrow")` puts the
- * size and the `uppercase` in *different* literals, so a per-literal scan reports
- * a violation that is not one. (glass-card.tsx was exactly that false positive.)
- */
 function classNameExpressions(src: string): string[] {
   const out: string[] = [];
   const re = /className=/g;
@@ -204,18 +181,6 @@ function classNameExpressions(src: string): string[] {
   return out;
 }
 
-/**
- * docs/DESIGN.md sanctions sub-10px type **only** for uppercase eyebrows — the
- * 600 weight and wide tracking of caps are what keep 9px legible, and running
- * text has neither. It matters most in Thai, which stacks two levels of marks
- * above the baseline (สระบน + วรรณยุกต์).
- *
- * `uppercase` is a weak proxy for "this is an eyebrow": plenty of legitimate
- * sub-10px sites are digits or drawings, which are neither uppercase nor running
- * text. So this does not try to classify — it freezes the known set. Anything NEW
- * has to be looked at by a person, who then either adds `uppercase` (proving it is
- * an eyebrow) or adds a line here saying why it is fine. That is the whole job.
- */
 const ALLOWED_SUB_10PX: Record<string, number> = {
   // ── Drawings of a UI, not text in a UI ──
   // Miniature mock interfaces: a fake terminal with macOS traffic-light dots, a

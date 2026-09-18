@@ -34,10 +34,6 @@ const APPROVAL_FILTER_FIELDS: FilterFieldDef[] = [
   },
 ];
 
-/**
- * คอมโพเนนต์หลักหน้าอนุมัติ แสดงสรุปจำนวนรายการรออนุมัติและคิวเอกสาร
- * @returns React element ของหน้า Approval
- */
 export default function ApprovalComponent() {
   const t = useTranslations("procurement.approval");
   const { dateFormat } = useProfile();
@@ -72,6 +68,10 @@ export default function ApprovalComponent() {
   const { params, search, setSearch, filter, setFilter, tableConfig } =
     useDataGridState({
       defaultPerpage: 10,
+      // ตรงกับ MY_PENDING_DEFAULT_SORT ของ backend (เอกสารที่รอนานสุดขึ้นก่อน)
+      // ประกาศไว้ฝั่งนี้ด้วยเพื่อให้หัวคอลัมน์โชว์ลูกศรตั้งแต่เปิดหน้า และการคลิก
+      // สลับ asc↔desc ได้ตลอด ไม่ตกไปอยู่สถานะ "ไม่เรียง" ที่มองไม่ออกว่าต่างกัน
+      defaultSort: "doc_date:asc",
     });
 
   const activeType = filter?.match(/doc_type:(\w+)/)?.[1] ?? "total";
@@ -92,10 +92,9 @@ export default function ApprovalComponent() {
     useApprovalPendingSummary();
 
   const items = data?.data ?? [];
-
-  const totalRecords = search
-    ? items.length
-    : (summary?.[activeType as keyof ApprovalPendingSummary] ?? items.length);
+  // จำนวนจริงของรายการที่เข้าเงื่อนไข มาจาก backend ที่กรองและแบ่งหน้าให้แล้ว
+  // เดิมต้องเดาจากการ์ดสรุปหรือ items.length เพราะรายการไม่ได้ถูกแบ่งหน้าจริง
+  const totalRecords = data?.paginate.total ?? 0;
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
@@ -107,11 +106,9 @@ export default function ApprovalComponent() {
         <ListToolbar
           variant="bare"
           search={search}
-          onSearch={(value) => {
-            // เลือกคำค้น = ล้าง filter สถานะที่ค้างไว้ ไม่งั้นค้นแล้วไม่เจออะไรเลย
-            if (value) setFilter("");
-            setSearch(value);
-          }}
+          // ค้นหาและ filter ประเภทเอกสารทำที่ SQL ทั้งคู่ จึงใช้ร่วมกันได้ตรง ๆ
+          // เดิมต้องล้าง filter ทิ้งตอนค้น เพราะทั้งสองทำฝั่ง client บนข้อมูลหน้าแรก
+          onSearch={setSearch}
           lf={lf}
           fields={APPROVAL_FILTER_FIELDS}
           onSaveViewClick={() => setSaveViewDialogOpen(true)}

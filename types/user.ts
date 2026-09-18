@@ -1,6 +1,5 @@
 import type { INVENTORY_TYPE } from "@/constant/location";
 
-/** ตัวตนของผู้ใช้ — ส่วนที่มาจากตาราง user กลาง ไม่ผูกกับ BU */
 export interface UserAccount {
   username: string;
   email: string;
@@ -10,11 +9,9 @@ export interface UserAccount {
   middlename: string;
   lastname: string;
   telephone: string;
-  /** presigned URL อายุสั้น — อย่าเก็บลง cache ยาว ๆ หรือ hardcode ที่ไหน */
   avatar_url: string;
 }
 
-/** บทบาทหนึ่งใบที่ผูกกับผู้ใช้ — `id` คือตัว mapping ไม่ใช่ตัว role */
 export interface UserRoleAssignment {
   id: string;
   application_role_id: string;
@@ -23,7 +20,6 @@ export interface UserRoleAssignment {
   assigned_at: string;
 }
 
-/** คลังหนึ่งใบที่ผูกกับผู้ใช้ — `id` คือตัว mapping ไม่ใช่ตัวคลัง */
 export interface UserLocation {
   id: string;
   location_id: string;
@@ -47,7 +43,6 @@ export interface UserDetail {
   department: DepartmentRef | null;
 }
 
-/** ชุด id ที่เพิ่ม/ถอนในหนึ่งครั้ง — ส่งเฉพาะฝั่งที่มีของ ว่างทั้งคู่ = ไม่ต้องส่ง field นั้น */
 export interface IdPatch {
   add?: string[];
   remove?: string[];
@@ -66,10 +61,8 @@ export interface UpdateUserPayload {
   department_id?: string;
 }
 
-/** payload + user_id ที่ hook เอาไปประกอบ URL (ไม่ถูกส่งไปใน body) */
 export type UpdateUserDto = UpdateUserPayload & { user_id: string };
 
-/** แผนกแบบย่อที่ผูกกับผู้ใช้ — endpoint ส่งมาแค่ id กับชื่อ ไม่มีรหัสแผนก */
 export interface DepartmentRef {
   id: string;
   name: string;
@@ -77,7 +70,6 @@ export interface DepartmentRef {
 
 // --- User × Role matrix (GET /api/config/{bu}/user-application-roles) ---
 
-/** แถว user พร้อม role ที่ถือ — ใช้ทำรายงาน print/CSV หน้า user */
 export interface UserApplicationRole {
   user_id: string;
   username: string;
@@ -85,14 +77,12 @@ export interface UserApplicationRole {
   firstname: string;
   middlename: string;
   lastname: string;
-  /** สิทธิ์ระดับ BU: "admin" | "user" (ค่าอื่นแสดงดิบ) */
   bu_role: string;
   is_active: boolean;
   is_bu_active: boolean;
   role_ids: string[];
 }
 
-/** role catalog ของ BU จาก summary ของ endpoint เดียวกัน */
 export interface UserRoleSummaryRole {
   id: string;
   name: string;

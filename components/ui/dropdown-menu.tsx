@@ -4,14 +4,12 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 
-/** Root ของ DropdownMenu */
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }
 
-/** Portal ของ DropdownMenu */
 function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
@@ -20,7 +18,6 @@ function DropdownMenuPortal({
   );
 }
 
-/** Trigger สำหรับเปิด DropdownMenu */
 function DropdownMenuTrigger({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
@@ -32,7 +29,6 @@ function DropdownMenuTrigger({
   );
 }
 
-/** กล่องเนื้อหาของ DropdownMenu */
 function DropdownMenuContent({
   className,
   sideOffset = 4,
@@ -53,7 +49,6 @@ function DropdownMenuContent({
   );
 }
 
-/** กลุ่มของรายการใน DropdownMenu */
 function DropdownMenuGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
@@ -62,11 +57,6 @@ function DropdownMenuGroup({
   );
 }
 
-/**
- * รายการหนึ่งตัวใน DropdownMenu รองรับ variant destructive และ inset
- * @param props - inset, variant และ props ของ Radix Item
- * @returns React element dropdown item
- */
 function DropdownMenuItem({
   className,
   inset,
@@ -90,7 +80,6 @@ function DropdownMenuItem({
   );
 }
 
-/** รายการ checkbox ใน DropdownMenu */
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -117,7 +106,6 @@ function DropdownMenuCheckboxItem({
   );
 }
 
-/** กลุ่ม radio ใน DropdownMenu */
 function DropdownMenuRadioGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
@@ -129,7 +117,6 @@ function DropdownMenuRadioGroup({
   );
 }
 
-/** รายการ radio หนึ่งตัวใน DropdownMenu */
 function DropdownMenuRadioItem({
   className,
   children,
@@ -154,7 +141,6 @@ function DropdownMenuRadioItem({
   );
 }
 
-/** Label ของกลุ่ม/หัวข้อใน DropdownMenu */
 function DropdownMenuLabel({
   className,
   inset,
@@ -175,7 +161,6 @@ function DropdownMenuLabel({
   );
 }
 
-/** เส้นคั่นระหว่างกลุ่มรายการใน DropdownMenu */
 function DropdownMenuSeparator({
   className,
   ...props
@@ -189,7 +174,6 @@ function DropdownMenuSeparator({
   );
 }
 
-/** แสดง keyboard shortcut ชิดขวาใน DropdownMenuItem */
 function DropdownMenuShortcut({
   className,
   ...props
@@ -206,14 +190,12 @@ function DropdownMenuShortcut({
   );
 }
 
-/** Submenu ของ DropdownMenu */
 function DropdownMenuSub({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
   return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />;
 }
 
-/** Trigger ของ submenu ใน DropdownMenu */
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -238,7 +220,6 @@ function DropdownMenuSubTrigger({
   );
 }
 
-/** กล่องเนื้อหาของ submenu ใน DropdownMenu */
 function DropdownMenuSubContent({
   className,
   ...props

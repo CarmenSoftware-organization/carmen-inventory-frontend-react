@@ -4,12 +4,6 @@ import { DepartmentForm } from "./department-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-/**
- * หน้าดู/แก้ไข Department ตาม id — ดึงข้อมูลผ่าน `useDepartmentById`
- *
- * @param props.id - รหัส Department ที่ route อ่านมาจาก URL segment (`useParams`)
- * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `DepartmentForm` เมื่อได้ข้อมูล
- */
 export function DepartmentEditContent({ id }: { id: string }) {
   const tErr = useTranslations("config.department");
   const { data: department, isLoading, error, refetch } = useDepartmentById(id);

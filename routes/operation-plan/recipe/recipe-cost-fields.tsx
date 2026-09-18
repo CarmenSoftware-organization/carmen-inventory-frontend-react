@@ -12,9 +12,6 @@ interface RecipeCostFieldsProps {
   readonly computed: RecipeComputed;
 }
 
-/**
- * Sticky cost console — composes hero + breakdown + margins + other metrics
- */
 export function RecipeCostFields({
   form,
   isDisabled,

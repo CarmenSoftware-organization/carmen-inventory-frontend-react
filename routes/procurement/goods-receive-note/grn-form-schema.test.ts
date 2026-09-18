@@ -13,7 +13,6 @@ const tv = ((k: string, p?: Record<string, string>) =>
 const tf = ((k: string) => k) as never;
 const schema = createGrnSchema(tv, tf);
 
-/** แถวที่กรอกครบพอจะผ่าน — รับของจริงจึงต้องมีราคา */
 const item = (over: Partial<GrnFormValues["items"][number]> = {}) => ({
   ...EMPTY_DETAIL,
   product_id: "prod-1",
@@ -169,22 +168,18 @@ const twoLocationsOneProduct = {
     {
       id: "detail-a",
       sequence_no: 1,
-      purchase_order_detail_id: "po-detail-1",
-      location_id: "loc-direct",
-      location_name: "Rooms-Front Office - Direct",
-      product_id: "prod-roselle",
-      product_name: "Dried Roselle 1 kg",
+      purchase_order_detail: { id: "po-detail-1" },
+      location: { id: "loc-direct", name: "Rooms-Front Office - Direct" },
+      product: { id: "prod-roselle", name: "Dried Roselle 1 kg" },
       doc_version: 0,
       items: [{ received_qty: 23, sub_total_price: 1288 }],
     },
     {
       id: "detail-b",
       sequence_no: 2,
-      purchase_order_detail_id: "po-detail-1",
-      location_id: "loc-it",
-      location_name: "IT",
-      product_id: "prod-roselle",
-      product_name: "Dried Roselle 1 kg",
+      purchase_order_detail: { id: "po-detail-1" },
+      location: { id: "loc-it", name: "IT" },
+      product: { id: "prod-roselle", name: "Dried Roselle 1 kg" },
       doc_version: 0,
       items: [{ received_qty: 24, sub_total_price: 1344 }],
     },
@@ -214,28 +209,27 @@ describe("สินค้าตัวเดียวกันเข้าสอ�
   });
 });
 
-/**
- * แถวเดียวจาก response จริงของ `GET /{bu}/good-received-notes/{id}` (GRN260900005)
- * — ครบทุกฟิลด์ที่ `getDefaultValues` อ่าน เพื่อปักการต่อสายระหว่าง detail กับ
- * item ข้างใน ซึ่งอยู่คนละชั้นและใช้ชื่อฟิลด์คนละแบบกับฟอร์ม
- */
 const detailFromResponse = {
   id: "ec38f32c",
   good_received_note_id: "grn-1",
   sequence_no: 1,
   // หลังบ้านส่ง null มาทั้งที่แถวนี้อ้าง PO อยู่ — ตัวที่บอกว่าอ้าง PO คือ
-  // purchase_order_detail_id ไม่ใช่ purchase_order_id
-  purchase_order_id: null,
-  purchase_order_detail_id: "po-detail-1",
+  // purchase_order_detail ไม่ใช่ purchase_order
+  purchase_order: null,
+  purchase_order_detail: { id: "po-detail-1" },
   po_no: "PO20260300042",
-  location_id: "loc-direct",
-  location_code: "2FO03",
-  location_name: "Rooms-Front Office - Direct",
+  location: {
+    id: "loc-direct",
+    code: "2FO03",
+    name: "Rooms-Front Office - Direct",
+  },
   location_type: "direct",
-  product_id: "prod-roselle",
-  product_code: "11140012",
-  product_name: "Dried Roselle 1 kg",
-  product_local_name: "กระเจี๊ยบแห้ง 1กก.",
+  product: {
+    id: "prod-roselle",
+    code: "11140012",
+    name: "Dried Roselle 1 kg",
+    local_name: "กระเจี๊ยบแห้ง 1กก.",
+  },
   product_sku: null,
   doc_version: 4,
   items: [
@@ -243,16 +237,16 @@ const detailFromResponse = {
       id: "item-1",
       good_received_note_detail_id: "ec38f32c",
       order_qty: 25,
-      order_unit_id: "unit-kg",
+      order_unit: { id: "unit-kg" },
       received_qty: 23,
-      received_unit_id: "unit-kg",
+      received_unit: { id: "unit-kg" },
       received_unit_conversion_factor: 1,
       received_base_qty: 23,
       received_price: 56,
       foc_qty: 2,
-      foc_unit_id: "unit-kg",
+      foc_unit: { id: "unit-kg" },
       foc_unit_conversion_factor: 1,
-      tax_profile_id: "tax-1",
+      tax_profile: { id: "tax-1" },
       tax_rate: 7,
       tax_amount: 90.16,
       is_tax_adjustment: false,

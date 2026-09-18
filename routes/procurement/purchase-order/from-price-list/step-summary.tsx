@@ -25,7 +25,6 @@ import type {
   FromPriceListSelectedItem,
 } from "./from-price-list-form-schema";
 
-/** ปลายทางของปุ่ม "แก้ไข" — ผู้ขายอยู่ step เดียวกับรายละเอียดใบสั่งซื้อแล้ว */
 type SummaryStep = 1 | 2;
 
 interface StepSummaryProps {

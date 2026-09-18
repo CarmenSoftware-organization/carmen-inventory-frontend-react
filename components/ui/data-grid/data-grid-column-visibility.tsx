@@ -10,26 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-/**
- * Dropdown toggle visibility ของ columns
- *
- * Render dropdown ที่มีรายการ column ทั้งหมดพร้อม checkbox toggle
- * `column.toggleVisibility` กรองเฉพาะ column ที่มี `accessorFn` และ `canHide`
- * ใช้ `meta.headerTitle` เป็นชื่อแสดง (fallback เป็น `column.id`)
- *
- * @typeParam TData - ประเภทข้อมูลแถว
- * @param props - props ของ component
- * @param props.table - TanStack Table instance
- * @param props.trigger - element trigger ของ dropdown
- * @returns JSX element ของ dropdown
- * @example
- * ```tsx
- * <DataGridColumnVisibility
- *   table={table}
- *   trigger={<Button size="icon-sm" variant="outline"><Columns3 /></Button>}
- * />
- * ```
- */
 function DataGridColumnVisibility<TData>({
   table,
   trigger,

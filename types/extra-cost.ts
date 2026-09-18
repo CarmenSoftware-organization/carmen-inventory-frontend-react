@@ -2,7 +2,6 @@ import type { Audit } from "./audit";
 
 export interface ExtraCost {
   id: string;
-  /** Optimistic-concurrency token — backend requires it back on PATCH update. */
   doc_version: number;
   name: string;
   is_active: boolean;
@@ -12,6 +11,5 @@ export interface ExtraCost {
 export interface CreateExtraCostDto {
   name: string;
   is_active: boolean;
-  /** Only sent on update for optimistic concurrency; absent on create. */
   doc_version?: number;
 }

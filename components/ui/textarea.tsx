@@ -2,11 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Textarea component พร้อม character counter เมื่อมี maxLength
- * @param props - props ของ textarea มาตรฐาน (maxLength, ref, ฯลฯ)
- * @returns React element textarea พร้อม counter overlay
- */
 function Textarea({
   className,
   maxLength,

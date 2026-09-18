@@ -5,8 +5,7 @@ import { useTranslations } from "use-intl";
 import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { PL_STATUS_TONE } from "@/constant/price-list";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   Field,
   FieldDescription,
@@ -123,9 +122,12 @@ export function PriceListTemplateForm({
           backLabel={tc("goBack")}
           onBack={actions.handleBack}
           badges={
-            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
-              {tsStatus(watchedStatus)}
-            </StatusDotBadge>
+            <StatusIconLabel
+              status={watchedStatus}
+              label={tsStatus(watchedStatus)}
+              // เบากว่าในตาราง: ตัวเอกของแถบนี้คือชื่อเทมเพลต สถานะเป็นข้อมูลประกอบ
+              className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+            />
           }
           actions={
             <>
@@ -305,11 +307,11 @@ export function PriceListTemplateForm({
             <FieldLabel>{tfl("status")}</FieldLabel>
             {isView ? (
               <div>
-                <StatusDotBadge
-                  tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}
-                >
-                  {tsStatus(watchedStatus)}
-                </StatusDotBadge>
+                <StatusIconLabel
+                  status={watchedStatus}
+                  label={tsStatus(watchedStatus)}
+                  className="uppercase"
+                />
               </div>
             ) : (
               <Controller
@@ -326,9 +328,13 @@ export function PriceListTemplateForm({
                     <SelectContent>
                       {PRICE_LIST_TEMPLATE_STATUS_OPTIONS.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
-                          {tsStatus(
-                            opt.value as "draft" | "active" | "inactive",
-                          )}
+                          <StatusIconLabel
+                            status={opt.value}
+                            label={tsStatus(
+                              opt.value as "draft" | "active" | "inactive",
+                            )}
+                            className="uppercase"
+                          />
                         </SelectItem>
                       ))}
                     </SelectContent>

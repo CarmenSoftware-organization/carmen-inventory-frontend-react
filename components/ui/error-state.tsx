@@ -29,7 +29,6 @@ const statusOf = (error: unknown): number =>
   error instanceof ApiError ? (error.statusCode ?? 0) : 0;
 
 interface ErrorStateProps {
-  /** ข้อความสำเร็จรูป — ใช้เมื่อเรารู้ดีกว่า error ว่าเกิดอะไร (เช่น "ไม่พบใบขอซื้อ") */
   readonly message?: string;
   /**
    * error ดิบ — แปลเป็นข้อความตาม locale และดึงรหัสให้เอง
@@ -46,10 +45,6 @@ interface ErrorStateProps {
    */
   readonly notFoundMessage?: string;
   readonly onRetry?: () => void;
-  /**
-   * ลิงก์กลับหน้ารายการ — ใส่เมื่อของที่เปิดอยู่ไม่มีแล้ว (ถูกลบ/ลิงก์เก่า)
-   * เคสนั้นปุ่มลองใหม่ไม่ช่วยอะไร กดกี่ทีก็ไม่เจอเหมือนเดิม
-   */
   readonly backTo?: string;
   readonly errorId?: string;
 }

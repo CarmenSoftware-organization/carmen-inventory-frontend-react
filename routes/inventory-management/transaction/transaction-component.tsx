@@ -49,7 +49,6 @@ const REF_TYPE_OPTIONS = [
   { label: "PC", value: "physical_count" },
 ] as const;
 
-/** format Date → `YYYY-MM-DD` (no timezone shift) */
 function toDateOnly(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");

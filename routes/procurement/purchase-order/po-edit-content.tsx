@@ -4,12 +4,6 @@ import PoForm from "./po-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
-/**
- * หน้าดู/แก้ไขใบสั่งซื้อตาม id — ดึงข้อมูลผ่าน `usePurchaseOrderById`
- *
- * @param props.id - รหัส PO ที่ route อ่านมาจาก URL segment (`useParams`)
- * @returns `FormSkeleton` ระหว่างโหลด · `ErrorState` เมื่อล้มเหลวหรือไม่พบ · `PoForm` เมื่อได้ข้อมูล
- */
 export function PoEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseOrder");
   const {

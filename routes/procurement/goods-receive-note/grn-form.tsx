@@ -10,6 +10,7 @@ import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import type { FormMode } from "@/types/form";
 import { GrnExtraCostFields } from "./grn-extra-cost-fields";
+import { GrnStockTable } from "./grn-stock-table";
 import {
   createGrnSchema,
   type GrnFormValues,
@@ -156,7 +157,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   }, [goodsReceiveNote, defaultValues, form]);
 
   const receivedByName =
-    goodsReceiveNote?.received_by_name ||
+    goodsReceiveNote?.received_by?.name ||
     [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
       .filter(Boolean)
       .join(" ");
@@ -231,12 +232,16 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
             <GrnItemTable form={form} disabled={isDisabled} />
           </TabsContent>
           <TabsContent value="extra-cost">
             <GrnExtraCostFields form={form} disabled={isDisabled} />
+          </TabsContent>
+          <TabsContent value="stock">
+            <GrnStockTable docStatus={goodsReceiveNote?.doc_status} />
           </TabsContent>
         </Tabs>
       </form>

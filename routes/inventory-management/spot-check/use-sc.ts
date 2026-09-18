@@ -42,16 +42,6 @@ export const useCreateSpotCheck = crud.useCreate;
 export const useUpdateSpotCheck = crud.useUpdate;
 export const useDeleteSpotCheck = crud.useDelete;
 
-/**
- * Hook สำหรับ reset spot check ตาม id
- * POST /api/{buCode}/spot-check/{id}/reset (ไม่มี body)
- * Invalidate รายการ spot check เมื่อสำเร็จ
- *
- * @returns mutation ที่รับ id ของ spot check
- * @example
- * const reset = useResetSpotCheck();
- * reset.mutate(spotCheck.id);
- */
 export function useResetSpotCheck() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -61,17 +51,6 @@ export function useResetSpotCheck() {
   });
 }
 
-/**
- * Hook บันทึก draft จำนวนนับของ Spot Check
- * PATCH /api/{buCode}/spot-check/{id}/save พร้อม { items: [{ id, actual_qty }] }
- * Invalidate รายการ spot check เมื่อสำเร็จ
- *
- * @param spotCheckId - id ของ spot check
- * @returns mutation ที่รับ payload `{ items }`
- * @example
- * const save = useSaveSpotCheck(spotCheckId);
- * save.mutate({ items: [{ id, actual_qty: 5 }] });
- */
 export function useSaveSpotCheck(spotCheckId: string) {
   return useApiMutation<SpotCheckSaveDto>({
     mutationFn: (data, buCode) =>
@@ -84,18 +63,6 @@ export function useSaveSpotCheck(spotCheckId: string) {
   });
 }
 
-/**
- * Hook ส่งจำนวนนับเพื่อ review (ปิดรอบให้ผู้ตรวจสอบ)
- * PATCH /api/{buCode}/spot-check/{id}/review พร้อม { items: [{ id, actual_qty }] }
- * Payload เหมือน save แต่ semantics = ส่งให้ตรวจสอบ → status เปลี่ยน
- * Invalidate รายการ spot check เมื่อสำเร็จ
- *
- * @param spotCheckId - id ของ spot check
- * @returns mutation ที่รับ payload `{ items }`
- * @example
- * const review = useReviewSpotCheck(spotCheckId);
- * review.mutate({ items: [{ id, actual_qty: 5 }] });
- */
 export function useReviewSpotCheck(spotCheckId: string) {
   return useApiMutation<SpotCheckSaveDto>({
     mutationFn: (data, buCode) =>
@@ -108,13 +75,6 @@ export function useReviewSpotCheck(spotCheckId: string) {
   });
 }
 
-/**
- * Hook ดึงข้อมูล review ของ Spot Check (variance summary)
- * GET /api/{buCode}/spot-check/{id}/review (path เดียวกับ submit แต่ method GET)
- * Response shape: SpotCheckReviewData (id, total, matched, variant, items[])
- *
- * @param id - รหัส spot check
- */
 export function useSpotCheckReview(id: string | undefined) {
   const buCode = useBuCode();
 
@@ -133,13 +93,6 @@ export function useSpotCheckReview(id: string | undefined) {
   });
 }
 
-/**
- * Hook submit final ของ Spot Check (workflow approval)
- * PATCH /api/{buCode}/spot-check/{id}/submit พร้อม doc_version
- * (optimistic concurrency)
- *
- * @param spotCheckId - รหัส spot check
- */
 export function useSubmitSpotCheck(spotCheckId: string) {
   return useApiMutation<{ doc_version?: number }>({
     mutationFn: (data, buCode) =>

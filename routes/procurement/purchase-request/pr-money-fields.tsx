@@ -24,7 +24,6 @@ import type { PrFormValues } from "./pr-form-schema";
  * ช่องที่ใช้ไม่ได้ตอนนั้นเป็นสีเทาแต่ยังเห็นค่า ไม่ใช่ซ่อนหาย
  */
 
-/** ส่วนลด: [% ] [ยอด] — ช่องที่แก้ได้ขึ้นกับ override */
 export function PrDiscountInput({
   form,
   index,
@@ -103,7 +102,6 @@ export function PrDiscountInput({
   );
 }
 
-/** ภาษี: [โปรไฟล์ภาษี] [ยอด] — อัตรามากับโปรไฟล์ แก้เองไม่ได้ */
 export function PrTaxInput({
   form,
   index,

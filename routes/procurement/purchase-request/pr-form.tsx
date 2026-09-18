@@ -34,7 +34,6 @@ import { PrHeader } from "./pr-header";
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
   readonly template?: PurchaseRequestTemplate;
-  /** ใบเดิมที่ผู้ใช้กด Duplicate — ทำหน้าที่เหมือน template (prefill แล้วนับ dirty) */
   readonly duplicateFrom?: PurchaseRequest;
 }
 
@@ -65,7 +64,7 @@ export function PurchaseRequestForm({
   const { data: previousStages, isLoading: stagesLoading } =
     usePrPreviousStages(
       purchaseRequest?.id,
-      !!purchaseRequest?.workflow_id &&
+      !!purchaseRequest?.workflow?.id &&
         !!purchaseRequest?.workflow_current_stage,
     );
 
@@ -173,10 +172,10 @@ export function PurchaseRequestForm({
     ? `${profile.user_info.firstname} ${profile.user_info.lastname}`
     : "";
 
-  const defaultRequestorName = purchaseRequest?.requestor_name;
+  const defaultRequestorName = purchaseRequest?.requestor?.name;
   const defaultRequestorId = profile?.id ?? "";
   const defaultDefaultId = defaultBu?.department?.id ?? "";
-  const defaultDepartmentName = purchaseRequest?.department_name;
+  const defaultDepartmentName = purchaseRequest?.department?.name;
   const defaultPrDate = purchaseRequest?.pr_date;
 
   const reqName = defaultRequestorName ?? requestorName;
@@ -249,7 +248,9 @@ export function PurchaseRequestForm({
         departmentName={departmentName ?? ""}
         prDateDisplay={prDateDisplay}
         description={descriptionReadOnly ? watchedDescription : undefined}
-        workflowName={purchaseRequest?.workflow_name ?? template?.workflow_name}
+        workflowName={
+          purchaseRequest?.workflow?.name ?? template?.workflow?.name ?? undefined
+        }
         workflowField={
           workflowEditable ? (
             <PrWorkflowField
@@ -323,7 +324,7 @@ export function PurchaseRequestForm({
         showHistory={actions.showHistory}
         setShowHistory={actions.setShowHistory}
         workflowHistory={purchaseRequest?.workflow_history}
-        requestorName={purchaseRequest?.requestor_name}
+        requestorName={purchaseRequest?.requestor?.name ?? undefined}
         createdAt={purchaseRequest?.audit?.created?.at}
         showNoDepartment={showNoDepartment}
         discardDialogProps={actions.discardDialogProps}

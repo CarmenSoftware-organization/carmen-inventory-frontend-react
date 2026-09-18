@@ -1,13 +1,6 @@
-/**
- * Runtime config ของ SPA — โหลดจาก /config.json ตอน boot (ไม่ฝังใน bundle)
- * เพื่อให้ artifact เดียว deploy ได้ทุก environment (uat/aws)
- */
 export interface RuntimeConfig {
-  /** Origin ของ backend (ค่าว่าง = same-origin, ใช้กับ Vite dev proxy) */
   BACKEND_URL: string;
-  /** ค่า x-app-id header ที่ backend ต้องการ */
   X_APP_ID: string;
-  /** WebSocket URL ของ notification (optional — ไม่ตั้ง = ปิด real-time) */
   WS_URL?: string;
   /**
    * สวิตช์ shadow-mode ของ FE สำหรับการล็อก UI ตาม license — mirror ของสวิตช์
@@ -93,7 +86,6 @@ export function getRuntimeConfig(): RuntimeConfig {
   return config;
 }
 
-/** สำหรับ unit tests เท่านั้น */
 export function setRuntimeConfigForTests(value: RuntimeConfig | null): void {
   config = value;
 }

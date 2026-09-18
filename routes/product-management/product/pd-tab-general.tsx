@@ -50,7 +50,6 @@ interface PdTabGeneralProps {
     categoryName: string,
     subCategoryName: string,
   ) => void;
-  /** รูปที่เลือกไว้แต่ยังไม่อัปโหลด — ฟอร์มเป็นคนถือ ส่งขึ้นตอนกด Save */
   readonly pendingImages?: readonly File[];
   readonly onPendingImagesChange?: (files: File[]) => void;
 }
@@ -270,7 +269,7 @@ function PdTabGeneral({
             <LookupCategory
               value={categoryId}
               onValueChange={handleCategoryChange}
-              defaultLabel={product?.product_category?.name}
+              defaultLabel={product?.product_category?.name ?? undefined}
               className="w-full"
               error={errors.product_category_id?.message}
             />
@@ -287,7 +286,7 @@ function PdTabGeneral({
               onValueChange={handleSubCategoryChange}
               filterCategoryId={categoryId}
               disabled={!categoryId}
-              defaultLabel={product?.product_sub_category?.name}
+              defaultLabel={product?.product_sub_category?.name ?? undefined}
               className="w-full"
               error={errors.product_sub_category_id?.message}
             />
@@ -308,7 +307,7 @@ function PdTabGeneral({
                   onValueChange={handleItemGroupChange}
                   filterSubCategoryId={subCategoryId}
                   disabled={!subCategoryId && !field.value}
-                  defaultLabel={product?.product_item_group?.name}
+                  defaultLabel={product?.product_item_group?.name ?? undefined}
                   placeholder={t("itemGroupPlaceholder")}
                   error={errors.product_item_group_id?.message}
                 />
@@ -345,7 +344,7 @@ function PdTabGeneral({
         <Field>
           <FieldLabel>{tfl("taxProfile")}</FieldLabel>
           {isDisabled ? (
-            <ReadOnlyValue value={product?.tax_profile_name} />
+            <ReadOnlyValue value={product?.tax_profile?.name} />
           ) : (
             <Controller
               control={form.control}

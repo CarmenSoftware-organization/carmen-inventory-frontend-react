@@ -45,14 +45,6 @@ export function useCreditNote(
   });
 }
 
-/**
- * Hook ดึง credit note เดี่ยวตาม id สำหรับหน้า view/edit
- * จะ fetch เฉพาะเมื่อ buCode และ id พร้อมทั้งคู่
- * @param id - id ของ credit note (undefined = ไม่ fetch)
- * @returns UseQueryResult ของ CreditNote
- * @example
- * const { data: cn } = useCreditNoteById(params.id);
- */
 export function useCreditNoteById(id: string | undefined) {
   const buCode = useBuCode();
 
@@ -76,13 +68,6 @@ interface CreateCnResponse {
   data: { id: string };
 }
 
-/**
- * Hook สำหรับสร้าง credit note ใหม่ พร้อม invalidate รายการหลัง success
- * @returns UseMutationResult รับ CreateCnDto คืน { data: { id } }
- * @example
- * const create = useCreateCreditNote();
- * await create.mutateAsync(formValues);
- */
 export function useCreateCreditNote() {
   return useApiMutation<CreateCnDto, CreateCnResponse>({
     mutationFn: (data, buCode) =>
@@ -92,13 +77,6 @@ export function useCreateCreditNote() {
   });
 }
 
-/**
- * Hook สำหรับแก้ไข credit note ที่มีอยู่ (PUT) พร้อม invalidate รายการ
- * @returns UseMutationResult รับ CreateCnDto + id
- * @example
- * const update = useUpdateCreditNote();
- * await update.mutateAsync({ id: cn.id, ...values });
- */
 export function useUpdateCreditNote() {
   return useApiMutation<CreateCnDto & { id: string }>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -128,14 +106,6 @@ export function useSubmitCreditNote() {
   });
 }
 
-/**
- * Hook สำหรับลบ credit note พร้อม optimistic update รายการใน cache
- * จะลบรายการออกจาก list ทันทีและ rollback หากเกิด error
- * @returns UseMutationResult รับ id ของ credit note ที่จะลบ
- * @example
- * const del = useDeleteCreditNote();
- * del.mutate(cn.id);
- */
 export function useDeleteCreditNote() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -151,7 +121,6 @@ export function useDeleteCreditNote() {
 
 // --- Comments ---
 
-/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
 export const cnCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.CREDIT_NOTE_COMMENTS,
   commentEndpoint: API_ENDPOINTS.CREDIT_NOTE_COMMENT,
@@ -160,14 +129,10 @@ export const cnCommentCrud = createCommentCrud({
   cacheProfile: CACHE_DYNAMIC,
 });
 
-/** ดึง comment ของ credit note จาก `/api/{buCode}/credit-note-comment/{cnId}` */
 export const useCreditNoteComments = cnCommentCrud.useComments;
-/** สร้าง comment ของ credit note ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
 export const useCreateCreditNoteComment = cnCommentCrud.useCreate;
 
-/** Hook สำหรับแก้ไข comment ของ credit note */
 export const useUpdateCreditNoteComment = cnCommentCrud.useUpdate;
-/** Hook สำหรับลบ comment ของ credit note */
 export const useDeleteCreditNoteComment = cnCommentCrud.useDelete;
 
 // --- Export ---
@@ -177,11 +142,6 @@ interface ExportCreditNoteArgs {
   columns: XlsxColumn<CreditNote>[];
 }
 
-/**
- * Hook ส่งออก CN เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list — caller กำหนด columns พร้อม translation
- * @returns { exportCreditNote, isExporting }
- */
 export function useExportCreditNote() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

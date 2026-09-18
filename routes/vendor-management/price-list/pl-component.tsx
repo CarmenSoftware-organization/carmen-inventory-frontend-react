@@ -19,7 +19,6 @@ import {
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useVendor } from "@/hooks/use-vendor";
 import { useCurrency } from "@/hooks/use-currency";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { PriceList } from "@/types/price-list";
@@ -56,21 +55,7 @@ export default function PriceListComponent() {
     defaultSort: "pricelist_no:asc",
   });
 
-  const { data: vendorData } = useVendor({ perpage: -1 });
-  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน priceListFilterFields memo ข้างล่างไม่เคย hit
-  const vendorOptions = useMemo(
-    () =>
-      (vendorData?.data ?? [])
-        .filter((v) => v.is_active)
-        .map((v) => ({
-          label: v.name,
-          value: `vendor_id|string:${v.id}`,
-        })),
-    [vendorData],
-  );
-
-  // vendor เป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
+  // code ของสกุลเงินเป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
   // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
   // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
   // PO_TYPE/CN_TYPE ใน Task 19). filter (status) ใช้ labelKey จริง (status.draft
@@ -88,19 +73,47 @@ export default function PriceListComponent() {
     [currencyData],
   );
 
+  // ป้ายเป็น i18n (ไม่ใช่ createStatusFilterOptions ที่เป็นอังกฤษล้วน) ให้ตรงกับ
+  // ป้ายในตาราง — ค่าเป็น clause เต็มต่อตัว MultiSelectFilter join เองเมื่อเลือกหลายตัว
+  const statusOptions = useMemo(
+    () =>
+      (["draft", "submitted", "active", "inactive"] as const).map((status) => ({
+        label: ts(status),
+        value: `status|string:${status}`,
+      })),
+    [ts],
+  );
+
   const priceListFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
+        // MultiSelectFilter แทน control: "status" (Select ข้อความเปล่า) เพื่อให้
+        // เมนูมีไอคอนสถานะชุดเดียวกับคอลัมน์ในตาราง — ไอคอนมาจากค่าท้าย value
+        // (`status|string:draft` → draft) ผ่าน lookupIcon ไม่ต้องประกาศซ้ำ
+        // ผลพลอยได้คือเลือกได้หลายสถานะเหมือนรายการเอกสารอื่น (PR/PO)
         key: "filter",
         section: "listView.sectionDocument",
-        control: "status",
+        control: "custom",
         labelKey: "common.status",
-        options: [
-          { labelKey: "status.draft", value: "status|string:draft" },
-          { labelKey: "status.submitted", value: "status|string:submitted" },
-          { labelKey: "status.active", value: "status|string:active" },
-          { labelKey: "status.inactive", value: "status|string:inactive" },
-        ],
+        // custom control ไม่มี `options` ให้ chip ไปหา label เอง — ไม่ใส่ตัวนี้
+        // chip จะกลายเป็นค่าดิบ ("draft") แทนป้ายภาษาไทย
+        valueText: (value) => {
+          const selected = new Set(value.split(","));
+          const labels = statusOptions
+            .filter((o) => selected.has(o.value))
+            .map((o) => o.label);
+          return labels.length > 1
+            ? `${labels[0]} +${labels.length - 1}`
+            : labels[0];
+        },
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={statusOptions}
+            className="w-full"
+          />
+        ),
       },
       {
         key: "currency",
@@ -118,19 +131,13 @@ export default function PriceListComponent() {
         ),
       },
       {
+        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
+        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
+        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
         key: "vendor",
         section: "listView.sectionPeople",
-        control: "custom",
+        control: "vendor",
         labelKey: "field.vendor",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={vendorOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // กรองที่วันเริ่มมีผล (effective_from_date) — ความหมายเดียวกับคอลัมน์
@@ -142,7 +149,7 @@ export default function PriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [vendorOptions, currencyOptions],
+    [currencyOptions, statusOptions],
   );
 
   const lf = useListFilters({

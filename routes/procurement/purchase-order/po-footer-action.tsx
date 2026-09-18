@@ -117,7 +117,8 @@ export function PoFooterAction({
   // ปลายทางของ PO แทน (PO ไม่มี voided) ของเดิมไม่ได้กันเลย ปุ่มจึงโผล่ได้ถ้า
   // backend ยังคืน role = create บนใบที่ส่งไปแล้ว
   const isTerminal =
-    poStatus === PO_STATUS.SENT ||
+    poStatus === PO_STATUS.APPROVED ||
+    poStatus === PO_STATUS.SENT_OR_PRINT ||
     poStatus === PO_STATUS.CLOSED ||
     poStatus === PO_STATUS.COMPLETED;
   const showSubmit = canSubmit && !isTerminal;

@@ -131,20 +131,6 @@ export function formatElapsed(
   return t("elapsedDays", { count: Math.round(hours / 24) });
 }
 
-/**
- * คำนวณจำนวนวันระหว่างสอง ISO date string
- *
- * คืน 0 หากค่าใดค่าหนึ่งเป็น empty string หรือ parse ไม่ได้
- * ปัดเศษเป็นจำนวนเต็มและไม่คืนค่าติดลบ
- *
- * @param a - ISO date string ของวันเริ่มต้น
- * @param b - ISO date string ของวันสิ้นสุด
- * @returns จำนวนวันระหว่างสองวัน (ค่าเป็นจำนวนเต็ม >= 0)
- * @example
- * ```ts
- * daysBetween("2026-04-01", "2026-04-10"); // 9
- * ```
- */
 export function daysBetween(a: string, b: string): number {
   if (!a || !b) return 0;
   const start = new Date(a).getTime();
@@ -153,17 +139,6 @@ export function daysBetween(a: string, b: string): number {
   return Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
 }
 
-/**
- * บวกวันเข้ากับวันที่ ISO — ใช้คำนวณวันครบกำหนดจากเทอมเครดิต
- *
- * @param iso - ISO date string ตั้งต้น
- * @param days - จำนวนวันที่บวก (ติดลบได้)
- * @returns ISO string ของวันที่ใหม่ · คืน "" ถ้า parse ไม่ได้
- * @example
- * ```ts
- * addDays("2026-06-25", 30); // "2026-07-25T..."
- * ```
- */
 export function addDays(iso: string, days: number): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -172,19 +147,6 @@ export function addDays(iso: string, days: number): string {
   return d.toISOString();
 }
 
-/**
- * แปลง ISO date string เป็นรูปแบบ YYYY-MM-DD สำหรับ HTML `<input type="date">`
- *
- * ตัดเฉพาะส่วนวันที่จาก ISO string คืน empty string หาก parse ไม่ได้
- *
- * @param iso - ISO date string ที่จะแปลง
- * @returns string รูปแบบ `YYYY-MM-DD` หรือ empty string หาก parse ไม่ได้
- * @example
- * ```ts
- * // ใช้ใน controlled date input
- * <input type="date" value={isoToDateInput(purchaseRequest.pr_date)} />
- * ```
- */
 export function isoToDateInput(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";

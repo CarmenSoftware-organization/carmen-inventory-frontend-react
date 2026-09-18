@@ -4,21 +4,6 @@ import { type CreatePoDto, PO_TYPE } from "@/types/purchase-order";
 import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
 
 /**
- * สร้าง payload DTO สำหรับส่ง PO ไปยัง API
- * โดยใช้ buildItemChanges เปรียบเทียบ items ที่ถูกเพิ่ม/แก้ไข/ลบออกจากค่าเดิม
- * แล้วรวมกับฟิลด์หลักของ PO เช่น vendor, currency, credit term
- *
- * @param values - ค่าปัจจุบันของฟอร์ม PoFormValues
- * @param defaultItems - items ชุดเดิมที่โหลดจาก defaultValues ของฟอร์ม
- * @returns CreatePoDto ที่พร้อมส่งไปยัง API purchase-order
- * @example
- * const payload = buildPoPayload(
- *   form.getValues(),
- *   form.formState.defaultValues?.items ?? [],
- * );
- * await createPo(buCode, payload);
- */
-/**
  * @param options.docVersion - เลขเวอร์ชันที่ resolve มาแล้ว (GET สดจาก DB) ไม่ส่ง =
  *   ใช้ค่าในฟอร์ม ซึ่งถูกเฉพาะใบใหม่ที่ยังไม่มี id ให้ไป GET · ใบที่มีอยู่แล้วต้อง
  *   ส่งมาเสมอ ไม่งั้น /save รอบถัดไปชน 409 (ดู lib/doc-version.ts)
@@ -29,7 +14,6 @@ export function buildPoPayload(
   options?: {
     po_type?: PO_TYPE;
     docVersion?: number;
-    /** `purchase_order_detail` จาก GET ล่าสุด — ทับเลขราย row ที่จะ update */
     freshDetails?: readonly { id: string; doc_version?: number }[];
   },
 ): CreatePoDto {

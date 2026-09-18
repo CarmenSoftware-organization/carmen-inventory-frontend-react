@@ -18,6 +18,7 @@ import type { PriceListFormValues } from "./pl-form-schema";
 import { buildPlItemColumns } from "./pl-item-columns";
 import type { DetailField } from "./pl-item-cells";
 import { PLItemGroupedView } from "./pl-item-grouped-view";
+import { toGroupableDetail } from "./pl-product-grouping";
 
 interface PLItemTableProps {
   readonly form: UseFormReturn<PriceListFormValues>;
@@ -25,7 +26,6 @@ interface PLItemTableProps {
   readonly detailRefs?: PriceList["pricelist_detail"];
   readonly isView: boolean;
   readonly isDisabled: boolean;
-  /** เปิด dialog ยืนยันลบของแถวนั้น — ไม่ได้ลบเอง (เจ้าของ field array ลบให้) */
   readonly onRequestRemove: (idx: number) => void;
 }
 
@@ -36,7 +36,12 @@ interface PLItemTableProps {
  */
 export function PLItemTable(props: PLItemTableProps) {
   if (props.isView)
-    return <PLItemGroupedView detailRefs={props.detailRefs ?? []} showNote />;
+    return (
+      <PLItemGroupedView
+        detailRefs={(props.detailRefs ?? []).map(toGroupableDetail)}
+        showNote
+      />
+    );
   return <PLItemEditTable {...props} />;
 }
 
@@ -83,7 +88,11 @@ function PLItemEditTable({
       <DataGrid
         table={table}
         recordCount={detailFields.length}
-        tableLayout={{ headerSticky: true }}
+        tableLayout={{
+          headerSticky: true,
+          // โหมดอ่านชิดบน — ชื่อสินค้ามีบรรทัดรอง เซลล์อื่นไม่มี
+          cellAlign: isView ? "top" : "middle",
+        }}
       >
         <DataGridContainer>
           <DataGridTable />

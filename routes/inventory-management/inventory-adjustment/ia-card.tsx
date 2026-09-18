@@ -24,16 +24,6 @@ interface IaCardProps {
   readonly onDelete: (item: InventoryAdjustment) => void;
 }
 
-/**
- * การ์ดใบปรับปรุงสต๊อก 1 ใบ สำหรับหน้ารายการ mobile/grid
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/SR — ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน
- * ครบเท่าคอลัมน์ของตาราง IA
- *
- * @param props.item - ข้อมูล InventoryAdjustment
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();

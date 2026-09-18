@@ -23,6 +23,12 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { SettingSection } from "@/components/ui/setting-section";
+import {
+  capQtyDecimals,
+  DEFAULT_QTY_DECIMALS,
+  QTY_MAX_DECIMALS,
+  QTY_STEP,
+} from "@/components/ui/input/qty-decimals";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useUnit } from "@/hooks/use-unit";
 import EmptyComponent from "@/components/empty-component";
@@ -80,6 +86,23 @@ function PdTabUnitConversion({
     const m = new Map<string, string>();
     for (const u of unitData?.data ?? []) {
       m.set(u.id, u.name);
+    }
+    return m;
+  }, [unitData?.data]);
+
+  // ทศนิยมที่หน่วยนั้นกรอกได้ — กติกาเดียวกับช่อง qty ของ PR/PO/GRN ที่อ่าน
+  // `decimal_place` จาก master data (EA = 0, kg ให้เศษ) ต่างกันแค่ที่นั่นดึงหน่วย
+  // ของสินค้ารายตัว ส่วนที่นี่หน่วยยังไม่ผูกกับสินค้าเลยอ่านจากทะเบียนหน่วยตรง ๆ
+  const unitDecimalsMap = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const u of unitData?.data ?? []) {
+      const dp = u.decimal_place;
+      m.set(
+        u.id,
+        dp == null || !Number.isFinite(dp)
+          ? DEFAULT_QTY_DECIMALS
+          : Math.min(Math.max(Math.trunc(dp), 0), QTY_MAX_DECIMALS),
+      );
     }
     return m;
   }, [unitData?.data]);
@@ -237,19 +260,28 @@ function PdTabUnitConversion({
             );
           }
           const errorMessage = errors[name]?.[row.index]?.to_unit_qty?.message;
+          // จำนวนนี้นับด้วยหน่วยปลายทาง ทศนิยมจึงมาจาก `to_unit_id` ไม่ใช่ค่าคงที่
+          const decimals =
+            unitDecimalsMap.get(
+              form.getValues(`${name}.${row.index}.to_unit_id`) ?? "",
+            ) ?? DEFAULT_QTY_DECIMALS;
+          const registered = form.register(`${name}.${row.index}.to_unit_qty`);
           return (
-            <div className="flex items-center">
-              <FieldInput
-                type="number"
-                inputMode="decimal"
-                step="any"
-                min={1}
-                className="h-8 text-right text-xs tabular-nums md:text-xs"
-                error={errorMessage}
-                errorIconAlign="left"
-                {...form.register(`${name}.${row.index}.to_unit_qty`)}
-              />
-            </div>
+            <FieldInput
+              type="number"
+              inputMode="decimal"
+              // step ตายตัวปัดค่าที่ละเอียดกว่านั้นทิ้ง เพดานจริงคุมที่ capQtyDecimals
+              step={QTY_STEP}
+              min={1}
+              className="text-right"
+              error={errorMessage}
+              errorIconAlign="left"
+              {...registered}
+              onChange={(e) => {
+                capQtyDecimals(e.currentTarget, decimals);
+                void registered.onChange(e);
+              }}
+            />
           );
         },
         size: 90,
@@ -359,6 +391,7 @@ function PdTabUnitConversion({
     inventoryUnitName,
     unitMap,
     usedSelectableIds,
+    unitDecimalsMap,
     // cell ปิดทับ errors ไว้ ไม่ใส่ใน deps แล้ว columns ไม่สร้างใหม่ตอน
     // validation fail — error ที่ส่งเข้า cell ค้างเป็นค่าเก่า
     errors,

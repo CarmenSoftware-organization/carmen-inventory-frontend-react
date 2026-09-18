@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  removeFromDocSequence,
-  useDocSequence,
-} from "@/hooks/use-doc-sequence";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -39,31 +35,9 @@ interface UsePoFormHandlersOptions {
   role: string | undefined;
   setShowReject: Dispatch<SetStateAction<boolean>>;
   setShowClose: Dispatch<SetStateAction<boolean>>;
-  /** เรียกเมื่อ validation ไม่ผ่าน — auto-expand row ที่ error + scroll + บอกว่าขาดอะไร */
   revealErrors: (errors?: Record<string, unknown>) => void;
 }
 
-/**
- * Hook รวม mutations และ handler ทั้งหมดของฟอร์ม PO
- * จัดการ create/update/delete และ workflow actions submit/approve/reject/review/close
- * คืน isPending รวมจากทุก mutation, onSubmit สำหรับ react-hook-form และ handler ต่าง ๆ
- *
- * @param options - ตัวเลือกของ hook
- * @param options.purchaseOrder - PO ปัจจุบัน (undefined = โหมดสร้างใหม่)
- * @param options.form - UseFormReturn ของ PoFormValues
- * @param options.defaultValues - ค่าเริ่มต้นของฟอร์ม (ใช้ diff items)
- * @param options.mode - โหมดฟอร์มปัจจุบัน (add/view/edit)
- * @param options.setMode - setter ของ mode
- * @param options.role - stage role ของผู้ใช้ปัจจุบัน
- * @param options.setShowReject - setter ของ reject dialog
- * @param options.setShowClose - setter ของ close dialog
- * @returns mutations, isPending และ handlers
- * @example
- * const { onSubmit, handleApprovePo, handleRejectConfirm, isPending } = usePoFormHandlers({
- *   purchaseOrder, form, defaultValues, mode, setMode, role, setShowReject, setShowClose,
- * });
- * <form onSubmit={form.handleSubmit(onSubmit)}> ... </form>
- */
 export function usePoFormHandlers({
   purchaseOrder,
   form,
@@ -76,9 +50,10 @@ export function usePoFormHandlers({
   revealErrors,
 }: UsePoFormHandlersOptions) {
   const navigate = useNavigate();
-  const location = useLocation();
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
+  const tv = useTranslations("validation");
+  const tfl = useTranslations("field");
   const buCode = useBuCode();
 
   const createPo = useCreatePurchaseOrder();
@@ -231,9 +206,8 @@ export function usePoFormHandlers({
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
     navigate("/procurement/purchase-order");
   };
@@ -249,10 +223,6 @@ export function usePoFormHandlers({
   // GET PO สดจาก DB ก่อนยิง workflow event ทุกตัว — /save bump doc_version
   // ระหว่างทาง ทำให้ค่าใน form/prop ค้างเก่า → 409 optimistic lock
   // (tb_purchase_order / tb_purchase_order_detail)
-  /**
-   * @param id - ใบที่จะดึง ไม่ส่ง = ใบที่เปิดอยู่ · ส่งมาเมื่อเพิ่งสร้างใบใหม่
-   *   ซึ่ง `purchaseOrder` prop ยังเป็น undefined อยู่
-   */
   const fetchFreshPo = async (
     id?: string,
   ): Promise<{
@@ -299,13 +269,9 @@ export function usePoFormHandlers({
    * ที่เพิ่งติ๊กแถว (ติ๊กแล้ว setValue ทำให้ dirty) ถ้าไม่ปิด guard ก่อน การ
    * navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่บันทึกไปแล้ว
    */
-  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
-  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิว (แบบเดียวกับ onSuccessList ของ PR)
-  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    removeFromDocSequence(location.pathname);
-    navigate(seq?.nextPath ?? "/procurement/purchase-order");
+    navigate("/procurement/purchase-order");
   };
 
   const runSubmitPo = async () => {
@@ -336,6 +302,45 @@ export function usePoFormHandlers({
   };
 
   /**
+   * "บันทึก" กับ "ส่ง" คนละมาตรฐานกันเรื่องจำนวนและราคา
+   *
+   * ร่างที่ยังไม่รู้ยอด/ยังไม่ได้ราคาจากผู้ขายต้องเซฟไว้ก่อนได้ schema จึงเป็น
+   * `min(0)` ทั้งคู่ — แต่ใบที่ส่งเข้าลำดับอนุมัติแล้วมีแถวจำนวน 0 หรือราคา 0
+   * คือใบที่ให้คนอนุมัติเซ็นของที่ไม่มีจำนวนหรือไม่มีมูลค่า เช็คเพิ่มเป็นชั้นที่สอง
+   * ตรงนี้ ไม่ยัดเข้า schema เพราะ schema ตัวเดียวกันถูกใช้ทั้งสองปุ่ม
+   *
+   * ขั้นต่ำจริงของจำนวนขึ้นกับทศนิยมของหน่วย (2 ตำแหน่ง = 0.01) ซึ่ง "มากกว่า 0"
+   * ครอบให้อยู่แล้ว ไม่ต้องไปคำนวณขั้นต่ำรายหน่วยซ้ำ
+   *
+   * @returns ผ่านไหม — ไม่ผ่านจะ setError ไว้ที่ช่องที่ผิดของแถวนั้นให้เลย
+   */
+  const validateSubmitItems = (): boolean => {
+    let ok = true;
+    form.getValues("items").forEach((item, index) => {
+      // แถวที่มีของแถมเกิดขึ้นจริง = บรรทัดนั้นมีของเข้ามาแล้ว ไม่ต้องมีทั้งจำนวน
+      // สั่งและราคา (ผู้ขายแถมมาให้เฉย ๆ สั่ง 0 จ่าย 0 แต่ได้ของ) ข้ามทั้งแถว
+      if (Number(item.foc_qty) > 0) return;
+      if (!(Number(item.order_qty) > 0)) {
+        form.setError(`items.${index}.order_qty`, {
+          type: "manual",
+          message: tv("positive", { field: tfl("qty") }),
+        });
+        ok = false;
+      }
+      // ทั้งบรรทัดเป็นของแถม (is_foc) ก็ไม่มีราคาเหมือนกัน — แต่ยังต้องมีจำนวนสั่ง
+      // เพราะมันคือ "ของที่สั่งแล้วไม่คิดเงิน" ไม่ใช่ "ของที่แถมมาโดยไม่ได้สั่ง"
+      if (!item.is_foc && !(Number(item.price) > 0)) {
+        form.setError(`items.${index}.price`, {
+          type: "manual",
+          message: tv("positive", { field: tfl("unitPrice") }),
+        });
+        ok = false;
+      }
+    });
+    return ok;
+  };
+
+  /**
    * ตรวจก่อนเปิดกล่องยืนยันส่งใบ — ติดตรงไหนต้องรู้**ก่อน**ตอบว่า "ส่ง"
    *
    * ของเดิมเปิดกล่องยืนยันทันที แล้วค่อย validate ข้างใน `handleSubmitPo` ผู้ใช้จึง
@@ -347,7 +352,14 @@ export function usePoFormHandlers({
    */
   const validateSubmitPo = async (): Promise<boolean> => {
     const valid = await form.trigger();
-    if (!valid) {
+    // เรียกหลัง trigger เสมอ — trigger เขียน errors ทั้งชุดใหม่จาก resolver
+    // เรียกก่อนหน้าจะโดนล้างทิ้ง
+    const itemsOk = validateSubmitItems();
+    if (!valid || !itemsOk) {
+      // เด้งเข้าโหมดแก้ไขให้เลย — ในโหมดอ่านทุกเซลล์เป็นตัวหนังสือ ช่องที่ผิดจึง
+      // ไม่มีขอบแดงให้เห็นและกดแก้ไม่ได้ ผู้ใช้จะได้แค่ toast แล้วไม่รู้จะทำอะไรต่อ
+      // (setMode ซ้ำค่าเดิมตอนอยู่โหมดแก้อยู่แล้ว React bail ให้เอง)
+      setMode("edit");
       revealErrors(form.formState.errors as Record<string, unknown>);
       return false;
     }
@@ -410,7 +422,10 @@ export function usePoFormHandlers({
     }
     if (form.formState.isDirty) {
       const valid = await form.trigger();
-      if (!valid) {
+      const itemsOk = validateSubmitItems();
+      if (!valid || !itemsOk) {
+        // เหตุผลเดียวกับใน validateSubmitPo — ติดตรงไหนต้องแก้ได้ทันที
+        setMode("edit");
         // revealErrors บอกเองแล้วว่าขาดกี่รายการ — toast ซ้ำสองใบไม่ได้ช่วยอะไร
         revealErrors(form.formState.errors as Record<string, unknown>);
         return;

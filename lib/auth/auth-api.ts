@@ -3,10 +3,6 @@ import { getRuntimeConfig } from "@/lib/runtime-config";
 import { refreshTokenStorage } from "./refresh-token-storage";
 import { tokenStore } from "./token-store";
 
-/**
- * Auth API ฝั่ง client — แทน Next server routes /api/auth/* เดิมทั้งหมด
- * (backend คืน token ใน JSON body และรับ refresh_token ทาง request body)
- */
 
 interface LoginResult {
   platform_role?: string;
@@ -85,7 +81,6 @@ export interface UserInfo {
 }
 
 export interface RegisterPayload {
-  /** token จากลิงก์ในอีเมล — อีเมลของบัญชีมาจาก token ไม่ใช่จาก payload */
   token: string;
   password: string;
   user_info: UserInfo;

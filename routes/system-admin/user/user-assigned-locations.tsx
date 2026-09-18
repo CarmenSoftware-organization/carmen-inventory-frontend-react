@@ -72,7 +72,6 @@ const fromAssigned = (l: UserLocation): LocationRow => ({
 interface LocationsSectionProps {
   readonly form: UseFormReturn<UserAssignedFormValues>;
   readonly isDisabled: boolean;
-  /** คลังที่ผูกอยู่ตอนเปิดหน้า — ใช้เป็นแถวของโหมดดู */
   readonly userLocations: UserLocation[];
 }
 
@@ -217,11 +216,8 @@ interface LocationsViewProps {
   readonly form: UseFormReturn<UserAssignedFormValues>;
   readonly isDisabled: boolean;
   readonly isLoading: boolean;
-  /** แถวทั้งหมดของโหมดปัจจุบัน — ใช้แยกว่า "ยังไม่มีเลย" กับ "กรองแล้วไม่เหลือ" */
   readonly allRows: LocationRow[];
-  /** เหลือหลังกรองตามชนิด — คือแถวที่แสดงจริง */
   readonly visibleLocations: LocationRow[];
-  /** ชิปกรองตามชนิดคลัง — วางแถวเดียวกับช่องค้น */
   readonly filters?: ReactNode;
 }
 

@@ -1,40 +1,5 @@
 import type { AuditInfo } from "@/types/workflows";
 
-interface CreditNoteItem {
-  id: string;
-  doc_version?: number;
-  sequence_no?: number;
-  location_id: string | null;
-  location_code: string | null;
-  location_name: string | null;
-  location_type?: string | null;
-  product_id: string;
-  product_code: string | null;
-  product_name: string;
-  product_local_name?: string | null;
-  product_sku?: string | null;
-  return_qty: number;
-  return_unit_id: string | null;
-  return_unit_name: string | null;
-  return_conversion_factor?: number;
-  return_base_qty?: number;
-  price: number;
-  tax_profile_id?: string | null;
-  tax_profile_name?: string | null;
-  tax_rate: number;
-  tax_amount: number;
-  base_tax_amount?: number;
-  is_tax_adjustment: boolean;
-  discount_rate?: number;
-  discount_amount?: number;
-  is_discount_adjustment?: boolean;
-  sub_total_price?: number;
-  net_amount: number;
-  total_price: number;
-  description: string | null;
-  note?: string | null;
-}
-
 type CreditNoteType = "quantity_return" | "amount_discount";
 
 export interface CnItemPayload {
@@ -98,6 +63,16 @@ export enum CN_STATUS {
   VOIDED = "voided",
 }
 
+/**
+ * แถวของ **list** `GET /{bu}/credit-notes` เท่านั้น — ไม่ใช่รูปร่างของใบเดี่ยว
+ * (นั่นคือ `CreditNoteDetail` ซึ่งมี field คนละชุด)
+ *
+ * list endpoint **ไม่ส่ง** `invoice_no` / `invoice_date` / `tax_invoice_*` /
+ * `credit_note_detail` กลับมา (ยืนยันจาก response จริง) การเคยประกาศไว้ทำให้ tsc
+ * ปล่อยผ่านโค้ดที่อ่านค่าเหล่านี้แล้วได้ `undefined` เงียบ ๆ — filter "Invoice No."
+ * ของหน้า list เคยว่างเปล่าตลอดเพราะเหตุนี้ จะเพิ่มกลับได้ต่อเมื่อยิง API จริง
+ * แล้วเห็นฟิลด์นั้นใน response
+ */
 export interface CreditNote {
   id: string;
   doc_version?: number;
@@ -117,10 +92,6 @@ export interface CreditNote {
   cn_reason_id: string | null;
   cn_reason_name?: string | null;
   cn_reason_description?: string | null;
-  invoice_no: string | null;
-  invoice_date: string | null;
-  tax_invoice_no: string | null;
-  tax_invoice_date: string | null;
   note: string | null;
   description: string | null;
   reference_number?: string | null;
@@ -129,9 +100,7 @@ export interface CreditNote {
   total_amount?: number;
   base_total_amount?: number;
   is_active?: boolean;
-  /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
   audit?: AuditInfo;
-  credit_note_detail: CreditNoteItem[];
 }
 
 interface CreditNoteDetailItem {
@@ -172,13 +141,6 @@ interface CreditNoteDetailItem {
   note?: string | null;
 }
 
-/**
- * Detail-view (findOne) shape of a credit note with relations collapsed into
- * nested objects. Distinct from `CreditNote` (flat, list). `reference_number`/
- * `tax_amount`/`discount_amount` are optional (not returned by findOne; form
- * defaults them).
- * รูปแบบ detail-view (findOne) ของใบลดหนี้ที่ยุบ relation เป็น object ซ้อน
- */
 export interface CreditNoteDetail {
   id: string;
   doc_version?: number;
@@ -214,7 +176,6 @@ export interface CreditNoteDetail {
     name: string | null;
     description: string | null;
   } | null;
-  /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
   audit?: AuditInfo;
   credit_note_detail: CreditNoteDetailItem[];
 }

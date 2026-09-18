@@ -60,7 +60,6 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
   };
 }
 
-/** Status column header — แปลหัวคอลัมน์ผ่าน i18n เหมือน column อื่นในตาราง */
 function StatusColumnHeader<T>({ column }: { column: Column<T, unknown> }) {
   const tfl = useTranslations("field");
   return (
@@ -89,9 +88,7 @@ export function statusColumn<T>(): ColumnDef<T> {
 }
 
 export interface ActionColumnActivity<T> {
-  /** entity id ของแถว — คืน undefined เพื่อซ่อนเมนูเฉพาะแถวนั้น */
   id: (row: T) => string | undefined;
-  /** ป้ายชื่อที่ขึ้นในหัว sheet เช่นเลขที่เอกสารหรือรหัส */
   label?: (row: T) => string | undefined;
 }
 
@@ -100,7 +97,6 @@ export function actionColumn<T>(
   options?: {
     deleteDenied?: boolean;
     deletePermission?: Permission;
-    /** สัญญาหมดอายุ/ถูกระงับ (`!canWrite`) — ปิดปุ่ม delete จริงพร้อม title อธิบาย */
     writeDisabled?: boolean;
     writeDisabledTitle?: string;
     activity?: ActionColumnActivity<T>;
@@ -139,13 +135,10 @@ export function actionColumn<T>(
   };
 }
 
-/** แถวที่มีข้อมูล audit — `Audit` (types/audit) กับ `AuditInfo` (types/workflows)
- *  โครงเหมือนกัน จึงรับด้วย shape ตรงนี้ทีเดียวไม่ต้องผูกกับ type ใด type หนึ่ง */
 interface RowWithAudit {
   audit?: { created?: AuditEntry; updated?: AuditEntry };
 }
 
-/** `useTranslations("field")` ของหน้าที่เรียก — ใช้แค่คีย์ created/updated */
 type FieldTranslator = (key: "created" | "updated") => string;
 
 export function auditColumns<T extends RowWithAudit>(

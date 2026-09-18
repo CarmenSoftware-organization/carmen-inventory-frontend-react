@@ -12,7 +12,6 @@ const tf = ((k: string) => k) as never;
 
 const schema = createCnSchema(tv, tf);
 
-/** ใบที่กรอกหัวครบแล้ว เหลือแต่ items ให้แต่ละเทสใส่เอง */
 function form(
   overrides: Partial<CnFormValues> & Pick<CnFormValues, "items">,
 ): CnFormValues {
@@ -31,7 +30,6 @@ function form(
   };
 }
 
-/** 1 แถวที่กรอกครบ — received/quantity/net ปรับได้ตามเทส */
 function item(overrides: Partial<CnFormValues["items"][number]> = {}) {
   return {
     ...CN_ITEM,
@@ -43,7 +41,6 @@ function item(overrides: Partial<CnFormValues["items"][number]> = {}) {
   };
 }
 
-/** path ของ issue แรกที่ตกในแถวที่ index นั้น */
 function firstItemIssuePath(result: ReturnType<typeof schema.safeParse>) {
   return result.success ? undefined : result.error.issues[0]?.path.join(".");
 }

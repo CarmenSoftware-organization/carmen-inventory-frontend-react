@@ -65,14 +65,6 @@ export function usePhysicalCountById(id: string | undefined) {
   });
 }
 
-/**
- * Hook สร้างเอกสารตรวจนับสต็อกใหม่
- * POST ข้อมูลและ invalidate รายการ physical count
- * @returns Mutation สำหรับสร้างเอกสาร
- * @example
- * const create = useCreatePhysicalCount();
- * create.mutate(payload);
- */
 export function useCreatePhysicalCount() {
   return useApiMutation<CreatePhysicalCountDto>({
     mutationFn: (data, buCode) =>
@@ -85,14 +77,6 @@ export function useCreatePhysicalCount() {
   });
 }
 
-/**
- * Hook แก้ไขเอกสารตรวจนับสต็อก
- * ส่ง PUT โดยระบุ id และ invalidate รายการ physical count
- * @returns Mutation สำหรับแก้ไขเอกสาร
- * @example
- * const update = useUpdatePhysicalCount();
- * update.mutate({ id, ...values });
- */
 export function useUpdatePhysicalCount() {
   return useApiMutation<
     CreatePhysicalCountDto & { id: string; doc_version?: number }
@@ -107,14 +91,6 @@ export function useUpdatePhysicalCount() {
   });
 }
 
-/**
- * Hook ลบเอกสารตรวจนับสต็อกตาม id
- * ส่ง DELETE และ invalidate รายการ physical count
- * @returns Mutation สำหรับลบเอกสาร
- * @example
- * const del = useDeletePhysicalCount();
- * del.mutate(id);
- */
 export function useDeletePhysicalCount() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
@@ -127,15 +103,6 @@ export function useDeletePhysicalCount() {
   });
 }
 
-/**
- * Hook บันทึกรายการตรวจนับในเอกสารตรวจนับ (save partial)
- * ส่ง PATCH ไปยัง endpoint save ของเอกสารนั้น ใช้สำหรับบันทึกรายการทีละส่วน
- * @param physicalCountId - รหัสเอกสารตรวจนับ
- * @returns Mutation สำหรับบันทึกข้อมูล
- * @example
- * const save = useSavePhysicalCount(id);
- * save.mutate({ items });
- */
 export function useSavePhysicalCount(physicalCountId: string) {
   return useApiMutation<PhysicalCountSaveDto>({
     mutationFn: (data, buCode) =>
@@ -151,12 +118,6 @@ export function useSavePhysicalCount(physicalCountId: string) {
   });
 }
 
-/**
- * Hook ดึงข้อมูล review ของ Physical Count
- * GET ไปยัง /api/{buCode}/physical-count/:id/review
- *
- * @param id - รหัสเอกสารตรวจนับ
- */
 export function usePhysicalCountReview(id: string | undefined) {
   const buCode = useBuCode();
 
@@ -174,13 +135,6 @@ export function usePhysicalCountReview(id: string | undefined) {
   });
 }
 
-/**
- * Hook submit Physical Count (final approval) — workflow transition
- * PATCH ไปยัง /api/{buCode}/physical-count/:id/submit พร้อม doc_version
- * (optimistic concurrency)
- *
- * @param physicalCountId - รหัสเอกสารตรวจนับ
- */
 export function useSubmitPhysicalCount(physicalCountId: string) {
   return useApiMutation<{ doc_version?: number }>({
     mutationFn: (data, buCode) =>
@@ -196,12 +150,6 @@ export function useSubmitPhysicalCount(physicalCountId: string) {
   });
 }
 
-/**
- * Hook ส่ง Physical Count ขึ้นรอบ review (workflow transition)
- * PATCH ไปยัง /api/{buCode}/physical-count/:id/review พร้อม items payload
- *
- * @param physicalCountId - รหัสเอกสารตรวจนับ
- */
 export function useReviewPhysicalCount(physicalCountId: string) {
   return useApiMutation<PhysicalCountSaveDto>({
     mutationFn: (data, buCode) =>
@@ -217,10 +165,6 @@ export function useReviewPhysicalCount(physicalCountId: string) {
   });
 }
 
-/**
- * Hook ดึงรายการ comment ของ Physical Count detail จาก
- * `/api/{buCode}/physical-count-detail-comment/{detailId}`
- */
 export function usePhysicalCountDetailComments(detailId: string | undefined) {
   const buCode = useBuCode();
 
@@ -240,15 +184,6 @@ export function usePhysicalCountDetailComments(detailId: string | undefined) {
   });
 }
 
-/**
- * Hook บันทึก comment + files ของ Physical Count detail
- * ใช้ multipart pattern เดียวกับ comment ของ PR/PO/CN/GRN/SR:
- * POST /api/{buCode}/physical-count-detail-comment/{detailId}
- * fields: message, type (เช่น "user"), files[]
- *
- * @param detailId - รหัส physical count detail
- * @returns Mutation รับ { message, type, files }
- */
 export function useSavePhysicalCountProductNote(detailId: string) {
   const buCode = useBuCode();
   const queryClient = useQueryClient();
@@ -283,15 +218,6 @@ export function useSavePhysicalCountProductNote(detailId: string) {
   });
 }
 
-/**
- * Hook รีเฟรชข้อมูลสินค้าในเอกสารตรวจนับสต็อกให้เป็นปัจจุบัน
- * ส่ง PATCH ไปยัง endpoint refresh เพื่อ sync stock ปัจจุบันเข้าเอกสาร
- * @param physicalCountId - รหัสเอกสารตรวจนับ
- * @returns Mutation สำหรับรีเฟรชข้อมูล
- * @example
- * const refresh = useRefreshPhysicalCount(id);
- * refresh.mutate({});
- */
 export function useRefreshPhysicalCount(physicalCountId: string) {
   return useApiMutation<Record<string, never>>({
     mutationFn: (_data, buCode) =>

@@ -10,6 +10,7 @@ import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
 import { useDepartment } from "@/hooks/use-department";
 import { useUser } from "@/hooks/use-user";
+import { useVendor } from "@/hooks/use-vendor";
 import { useListViews, type UseListViewsResult } from "@/hooks/use-list-views";
 import {
   encodeFilterParam,
@@ -22,7 +23,6 @@ import type { ListPageKey } from "@/constant/list-page-keys";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
 
-/** ค่าดิบราย id จาก clause — ตัด "col|type:" ทิ้ง (รองรับทั้ง merge และ clause ซ้ำ prefix) */
 function clauseTokens(value: string): string[] {
   return value
     .split(",")
@@ -33,7 +33,6 @@ function clauseTokens(value: string): string[] {
     .filter(Boolean);
 }
 
-/** ชื่อตัวแรก +N — คืน undefined เมื่อไม่มีชื่อให้โชว์ (ให้ fallback ทำงานต่อ) */
 function firstPlusRest(names: readonly string[]): string | undefined {
   if (names.length === 0) return undefined;
   return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
@@ -85,7 +84,6 @@ export function chipValueText(
 
 export interface UseListFiltersOptions {
   pageKey: ListPageKey;
-  /** field ที่จะ render เป็น filter chip/sheet — ดู note เรื่อง reference stability ที่ `useURLValues` */
   fields: readonly FilterFieldDef[];
   /**
    * sort ที่หน้าใช้เมื่อ URL ไม่มี `sort` param — เก็บไว้เป็นข้อมูลอ้างอิงให้ caller
@@ -97,23 +95,17 @@ export interface UseListFiltersOptions {
 
 export interface UseListFiltersResult {
   values: Record<string, string>;
-  /** เขียนค่า filter field หนึ่งตัวลง URL แล้วรีเซ็ต page กลับหน้าแรก */
   setValue: (key: string, value: string) => void;
-  /** ล้างทุก filter field + saved-view ที่กำลัง apply (`sv`) + page */
   clearAll: () => void;
   filterParam: string | undefined;
-  /** ค่า `sort` ดิบจาก URL — `""` แปลว่าใช้ default sort ของหน้า */
   sortParam: string;
   activeFilters: ActiveFilter[];
   view: {
     current: SavedView | null;
     scope: ViewScope | null;
     isDirty: boolean;
-    /** เขียน filters + sort + sv ทับ URL ทั้งชุดแบบอะตอมมิก (ล้าง field เดิมก่อนเสมอ) */
     apply: (view: SavedView) => void;
-    /** ล้างแค่ `sv` — filter ที่แก้ไว้ยังอยู่ (กลายเป็น "unsaved" ไม่ผูก view ไหน) */
     clear: () => void;
-    /** เขียนค่าของ view ปัจจุบันทับ URL อีกรอบ (ใช้ปุ่ม "Discard changes") */
     revert: () => void;
     /**
      * บันทึก filter+sort ปัจจุบันเป็น view ชื่อ `name` ใน scope นั้น — ชื่อซ้ำ =
@@ -121,7 +113,6 @@ export interface UseListFiltersResult {
      * ต่อตรงกับ `onSave` ของ `SaveViewDialog` ได้เลย
      */
     saveOrUpdate: (name: string, scope: ViewScope) => Promise<void>;
-    /** ชื่อ view ที่มีอยู่แล้วใน scope นั้น — ให้ `SaveViewDialog` เตือนชื่อซ้ำ */
     existingNames: (scope: ViewScope) => string[];
   } & UseListViewsResult;
 }
@@ -227,12 +218,12 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
-  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
+  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ/ผู้ขาย — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
   // ทะเบียนกลาง ไม่ใช่ในตัว control
   //
   // เงื่อนไขคือ "มี chip ที่ต้องแปลงชื่อจริง ๆ" ไม่ใช่แค่ "หน้านี้มี field ชนิดนั้น" —
   // เปิดหน้าเปล่าโดยไม่มี filter ค้าง (เกือบทุกครั้งที่เข้าหน้า) จะได้ไม่ลากทะเบียน
-  // ผู้ใช้ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester
+  // ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester/FilterVendor
   // ยิงเองตอนเปิดอยู่แล้ว และพอเลือกเสร็จ chip ก็มาขอทะเบียนชุดเดียวกัน
   // (query key เดียวกัน react-query จึงใช้ของที่ cache ไว้ ไม่ยิงซ้ำ)
   const hasDepartmentField = fields.some(
@@ -241,6 +232,9 @@ export function useListFilters(
   const hasRequesterField = fields.some(
     (f) => f.control === "requester" && !!values[f.key]?.trim(),
   );
+  const hasVendorField = fields.some(
+    (f) => f.control === "vendor" && !!values[f.key]?.trim(),
+  );
   const { data: departmentData } = useDepartment(
     { perpage: -1 },
     { enabled: hasDepartmentField },
@@ -248,6 +242,10 @@ export function useListFilters(
   const { data: userData } = useUser(
     { perpage: -1 },
     { enabled: hasRequesterField },
+  );
+  const { data: vendorData } = useVendor(
+    { perpage: -1 },
+    { enabled: hasVendorField },
   );
 
   // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
@@ -288,6 +286,13 @@ export function useListFilters(
                   .map((id) => list.find((d) => d.id === id)?.name)
                   .filter((n): n is string => !!n),
               );
+            } else if (f.control === "vendor") {
+              const list = vendorData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => list.find((v) => v.id === id)?.name)
+                  .filter((n): n is string => !!n),
+              );
             } else if (f.control === "requester") {
               const list = userData?.data ?? [];
               named = firstPlusRest(
@@ -321,7 +326,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue, peer, departmentData, userData],
+    [fields, values, t, setValue, peer, departmentData, userData, vendorData],
   );
 
   const current: SavedView | null = sv
@@ -355,8 +360,6 @@ export function useListFilters(
   const existingNames = (scope: ViewScope) =>
     (scope === "bu" ? views.buViews : views.userViews).map((v) => v.name);
 
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (เดิมทุกหน้า list ก๊อปฟังก์ชันนี้ไว้เองคนละก๊อป — ย้ายมารวมที่นี่จุดเดียว) */
   const saveOrUpdate = async (name: string, scope: ViewScope) => {
     const list = scope === "bu" ? views.buViews : views.userViews;
     const existing = list.find((v) => v.name === name);

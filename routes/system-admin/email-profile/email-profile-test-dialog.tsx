@@ -14,13 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import type { EmailProfile } from "@/types/email-profile";
 
-/** ตรวจรูปแบบอีเมลอย่างหลวม ๆ พอกันพิมพ์ผิด — ด่านตัดสินจริงคือ zod ที่ gateway */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface EmailProfileTestDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** โปรไฟล์ที่จะทดสอบ — ตัวเรียก mount คอมโพเนนต์นี้เฉพาะตอนเปิดจริง จึงไม่มีวันเป็น null */
   readonly profile: EmailProfile;
   readonly onSend: (to: string) => void;
   readonly isSending: boolean;

@@ -13,20 +13,6 @@ interface PrCardListProps {
   readonly isMyPending?: boolean;
 }
 
-/**
- * รายการการ์ด PR แบบ responsive grid พร้อม skeleton ระหว่างโหลดและ empty state เมื่อไม่มีข้อมูล
- * @param props - Props ของ `PrCardList`
- * @param props.items - รายการ PR ที่จะแสดง
- * @param props.isLoading - flag ระบุว่ากำลังโหลด
- * @param props.onEdit - callback เมื่อคลิกการ์ดเพื่อแก้ไข
- * @param props.onApprove - callback เมื่อกด approve
- * @param props.onReject - callback เมื่อกด reject
- * @param props.onDelete - callback เมื่อกด delete
- * @param props.isMyPending - flag ว่าอยู่ใน view my-pending
- * @returns React element ของ grid การ์ด PR
- * @example
- * <PrCardList items={prs} isLoading={false} onEdit={handleEdit} isMyPending />
- */
 export default function PrCardList({
   items,
   isLoading,

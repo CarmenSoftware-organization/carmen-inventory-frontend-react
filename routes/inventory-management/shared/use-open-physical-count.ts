@@ -6,12 +6,10 @@ import { useCreatePhysicalCount } from "./use-physical-count";
 import type { PhysicalCountLocation } from "@/types/physical-count";
 
 interface UseOpenPhysicalCountResult {
-  /** เปิดใบนับของ location นี้ — สร้างใบใหม่ถ้ายังไม่มี แล้วพาไปหน้านับ */
   readonly open: (
     item: PhysicalCountLocation,
     physicalCountPeriodId: string,
   ) => void;
-  /** location ที่กำลังสร้างใบอยู่ — ใช้โชว์ spinner เฉพาะการ์ดใบนั้น */
   readonly pendingLocationId: string | null;
 }
 

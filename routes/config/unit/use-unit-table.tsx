@@ -22,19 +22,6 @@ interface UseUnitTableOptions {
   onDelete: (unit: Unit) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Unit พร้อมคอลัมน์ name
- *
- * ใช้ภายใน `UnitComponent` โดยส่งผ่าน prop `useTable` ของ
- * `ConfigListTemplate`
- *
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * ```tsx
- * <ConfigListTemplate useTable={useUnitTable} ... />
- * ```
- */
 export function useUnitTable({
   data,
   totalRecords,

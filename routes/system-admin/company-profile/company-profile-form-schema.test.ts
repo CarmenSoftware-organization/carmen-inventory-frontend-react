@@ -10,7 +10,6 @@ import {
   normalizeConfig,
 } from "./company-profile-form-schema";
 
-/** minimal detail สำหรับ test — ค่าที่ไม่เกี่ยวใส่ null/ค่าว่างพอผ่าน type */
 const baseData: BusinessUnitDetail = {
   id: "bu-1",
   cluster_id: "cl-1",

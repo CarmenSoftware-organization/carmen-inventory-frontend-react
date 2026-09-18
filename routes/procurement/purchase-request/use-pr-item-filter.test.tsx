@@ -49,7 +49,6 @@ function renderFilter(items: unknown[] = ITEMS) {
 }
 
 describe("usePrItemFilter — ตัวเลือกมาจากแถวในใบ", () => {
-  /** อ่าน options ที่ field ส่งให้ MultiSelectFilter (render คืน element ตรง ๆ) */
   function optionsOfField(fields: PrItemFilter["fields"], key: string) {
     const field = fields.find((f) => f.key === key);
     if (!field || field.control !== "custom" || !field.render) return [];

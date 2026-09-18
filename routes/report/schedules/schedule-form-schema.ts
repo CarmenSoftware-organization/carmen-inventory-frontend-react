@@ -22,10 +22,6 @@ export function createScheduleSchema(tv: TranslationFn, tf: TranslationFn) {
         .min(1, tv("required", { field: tf("reportTemplate") })),
       frequency: z.enum(FREQUENCY),
       time: z.string().min(1, tv("required", { field: tf("time") })),
-      /**
-       * "HH:mm" หรือ "" = แจ้งทันทีที่รันเสร็จ
-       * เร็วกว่า `time` แปลว่าวันถัดไป (+1) — ไม่ใช่ค่าผิด จึงไม่มี refine ห้าม
-       */
       notify_at: z.string(),
       days_of_week: z.array(z.number().int().min(0).max(6)),
       days_of_month: z.array(z.number().int().min(1).max(31)),
@@ -70,12 +66,6 @@ export const EMPTY_FORM: ScheduleFormValues = {
   recipients: [],
 };
 
-/**
- * คืน defaults ของ form — เหมือน `EMPTY_FORM` แต่ wrap เป็นฟังก์ชันเผื่อ
- * ภายหลังต้อง seed จาก profile/context
- *
- * @returns ScheduleFormValues
- */
 export function getDefaultValues(): ScheduleFormValues {
   return {
     ...EMPTY_FORM,

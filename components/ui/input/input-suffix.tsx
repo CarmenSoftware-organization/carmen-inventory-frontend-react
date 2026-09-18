@@ -9,16 +9,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { InputAmount } from "@/components/ui/input/input-amount";
 import {
   capQtyDecimals,
   DEFAULT_QTY_DECIMALS,
   QTY_STEP,
 } from "@/components/ui/input/qty-decimals";
 
-/**
- * State ที่ InputSuffixField แชร์ให้ลูก (InputSuffixInput) ผ่าน context
- * เพื่อให้ input รับ error/disabled ของกล่องเองโดยไม่ต้องส่งซ้ำ
- */
 type InputSuffixContextValue = {
   error?: boolean;
   disabled?: boolean;
@@ -26,33 +23,6 @@ type InputSuffixContextValue = {
 
 const InputSuffixContext = React.createContext<InputSuffixContextValue>({});
 
-/**
- * กล่อง border เดียวสำหรับจับคู่ "ค่า" (ซ้าย) กับ "suffix" (ขวา) ให้ดูเป็น
- * field เดียว — suffix เป็นได้ทั้งหน่วยนับ (kg / product unit) หรือสกุลเงิน
- * (THB / currency code) เช่น qty + unit หรือ amount + currency
- *
- * ใช้ composition: วาง <InputSuffixInput /> เป็นค่า และ <InputSuffixAddon> ครอบ
- * suffix ทางขวา (unit lookup / currency select / ข้อความ) โดย InputSuffixField
- * จัดการ focus ring / error border / disabled ร่วมของทั้งกล่องผ่าน focus-within
- * และแชร์ error/disabled ให้ InputSuffixInput ผ่าน context
- *
- * ความกว้างปล่อยให้ผู้เรียกกำหนดผ่าน className (เช่น "w-44")
- *
- * @param error - true → กล่องขึ้น border สี destructive
- * @param disabled - true → กล่อง dim (ตัว control ภายในสั่ง disabled แยกได้)
- * @param className - class เสริม (เช่นความกว้าง/ความสูง override)
- * @returns JSX element ของกล่อง group
- * @example
- * ```tsx
- * <InputSuffixField className="w-44" error={!!fieldError} disabled={disabled}>
- *   <InputSuffixInput type="number" {...register("received_qty", { valueAsNumber: true })} />
- *   <InputSuffixAddon>
- *     <LookupProductUnit productId={pid} value={unit} onValueChange={setUnit}
- *       className="h-full w-19 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0" />
- *   </InputSuffixAddon>
- * </InputSuffixField>
- * ```
- */
 function InputSuffixField({
   className,
   error,
@@ -62,7 +32,6 @@ function InputSuffixField({
   ...props
 }: Omit<React.ComponentProps<"div">, "children"> & {
   error?: boolean;
-  /** ข้อความ error — มีเมื่อไหร่กล่องขึ้นไอคอนเตือน + tooltip ตอน hover */
   errorMessage?: string;
   disabled?: boolean;
   children?: React.ReactNode;
@@ -211,6 +180,25 @@ function InputSuffixQty({
   );
 }
 
+function InputSuffixAmount({
+  className,
+  disabled,
+  ...props
+}: React.ComponentProps<typeof InputAmount>) {
+  const ctx = React.useContext(InputSuffixContext);
+  return (
+    <InputAmount
+      data-slot="input-suffix-input"
+      disabled={disabled ?? ctx.disabled}
+      className={cn(
+        "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 /**
  * Slot ทางขวาของ InputSuffixField สำหรับ suffix (unit lookup / currency select /
  * ข้อความ เช่น "kg", "THB") — มี divider เส้นตั้งคั่นด้านซ้ายในตัว, shrink-0
@@ -312,6 +300,7 @@ export {
   InputSuffixField,
   InputSuffixInput,
   InputSuffixQty,
+  InputSuffixAmount,
   InputSuffixAddon,
   InputSuffixPlain,
 };

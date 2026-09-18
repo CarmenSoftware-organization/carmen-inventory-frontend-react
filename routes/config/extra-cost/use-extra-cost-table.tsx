@@ -22,14 +22,6 @@ interface UseExtraCostTableOptions {
   onDelete: (extraCost: ExtraCost) => void;
 }
 
-/**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Extra Cost พร้อมคอลัมน์ name
- * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
- * @returns TanStack table instance
- * @example
- * // route: /config/extra-cost
- * const { table } = useExtraCostTable({ data, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useExtraCostTable({
   data,
   totalRecords,

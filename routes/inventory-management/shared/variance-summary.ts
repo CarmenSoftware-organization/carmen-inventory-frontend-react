@@ -12,17 +12,11 @@ export interface VarianceSummary<T> {
   variances: number;
   overages: number;
   shortages: number;
-  /** เฉพาะแถวที่ไม่ตรง — ตารางบนหน้า review แสดงแค่ชุดนี้ */
   varianceItems: T[];
 }
 
 interface VarianceOptions<T> {
-  /** ผลต่างของแถว (นับได้ − ระบบ) */
   getDiff: (row: T) => number;
-  /**
-   * แถวนี้นับแล้วหรือยัง — แถวที่ยังไม่นับต้องไม่ถูกนับเป็น "ตรง"
-   * ไม่ระบุ = ถือว่านับครบทุกแถว (spot check ส่งมาเฉพาะแถวที่นับแล้ว)
-   */
   isCounted?: (row: T) => boolean;
 }
 

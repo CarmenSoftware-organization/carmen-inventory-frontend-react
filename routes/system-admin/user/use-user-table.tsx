@@ -25,13 +25,6 @@ interface UseUserTableOptions {
   onDelete: (user: User) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับตารางผู้ใช้ พร้อมคอลัมน์ชื่อ/อีเมล/แผนก/action
- * @param options - users, totalRecords, params, tableConfig, onEdit และ onDelete
- * @returns react-table instance สำหรับ User list
- * @example
- * const table = useUserTable({ users, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useUserTable({
   users,
   totalRecords,

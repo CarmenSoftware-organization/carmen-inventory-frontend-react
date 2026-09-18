@@ -13,9 +13,7 @@ export interface FilterPeerAccess {
 }
 
 interface FilterFieldBase {
-  /** ชื่อ URL param — ต้องตรงกับที่หน้าเดิมใช้ เพื่อไม่หัก deep link เก่า */
   readonly key: string;
-  /** i18n key เต็ม เช่น "common.status" (แปลด้วย useTranslations() แบบไม่ระบุ namespace) */
   readonly labelKey: string;
   /**
    * แปลงค่า URL → backend filter clause — default คือส่งผ่านตรง
@@ -42,20 +40,10 @@ interface FilterFieldBase {
    * ไม่ระบุ = ไม่มีหัวข้อ render แบนเหมือนเดิม
    */
   readonly section?: string;
-  /**
-   * icon หน้าแถวใน ListFilterMenu (desktop) — ไม่ระบุ = default ตามชนิด control
-   * (ดู CONTROL_ICONS ใน list-filter-menu.tsx) มือถือไม่ใช้
-   */
   readonly icon?: LucideIcon;
-  /**
-   * แปลงค่า URL → ข้อความค่าบน chip ของ ActiveFilterBar (เช่น "Draft +2")
-   * ไม่ระบุ = derive อัตโนมัติ: options ที่ประกาศใน field → label, date_range →
-   * "จาก – ถึง", ค่า slug อ่านออก → โชว์ตรง, id (uuid) → จำนวนรายการ
-   */
   readonly valueText?: (value: string) => string;
 }
 
-/** นิยาม field หนึ่งตัวใน filter sheet ของหน้า list */
 export type FilterFieldDef =
   | (FilterFieldBase & {
       readonly control: "status";
@@ -72,13 +60,12 @@ export type FilterFieldDef =
     })
   | (FilterFieldBase & {
       readonly control: "amount-range";
-      /** ชื่อคอลัมน์ใน clause เช่น `base_total_amount` */
       readonly fieldKey: string;
     })
   | (FilterFieldBase & { readonly control: "department" })
+  | (FilterFieldBase & { readonly control: "vendor" })
   | (FilterFieldBase & {
       readonly control: "requester";
-      /** ชื่อคอลัมน์ใน clause — default `requestor_id` (PO ใช้ `created_by_id` กรองผู้จัดซื้อ) */
       readonly fieldKey?: string;
     })
   | (FilterFieldBase & { readonly control: "stage"; readonly stages: string[] })

@@ -85,6 +85,7 @@ const VENDOR: VendorDetail = {
   name: "Acme Foods",
   description: "",
   is_active: true,
+  tax_profile: null,
   business_type: [],
   info: [],
   vendor_address: [],
@@ -95,15 +96,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-/**
- * บันทึกพฤติกรรมปัจจุบันของ VendorForm ไว้ก่อนยุบเข้า hook กลาง
- * — ไม่ได้บอกว่าถูก บอกว่าตอนนี้เป็นแบบนี้
- */
 describe("VendorForm — characterization", () => {
-  /**
-   * ฟอร์มนี้ใหญ่ (field array ของที่อยู่/ผู้ติดต่อ) — `userEvent.click` ไล่เช็ค
-   * pointer-events ทั้งต้นไม้จนช้า ใช้ `fireEvent` ใน `act` พอ
-   */
   async function enterEditMode() {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: en.common.edit }));

@@ -24,64 +24,14 @@ const crud = createConfigCrud<
   updateMethod: "PATCH",
 });
 
-/**
- * Hook ดึงรายการงวดตรวจนับสต็อก (physical count period) แบบแบ่งหน้า
- *
- * Re-export จาก factory ใช้ใน inventory-management > physical count
- *
- * @param params - พารามิเตอร์ pagination/search/filter
- * @param options - UseQueryOptions เพิ่มเติม
- * @returns UseQueryResult ของ PaginatedResponse<PhysicalCountPeriod>
- * @example
- * ```ts
- * const { data } = usePhysicalCountPeriod({ page: 1, perpage: 20 });
- * ```
- */
 export const usePhysicalCountPeriod = crud.useList;
 
-/**
- * Hook ดึงข้อมูลงวดตรวจนับตาม id
- *
- * @param id - id ของงวด
- * @returns UseQueryResult ของ PhysicalCountPeriod
- * @example
- * ```ts
- * const { data } = usePhysicalCountPeriodById(params.id);
- * ```
- */
 export const usePhysicalCountPeriodById = crud.useById;
 
-/**
- * Hook สำหรับสร้างงวดตรวจนับใหม่
- *
- * @returns UseMutationResult สำหรับสร้าง entity
- * @example
- * ```ts
- * useCreatePhysicalCountPeriod().mutate({ code: "PC-01", start_date: "...", end_date: "..." });
- * ```
- */
 export const useCreatePhysicalCountPeriod = crud.useCreate;
 
-/**
- * Hook สำหรับแก้ไขงวดตรวจนับ
- *
- * @returns UseMutationResult สำหรับอัพเดต entity
- * @example
- * ```ts
- * useUpdatePhysicalCountPeriod().mutate({ id, code: "PC-02" });
- * ```
- */
 export const useUpdatePhysicalCountPeriod = crud.useUpdate;
 
-/**
- * Hook สำหรับลบงวดตรวจนับ
- *
- * @returns UseMutationResult สำหรับลบ entity
- * @example
- * ```ts
- * useDeletePhysicalCountPeriod().mutate(p.id);
- * ```
- */
 export const useDeletePhysicalCountPeriod = crud.useDelete;
 
 /**
@@ -118,19 +68,6 @@ export function usePhysicalCountPeriodCurrent(includeNotCount = false) {
   });
 }
 
-/**
- * Hook ดึงรายละเอียดของงวดตรวจนับสต็อกตาม periodId
- *
- * ใช้ cache dynamic (1 นาที) enabled เมื่อทั้ง buCode และ periodId พร้อม
- *
- * @param periodId - รหัสงวด
- * @param includeNotCount - ให้รวมรายการที่ยังไม่นับหรือไม่ (default false)
- * @returns UseQueryResult ของ CurrentPeriodData
- * @example
- * ```ts
- * const { data } = usePhysicalCountPeriodDetail(periodId, false);
- * ```
- */
 export function usePhysicalCountPeriodDetail(
   periodId: string | undefined,
   includeNotCount = false,

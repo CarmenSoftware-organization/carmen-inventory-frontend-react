@@ -8,10 +8,6 @@ interface Props {
   readonly onDelete?: (item: RunningCode) => void;
 }
 
-/**
- * การ์ดรูปแบบเลขที่เอกสาร 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
- * ไม่มีสถานะ จึงไม่มี badge มุมขวาบน
- */
 export default function RunningCodeCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 

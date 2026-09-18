@@ -40,17 +40,6 @@ interface PriceListExternalComponentProps {
   urlToken: string;
 }
 
-/**
- * Component หลักสำหรับหน้า price list external
- * จัดการ form, โหมด view/edit, save และ submit price list ผ่าน url token
- *
- * @param props - urlToken สำหรับระบุ price list ที่จะเปิด
- * @returns element ของหน้า price list external
- * @example
- * ```tsx
- * <PriceListExternalComponent urlToken="abc123" />
- * ```
- */
 export default function PriceListExternalComponent({
   urlToken,
 }: PriceListExternalComponentProps) {

@@ -23,12 +23,6 @@ export const PRINT_FORM_DOCUMENT_TYPES: readonly PrintDocumentType[] = [
   "EOP",
 ] as const;
 
-/**
- * key ของ config "แบบฟอร์มการพิมพ์" ของ document type หนึ่ง
- *
- * @param type - document type (เช่น "PR")
- * @returns key ที่เก็บใน BU config (เช่น "print-form.pr")
- */
 export function printFormConfigKey(type: PrintDocumentType): string {
   return `print-form.${type.toLowerCase()}`;
 }

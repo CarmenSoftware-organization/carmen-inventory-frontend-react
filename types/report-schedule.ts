@@ -21,11 +21,8 @@ export type ReportFormat =
 
 interface ScheduleConfig {
   frequency: ScheduleFrequency;
-  /** "HH:mm" 24h */
   time: string;
-  /** 0=Sun .. 6=Sat — used when frequency=weekly */
   days_of_week?: number[];
-  /** 1..31 — used when frequency=monthly */
   days_of_month?: number[];
 }
 
@@ -47,7 +44,6 @@ export interface ReportSchedule {
   format: ReportFormat;
   cron_expression: string;
   schedule_config?: ScheduleConfig;
-  /** "HH:mm" — เวลาที่ผู้รับถูกแจ้งว่ารายงานพร้อม ไม่ใช่เวลาที่รายงานรัน */
   notify_at?: string;
   /**
    * จำนวนวันหลังรอบรันที่ `notify_at` ตกลง — 0 วันเดียวกัน, 1 วันถัดไป
@@ -67,7 +63,6 @@ export interface CreateReportScheduleDto {
   format: "viewer_url";
   delivery: ScheduleDelivery;
   schedule_config: ScheduleConfig;
-  /** "HH:mm" — ไม่ส่ง = แจ้งทันทีที่รันเสร็จ */
   notify_at?: string;
   notifications: ScheduleNotifications;
   filters?: Record<string, string>;

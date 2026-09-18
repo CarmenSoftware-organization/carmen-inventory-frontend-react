@@ -3,11 +3,6 @@ import type { CreditNote } from "@/types/credit-note";
 
 type TFn = (key: string) => string;
 
-/**
- * คอลัมน์ไฟล์ xlsx ของหน้ารายการใบลดหนี้ — ลำดับกับความกว้างตามที่ใช้จริงในไฟล์ที่ส่งออก
- * @param tfl - translator ของ namespace "field"
- * @returns column def พร้อม header ที่แปลแล้ว ส่งเข้า `exportCreditNote` ได้ตรง ๆ
- */
 export function buildCnExportColumns(tfl: TFn): XlsxColumn<CreditNote>[] {
   return [
     { header: tfl("cnNo"), value: (r) => r.cn_no, width: 22 },

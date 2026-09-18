@@ -1,0 +1,147 @@
+{
+  "_url": "/api/T02/stock-ins?perpage=5",
+  "data": [
+    {
+      "adjustment_type_code": "I001",
+      "adjustment_type_id": "bcce2834-9202-4ed4-a8d5-e5019596286b",
+      "adjustment_type_name": "โอนเข้า",
+      "audit": {
+        "created": {
+          "at": "2026-03-16T05:29:39.431Z",
+          "id": "d3ba9c08-162f-4e81-8337-75d3d56f6aff",
+          "name": "Armando Ebert"
+        },
+        "updated": {
+          "at": "2026-03-16T05:29:39.431Z"
+        }
+      },
+      "base_total_cost": 0,
+      "description": "SI มาแล้วจ๊ะ",
+      "doc_status": "draft",
+      "id": "02b1caaa-97c6-48b7-82dc-a652c03c0ba6",
+      "item_count": 0,
+      "location_code": null,
+      "location_id": "0731acf1-e04d-4648-b64d-cfbd34fa5d08",
+      "location_name": null,
+      "location_type": "direct",
+      "si_date": null,
+      "si_no": "SI20260300001"
+    },
+    {
+      "adjustment_type_code": "I001",
+      "adjustment_type_id": "bcce2834-9202-4ed4-a8d5-e5019596286b",
+      "adjustment_type_name": "โอนเข้า",
+      "audit": {
+        "created": {
+          "at": "2026-05-18T02:10:35.928Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-05-18T02:10:35.928Z"
+        }
+      },
+      "base_total_cost": 400,
+      "description": "",
+      "doc_status": "completed",
+      "id": "04e246e6-546b-4bc2-8e1f-1d86ee35dc24",
+      "item_count": 1,
+      "location_code": "1AG01",
+      "location_id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+      "location_name": "A&G-Accounting",
+      "location_type": "inventory",
+      "si_date": "2026-03-30T23:59:59.000Z",
+      "si_no": "SI20260300015"
+    },
+    {
+      "adjustment_type_code": "Found",
+      "adjustment_type_id": "b5939f7c-d059-4d92-b0ab-1d9a6a0c06de",
+      "adjustment_type_name": "เจอของ",
+      "audit": {
+        "created": {
+          "at": "2026-08-31T06:25:17.607Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        },
+        "updated": {
+          "at": "2026-08-31T06:25:18.171Z",
+          "id": "7a7c1704-1742-4b97-9d4c-f21f76a2d2be",
+          "name": "สมชาย ใจดี"
+        }
+      },
+      "base_total_cost": 30,
+      "description": "rerun si",
+      "doc_status": "completed",
+      "id": "066f3263-fcd9-40fc-8361-560a2f545129",
+      "item_count": 1,
+      "location_code": "1AG01",
+      "location_id": "47414c16-9d52-4b16-8428-4a4c4e89986e",
+      "location_name": "A&G-Accounting",
+      "location_type": "inventory",
+      "si_date": "2026-08-31T06:25:15.552Z",
+      "si_no": "SI260800001"
+    },
+    {
+      "adjustment_type_code": "Found",
+      "adjustment_type_id": "b5939f7c-d059-4d92-b0ab-1d9a6a0c06de",
+      "adjustment_type_name": "เจอของ",
+      "audit": {
+        "created": {
+          "at": "2026-06-30T07:10:41.247Z",
+          "id": "2e2d936c-cb5c-4484-896f-aef71007b198",
+          "name": "Admin Fernando Torres"
+        },
+        "updated": {
+          "at": "2026-06-30T07:10:41.247Z"
+        }
+      },
+      "base_total_cost": 66,
+      "description": "daew",
+      "doc_status": "completed",
+      "id": "0fdb81bf-c342-4515-9bad-5391c2f6636a",
+      "item_count": 1,
+      "location_code": "NERV-01",
+      "location_id": "0813de2c-b900-472f-925f-5fdde03348c3",
+      "location_name": "โตเกียว-3",
+      "location_type": "inventory",
+      "si_date": "2026-05-31T00:00:00.000Z",
+      "si_no": "SI20260500003"
+    },
+    {
+      "adjustment_type_code": "Found",
+      "adjustment_type_id": "b5939f7c-d059-4d92-b0ab-1d9a6a0c06de",
+      "adjustment_type_name": "เจอของ",
+      "audit": {
+        "created": {
+          "at": "2026-04-24T10:27:19.485Z",
+          "id": "8fff8ba0-10e3-490d-943b-ca0f06097e7d",
+          "name": "ศิริวรรณ Purchase k ทองดี"
+        },
+        "updated": {
+          "at": "2026-04-24T10:27:19.485Z"
+        }
+      },
+      "base_total_cost": 12,
+      "description": "aaaa",
+      "doc_status": "completed",
+      "id": "128a2d95-7cc8-4520-a05e-f643f06156d3",
+      "item_count": 1,
+      "location_code": "1FB02",
+      "location_id": "3ad9d3e6-ca78-44de-9812-1f62adf26600",
+      "location_name": "F&B Main Kitchen",
+      "location_type": "inventory",
+      "si_date": "2026-03-30T23:59:59.000Z",
+      "si_no": "SI20260400007"
+    }
+  ],
+  "message": "Success",
+  "paginate": {
+    "page": 1,
+    "pages": 9,
+    "perpage": 5,
+    "total": 44
+  },
+  "status": 200,
+  "success": true,
+  "timestamp": "2026-09-16T18:09:45.117Z"
+}

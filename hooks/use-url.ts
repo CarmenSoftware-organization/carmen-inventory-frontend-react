@@ -2,38 +2,12 @@ import { useCallback, useSyncExternalStore } from "react";
 
 export const URL_CHANGE_EVENT = "useurl:change";
 
-/**
- * อ่านค่า query parameter จาก URL ปัจจุบัน
- *
- * helper สำหรับ `getSnapshot` ของ `useSyncExternalStore`
- * ใช้ `URLSearchParams` parse `window.location.search`
- *
- * @param paramName - ชื่อ parameter
- * @param defaultValue - ค่าเริ่มต้นหากไม่พบ
- * @returns ค่าของ parameter
- * @example
- * ```ts
- * const search = getURLParam("search", "");
- * ```
- */
 function getURLParam(paramName: string, defaultValue: string): string {
   return (
     new URLSearchParams(window.location.search).get(paramName) ?? defaultValue
   );
 }
 
-/**
- * เขียน/ลบหลาย query param ใน replaceState ครั้งเดียว (ค่าว่าง = ลบ param)
- * แล้ว dispatch useurl:change ครั้งเดียว — ใช้ตอน apply saved view เพื่อไม่ยิง
- * event/render ทีละ param
- *
- * @param entries - Record ของ param name -> value (empty string = ลบ param)
- * @example
- * ```ts
- * setURLParams({ search: "vendor-a", page: "1" });
- * setURLParams({ search: "" }); // ลบ search param
- * ```
- */
 export function setURLParams(entries: Record<string, string>): void {
   const url = new URL(window.location.href);
   for (const [k, v] of Object.entries(entries)) {
@@ -58,23 +32,6 @@ type URLStateOptions = {
   onUpdate?: (value: string) => void;
 };
 
-/**
- * Hook sync state กับ URL query parameter ผ่าน `useSyncExternalStore`
- *
- * ใช้เป็น source of truth ของ filter/search/pagination บน list page
- * subscribe `popstate` + custom event `useurl:change` เพื่อ trigger re-render
- * เมื่อ URL เปลี่ยน update ใช้ `history.replaceState` (ไม่เพิ่ม history entry)
- * และยิง custom event ให้ instance อื่น ๆ sync ตาม
- *
- * @param paramName - ชื่อ query parameter
- * @param options - default value และ callback onUpdate
- * @returns tuple [value, updateValue]
- * @example
- * ```ts
- * const [search, setSearch] = useURL("search", { defaultValue: "" });
- * setSearch("vendor-a");
- * ```
- */
 export const useURL = (paramName: string, options: URLStateOptions = {}) => {
   const { defaultValue = "", onUpdate } = options;
 

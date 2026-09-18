@@ -9,7 +9,6 @@ import type {
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-/** tier id ที่ขึ้นต้นด้วย `tier-new-` = สร้างในเครื่อง ยังไม่มี row ฝั่ง server */
 const isNewTierId = (id?: string | null) =>
   !id || String(id).startsWith("tier-new-");
 
@@ -93,28 +92,14 @@ const buildPayload = (formData: PricelistExternalDto) => {
   };
 };
 
-/**
- * Error class สำหรับข้อผิดพลาดจาก HTTP พร้อม status code
- */
 export class HttpError extends Error {
   status: number;
-  /**
-   * สร้าง HttpError พร้อมข้อความและ status code
-   * @param message - ข้อความ error
-   * @param status - HTTP status code
-   */
   constructor(message: string, status: number) {
     super(message);
     this.status = status;
   }
 }
 
-/**
- * แปลง Response เป็น JSON หรือโยน HttpError หาก response ไม่ ok
- * @param res - Fetch Response
- * @param errorMessage - ข้อความ fallback เมื่อ parse error message ไม่ได้
- * @returns ข้อมูล JSON ที่ parse แล้ว
- */
 async function handleResponse<T = unknown>(
   res: Response,
   errorMessage: string,
@@ -156,14 +141,6 @@ export function usePriceListExternal(urlToken: string) {
   });
 }
 
-/**
- * Hook ดึง tax profile options สำหรับ portal vendor ภายนอก (public — เรียก auth
- * lookup ไม่ได้) ผ่าน endpoint แยก GET /check-pricelist/{token}/tax-profiles
- * @param urlToken - token ของ vendor
- * @returns React Query ของ tax profile options
- * @example
- * const { data: taxProfiles } = useExternalTaxProfiles(urlToken);
- */
 export function useExternalTaxProfiles(urlToken: string) {
   return useQuery({
     queryKey: [QUERY_KEYS.PRICE_LIST_EXTERNAL_TAX_PROFILES, urlToken],
@@ -185,15 +162,6 @@ export function useExternalTaxProfiles(urlToken: string) {
   });
 }
 
-/**
- * Hook บันทึก price list ของ vendor ภายนอก (save draft)
- * แปลงฟอร์มเป็น payload products+moqs แล้ว PATCH และ invalidate cache
- * @param urlToken - token สำหรับยืนยันสิทธิ์ของ vendor
- * @returns Mutation สำหรับบันทึกข้อมูล
- * @example
- * const save = useUpdatePriceListExternal(urlToken);
- * save.mutate(formValues);
- */
 export function useUpdatePriceListExternal(urlToken: string) {
   const queryClient = useQueryClient();
 
@@ -216,15 +184,6 @@ export function useUpdatePriceListExternal(urlToken: string) {
   });
 }
 
-/**
- * Hook ส่ง (submit) price list ของ vendor ภายนอกให้ระบบ
- * POST ไปยัง endpoint /submit ซึ่งจะ finalize price list และ invalidate cache
- * @param urlToken - token สำหรับยืนยันสิทธิ์ของ vendor
- * @returns Mutation สำหรับ submit ข้อมูล
- * @example
- * const submit = useSubmitPriceListExternal(urlToken);
- * submit.mutate();
- */
 export function useSubmitPriceListExternal(urlToken: string) {
   const queryClient = useQueryClient();
 

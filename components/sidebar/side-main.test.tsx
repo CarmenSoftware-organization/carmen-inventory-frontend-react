@@ -159,10 +159,6 @@ describe("SideMain — locked wins over denied when both are true", () => {
   });
 });
 
-/**
- * เมนูย่อยอีกชั้น (workflow แยกตามชนิดใบ) — ลูกมี path ของตัวเองที่ซ้อนอยู่ใต้
- * path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออกจะสว่างสองอัน
- */
 describe("SideMain — เมนูย่อยอีกชั้น", () => {
   const parent = () =>
     sub({

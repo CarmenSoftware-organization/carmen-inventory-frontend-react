@@ -10,19 +10,6 @@ interface CnCardListProps {
   readonly onDelete: (item: CreditNote) => void;
 }
 
-/**
- * แสดงรายการใบลดหนี้เป็น grid ของการ์ด รองรับสถานะโหลดและว่างเปล่า
- * ขณะ loading จะ render 8 skeleton cards, ถ้าไม่มีข้อมูลจะ render `EmptyComponent`, ไม่เช่นนั้น map `CnCard`
- *
- * @param props - CnCardListProps
- * @param props.items - array ของใบลดหนี้
- * @param props.isLoading - สถานะโหลด (optional) — true จะแสดง skeleton
- * @param props.onEdit - callback เมื่อคลิกการ์ดเพื่อไปหน้า edit/view
- * @returns React element ของ grid การ์ด, skeleton หรือ empty state
- *
- * @example
- * <CnCardList items={creditNotes} isLoading={isLoading} onEdit={(cn) => router.push(`/procurement/credit-note/${cn.id}`)} />
- */
 export default function CnCardList({
   items,
   isLoading,

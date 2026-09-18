@@ -57,7 +57,6 @@ export function OverrideToggle({
   );
 }
 
-/** Discount: rate% + amount ในกล่องเดียว — override ตัดสินว่าช่องไหนแก้ได้ */
 export function DiscountOverrideInput({
   rate,
   amount,
@@ -113,7 +112,6 @@ export function DiscountOverrideInput({
   );
 }
 
-/** Tax: tax-profile lookup + amount ในกล่องเดียว — amount แก้ได้เมื่อ override */
 export function TaxOverrideInput({
   taxProfileId,
   amount,

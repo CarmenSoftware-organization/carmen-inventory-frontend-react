@@ -15,7 +15,6 @@ export const CurrencyCell = memo(function CurrencyCell({
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
-  /** ทับ style ตอนใช้เป็นคอลัมน์เดี่ยว — ไม่ส่งมา = ยังเป็น addon ในกล่องยอดเหมือนเดิม */
   className?: string;
 }) {
   "use no memo";

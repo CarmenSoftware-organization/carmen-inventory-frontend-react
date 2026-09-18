@@ -31,17 +31,11 @@ interface PcLocationCardProps {
   readonly item: PhysicalCountLocation;
   readonly index?: number;
   readonly onAction: (item: PhysicalCountLocation) => void;
-  /** ปิดปุ่มเมื่อยังเปิดรอบตรวจนับไม่ได้ — ใส่ `disabledReason` เป็น tooltip ด้วยเสมอ */
   readonly disabled?: boolean;
   readonly disabledReason?: string;
-  /** กำลังสร้างใบนับของ location นี้อยู่ */
   readonly pending?: boolean;
 }
 
-/**
- * การ์ดแสดง Physical Count Location หนึ่งรายการ (Soft Sheet style)
- * แสดง progress bar, location type และสถานะ complete / in_progress / not_started
- */
 export function PcLocationCard({
   item,
   index,

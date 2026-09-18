@@ -29,7 +29,6 @@ interface VendorInfoTabProps {
   >["remove"];
 }
 
-/** Vendor info section — dynamic key/value/type rows in glass card */
 export function VendorInfo({
   form,
   isDisabled,

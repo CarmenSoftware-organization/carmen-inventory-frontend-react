@@ -12,20 +12,12 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type { FormMode } from "@/types/form";
 
 interface UseEntityFormOptions<TValues extends FieldValues> {
-  /** entity ที่โหลดมา — ไม่มี = โหมด add */
   entity: unknown;
   resolver: Resolver<TValues>;
   defaultValues: DefaultValues<TValues>;
-  /** path ของหน้ารายการ — ปุ่ม Back กับ Cancel ตอน add เด้งไปที่นี่ */
   listPath: string;
-  /** mutation ที่กำลังทำงานอยู่ (create/update) */
   isPending: boolean;
-  /**
-   * dirty ที่ไม่ได้มาจาก RHF — รูปที่เลือกไว้แต่ยังไม่อัปโหลด, gallery, transfer
-   * ปล่อยว่างได้ถ้าฟอร์มไม่มี state นอก RHF
-   */
   extraDirty?: boolean;
-  /** เรียกตอนกด Cancel ในโหมด edit — รีเซ็ต state นอก RHF กลับค่าเดิม */
   onResetExtra?: () => void;
 }
 
@@ -86,9 +78,8 @@ export function useEntityForm<TValues extends FieldValues>({
 
   const backToList = () => navigate(listPath);
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
+  // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const handleBack = () => {
     if (isEdit || isAdd) {
       discard.confirm(backToList);
@@ -102,7 +93,18 @@ export function useEntityForm<TValues extends FieldValues>({
   const handleCancel = () => {
     discard.confirm(() => {
       if (isEdit && entity) {
-        form.reset(defaultValues);
+        // `keepFieldsRef` ไม่ใช่ของเสริม — ถ้าไม่ใส่ ค่าที่ยกเลิกไปแล้วจะค้างบนหน้าจอ
+        //
+        // `reset(values)` ที่ส่ง object เข้าไป จะเข้า branch `_fields = {}` ของ RHF
+        // คือทิ้ง ref ของทุก field แล้ว **ไม่เขียนค่ากลับลง DOM** เพราะมันคาดว่า input
+        // จะ unmount/remount ให้ `register` re-attach พร้อมค่าใหม่ ส่วน native
+        // `form.reset()` ที่จะคืนค่า DOM ให้ ถูก gate ด้วย `isUndefined(formValues)`
+        // การส่งค่าเข้าไปจึงปิดทางนั้นไปด้วย (react-hook-form 7.85.0 `_reset`)
+        //
+        // ฟอร์มที่นี่กด Cancel แล้ว input ไม่ remount — มีแค่ `disabled` ที่พลิก
+        // state ของ RHF จึงคืนค่าถูกต้องแต่ช่องบนจอยังโชว์ข้อความที่เพิ่งยกเลิกไป
+        // `keepFieldsRef: true` ทำให้เข้า loop `setValue()` ที่เขียนลง DOM จริงแทน
+        form.reset(defaultValues, { keepFieldsRef: true });
         onResetExtra?.();
         setMode("view");
       } else {

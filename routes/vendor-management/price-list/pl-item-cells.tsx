@@ -55,8 +55,8 @@ export function ProductCell({
   if (isView)
     return (
       <NameWithSubtext
-        primary={detailRef?.product_name ?? ""}
-        secondary={detailRef?.product_local_name}
+        primary={detailRef?.product?.name ?? ""}
+        secondary={detailRef?.product?.local_name ?? undefined}
       />
     );
   return (
@@ -97,7 +97,7 @@ export function UnitCell({
       control: form.control,
       name: `pricelist_detail.${index}.product_id`,
     }) ?? "";
-  if (isView) return <FieldPlainText>{detailRef?.unit_name}</FieldPlainText>;
+  if (isView) return <FieldPlainText>{detailRef?.unit?.name}</FieldPlainText>;
   return (
     <Controller
       control={form.control}
@@ -217,10 +217,6 @@ export function PriceCell({
   );
 }
 
-/**
- * ดึง price (gross) + tax_rate ของ row (view=detailRef · edit=watch สด) แล้ว
- * derive PWT (ก่อนภาษี) + tax amount กลับ — input คือ price รวมภาษี
- */
 function useRowPriceParts(
   form: UseFormReturn<PriceListFormValues>,
   index: number,
@@ -250,7 +246,6 @@ function useRowPriceParts(
   };
 }
 
-/** PWT — ราคาก่อนภาษี (computed จาก price ÷ (1+rate), read-only) */
 export function PWTCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
   const { pwt } = useRowPriceParts(form, index, isView, detailRef);
@@ -261,7 +256,6 @@ export function PWTCell({ form, index, isView, detailRef }: CellProps) {
   );
 }
 
-/** Amount — ราคารวมภาษี (= price gross, read-only) ทั้ง view/edit */
 export function AmountCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
   const { amount } = useRowPriceParts(form, index, isView, detailRef);
@@ -272,7 +266,6 @@ export function AmountCell({ form, index, isView, detailRef }: CellProps) {
   );
 }
 
-/** Preferred — view: Crown เมื่อ preferred · edit: checkbox toggle ต่อ item */
 export function PreferredCell({
   form,
   index,
@@ -318,7 +311,7 @@ export function TaxCell({
   "use no memo";
   const errors = useRowErrors(form, index);
   if (isView)
-    return <FieldPlainText>{detailRef?.tax_profile_name}</FieldPlainText>;
+    return <FieldPlainText>{detailRef?.tax_profile?.name}</FieldPlainText>;
   return (
     <Controller
       control={form.control}

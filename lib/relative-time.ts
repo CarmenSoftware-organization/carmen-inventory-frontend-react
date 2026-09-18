@@ -8,15 +8,6 @@ const DIVISIONS: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
   { amount: Number.POSITIVE_INFINITY, unit: "year" },
 ];
 
-/**
- * แปลง ISO date string เป็นข้อความเวลาแบบสัมพัทธ์ (เช่น "2 hours ago", "3 วันที่แล้ว")
- * ใช้ Intl.RelativeTimeFormat ของ browser ตาม locale
- * @param iso - ISO date string หรือ Date object
- * @param locale - locale code เช่น "en", "th"
- * @returns ข้อความเวลาแบบสัมพัทธ์ หรือ empty string ถ้า input ไม่ถูกต้อง
- * @example
- * formatRelativeTime("2026-04-20T04:33:35.777Z", "th") // "15 วันที่แล้ว"
- */
 export function formatRelativeTime(
   iso: string | Date | null | undefined,
   locale = "en",

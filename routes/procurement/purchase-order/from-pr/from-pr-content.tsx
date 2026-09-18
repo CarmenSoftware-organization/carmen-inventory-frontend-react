@@ -11,8 +11,8 @@ import {
   ClipboardCheck,
   Loader2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import {
   Stepper,
@@ -37,6 +37,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type { GroupPrPo } from "@/types/purchase-order";
 import { StepSelectPr } from "./step-select-pr";
 import { StepReviewGroup } from "./step-review-group";
+import { StepResult, type ConfirmPrResult } from "./step-result";
 
 type Step = 1 | 2;
 
@@ -53,16 +54,6 @@ const STEPS: ReadonlyArray<{
 const PO_LIST_PATH = "/procurement/purchase-order";
 const COMPLETED_INDICATOR = <Check className="size-3" aria-hidden="true" />;
 
-/**
- * สร้างใบสั่งซื้อจากใบขอซื้อ — หน้าเต็ม 2 ขั้น (ทรงเดียวกับ from-price-list)
- *
- * ของเดิมเป็น dialog ซ้อน dialog: กดสร้าง → เลือกวิธี → เปิด dialog อีกใบที่มี
- * ตารางเลือกใบขอซื้อกับตารางตรวจสอบอยู่ข้างใน ตารางกว้าง ๆ สองตารางในกล่องลอย
- * ที่ปิดแล้วของหายหมด
- *
- * งานจริงอยู่ที่หลังบ้านสองเส้น: `group` จัดกลุ่มใบขอซื้อให้ดูก่อน แล้ว `confirm`
- * ถึงจะสร้างจริง — หน้านี้ไม่มีฟอร์มของตัวเอง จึงไม่ต้องมี react-hook-form
- */
 export function FromPrContent() {
   const navigate = useNavigate();
   const t = useTranslations("procurement.purchaseOrder");
@@ -76,23 +67,20 @@ export function FromPrContent() {
   const [step, setStep] = useState<Step>(1);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [groupedData, setGroupedData] = useState<GroupPrPo[]>([]);
+  const [groupWorkflowName, setGroupWorkflowName] = useState("");
   const [workflowId, setWorkflowId] = useState("");
   const [isGrouping, setIsGrouping] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [result, setResult] = useState<ConfirmPrResult | null>(null);
 
   const isPending = isGrouping || isConfirming;
   const selectedPrIds = Object.keys(rowSelection).filter(
     (id) => rowSelection[id],
   );
   const selectedCount = selectedPrIds.length;
-
-  // "มีของค้าง" = เลือกอะไรไปแล้วก็นับ ตั้งแต่ลำดับขั้นอนุมัติ ไม่ใช่รอจนติ๊กใบ —
-  // ยังไม่ได้สร้างอะไร แต่ออกไปแล้วต้องมาไล่เลือกใหม่ทั้งหมด
   const isDirty = (!!workflowId || selectedCount > 0) && !isConfirming;
-
   const discard = useDiscardConfirm({ isDirty, isPending });
-  // ปุ่มยกเลิกกับลูกศรย้อนกลับเรียก navigate() ตรง ๆ ซึ่ง useNavigationGuard
-  // ดักไม่ได้ (ดักแค่คลิกลิงก์กับปุ่ม Back ของเบราว์เซอร์)
   const handleCancel = () => discard.confirm(() => navigate(PO_LIST_PATH));
   const navGuard = useNavigationGuard(isDirty && !isPending);
 
@@ -110,6 +98,7 @@ export function FromPrContent() {
       if (!res.ok) throw await ApiError.from(res, "Failed to group PRs");
       const json = await res.json();
       setGroupedData(json.data.groups);
+      setGroupWorkflowName(json.data.workflow?.name ?? "");
       setStep(2);
     } catch (err) {
       errorToast(err);
@@ -120,8 +109,6 @@ export function FromPrContent() {
 
   const handleStepChange = (value: number) => {
     if (isPending) return;
-    // ถอยกลับได้เสมอ ส่วนเดินหน้าต้องผ่าน handleNext เพราะขั้นที่ 2 ต้องรอ
-    // ผลจัดกลุ่มจากหลังบ้านก่อน
     if (value <= step) setStep(Math.max(1, value) as Step);
   };
 
@@ -146,17 +133,24 @@ export function FromPrContent() {
         },
       );
       if (!res.ok) throw await ApiError.from(res, "Failed to confirm PRs");
-      await res.json();
+      const json = await res.json();
       toast.success(tt("createSuccess", { entity: t("entity") }));
       await queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.PURCHASE_ORDERS],
       });
-      navigate(PO_LIST_PATH);
+      // ไม่เด้งกลับ list — backend ส่งใบที่สร้างมาให้ครบแล้ว โชว์ให้เห็นว่าได้
+      // อะไรมาบ้างพร้อมลิงก์เข้าใบ ดีกว่าให้ไปไล่หาเองในรายการพันใบ
+      setConfirmOpen(false);
+      setResult(json.data as ConfirmPrResult);
     } catch (err) {
       errorToast(err);
       setIsConfirming(false);
     }
   };
+
+  // สร้างเสร็จแล้ว = จบงาน หน้าสรุปทับทั้งหน้า ไม่เหลือ stepper/ปุ่มของขั้นตอนเดิม
+  // ให้กดย้อนกลับไปสร้างซ้ำจากชุดเดิม (PR ที่ใช้ไปแล้วเลือกซ้ำไม่ได้)
+  if (result) return <StepResult result={result} />;
 
   return (
     <div className="flex flex-col gap-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -176,10 +170,20 @@ export function FromPrContent() {
           </h1>
           <p className="text-muted-foreground text-sm">{t("fromPrDesc")}</p>
         </div>
-        {selectedCount > 0 && (
-          <Badge className="mt-0.5 shrink-0 tabular-nums">
-            {t("nSelected", { count: selectedCount })}
-          </Badge>
+        {step === LAST_STEP && (
+          <Button
+            size="sm"
+            className="mr-8"
+            onClick={() => setConfirmOpen(true)}
+            disabled={isConfirming}
+          >
+            {isConfirming ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <ClipboardCheck aria-hidden="true" />
+            )}
+            {tc("confirm")}
+          </Button>
         )}
       </header>
 
@@ -189,9 +193,6 @@ export function FromPrContent() {
         indicators={{ completed: COMPLETED_INDICATOR }}
         className="px-9"
       >
-        {/* แถบขั้นตอนกว้างเท่าที่มันต้องใช้ ไม่กางเต็มจอ — StepperNav บังคับ
-            w-full ของตัวเองไว้ด้วย data-variant ซึ่งชนะ class ที่ส่งเข้าไป
-            เลยต้องคุมความกว้างจากกล่องข้างนอกแทน · max-w-full กันจอแคบล้น */}
         <div className="mx-auto w-96 max-w-full">
           <StepperNav>
             {STEPS.map(({ step: s, labelKey }, i, arr) => (
@@ -220,7 +221,10 @@ export function FromPrContent() {
             />
           </StepperContent>
           <StepperContent value={2}>
-            <StepReviewGroup data={groupedData} />
+            <StepReviewGroup
+              data={groupedData}
+              workflowName={groupWorkflowName}
+            />
           </StepperContent>
         </StepperPanel>
       </Stepper>
@@ -259,23 +263,23 @@ export function FromPrContent() {
               {tc("next")}
             </Button>
           )}
-          {step === LAST_STEP && (
-            <Button size="sm" onClick={handleConfirm} disabled={isConfirming}>
-              {isConfirming ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <ClipboardCheck aria-hidden="true" />
-              )}
-              {tc("confirm")}
-            </Button>
-          )}
         </div>
       </footer>
 
-      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t("confirmCreateTitle")}
+        description={t("confirmCreateDesc", {
+          poCount: groupedData.length,
+          prCount: selectedCount,
+        })}
+        isPending={isConfirming}
+        onConfirm={handleConfirm}
+        confirmText={tc("confirm")}
+      />
 
-      {/* ตัวเดียวกันแต่คนละต้นทาง — อันนี้ของคลิกลิงก์ใน sidebar กับปุ่ม Back
-          ของเบราว์เซอร์ ซึ่ง useNavigationGuard ดักไว้ให้ */}
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
       <DiscardDialog
         open={navGuard.isOpen}
         onOpenChange={(o) => {

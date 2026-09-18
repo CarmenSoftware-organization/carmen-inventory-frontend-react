@@ -106,22 +106,6 @@ function VersionBlock({ entry }: { readonly entry: VersionEntry }) {
   );
 }
 
-/**
- * Dialog แสดง "What's New" / changelog ให้ผู้ใช้
- *
- * Render ทุก version จาก `changelog.json` (ล่าสุดอยู่บนสุด) แต่ละ version
- * จัดกลุ่มเป็น Added / Fixed / Changed พร้อม icon และ scope chip โดย
- * **ไม่แสดง** git hash / author / PR เพื่อให้อ่านง่ายสำหรับผู้ใช้ทั่วไป
- * เป็น controlled component — ตัวเรียกใช้คุม `open` / `onOpenChange`
- *
- * @param props - `open` สถานะเปิด, `onOpenChange` callback เมื่อสถานะเปลี่ยน
- * @returns JSX element ของ dialog
- * @example
- * ```tsx
- * const [open, setOpen] = useState(false);
- * <WhatsNewDialog open={open} onOpenChange={setOpen} />
- * ```
- */
 export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

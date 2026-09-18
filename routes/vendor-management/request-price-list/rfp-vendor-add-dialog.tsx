@@ -33,7 +33,6 @@ import { VendorNameCell } from "./rfp-vendor-cells";
 interface Props {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  /** ผู้ขายที่อยู่ในคำขอแล้ว — ติ๊กค้างไว้และเลือกซ้ำไม่ได้ */
   readonly selectedVendorIds: Set<string>;
   readonly onAdd: (vendors: Vendor[]) => void;
 }

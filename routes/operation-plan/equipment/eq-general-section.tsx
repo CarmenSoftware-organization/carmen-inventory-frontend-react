@@ -16,7 +16,6 @@ interface EqGeneralSectionProps {
   readonly onImageChange: (next: EqImageChange) => void;
 }
 
-/** General info — image · code · name · category · brand/model/serial · station · capacity · power · description */
 export function EqGeneralSection({
   form,
   isDisabled,

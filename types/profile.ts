@@ -21,13 +21,10 @@ export interface UserProfile {
     middlename: string;
     lastname: string;
     telephone: string | null;
-    /** Object storage key for the avatar source — never display directly */
     avatar_file_token: string | null;
   };
   business_unit: BusinessUnit[];
-  /** Pre-signed avatar URL (S3 / object storage). Expires — re-fetch profile to refresh */
   avatar_url: string | null;
-  /** Pre-signed signature URL (transparent PNG). Expires — re-fetch profile to refresh. Null when unset. */
   signature_url: string | null;
 }
 
@@ -46,7 +43,6 @@ export interface BusinessUnit {
   name: string;
   code: string;
   alias_name: string;
-  /** Object storage key for the BU logo — never display directly */
   logo_file_token: string | null;
   is_default: boolean;
   system_level: string;
@@ -65,9 +61,7 @@ export interface BusinessUnit {
   current_period?: CurrentPeriod;
   config: BusinessUnitConfig;
   permissions: string[];
-  /** Pre-signed logo URL — for documents (PDF/print). May be wide/landscape. Null when `logo_file_token` is null. */
   logo_url: string | null;
-  /** Pre-signed avatar URL — for UI display only (square thumbnail, headers, lists). */
   avatar_url: string | null;
 }
 

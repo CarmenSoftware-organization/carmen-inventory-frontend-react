@@ -67,43 +67,17 @@ interface UseApiMutationOptions<TVariables> {
   mutationFn: (variables: TVariables, buCode: string) => Promise<Response>;
   invalidateKeys?: readonly unknown[];
   errorMessage?: string;
-  /** `{ skipGlobalErrorToast: true }` = mutation นี้แสดง error เอง ดู `<ApiErrorToaster />` */
   meta?: ApiErrorMeta;
   optimistic?: {
     queryKey: readonly unknown[];
     updater: (old: unknown, variables: TVariables) => unknown;
   };
-  /**
-   * Optimistically update all list queries whose key starts with the given prefix.
-   * Useful for list mutations (delete/approve) where the full key includes dynamic params.
-   * Snapshots and rolls back on error.
-   */
   optimisticList?: {
     queryKeyPrefix: readonly unknown[];
     updater: (old: unknown, variables: TVariables) => unknown;
   };
 }
 
-/**
- * Hook ห่อ `useMutation` สำหรับเรียก API พร้อมจัดการ error, optimistic update และ invalidate cache
- *
- * Normalize error ให้เป็น `ApiError` เสมอ (parse server message ถ้ามี)
- * เช็ค `{ success: false }` ใน response body เพื่อ throw validation error ด้วย
- * รองรับ optimistic 2 แบบ: single-key (`optimistic`) และ prefix-match (`optimisticList`)
- * snapshot + rollback อัตโนมัติเมื่อ error invalidate `invalidateKeys` ทุกตัวใน onSettled
- *
- * @param options - ตัวเลือก mutationFn, invalidateKeys, errorMessage และ optimistic update
- * @returns UseMutationResult พร้อม ApiError handling
- * @example
- * ```ts
- * const mutation = useApiMutation<CreateVendorDto>({
- *   mutationFn: (data, bu) => api.create(bu, data),
- *   invalidateKeys: [QUERY_KEYS.VENDORS],
- *   errorMessage: "Failed to create vendor",
- * });
- * mutation.mutate({ code: "V01", name: "ABC" });
- * ```
- */
 export function useApiMutation<TVariables, TResponse = unknown>({
   mutationFn,
   invalidateKeys,

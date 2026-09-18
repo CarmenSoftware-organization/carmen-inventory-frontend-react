@@ -46,7 +46,6 @@ interface SrHeaderProps {
   readonly isPending: boolean;
   readonly hasDepartment: boolean;
   readonly isDeletePending: boolean;
-  /** ribbon — document info (date/requester/department) */
   readonly srDate?: string;
   readonly dateFormat: string;
   readonly requesterName: string;
@@ -60,11 +59,6 @@ interface SrHeaderProps {
   readonly onComment?: () => void;
 }
 
-/**
- * Header ของฟอร์ม Store Requisition — ใช้ `DocFormHeader` กลางร่วมกับ
- * PO/PR/GRN/CN พร้อม ribbon แสดง document info (sr_date / requester /
- * department)
- */
 export function SrHeader({
   storeRequisition,
   srType,

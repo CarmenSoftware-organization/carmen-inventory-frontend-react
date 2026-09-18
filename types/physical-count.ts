@@ -30,7 +30,7 @@ export interface PhysicalCountLocation {
 export interface CurrentPeriodData {
   id: string;
   period_id: string;
-  tb_period: {
+  tb_inventory_period: {
     id: string;
     period: string;
     start_at: string;

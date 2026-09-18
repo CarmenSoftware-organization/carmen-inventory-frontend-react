@@ -111,11 +111,6 @@ interface DeleteFlowArgs<TEntity extends { id: string }> {
   readonly tt: ReturnType<typeof useTranslations>;
 }
 
-/**
- * Render delete confirmation flow (custom `renderDeleteDialog` หรือ `DeleteDialog` กลาง)
- *
- * แยกออกจาก ConfigListTemplate เพื่อลดความยาวของ component หลัก
- */
 function renderDeleteFlow<TEntity extends { id: string }>({
   deleteTarget,
   setDeleteTarget,

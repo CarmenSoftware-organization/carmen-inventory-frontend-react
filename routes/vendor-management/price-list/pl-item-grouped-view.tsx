@@ -11,7 +11,6 @@ import {
 
 interface PLItemGroupedViewProps {
   readonly detailRefs: readonly GroupableDetail[];
-  /** โชว์คอลัมน์ note ต่อ tier — เปิดเฉพาะ price-list ภายใน (ไม่ใช่ portal) */
   readonly showNote?: boolean;
 }
 

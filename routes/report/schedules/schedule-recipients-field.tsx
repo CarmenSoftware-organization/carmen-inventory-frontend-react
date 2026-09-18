@@ -15,18 +15,6 @@ interface ScheduleRecipientsFieldProps {
   readonly disabled: boolean;
 }
 
-/**
- * Multi-select user picker สำหรับ recipients ของ schedule
- *
- * - แสดง chip ของ recipient ที่เลือกอยู่ + ปุ่ม X เอาออก
- * - List ของ user ทั้งหมดดึงผ่าน `useAllUsers()` (TanStack Query)
- * - แต่ละ row ใช้ shadcn `Checkbox` + `Label htmlFor` ไม่ใช้ native input
- * - List wrap ใน scroll container `max-h-40`
- *
- * @param props.form - RHF instance
- * @param props.disabled - ปิด controls ทั้งกลุ่ม
- * @returns JSX
- */
 export function ScheduleRecipientsField({
   form,
   disabled,

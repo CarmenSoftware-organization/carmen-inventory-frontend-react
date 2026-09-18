@@ -18,17 +18,6 @@ interface CnCardProps {
   readonly onDelete: (item: CreditNote) => void;
 }
 
-/**
- * การ์ดใบลดหนี้ 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
- *
- * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/PO/GRN/SR/IA/PRT — ไฟล์นี้เหลือแค่ว่าข้อมูล
- * อะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง CN · ยอดเงินใช้ `currency_code` ของ
- * ใบนั้น (CN มีสกุลเงินต่อใบเหมือน PO/GRN)
- *
- * @param props.item - ข้อมูลใบลดหนี้
- * @param props.onEdit - callback เมื่อคลิกการ์ด
- * @param props.onDelete - callback เมื่อกดปุ่มลบ
- */
 export default function CnCard({ item, onEdit, onDelete }: CnCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();

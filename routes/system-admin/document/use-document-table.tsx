@@ -34,13 +34,6 @@ interface UseDocumentTableOptions {
   onDelete: (doc: DocumentFile) => void;
 }
 
-/**
- * คืนค่าข้อมูลประเภทไฟล์ (icon, label key, className) ตาม content type
- * @param contentType - MIME type ของไฟล์ (เช่น "application/pdf")
- * @returns ออบเจกต์ที่มี icon component, labelKey และ className สำหรับสี
- * @example
- * getFileTypeInfo("application/pdf"); // { icon: FileText, labelKey: "pdf", className: "text-red-500" }
- */
 const getFileTypeInfo = (contentType: string) => {
   if (
     contentType.includes("spreadsheet") ||
@@ -103,13 +96,6 @@ const getFileTypeInfo = (contentType: string) => {
   };
 };
 
-/**
- * Hook กำหนดคอลัมน์และ config ของตารางเอกสาร (Document) พร้อมไอคอนประเภทไฟล์
- * @param options - อาร์เรย์ documents, totalRecords, params, tableConfig และ callback onDelete
- * @returns TanStack Table instance สำหรับ Document
- * @example
- * const table = useDocumentTable({ documents, totalRecords, params, tableConfig, onDelete });
- */
 export function useDocumentTable({
   documents,
   totalRecords,

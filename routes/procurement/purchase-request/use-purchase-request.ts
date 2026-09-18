@@ -22,16 +22,6 @@ import type { ActionPr } from "@/types/stage-role";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 
 /**
- * Hook ดึงรายการใบขอซื้อ (Purchase Request) ทั้งหมด
- * ใช้ CACHE_DYNAMIC และ validate schema ด้วย zod (warn ถ้าไม่ตรง)
- * Unwrap section แรกจาก response เป็น paginated มาตรฐาน
- * @param params - พารามิเตอร์ filter/sort/pagination
- * @param options - ตัวเลือกเสริม เช่น enabled
- * @returns React Query ของ PaginatedResponse<PurchaseRequest>
- * @example
- * const { data } = usePurchaseRequest({ page: 1, perpage: 20 });
- */
-/**
  * response ที่ backend ส่งมาไม่ตรง schema ที่ FE ถืออยู่ — เป็นสัญญาณว่า contract
  * เพี้ยน ไม่ใช่ error ของผู้ใช้ list จึงยังแสดงต่อด้วยข้อมูลดิบตามเดิม
  *
@@ -110,15 +100,6 @@ export function usePurchaseRequest(
   });
 }
 
-/**
- * Hook ดึง PR ที่รอให้ผู้ใช้ปัจจุบันดำเนินการใน workflow
- * ใช้ endpoint my-pending พร้อมตรวจ schema และ unwrap section แรก
- * @param params - พารามิเตอร์ filter/sort/pagination
- * @param options - ตัวเลือกเสริม เช่น enabled
- * @returns React Query ของ PaginatedResponse<PurchaseRequest>
- * @example
- * const { data } = useMyPendingPurchaseRequest({ page: 1 });
- */
 export function useMyPendingPurchaseRequest(
   params?: ParamsDto,
   options?: { enabled?: boolean },
@@ -256,14 +237,6 @@ interface CreatePrResponse {
   data: PurchaseRequest;
 }
 
-/**
- * Hook สร้าง PR ใหม่ผ่าน POST
- * Invalidate PURCHASE_REQUESTS cache เมื่อสำเร็จและคืน data.id ของ PR ที่สร้าง
- * @returns Mutation สำหรับสร้าง PR
- * @example
- * const create = useCreatePurchaseRequest();
- * const res = await create.mutateAsync(payload);
- */
 export function useCreatePurchaseRequest() {
   return useApiMutation<CreatePurchaseRequestDto, CreatePrResponse>({
     mutationFn: (data, buCode) =>
@@ -275,7 +248,6 @@ export function useCreatePurchaseRequest() {
 
 // --- Comments ---
 
-/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
 export const prCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.PURCHASE_REQUEST_COMMENTS,
   commentEndpoint: API_ENDPOINTS.PURCHASE_REQUEST_COMMENT,
@@ -283,14 +255,10 @@ export const prCommentCrud = createCommentCrud({
   label: "purchase request",
 });
 
-/** ดึงความคิดเห็นของ PR จาก `/api/{buCode}/purchase-request-comment/{prId}` */
 export const usePurchaseRequestComments = prCommentCrud.useComments;
-/** สร้างความคิดเห็นใน PR ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
 export const useCreatePurchaseRequestComment = prCommentCrud.useCreate;
 
-/** แก้ไขความคิดเห็นใน PR */
 export const useUpdatePurchaseRequestComment = prCommentCrud.useUpdate;
-/** ลบความคิดเห็นใน PR */
 export const useDeletePurchaseRequestComment = prCommentCrud.useDelete;
 
 export function useDeletePurchaseRequest() {
@@ -313,16 +281,6 @@ const PR_INVALIDATE_KEYS = [
   QUERY_KEYS.MY_PENDING_PURCHASE_REQUESTS,
 ];
 
-/**
- * Hook ครอบคลุม action ทั้งหมดของ PR: แก้ไขทั่วไปหรือ workflow action
- * Append /{action} ต่อท้าย URL ถ้ามี action (submit/approve/reject/review/...) ถ้าไม่มีเป็น PATCH update ปกติ
- * Invalidate ทั้ง PURCHASE_REQUESTS และ MY_PENDING_PURCHASE_REQUESTS
- * @param action - workflow action (ไม่ระบุ = update ทั่วไป)
- * @returns Mutation สำหรับ action ที่เลือก
- * @example
- * const update = useUpdatePr();
- * const approve = useUpdatePr<ApprovePayload>("approve");
- */
 export function useUpdatePr<T extends { id: string } = PrActionPayload>(
   action?: ActionPr,
 ) {
@@ -342,15 +300,6 @@ export interface PrPreviousStage {
   name: string;
 }
 
-/**
- * Hook ดึงรายการ stage ก่อนหน้าของ PR (สำหรับ send-back review)
- * API คืน object map แล้ว transform เป็น array ของ { key, name }
- * @param prId - รหัส PR
- * @param enabled - เปิด/ปิดการ fetch (default true)
- * @returns React Query ของรายการ PrPreviousStage[]
- * @example
- * const { data } = usePrPreviousStages(prId, isOpen);
- */
 export function usePrPreviousStages(prId: string | undefined, enabled = true) {
   const buCode = useBuCode();
 
@@ -479,11 +428,6 @@ interface ExportPurchaseRequestArgs {
   columns: XlsxColumn<PurchaseRequest>[];
 }
 
-/**
- * Hook ส่งออก PR เป็นไฟล์ xlsx ฝั่ง client โดยใช้ filter ปัจจุบันและ endpoint
- * เดียวกับ list (เลือกตาม viewMode) — caller กำหนด columns พร้อม translation
- * @returns { exportPurchaseRequest, isExporting }
- */
 export function useExportPurchaseRequest() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();

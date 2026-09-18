@@ -24,19 +24,6 @@ export function buildQueryString<T extends object>(params?: T): string {
     .join("&");
 }
 
-/**
- * รวม base URL กับ query string ที่สร้างจาก params ให้เป็น URL สมบูรณ์
- *
- * ถ้าไม่มี params หรือ params ว่างทั้งหมด จะคืน baseUrl ตามเดิมโดยไม่ต่อ `?`
- *
- * @param baseUrl - URL ฐานที่จะใช้ต่อ query string
- * @param params - object ของ query params (optional)
- * @returns URL ที่รวม query string แล้ว
- * @example
- * ```ts
- * buildUrl("/api/users", { page: 1 }); // "/api/users?page=1"
- * ```
- */
 export function buildUrl<T extends object>(
   baseUrl: string,
   params?: T,

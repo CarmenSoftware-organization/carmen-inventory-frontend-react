@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
  * ลำดับสุดท้ายให้ผลผิด เลยต้องมีอันนี้
  */
 
-/** บันไดที่ต้องลงทะเบียนไว้กับ twMerge — ต้องตรงกับ globals.css */
 const LADDER = [
   "text-micro-floor",
   "text-micro-eyebrow",

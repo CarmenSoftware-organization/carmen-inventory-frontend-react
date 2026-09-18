@@ -21,15 +21,10 @@ import type {
 } from "@/lib/print-document";
 
 interface DocActionsMenuProps {
-  /** สร้างใบใหม่จากใบนี้ — ไม่ส่ง = ไม่มีเมนูนี้ (ส่งเฉพาะโหมด view) */
   readonly onDuplicate?: () => void;
-  /** เปิด comment sheet — ไม่ส่ง = ไม่มีเมนูนี้ */
   readonly onComment?: () => void;
-  /** จำนวน comment — `undefined`/`0` = ไม่มีจุดบนปุ่มและไม่มีเลขในเมนู */
   readonly commentCount?: number;
-  /** เปิด activity sheet ของเอกสารนี้ — ไม่ส่ง = ไม่มีเมนูนี้ */
   readonly activity?: { id: string; label?: string };
-  /** พิมพ์เอกสาร — ไม่ส่ง = ไม่มีเมนูนี้ (ส่งเฉพาะโหมด view) */
   readonly print?: {
     documentType: PrintDocumentType;
     documentId?: string;

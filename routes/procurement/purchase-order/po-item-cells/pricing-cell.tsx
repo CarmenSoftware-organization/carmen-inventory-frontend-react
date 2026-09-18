@@ -4,7 +4,6 @@ import { formatCurrency } from "@/lib/currency-utils";
 import type { PoFormValues } from "../po-form-schema";
 import { computeItemPricing } from "../po-item-pricing";
 
-/** Read-only display ของ sub/disc/net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */
 export const ComputedPricingCell = function ComputedPricingCell({
   control,
   index,
@@ -37,21 +36,6 @@ export const ComputedPricingCell = function ComputedPricingCell({
   );
 };
 
-/**
- * เขียน derived fields (pricing + base_qty) กลับเข้า form
- * เพื่อให้ payload (mapItemToPayload) และ summary อ่านได้
- *
- * Render-null — ติดตั้ง 1 ตัวต่อ item ที่ระดับ grid (ไม่ซ้ำ desktop/mobile)
- * จึงรัน setValue ครั้งเดียวต่อ item แทนที่จะซ้ำใน ItemRow + ItemCard
- */
-
-/**
- * เขียน derived fields (pricing + base_qty) กลับเข้า form
- * เพื่อให้ payload (mapItemToPayload) และ summary อ่านได้
- *
- * Render-null — ติดตั้ง 1 ตัวต่อ item ที่ระดับ grid (ไม่ซ้ำ desktop/mobile)
- * จึงรัน setValue ครั้งเดียวต่อ item แทนที่จะซ้ำใน ItemRow + ItemCard
- */
 export const PoItemComputedSync = memo(function PoItemComputedSync({
   control,
   form,

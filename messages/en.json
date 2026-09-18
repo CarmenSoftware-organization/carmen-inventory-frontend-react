@@ -454,7 +454,13 @@
     "sectionKpi": "Metrics",
     "sectionDistribution": "Distribution",
     "sectionComparison": "Comparison",
-    "sectionTrends": "Trends"
+    "sectionTrends": "Trends",
+    "gaugeEstimated": "(auto)",
+    "tableCol": {
+      "label": "Name",
+      "value": "Value",
+      "rank": "#"
+    }
   },
   "profileGate": {
     "loadingTitle": "Loading your workspace",
@@ -559,6 +565,7 @@
     "processing": "Processing...",
     "download": "Download",
     "select": "Select",
+    "assign": "Assign",
     "selectDate": "Select date",
     "single": "Single",
     "range": "Range",
@@ -602,7 +609,6 @@
     "duplicate": "Duplicate",
     "createDocument": "Create document",
     "createEntity": "Create {entity}",
-    "previous": "Previous",
     "formatJson": "Format",
     "workflowHistoryHint": "See who has handled this document"
   },
@@ -673,6 +679,7 @@
     "voided": "Voided",
     "void": "Voided",
     "sent": "Sent",
+    "sent_or_print": "Sent or print",
     "closed": "Closed",
     "saved": "Saved",
     "committed": "Committed",
@@ -864,7 +871,10 @@
     "noBusinessUnit": "No business unit selected — pick one from the top bar first.",
     "buSwitchFailed": "Could not switch business unit. Please try again.",
     "workflowInProgress": "Only the stages and their routing are locked while documents are in progress — approvers, products and the rest of the form can still be saved.",
-    "workflowStageNoActor": "That stage would be left with nobody able to approve, and documents are waiting there. Assign at least one person before saving."
+    "workflowStageNoActor": "That stage would be left with nobody able to approve, and documents are waiting there. Assign at least one person before saving.",
+    "dateOutsideOpenPeriod": "The receipt date is outside every open accounting period. Change the date, or ask accounting to open that period.",
+    "checkFields": "Check these fields again: {fields}",
+    "srDateOutsideOpenPeriod": "The requisition date is outside every open accounting period. Change the date, or ask accounting to open that period."
   },
   "validation": {
     "required": "{field} is required",
@@ -1060,6 +1070,8 @@
     "voidReason": "Void Reason",
     "voidReasonPlaceholder": "Enter reason for voiding this document",
     "unitCost": "Unit Cost",
+    "balance": "Balance",
+    "avgCost": "Avg Cost",
     "lossValue": "Loss Value",
     "totalQty": "Total Qty",
     "totalTime": "Total Time",
@@ -1123,6 +1135,8 @@
     "discPercent": "Disc %",
     "discAmt": "Disc Amt",
     "foc": "FOC",
+    "orderGrn": "Order / GRN",
+    "focGrn": "FOC / GRN",
     "focQty": "FOC Qty",
     "details": "Details",
     "expand": "Expand",
@@ -1143,7 +1157,6 @@
     "receivedQty": "Received Qty",
     "received": "Received",
     "returnQty": "Return",
-    "cnAmount": "CN Amount",
     "receivedAt": "Received At",
     "remaining": "Remaining",
     "receivedUnit": "Received Unit",
@@ -1511,10 +1524,10 @@
           "stat": "247 active users · 38 admins",
           "meta": "3 pending invitations"
         },
-        "period": {
-          "name": "Period",
-          "one": "Fiscal periods, close & reopen.",
-          "long": "Define fiscal months and quarters, freeze them at close, and reopen with a documented reason. Period status drives what every transaction screen will accept.",
+        "inventoryPeriod": {
+          "name": "Inventory Period",
+          "one": "Inventory periods, close & reopen.",
+          "long": "Define inventory months and quarters, freeze them at close, and reopen with a documented reason. Inventory period status drives what every transaction screen will accept.",
           "stat": "May 2026 · Open",
           "meta": "next close · 31 May"
         },
@@ -1678,7 +1691,7 @@
         "master_eco_label": "Master Eco Label",
         "notification_template": "Notification Template",
         "operation_plan_category": "Recipe Category",
-        "period": "Accounting Period",
+        "period": "Inventory Period",
         "period_end": "Period End",
         "physical_count": "Physical Count",
         "physical_count_period": "Physical Count Period",
@@ -1813,6 +1826,9 @@
     "workflow": {
       "entity": "Workflow",
       "title": "Workflow",
+      "titlePurchaseRequest": "Purchase Request Workflow",
+      "titlePurchaseOrder": "Purchase Order Workflow",
+      "titleStoreRequisition": "Store Requisition Workflow",
       "desc": "Who approves what, and in which order, before a document can go through.",
       "add": "New Workflow",
       "edit": "Edit Workflow",
@@ -2006,14 +2022,14 @@
       "advancedConfig": "Advanced (JSON)",
       "configUnreadable": "This format is not supported by the editor — edit it as JSON below."
     },
-    "period": {
-      "entity": "Period",
-      "title": "Period",
-      "desc": "Accounting periods — open one to post into, close it when the month is done.",
-      "add": "Add Period",
-      "deleteTitle": "Delete Period",
-      "deleteConfirm": "Are you sure you want to delete period FY{year}/M{month}? This action cannot be undone.",
-      "period": "Period",
+    "inventoryPeriod": {
+      "entity": "Inventory Period",
+      "title": "Inventory Period",
+      "desc": "Inventory periods — open one to post into, close it when the month is done.",
+      "add": "Add Inventory Period",
+      "deleteTitle": "Delete Inventory Period",
+      "deleteConfirm": "Are you sure you want to delete inventory period FY{year}/M{month}? This action cannot be undone.",
+      "period": "Inventory Period",
       "fiscalYear": "Fiscal Year",
       "fiscalMonth": "Fiscal Month",
       "startAt": "Start Date",
@@ -2022,7 +2038,7 @@
       "statusOpen": "Open",
       "statusClosed": "Closed",
       "statusLocked": "Locked",
-      "generateNext": "Generate next 12 periods"
+      "generateNext": "Generate next 12 inventory periods"
     },
     "configEmail": {
       "title": "Email Configuration",
@@ -2047,24 +2063,25 @@
     "notificationTemplate": {
       "entity": "Notification Template",
       "title": "Notification Template",
-      "desc": "The wording of the emails and alerts sent when a document moves along.",
+      "desc": "The wording of the in-app alerts sent when a document moves along.",
       "add": "Add Notification Template",
       "edit": "Edit Notification Template",
       "untitled": "Untitled Template",
       "deleteTitle": "Delete Notification Template",
       "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Good Received Note Approved",
-      "subjectPlaceholder": "Email subject (optional)",
       "bodyPlaceholder": "Message body — supports template variables",
-      "selectChannel": "Select channel",
       "sectionGeneralTitle": "General",
-      "sectionGeneralDesc": "Identify the template and the channel it is delivered through.",
+      "sectionGeneralDesc": "Name the template and choose whether it is in use.",
       "sectionMessageTitle": "Message content",
-      "sectionMessageDesc": "The subject and body sent to recipients. Supports template variables.",
+      "sectionMessageDesc": "What recipients see in their notifications. Supports template variables.",
       "colName": "Name",
-      "colChannel": "Channel",
-      "colSubject": "Subject",
-      "colBody": "Body"
+      "colBody": "Body",
+      "colMessage": "Message",
+      "insertVariable": "Insert:",
+      "previewNow": "now",
+      "previewUnknownVars": "No value is supplied for these — recipients will see them as-is:",
+      "previewTitle": "Preview"
     },
     "queryDataset": {
       "title": "Query Dataset"
@@ -2226,24 +2243,14 @@
         "port": "Port",
         "secure": "Implicit TLS",
         "password": "Password",
-        "passwordHint": "Leave unchanged to keep the stored password.",
         "senderSection": "Sender",
         "fromEmail": "From email",
         "fromName": "From name",
-        "replyTo": "Reply-to",
-        "defaultCc": "Default CC",
-        "defaultCcHint": "Separate multiple addresses with a comma, semicolon or space.",
-        "templateSection": "Templates",
-        "subjectTemplate": "Subject template",
-        "bodyTemplate": "Body template",
         "profileName": "Profile name",
         "secureHint": "Turn on for implicit TLS (usually port 465) — port 587 normally uses STARTTLS, so leave it off.",
         "passwordIsSet": "A password is set",
         "changePassword": "Change password",
-        "keepPassword": "Keep the stored password",
-        "note": "Note",
-        "notePlaceholder": "Internal note — never sent with the email",
-        "advancedSection": "Advanced settings"
+        "keepPassword": "Keep the stored password"
       },
       "test": {
         "title": "Send test email",
@@ -2251,6 +2258,46 @@
         "toLabel": "Send to",
         "send": "Send test",
         "invalidEmail": "Enter a valid email address"
+      }
+    },
+    "emailTemplate": {
+      "title": "Email Messages",
+      "desc": "Reusable subject and message templates for emailing purchase orders and pricing requests to vendors.",
+      "entity": "Email message",
+      "add": "Add message",
+      "empty": "No email messages yet. Add one so the send dialog starts from your own wording.",
+      "loadError": "Could not load email messages",
+      "table": {
+        "name": "Name",
+        "docType": "Document",
+        "subject": "Subject",
+        "status": "Status"
+      },
+      "docType": {
+        "po": "Purchase order",
+        "rfp": "Request for pricing"
+      },
+      "defaultBadge": "Default",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "\"{name}\" is now the default message",
+      "deleteTitle": "Delete email message",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "dialog": {
+        "templateName": "Message name",
+        "docType": "Document type",
+        "subject": "Subject",
+        "subjectPlaceholder": "e.g. Purchase order PO-2026-000123",
+        "body": "Message",
+        "insertVariable": "Insert variable",
+        "preview": "Preview",
+        "backToEdit": "Back to editing",
+        "defaultCc": "Default CC",
+        "defaultCcPlaceholder": "procurement@hotel.com, finance@hotel.com",
+        "note": "Note",
+        "enabled": "Enabled",
+        "insertIntoSubject": "Insert into subject"
       }
     }
   },
@@ -2569,7 +2616,16 @@
         "remove": "Remove {email}",
         "duplicateEmail": "Already added",
         "send": "Send",
-        "unavailable": "Not available yet"
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
+        "toRequired": "At least one recipient is required",
+        "sending": "Sending...",
+        "sendSuccess": "Price list request sent",
+        "sendFailed": "Could not send the price list request",
+        "sendPartial": "Sent, but these addresses were rejected: {emails}",
+        "unsavedRfp": "Save the request first, then send it to vendors",
+        "subjectBodyRequired": "Subject and message cannot be empty"
       }
     }
   },
@@ -2625,7 +2681,6 @@
       "tabNotStarted": "Not Started",
       "tabComplete": "Complete",
       "progress": "Progress",
-      "nItems": "{count} items",
       "count": "Count",
       "notCount": "Not count",
       "started": "Started {date}",
@@ -3458,6 +3513,7 @@
       "desc": "Requests to move stock from a store to a department — what was asked for, what was issued.",
       "add": "New Store Requisition",
       "noCreatableWorkflow": "None of the approval flows let you start a store requisition.",
+      "nItems": "{count} items",
       "edit": "Edit Store Requisition",
       "deleteTitle": "Delete Store Requisition",
       "deleteConfirm": "Are you sure you want to delete \"{srNo}\"? This action cannot be undone.",
@@ -3676,9 +3732,10 @@
       "fromTemplateDesc": "Use a saved template to save time and enforce best practices.",
       "selectTemplate": "Select Template",
       "selectTemplateDesc": "Choose a template to prefill your purchase request.",
+      "templateQtyDesc": "Set the quantity for this round. Items left at 0 are not included.",
       "noTemplates": "No Templates Available",
       "noTemplatesDesc": "Create a template to prefill your purchase request.",
-      "priceListComparison": "Price List Comparison",
+      "priceListComparison": "Price Comparison",
       "priceListLoadFailed": "Failed to load price lists",
       "noPriceList": "No Price List Found",
       "noPriceListDesc": "No price list found for this item.",
@@ -3699,6 +3756,8 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
+      "lots": "Lots",
+      "movements": "Movements",
       "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
@@ -3710,11 +3769,7 @@
         "healthy": "Healthy",
         "low": "Low Stock",
         "critical": "Critical"
-      },
-      "priceAlertTitle": "{pct}% higher than last received",
-      "priceAlertLastCost": "Last received at {cost}",
-      "priceAlertCheaper": "· {price} available",
-      "priceAlertCheaperDetail": "{vendor} offers {price} — {pct}% cheaper"
+      }
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
@@ -3726,6 +3781,7 @@
       "deleteConfirm": "Are you sure you want to delete template \"{name}\"? This action cannot be undone.",
       "notFound": "Template not found",
       "addItem": "Add Item",
+      "selectWorkflowFirst": "Select a workflow first, then add items.",
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this template.",
       "removeItem": "Remove Item",
@@ -3741,6 +3797,12 @@
       "desc": "Orders placed with vendors — what was ordered, at what price, and how much has arrived.",
       "add": "New Purchase Order",
       "noCreatableWorkflow": "None of the approval flows let you start a purchase order.",
+      "confirmCreateTitle": "Create purchase orders?",
+      "crossWorkflowTitle": "Requests use different approval flows",
+      "crossWorkflowDesc": "Requests grouped into one purchase order must share an approval flow. Continue and only the requests on {workflow} stay selected.",
+      "confirmCreateDesc": "{poCount} purchase orders will be created from {prCount} purchase requests. Requests that go in cannot be picked again.",
+      "createdPoTitle": "{count} purchase orders created",
+      "createdPoDesc": "From {prCount} purchase requests · {detailCount} lines",
       "edit": "Edit Purchase Order",
       "type": "Type",
       "breadcrumb": "Procurement / Purchase Orders",
@@ -3883,6 +3945,9 @@
         "desc": "Email {poNo} to the vendor with the PO attached as a PDF.",
         "profile": "Sender profile",
         "profilePlaceholder": "Select a sender profile",
+        "template": "Message template",
+        "templatePlaceholder": "Select a message",
+        "insertVariable": "Insert variable",
         "noProfiles": "No enabled email profile is set up for this business unit yet.",
         "goToSettings": "Go to email profile settings",
         "loadError": "Could not load email profiles",
@@ -3908,6 +3973,11 @@
       }
     },
     "creditNote": {
+      "tabItems": "Items",
+      "tabStock": "Stock Movement",
+      "stockComingSoon": "Stock movement is not available yet",
+      "stockNeedsCompleted": "Stock movement shows after this credit note is completed",
+      "netOrCnAmount": "Net/CN amount",
       "entity": "Credit Note",
       "title": "Credit Note",
       "desc": "Goods or money claimed back from a vendor after delivery — returns and price corrections.",
@@ -3960,10 +4030,8 @@
       "selectGrnFirst": "Select a GRN first — items are picked from its received lines.",
       "nItemsSelected": "{count} selected",
       "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
-      "cnAmount": "CN Amount",
       "submitTitle": "Submit Credit Note",
-      "submitConfirm": "This will submit the credit note for approval. Are you sure?",
-      "returnLine": "Return"
+      "submitConfirm": "This will submit the credit note for approval. Are you sure?"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",
@@ -3992,11 +4060,18 @@
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this goods receive note.",
       "removeItem": "Remove Item",
-      "deleteProduct": "Delete Product",
+      "removeItemConfirm": "Remove \"{product}\" at {location} from this receipt?",
+      "removeItemConfirmNoLocation": "Remove \"{product}\" from this receipt?",
+      "removeItemUntitled": "line #{index}",
       "tabItems": "Items",
       "tabDetail": "Detail",
       "tabPayment": "Payment",
       "tabExtraCost": "Extra Cost",
+      "tabStock": "Stock Movement",
+      "refDocs": "Source documents",
+      "refDocsComingSoon": "Source documents for this line are not available yet",
+      "stockComingSoon": "Stock movement is not available yet",
+      "stockNeedsCommitted": "Stock movement shows after this receipt is committed",
       "docInfo": "Document Information",
       "docType": "Document Type",
       "purchaseOrder": "Purchase Order",
@@ -4093,7 +4168,7 @@
       "poCount": "{count} PO(s)",
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
-      "deleteProductLine": "Remove this product and all its locations"
+      "deleteProductLine": "Remove this line"
     },
     "approval": {
       "entity": "Approval",
@@ -4146,11 +4221,29 @@
       "chartType": {
         "label": "Chart type",
         "kpi": "Number",
+        "gauge": "Gauge",
         "pie": "Pie",
         "bar": "Bar",
         "line": "Line",
         "area": "Area",
         "table": "Table"
+      },
+      "display": {
+        "section": "Appearance",
+        "size": "Size (columns × rows)",
+        "sizeOption": "{width} × {height}",
+        "decimals": "Decimals",
+        "min": "Scale from",
+        "max": "Scale to",
+        "maxPlaceholder": "auto",
+        "threshold": "Warn above",
+        "thresholdColor": "Warning colour",
+        "color": {
+          "chart-4": "Amber",
+          "chart-2": "Teal",
+          "chart-1": "Blue",
+          "destructive": "Red"
+        }
       }
     },
     "greeting": {
@@ -4630,7 +4723,8 @@
     "workflowStoreRequisition": "Store Requisition",
     "interface": "Interfaces",
     "emailProfile": "Email Profiles",
-    "period": "Period",
+    "emailTemplate": "Email Messages",
+    "inventoryPeriod": "Inventory Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",
     "activityLog": "Activity Monitor",
