@@ -665,21 +665,24 @@ export const moduleList: ModuleDto[] = [
       {
         name: "interface",
         path: "/system-admin/interface",
-        licenseFeature: "configuration.app_config", // config:app-config
+        // ย้ายจาก `configuration.app_config` (2026-09-20) — Interface ขายแยกผ่านใบ INF
+        // (`tb_business_unit_interface_license`) ไม่ใช่กลุ่มของสัญญา ดู spec
+        // docs/superpowers/specs/2026-09-20-app-config-license-split-design.md
+        licenseFeature: "interface",
         icon: Cable,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailProfile",
         path: "/system-admin/email-profile",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_profile",
         icon: Mail,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailTemplate",
         path: "/system-admin/email-template",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_template",
         icon: MailOpen,
         permission: PERMISSIONS.system_configuration.view,
       },
