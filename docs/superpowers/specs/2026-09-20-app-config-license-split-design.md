@@ -164,11 +164,15 @@ service ไปเรียก license ของ BU มาคำนวณ (ทา
 ได้ความปลอดภัยแถมมาด้วย: วันนี้ dialog ได้ `smtp.host/port/username` ติดมาด้วย
 (password ถูก mask เป็น `***ENCRYPTED***` แต่ที่เหลือไม่ได้ mask) เส้นใหม่ปิดช่องนั้น
 
-สองเส้นนี้อยู่นอกขอบเขต license แต่ **ไม่ได้อยู่นอกขอบเขต permission** — ยังต้อง
-ผ่าน guard ปกติด้วย permission ที่หน้าส่งอีเมลใช้อยู่แล้ว (`procurement.purchase_order.*`
-/ `vendor_management.request_price_list.*`) ไม่ใช่เปิดให้ทุกคนที่ล็อกอิน
+สองเส้นนี้ผ่าน `KeycloakGuard` อย่างเดียว — **ไม่มี `PermissionGuard` และไม่มี `AppIdGuard`**
+ซึ่งตรงกับ controller ของ app-config ที่มันห่ออยู่ (และกับอีกราว 40 controller ใน
+`application/`) จึงไม่ใช่การถอยหลัง · แต่ประโยคเดิมของสเปกที่ว่า "ยังต้องผ่าน permission
+guard" และที่สั่งให้ไปเติม `seed.application-api.data.ts` **เขียนเกินจริง** — ไม่มี `api_name`
+ให้ allowlist บังคับได้เลย ตัดขั้นนั้นออกจาก checklist ได้ · ความเสี่ยงต่ำเพราะสิ่งที่คืนคือ
+ชื่อ/อีเมลผู้ส่งกับข้อความตั้งต้น ไม่มีความลับ · ถ้าวันหน้าต้องบังคับ app-id ต้องเติม
+`AppIdGuard` แล้ว regenerate app-api catalog ซึ่งผูก deploy เพิ่มโดยไม่จำเป็นตอนนี้
 
-ก่อน deploy ต้องตรวจ allowlist `api_name` ของ app-id ที่ FE ใช้
+เดิมเขียนไว้ว่าต้องตรวจ allowlist `api_name` ของ app-id ที่ FE ใช้
 (`seed.application-api.data.ts`) — แอปที่ `allow_all: true` ไม่ต้องเติม แต่
 `mobile-app` เป็น `allow_all: false` ถ้าวันหลังต้องเรียกต้องเติมก่อน มิฉะนั้น
 ผู้ใช้จะถูกเด้งออกหน้า login ไม่ใช่แค่ฟีเจอร์ไม่ขึ้น
@@ -198,16 +202,34 @@ service ไปเรียก license ของ BU มาคำนวณ (ทา
 
 ลำดับที่ไม่มีหน้าต่างเสี่ยง:
 
+0. **merge PR ฝั่ง FE เข้า `main` ก่อน แล้วค่อย merge ฝั่ง BE** — บังคับ ไม่ใช่คำแนะนำ
+   `scripts/audit-fe-license-fixture/run.ts` ของรีโป backend อ่าน fixture จาก **main ของ
+   รีโป FE** เปิด PR ฝั่ง BE ก่อนจะทำให้ CI แดงว่า fixture ขาดสองคีย์ แล้วคนไล่หาสาเหตุ
+   ผิดทาง (merge ≠ deploy — deploy เป็น manual ทั้งสองรีโป)
 1. `db:seed.license-feature` ของ env นั้น (เพิ่มสองคีย์ใหม่เข้า catalog) — ทำได้
    ทันที ไม่มีผลอะไรเพราะยังไม่มี route ผูกกับคีย์
 2. carmen-platform: ใส่ `configuration.email_profile` + `configuration.email_template`
    เข้ากลุ่มของสัญญาให้ **ทุก BU** และออกใบ INF ให้ BU ที่ควรได้ Interface
-3. ตรวจผ่าน `/api/license` ว่า `features[]` ของทุก BU มีคีย์ใหม่ครบ
+   **ห้ามลอกชื่อกลุ่มจาก dev** — หาเองว่า env นั้นคีย์ `configuration.app_config` อยู่ในกลุ่มไหน
+   แล้วเติมสองคีย์ใหม่เข้ากลุ่มเดียวกัน (ให้สิทธิ์เท่าที่แต่ละ BU มีอยู่เดิมเป๊ะ ไม่แจกเกิน)
+   **กลุ่มที่สร้างใหม่ในอนาคตจะไม่มีสองคีย์นี้ติดมาเอง** — BU ใหม่จะเสียหน้า Email
+   Profile/Template เงียบ ๆ ควรเพิ่มเข้า checklist ของการสร้างกลุ่ม
+   **Interface เสี่ยงกว่า email มาก**: วันนี้ทุก BU บน UAT/prod เห็นเมนู Interface ผ่าน
+   `configuration.app_config` หลัง deploy จะเหลือเฉพาะ BU ที่ถือใบ INF ซึ่ง §6 ระบุว่า
+   ยังไม่เคยออกใบให้ใครบน UAT/prod เลย ⇒ ข้ามขั้นนี้ = เมนูหายทั้ง environment
+3. ตรวจผ่าน `/api/license` ว่า `features[]` ของทุก BU มีคีย์ใหม่ครบ — **และตรวจสายของ
+   interface ให้ครบด้วย** ไม่ใช่แค่สองคีย์ email: BU ที่ควรได้ Interface ต้องเห็นทั้งคีย์ราก
+   `interface` และคีย์ราย brand ครบสาย (เช่น `interface`, `interface.pos`, `interface.pos.micros`)
 4. deploy backend (route map + list filter + lookup สองเส้น)
 5. deploy frontend
 
 ขั้น 1–3 ไม่เปลี่ยนพฤติกรรมของระบบที่รันอยู่เลย ย้อนกลับได้ทุกเมื่อ · จุดที่
 เปลี่ยนจริงคือขั้น 4
+
+**แต่หลังขั้น 5 ย้อนกลับเดี่ยว ๆ ไม่ได้อีกแล้ว** — rollback BE ตัวเดียวจะทำให้ dialog
+ส่งอีเมลของ PO และ RFP พังทันที เพราะ FE ใหม่ยิง `/api/{bu}/email-senders` ที่ไม่มีใน
+BE เก่า ได้ 404 แล้วตีเป็น "ยังไม่ตั้งค่า" ⇒ ไม่มีผู้ส่งให้เลือก · หลังขั้น 5 ต้อง
+rollback เป็นคู่เสมอ
 
 ## 6. สถานะบน dev ณ วันเขียน
 
@@ -254,3 +276,8 @@ dialog ส่งอีเมลของ PO กับ RFP ด้วยบัญ�
   หมดอายุจะไม่ได้สิทธิ์ interface แม้ถือใบ INF ที่ยังไม่หมด (ตั้งใจตามสเปก 2026-09-09)
 - **list endpoint filter เป็น breaking change เงียบ ๆ** สำหรับผู้เรียกนอก FE ที่
   พึ่งคีย์ทั้งสามจาก list ต้องไล่ให้ครบก่อน
+- **ด่าน license ของคีย์ที่แยกออกมาอยู่ที่ URL เท่านั้น** — `ConfigAppConfigService.get()`
+  ไม่มีอะไรครอบ `email_profiles`/`email_templates` ที่ระดับ service (มีแค่
+  `assertInterfaceEntitled()` ที่ครอบ `interface_*`) โมดูลไหนที่ import service นี้อ่านได้
+  เต็มก้อนภายใต้ license ของ route ตัวเอง · งานนี้ใช้ช่องนั้นอย่างตั้งใจเพื่อให้ lookup
+  อยู่ใต้ `configuration.app_config` แต่คนถัดไปต้องรู้ก่อน reuse

@@ -30,8 +30,11 @@ endpoint ในหน้า Interface และเปลี่ยน dialog ไ�
   - `check.endpoint-permission-coverage.ts` exit 1 อยู่แล้ว · เกณฑ์ผ่าน = `MISSING_PERMISSION = 0`
     และ `UNMAPPED_SEGMENT` ยังเป็น 5 ตัวเดิม (app:periods, app:product-locations,
     config:app-user-config, config:products-location-workflow, config:users)
-  - `bun test apps/backend-gateway/src/license` แดง 3 เทสต์อยู่แล้วจาก `jest.isolateModules`
-    ที่ bun ไม่ implement · เกณฑ์ผ่าน = ไม่เพิ่มจาก 3
+  - **BE runner จริงคือ `jest` ไม่ใช่ `bun test`** (`apps/backend-gateway/package.json:22`)
+    ใช้ `npx jest <path>` · **baseline เขียว 100%** (`npx jest src/license` = 124/124)
+    ⚠️ ฉบับแรกของแผนเขียนผิดว่า "แดง 3 ตัวเป็น baseline" — นั่นเป็น artifact ของการรัน
+    `bun test` กับ suite ที่เขียนสำหรับ jest (`jest.isolateModules` ที่ bun ไม่ implement)
+    **อย่ายอมรับเทสต์แดงด้วยเหตุผลนี้อีก**
   - `check.license-catalog-drift.ts` **ต้อง exit 0 จริง**
 - `turbo run build` ของ gateway ใช้ SWC ที่ strip type ทิ้ง **ไม่ใช่ด่าน type** ต้องรัน
   `bunx tsc --noEmit` เอง
@@ -524,13 +527,10 @@ cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
 grep -n "name: '\|allow_all" packages/prisma-shared-schema-platform/prisma/seed.application-api.data.ts | head -20
 ```
 
-แอปที่ FE inventory ใช้ต้องเป็น `allow_all: true` (`website`) ถ้าไม่ใช่ **ต้องเติม
-`api_name` ของสอง endpoint ใหม่ให้แอปนั้นก่อน deploy** ไม่งั้นผู้ใช้จะถูกเด้งออกหน้า
-login ไม่ใช่แค่ฟีเจอร์ไม่ขึ้น · `mobile-app` เป็น `allow_all: false` แต่ยังไม่เรียก
-สองเส้นนี้ จึงยังไม่ต้องเติม
-
-ถ้าต้องเติม allowlist จริง ให้รัน `bun prisma/check.application-api-drift.ts` ต่อท้ายด้วย
-และต้อง exit 0
+**ผลที่ตรวจจริงหลังทำเสร็จ: ขั้นนี้ไม่จำเป็นเลย** — controller ใหม่มีแค่ `KeycloakGuard`
+ไม่มี `AppIdGuard` จึงไม่มี `api_name` ให้ allowlist บังคับได้ (เหมือน controller ของ
+app-config ที่มันห่ออยู่) `audit:app-api-catalog-drift` เขียวโดยไม่ต้องแตะอะไร
+เก็บย่อหน้านี้ไว้เป็นบันทึกว่าเคยกังวลแล้วตรวจแล้ว ไม่ใช่งานค้าง
 
 - [ ] **Step 6: typecheck + ด่าน coverage**
 
@@ -982,6 +982,12 @@ git commit -m "feat(email): dialog ส่งอีเมลอ่านผู้
 > ลำดับนี้สลับจากสูตรสามขั้นใน CLAUDE.md โดยตั้งใจ — เหตุผลอยู่ใน spec §5
 > `LICENSE_ENFORCEMENT` เปิดอยู่จริงทุก environment ลำดับนี้จึงไม่ใช่คำแนะนำแต่เป็นข้อบังคับ
 
+- [ ] **Step 0: merge PR ฝั่ง FE เข้า `main` ก่อน แล้วค่อย merge ฝั่ง BE**
+
+บังคับ ไม่ใช่คำแนะนำ — `scripts/audit-fe-license-fixture/run.ts` ของรีโป backend อ่าน
+fixture จาก **main ของรีโป FE** เปิด PR ฝั่ง BE ก่อนจะทำให้ CI แดงว่า fixture ขาดสองคีย์
+แล้วคนไล่หาสาเหตุผิดทาง · merge ≠ deploy (deploy เป็น manual ทั้งสองรีโป)
+
 - [ ] **Step 1: seed catalog ของ environment นั้น**
 
 ```bash
@@ -1021,6 +1027,10 @@ Expected: `ok: true` ทุก BU ที่ควรได้ · **ถ้าม�
 ออกจาก list แล้ว แต่ FE รุ่นเก่ายังอ่านสถานะจาก list อยู่ (`interface-list.tsx:47,55`)
 เป็นเรื่องการแสดงผลล้วน ไม่มีข้อมูลเสียหายและไม่มีใครถูกตัดสิทธิ์ แต่ต้องรู้ไว้ก่อนว่า
 **ถ้ามีคนเปิดหน้านั้นระหว่างสองขั้นนี้ เขาจะเห็นข้อมูลที่ผิด** — อย่าปล่อยให้คั่นข้ามคืน
+
+**หลังขั้นนี้ rollback เดี่ยว ๆ ไม่ได้อีกแล้ว** — rollback BE ตัวเดียวจะทำให้ dialog ส่งอีเมล
+ของ PO และ RFP พังทันที (FE ใหม่ยิง `/api/{bu}/email-senders` ที่ไม่มีใน BE เก่า → 404 →
+ตีเป็น "ยังไม่ตั้งค่า" → ไม่มีผู้ส่งให้เลือก) ต้อง rollback เป็นคู่เสมอ
 
 - [ ] **Step 6: ตรวจหลัง deploy**
 
