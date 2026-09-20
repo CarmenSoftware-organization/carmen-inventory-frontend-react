@@ -146,10 +146,14 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
   `LICENSE_ROUTE_FEATURES` ของ backend เท่านั้น และ
   `constant/module-list.license-feature.test.ts` จะแดงถ้า key ที่ผลิตได้ไม่มีใน catalog
   (สำเนา catalog อยู่ที่ `constant/__fixtures__/license-catalog.ts` พร้อมวิธีอัปเดต)
-- **สวิตช์ `LICENSE_ENFORCEMENT` ต้องเปิดเองตอน rollout** — เป็น optional key ใน
-  `RuntimeConfig` (`lib/runtime-config.ts`), default `false` (shadow mode: banner/ปุ่ม
-  เขียนไม่ล็อกอะไรเลยแม้ `state` จะเป็น `expired`/`inactive`/`none`) ไฟล์
-  `public/config.{local,dev,uat,prod}.json` ของแต่ละ environment จริงถูก **gitignore**
-  (`public/config*.json` ยกเว้น `public/config.sample.json` ซึ่งมีคีย์นี้เป็นตัวอย่างอยู่แล้ว)
-  จึงต้อง**เติมคีย์ `LICENSE_ENFORCEMENT: true` ด้วยมือ** ในไฟล์ config ของ environment
-  นั้นเมื่อพร้อมเปิดใช้งานจริง — ไม่มีทางเปิดผ่าน env var หรือ build flag
+- **`LICENSE_ENFORCEMENT` เปิดอยู่จริงแล้วทุก environment** (ตรวจ 2026-09-20) — เป็น
+  optional key ใน `RuntimeConfig` (`lib/runtime-config.ts`) ที่ default `false`
+  (shadow mode) แต่ `public/config.{local,dev,uat,prod}.json` **ตั้ง `true` ครบทุกไฟล์
+  แล้ว** ไฟล์พวกนี้ถูก gitignore (`public/config*.json` ยกเว้น `public/config.sample.json`)
+  จึงอ่านจากรีโปไม่เห็น — **อย่าอ่านค่า default ว่า "ยังไม่มีผล"** และไม่มีทางเปิด/ปิด
+  ผ่าน env var หรือ build flag ต้องแก้ที่ไฟล์ config ของ environment นั้น
+  ผลที่ตามมา: การผูก leaf กับ **license feature key ใหม่ล็อกหน้านั้นทันทีที่ deploy**
+  สำหรับ BU ที่ยังไม่ถูก assign feature การเพิ่มคีย์ระดับ resource จึงต้องทำสามขั้นตาม
+  ลำดับเสมอ — deploy backend → `db:seed.license-feature` ของ env นั้น → assign feature
+  ให้ทุก BU ที่ carmen-platform → ค่อย deploy FE (ตรวจงาน license ในเครื่องด้วยการสลับ
+  `LICENSE_ENFORCEMENT` เป็น `false` ชั่วคราวแล้วคืนค่า)
