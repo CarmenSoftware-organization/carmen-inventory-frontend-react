@@ -34,13 +34,15 @@ function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
  * การ map มั่วจึงล็อกหน้าที่ backend ไม่เคยบล็อก ซึ่งแย่กว่าไม่ map
  *
  * **ตอนนี้ว่าง** — เดิมมี 11 รายการ (`/procurement/approval`, `/config/chart-of-accounts`,
- * `/config/account-mapping` และ `/accounting/*` ทั้งกลุ่ม) ซึ่งกลายเป็นรูโหว่จริงบนหน้าจอ:
+ * `/config/chart-of-account-mapping` และ `/accounting/*` ทั้งกลุ่ม) ซึ่งกลายเป็นรูโหว่จริงบนหน้าจอ:
  * leaf ที่ผลิต key ไม่ได้จะ `locked: false` เสมอ และเพราะ parent locked ก็ต่อเมื่อลูก locked
  * หมด ลูกที่หลุดตัวเดียวจึงปลดล็อกหัวข้อทั้งโมดูล — BU ที่ไม่มี license เลยยังเห็น
  * Procurement / Config / Accounting เป็นเมนูใช้งานได้ ทั้งสามจึงถูกผูกคีย์แล้ว โดยใช้
  * **ชื่อคีย์จาก catalog ตรง ๆ เท่านั้น** ไม่มีการเดา: ตัวที่ catalog ไม่มีคีย์ระดับ resource
- * (`/procurement/approval`, `/config/account-mapping`) ผูกคีย์ระดับ module ตามกติกาเดิม
- * ของ `/config/shelf` → `"configuration"`
+ * (`/procurement/approval`) ผูกคีย์ระดับ module ตามกติกาเดิมของ `/config/shelf` →
+ * `"configuration"` ส่วน `/config/chart-of-account-mapping` ได้คีย์ระดับ resource ของ
+ * ตัวเองแล้ว (`configuration.chart_of_account_mapping` มาจาก `LICENSE_ONLY_RESOURCES`
+ * ของ backend — ขายได้ทั้งที่ยังไม่มี endpoint)
  *
  * เพิ่มรายการใหม่ได้ แต่ต้องเขียนเหตุผลว่าทำไม catalog ถึงไม่มีคีย์ให้ผูก และต้องรู้ว่า
  * มันปลดล็อกหัวข้อโมดูลทั้งก้อนไปด้วย

@@ -88,8 +88,15 @@ export const router = createBrowserRouter([
                   import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
+                path: "chart-of-account-mapping",
+                lazy: () =>
+                  import("./config/chart-of-account-mapping/coam.route"),
+              },
+              // path เดิมก่อนเปลี่ยนชื่อหน้า — คง redirect ไว้ให้ bookmark เก่าไม่ 404
+              // ถอดออกได้หลังปล่อยไปแล้วหนึ่งรอบ release
+              {
                 path: "account-mapping",
-                lazy: () => import("./config/account-mapping/am.route"),
+                element: <Navigate to="/config/chart-of-account-mapping" replace />,
               },
               { path: "unit", lazy: () => import("./config/unit/unit.route") },
               {

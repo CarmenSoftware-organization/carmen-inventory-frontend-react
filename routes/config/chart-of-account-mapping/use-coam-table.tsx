@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
-import type { AccountMappingRow, CodeName } from "@/types/account-mapping";
+import type { AccountMappingRow, CodeName } from "@/types/chart-of-account-mapping";
 
 const codeNameCell = (value: CodeName) =>
   value.code || value.name ? (
@@ -20,7 +20,7 @@ const codeNameCell = (value: CodeName) =>
     <span className="text-muted-foreground">—</span>
   );
 
-interface UseAmTableOptions {
+interface UseCoamTableOptions {
   data: AccountMappingRow[];
 }
 
@@ -33,11 +33,11 @@ interface UseAmTableOptions {
  * @param options - data ของตาราง
  * @returns TanStack table instance
  */
-export function useAmTable({ data }: UseAmTableOptions) {
+export function useCoamTable({ data }: UseCoamTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
-  const t = useTranslations("config.accountMapping");
+  const t = useTranslations("config.chartOfAccountMapping");
   const { dateTimeFormat } = useProfile();
 
   const columns: ColumnDef<AccountMappingRow>[] = [
