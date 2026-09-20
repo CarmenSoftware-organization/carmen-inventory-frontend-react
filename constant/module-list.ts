@@ -140,7 +140,11 @@ export const moduleList: ModuleDto[] = [
       {
         // กล่องอนุมัติรวม PR/PO/SR ยิง /api/my-pending ซึ่งไม่อยู่ใน
         // LICENSE_ROUTE_FEATURES จึงไม่มีคีย์ระดับ resource ให้ผูก — ใช้คีย์ระดับ
-        // module ของ Procurement แทน (กติกาเดียวกับ /config/shelf → "configuration")
+        // module ของ Procurement แทน
+        //
+        // เกณฑ์คือ "backend ไม่มีคีย์ให้ผูกจริง ๆ" ไม่ใช่ "ยังไม่ได้หา" — ถ้า catalog
+        // มีคีย์ระดับ resource อยู่ ต้องผูกคีย์นั้น ไม่งั้นเมนูเปิดได้แต่ API ตอบ 403
+        // (เคยเกิดกับ /config/shelf ที่เคยถูกยกเป็นตัวอย่างตรงนี้)
         name: "myApproval",
         path: "/procurement/approval",
         licenseFeature: "procurement",
@@ -517,9 +521,12 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.product_management.unit.view,
       },
       {
+        // permission คือ `configuration.shelf` แต่ license catalog เรียกมันว่า
+        // `configuration.location_shelf` — เคส key คนละ namespace จึงต้องระบุ
+        // `licenseFeature` เอง (`featureKeyOf(permission)` ผลิตคีย์ที่ catalog ไม่มี)
         name: "shelf",
         path: "/config/shelf",
-        licenseFeature: "configuration",
+        licenseFeature: "configuration.location_shelf",
         icon: Rows3,
         permission: PERMISSIONS.configuration.shelf.view,
       },
