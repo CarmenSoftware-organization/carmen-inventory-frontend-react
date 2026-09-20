@@ -19,8 +19,18 @@ Per-BU config for connections to external systems — **Accounting**, **POS**, *
   `secretPathsByKey` registry; a never-configured interface returns `{ enabled: false }`
   (not 404). **Prod/UAT must set `SECRET_ENCRYPTION_KEY`** or any secret-bearing save (incl.
   the pre-existing `report_email`) 400s.
-- **List-envelope gotcha:** the app-config *list* endpoint returns `{ data: { items, count } }`
-  — the array is at `json.data.items`, NOT `json.data` (which is the array only in a mental
-  model, never in reality). The *single-key* GET's `json.data` IS the row. `useAppConfigs`
-  reads `.items`; any new list hook must too. A test mocking a bare `{ data: [...] }` passes
-  while the real page crashes — verify list features in a real browser.
+- **The list page (`interface-list.tsx`) no longer calls the list endpoint.** It reads every
+  brand's config one key at a time via `use-interface-configs.ts` (plural — distinct from the
+  per-interface `use-interface-config.ts` above; fires one `useAppConfigByKey`-style query per
+  brand via `useQueries`) — moved off `useAppConfigs()` on 2026-09-20 because the backend
+  stopped returning `interface_*` keys from `GET /app-config` (that list maps to the shared
+  `configuration.app_config` license; the three groups split out — `email_profiles`,
+  `email_templates`, `interface_*` — now each have their own feature and are read one key at a
+  time instead). `useAppConfigs()` itself still exists (kept for `GET /app-config`'s other
+  callers) but has no caller left in this app besides its own test.
+- **List-envelope gotcha (for other list callers, not this page):** the app-config *list*
+  endpoint still returns `{ data: { items, count } }` for the keys it does return — the array
+  is at `json.data.items`, NOT `json.data` (which is the array only in a mental model, never
+  in reality). The *single-key* GET's `json.data` IS the row. Any hook that still reads the
+  list must unwrap `.items`. A test mocking a bare `{ data: [...] }` passes while the real page
+  crashes — verify list features in a real browser.

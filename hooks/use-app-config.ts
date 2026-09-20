@@ -38,8 +38,14 @@ export function useAppConfigByKey(key: string | undefined) {
 /**
  * Hook ดึง app config ทั้งหมดของ business unit ปัจจุบัน
  *
- * ใช้ในหน้า list ที่ต้องรู้สถานะของหลาย key พร้อมกัน (เช่น interface list ที่โชว์
- * badge enabled/disabled ต่อ interface) แทนการยิง `useAppConfigByKey` ทีละ key
+ * ไม่มีผู้เรียกในแอปนี้แล้ว (เหลือแค่ `hooks/__tests__/use-app-config.test.ts`) — หน้า
+ * interface ที่เคยใช้ hook นี้ย้ายไปอ่านรายคีย์ผ่าน `use-interface-configs.ts` แทนเมื่อ
+ * 2026-09-20 เพราะ list endpoint (`GET /app-config`) ผูกกับ license `configuration.app_config`
+ * ก้อนเดียว ในขณะที่ backend ตัดคีย์ `interface_*` ออกจาก list ไปแล้ว (มี license feature
+ * ของตัวเอง) — เรียกทางนี้จึงไม่มีทางเห็นคีย์ interface อีกต่อไป
+ *
+ * เก็บฟังก์ชันนี้ไว้เพราะ endpoint `GET /app-config` ยังมีอยู่จริงและ god-mode ยังเรียกได้
+ * (ไม่ได้ตายเพราะ endpoint หาย แค่ไม่มีใครในแอปนี้ต้องใช้ list ก้อนรวมแล้ว)
  *
  * @returns query ที่คืน `AppConfig[]`
  */

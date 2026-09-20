@@ -1,7 +1,8 @@
-import { useAppConfigByKey, useUpsertAppConfig } from "@/hooks/use-app-config";
+import { useAppConfigByKey } from "@/hooks/use-app-config";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { QUERY_KEYS } from "@/constant/query-keys";
 import { ApiError } from "@/lib/api-error";
 import {
   EMAIL_PROFILES_CONFIG_KEY,
@@ -45,7 +46,21 @@ export interface TestEmailProfileResponse {
  */
 export function useEmailProfiles() {
   const query = useAppConfigByKey(EMAIL_PROFILES_CONFIG_KEY);
-  const upsert = useUpsertAppConfig();
+  // ใช้ useApiMutation ตรงแทน useUpsertAppConfig ทั่วไป (แทนที่จะแก้ useUpsertAppConfig
+  // ให้รวม EMAIL_SENDERS เข้าไปด้วย เพราะฟังก์ชันนั้นถูกใช้เขียน saved view ทุกครั้ง —
+  // ใส่ไว้ตรงนั้นจะกลายเป็น refetch ฟรีทั้งแอปทุกจุดที่เรียก ไม่ใช่แค่หน้านี้)
+  //
+  // ต้อง invalidate ["email-senders", buCode] เพิ่มจาก ["app-configs", ...] เดิม เพราะ
+  // useEmailSenders() (dialog ส่ง PO) อ่านคีย์ "email_profiles" ก้อนเดียวกันนี้ผ่าน hook/
+  // cache key คนละตัว (CACHE_STATIC = staleTime 30 นาที) — ถ้า invalidate แค่ app-configs
+  // แอดมินแก้โปรไฟล์เสร็จแล้วเปิด dialog ส่ง PO ใน session เดียวกันจะยังเห็นของเก่านานถึง
+  // 30 นาที (ก่อนหน้านี้สองหน้าใช้ cache entry เดียวกัน จึง invalidate ทันทีโดยไม่ต้องทำอะไรพิเศษ)
+  const upsert = useApiMutation<{ key: string; value: Record<string, unknown> }>({
+    mutationFn: ({ key, value }, buCode) =>
+      httpClient.put(API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode, key), { value }),
+    invalidateKeys: [QUERY_KEYS.APP_CONFIGS, QUERY_KEYS.EMAIL_SENDERS],
+    errorMessage: "Failed to save app config",
+  });
   const test = useApiMutation<{ profile_id: string; to: string }, TestEmailProfileResponse>({
     mutationFn: (data, buCode) =>
       httpClient.post(
