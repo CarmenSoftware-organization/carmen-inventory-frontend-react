@@ -22,10 +22,23 @@ endpoint ในหน้า Interface และเปลี่ยน dialog ไ�
 - **ไม่เขียนไฟล์เทสต์ใหม่** ตามกติกาการทำงานของเจ้าของรีโป — ข้ามขั้น "เขียนเทสต์ให้แดงก่อน"
   ทุกขั้นในทุก task · เทสต์ชุดที่มีอยู่และด่าน drift ต้องเขียว 100% ก่อน commit
   (subagent ที่รับ task ไปทำ **ต้องถูกบอกข้อนี้ตรง ๆ** มันไม่ได้สืบทอดมาเอง)
-- **static check ไม่ใช่เทสต์ — ยังต้องรัน**: `bunx tsc --noEmit` และ lint ทุก task
+- **static check ไม่ใช่เทสต์ — ยังต้องรัน** ทุก task · **คำสั่งต่างกันตามรีโป**:
+  - BE: `bunx tsc --noEmit -p apps/backend-gateway/tsconfig.json` (รันที่รากได้ ~16k error
+    ของเดิมที่ไม่เกี่ยวกับงานนี้) **baseline = 1 error** (TS6059 ที่ `verify-swagger.spec.ts`)
+  - FE: `bunx tsc --noEmit` + `bun run lint`
+- **baseline ของด่านตรวจฝั่ง BE ไม่ใช่ศูนย์** — เทียบกับค่าพวกนี้ ไม่ใช่กับ exit 0:
+  - `check.endpoint-permission-coverage.ts` exit 1 อยู่แล้ว · เกณฑ์ผ่าน = `MISSING_PERMISSION = 0`
+    และ `UNMAPPED_SEGMENT` ยังเป็น 5 ตัวเดิม (app:periods, app:product-locations,
+    config:app-user-config, config:products-location-workflow, config:users)
+  - `bun test apps/backend-gateway/src/license` แดง 3 เทสต์อยู่แล้วจาก `jest.isolateModules`
+    ที่ bun ไม่ implement · เกณฑ์ผ่าน = ไม่เพิ่มจาก 3
+  - `check.license-catalog-drift.ts` **ต้อง exit 0 จริง**
 - `turbo run build` ของ gateway ใช้ SWC ที่ strip type ทิ้ง **ไม่ใช่ด่าน type** ต้องรัน
   `bunx tsc --noEmit` เอง
 - ห้าม commit secret หรือ credential — token/DSN ต้องมาจากตัวแปร shell เสมอ
+- **`Result` ของ `@repo/nest-result` ใช้ `isOk()` / `isError()` / `.value` / `.error`**
+  — **ไม่มี `.ok` และไม่มี `.data`** (ยืนยันที่ `packages/nest-result/src/result.ts:45,58,208,217`)
+  โค้ดตัวอย่างในแผนรอบแรกเขียนผิดเป็น `.ok`/`.data` แก้แล้วทั้ง Task 2 และ Task 3
 - รีโป `carmen-turborepo-backend-v2` มี formatter hook ที่จัด prettier ทับไฟล์หลังทุก edit
   และไฟล์บน `main` ไม่ compliant อยู่แล้ว — ต้องคืนไฟล์ที่ไม่ได้ตั้งใจแก้กลับก่อน commit
   ทุกครั้ง (`git checkout -- <path>`) ไม่งั้น PR จะมี churn หลายร้อยบรรทัด
@@ -401,8 +414,8 @@ export class EmailLookupService {
   async senders(bu_code: string, user_id: string) {
     this.logger.debug({ function: 'senders', bu_code }, EmailLookupService.name);
     const res = await this.appConfig.get(bu_code, user_id, 'email_profiles');
-    if (!res.ok) return res;
-    const value = (res.data as { value?: unknown } | null)?.value as
+    if (!res.isOk()) return res;
+    const value = (res.value as { value?: unknown } | null)?.value as
       | { default_profile_id?: string | null; profiles?: Record<string, unknown>[] }
       | undefined;
     const profiles: EmailSenderDto[] = (value?.profiles ?? []).map((p) => ({
@@ -418,8 +431,8 @@ export class EmailLookupService {
   async messages(bu_code: string, user_id: string) {
     this.logger.debug({ function: 'messages', bu_code }, EmailLookupService.name);
     const res = await this.appConfig.get(bu_code, user_id, 'email_templates');
-    if (!res.ok) return res;
-    return Result.ok((res.data as { value?: unknown } | null)?.value ?? null);
+    if (!res.isOk()) return res;
+    return Result.ok((res.value as { value?: unknown } | null)?.value ?? null);
   }
 }
 ```
@@ -1001,7 +1014,13 @@ Expected: `ok: true` ทุก BU ที่ควรได้ · **ถ้าม�
 
 จุดนี้คือจุดเดียวที่พฤติกรรมเปลี่ยนจริง
 
-- [ ] **Step 5: deploy frontend**
+- [ ] **Step 5: deploy frontend** — **ต้องตามหลัง Step 4 ให้เร็วที่สุด**
+
+ช่วงระหว่าง Step 4 กับ Step 5 มีหน้าต่างที่หน้า `/system-admin/interface` จะแสดง badge
+ของทุก brand เป็น disabled ทั้งที่ค่าจริงเป็น enabled — เพราะ backend กรอง `interface_*`
+ออกจาก list แล้ว แต่ FE รุ่นเก่ายังอ่านสถานะจาก list อยู่ (`interface-list.tsx:47,55`)
+เป็นเรื่องการแสดงผลล้วน ไม่มีข้อมูลเสียหายและไม่มีใครถูกตัดสิทธิ์ แต่ต้องรู้ไว้ก่อนว่า
+**ถ้ามีคนเปิดหน้านั้นระหว่างสองขั้นนี้ เขาจะเห็นข้อมูลที่ผิด** — อย่าปล่อยให้คั่นข้ามคืน
 
 - [ ] **Step 6: ตรวจหลัง deploy**
 
