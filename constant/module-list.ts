@@ -483,12 +483,12 @@ export const moduleList: ModuleDto[] = [
         icon: BookText,
       },
       {
-        // ยังไม่มีคีย์ระดับ resource ใน catalog (หน้า list ยังอ่าน mock) — ใช้คีย์
-        // ระดับ module ไปก่อน เปลี่ยนเป็น configuration.account_mapping ทันทีที่
-        // backend เพิ่มเข้า catalog
-        name: "accountMapping",
-        path: "/config/account-mapping",
-        licenseFeature: "configuration",
+        // คีย์นี้มาจาก `LICENSE_ONLY_RESOURCES` ของ backend (ไม่มี endpoint รองรับ
+        // เพราะหน้า list ยังอ่าน mock) การล็อกจึงเกิดที่ FE จาก `license.features`
+        // ไม่ใช่ที่ `LicenseInterceptor`
+        name: "chartOfAccountMapping",
+        path: "/config/chart-of-account-mapping",
+        licenseFeature: "configuration.chart_of_account_mapping",
         icon: Link2,
       },
       {

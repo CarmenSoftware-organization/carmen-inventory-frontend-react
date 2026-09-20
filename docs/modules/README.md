@@ -23,7 +23,7 @@ Master/config data — units, currencies, tax profiles, departments, locations, 
 
 | URL | File |
 |---|---|
-| `/config/account-mapping` | `routes/config/account-mapping/am.route.tsx` |
+| `/config/chart-of-account-mapping` | `routes/config/chart-of-account-mapping/coam.route.tsx` |
 | `/config/adjustment-type` | `routes/config/adjustment-type/adjustment-type.route.tsx` |
 | `/config/business-type` | `routes/config/business-type/business-type.route.tsx` |
 | `/config/chart-of-accounts` | `routes/config/chart-of-accounts/chart-of-accounts.route.tsx` |
