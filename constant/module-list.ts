@@ -138,8 +138,12 @@ export const moduleList: ModuleDto[] = [
     icon: ShoppingCart,
     subModules: [
       {
+        // กล่องอนุมัติรวม PR/PO/SR ยิง /api/my-pending ซึ่งไม่อยู่ใน
+        // LICENSE_ROUTE_FEATURES จึงไม่มีคีย์ระดับ resource ให้ผูก — ใช้คีย์ระดับ
+        // module ของ Procurement แทน (กติกาเดียวกับ /config/shelf → "configuration")
         name: "myApproval",
         path: "/procurement/approval",
+        licenseFeature: "procurement",
         icon: FileCheck,
       },
       {
@@ -398,21 +402,25 @@ export const moduleList: ModuleDto[] = [
       {
         name: "journalVoucher",
         path: "/accounting/journal-voucher",
+        licenseFeature: "accounting.gl",
         icon: FileText,
       },
       {
         name: "templateVoucher",
         path: "/accounting/template-voucher",
+        licenseFeature: "accounting.gl.jv_template",
         icon: FileSpreadsheet,
       },
       {
         name: "recurringVoucher",
         path: "/accounting/recurring-voucher",
+        licenseFeature: "accounting.gl",
         icon: Clock,
       },
       {
         name: "allocationVoucher",
         path: "/accounting/allocation-voucher",
+        licenseFeature: "accounting.gl",
         icon: ArrowLeftRight,
       },
       {
@@ -424,11 +432,13 @@ export const moduleList: ModuleDto[] = [
           {
             name: "apInvoice",
             path: "/accounting/accounts-payable/invoice",
+            licenseFeature: "accounting.ap",
             icon: FileInput,
           },
           {
             name: "apPayment",
             path: "/accounting/accounts-payable/payment",
+            licenseFeature: "accounting.ap",
             icon: DollarSign,
           },
         ],
@@ -441,11 +451,13 @@ export const moduleList: ModuleDto[] = [
           {
             name: "arInvoice",
             path: "/accounting/accounts-receivable/invoice",
+            licenseFeature: "accounting.ar",
             icon: FileText,
           },
           {
             name: "arReceipt",
             path: "/accounting/accounts-receivable/receipt",
+            licenseFeature: "accounting.ar",
             icon: BadgeDollarSign,
           },
         ],
@@ -453,6 +465,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "financialReports",
         path: "/accounting/financial-reports",
+        licenseFeature: "accounting",
         icon: Files,
         separatorBefore: true,
       },
@@ -464,18 +477,18 @@ export const moduleList: ModuleDto[] = [
     icon: Settings2,
     subModules: [
       {
-        // ยังไม่ผูก permission/licenseFeature โดยตั้งใจ — โมดูลนี้เพิ่งวางโครง
-        // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
-        // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
-        // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
         name: "chartOfAccounts",
         path: "/config/chart-of-accounts",
+        licenseFeature: "configuration.chart_of_accounts", // config:chart-of-accounts
         icon: BookText,
       },
       {
-        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccounts
+        // ยังไม่มีคีย์ระดับ resource ใน catalog (หน้า list ยังอ่าน mock) — ใช้คีย์
+        // ระดับ module ไปก่อน เปลี่ยนเป็น configuration.account_mapping ทันทีที่
+        // backend เพิ่มเข้า catalog
         name: "accountMapping",
         path: "/config/account-mapping",
+        licenseFeature: "configuration",
         icon: Link2,
       },
       {
