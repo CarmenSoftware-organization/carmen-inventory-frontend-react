@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import type { LucideIcon } from "lucide-react";
 import { firstAccessiblePath, LANDING_FALLBACK_PATH } from "./use-landing-path";
 import { annotate, type ModuleWithAccess } from "./use-visible-modules";
-import { licenseFeatureOf } from "@/hooks/use-license";
 import { moduleList, findRouteLeaf } from "@/constant/module-list";
 
 // ใช้ dummy icon เพราะ ModuleDto ต้องการ LucideIcon แต่ที่นี่ไม่ได้ทดสอบการ render ไอคอน
@@ -121,16 +120,18 @@ describe("firstAccessiblePath กับ moduleList จริง", () => {
     expect(path).toBe("/dashboard");
   });
 
-  it("BU ไม่ได้ซื้ออะไรเลย → ยังได้ path ที่เปิดได้จริง ไม่ใช่ /dashboard", () => {
+  it("BU ไม่ได้ซื้ออะไรเลย → ตกมาที่ fallback ไม่ใช่ /dashboard", () => {
     const path = firstAccessiblePath(
       annotate(moduleList, canAll, licensedNone),
     );
     expect(path).not.toBe("/dashboard");
-    // ต้องเป็น path ที่ RouteGuard ปล่อยผ่านจริง ไม่ใช่แค่ string อะไรก็ได้ —
-    // leaf ที่ไม่มี licenseFeature แต่มี permission ก็ยังได้ feature key จาก
-    // featureKeyOf() แล้วถูกล็อก จึงต้องเช็คด้วย licenseFeatureOf() ไม่ใช่ฟิลด์ดิบ
-    const target = findRouteLeaf(path);
-    expect(target).toBeDefined();
-    expect(licenseFeatureOf(target!)).toBeUndefined();
+    // ทุก leaf ใน moduleList ผลิต feature key ได้แล้ว (allowlist UNMAPPED_ON_PURPOSE
+    // ว่างเปล่า — ดู constant/module-list.license-feature.test.ts) BU ที่ไม่มีสัญญา
+    // เลยจึงไม่เหลือหน้าไหนใน moduleList ให้ไป และต้องตกมาที่ /profile ซึ่งเป็นหน้า
+    // เดียวที่ RouteGuard บล็อกไม่ได้ — ก่อนหน้านี้เทสต์นี้ผ่านเพราะบังเอิญมี leaf
+    // ที่ยังไม่ผูก license (เช่น /accounting/*) รับหน้าที่นี้อยู่ ซึ่งคือรูโหว่เดียวกัน
+    // ที่ทำให้เมนู Procurement/Config/Accounting ยัง active ทั้งที่ไม่มี license
+    expect(path).toBe(LANDING_FALLBACK_PATH);
+    expect(findRouteLeaf(path)).toBeUndefined();
   });
 });

@@ -32,56 +32,20 @@ function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
  * ทุกตัวในนี้ backend เองก็ไม่ตัดสิน license ให้ (endpoint ของมันไม่แมตช์
  * `LICENSE_ROUTE_FEATURES` → `resolveRouteFeature` คืน `null` = นอกขอบเขต ผ่านเสมอ)
  * การ map มั่วจึงล็อกหน้าที่ backend ไม่เคยบล็อก ซึ่งแย่กว่าไม่ map
+ *
+ * **ตอนนี้ว่าง** — เดิมมี 11 รายการ (`/procurement/approval`, `/config/chart-of-accounts`,
+ * `/config/account-mapping` และ `/accounting/*` ทั้งกลุ่ม) ซึ่งกลายเป็นรูโหว่จริงบนหน้าจอ:
+ * leaf ที่ผลิต key ไม่ได้จะ `locked: false` เสมอ และเพราะ parent locked ก็ต่อเมื่อลูก locked
+ * หมด ลูกที่หลุดตัวเดียวจึงปลดล็อกหัวข้อทั้งโมดูล — BU ที่ไม่มี license เลยยังเห็น
+ * Procurement / Config / Accounting เป็นเมนูใช้งานได้ ทั้งสามจึงถูกผูกคีย์แล้ว โดยใช้
+ * **ชื่อคีย์จาก catalog ตรง ๆ เท่านั้น** ไม่มีการเดา: ตัวที่ catalog ไม่มีคีย์ระดับ resource
+ * (`/procurement/approval`, `/config/account-mapping`) ผูกคีย์ระดับ module ตามกติกาเดิม
+ * ของ `/config/shelf` → `"configuration"`
+ *
+ * เพิ่มรายการใหม่ได้ แต่ต้องเขียนเหตุผลว่าทำไม catalog ถึงไม่มีคีย์ให้ผูก และต้องรู้ว่า
+ * มันปลดล็อกหัวข้อโมดูลทั้งก้อนไปด้วย
  */
-const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
-  {
-    path: "/procurement/approval",
-    why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-pending ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
-  },
-  {
-    path: "/config/chart-of-accounts",
-    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — backend ยังไม่มี endpoint ของตัวเอง (ผังบัญชีเป็น sub-resource ของสินค้า/หมวดสินค้า) และ catalog ยังไม่มีคีย์ให้ผูก",
-  },
-  {
-    path: "/config/account-mapping",
-    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — ยังไม่มี endpoint จริง หน้า list อ่านจาก mock อยู่",
-  },
-  // /accounting/* ทั้งกลุ่ม: ยังเป็นหน้า mock ไม่เรียก API สักตัว และ catalog ของ
-  // backend ไม่มี module `accounting` เลย → อยู่นอกขอบเขต license ทั้งหมด
-  { path: "/accounting/journal-voucher", why: "accounting ยังไม่มีใน catalog" },
-  {
-    path: "/accounting/template-voucher",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/recurring-voucher",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/allocation-voucher",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/accounts-payable/invoice",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/accounts-payable/payment",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/accounts-receivable/invoice",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/accounts-receivable/receipt",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-  {
-    path: "/accounting/financial-reports",
-    why: "accounting ยังไม่มีใน catalog",
-  },
-];
+const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [];
 
 const unmappedPaths = new Set(UNMAPPED_ON_PURPOSE.map((e) => e.path));
 
