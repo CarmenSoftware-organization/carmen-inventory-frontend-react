@@ -558,8 +558,10 @@ git commit -m "feat(email): เพิ่ม endpoint อ่านผู้ส่
 - Regenerate: `constant/__fixtures__/license-catalog.ts`
 
 **Interfaces:**
-- Consumes: catalog ที่ Task 1 ผลิต — **ต้องรัน Task 1 เสร็จและ merge เข้า `main`
-  ของรีโป backend ก่อน** ไม่งั้น `gen:license-fixture` จะไม่เห็นคีย์ใหม่
+- Consumes: catalog ที่ Task 1 ผลิต — **ต้องรัน Task 1 เสร็จและ commit ลง branch ของ
+  checkout `../carmen-turborepo-backend-v2` ก่อน** (ไม่ต้อง merge เข้า main)
+  `scripts/gen-license-fixture.ts:29-30` อ่านจาก working tree ของ checkout พี่น้องตรง ๆ
+  หรือจาก `$BACKEND_REPO` ถ้าตั้งไว้
 - Produces: เมนูสามตัวถูก gate แยกกันใน `useVisibleModules` และ RouteGuard
 
 - [ ] **Step 1: แก้ `licenseFeature` สามบรรทัด**
