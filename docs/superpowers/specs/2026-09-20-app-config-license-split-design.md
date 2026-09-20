@@ -77,32 +77,54 @@ saved view ของทุกหน้า list เก็บเป็น app-conf
 เส้นแบ่งของงานนี้คือ **"สิทธิ์ตั้งค่า" ≠ "สิทธิ์ใช้ค่านั้น"** — ตั้งค่าโปรไฟล์ผู้ส่ง
 ผูกกับ license ใหม่ ส่วนการอ่านรายชื่อผู้ส่งเพื่อส่ง PO ติดมากับ Procurement
 
-### 4.2 route map
+### 4.2 route map — ผ่าน `LICENSE_ROUTE_OVERRIDES` (แมปใหม่ เฉพาะ license)
 
-`packages/prisma-shared-schema-platform/prisma/permission.route-map.ts`
-เพิ่ม 11 แถว:
+`packages/prisma-shared-schema-platform/prisma/permission.route-map.ts` เป็นต้นทาง
+ของ **ทั้งสองระบบ**: `scripts/generate-license-catalog/run.ts` ผลิต
+`LICENSE_ROUTE_FEATURES` จากมัน และ `check.endpoint-permission-coverage.ts` ก็อ่าน
+มันเพื่อจับคู่ endpoint กับ permission
 
+ถ้าใส่ 11 แถวลง `SUB_PATH_RESOURCE_MAP` (กลไกเดิมของ `config:workflows`) ด่าน
+coverage จะรายงาน `MISSING_PERMISSION` ทันที เพราะ `configuration.email_profile`,
+`configuration.email_template` และ `interface` ไม่มี permission รองรับใน
+`seed.permission.data.ts` ทางแก้แบบ "เพิ่ม permission ตามไปด้วย" ลาก matrix ของ
+`seed.role-permission.ts` เข้ามาทั้งชุด และเสี่ยงให้ผู้ใช้เสียสิทธิ์ที่เคยมี ทั้งที่
+โจทย์นี้ไม่ได้ขอแยก permission เลย
+
+จึงเพิ่มแมปใหม่ `LICENSE_ROUTE_OVERRIDES` ที่ **generator อ่านคนเดียว**:
+
+```ts
+export const LICENSE_ROUTE_OVERRIDES: Readonly<Record<string, string>> = {
+  'config:app-config/email_profiles': 'configuration.email_profile',
+  'config:app-config/email_templates': 'configuration.email_template',
+  'config:app-config/test-email-profile': 'configuration.email_profile',
+  'config:app-config/interface_accounting_carmen_gl': 'interface',
+  'config:app-config/interface_accounting_blueledgers': 'interface',
+  'config:app-config/interface_accounting_external': 'interface',
+  'config:app-config/interface_pos_micros': 'interface',
+  'config:app-config/interface_pos_infrasys': 'interface',
+  'config:app-config/interface_pos_square': 'interface',
+  'config:app-config/interface_pms_opera': 'interface',
+  'config:app-config/interface_pms_protel': 'interface',
+};
 ```
-config:app-config/interface_accounting_carmen_gl    -> interface
-config:app-config/interface_accounting_blueledgers  -> interface
-config:app-config/interface_accounting_external     -> interface
-config:app-config/interface_pos_micros              -> interface
-config:app-config/interface_pos_infrasys            -> interface
-config:app-config/interface_pos_square              -> interface
-config:app-config/interface_pms_opera               -> interface
-config:app-config/interface_pms_protel              -> interface
-config:app-config/email_profiles                    -> configuration.email_profile
-config:app-config/email_templates                   -> configuration.email_template
-config:app-config/test-email-profile                -> configuration.email_profile
-```
 
-รายการ 8 คีย์แรกต้องตรงกับ `INTERFACE_CATEGORIES` ใน
+แนวคิดที่แมปนี้เพิ่มเข้ามาคือ **license แบ่งละเอียดกว่า permission ได้** ซึ่งเป็น
+ส่วนขยายตรงไปตรงมาของกติกาเดิมที่เขียนไว้แล้วว่า "license ถือแค่ resource ส่วน
+action เป็นหน้าที่ของ RBAC" — ที่นี่เพิ่มว่า resource ฝั่ง license แตกย่อยกว่าฝั่ง
+RBAC ได้ โดย RBAC ยังเห็น `configuration.app_config` ก้อนเดียวเหมือนเดิม
+
+generator ต้องอ่านแมปนี้สองที่: `collect_resources()` (เพื่อให้สองคีย์ใหม่เกิดใน
+catalog) และ `build_route_features()` (เพื่อให้แถวโผล่ใน `LICENSE_ROUTE_FEATURES`)
+`resolveRouteFeature()` ไม่ต้องแก้ — มันลองคีย์สองชั้นอยู่แล้ว
+
+`config:app-config -> configuration.app_config` ยังอยู่ใน `ROUTE_RESOURCE_MAP`
+ตามเดิม ครอบ `list_views_*`, `report_email`, `test-email`, `signature-candidates`
+
+รายการ 8 คีย์ interface ต้องตรงกับ `INTERFACE_CATEGORIES` ใน
 `routes/system-admin/interface/interface-registry.ts` เสมอ — เพิ่ม brand ใหม่
 เมื่อไหร่ต้องเพิ่มแถวที่นี่ด้วย ไม่งั้น brand ใหม่จะตกไปอยู่ใต้
 `configuration.app_config` เงียบ ๆ
-
-คงเดิม: `config:app-config -> configuration.app_config` ครอบ `list_views_*`,
-`report_email`, `test-email`
 
 ### 4.3 ปิดช่องอ่านข้าม feature ที่ list endpoint
 
@@ -130,8 +152,14 @@ service ไปเรียก license ของ BU มาคำนวณ (ทา
 
 | เส้น | คืนอะไร | license |
 |---|---|---|
-| `GET /api/{bu}/email-senders` | `default_profile_id` + `{id, name, from_email, from_name, enabled}` ต่อโปรไฟล์ — **ตัดก้อน `smtp` ทิ้งทั้งหมด** | ไม่อยู่ใน route map = resolver คืน `null` = ผ่านทุก BU |
-| `GET /api/{bu}/email-messages` | `email_templates` ตามรูปเดิม (ไม่มีความลับอยู่ในคีย์นี้) | เหมือนกัน |
+| `GET /api/{bu}/email-senders` | `default_profile_id` + `{id, name, from_email, from_name, enabled}` ต่อโปรไฟล์ — **ตัดก้อน `smtp` ทิ้งทั้งหมด** | `configuration.app_config` |
+| `GET /api/{bu}/email-messages` | `email_templates` ตามรูปเดิม (ไม่มีความลับอยู่ในคีย์นี้) | `configuration.app_config` |
+
+ทั้งสองเส้นใส่ใน `ROUTE_RESOURCE_MAP` ชี้ไป `configuration.app_config` ไม่ใช่ปล่อย
+ให้หลุดนอก route map — segment ที่ไม่มีใน map จะถูก `check.endpoint-permission-coverage.ts`
+รายงานเป็น `UNMAPPED_SEGMENT` และไม่มีกลไกยกเว้นในสคริปต์นั้น · ผลลัพธ์เหมือนกันใน
+ทางปฏิบัติเพราะ `configuration.app_config` เป็นคีย์ที่ทุก BU มีอยู่แล้ว (saved view
+ของทุกหน้า list พึ่งมัน) และซื่อตรงกว่าในเชิงความหมาย: "อ่านค่าจาก app-config"
 
 ได้ความปลอดภัยแถมมาด้วย: วันนี้ dialog ได้ `smtp.host/port/username` ติดมาด้วย
 (password ถูก mask เป็น `***ENCRYPTED***` แต่ที่เหลือไม่ได้ mask) เส้นใหม่ปิดช่องนั้น
