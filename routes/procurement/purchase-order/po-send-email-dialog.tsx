@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useProfile } from "@/hooks/use-profile";
-import { useEmailProfiles } from "@/hooks/use-email-profiles";
-import { useEmailTemplates } from "@/hooks/use-email-templates";
+import { useEmailSenders } from "@/hooks/use-email-senders";
+import { useEmailMessages } from "@/hooks/use-email-messages";
 import { useVendorById } from "@/hooks/use-vendor";
 import {
   EMAIL_PLACEHOLDERS,
@@ -36,7 +36,7 @@ import {
 } from "@/lib/email-template";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import type { EmailProfile } from "@/types/email-profile";
+import type { EmailSender } from "@/hooks/use-email-senders";
 import type { EmailTemplate } from "@/types/email-template";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { usePoSendEmail } from "./use-po-send-email";
@@ -171,9 +171,9 @@ export function PoSendEmailDialog({
     value: emailProfiles,
     isLoading: profilesLoading,
     isError: profilesError,
-  } = useEmailProfiles();
+  } = useEmailSenders();
   const { value: emailTemplates, isLoading: templatesLoading } =
-    useEmailTemplates();
+    useEmailMessages();
   const vendorQuery = useVendorById(purchaseOrder.vendor?.id ?? "");
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
@@ -393,7 +393,7 @@ export function PoSendEmailDialog({
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {enabledProfiles.map((profile: EmailProfile) => (
+                  {enabledProfiles.map((profile: EmailSender) => (
                     <SelectItem key={profile.id} value={profile.id}>
                       {profile.name}
                     </SelectItem>

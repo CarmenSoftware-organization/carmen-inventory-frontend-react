@@ -133,6 +133,8 @@ export const QUERY_KEYS = {
   WASTAGE_REPORTS: "wastage-reports",
   APP_CONFIGS: "app-configs",
   APP_USER_CONFIGS: "app-user-configs",
+  EMAIL_SENDERS: "email-senders",
+  EMAIL_MESSAGES: "email-messages",
   WORKFLOWS: "workflows",
   // External
   PRICE_LIST_EXTERNAL: "price-list-external",
