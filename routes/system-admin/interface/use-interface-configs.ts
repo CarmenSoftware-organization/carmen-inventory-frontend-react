@@ -48,9 +48,16 @@ export function useInterfaceConfigs() {
     isLoading: results.some((r) => r.isPending),
     isError: results.some((r) => r.isError),
     refetch: () => {
-      void queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.APP_CONFIGS, buCode],
-      });
+      // Invalidate each interface config key individually with exact: true to avoid
+      // accidentally invalidating other queries that share the same prefix (saved views,
+      // report_email, email profiles/templates, etc.). React Query does partial match
+      // by default, so prefix-only invalidation would drag unrelated queries along.
+      CONFIG_KEYS.forEach((key) =>
+        void queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.APP_CONFIGS, buCode, key],
+          exact: true,
+        }),
+      );
     },
   };
 }
