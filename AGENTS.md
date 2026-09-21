@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 CARMEN BLUE frontend — **Vite + React Router SPA port** of the legacy Next.js app
 (that repo has since been removed). Static bundle on S3/CloudFront; the browser calls the
@@ -24,7 +24,7 @@ bun test:run         # Single run    bun test:run path # Single file
 
 ตัด release / deploy (`build:bump` · changelog · S3/GCS/Docker/CDN) → skill `release-and-deploy`
 
-## Architecture (deltas from the source app — its CLAUDE.md still describes module patterns)
+## Architecture (deltas from the source app — its AGENTS.md still describes module patterns)
 
 - **No server.** `lib/http-client.ts` rewrites `/api/proxy/<rest>` and `/api/external/<rest>`
   → `${BACKEND_URL}/<rest>` and attaches `Authorization: Bearer` + `x-app-id` itself.
@@ -78,7 +78,7 @@ bun test:run         # Single run    bun test:run path # Single file
 
 ## Migrating a module from the source app
 
-Use the `migrate-source-module` skill (`.claude/skills/migrate-source-module/`) — it carries
+Use the `migrate-source-module` skill (`.Codex/skills/migrate-source-module/`) — it carries
 the full colocated-route convention and Next→react-router rewrite steps. Gate: `bunx tsc
 --noEmit && bun test:run` must be clean. (The `scripts/codemods/*` helpers predate the
 compat removal — don't rely on them for the import step.)
@@ -95,7 +95,7 @@ compat removal — don't rely on them for the import step.)
 ## Interfaces config (`/system-admin/interface`)
 
 Per-BU external-system config (Accounting / POS / PMS). Conventions, storage model, and the
-list-envelope gotcha live in `routes/system-admin/interface/CLAUDE.md` (loads when working
+list-envelope gotcha live in `routes/system-admin/interface/AGENTS.md` (loads when working
 in that folder). One cross-cutting deploy note: **Prod/UAT must set `SECRET_ENCRYPTION_KEY`**
 or any secret-bearing app-config save (incl. the pre-existing `report_email`) 400s.
 
@@ -109,7 +109,7 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
 
 ## React Compiler กับตาราง (`DataGrid`)
 
-กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`
+กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/AGENTS.md`
 (โหลดเองเมื่อทำงานใต้ `routes/`)
 
 ## Design system (`/design-system`)
@@ -142,8 +142,8 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
   proxy; the **Docker image needs no CORS** — its nginx proxies `/api/*` itself).
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
 - Backend bug ที่ผูกกับโมดูลเดียว ย้ายไปอยู่ข้างโมดูลแล้ว (โหลดเองเมื่อทำงานในโฟลเดอร์นั้น):
-  decimal qty ที่ `.int()` ปัด → `routes/CLAUDE.md` · dashboard-widgets 500 →
-  `routes/dashboard/CLAUDE.md` · PR list ไม่มี `audit` → `routes/procurement/CLAUDE.md`
+  decimal qty ที่ `.int()` ปัด → `routes/AGENTS.md` · dashboard-widgets 500 →
+  `routes/dashboard/AGENTS.md` · PR list ไม่มี `audit` → `routes/procurement/AGENTS.md`
 - `scripts/changelog.ts`'s conventional-commit regex captures the breaking-change `!`
   marker (e.g. `feat(api)!: …`) but nothing reads it — deliberately not implementing a
   breaking-change badge in What's New for now; such commits render like ordinary features.
