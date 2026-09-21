@@ -9,6 +9,9 @@ export interface OnOrderRow {
   po_id: string | null;
   po_no: string | null;
   vendor_name: string | null;
+  location_id: string | null;
+  location_code: string | null;
+  location_name: string | null;
   order_date: string | null;
   delivery_date: string | null;
   order_qty: number;

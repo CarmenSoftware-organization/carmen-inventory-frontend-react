@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import EmptyComponent from "@/components/empty-component";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import {
   DataGrid,
   DataGridContainer,
@@ -92,6 +93,19 @@ export function OnOrderDialog({ open, onOpenChange, productId }: Props) {
           </div>
         ),
         size: 200,
+      },
+      {
+        accessorKey: "location_name",
+        header: () => tfl("location"),
+        // รหัสคลังเป็นบรรทัดรอง ทรงเดียวกับที่ใช้ทั่วแอป — ชื่อคลังคือสิ่งที่คนอ่าน
+        // รหัสคือสิ่งที่คนเอาไปเทียบกับระบบอื่น
+        cell: ({ row }) => (
+          <NameWithSubtext
+            primary={row.original.location_name ?? "—"}
+            secondary={row.original.location_code ?? undefined}
+          />
+        ),
+        size: 180,
       },
       {
         accessorKey: "order_date",
