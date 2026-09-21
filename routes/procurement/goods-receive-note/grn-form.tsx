@@ -19,6 +19,7 @@ import {
 import {
   countInvalidItems,
   scrollToFirstInvalidField,
+  draftSaveHandler,
 } from "@/lib/form-helpers";
 import { getSessionItem, removeSessionItem } from "@/lib/safe-storage";
 import { GrnItemTable } from "./grn-item-table";
@@ -204,7 +205,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
 
       <form
         id="grn-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, revealErrors)}
+        onSubmit={draftSaveHandler(form, actions.onSubmit)}
         className="space-y-3 px-4"
       >
         <GrnFormHeader

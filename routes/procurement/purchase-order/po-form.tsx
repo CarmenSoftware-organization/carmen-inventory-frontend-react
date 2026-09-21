@@ -20,6 +20,7 @@ import {
 import {
   countInvalidItems,
   scrollToFirstInvalidField,
+  draftSaveHandler,
 } from "@/lib/form-helpers";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
@@ -231,7 +232,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       />
       <form
         id="po-form"
-        onSubmit={form.handleSubmit(onSubmit, revealErrors)}
+        onSubmit={draftSaveHandler(form, onSubmit)}
         className="flex flex-1 flex-col gap-4 px-4"
       >
         <PoGeneralFields

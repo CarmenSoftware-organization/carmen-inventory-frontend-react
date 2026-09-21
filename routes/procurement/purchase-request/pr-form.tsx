@@ -3,7 +3,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useTranslations } from "use-intl";
-import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { scrollToFirstInvalidField, draftSaveHandler } from "@/lib/form-helpers";
 import {
   PR_STATUS,
   type PurchaseRequest,
@@ -297,7 +297,7 @@ export function PurchaseRequestForm({
         id="purchase-request-form"
         onSubmit={(e) => {
           actions.fillKnownItemDefaults();
-          form.handleSubmit(actions.onSubmit, actions.revealInvalid)(e);
+          draftSaveHandler(form, actions.onSubmit)(e);
         }}
         className="space-y-4 px-4"
       >
