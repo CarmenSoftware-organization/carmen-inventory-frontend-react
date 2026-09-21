@@ -247,6 +247,8 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            // ยอดที่รับแล้วโชว์เฉพาะโหมดอ่าน เกณฑ์เดียวกับคอลัมน์ Order / GRN
+            showReceived={isViewMode}
           />
         ),
       },

@@ -56,6 +56,9 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
    */
   comment?: string | null;
   foc_qty: number;
+  /** ของแถมที่รับเข้ามาแล้ว — อยู่บนแถวตรง ๆ ต่างจาก `received_qty` ของยอดสั่งซื้อ
+   *  ที่ต้องไปรวมเอาจาก `pr_details[]` */
+  foc_received_qty: number;
   // ไม่มี foc_unit บน wire เลย (ยืนยัน 8/8 เอกสารจริง — มีแค่ foc_qty ไม่มี
   // foc_unit_id/foc_unit_name หรือ foc_unit object คู่กัน) ของเดิมมี
   // foc_unit_id?/foc_unit_name? เป็น phantom field มาก่อนแล้ว ลบทิ้งตามจริง
