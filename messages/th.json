@@ -5205,5 +5205,10 @@
     "markAllRead": "ทำเครื่องหมายว่าอ่านทั้งหมด",
     "emptyUnreadTitle": "อ่านครบแล้ว",
     "emptyUnreadDesc": "ไม่มีการแจ้งเตือนที่ยังไม่ได้อ่าน"
+  },
+  "period": {
+    "outsideOpenPeriod": "วันที่บนเอกสารอยู่นอกงวดที่เปิดอยู่ ({from} – {to}) เลือกว่าจะลงวันที่ไหน",
+    "useOpenPeriodDate": "ย้ายเข้างวดที่เปิดอยู่ ({date})",
+    "useDocumentDate": "คงวันที่บนเอกสารไว้ ({date})"
   }
 }

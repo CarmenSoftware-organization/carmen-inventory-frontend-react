@@ -5215,5 +5215,10 @@
     "markAllRead": "Mark all as read",
     "emptyUnreadTitle": "You're all caught up",
     "emptyUnreadDesc": "You have no unread notifications."
+  },
+  "period": {
+    "outsideOpenPeriod": "This document is dated outside the open period ({from} – {to}). Pick the date it should carry.",
+    "useOpenPeriodDate": "Move it into the open period ({date})",
+    "useDocumentDate": "Keep the date on the document ({date})"
   }
 }

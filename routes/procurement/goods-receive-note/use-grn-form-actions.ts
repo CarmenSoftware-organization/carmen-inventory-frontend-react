@@ -23,6 +23,11 @@ import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { useProfile } from "@/hooks/use-profile";
+import {
+  resolvePeriodDate,
+  type PeriodDateChoice as PeriodDateChoiceValue,
+} from "@/components/share/period-date-choice";
 import { removeSessionItem } from "@/lib/safe-storage";
 import {
   mapDetailToPayload,
@@ -59,6 +64,7 @@ export function useGrnFormActions({
   const deleteGrn = useDeleteGoodsReceiveNote();
   const saveGrn = useSaveGoodsReceiveNote();
   const buCode = useBuCode();
+  const { currentPeriod } = useProfile();
   const commitGrn = useCommitGoodsReceiveNote();
 
   /**
@@ -95,6 +101,11 @@ export function useGrnFormActions({
   };
   const voidGrn = useVoidGoodsReceiveNote();
 
+  // วันที่บนใบอยู่นอกงวดที่เปิดอยู่ → dialog commit ถามว่าจะย้ายเข้างวดหรือคงวันเดิม
+  // (`PeriodDateChoice` เรนเดอร์เองเฉพาะตอนต้องถาม) default = คงวันเดิม ไม่ไปขยับ
+  // วันที่ของเอกสารให้ใครโดยไม่ได้สั่ง
+  const [periodDateChoice, setPeriodDateChoice] =
+    useState<PeriodDateChoiceValue>("document");
   const [showDelete, setShowDelete] = useState(false);
   const [showCommit, setShowCommit] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
@@ -474,6 +485,17 @@ export function useGrnFormActions({
   const handleConfirmCommit = async () => {
     if (!goodsReceiveNote) return;
     if (goodsReceiveNote.doc_status === "draft") {
+      // เลือก "ย้ายเข้างวด" → เขียน grn_date ลงฟอร์มก่อน แล้วปล่อยให้สาย
+      // PATCH → /save เดิมพามันขึ้นไปเอง (PATCH ส่งเฉพาะ field ที่ต่างจาก
+      // baseline อยู่แล้ว) ไม่ต้องมี payload พิเศษของตัวเอง
+      const periodDate = resolvePeriodDate(
+        periodDateChoice,
+        form.getValues("grn_date"),
+        currentPeriod,
+      );
+      if (periodDate) {
+        form.setValue("grn_date", periodDate, { shouldDirty: true });
+      }
       handleSubmitWithStatus("saved", () => void runCommit());
       return;
     }
@@ -498,6 +520,8 @@ export function useGrnFormActions({
     voidGrn,
     isPending,
     isActionPending,
+    periodDateChoice,
+    setPeriodDateChoice,
     showDelete,
     setShowDelete,
     showCommit,

@@ -274,6 +274,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           showCommit={actions.showCommit}
           setShowCommit={actions.setShowCommit}
           isCommitPending={actions.isActionPending}
+          isDraft={goodsReceiveNote?.doc_status === "draft"}
+          grnDate={form.getValues("grn_date")}
+          periodDateChoice={actions.periodDateChoice}
+          onPeriodDateChoiceChange={actions.setPeriodDateChoice}
           onConfirmCommit={actions.handleConfirmCommit}
           showVoid={actions.showVoid}
           setShowVoid={actions.setShowVoid}

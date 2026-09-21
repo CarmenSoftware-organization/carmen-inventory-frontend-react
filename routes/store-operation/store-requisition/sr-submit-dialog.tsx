@@ -10,12 +10,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ReactNode } from "react";
+import {
+  PeriodDateChoice,
+  type PeriodDateChoice as PeriodDateChoiceValue,
+} from "@/components/share/period-date-choice";
+
 interface SrSubmitDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly srNo?: string;
   readonly isPending: boolean;
   readonly onConfirm: () => void;
+  readonly srDate?: string;
+  readonly periodDateChoice: PeriodDateChoiceValue;
+  readonly onPeriodDateChoiceChange: (value: PeriodDateChoiceValue) => void;
 }
 
 export function SrSubmitDialog({
@@ -24,6 +32,9 @@ export function SrSubmitDialog({
   srNo,
   isPending,
   onConfirm,
+  srDate,
+  periodDateChoice,
+  onPeriodDateChoiceChange,
 }: SrSubmitDialogProps) {
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
@@ -53,6 +64,14 @@ export function SrSubmitDialog({
                   strong: renderStrong,
                 })}
               </AlertDialogDescription>
+              {/* ส่งใบแล้วรอบบัญชีถูกผูกไปกับเอกสาร — ถ้าวันที่บนใบอยู่นอกงวด
+                  ที่เปิดอยู่ ถามตรงนี้ก่อน ดีกว่าปล่อยไปให้ backend ตีกลับ 422
+                  แล้วค่อยเปิด dialog ถามทีหลัง */}
+              <PeriodDateChoice
+                docDate={srDate}
+                value={periodDateChoice}
+                onChange={onPeriodDateChoiceChange}
+              />
             </div>
           </div>
         </div>

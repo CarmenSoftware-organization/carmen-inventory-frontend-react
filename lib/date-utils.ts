@@ -189,3 +189,30 @@ export function formatLocalizedDate(
     calendar: "gregory",
   }).format(date);
 }
+
+/**
+ * วันที่ของเอกสารอยู่นอกงวดบัญชีที่เปิดอยู่หรือเปล่า
+ *
+ * เทียบแบบ "ทั้งวัน" ไม่ใช่ timestamp — `start_at`/`end_at` ที่ backend ส่งมาเป็น
+ * ISO ที่มีเวลาติดมาด้วย ถ้าเทียบดิบ ๆ เอกสารที่ลงวันสุดท้ายของงวดตอนบ่ายจะกลาย
+ * เป็น "เลยงวด" ทั้งที่เป็นวันเดียวกัน
+ *
+ * ไม่มีงวดเปิดอยู่ (`period` เป็น undefined) คืน `false` — เราไม่รู้ก็อย่าไปขวาง
+ * ผู้ใช้ ปล่อยให้ backend เป็นคนตัดสิน
+ *
+ * @param docDate - วันที่บนเอกสาร (ISO)
+ * @param period - งวดปัจจุบันจาก `useProfile().currentPeriod`
+ */
+export function isOutsideOpenPeriod(
+  docDate: string | undefined,
+  period: { start_at: string; end_at: string } | undefined,
+): boolean {
+  if (!docDate || !period) return false;
+  // ผ่าน isoToDateInput ไม่ใช่ slice(0,10) — ค่าที่ backend ส่งมาเป็น UTC พอตัด
+  // สตริงดิบบน deployment UTC+7 เอกสารที่ลงตั้งแต่ 17:00Z จะกลายเป็นคนละวัน
+  // (เหตุผลเดียวกับที่ isoToDateInput ใช้ local getter — ดูคอมเมนต์ข้างบน)
+  const day = isoToDateInput;
+  const d = day(docDate);
+  if (!d) return false;
+  return d < day(period.start_at) || d > day(period.end_at);
+}
