@@ -147,14 +147,26 @@ describe("PR add form — dirty state after auto-populating hidden defaults", ()
     expect(result.current.form.getValues("pr_date")).toBe(AUTO.pr_date);
     expect(result.current.form.formState.isDirty).toBe(true);
 
-    // ท่า reset+keepDirtyValues ที่ห้ามใช้ — กันคนย้อนกลับมาใช้แล้วตารางหาย
+    // ท่า reset+keepDirtyValues **เคย** ล้างตารางทิ้งใน react-hook-form ≤7.87 —
+    // `reset(..., { keepValues: true })` ไม่ใส่ field ที่ค่าต่างจาก default ลง
+    // `dirtyFields` ให้ครบ `items` จึงไม่ถูกมองว่า dirty แล้วโดนแทนด้วย default
+    // 7.88 แก้บั๊กนั้น (#13701 "reset() keeping dirtyFields out of sync with
+    // isDirty when keepValues is enabled") ตารางจึงอยู่ครบแล้ว
+    //
+    // เทสต์นี้ยืนยัน **สองชั้น**: `dirtyFields` ต้องครอบ items จริง และผลลัพธ์
+    // ปลายทางคือ items ไม่หาย — ถ้า RHF ถอยกลับไปพฤติกรรมเดิมเมื่อไหร่ ชั้นแรก
+    // จะแดงก่อนและชี้สาเหตุตรง ๆ แทนที่จะเห็นแค่ "ตารางหาย"
+    expect(Object.keys(result.current.form.formState.dirtyFields)).toContain(
+      "items",
+    );
     act(() =>
       result.current.form.reset(
         { ...getDefaultValues(), pr_date: AUTO.pr_date },
         { keepDirtyValues: true },
       ),
     );
-    expect(result.current.form.getValues("items")).toHaveLength(0);
+    expect(result.current.form.getValues("items")).toHaveLength(1);
+    expect(result.current.form.getValues("workflow_id")).toBe("wf-t");
   });
 
   it("FIX 2-phase: profile โหลดทีหลัง → reset รอบสองต้องไม่ wipe pr_date และไม่ dirty", () => {
