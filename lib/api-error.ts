@@ -60,6 +60,14 @@ export class ApiError extends Error {
    */
   public readonly fieldErrors?: readonly string[];
 
+  /**
+   * ค่าแทน placeholder ของข้อความใน catalog (`body.params`) เช่น `{blocked}` `{total}`
+   *
+   * backend แทนค่าลง `message` ของมันเองไปแล้ว แต่เราไม่ได้เอา message นั้นมาโชว์ —
+   * เราแปลจาก `appCode` เอง จึงต้องได้ค่าพวกนี้มาเติมในข้อความฝั่งเรา
+   */
+  public readonly appParams?: Readonly<Record<string, string | number>>;
+
   constructor(
     public readonly code: ErrorCode,
     message: string,
@@ -69,12 +77,14 @@ export class ApiError extends Error {
     serverMessage?: string,
     appCode?: string,
     fieldErrors?: readonly string[],
+    appParams?: Readonly<Record<string, string | number>>,
   ) {
     super(message);
     this.name = "ApiError";
     this.serverMessage = serverMessage;
     this.appCode = appCode;
     this.fieldErrors = fieldErrors;
+    this.appParams = appParams;
   }
 
   /**
@@ -122,6 +132,7 @@ export class ApiError extends Error {
       data,
       appCode,
       fieldErrors,
+      appParams,
     } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
@@ -136,6 +147,7 @@ export class ApiError extends Error {
       serverMessage,
       appCode,
       fieldErrors,
+      appParams,
     );
   }
 }
@@ -214,6 +226,25 @@ export function isTransportError(error: unknown): boolean {
  *
  * คืน message เป็น undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */
+/**
+ * `body.params` ของ error catalog — เอาเฉพาะค่าที่เติมลงข้อความได้จริง
+ *
+ * ค่าที่เป็น object/array ถูกทิ้ง เพราะ ICU จะ render มันเป็น "[object Object]"
+ * กลางประโยค (`SR_DEPARTMENT_AMBIGUOUS` ส่ง departments มาเป็น string อยู่แล้ว)
+ */
+const readParams = (
+  raw: unknown,
+): Readonly<Record<string, string | number>> | undefined => {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return undefined;
+  }
+  const out: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (typeof v === "string" || typeof v === "number") out[k] = v;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+};
+
 const readErrorBody = async (
   res: Response,
 ): Promise<{
@@ -221,6 +252,7 @@ const readErrorBody = async (
   data: unknown;
   appCode?: string;
   fieldErrors?: readonly string[];
+  appParams?: Readonly<Record<string, string | number>>;
 }> => {
   try {
     const body = await res.clone().json();
@@ -244,6 +276,7 @@ const readErrorBody = async (
             )
             .filter((f: string | undefined): f is string => !!f)
         : undefined,
+      appParams: readParams(body?.params),
     };
   } catch {
     return { message: undefined, data: undefined };

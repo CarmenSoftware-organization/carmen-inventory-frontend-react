@@ -7,6 +7,7 @@ import type { StoreRequisition } from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 import { SrSubmitDialog } from "./sr-submit-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
+import { SrDatePatternDialog } from "./sr-date-pattern-dialog";
 import type { UseSrFormActionsReturn } from "./use-sr-form-actions";
 import { srCommentCrud, useSrPreviousStages } from "./use-sr";
 
@@ -79,6 +80,14 @@ export function SrFormDialogs({
         srNo={storeRequisition?.sr_no}
         isPending={actions.submitIsPending}
         onConfirm={actions.confirmSubmitSr}
+      />
+
+      <SrDatePatternDialog
+        open={!!actions.datePattern}
+        field={actions.datePattern?.field ?? "sr_date_pattern"}
+        isPending={actions.isWorkflowActionPending}
+        onOpenChange={(o) => !o && actions.closeDatePattern()}
+        onPick={(pattern) => actions.datePattern?.retry(pattern)}
       />
 
       <SrActionDialog

@@ -113,36 +113,42 @@ export function getUserErrorMessage(
   t: TranslationFn,
   tField?: TranslationFn,
 ): string {
-  if (err instanceof ApiError) {
-    if (
-      err.code === ERROR_CODES.VALIDATION_ERROR ||
-      err.code === ERROR_CODES.MISSING_REQUIRED_FIELD
-    ) {
-      // ไม่เอา message จาก server มาโชว์เลย — backend ส่ง stack trace ของ Prisma
-      // กลับมาใน 400 ได้จริง ("1482 await prisma.tb_purchase_request_detail
-      // .updateMany(... Unique constraint failed on the fields: ...") ซึ่งพนักงาน
-      // หน้างานอ่านไม่รู้เรื่อง · ข้อความกลางที่บอกว่าให้ทำอะไรต่อใช้ได้จริงกว่า
-      // ต่อไปถ้าจะแปลบางเคสให้เจาะจงขึ้น (เช่น unique constraint ของ
-      // product+location = "ใบนี้มีสินค้าตัวนี้ในคลังนี้อยู่แล้ว") ให้ map เป็นคีย์
-      // i18n ที่นี่ ไม่ใช่ปล่อยข้อความดิบผ่านไป
-      // รหัสจาก catalog มาก่อน: มันบอกเหตุผลจริงที่ backend ปฏิเสธ ส่วนข้อความกลางเป็นทางลงเมื่อ
-      // ไม่รู้ว่าเป็นเรื่องอะไร ไม่ใช่ค่าเริ่มต้นที่ควรกลบเหตุผลที่รู้อยู่แล้ว
-      const mapped = err.appCode ? APP_CODE_TO_KEY[err.appCode] : undefined;
-      if (mapped) return t(mapped);
-      // บอกชื่อช่องที่ backend ตีกลับ ถ้าแปลงเป็นชื่อที่คนอ่านรู้เรื่องได้ทุกตัว —
-      // แปลงไม่ได้สักตัวก็ตกไปข้อความกลาง ไม่ยัด field name ดิบใส่หน้าผู้ใช้
-      if (tField && err.fieldErrors?.length) {
-        const labels = fieldLabels(err.fieldErrors, tField);
-        if (labels.length > 0) {
-          return t("checkFields", { fields: labels.join(", ") });
-        }
-      }
-      return t(fallbackKey(err.code, err.statusCode));
-    }
-    const key = CODE_TO_KEY[err.code];
-    return key ? t(key) : t("unexpected");
+  if (!(err instanceof ApiError)) return t("unexpected");
+
+  // รหัสจาก catalog มาก่อนเสมอ: มันบอกเหตุผลจริงที่ backend ปฏิเสธ ส่วนข้อความกลางที่
+  // แปลจาก HTTP status เป็นทางลงเมื่อไม่รู้ว่าเป็นเรื่องอะไร ไม่ใช่ค่าเริ่มต้นที่ควร
+  // กลบเหตุผลที่รู้อยู่แล้ว — "ไม่พบข้อมูล" กับ "ใบนี้ไม่ใช่ร่างแล้ว เพิ่มรายการไม่ได้"
+  // เป็น 404/400 เหมือนกันทั้งคู่
+  if (err.appCode) {
+    const mapped = APP_CODE_TO_KEY[err.appCode];
+    if (mapped) return t(mapped, err.appParams);
+    // คีย์ตรงตามชื่อรหัส — ไม่ต้องตั้งชื่อกลางให้ทุกตัว เติม catalog ใหม่ = เติม
+    // `errors.byCode.<CODE>` ใน messages/{en,th}.json อย่างเดียว ไม่มีตารางให้ลืมซิงก์
+    const byCode = `byCode.${err.appCode}`;
+    if (t.has?.(byCode)) return t(byCode, err.appParams);
   }
-  return t("unexpected");
+
+  if (
+    err.code === ERROR_CODES.VALIDATION_ERROR ||
+    err.code === ERROR_CODES.MISSING_REQUIRED_FIELD
+  ) {
+    // ไม่เอา message จาก server มาโชว์เลย — backend ส่ง stack trace ของ Prisma
+    // กลับมาใน 400 ได้จริง ("1482 await prisma.tb_purchase_request_detail
+    // .updateMany(... Unique constraint failed on the fields: ...") ซึ่งพนักงาน
+    // หน้างานอ่านไม่รู้เรื่อง · ข้อความกลางที่บอกว่าให้ทำอะไรต่อใช้ได้จริงกว่า
+    // บอกชื่อช่องที่ backend ตีกลับ ถ้าแปลงเป็นชื่อที่คนอ่านรู้เรื่องได้ทุกตัว —
+    // แปลงไม่ได้สักตัวก็ตกไปข้อความกลาง ไม่ยัด field name ดิบใส่หน้าผู้ใช้
+    if (tField && err.fieldErrors?.length) {
+      const labels = fieldLabels(err.fieldErrors, tField);
+      if (labels.length > 0) {
+        return t("checkFields", { fields: labels.join(", ") });
+      }
+    }
+    return t(fallbackKey(err.code, err.statusCode));
+  }
+
+  const key = CODE_TO_KEY[err.code];
+  return key ? t(key) : t("unexpected");
 }
 
 export function getErrorId(err: unknown): string | undefined {

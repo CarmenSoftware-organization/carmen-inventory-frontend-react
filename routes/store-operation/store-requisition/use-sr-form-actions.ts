@@ -13,6 +13,8 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
+import { ApiError } from "@/lib/api-error";
+import { reportApiError } from "@/lib/api-error-handler";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { SR_LIST_PATH } from "@/constant/store-requisition";
@@ -26,6 +28,7 @@ import {
   useReviewStoreRequisition,
   useDeleteStoreRequisition,
   type SrActionPayload,
+  type SrDatePattern,
   type SrStageDetail,
 } from "./use-sr";
 import type {
@@ -39,6 +42,27 @@ import { mapSrItemToPayload } from "./sr-form-helpers";
 
 export type SrActionDialogType =
   "approve" | "issue" | "reject" | "review" | null;
+
+type SrDatePatternField = "sr_date_pattern" | "issue_date_pattern";
+
+/**
+ * 422 สองตัวนี้ไม่ใช่ความผิดพลาด — backend กำลังถามว่าจะลงวันที่ไหน เพราะวันนี้
+ * อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด ตอบกลับไปด้วยฟิลด์ที่คู่กันแล้วยิงซ้ำได้เลย
+ */
+const DATE_PATTERN_FIELD: Record<string, SrDatePatternField> = {
+  SR_DATE_PATTERN_REQUIRED: "sr_date_pattern",
+  SR_ISSUE_DATE_PATTERN_REQUIRED: "issue_date_pattern",
+};
+
+const datePatternField = (err: unknown): SrDatePatternField | undefined =>
+  err instanceof ApiError && err.appCode
+    ? DATE_PATTERN_FIELD[err.appCode]
+    : undefined;
+
+type PendingDatePattern = {
+  field: SrDatePatternField;
+  retry: (pattern: SrDatePattern) => void;
+};
 
 interface UseSrFormActionsParams {
   form: UseFormReturn<SrFormValues>;
@@ -73,6 +97,9 @@ export function useSrFormActions({
   const [showSubmit, setShowSubmit] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const [actionDialog, setActionDialog] = useState<SrActionDialogType>(null);
+  const [datePattern, setDatePattern] = useState<PendingDatePattern | null>(
+    null,
+  );
 
   // mutations
   const createSr = useCreateStoreRequisition();
@@ -204,6 +231,13 @@ export function useSrFormActions({
     }
   };
 
+  /**
+   * ยิง workflow action แล้วรับ error เอง (mutation ปิด toast กลางไว้ — ดู `useSrAction`)
+   *
+   * รหัสที่ขอให้เลือกวันที่จะเปิด dialog แทน toast แล้ว `retry` ยิงซ้ำด้วย payload
+   * เดิมบวกฟิลด์คำตอบ — doc_version ตัวเดิมใช้ต่อได้ เพราะรอบที่ถูกตีกลับไม่ได้
+   * แก้อะไรในใบเลย
+   */
   const runWorkflow = async (
     mutation: typeof submitSr,
     payload: SrActionPayload,
@@ -211,21 +245,40 @@ export function useSrFormActions({
     options?: { onDone?: () => void },
   ) => {
     if (!storeRequisition) return;
-    // ปิด guard ก่อนยิง mutation — ผู้อนุมัติ/ผู้จ่ายที่เพิ่งติ๊กแถวคือฟอร์ม dirty
-    // ถ้าไม่ปิดก่อน navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม
-    setIsSubmitting(true);
     const fresh = await fetchFreshSr();
-    mutation.mutate(
-      { ...payload, doc_version: resolveDocVersion(fresh) },
-      {
-        onSuccess: () => {
-          toast.success(successMsg);
-          options?.onDone?.();
-          goList();
+    const body = { ...payload, doc_version: resolveDocVersion(fresh) };
+
+    const fire = (extra?: Partial<SrActionPayload>) => {
+      // ปิด guard ก่อนยิง mutation — ผู้อนุมัติ/ผู้จ่ายที่เพิ่งติ๊กแถวคือฟอร์ม dirty
+      // ถ้าไม่ปิดก่อน navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม
+      setIsSubmitting(true);
+      mutation.mutate(
+        { ...body, ...extra },
+        {
+          onSuccess: () => {
+            setDatePattern(null);
+            toast.success(successMsg);
+            options?.onDone?.();
+            goList();
+          },
+          onError: (err) => {
+            setIsSubmitting(false);
+            const field = datePatternField(err);
+            if (field) {
+              setDatePattern({
+                field,
+                retry: (pattern) => fire({ [field]: pattern }),
+              });
+              return;
+            }
+            setDatePattern(null);
+            reportApiError(err);
+          },
         },
-        onError: () => setIsSubmitting(false),
-      },
-    );
+      );
+    };
+
+    fire();
   };
 
   const buildStageDetails = (
@@ -247,6 +300,53 @@ export function useSrFormActions({
   };
 
   /**
+   * ยิง submit จริง แยกจากขั้น save เพราะมันคือขั้นเดียวที่อาจถูกถามเรื่องวันที่กลับมา
+   *
+   * ยิงซ้ำด้วย id/doc_version/details ชุดเดิมได้ — รอบที่ถูกตีกลับด้วย 422 ไม่ได้
+   * แก้อะไรในใบ doc_version จึงยังตรง
+   */
+  const fireSubmit = (
+    srId: string,
+    docVersion: number,
+    details: SrStageDetail[],
+    pattern?: SrDatePattern,
+  ) => {
+    setIsSubmitting(true);
+    submitSr.mutate(
+      {
+        id: srId,
+        stage_role: "create",
+        doc_version: docVersion,
+        details,
+        ...(pattern ? { sr_date_pattern: pattern } : {}),
+      },
+      {
+        onSuccess: () => {
+          setDatePattern(null);
+          setShowSubmit(false);
+          toast.success(t("submitted"));
+          goList();
+        },
+        onError: (err) => {
+          setIsSubmitting(false);
+          if (datePatternField(err) === "sr_date_pattern") {
+            // ปิด dialog ยืนยันการส่งก่อน — ไม่งั้นซ้อนกันสองชั้น ชั้นบนถามวันที่
+            // ชั้นล่างยังถามว่าจะส่งไหม
+            setShowSubmit(false);
+            setDatePattern({
+              field: "sr_date_pattern",
+              retry: (p) => fireSubmit(srId, docVersion, details, p),
+            });
+            return;
+          }
+          setDatePattern(null);
+          reportApiError(err);
+        },
+      },
+    );
+  };
+
+  /**
    * กด Submit ได้ตั้งแต่ยังไม่เคย save — save ให้เองก่อนแล้วค่อยยิง submit
    *
    * ใบใหม่ = create → submit, ใบเดิมที่แก้ค้าง = update → submit, ใบที่ไม่มีอะไรค้าง
@@ -256,8 +356,8 @@ export function useSrFormActions({
   const handleSubmitSr = async (values: SrFormValues) => {
     // ปิด guard ก่อนยิง mutation → sentinel ถูกลบทันการ navigate(list) ตอนสำเร็จ
     setIsSubmitting(true);
+    let srId = storeRequisition?.id;
     try {
-      let srId = storeRequisition?.id;
       if (!srId) {
         const res = await createSr.mutateAsync({
           stage_role: "create",
@@ -271,29 +371,21 @@ export function useSrFormActions({
           details: buildSaveDetails(values, await fetchFreshSr()),
         });
       }
-      if (!srId) {
-        setIsSubmitting(false);
-        return;
-      }
-
-      const saved = await fetchSrById(srId);
-      const details: SrStageDetail[] = (
-        saved?.store_requisition_detail ?? []
-      ).map((d) => ({ id: d.id, stage_status: "submit", stage_message: null }));
-      await submitSr.mutateAsync({
-        id: srId,
-        stage_role: "create",
-        doc_version: saved?.doc_version ?? 0,
-        details,
-      });
-
-      setShowSubmit(false);
-      toast.success(t("submitted"));
-      goList();
     } catch {
-      // error toast มาจาก mutation เอง — แค่เปิด guard กลับให้กรอกต่อได้
+      // create/update ยังใช้ toast กลาง — แค่เปิด guard กลับให้กรอกต่อได้
       setIsSubmitting(false);
+      return;
     }
+    if (!srId) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    const saved = await fetchSrById(srId);
+    const details: SrStageDetail[] = (
+      saved?.store_requisition_detail ?? []
+    ).map((d) => ({ id: d.id, stage_status: "submit", stage_message: null }));
+    fireSubmit(srId, saved?.doc_version ?? 0, details);
   };
 
   const revealInvalid = (errors: FieldErrors<SrFormValues>) => {
@@ -429,6 +521,8 @@ export function useSrFormActions({
     setShowComment,
     actionDialog,
     setActionDialog,
+    datePattern,
+    closeDatePattern: () => setDatePattern(null),
     // discard
     discardDialogProps: discard.dialogProps,
     navDiscardDialogProps,
