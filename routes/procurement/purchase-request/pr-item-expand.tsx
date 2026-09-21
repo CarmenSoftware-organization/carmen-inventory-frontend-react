@@ -240,6 +240,13 @@ export function PrItemExpand({
                       form.setValue(`items.${index}.stage_status`, "approve");
                     }
                   }}
+                  // ชื่อผู้ขายเป็นคนละช่องกับ id และโหมดอ่านวาดจากชื่อ — ไม่เซ็ต
+                  // คู่กันตรงนี้ พอ save เสร็จแล้วกลับไปโหมดอ่านจะได้ "—" จนกว่า
+                  // จะ refresh (ทางอื่นที่ตั้งผู้ขายเซ็ตสองช่องคู่กันหมดอยู่แล้ว
+                  // ดู pr-auto-allocate)
+                  onItemChange={(vendor) =>
+                    form.setValue(`items.${index}.vendor_name`, vendor.name)
+                  }
                   className="w-full text-xs"
                   error={vendorError}
                 />

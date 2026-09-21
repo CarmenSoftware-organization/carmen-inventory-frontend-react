@@ -15,10 +15,18 @@ vi.mock("@/lib/http-client", () => ({
 vi.mock("@/components/lookup/lookup-vendor", () => ({
   LookupVendor: ({
     onValueChange,
+    onItemChange,
   }: {
     onValueChange: (value: string) => void;
+    onItemChange?: (vendor: { id: string; name: string }) => void;
   }) => (
-    <button type="button" onClick={() => onValueChange("vendor-1")}>
+    <button
+      type="button"
+      onClick={() => {
+        onValueChange("vendor-1");
+        onItemChange?.({ id: "vendor-1", name: "Acme Foods" });
+      }}
+    >
       pick-vendor
     </button>
   ),
@@ -91,5 +99,25 @@ describe("เลือกผู้ขายในแถวขยาย", () => {
     expect(item.stage_status).toBe("approve");
     // สถานะจริงใน DB ต้องไม่ขยับจนกว่าจะมีคนกดอนุมัติ
     expect(item.current_stage_status).toBe("pending");
+  });
+
+  // โหมดอ่านวาดจาก vendor_name ไม่ใช่ vendor_id — ไม่เซ็ตคู่กัน พอ save เสร็จ
+  // แล้วกลับไปโหมดอ่านจะได้ "—" จนกว่าจะ refresh
+  it("เก็บชื่อผู้ขายคู่กับ id ไว้ให้โหมดอ่านใช้วาด", () => {
+    let form!: UseFormReturn<PrFormValues>;
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
+    render(
+      <QueryClientProvider client={qc}>
+        <IntlProvider locale="en" messages={en}>
+          <Harness onForm={(f) => (form = f)} />
+        </IntlProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByText("pick-vendor"));
+
+    expect(form.getValues("items.0.vendor_name")).toBe("Acme Foods");
   });
 });
