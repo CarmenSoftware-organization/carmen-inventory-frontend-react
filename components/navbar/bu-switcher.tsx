@@ -66,7 +66,13 @@ export default function BuSwitcher() {
   const tt = useTranslations("toast");
   const tErr = useTranslations("errors");
   const navigate = useNavigate();
-  const { data: profile, isLoading, isError, defaultBu } = useProfile();
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    defaultBu,
+    hasDefaultBu,
+  } = useProfile();
   const switchBuMutation = useSwitchBu();
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -131,7 +137,11 @@ export default function BuSwitcher() {
           </p>
         </div>
         {departments.map((bu) => {
-          const isActive = bu.id === currentDept.id;
+          // `defaultBu` fallback เป็น BU ตัวแรกเมื่อไม่มีแถวไหน is_default=true
+          // ถ้าเชื่อมันตรง ๆ ตรงนี้ BU ตัวนั้นจะถูกมองว่า active แล้วโดนปิดปุ่ม
+          // ผู้ใช้จึงกดตั้ง default ไม่ได้เลย และทุกหน้าที่ยิง /api/business-units
+          // ค้าง 404 ถาวร — ไม่มี default จริงก็ต้องไม่มีตัวไหน active
+          const isActive = hasDefaultBu && bu.id === currentDept.id;
           return (
             <DropdownMenuItem
               key={bu.id}
