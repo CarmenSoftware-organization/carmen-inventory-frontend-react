@@ -4038,7 +4038,6 @@
       "tabStock": "Stock Movement",
       "refDocs": "Source documents",
       "refDocsComingSoon": "Source documents for this line are not available yet",
-      "stockComingSoon": "Stock movement is not available yet",
       "stockNeedsCommitted": "Stock movement shows after this receipt is committed",
       "docInfo": "Document Information",
       "docType": "Document Type",
@@ -4136,7 +4135,8 @@
       "poCount": "{count} PO(s)",
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
-      "deleteProductLine": "Remove this line"
+      "deleteProductLine": "Remove this line",
+      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is"
     },
     "approval": {
       "entity": "Approval",

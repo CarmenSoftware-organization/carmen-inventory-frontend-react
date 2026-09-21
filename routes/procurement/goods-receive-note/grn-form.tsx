@@ -242,7 +242,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             <GrnExtraCostFields form={form} disabled={isDisabled} />
           </TabsContent>
           <TabsContent value="stock">
-            <GrnStockTable docStatus={goodsReceiveNote?.doc_status} />
+            <GrnStockTable
+              grnId={goodsReceiveNote?.id}
+              docStatus={goodsReceiveNote?.doc_status}
+            />
           </TabsContent>
         </Tabs>
       </form>

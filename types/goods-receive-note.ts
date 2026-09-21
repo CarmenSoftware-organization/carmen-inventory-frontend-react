@@ -228,3 +228,37 @@ export interface CreateGrnDto {
     };
   };
 }
+
+/**
+ * แถวเคลื่อนไหวสต๊อกของใบรับสินค้า (`GET .../good-received-notes/{id}/stock-movements`)
+ *
+ * **ประกาศเฉพาะฟิลด์ที่ตารางวาดจริง** — ทรงลอกมาจาก `CnStockMovement` ของ
+ * endpoint พี่น้องกัน ฟิลด์ที่เกินมาไม่กระทบ ส่วนที่หายจะขึ้นเป็นช่องว่าง
+ */
+export interface GrnStockMovementItem {
+  id: string;
+  sequence_no: number;
+  location_name: string;
+  product_name: string;
+  product_local_name?: string | null;
+  inventory_unit_name: string;
+  lot_no?: string | null;
+  /** จำนวนที่ใบบอกว่ารับ — มีค่าเสมอ ต่างจาก `qty_in` ที่ว่างจนกว่าจะเข้าสต๊อกจริง */
+  received_qty?: number;
+  /** จำนวนที่สต๊อกขยับจริง — `0` ตราบใดที่ `is_posted` ยังไม่เป็น true */
+  qty_in: number;
+  cost_per_unit: number;
+  total_cost: number;
+}
+
+export interface GrnStockMovement {
+  good_received_note_id: string;
+  /**
+   * `false` = ตัวเลขเป็นการคาดการณ์จากตัวใบ ยังไม่ได้เข้าสต๊อกจริง · `undefined` =
+   * backend ไม่ได้ส่งมา ซึ่งต่างจาก false — ห้ามเช็คด้วย `!is_posted`
+   */
+  is_posted?: boolean;
+  /** `inventory_transaction` = ของขยับจริง · `document_detail` = อ่านจากตัวใบ */
+  source?: string;
+  items: GrnStockMovementItem[];
+}

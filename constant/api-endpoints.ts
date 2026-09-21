@@ -115,6 +115,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/extra-cost-types`,
   GOODS_RECEIVE_NOTE: (buCode: string) =>
     `/api/proxy/api/${buCode}/good-received-notes`,
+  GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
+    `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>
