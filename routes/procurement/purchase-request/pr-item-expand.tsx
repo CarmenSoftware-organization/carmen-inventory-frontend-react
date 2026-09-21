@@ -227,12 +227,17 @@ export function PrItemExpand({
                       shouldDirty: true,
                       shouldValidate: true,
                     });
+                    // เซ็ตแค่ `stage_status` (= สิ่งที่ผู้ใช้ตัดสินใจใน session นี้)
+                    // **ห้ามแตะ `current_stage_status`** ซึ่งเป็นสถานะจริงใน DB —
+                    // ปุ่ม Save ของ stage purchase ส่ง detail เต็มผ่าน
+                    // `preparePurchaseDetails` แล้วหลังบ้าน (purchase-request.service
+                    // `update()`) destructure ทิ้งแค่ stage_status/stage_message
+                    // ส่วน current_stage_status ลอดเข้า pickDetailColumns ไปเขียน DB
+                    // → แค่เลือกผู้ขายแล้วกด Save แถวนั้นกลายเป็น approve ทั้งที่
+                    // ยังไม่มีใครกดอนุมัติ · ตอนกด Purchase Approve ยังได้ approve
+                    // เหมือนเดิมเพราะ `resolveApproveStageStatus` อ่าน stage_status ก่อน
                     if (value) {
                       form.setValue(`items.${index}.stage_status`, "approve");
-                      form.setValue(
-                        `items.${index}.current_stage_status`,
-                        "approve",
-                      );
                     }
                   }}
                   className="w-full text-xs"
