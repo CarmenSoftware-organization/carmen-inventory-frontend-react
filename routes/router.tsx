@@ -77,6 +77,14 @@ export const router = createBrowserRouter([
             lazy: () => import("./notifications/notifications.route"),
             ErrorBoundary: RouteErrorBoundaryAdapter,
           },
+          // หน้าอ้างอิง design system — เครื่องมือของทีมพัฒนา ไม่ใช่โมดูลใช้งาน
+          // จึงไม่อยู่ใน constant/module-list.ts (ไม่ขึ้นเมนู ไม่ผูก permission
+          // และไม่ผูก license feature) แต่ยังอยู่หลัง auth เพราะไม่มีเหตุให้เปิด public
+          {
+            path: "design-system",
+            lazy: () => import("./design-system/design-system.route"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
           {
             path: "config",
             ErrorBoundary: RouteErrorBoundaryAdapter,

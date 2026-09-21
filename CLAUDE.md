@@ -112,6 +112,26 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
 กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`
 (โหลดเองเมื่อทำงานใต้ `routes/`)
 
+## Design system (`/design-system`)
+
+กฎอยู่ใน `docs/DESIGN.md` · ของจริงอยู่ที่หน้า **`/design-system`** ซึ่งเรนเดอร์ token จาก
+`styles/globals.css` และ primitive จาก `components/ui/` ตรง ๆ (โค้ดหน้าอยู่ที่
+`routes/design-system/` — dev tool: อยู่หลัง auth แต่ไม่อยู่ใน `constant/module-list.ts`
+จึงไม่ขึ้นเมนู ไม่ผูก permission/license และไม่ผ่าน i18n) ก่อนเพิ่มหรือแก้ UI
+ให้หยิบของที่มีอยู่ อย่าตั้งค่าสี/ขนาดใหม่ที่ call site
+
+สี่กับดักที่พลาดกันบ่อย:
+
+- token สถานะ (`--success` `--warning` …) เป็น **สีพื้น** ใช้เป็น `text-*` แล้วตก WCAG AA
+  — ข้อความต้องใช้ `text-success-ink` / `text-warning-ink` (`lib/__tests__/status-ink-contrast.test.ts` ดักอยู่)
+- utility `bg-status-*` **ไม่มีจริง** ต้องเขียน `bg-[var(--status-draft)]` (บล็อก `@theme inline` ท้าย `styles/badge-status.css` เป็นโค้ดที่ไม่มีผล)
+- ห้ามประกาศ `--spacing-md` (รวมถึง sm/lg/xl/2xl) — Tailwind v4 ใช้คีย์ร่วมกับสเกล container แล้ว `max-w-md` ทั้งแอปจะยุบ
+- ขนาดตัวอักษรดิบนอก ladder เป็นบั๊ก design system — `components/ui/type-ladder.test.ts` แดงทันที
+
+**dark mode ทั้งแอปยังไม่มีสวิตช์จริง** — CSS ครบทั้งชุดแต่ไม่มีโค้ดไหนตั้งคลาส `.dark`
+ที่ `<html>` เลย ปุ่มสลับธีมในหน้า `/design-system` จึงผูกคลาสไว้ที่ container ของหน้าเอง
+(`&:is(.dark *)` ต้องการแค่ ancestor) ใช้ดูงานได้ แต่ไม่ใช่การเปิด dark mode ให้ผู้ใช้
+
 ## Known open items
 
 - `/api/time` was a Next route — `use-server-time` is stubbed to client time.
