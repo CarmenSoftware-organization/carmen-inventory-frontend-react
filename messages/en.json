@@ -3799,7 +3799,7 @@
       "blankPo": "Blank PO",
       "blankPoSubtitle": "Start from scratch",
       "blankPoDesc": "Fill in every field yourself — no PR linkage.",
-      "fromPr": "From PR",
+      "fromPr": "From purchase request",
       "fromPrSubtitle": "Use approved PR",
       "fromPrDesc": "Generate PO lines from an approved purchase request.",
       "fromPriceList": "From Price List",
@@ -3936,7 +3936,10 @@
         "sendSuccess": "Purchase order sent to the vendor.",
         "sendPartial": "Sent, but delivery failed for: {emails}",
         "sendFailed": "The email could not be delivered to any recipient."
-      }
+      },
+      "fromPrCount": "{count} PRs",
+      "fromPrLabel": "Open the purchase requests this line came from ({count})",
+      "noPrSource": "No source purchase request"
     },
     "creditNote": {
       "tabItems": "Items",

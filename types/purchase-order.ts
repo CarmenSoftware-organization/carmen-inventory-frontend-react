@@ -82,10 +82,22 @@ export interface PoItemHistoryEntry {
 
 export interface PrDetailRef {
   pr_detail: EntityRef | null;
+  /** ใบขอซื้อต้นทาง — `null` เมื่อแถวนี้ไม่ได้มาจาก PR (manual / price list) */
+  pr_id: string | null;
+  pr_no: string | null;
+  /**
+   * ใบรับสินค้าที่อ้างแถวนี้
+   *
+   * **ยังไม่รู้ทรงของสมาชิก** — เอกสารตัวอย่างที่เคยเห็นส่งมาเป็น array ว่างทุกแถว
+   * ประกาศเป็น `unknown[]` ตามที่รู้จริง ไม่ใช่เดาเอา · จะอ่านค่าข้างในต้องไปดู
+   * response ที่มีข้อมูลจริงก่อนแล้วค่อยประกาศ type ให้ตรง
+   */
+  grn: unknown[];
   order_qty: number;
   order_base_qty: number;
   received_qty: number;
   foc_qty: number;
+  foc_received_qty: number;
 }
 
 /**
