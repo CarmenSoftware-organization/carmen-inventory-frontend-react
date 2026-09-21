@@ -52,9 +52,14 @@ export function useProfile() {
     retry: 1,
   });
 
-  const defaultBu =
-    query.data?.business_unit.find((b) => b.is_default) ??
-    query.data?.business_unit[0];
+  // backend ยืนยัน "BU ปัจจุบัน" จาก is_default เท่านั้น — ถ้าไม่มีแถวไหนตั้งไว้
+  // `/api/business-units` ตอบ 404 "No current business unit set for user"
+  // fallback เป็นตัวแรกจึงเป็นของสำหรับ "แสดงผล" ล้วน ๆ ไม่ใช่คำตอบว่า BU ไหน
+  // active จริง ใครที่ต้องรู้ความจริงข้อนี้ (เช่น bu-switcher ที่ปิดปุ่มของ BU
+  // ที่ active อยู่) ต้องอ่าน `hasDefaultBu` ไม่ใช่เดาจากการที่ `defaultBu` มีค่า
+  const assignedDefaultBu = query.data?.business_unit.find((b) => b.is_default);
+  const hasDefaultBu = !!assignedDefaultBu;
+  const defaultBu = assignedDefaultBu ?? query.data?.business_unit[0];
 
   const userId = query.data?.id;
   const aliasName = query.data?.alias_name;
@@ -91,6 +96,11 @@ export function useProfile() {
     if (query.data.business_unit.length === 0) {
       console.warn("[useProfile] business_unit array is empty");
     }
+    if (!hasDefaultBu && query.data.business_unit.length > 0) {
+      console.warn(
+        "[useProfile] no business unit has is_default=true — showing the first one; /api/business-units stays 404 until one is set",
+      );
+    }
     if (defaultBu && !defaultBu.config) {
       console.warn(
         "[useProfile] Default BU config is missing:",
@@ -102,6 +112,7 @@ export function useProfile() {
   return {
     ...query,
     defaultBu,
+    hasDefaultBu,
     buCode,
     defaultCurrencyId,
     defaultCurrencyCode,
