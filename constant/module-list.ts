@@ -597,7 +597,7 @@ export const moduleList: ModuleDto[] = [
         // ซึ่งล็อกเฉพาะ BU ที่ไม่ได้ซื้อ System Admin ทั้งโมดูล (over-lock น้อยที่สุด)
         licenseFeature: "system_admin",
         icon: Briefcase,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.business_unit.view,
       },
       {
         name: "defaultSetting",
@@ -606,7 +606,7 @@ export const moduleList: ModuleDto[] = [
         // ซึ่งอยู่นอกขอบเขต license ทั้งคู่
         licenseFeature: "system_admin",
         icon: SlidersHorizontal,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.business_unit.view,
       },
       {
         name: "inventoryPeriod",
@@ -614,14 +614,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.inventory_period", // app:inventory-periods
         icon: Calendar,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.inventory_period.view,
       },
       {
         name: "workflow",
         path: "/system-admin/workflow",
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.workflow.view,
         // สามชนิดเอกสารเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
         // (`GET /config/{bu}/workflows/{slug}`) ไม่ใช่กรองจากชุดเดียวกัน
         //
@@ -637,28 +637,28 @@ export const moduleList: ModuleDto[] = [
             path: "/system-admin/workflow/purchase-request",
             licenseFeature: "system_admin.workflow",
             icon: ShoppingCart,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.system_admin.workflow.purchase_request.view,
           },
           {
             name: "workflowPurchaseOrder",
             path: "/system-admin/workflow/purchase-order",
             licenseFeature: "system_admin.workflow",
             icon: Receipt,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.system_admin.workflow.purchase_order.view,
           },
           {
             name: "workflowStoreRequisition",
             path: "/system-admin/workflow/store-requisition",
             licenseFeature: "system_admin.workflow",
             icon: Store,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.system_admin.workflow.store_requisition.view,
           },
           {
             name: "notificationTemplate",
             path: "/system-admin/notification-template",
             licenseFeature: "configuration.notification_template", // config:notification-templates
             icon: BellRing,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.configuration.notification_template.view,
           },
         ],
       },
@@ -669,22 +669,24 @@ export const moduleList: ModuleDto[] = [
         // (`tb_business_unit_interface_license`) ไม่ใช่กลุ่มของสัญญา ดู spec
         // docs/superpowers/specs/2026-09-20-app-config-license-split-design.md
         licenseFeature: "interface",
+        // **ไม่มี `permission` โดยตั้งใจ** — backend ไม่มี resource `interface` ใน
+        // permission catalog เลย (เป็น `LICENSE_ONLY_RESOURCES`) หน้านี้คุมด้วยใบ INF
+        // อย่างเดียว การใส่คีย์ที่ไม่มีอยู่จริงกลับเข้ามาเท่ากับปิดหน้านี้ถาวรสำหรับ non-admin
         icon: Cable,
-        permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailProfile",
         path: "/system-admin/email-profile",
         licenseFeature: "configuration.email_profile",
         icon: Mail,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.config_email.view,
       },
       {
         name: "emailTemplate",
         path: "/system-admin/email-template",
         licenseFeature: "configuration.email_template",
         icon: MailOpen,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.config_email.view,
       },
       {
         name: "role",
@@ -692,14 +694,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.role", // config:application-roles
         icon: ShieldCheck,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.role.view,
       },
       {
         name: "user",
         path: "/system-admin/user",
         licenseFeature: "system_admin.user", // app:users
         icon: UserCheck,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.user.view,
       },
       {
         name: "runningCode",
@@ -707,14 +709,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.running_code", // config:running-codes
         icon: Hash,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.running_code.view,
       },
       {
         name: "document",
         path: "/system-admin/document",
         licenseFeature: "system_admin.document", // app:documents
         icon: FileCheck,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.document.view,
       },
       {
         name: "userActivity",
@@ -722,14 +724,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: UserRoundSearch,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.user_activity.view,
       },
       {
         name: "activityLog",
         path: "/system-admin/activity-log",
         licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: Activity,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.activity_log.view,
       },
       {
         name: "dashboardDataset",
@@ -739,7 +741,7 @@ export const moduleList: ModuleDto[] = [
         // เส้นคั่นเคยมาจาก notificationTemplate ที่เคยอยู่เหนือมัน — ย้ายตัวนั้นไป
         // ใต้ workflow แล้ว ถ้าไม่ถือเส้นเอง มันจะไหลไปติดกลุ่ม activity
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.dashboard.dataset.view,
       },
     ],
   },

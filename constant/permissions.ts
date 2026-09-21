@@ -39,6 +39,7 @@ export const PERMISSIONS = {
     // shelf: backend ยังไม่มี permission key นี้ — หน้าสร้างรอไว้ non-admin
     // จะยังไม่เห็นเมนูจนกว่า backend จะ seed permission ตามชื่อนี้
     shelf: crud("configuration.shelf"),
+    notification_template: crud("configuration.notification_template"),
     tax_profile: crud("configuration.tax_profile"),
   },
   product_management: {
@@ -108,9 +109,58 @@ export const PERMISSIONS = {
       manage_bu: "widget.dashboard.manage_bu",
     },
   },
-  system_configuration: {
-    view: "system_configuration.view",
-    update: "system_configuration.update",
+  /**
+   * System Admin — คีย์ทุกตัวในบล็อกนี้ยืนยันแล้วว่ามีแถวจริงใน
+   * `CARMEN_SYSTEM.tb_permission` ของ backend (ตรวจ 2026-09-21)
+   *
+   * ก่อนหน้านี้ทุกหน้าใต้ `/system-admin` ใช้ `system_configuration.view` ร่วมกัน
+   * ตัวเดียว ซึ่ง **ไม่มีอยู่ใน permission catalog ของ backend เลย** (0 แถวจาก 301)
+   * ผลคือ non-admin ถูก `denied` ทุกหน้าโดยไม่มีทางแก้ที่หน้า Role และ admin ไม่เห็น
+   * ปัญหาเพราะ `useCan()` bypass ให้อยู่แล้ว — อย่าเพิ่มคีย์ที่ไม่ได้มาจาก
+   * `seed.permission.data.ts` กลับเข้ามาอีก
+   *
+   * `business_unit` / `config_email` / `user_activity` ถูกทำเครื่องหมาย
+   * `PLANNED_RESOURCES` ฝั่ง backend (ยังไม่มี endpoint รองรับ) แต่ seed เข้า DB แล้วจริง
+   * จึงติ๊กที่หน้า Role ได้ตามปกติ — เครื่องหมายนั้นไม่ได้กันการ seed
+   */
+  system_admin: {
+    view: "system_admin.view",
+    /** Company Profile + Default Setting — ทั้งคู่ยิง `/api/business-units` */
+    business_unit: {
+      view: "system_admin.business_unit.view",
+      update: "system_admin.business_unit.update",
+    },
+    inventory_period: crud("system_admin.inventory_period"),
+    workflow: {
+      ...crud("system_admin.workflow"),
+      purchase_request: viewOnly("system_admin.workflow.purchase_request"),
+      purchase_order: viewOnly("system_admin.workflow.purchase_order"),
+      store_requisition: viewOnly("system_admin.workflow.store_requisition"),
+    },
+    /** Email Profile + Email Template — ตั้งค่าอีเมลย้ายไปอยู่ใต้ `config/app-config` */
+    config_email: {
+      view: "system_admin.config_email.view",
+      update: "system_admin.config_email.update",
+    },
+    role: crud("system_admin.role"),
+    user: crud("system_admin.user"),
+    running_code: crud("system_admin.running_code"),
+    document: crud("system_admin.document"),
+    user_activity: viewOnly("system_admin.user_activity"),
+    activity_log: {
+      view: "system_admin.activity_log.view",
+      delete: "system_admin.activity_log.delete",
+    },
+  },
+  /**
+   * `dashboard.dataset` คือ resource ของ `app:datasets` / `app:dashboard-lab`
+   * ใน route map ของ backend — คนละตัวกับ `widget.*` ด้านบน
+   */
+  dashboard: {
+    dataset: {
+      view: "dashboard.dataset.view",
+      create: "dashboard.dataset.create",
+    },
   },
   report_analytics: {
     view: "report_analytics.view",
