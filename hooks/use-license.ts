@@ -11,10 +11,10 @@ import type { BusinessUnitLicense, BusinessUnitSeat } from "@/types/license";
  * ส่วน permission ถือ resource + action (`procurement.purchase_request.create`)
  * กติกาการตัดเหมือน `usePermissionPrefix()` ทุกประการ (ตัดหลังจุด**สุดท้าย**ออก)
  *
- * ⚠️ **การตัด action ถูกต้อง แต่ไม่พอ** — namespace ของ permission กับของ license
- * feature ไม่ใช่ตัวเดียวกัน (`product_management.unit.view` → license คือ
- * `configuration.unit`, `report_analytics.view` → `report.list`,
- * `system_configuration.view` → `system_admin.*`) leaf ที่ไม่ตรงต้องระบุ
+ * ⚠️ **การตัด action ถูกต้อง แต่ไม่พอ** — resource ของ permission กับ feature key ของ
+ * license ไม่ตรงกันเสมอ (`system_admin.business_unit.view` → license คือ `system_admin`
+ * เพราะ `/api/business-units` อยู่นอกขอบเขต license, `report.schedule.view` →
+ * `report.list`) leaf ที่ไม่ตรงต้องระบุ
  * `licenseFeature` ใน `constant/module-list.ts` ตรง ๆ — **ห้ามแก้ฟังก์ชันนี้ให้ไป
  * เดา mapping เอง** เพราะมันเป็นข้อมูล ไม่ใช่ตรรกะ ใช้ `licenseFeatureOf()` แทน
  * เวลาต้องการ feature ของ leaf หนึ่ง ๆ

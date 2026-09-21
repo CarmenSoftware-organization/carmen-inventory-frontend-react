@@ -24,25 +24,6 @@ interface LookupProductUnitProps {
   readonly readOnly?: boolean;
 }
 
-/**
- * Select สำหรับเลือกหน่วยนับของสินค้ารายการใดรายการหนึ่ง (cascading จาก productId)
- *
- * ดึงข้อมูลผ่าน `useProductUnits(productId)` ซึ่งคืนเฉพาะหน่วยที่สินค้าชิ้นนั้นรองรับ
- * (inventory/order/ingredient units) auto-select หน่วยแรกเมื่อ value ไม่ match หรือยังว่าง
- * เปิดใช้ได้แม้ยังไม่เลือก `productId` (dropdown จะว่างจนกว่าจะมี product) มี
- * `onItemChange` ส่ง object `ProductUnit` เต็มสำหรับ side effects
- *
- * @param value - product unit id ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX select element ของ product unit lookup
- * @example
- * ```tsx
- * const productId = useWatch({ control, name: "product_id" });
- * <Controller name="unit_id" control={control} render={({ field }) => (
- *   <LookupProductUnit productId={productId} value={field.value} onValueChange={field.onChange} />
- * )} />
- * ```
- */
 export function LookupProductUnit({
   productId,
   value,
@@ -71,8 +52,6 @@ export function LookupProductUnit({
     onValueChangeRef.current(units[0].id);
   }, [units, value]);
 
-  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
-  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
   if (readOnly) {
     const selected = units.find((u) => u.id === value);
     return (
@@ -94,11 +73,6 @@ export function LookupProductUnit({
         size="sm"
         align="end"
         aria-invalid={!!error}
-        // ห้ามใส่ w-* ที่นี่ — `SelectTrigger` มี `w-fit` เป็นฐานอยู่แล้ว ต่อท้าย
-        // className อีกตัวเมื่อไหร่ tailwind-merge จะเขี่ยความกว้างที่ผู้เรียก
-        // ส่งมาทิ้งทุกครั้ง (PR/GRN/PRT ส่งความกว้างคงที่มาแล้วตายหมด ช่องหน่วย
-        // ในตารางเลยกว้างตามชื่อหน่วย ขอบขวาไม่ตรงกันสักแถว เฉพาะโหมดแก้ไข
-        // เพราะโหมดอ่านออกที่ FieldPlainText ก่อนถึงบรรทัดนี้)
         className={cn("text-xs", className)}
       >
         {isLoading ? (

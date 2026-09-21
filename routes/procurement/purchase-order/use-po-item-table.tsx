@@ -114,6 +114,7 @@ interface UsePoItemTableOptions {
   showApproveCheckbox: boolean;
   showStatusBadge: boolean;
   canResetStatus: boolean;
+  isViewMode: boolean;
   onDelete: (index: number) => void;
 }
 
@@ -128,6 +129,7 @@ export function usePoItemTable({
   showApproveCheckbox,
   showStatusBadge,
   canResetStatus,
+  isViewMode,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -226,6 +228,10 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            // ยอดที่รับแล้วโชว์เฉพาะโหมดอ่าน — ตอนกรอก (add/edit) ตัวเลข GRN
+            // ใต้ช่องอ่านปนกับสิ่งที่ตัวเองเพิ่งพิมพ์ และใบที่เพิ่งสร้างก็เป็น 0
+            // ทุกแถวอยู่แล้ว
+            showReceived={isViewMode}
           />
         ),
       },
@@ -362,6 +368,7 @@ export function usePoItemTable({
     showApproveCheckbox,
     showStatusBadge,
     canResetStatus,
+    isViewMode,
     onDelete,
     tfl,
     showAction,
@@ -373,5 +380,10 @@ export function usePoItemTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: showApproveCheckbox,
+    // ไม่ให้ลากขอบหัวคอลัมน์ — ความกว้างที่ลากไม่ถูกจำ ออกจากหน้าแล้วกลับมาได้
+    // ค่าเดิมทุกครั้ง · `columnsResizable` ของ DataGrid ยังต้องเปิดไว้เพราะมัน
+    // คุมอีกเรื่องด้วย: table width = getTotalSize() (คอลัมน์กว้างตาม size px
+    // แล้วเลื่อนแนวนอน) ปิดไปตารางจะกลับเป็น w-full บีบ 11 คอลัมน์ลงในจอ
+    enableColumnResizing: false,
   });
 }

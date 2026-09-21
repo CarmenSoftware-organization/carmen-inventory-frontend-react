@@ -51,12 +51,14 @@ export const QtyUnitCell = function QtyUnitCell({
   index,
   disabled,
   readOnly = false,
+  showReceived = true,
 }: {
   control: Control<PoFormValues>;
   form: UseFormReturn<PoFormValues>;
   index: number;
   disabled: boolean;
   readOnly?: boolean;
+  showReceived?: boolean;
 }) {
   "use no memo";
   const qty = useWatch({ control, name: `items.${index}.order_qty` }) ?? 0;
@@ -79,7 +81,7 @@ export const QtyUnitCell = function QtyUnitCell({
           suffix={unitName}
           suffixClassName="text-right"
         />
-        <ReceivedSubtext control={control} index={index} />
+        {showReceived && <ReceivedSubtext control={control} index={index} />}
       </div>
     );
   }
@@ -109,7 +111,7 @@ export const QtyUnitCell = function QtyUnitCell({
           />
         </InputSuffixAddon>
       </InputSuffixField>
-      <ReceivedSubtext control={control} index={index} />
+      {showReceived && <ReceivedSubtext control={control} index={index} />}
     </div>
   );
 };
