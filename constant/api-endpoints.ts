@@ -72,6 +72,8 @@ export const API_ENDPOINTS = {
   CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/users/${userId}`,
   CREDIT_NOTE: (buCode: string) => `/api/proxy/api/${buCode}/credit-notes`,
+  CREDIT_NOTE_STOCK_MOVEMENTS: (buCode: string, cnId: string) =>
+    `/api/proxy/api/${buCode}/credit-notes/${cnId}/stock-movements`,
   CREDIT_NOTE_COMMENT: (buCode: string, cnId?: string) =>
     cnId
       ? `/api/proxy/api/${buCode}/credit-note-comments/${cnId}`

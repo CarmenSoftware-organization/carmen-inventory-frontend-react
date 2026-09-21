@@ -12,6 +12,7 @@ import type {
   CreditNote,
   CreditNoteDetail,
   CreateCnDto,
+  CnStockMovement,
 } from "@/types/credit-note";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -168,4 +169,35 @@ export function useExportCreditNote() {
   };
 
   return { exportCreditNote, isExporting };
+}
+
+/**
+ * การเคลื่อนไหวสต๊อกของใบลดหนี้ — ยิงตอนคอมโพเนนต์ในแท็บ Stock mount เท่านั้น
+ *
+ * Radix ถอด `TabsContent` ที่ไม่ได้เลือกออกจาก DOM ตาราง (และ hook นี้) จึงเกิด
+ * ตอนกดแท็บ ไม่ใช่ตอนเปิดฟอร์ม · `enabled` ยังกันอีกชั้นสำหรับใบที่ยังไม่ปิดจบ
+ * เพราะก่อน completed ของยังไม่ขยับ ยิงไปก็ได้ใบเปล่า
+ *
+ * @param cnId - รหัสใบลดหนี้ (ใบใหม่ที่ยังไม่บันทึกไม่มี id → ไม่ยิง)
+ * @param options.enabled - default `true`
+ */
+export function useCnStockMovements(
+  cnId: string | undefined,
+  options?: { enabled?: boolean },
+) {
+  const buCode = useBuCode();
+
+  return useQuery<CnStockMovement>({
+    queryKey: [QUERY_KEYS.CREDIT_NOTE_STOCK_MOVEMENTS, buCode, cnId],
+    queryFn: async () => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.CREDIT_NOTE_STOCK_MOVEMENTS(buCode!, cnId!),
+      );
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch stock movements");
+      const json = await res.json();
+      return json.data as CnStockMovement;
+    },
+    enabled: !!buCode && !!cnId && (options?.enabled ?? true),
+    ...CACHE_DYNAMIC,
+  });
 }

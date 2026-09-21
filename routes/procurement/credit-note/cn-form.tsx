@@ -419,7 +419,10 @@ export function CnForm({ creditNote }: CnFormProps) {
           </TabsContent>
 
           <TabsContent value="stock">
-            <CnStockTable docStatus={creditNote?.doc_status} />
+            <CnStockTable
+              cnId={creditNote?.id}
+              docStatus={creditNote?.doc_status}
+            />
           </TabsContent>
         </Tabs>
       </form>
