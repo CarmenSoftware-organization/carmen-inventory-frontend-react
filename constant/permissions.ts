@@ -34,26 +34,27 @@ export const PERMISSIONS = {
     delivery_point: crud("configuration.delivery_point"),
     department: crud("configuration.department"),
     exchange_rate: crud("configuration.exchange_rate"),
-    extra_cost: crud("configuration.extra_cost"),
+    // backend สะกดว่า `extra_cost_type` (คีย์ `configuration.extra_cost` เป็นของ
+    // โมดูล Procurement คนละตัวกัน) — ตรงกับ licenseFeature ของ leaf อยู่แล้ว
+    extra_cost_type: crud("configuration.extra_cost_type"),
     location: crud("configuration.location"),
-    // shelf: backend ยังไม่มี permission key นี้ — หน้าสร้างรอไว้ non-admin
-    // จะยังไม่เห็นเมนูจนกว่า backend จะ seed permission ตามชื่อนี้
-    shelf: crud("configuration.shelf"),
+    // backend สะกดว่า `location_shelf` ทั้งฝั่ง permission และ license — คอมเมนต์เดิม
+    // ที่ว่า "backend ยังไม่ seed" ไม่จริง คีย์มีอยู่ใน tb_permission ครบทั้ง 4 action
+    location_shelf: crud("configuration.location_shelf"),
+    /** license เรียกคีย์นี้เหมือนกัน — leaf `/config/unit` ระบุ licenseFeature ไว้แล้ว */
+    unit: crud("configuration.unit"),
     notification_template: crud("configuration.notification_template"),
     tax_profile: crud("configuration.tax_profile"),
   },
   product_management: {
     view: "product_management.view",
-    unit: crud("product_management.unit"),
     product: crud("product_management.product"),
     category: crud("product_management.category"),
-    report: viewOnly("product_management.report"),
   },
   vendor_management: {
     view: "vendor_management.view",
     vendor: crud("vendor_management.vendor"),
     price_list: crud("vendor_management.price_list"),
-    price_comparison: viewOnly("vendor_management.price_comparison"),
   },
   procurement: {
     view: "procurement.view",
@@ -77,14 +78,8 @@ export const PERMISSIONS = {
     view: "inventory_management.view",
     stock_in: crud("inventory_management.stock_in"),
     stock_out: crud("inventory_management.stock_out"),
-    store_requisition: {
-      view: "inventory_management.store_requisition.view",
-      view_department: "inventory_management.store_requisition.view_department",
-      view_all: "inventory_management.store_requisition.view_all",
-    },
-    store_requisition_template: crud(
-      "inventory_management.store_requisition_template",
-    ),
+    // SR ของจริงอยู่ใน namespace `store_operations` ด้านล่าง — สำเนาที่เคยอยู่ตรงนี้
+    // ไม่มีแถวใน tb_permission เลย และไม่มี call site ไหนเรียก
     physical_count: crud("inventory_management.physical_count"),
     spot_check: crud("inventory_management.spot_check"),
     period_end: {
@@ -161,8 +156,18 @@ export const PERMISSIONS = {
       create: "dashboard.dataset.create",
     },
   },
-  report_analytics: {
-    view: "report_analytics.view",
+  /**
+   * backend ไม่มี namespace `report_analytics` — คีย์จริงคือ `report.*` และแยกราย
+   * หน้าตาม `SUB_PATH_RESOURCE_MAP['app:reports']` (history / schedules / ที่เหลือ)
+   */
+  report: {
+    view: "report.view",
+    list: {
+      view: "report.list.view",
+      create: "report.list.create",
+    },
+    schedule: crud("report.schedule"),
+    history: viewOnly("report.history"),
   },
   operation_plan: {
     view: "operation_plan.view",

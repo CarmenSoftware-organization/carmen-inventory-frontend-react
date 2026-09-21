@@ -78,11 +78,12 @@ export interface ModuleDto {
    * License feature key ของ leaf นี้ — ระบุตรง ๆ เมื่อ key ที่คำนวณจาก `permission`
    * ไม่ตรงกับ catalog ของ backend
    *
-   * **ทำไมต้องมีฟิลด์นี้:** namespace ของ *permission* (RBAC) กับของ *license feature*
-   * **ไม่ใช่ตัวเดียวกัน** เช่น หน้า Unit ใช้ permission `product_management.unit.view`
-   * แต่ backend คิดค่า license เป็น `configuration.unit`; หน้า Report ใช้
-   * `report_analytics.view` แต่ feature จริงคือ `report.list` การปล่อยให้คำนวณเอง
-   * จะได้ key ที่ไม่มีอยู่ใน catalog → หน้านั้นถูกล็อกถาวรตอนเปิด
+   * **ทำไมต้องมีฟิลด์นี้:** resource ของ *permission* (RBAC) กับของ *license feature*
+   * **ไม่ใช่ตัวเดียวกันเสมอ** เช่น Company Profile ใช้ permission
+   * `system_admin.business_unit.view` แต่ license ผูกกับ module key `system_admin`
+   * เพราะ `/api/business-units` ไม่แมตช์ `LICENSE_ROUTE_FEATURES` เลย; หน้า Report
+   * Schedule ใช้ `report.schedule.view` แต่ feature ที่ผูกไว้คือ `report.list`
+   * การปล่อยให้คำนวณเองจะได้ key ที่ไม่มีอยู่ใน catalog → หน้านั้นถูกล็อกถาวรตอนเปิด
    * `LICENSE_ENFORCEMENT` และ license **ไม่มี admin bypass** จึงไม่มีใครเข้าไปแก้ได้
    *
    * ค่าที่ใส่ต้องมาจาก `LICENSE_ROUTE_FEATURES` ของ backend (map จาก URL path จริง
@@ -380,21 +381,21 @@ export const moduleList: ModuleDto[] = [
         path: "/report/list",
         licenseFeature: "report.list", // app:reports
         icon: Files,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.list.view,
       },
       {
         name: "reportSchedule",
         path: "/report/schedules",
         licenseFeature: "report.list", // app:reports (/api/{bu}/reports/schedules -> segment 'reports')
         icon: Calendar,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.schedule.view,
       },
       {
         name: "reportHistory",
         path: "/report/history",
         licenseFeature: "report.list", // app:reports (/api/{bu}/reports/history -> segment 'reports')
         icon: Clock,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.history.view,
       },
     ],
   },
@@ -518,17 +519,14 @@ export const moduleList: ModuleDto[] = [
         path: "/config/unit",
         licenseFeature: "configuration.unit", // config:units
         icon: Scale,
-        permission: PERMISSIONS.product_management.unit.view,
+        permission: PERMISSIONS.configuration.unit.view,
       },
       {
-        // permission คือ `configuration.shelf` แต่ license catalog เรียกมันว่า
-        // `configuration.location_shelf` — เคส key คนละ namespace จึงต้องระบุ
-        // `licenseFeature` เอง (`featureKeyOf(permission)` ผลิตคีย์ที่ catalog ไม่มี)
         name: "shelf",
         path: "/config/shelf",
         licenseFeature: "configuration.location_shelf",
         icon: Rows3,
-        permission: PERMISSIONS.configuration.shelf.view,
+        permission: PERMISSIONS.configuration.location_shelf.view,
       },
       {
         name: "adjustmentType",
@@ -580,7 +578,7 @@ export const moduleList: ModuleDto[] = [
         path: "/config/extra-cost",
         licenseFeature: "configuration.extra_cost_type", // config:extra-cost-types
         icon: Coins,
-        permission: PERMISSIONS.configuration.extra_cost.view,
+        permission: PERMISSIONS.configuration.extra_cost_type.view,
       },
     ],
   },
