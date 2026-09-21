@@ -83,14 +83,20 @@ function InputSuffixField({
     </div>
   );
 
+  // Tooltip ครอบไว้เสมอ ให้เฉพาะ TooltipContent เป็นตัวที่โผล่/หาย — ของเดิม
+  // สลับทั้งก้อนระหว่าง `<div>` เปล่ากับ `<TooltipProvider>` ตาม errorMessage
+  // React เห็น type คนละตัวก็ unmount subtree ทิ้งแล้ว mount ใหม่ = `<input>`
+  // ข้างในเป็นคนละ node → **โฟกัสหลุดกลางพิมพ์** ทันทีที่ error โผล่ ซึ่งเป็น
+  // จังหวะที่คนกำลังพิมพ์แก้พอดี (เจอที่ช่องยอดลดหนี้ของ CN · ช่องจำนวนคืน ·
+  // requested/approved ของ PR ก็โดนเหมือนกัน)
   return (
     <InputSuffixContext.Provider value={ctx}>
-      {errorMessage ? (
-        // asChild ต้องครอบ <div> ตรงๆ — ถ้าเอา Provider ไว้ข้างใน Radix จะ clone
-        // handler ใส่ Provider ที่ไม่ใช่ DOM element แล้ว tooltip เงียบสนิท
-        <TooltipProvider>
-          <Tooltip delayDuration={100}>
-            <TooltipTrigger asChild>{box}</TooltipTrigger>
+      <TooltipProvider>
+        <Tooltip delayDuration={100}>
+          {/* asChild ต้องครอบ <div> ตรงๆ — ถ้าเอา Provider ไว้ข้างใน Radix จะ clone
+              handler ใส่ Provider ที่ไม่ใช่ DOM element แล้ว tooltip เงียบสนิท */}
+          <TooltipTrigger asChild>{box}</TooltipTrigger>
+          {!!errorMessage && (
             <TooltipContent
               side="top"
               align="end"
@@ -98,11 +104,9 @@ function InputSuffixField({
             >
               {errorMessage}
             </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : (
-        box
-      )}
+          )}
+        </Tooltip>
+      </TooltipProvider>
     </InputSuffixContext.Provider>
   );
 }
