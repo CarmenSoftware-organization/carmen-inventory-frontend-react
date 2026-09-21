@@ -182,7 +182,6 @@ const LIVE_RESOURCES: Record<string, string[]> = {
     "config_email",
     "document",
     "period",
-    "query_dataset",
     "role",
     "running_code",
     "user",
