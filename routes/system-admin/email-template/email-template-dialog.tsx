@@ -6,6 +6,7 @@ import { Eye, PencilLine } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -107,17 +108,25 @@ export function EmailTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={isSaving ? undefined : onOpenChange}>
-      <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-2xl">
-        <DialogHeader className="gap-0 pb-1">
-          <DialogTitle className="text-sm">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-2xl">
+        {/* หัว/ท้ายอยู่กับที่ เลื่อนเฉพาะฟอร์มตรงกลาง — ตัวแก้ไขเนื้อหาสูงจน
+            ปุ่มบันทึกเลื่อนหายถ้าปล่อยให้ทั้งกล่องเลื่อนด้วยกัน */}
+        <DialogHeader className="shrink-0 gap-1 px-5 pt-5 pr-12 pb-4">
+          <DialogTitle className="text-base">
             {isEdit
               ? tf("editTitle", { entity: t("entity") })
               : tf("addTitle", { entity: t("entity") })}
           </DialogTitle>
+          {/* บริบทที่เลื่อนหายไปกับฟอร์ม: ชนิดเอกสารและสถานะของรายการนี้ */}
+          <DialogDescription className="text-xs">
+            {t(`docType.${docType}`)}
+            <span aria-hidden="true"> · </span>
+            {enabled ? t("statusEnabled") : t("statusDisabled")}
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={submit} className="space-y-4">
-          <FieldGroup className="gap-3">
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <FieldGroup className="min-h-0 flex-1 gap-3 overflow-y-auto border-y px-5 py-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <Field data-invalid={!!form.formState.errors.name}>
                 <FieldLabel htmlFor="et-name" required>
@@ -279,7 +288,7 @@ export function EmailTemplateDialog({
             </label>
           </FieldGroup>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="shrink-0 gap-2 px-5 py-3">
             <Button
               type="button"
               variant="outline"

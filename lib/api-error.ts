@@ -313,3 +313,51 @@ function statusToCode(status: number): ErrorCode {
         : ERROR_CODES.VALIDATION_ERROR;
   }
 }
+
+/**
+ * รายละเอียดประกอบของ 403 ฝั่ง license — `feature` (คีย์ที่ BU ไม่มีสิทธิ์) กับ `bu_codes` /
+ * `bu_names` (หน่วยงานที่ถูกบล็อก) ที่ `LicenseInterceptor` วางไว้ **ระดับบนสุด** ของ error body
+ * ไม่ใช่ใน `error` (ดู `throw new ForbiddenException({ code, feature, bu_codes, bu_names })`)
+ *
+ * ข้อความอย่างเดียว ("หน่วยงานของคุณยังไม่ได้เปิดใช้งานความสามารถนี้") ไม่บอกว่า *ความสามารถไหน*
+ * ผู้ดูแลจึงเอาไปสั่งงานต่อไม่ได้ ต้องถาม dev ทุกครั้ง — สามฟิลด์นี้คือสิ่งที่ตอบคำถามนั้นได้
+ *
+ * `bu_names` เป็นของใหม่ที่ gateway เพิ่งเริ่มส่ง — gateway รุ่นก่อนหน้าจะไม่มีฟิลด์นี้เลย
+ * ผู้เรียกจึงต้องมีทางลงของตัวเองเสมอ (ดู `PermissionDeniedDialog` ที่แปลงจาก profile ต่อ)
+ *
+ * @param body - error body ที่ parse แล้ว (ชนิดอะไรก็ได้)
+ * @returns ฟิลด์ที่ไม่มีหรือรูปไม่ตรงถูกตัดทิ้งเป็น undefined
+ * @example
+ * ```ts
+ * licenseContextFrom({ feature: "configuration.currency", bu_codes: ["GR2VYNKQ"] });
+ * // { feature: "configuration.currency", buCodes: ["GR2VYNKQ"] }
+ * licenseContextFrom(null); // {}
+ * ```
+ */
+export function licenseContextFrom(body: unknown): {
+  feature?: string;
+  buCodes?: string[];
+  buNames?: string[];
+} {
+  if (typeof body !== "object" || body === null) return {};
+  const {
+    feature,
+    bu_codes: buCodes,
+    bu_names: buNames,
+  } = body as {
+    feature?: unknown;
+    bu_codes?: unknown;
+    bu_names?: unknown;
+  };
+  const stringList = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((v) => typeof v === "string")
+      ? (value as string[])
+      : undefined;
+  return {
+    feature: typeof feature === "string" && feature ? feature : undefined,
+    buCodes: stringList(buCodes),
+    buNames: stringList(buNames),
+  };
+}

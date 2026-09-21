@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -13,14 +14,27 @@ vi.mock("use-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+/**
+ * dialog อ่านชื่อหน่วยงานจาก cache ของ profile จึงต้องอยู่ใต้ QueryClientProvider
+ * เหมือนในแอปจริง (`components/providers.tsx`) — client เปล่าแปลว่า "ยังไม่มี profile"
+ * ซึ่งเป็นสภาพตั้งต้นที่เทสต์ชุดนี้สนใจ
+ */
+function renderDialog() {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <PermissionDeniedDialog />
+    </QueryClientProvider>,
+  );
+}
+
 function open(message?: string) {
-  render(<PermissionDeniedDialog />);
+  renderDialog();
   act(() => dispatchPermissionDenied(undefined, message));
 }
 
 describe("PermissionDeniedDialog", () => {
   it("stays closed until the event fires", () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
@@ -90,7 +104,7 @@ describe("dispatchPermissionDenied — reason parameter", () => {
 
 describe("PermissionDeniedDialog — reason variants", () => {
   it('shows the generic permission copy + ShieldOff icon when reason is "permission" (default, unchanged)', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied());
     expect(screen.getByText("title")).toBeInTheDocument();
     expect(screen.getByText("description")).toBeInTheDocument();
@@ -101,7 +115,7 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 
   it('shows the license copy + Lock icon when reason is "license"', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "license"));
     expect(screen.getByText("licenseTitle")).toBeInTheDocument();
     expect(screen.getByText("licenseDescription")).toBeInTheDocument();
@@ -113,7 +127,7 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 
   it('shows the expired copy + CalendarX icon when reason is "expired"', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "expired"));
     expect(screen.getByText("expiredTitle")).toBeInTheDocument();
     expect(screen.getByText("expiredDescription")).toBeInTheDocument();
@@ -125,13 +139,13 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 
   it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "license" — คำอธิบายบอกให้ติดต่อฝ่ายขาย', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "license"));
     expect(screen.queryByText("contactAdmin")).toBeNull();
   });
 
   it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "expired" — คำอธิบายบอกให้ต่ออายุ', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "expired"));
     expect(screen.queryByText("contactAdmin")).toBeNull();
   });
@@ -139,7 +153,7 @@ describe("PermissionDeniedDialog — reason variants", () => {
   // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่ง มีสองทางแก้ (ปิดผู้ใช้ / ซื้อเพิ่ม) ต่างจาก
   // license/expired ที่มีทางแก้เดียว — ทั้งสองทางอยู่ใน seatDescription แล้ว
   it('shows the seat copy + Users icon when reason is "seat"', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "seat"));
     expect(screen.getByText("seatTitle")).toBeInTheDocument();
     expect(screen.getByText("seatDescription")).toBeInTheDocument();
@@ -151,13 +165,13 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 
   it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "seat" — คำอธิบายบอกทางแก้ไว้แล้ว', () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() => dispatchPermissionDenied(undefined, undefined, "seat"));
     expect(screen.queryByText("contactAdmin")).toBeNull();
   });
 
   it("still prefers an explicit message over the seat-specific copy", () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() =>
       dispatchPermissionDenied(undefined, "custom seat override", "seat"),
     );
@@ -167,7 +181,7 @@ describe("PermissionDeniedDialog — reason variants", () => {
   });
 
   it("still prefers an explicit message over the reason-specific copy", () => {
-    render(<PermissionDeniedDialog />);
+    renderDialog();
     act(() =>
       dispatchPermissionDenied(undefined, "custom override", "license"),
     );
