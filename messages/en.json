@@ -4784,7 +4784,9 @@
     "expiredTitle": "Subscription Expired",
     "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew.",
     "seatTitle": "Seat Limit Exceeded",
-    "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats."
+    "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats.",
+    "featureLabel": "Feature:",
+    "buLabel": "Business unit:"
   },
   "license": {
     "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
