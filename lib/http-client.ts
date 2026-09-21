@@ -8,6 +8,17 @@ type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
   body?: unknown;
+  /**
+   * ไม่ต้องเด้ง `PermissionDeniedDialog` เมื่อได้ 403 เรื่องสิทธิ์ (RBAC) จากคำขอนี้
+   *
+   * ใช้กับคำขอ **เสริม** ที่หน้ามีทางลงอย่างนุ่มนวลอยู่แล้ว เช่น lookup ที่เติม dropdown —
+   * กล่อง modal ทับทั้งหน้าเพราะ dropdown ตัวเดียวโหลดไม่ได้นั้นเกินกว่าเหตุ และยังกลบ
+   * ส่วนที่เหลือของหน้าที่ยังใช้งานได้ปกติ caller ที่ตั้ง flag นี้ต้องรับผิดชอบแสดงอาการเอง
+   *
+   * ครอบเฉพาะ 403 ของสิทธิ์เท่านั้น — 403 เรื่อง license/สัญญาหมดอายุ/เกินโควตาที่นั่ง
+   * ยังเด้งเหมือนเดิม เพราะเป็นเรื่องระดับสัญญาที่ผู้ใช้ต้องรู้ ไม่ใช่ข้อจำกัดของหน้าใดหน้าหนึ่ง
+   */
+  silentForbidden?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,6 +197,7 @@ const handleClientErrors = async (
   url: string,
   init: RequestInit,
   isRetry = false,
+  silentForbidden = false,
 ): Promise<Response> => {
   // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
   // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
@@ -203,7 +215,7 @@ const handleClientErrors = async (
         // ส่ง retry response กลับเข้า handler อีกรอบ (isRetry=true) เพื่อให้
         // 401/403/429 รอบสองถูกจัดการแทนที่จะคืน response ดิบ
         const retried = await safeFetch(url, init);
-        return handleClientErrors(retried, url, init, true);
+        return handleClientErrors(retried, url, init, true, silentForbidden);
       }
     }
 
@@ -247,7 +259,8 @@ const handleClientErrors = async (
             ? "seat"
             : "license",
       );
-    } else {
+    } else if (!silentForbidden) {
+      // `silentForbidden` ปิดเฉพาะกล่อง — ApiError ยังถูกโยนเหมือนเดิม caller จึงรู้ผลเสมอ
       dispatchAuthError(message);
     }
 
@@ -280,7 +293,7 @@ const request = async (
 ): Promise<Response> => {
   checkRateLimit();
 
-  const { body, headers, ...rest } = options ?? {};
+  const { body, headers, silentForbidden, ...rest } = options ?? {};
 
   // FormData (multipart) ต้องปล่อยให้ browser ตั้ง Content-Type + boundary เอง
   // และห้าม JSON.stringify — ไม่งั้น payload จะเสีย
@@ -301,7 +314,7 @@ const request = async (
 
   const response = await safeFetch(url, init);
 
-  return handleClientErrors(response, url, init);
+  return handleClientErrors(response, url, init, false, silentForbidden);
 };
 
 /**

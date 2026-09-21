@@ -20,8 +20,13 @@ export function useReportFormTemplates() {
   return useQuery<Map<string, ReportFormOption[]>>({
     queryKey: [QUERY_KEYS.REPORT_TEMPLATE_FORMS],
     queryFn: async () => {
+      // `silentForbidden`: endpoint นี้อยู่ใต้ api-system (namespace ของแพลตฟอร์ม) ถ้าสิทธิ์
+      // ฝั่ง backend ถูกรัดกลับไปเป็น platform-only อีกครั้ง ผู้ใช้ BU จะได้ 403 — หน้านี้
+      // จัดการเองอยู่แล้วด้วยข้อความในส่วน "แบบฟอร์มการพิมพ์" + option ค่าเดิมที่ไม่หายตอน Save
+      // การเด้ง modal ทับทั้งหน้าเพราะ dropdown ตัวเดียวจึงเกินกว่าเหตุ
       const res = await httpClient.get(
         `${API_ENDPOINTS.REPORT_TEMPLATE_FORMS}?perpage=-1`,
+        { silentForbidden: true },
       );
       if (!res.ok) {
         throw await ApiError.from(res, "Failed to fetch report form templates");
