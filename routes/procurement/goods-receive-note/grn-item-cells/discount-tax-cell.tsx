@@ -5,6 +5,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "../grn-form-schema";
@@ -113,23 +114,29 @@ export function GrnItemTaxCell({
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
+      <TaxOverrideInput
+        rate={Number(rate) || 0}
+        amount={amount}
+        isAdjustment={isAdj}
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
+      />
+      {/* แถวล่าง: โปรไฟล์ภาษีคู่กับสวิตช์ override — ท่าเดียวกับคอลัมน์ภาษีของ PO */}
       <div className="flex items-center gap-1.5">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
-              shouldDirty: true,
-              shouldValidate: true,
-            });
-            form.setValue(`${base}.tax_rate`, r);
-          }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-          }
-        />
+        <div className="min-w-0 flex-1">
+          <LookupTaxProfile
+            value={taxProfileId ?? ""}
+            onValueChange={(value, r) => {
+              form.setValue(`${base}.tax_profile_id`, value || null, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+              form.setValue(`${base}.tax_rate`, r);
+            }}
+            className="h-8 w-full text-xs"
+          />
+        </div>
         <OverrideToggle
           checked={isAdj}
           hint={tfl("overrideHintTax")}
@@ -145,11 +152,6 @@ export function GrnItemTaxCell({
           }}
         />
       </div>
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro-legal text-right tabular-nums">
-          {rate}%
-        </span>
-      )}
     </div>
   );
 }
