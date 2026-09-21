@@ -52,9 +52,7 @@ export function GrnItemDiscountCell({
     return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
-    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
-    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-col gap-0.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -69,21 +67,30 @@ export function GrnItemDiscountCell({
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
       />
-      <OverrideToggle
-        checked={isAdj}
-        hint={tfl("overrideHintDiscount")}
-        onCheckedChange={(on) => {
-          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-          if (on) {
-            form.setValue(`${base}.discount_amount`, amount, {
+      {/* แถวล่าง: % ที่ใช้คิด คู่กับสวิตช์ override — ท่าเดียวกับคอลัมน์ส่วนลดของ PO
+          ช่องกรอกได้ความกว้างเต็มเซลล์ และ % ไม่หายไปตอน override เปิด */}
+      <div className="flex items-center justify-end gap-1.5">
+        {Number(rate) > 0 && (
+          <span className="text-muted-foreground text-micro-legal tabular-nums">
+            {rate}%
+          </span>
+        )}
+        <OverrideToggle
+          checked={isAdj}
+          hint={tfl("overrideHintDiscount")}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
               shouldDirty: true,
             });
-          }
-          form.setValue(`${base}.is_discount_adjustment`, on, {
-            shouldDirty: true,
-          });
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 }
