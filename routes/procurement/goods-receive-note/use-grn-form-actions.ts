@@ -398,6 +398,19 @@ export function useGrnFormActions({
     // ปิด guard ตั้งแต่ก่อนยิง mutation → sentinel ถูกลบระหว่างรอ network → พอ
     // create สำเร็จแล้ว navigate จะ replace /new จริง ไม่ใช่ sentinel
     setIsSubmitting(true);
+
+    // เก็บร่างไม่บังคับกรอกครบ — คนรับของอาจยังไม่รู้ราคา ยังไม่มีเลขใบกำกับ
+    // แล้วอยากเก็บที่กรอกไว้ก่อน บังคับให้ครบ = ต้องกรอกมั่วให้ผ่านหรือทิ้งทั้งใบ
+    //
+    // "บันทึก" (saved) กับปุ่ม Commit ที่ยืมทางนี้ไปยังบังคับครบตามเดิม เพราะขั้น
+    // นั้น /save ลงรายการสต๊อกกับตัดยอดรับของ PO จริง ของที่กรอกไม่ครบเข้าสต๊อก
+    // ไปแล้วแก้ทีหลังไม่ได้ · ค่าที่ส่งเป็น getValues() ดิบ ไม่ผ่าน z.coerce
+    // (เหตุผลเดียวกับ `draftSaveHandler` ใน lib/form-helpers)
+    if (status === "draft") {
+      void onSubmit(form.getValues(), onSaved);
+      return;
+    }
+
     form.handleSubmit((values) => onSubmit(values, onSaved), (errs) => {
       finishAction(); // validation ไม่ผ่าน → guard กลับมาเฝ้า + ปิด dialog ยืนยัน
       // location/received_qty/discount/tax อยู่ใน group expand → เผย + scroll +
