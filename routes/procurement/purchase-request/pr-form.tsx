@@ -204,8 +204,13 @@ export function PurchaseRequestForm({
     }
     if (Object.keys(patch).length === 0) return;
     // จาก template/duplicate ฟอร์มต้อง dirty อยู่แล้ว (baseline เปล่า) — setValue
-    // ตรง ๆ พอ ห้ามเดินทาง reset ข้างล่าง: keepDirtyValues เก็บเฉพาะ field ที่อยู่ใน
-    // dirtyFields ซึ่ง items ที่ prefill มายังไม่อยู่ → โดน wipe ทั้งตาราง
+    // ตรง ๆ พอ ไม่ต้องเดินทาง reset ข้างล่าง
+    //
+    // ทางนั้นเคย **ล้างตารางทิ้ง** ใน react-hook-form ≤7.87 เพราะ `keepDirtyValues`
+    // เก็บเฉพาะ field ที่อยู่ใน `dirtyFields` ซึ่งตอนนั้นไม่มี items ที่ prefill มา
+    // 7.88 แก้ให้ `dirtyFields` sync ถูกต้อง (#13701) ตารางจึงไม่หายแล้ว — แต่ยังใช้
+    // setValue ต่อ เพราะมันไม่ต้องพึ่ง `dirtyFields` ซึ่งเป็น internal state ที่
+    // เปลี่ยนพฤติกรรมมาแล้วหนึ่งรอบ (ดู pr-form-dirty.test.tsx ที่ยืนยันทั้งสองชั้น)
     if (isPrefilled) {
       if (patch.pr_date) form.setValue("pr_date", patch.pr_date);
       if (patch.requestor_id) form.setValue("requestor_id", patch.requestor_id);

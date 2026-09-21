@@ -41,9 +41,22 @@ describe("เมนูย่อยของ workflow", () => {
     expect(slugs).toEqual([...WORKFLOW_DOC_TYPES]);
   });
 
-  it("เมนูชนิดเอกสารสืบสิทธิ์และ license feature จากตัวแม่ ไม่ตกหล่น", () => {
+  // permission กับ licenseFeature ของสามใบนี้ **ไม่เท่ากัน** โดยตั้งใจ:
+  //
+  // - permission เป็นคีย์ของประเภทตัวเอง เพราะ `SUB_PATH_RESOURCE_MAP['config:workflows']`
+  //   ฝั่ง backend แตก `GET /workflows/<type>` เป็น `system_admin.workflow.<type>` จริง
+  //   (swagger ของ config_workflows.controller เขียนไว้เองว่าแต่ละประเภทให้สิทธิ์แยกกันได้)
+  //   ส่วนการ **เขียน** ตกมาที่คีย์แม่ทั้งหมด — จึงคุมที่แม่ ไม่ใช่ที่นี่
+  // - licenseFeature ยังเป็นของแม่ เพราะ BU ที่ซื้อ `system_admin.workflow` วันนี้ยังไม่ถูก
+  //   assign คีย์ลูก การเปลี่ยนไปผูกคีย์ลูกจะล็อกหน้าทันทีที่ deploy (LICENSE_ENFORCEMENT
+  //   เปิดอยู่ทุก environment)
+  it("เมนูชนิดเอกสารถือ permission ของประเภทตัวเอง แต่ยังใช้ license feature ของตัวแม่", () => {
+    expect(docTypeChildren.map((s) => s.permission)).toEqual([
+      "system_admin.workflow.purchase_request.view",
+      "system_admin.workflow.purchase_order.view",
+      "system_admin.workflow.store_requisition.view",
+    ]);
     for (const s of docTypeChildren) {
-      expect(s.permission).toBe(workflow?.permission);
       expect(s.licenseFeature).toBe(workflow?.licenseFeature);
     }
   });

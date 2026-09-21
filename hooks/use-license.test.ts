@@ -186,12 +186,14 @@ describe("licenseFeatureOf", () => {
   const base = { name: "x", path: "/x", icon: (() => null) as never };
 
   it("ใช้ licenseFeature ที่ระบุไว้ก่อนเสมอ แม้จะมี permission", () => {
+    // คู่จริงในแอป: Company Profile ถือ permission ระดับ resource แต่ license ผูกกับ
+    // module key เพราะ `/api/business-units` ไม่แมตช์ LICENSE_ROUTE_FEATURES เลย
     const mod: ModuleDto = {
       ...base,
-      permission: "product_management.unit.view",
-      licenseFeature: "configuration.unit",
+      permission: "system_admin.business_unit.view",
+      licenseFeature: "system_admin",
     };
-    expect(licenseFeatureOf(mod)).toBe("configuration.unit");
+    expect(licenseFeatureOf(mod)).toBe("system_admin");
   });
 
   it("ไม่มี licenseFeature → คำนวณจาก permission", () => {
