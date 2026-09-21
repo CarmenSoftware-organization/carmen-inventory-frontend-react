@@ -1352,8 +1352,8 @@
         "failedDesc": "Could not import the chart of accounts. Nothing was changed."
       }
     },
-    "accountMapping": {
-      "title": "Account Mapping",
+    "chartOfAccountMapping": {
+      "title": "Chart of Account Mapping",
       "desc": "Which account code each store, category and department posts to — and what is still unmapped.",
       "mapped": "Mapped",
       "notMapped": "Not mapped",
@@ -4690,7 +4690,7 @@
     "notifications": "Notifications",
     "fromPriceList": "From price list",
     "chartOfAccounts": "Chart of Accounts",
-    "accountMapping": "Account Mapping"
+    "chartOfAccountMapping": "Chart of Account Mapping"
   },
   "commentSheet": {
     "title": "Comments ({count})",

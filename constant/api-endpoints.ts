@@ -48,6 +48,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/test-email-profile`,
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
+  EMAIL_SENDERS: (buCode: string) => `/api/proxy/api/${buCode}/email-senders`,
+  EMAIL_MESSAGES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/email-messages`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
   BUSINESS_UNIT_AVATAR: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/avatar`,

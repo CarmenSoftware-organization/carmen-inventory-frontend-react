@@ -1352,8 +1352,8 @@
         "failedDesc": "นำเข้าผังบัญชีไม่สำเร็จ ไม่มีการเปลี่ยนแปลงข้อมูล"
       }
     },
-    "accountMapping": {
-      "title": "การผูกบัญชี",
+    "chartOfAccountMapping": {
+      "title": "การผูกผังบัญชี",
       "desc": "แต่ละคลัง หมวด และแผนก ลงบัญชีรหัสไหน — และตรงไหนที่ยังไม่ได้ผูก",
       "mapped": "ผูกแล้ว",
       "notMapped": "ยังไม่ผูก",
@@ -4680,7 +4680,7 @@
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
     "chartOfAccounts": "ผังบัญชี",
-    "accountMapping": "การผูกบัญชี"
+    "chartOfAccountMapping": "การผูกผังบัญชี"
   },
   "commentSheet": {
     "title": "ความคิดเห็น ({count})",

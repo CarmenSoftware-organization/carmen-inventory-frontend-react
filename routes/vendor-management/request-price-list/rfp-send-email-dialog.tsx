@@ -23,8 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { useEmailProfiles } from "@/hooks/use-email-profiles";
-import { useEmailTemplates } from "@/hooks/use-email-templates";
+import { useEmailSenders } from "@/hooks/use-email-senders";
+import { useEmailMessages } from "@/hooks/use-email-messages";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import {
@@ -34,7 +34,7 @@ import {
   plainTextToHtml,
   templatesForDocType,
 } from "@/lib/email-template";
-import type { EmailProfile } from "@/types/email-profile";
+import type { EmailSender } from "@/hooks/use-email-senders";
 import type { EmailTemplate } from "@/types/email-template";
 import { useRfpSendEmail } from "./use-rfp-send-email";
 
@@ -179,9 +179,9 @@ export function RfpSendEmailDialog({
     value: emailProfiles,
     isLoading: profilesLoading,
     isError,
-  } = useEmailProfiles();
+  } = useEmailSenders();
   const { value: emailTemplates, isLoading: templatesLoading } =
-    useEmailTemplates();
+    useEmailMessages();
   const sendEmail = useRfpSendEmail(rfpId ?? "");
 
   const isLoading = profilesLoading || templatesLoading;
@@ -360,7 +360,7 @@ export function RfpSendEmailDialog({
                   <SelectValue placeholder={t("profilePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {enabledProfiles.map((profile: EmailProfile) => (
+                  {enabledProfiles.map((profile: EmailSender) => (
                     <SelectItem key={profile.id} value={profile.id}>
                       {profile.name}
                     </SelectItem>

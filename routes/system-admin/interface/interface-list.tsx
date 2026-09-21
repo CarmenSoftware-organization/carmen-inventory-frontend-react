@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
-import { useAppConfigs } from "@/hooks/use-app-config";
+import { useInterfaceConfigs } from "./use-interface-configs";
 import {
   useInterfaceEntitlement,
   type InterfaceEntitlement,
@@ -62,7 +62,7 @@ export function interfaceGroups(
 export default function InterfaceList() {
   const t = useTranslations("systemAdmin.interface");
   const { entitlementOf } = useInterfaceEntitlement();
-  const { data, isLoading, isError, refetch } = useAppConfigs();
+  const { data, isLoading, isError, refetch } = useInterfaceConfigs();
 
   const groups = interfaceGroups(INTERFACE_CATEGORIES, data ?? [], entitlementOf);
 

@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import DisplayTemplate from "@/components/display-template";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
-import type { AccountMappingRow } from "@/types/account-mapping";
-import { AM_MOCK_ROWS } from "./am-mock";
-import { useAmTable } from "./use-am-table";
+import type { AccountMappingRow } from "@/types/chart-of-account-mapping";
+import { COAM_MOCK_ROWS } from "./coam-mock";
+import { useCoamTable } from "./use-coam-table";
 
 const matches = (row: AccountMappingRow, term: string) => {
   const haystack = [
@@ -39,7 +39,7 @@ const matches = (row: AccountMappingRow, term: string) => {
 
 function AmTable({ rows }: { readonly rows: AccountMappingRow[] }) {
   "use no memo";
-  const table = useAmTable({ data: rows });
+  const table = useCoamTable({ data: rows });
 
   return (
     <DataGrid
@@ -60,17 +60,17 @@ function AmTable({ rows }: { readonly rows: AccountMappingRow[] }) {
   );
 }
 
-export default function AmComponent() {
+export default function CoamComponent() {
   "use no memo";
-  const t = useTranslations("config.accountMapping");
+  const t = useTranslations("config.chartOfAccountMapping");
   const tc = useTranslations("common");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"AP" | "GL">("AP");
 
   const rows = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return AM_MOCK_ROWS;
-    return AM_MOCK_ROWS.filter((row) => matches(row, term));
+    if (!term) return COAM_MOCK_ROWS;
+    return COAM_MOCK_ROWS.filter((row) => matches(row, term));
   }, [search]);
 
   // แยกไว้ก่อน render ทั้งสองชุด เพื่อให้ตัวเลขบนหัวแท็บตรงกับที่อยู่ในตารางเสมอ

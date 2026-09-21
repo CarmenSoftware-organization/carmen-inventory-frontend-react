@@ -1,4 +1,4 @@
-import type { AccountMappingRow } from "@/types/account-mapping";
+import type { AccountMappingRow } from "@/types/chart-of-account-mapping";
 
 /**
  * ข้อมูลตัวอย่างระหว่างรอ backend — หน้า list อ่านจากตัวนี้ตรง ๆ ไม่ยิง API
@@ -7,7 +7,7 @@ import type { AccountMappingRow } from "@/types/account-mapping";
  * `last_scanned_at` เป็น null เพื่อให้เห็นทุกสภาพของตารางจริงตั้งแต่ยังไม่มี API
  * **ลบไฟล์นี้ทิ้งเมื่อ endpoint พร้อม**
  */
-export const AM_MOCK_ROWS: AccountMappingRow[] = [
+export const COAM_MOCK_ROWS: AccountMappingRow[] = [
   {
     id: "map_0001",
     business_unit: "VALHALLA",

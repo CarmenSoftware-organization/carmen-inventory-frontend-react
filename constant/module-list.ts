@@ -138,8 +138,16 @@ export const moduleList: ModuleDto[] = [
     icon: ShoppingCart,
     subModules: [
       {
+        // กล่องอนุมัติรวม PR/PO/SR ยิง /api/my-pending ซึ่งไม่อยู่ใน
+        // LICENSE_ROUTE_FEATURES จึงไม่มีคีย์ระดับ resource ให้ผูก — ใช้คีย์ระดับ
+        // module ของ Procurement แทน
+        //
+        // เกณฑ์คือ "backend ไม่มีคีย์ให้ผูกจริง ๆ" ไม่ใช่ "ยังไม่ได้หา" — ถ้า catalog
+        // มีคีย์ระดับ resource อยู่ ต้องผูกคีย์นั้น ไม่งั้นเมนูเปิดได้แต่ API ตอบ 403
+        // (เคยเกิดกับ /config/shelf ที่เคยถูกยกเป็นตัวอย่างตรงนี้)
         name: "myApproval",
         path: "/procurement/approval",
+        licenseFeature: "procurement",
         icon: FileCheck,
       },
       {
@@ -398,21 +406,25 @@ export const moduleList: ModuleDto[] = [
       {
         name: "journalVoucher",
         path: "/accounting/journal-voucher",
+        licenseFeature: "accounting.gl",
         icon: FileText,
       },
       {
         name: "templateVoucher",
         path: "/accounting/template-voucher",
+        licenseFeature: "accounting.gl.jv_template",
         icon: FileSpreadsheet,
       },
       {
         name: "recurringVoucher",
         path: "/accounting/recurring-voucher",
+        licenseFeature: "accounting.gl",
         icon: Clock,
       },
       {
         name: "allocationVoucher",
         path: "/accounting/allocation-voucher",
+        licenseFeature: "accounting.gl",
         icon: ArrowLeftRight,
       },
       {
@@ -424,11 +436,13 @@ export const moduleList: ModuleDto[] = [
           {
             name: "apInvoice",
             path: "/accounting/accounts-payable/invoice",
+            licenseFeature: "accounting.ap",
             icon: FileInput,
           },
           {
             name: "apPayment",
             path: "/accounting/accounts-payable/payment",
+            licenseFeature: "accounting.ap",
             icon: DollarSign,
           },
         ],
@@ -441,11 +455,13 @@ export const moduleList: ModuleDto[] = [
           {
             name: "arInvoice",
             path: "/accounting/accounts-receivable/invoice",
+            licenseFeature: "accounting.ar",
             icon: FileText,
           },
           {
             name: "arReceipt",
             path: "/accounting/accounts-receivable/receipt",
+            licenseFeature: "accounting.ar",
             icon: BadgeDollarSign,
           },
         ],
@@ -453,6 +469,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "financialReports",
         path: "/accounting/financial-reports",
+        licenseFeature: "accounting",
         icon: Files,
         separatorBefore: true,
       },
@@ -464,18 +481,18 @@ export const moduleList: ModuleDto[] = [
     icon: Settings2,
     subModules: [
       {
-        // ยังไม่ผูก permission/licenseFeature โดยตั้งใจ — โมดูลนี้เพิ่งวางโครง
-        // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
-        // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
-        // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
         name: "chartOfAccounts",
         path: "/config/chart-of-accounts",
+        licenseFeature: "configuration.chart_of_accounts", // config:chart-of-accounts
         icon: BookText,
       },
       {
-        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccounts
-        name: "accountMapping",
-        path: "/config/account-mapping",
+        // คีย์นี้มาจาก `LICENSE_ONLY_RESOURCES` ของ backend (ไม่มี endpoint รองรับ
+        // เพราะหน้า list ยังอ่าน mock) การล็อกจึงเกิดที่ FE จาก `license.features`
+        // ไม่ใช่ที่ `LicenseInterceptor`
+        name: "chartOfAccountMapping",
+        path: "/config/chart-of-account-mapping",
+        licenseFeature: "configuration.chart_of_account_mapping",
         icon: Link2,
       },
       {
@@ -504,9 +521,12 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.product_management.unit.view,
       },
       {
+        // permission คือ `configuration.shelf` แต่ license catalog เรียกมันว่า
+        // `configuration.location_shelf` — เคส key คนละ namespace จึงต้องระบุ
+        // `licenseFeature` เอง (`featureKeyOf(permission)` ผลิตคีย์ที่ catalog ไม่มี)
         name: "shelf",
         path: "/config/shelf",
-        licenseFeature: "configuration",
+        licenseFeature: "configuration.location_shelf",
         icon: Rows3,
         permission: PERMISSIONS.configuration.shelf.view,
       },
@@ -645,21 +665,24 @@ export const moduleList: ModuleDto[] = [
       {
         name: "interface",
         path: "/system-admin/interface",
-        licenseFeature: "configuration.app_config", // config:app-config
+        // ย้ายจาก `configuration.app_config` (2026-09-20) — Interface ขายแยกผ่านใบ INF
+        // (`tb_business_unit_interface_license`) ไม่ใช่กลุ่มของสัญญา ดู spec
+        // docs/superpowers/specs/2026-09-20-app-config-license-split-design.md
+        licenseFeature: "interface",
         icon: Cable,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailProfile",
         path: "/system-admin/email-profile",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_profile",
         icon: Mail,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailTemplate",
         path: "/system-admin/email-template",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_template",
         icon: MailOpen,
         permission: PERMISSIONS.system_configuration.view,
       },
