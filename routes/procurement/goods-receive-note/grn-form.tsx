@@ -273,7 +273,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           onConfirmDelete={actions.handleConfirmDelete}
           showCommit={actions.showCommit}
           setShowCommit={actions.setShowCommit}
-          isCommitPending={actions.commitGrn.isPending}
+          isCommitPending={actions.isActionPending}
           onConfirmCommit={actions.handleConfirmCommit}
           showVoid={actions.showVoid}
           setShowVoid={actions.setShowVoid}
