@@ -100,15 +100,6 @@ export const PERMISSIONS = {
       view_all: "store_operations.store_requisition.view_all",
     },
   },
-  widget: {
-    view: "widget.view",
-    create: "widget.create",
-    update: "widget.update",
-    delete: "widget.delete",
-    dashboard: {
-      manage_bu: "widget.dashboard.manage_bu",
-    },
-  },
   /**
    * System Admin — คีย์ทุกตัวในบล็อกนี้ยืนยันแล้วว่ามีแถวจริงใน
    * `CARMEN_SYSTEM.tb_permission` ของ backend (ตรวจ 2026-09-21)
@@ -153,10 +144,18 @@ export const PERMISSIONS = {
     },
   },
   /**
-   * `dashboard.dataset` คือ resource ของ `app:datasets` / `app:dashboard-lab`
-   * ใน route map ของ backend — คนละตัวกับ `widget.*` ด้านบน
+   * Dashboard — เดิมไฟล์นี้สะกด namespace นี้ว่า `widget.*` ซึ่งไม่มีอยู่ใน catalog
+   * ของ backend เลย (0 แถวใน `tb_permission`) backend เรียกว่า `dashboard.widget`
+   * ส่วน `widget.dashboard.manage_bu` ไม่มีที่มาทั้งใน tenant และ platform seed
+   * จึงถูกลบทิ้ง ไม่ใช่ย้าย
+   *
+   * ไม่มี call site ไหนเคยเรียกคีย์ชุดเก่า จึงไม่มีพฤติกรรมไหนเปลี่ยน — leaf
+   * `/dashboard` คุมด้วย license `dashboard.widget` อย่างเดียวเหมือนเดิม
    */
   dashboard: {
+    view: "dashboard.view",
+    widget: crud("dashboard.widget"),
+    /** resource ของ `app:datasets` / `app:dashboard-lab` ใน route map */
     dataset: {
       view: "dashboard.dataset.view",
       create: "dashboard.dataset.create",
