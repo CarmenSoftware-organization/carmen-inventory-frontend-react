@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -100,6 +101,7 @@ export function EmailProfileDialog({
   );
 
   const enabled = form.watch("enabled");
+  const smtpHost = form.watch("smtp_host");
   const secure = form.watch("smtp_secure");
 
   const startChangingPassword = () => {
@@ -116,199 +118,213 @@ export function EmailProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={isSaving ? undefined : onOpenChange}>
-      <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-2xl">
-        <DialogHeader className="gap-0 pb-1">
-          <DialogTitle className="text-sm">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-2xl">
+        <DialogHeader className="shrink-0 gap-1 px-5 pt-5 pr-12 pb-4">
+          <DialogTitle className="text-base">
             {isEdit
               ? tf("editTitle", { entity: t("entity") })
               : tf("addTitle", { entity: t("entity") })}
           </DialogTitle>
+          {/* บริบทที่เลื่อนหายไปกับฟอร์ม: เซิร์ฟเวอร์ที่ใช้ส่งและสถานะของโปรไฟล์นี้ */}
+          <DialogDescription className="text-xs">
+            {smtpHost ? (
+              <>
+                {smtpHost}
+                <span aria-hidden="true"> · </span>
+              </>
+            ) : null}
+            {enabled ? t("statusEnabled") : t("statusDisabled")}
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={submit} className="space-y-4">
-          <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="ep-name" required>
-              {t("dialog.profileName")}
-            </FieldLabel>
-            <Input
-              id="ep-name"
-              {...form.register("name")}
-              placeholder={t("dialog.namePlaceholder")}
-              disabled={isSaving}
-            />
-            <FieldError>{form.formState.errors.name?.message}</FieldError>
-          </Field>
+        {/* หัว/ท้ายอยู่กับที่ เลื่อนเฉพาะฟอร์มตรงกลาง — ฟอร์มยาวจนปุ่มบันทึก
+            เลื่อนหายถ้าปล่อยให้ทั้งกล่องเลื่อนด้วยกัน */}
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-y px-5 py-4">
+            <Field data-invalid={!!form.formState.errors.name}>
+              <FieldLabel htmlFor="ep-name" required>
+                {t("dialog.profileName")}
+              </FieldLabel>
+              <Input
+                id="ep-name"
+                {...form.register("name")}
+                placeholder={t("dialog.namePlaceholder")}
+                disabled={isSaving}
+              />
+              <FieldError>{form.formState.errors.name?.message}</FieldError>
+            </Field>
 
-          <section className="space-y-3">
-            <SectionLabel>{t("dialog.senderSection")}</SectionLabel>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field data-invalid={!!form.formState.errors.from_email}>
-                <FieldLabel htmlFor="ep-from-email" required>
-                  {t("dialog.fromEmail")}
-                </FieldLabel>
-                <Input
-                  id="ep-from-email"
-                  {...form.register("from_email")}
-                  type="email"
-                  placeholder="purchasing@example.com"
-                  disabled={isSaving}
-                />
-                <FieldError>
-                  {form.formState.errors.from_email?.message}
-                </FieldError>
-              </Field>
+            <section className="space-y-3">
+              <SectionLabel>{t("dialog.senderSection")}</SectionLabel>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field data-invalid={!!form.formState.errors.from_email}>
+                  <FieldLabel htmlFor="ep-from-email" required>
+                    {t("dialog.fromEmail")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-from-email"
+                    {...form.register("from_email")}
+                    type="email"
+                    placeholder="purchasing@example.com"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.from_email?.message}
+                  </FieldError>
+                </Field>
 
-              <Field data-invalid={!!form.formState.errors.from_name}>
-                <FieldLabel htmlFor="ep-from-name">
-                  {t("dialog.fromName")}
-                </FieldLabel>
-                <Input
-                  id="ep-from-name"
-                  {...form.register("from_name")}
-                  disabled={isSaving}
-                />
-                <FieldError>
-                  {form.formState.errors.from_name?.message}
-                </FieldError>
-              </Field>
-            </div>
-          </section>
+                <Field data-invalid={!!form.formState.errors.from_name}>
+                  <FieldLabel htmlFor="ep-from-name">
+                    {t("dialog.fromName")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-from-name"
+                    {...form.register("from_name")}
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.from_name?.message}
+                  </FieldError>
+                </Field>
+              </div>
+            </section>
 
-          <section className="space-y-3">
-            <SectionLabel>{t("dialog.smtpSection")}</SectionLabel>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field data-invalid={!!form.formState.errors.smtp_host}>
-                <FieldLabel htmlFor="ep-host" required>
-                  {t("dialog.host")}
-                </FieldLabel>
-                <Input
-                  id="ep-host"
-                  {...form.register("smtp_host")}
-                  placeholder="smtp.gmail.com"
-                  disabled={isSaving}
-                />
-                <FieldError>
-                  {form.formState.errors.smtp_host?.message}
-                </FieldError>
-              </Field>
+            <section className="space-y-3">
+              <SectionLabel>{t("dialog.smtpSection")}</SectionLabel>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field data-invalid={!!form.formState.errors.smtp_host}>
+                  <FieldLabel htmlFor="ep-host" required>
+                    {t("dialog.host")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-host"
+                    {...form.register("smtp_host")}
+                    placeholder="smtp.gmail.com"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_host?.message}
+                  </FieldError>
+                </Field>
 
-              <Field data-invalid={!!form.formState.errors.smtp_port}>
-                <FieldLabel htmlFor="ep-port" required>
-                  {t("dialog.port")}
-                </FieldLabel>
-                <Input
-                  id="ep-port"
-                  {...form.register("smtp_port")}
-                  type="number"
-                  placeholder="587"
-                  disabled={isSaving}
-                />
-                <FieldError>
-                  {form.formState.errors.smtp_port?.message}
-                </FieldError>
-              </Field>
+                <Field data-invalid={!!form.formState.errors.smtp_port}>
+                  <FieldLabel htmlFor="ep-port" required>
+                    {t("dialog.port")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-port"
+                    {...form.register("smtp_port")}
+                    type="number"
+                    placeholder="587"
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_port?.message}
+                  </FieldError>
+                </Field>
 
-              <Field data-invalid={!!form.formState.errors.smtp_username}>
-                <FieldLabel htmlFor="ep-username" required>
-                  {tfl("username")}
-                </FieldLabel>
-                <Input
-                  id="ep-username"
-                  {...form.register("smtp_username")}
-                  disabled={isSaving}
-                />
-                <FieldError>
-                  {form.formState.errors.smtp_username?.message}
-                </FieldError>
-              </Field>
+                <Field data-invalid={!!form.formState.errors.smtp_username}>
+                  <FieldLabel htmlFor="ep-username" required>
+                    {tfl("username")}
+                  </FieldLabel>
+                  <Input
+                    id="ep-username"
+                    {...form.register("smtp_username")}
+                    disabled={isSaving}
+                  />
+                  <FieldError>
+                    {form.formState.errors.smtp_username?.message}
+                  </FieldError>
+                </Field>
 
-              <Field data-invalid={!!form.formState.errors.smtp_password}>
-                <FieldLabel htmlFor="ep-password" required={changingPassword}>
-                  {t("dialog.password")}
-                </FieldLabel>
-                {changingPassword ? (
-                  <>
-                    <Input
-                      id="ep-password"
-                      {...form.register("smtp_password")}
-                      type="password"
-                      autoComplete="new-password"
-                      disabled={isSaving}
-                    />
-                    {isEdit && (
+                <Field data-invalid={!!form.formState.errors.smtp_password}>
+                  <FieldLabel htmlFor="ep-password" required={changingPassword}>
+                    {t("dialog.password")}
+                  </FieldLabel>
+                  {changingPassword ? (
+                    <>
+                      <Input
+                        id="ep-password"
+                        {...form.register("smtp_password")}
+                        type="password"
+                        autoComplete="new-password"
+                        disabled={isSaving}
+                      />
+                      {isEdit && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          className="self-start px-0"
+                          onClick={cancelChangingPassword}
+                          disabled={isSaving}
+                        >
+                          {t("dialog.keepPassword")}
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex h-9 items-center gap-2">
+                      <span className="text-muted-foreground text-xs">
+                        {t("dialog.passwordIsSet")}
+                      </span>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="xs"
-                        className="self-start px-0"
-                        onClick={cancelChangingPassword}
+                        onClick={startChangingPassword}
                         disabled={isSaving}
                       >
-                        {t("dialog.keepPassword")}
+                        {t("dialog.changePassword")}
                       </Button>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex h-9 items-center gap-2">
-                    <span className="text-muted-foreground text-xs">
-                      {t("dialog.passwordIsSet")}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="xs"
-                      onClick={startChangingPassword}
-                      disabled={isSaving}
-                    >
-                      {t("dialog.changePassword")}
-                    </Button>
-                  </div>
-                )}
-                <FieldError>
-                  {form.formState.errors.smtp_password?.message}
-                </FieldError>
+                    </div>
+                  )}
+                  <FieldError>
+                    {form.formState.errors.smtp_password?.message}
+                  </FieldError>
+                </Field>
+              </div>
+
+              <Field>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="ep-secure"
+                    checked={secure}
+                    onCheckedChange={(v) =>
+                      form.setValue("smtp_secure", v === true, {
+                        shouldDirty: true,
+                      })
+                    }
+                    disabled={isSaving}
+                  />
+                  <FieldLabel htmlFor="ep-secure" className="font-normal">
+                    {t("dialog.secure")}
+                  </FieldLabel>
+                </div>
+                <p className="text-muted-foreground text-micro">
+                  {t("dialog.secureHint")}
+                </p>
               </Field>
-            </div>
+            </section>
 
             <Field>
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="ep-secure"
-                  checked={secure}
+                  id="ep-enabled"
+                  checked={enabled}
                   onCheckedChange={(v) =>
-                    form.setValue("smtp_secure", v === true, {
-                      shouldDirty: true,
-                    })
+                    form.setValue("enabled", v === true, { shouldDirty: true })
                   }
                   disabled={isSaving}
                 />
-                <FieldLabel htmlFor="ep-secure" className="font-normal">
-                  {t("dialog.secure")}
+                <FieldLabel htmlFor="ep-enabled" className="font-normal">
+                  {t("dialog.enabled")}
                 </FieldLabel>
               </div>
-              <p className="text-muted-foreground text-micro">
-                {t("dialog.secureHint")}
-              </p>
             </Field>
-          </section>
+          </div>
 
-          <Field>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="ep-enabled"
-                checked={enabled}
-                onCheckedChange={(v) =>
-                  form.setValue("enabled", v === true, { shouldDirty: true })
-                }
-                disabled={isSaving}
-              />
-              <FieldLabel htmlFor="ep-enabled" className="font-normal">
-                {t("dialog.enabled")}
-              </FieldLabel>
-            </div>
-          </Field>
-
-          <DialogFooter className="pt-1">
+          <DialogFooter className="shrink-0 gap-2 px-5 py-3">
             <Button
               type="button"
               variant="outline"

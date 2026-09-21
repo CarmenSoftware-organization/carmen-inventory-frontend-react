@@ -316,9 +316,9 @@ export function RfpSendEmailDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-xl">
-        <DialogHeader className="gap-0 pb-1">
-          <DialogTitle className="flex items-center gap-2 text-sm">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-xl">
+        <DialogHeader className="shrink-0 gap-1 px-5 pt-5 pr-12 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-base">
             <Mail className="size-4" aria-hidden="true" />
             {t("title")}
           </DialogTitle>
@@ -327,122 +327,126 @@ export function RfpSendEmailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading && (
-          <div className="flex items-center justify-center py-10">
-            <Loader2
-              className="text-muted-foreground size-5 animate-spin"
-              aria-hidden="true"
-            />
-          </div>
-        )}
+        {/* หัว/ท้ายอยู่กับที่ เลื่อนเฉพาะเนื้อหาตรงกลาง — รายชื่อผู้รับกับข้อความ
+            ยาวจนปุ่มส่งเลื่อนหายถ้าปล่อยให้ทั้งกล่องเลื่อนด้วยกัน */}
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto border-y px-5 py-4">
+          {isLoading && (
+            <div className="flex items-center justify-center py-10">
+              <Loader2
+                className="text-muted-foreground size-5 animate-spin"
+                aria-hidden="true"
+              />
+            </div>
+          )}
 
-        {!isLoading && hasNoProfiles && (
-          <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <Settings
-              className="text-muted-foreground size-8"
-              aria-hidden="true"
-            />
-            <p className="text-muted-foreground text-sm">
-              {isError ? t("loadError") : t("noProfiles")}
-            </p>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/system-admin/email-profile">{t("goToSettings")}</Link>
-            </Button>
-          </div>
-        )}
+          {!isLoading && hasNoProfiles && (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <Settings
+                className="text-muted-foreground size-8"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground text-sm">
+                {isError ? t("loadError") : t("noProfiles")}
+              </p>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/system-admin/email-profile">{t("goToSettings")}</Link>
+              </Button>
+            </div>
+          )}
 
-        {!isLoading && !hasNoProfiles && (
-          <div className="space-y-4">
-            <Field>
-              <FieldLabel htmlFor="rse-profile">{t("profile")}</FieldLabel>
-              <Select value={profileId} onValueChange={setPickedProfileId}>
-                <SelectTrigger id="rse-profile" className="w-full">
-                  <SelectValue placeholder={t("profilePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {enabledProfiles.map((profile: EmailSender) => (
-                    <SelectItem key={profile.id} value={profile.id}>
-                      {profile.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            {rfpTemplates.length > 0 && (
+          {!isLoading && !hasNoProfiles && (
+            <div className="space-y-4">
               <Field>
-                <FieldLabel htmlFor="rse-template">{t("template")}</FieldLabel>
-                <Select
-                  value={selectedTemplate?.id ?? ""}
-                  onValueChange={handleTemplateChange}
-                >
-                  <SelectTrigger id="rse-template" className="w-full">
-                    <SelectValue placeholder={t("templatePlaceholder")} />
+                <FieldLabel htmlFor="rse-profile">{t("profile")}</FieldLabel>
+                <Select value={profileId} onValueChange={setPickedProfileId}>
+                  <SelectTrigger id="rse-profile" className="w-full">
+                    <SelectValue placeholder={t("profilePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {rfpTemplates.map((template: EmailTemplate) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
+                    {enabledProfiles.map((profile: EmailSender) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
-            )}
 
-            <Field data-invalid={toError}>
-              <FieldLabel htmlFor="rse-to" required>
-                {t("to")}
-              </FieldLabel>
-              <EmailChipField
-                id="rse-to"
-                value={to}
-                onChange={(next) => {
-                  setTo(next);
-                  if (next.length > 0) setToError(false);
-                }}
-                placeholder={t("toPlaceholder")}
-              />
-              {toError && <FieldError>{t("toRequired")}</FieldError>}
-            </Field>
+              {rfpTemplates.length > 0 && (
+                <Field>
+                  <FieldLabel htmlFor="rse-template">{t("template")}</FieldLabel>
+                  <Select
+                    value={selectedTemplate?.id ?? ""}
+                    onValueChange={handleTemplateChange}
+                  >
+                    <SelectTrigger id="rse-template" className="w-full">
+                      <SelectValue placeholder={t("templatePlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rfpTemplates.map((template: EmailTemplate) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
 
-            <Field>
-              <FieldLabel htmlFor="rse-cc">{t("cc")}</FieldLabel>
-              <EmailChipField
-                id="rse-cc"
-                value={cc}
-                onChange={setPickedCc}
-                placeholder={t("ccPlaceholder")}
-              />
-            </Field>
+              <Field data-invalid={toError}>
+                <FieldLabel htmlFor="rse-to" required>
+                  {t("to")}
+                </FieldLabel>
+                <EmailChipField
+                  id="rse-to"
+                  value={to}
+                  onChange={(next) => {
+                    setTo(next);
+                    if (next.length > 0) setToError(false);
+                  }}
+                  placeholder={t("toPlaceholder")}
+                />
+                {toError && <FieldError>{t("toRequired")}</FieldError>}
+              </Field>
 
-            <Field>
-              <FieldLabel htmlFor="rse-subject">{t("subject")}</FieldLabel>
-              <Input
-                id="rse-subject"
-                value={currentSubject}
-                onChange={(e) => setSubject(e.target.value)}
-                disabled={sendEmail.isPending}
-              />
-            </Field>
+              <Field>
+                <FieldLabel htmlFor="rse-cc">{t("cc")}</FieldLabel>
+                <EmailChipField
+                  id="rse-cc"
+                  value={cc}
+                  onChange={setPickedCc}
+                  placeholder={t("ccPlaceholder")}
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel htmlFor="rse-body">{t("body")}</FieldLabel>
-              {/* ลิงก์กรอกราคาอยู่ในเนื้อความที่เดียว — ผู้ใช้ย้ายหรือตัดได้
-                  สิ่งที่เห็นตรงนี้คือสิ่งที่ถูกส่งออกไปจริง */}
-              <RichTextEditor
-                id="rse-body"
-                value={currentBody}
-                onChange={setBody}
-                placeholders={EMAIL_PLACEHOLDERS.rfp}
-                placeholderLabel={t("insertVariable")}
-                disabled={sendEmail.isPending}
-              />
-            </Field>
-          </div>
-        )}
+              <Field>
+                <FieldLabel htmlFor="rse-subject">{t("subject")}</FieldLabel>
+                <Input
+                  id="rse-subject"
+                  value={currentSubject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  disabled={sendEmail.isPending}
+                />
+              </Field>
 
-        <DialogFooter className="pt-1">
+              <Field>
+                <FieldLabel htmlFor="rse-body">{t("body")}</FieldLabel>
+                {/* ลิงก์กรอกราคาอยู่ในเนื้อความที่เดียว — ผู้ใช้ย้ายหรือตัดได้
+                    สิ่งที่เห็นตรงนี้คือสิ่งที่ถูกส่งออกไปจริง */}
+                <RichTextEditor
+                  id="rse-body"
+                  value={currentBody}
+                  onChange={setBody}
+                  placeholders={EMAIL_PLACEHOLDERS.rfp}
+                  placeholderLabel={t("insertVariable")}
+                  disabled={sendEmail.isPending}
+                />
+              </Field>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="shrink-0 gap-2 px-5 py-3">
           <Button
             type="button"
             variant="outline"
