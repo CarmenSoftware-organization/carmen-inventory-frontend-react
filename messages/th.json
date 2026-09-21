@@ -876,7 +876,8 @@
     "incompleteDocument": "ยังกรอกข้อมูลไม่ครบ พาไปที่ช่องที่ต้องแก้ให้แล้ว",
     "fileUnsupportedFormat": "อัปโหลดได้เฉพาะไฟล์ {formats}",
     "fileTooLarge": "ไฟล์ {size} ใหญ่กว่าที่รับได้ {max}",
-    "filesRejected": "ข้ามไป {count} ไฟล์ — {first}"
+    "filesRejected": "ข้ามไป {count} ไฟล์ — {first}",
+    "maxCnAmount": "ลดหนี้ได้ไม่เกินยอดสุทธิที่รับมา"
   },
   "field": {
     "field": "ฟิลด์",

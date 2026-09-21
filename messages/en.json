@@ -876,7 +876,8 @@
     "incompleteDocument": "Some details are missing — jumped to the field to fix.",
     "fileUnsupportedFormat": "only {formats} files are allowed",
     "fileTooLarge": "{size} is over the {max} limit",
-    "filesRejected": "{count} files skipped — {first}"
+    "filesRejected": "{count} files skipped — {first}",
+    "maxCnAmount": "Cannot credit more than the net amount received"
   },
   "field": {
     "field": "Field",

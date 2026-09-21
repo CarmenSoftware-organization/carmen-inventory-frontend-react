@@ -121,6 +121,23 @@ export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
               path: ["items", index, "net_amount"],
               message: tv("positive", { field: tf("netAmount") }),
             });
+            return;
+          }
+          // ลดหนี้เกินยอดสุทธิที่รับมาไม่ได้ — เพดานของฝั่งยอดเงิน คู่กับเพดาน
+          // จำนวนคืนของอีกประเภท · gate ด้วย `_grn_received_qty != null` ไม่ใช่
+          // `_grn_net_amount > 0` เพราะยอดฝั่ง GRN ทั้งชุดถูกเติมทีเดียวพร้อมกัน
+          // โดยใช้ตัวนั้นเป็นธงว่า "ข้อมูล GRN มาถึงแล้ว" (ดู cn-item.tsx) ส่วน
+          // `_grn_net_amount` เป็น 0 ได้จริงทั้งตอนยังไม่รู้และตอนรับมาเป็นศูนย์
+          // แยกสองอย่างนี้ด้วยตัวมันเองไม่ได้ ใช้ธงเลยชัดกว่า
+          if (
+            item._grn_received_qty != null &&
+            item.net_amount > item._grn_net_amount
+          ) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["items", index, "net_amount"],
+              message: tv("maxCnAmount"),
+            });
           }
           return;
         }
