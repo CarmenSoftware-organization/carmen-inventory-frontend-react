@@ -1,0 +1,84 @@
+# Cloud Build config for the "carmen-web-build" trigger (see carmen-infra-gcp/cloudbuild.tf).
+# "carmen-web" is this system's short alias for this repo (matches storage.tf's bucket/
+# backend-bucket resource names) — the GitHub repo itself stays carmen-inventory-frontend-react.
+#
+# Unlike carmen-platform, this repo uses a *runtime* config.json (BACKEND_URL/X_APP_ID/...)
+# fetched at boot, not build-time env vars — so the build here only needs the committed
+# placeholder (public/config.sample.json, via BUILD_CONFIG_FILE) to satisfy vite.config.ts's
+# build-time check. The real config.json is written directly onto the live bucket by
+# carmen-web-deploy, never part of this build artifact (see scripts/deploy-gcs.sh's own
+# comment on why config*.json is excluded from its sync).
+#
+# Uploads dist/ to the shared staging bucket under carmen-web/${SHORT_SHA}/, then invokes
+# "carmen-web-deploy" (approval_required=true) with that same SHA.
+#
+# Manual-dispatch only for now — run with:
+#   gcloud builds triggers run carmen-web-build --region=asia-southeast3 --branch=main
+
+steps:
+  - id: install-and-build
+    name: oven/bun:1
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        bun install --frozen-lockfile
+        BUILD_CONFIG_FILE=config.sample.json bun run build
+        # vite copies public/ into dist/ wholesale, including every config*.json placeholder —
+        # guard against any of them ending up in the staged artifact (same guard
+        # scripts/deploy-gcs.sh applies locally before its own sync).
+        rm -f dist/config*.json
+
+  - id: upload-artifact
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - storage
+      - rsync
+      - dist
+      - gs://${_STAGING_BUCKET}/carmen-web/${SHORT_SHA}/
+      - --recursive
+    waitFor: ['install-and-build']
+
+  - id: invoke-deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        gcloud builds triggers run carmen-web-deploy \
+          --region=${_REGION} --branch=main \
+          --substitutions=_ARTIFACT_SHA=${SHORT_SHA}
+        curl -sS -X POST -H "Content-Type: application/json" \
+          -d @- "$$DISCORD_WEBHOOK_URL" <<'PAYLOAD'
+        {
+          "embeds": [{
+            "title": "🔔 carmen-web (carmen-inventory-frontend-react) build สำเร็จ — รอการอนุมัติ deploy",
+            "color": 16776960,
+            "fields": [
+              {"name": "Commit", "value": "${SHORT_SHA}", "inline": true},
+              {"name": "ผู้มีสิทธิ์อนุมัติ", "value": "${_APPROVER_EMAIL}", "inline": true},
+              {"name": "ไปอนุมัติที่", "value": "[Cloud Build Console](https://console.cloud.google.com/cloud-build/builds;region=${_REGION}?project=${PROJECT_ID})", "inline": false}
+            ]
+          }]
+        }
+        PAYLOAD
+    secretEnv: ['DISCORD_WEBHOOK_URL']
+    waitFor: ['upload-artifact']
+
+substitutions:
+  _REGION: asia-southeast3
+  _APPROVER_EMAIL: (unset)
+  _STAGING_BUCKET: (unset)
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/${PROJECT_ID}/secrets/discord-webhook-url/versions/latest
+      env: 'DISCORD_WEBHOOK_URL'
+
+timeout: 1200s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
