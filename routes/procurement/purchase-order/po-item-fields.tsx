@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { PO_STATUS } from "@/types/purchase-order";
+import type { PrSource } from "./po-item-cells";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { computePoAction } from "@/constant/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
@@ -43,6 +44,8 @@ interface PoItemFieldsProps {
   onReject?: () => void;
   onClose?: (reason: string) => void;
   isPending?: boolean;
+  /** id ของแถว PO → ใบขอซื้อต้นทาง (มาจาก response ของ GET ไม่ได้อยู่ในฟอร์ม) */
+  prSourcesByDetailId: Map<string, PrSource[]>;
 }
 
 export function PoItemFields({
@@ -57,6 +60,7 @@ export function PoItemFields({
   onReject,
   onClose,
   isPending,
+  prSourcesByDetailId,
 }: PoItemFieldsProps) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
@@ -96,6 +100,7 @@ export function PoItemFields({
     // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
     canResetStatus: isApprover && isEditMode,
     isViewMode,
+    prSourcesByDetailId,
     onDelete: setDeleteIndex,
   });
 

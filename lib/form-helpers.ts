@@ -1,3 +1,5 @@
+import type { FieldValues, UseFormReturn } from "react-hook-form";
+
 
 /**
  * Scroll และ focus ไปยัง field แรกที่มี validation error
@@ -236,4 +238,35 @@ export function countInvalidItems(
 ): number {
   const itemErrors = errors?.[key];
   return Array.isArray(itemErrors) ? itemErrors.filter(Boolean).length : 0;
+}
+
+/**
+ * `onSubmit` ของ `<form>` ที่ **ข้าม validation** — ใช้กับปุ่ม Save ของเอกสารที่ยัง
+ * เป็นร่าง (PR/PO/GRN/CN/SR)
+ *
+ * Save = "เก็บที่กรอกไว้ก่อน" ไม่ใช่ "ส่ง/ยืนยัน" คนกรอกอาจยังไม่รู้ผู้ขาย ยังไม่รู้
+ * ราคา แล้วอยากปิดจอไปทำอย่างอื่นก่อน บังคับให้ครบก่อนบันทึก = เขาต้องกรอกมั่วให้
+ * ผ่าน หรือไม่ก็ทิ้งทั้งใบ · ตัวที่ยังบังคับครบคือปุ่ม Submit/Commit ซึ่งเป็นจุดที่
+ * เอกสารพ้นมือคนกรอกไปแล้วจริง ๆ (เทมเพลต PR ไม่ใช้ตัวนี้ — มันไม่มีขั้นที่สอง
+ * ให้ไปตรวจ บันทึกคือจบ)
+ *
+ * ค่าที่ส่งคือ `form.getValues()` ดิบ ๆ ไม่ผ่าน zod — ทุกช่องตัวเลขในโมดูลพวกนี้
+ * `setValue` เป็น `number` ตั้งแต่ `onChange` อยู่แล้ว ไม่ได้พึ่ง `z.coerce`
+ * ถ้าเพิ่มช่องใหม่ที่ปล่อยค่าเป็น string ต้อง coerce ที่ตัวช่องเอง
+ *
+ * @param form - instance ของ react-hook-form
+ * @param save - ตัวบันทึกจริง รับ values ของฟอร์ม
+ * @example
+ * ```tsx
+ * <form onSubmit={draftSaveHandler(form, onSubmit)}>
+ * ```
+ */
+export function draftSaveHandler<T extends FieldValues>(
+  form: UseFormReturn<T>,
+  save: (values: T) => void | Promise<void>,
+) {
+  return (e: React.FormEvent) => {
+    e.preventDefault();
+    void save(form.getValues());
+  };
 }

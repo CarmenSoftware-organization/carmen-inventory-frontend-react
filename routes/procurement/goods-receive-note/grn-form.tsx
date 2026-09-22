@@ -19,6 +19,7 @@ import {
 import {
   countInvalidItems,
   scrollToFirstInvalidField,
+  draftSaveHandler,
 } from "@/lib/form-helpers";
 import { getSessionItem, removeSessionItem } from "@/lib/safe-storage";
 import { GrnItemTable } from "./grn-item-table";
@@ -204,7 +205,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
 
       <form
         id="grn-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, revealErrors)}
+        onSubmit={draftSaveHandler(form, actions.onSubmit)}
         className="space-y-3 px-4"
       >
         <GrnFormHeader
@@ -241,7 +242,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             <GrnExtraCostFields form={form} disabled={isDisabled} />
           </TabsContent>
           <TabsContent value="stock">
-            <GrnStockTable docStatus={goodsReceiveNote?.doc_status} />
+            <GrnStockTable
+              grnId={goodsReceiveNote?.id}
+              docStatus={goodsReceiveNote?.doc_status}
+            />
           </TabsContent>
         </Tabs>
       </form>
@@ -269,7 +273,11 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           onConfirmDelete={actions.handleConfirmDelete}
           showCommit={actions.showCommit}
           setShowCommit={actions.setShowCommit}
-          isCommitPending={actions.commitGrn.isPending}
+          isCommitPending={actions.isActionPending}
+          isDraft={goodsReceiveNote?.doc_status === "draft"}
+          grnDate={form.getValues("grn_date")}
+          periodDateChoice={actions.periodDateChoice}
+          onPeriodDateChoiceChange={actions.setPeriodDateChoice}
           onConfirmCommit={actions.handleConfirmCommit}
           showVoid={actions.showVoid}
           setShowVoid={actions.setShowVoid}

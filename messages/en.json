@@ -1664,7 +1664,6 @@
         "purchase_order": "Purchase Order",
         "purchase_request": "Purchase Request",
         "purchase_request_template": "Purchase Request Template",
-        "query_dataset": "Query Dataset",
         "recipe": "Recipe",
         "request_price_list": "Request Price List",
         "role": "Role",
@@ -3800,7 +3799,7 @@
       "blankPo": "Blank PO",
       "blankPoSubtitle": "Start from scratch",
       "blankPoDesc": "Fill in every field yourself — no PR linkage.",
-      "fromPr": "From PR",
+      "fromPr": "From purchase request",
       "fromPrSubtitle": "Use approved PR",
       "fromPrDesc": "Generate PO lines from an approved purchase request.",
       "fromPriceList": "From Price List",
@@ -3937,7 +3936,10 @@
         "sendSuccess": "Purchase order sent to the vendor.",
         "sendPartial": "Sent, but delivery failed for: {emails}",
         "sendFailed": "The email could not be delivered to any recipient."
-      }
+      },
+      "fromPrCount": "{count} PRs",
+      "fromPrLabel": "Open the purchase requests this line came from ({count})",
+      "noPrSource": "No source purchase request"
     },
     "creditNote": {
       "tabItems": "Items",
@@ -4039,7 +4041,6 @@
       "tabStock": "Stock Movement",
       "refDocs": "Source documents",
       "refDocsComingSoon": "Source documents for this line are not available yet",
-      "stockComingSoon": "Stock movement is not available yet",
       "stockNeedsCommitted": "Stock movement shows after this receipt is committed",
       "docInfo": "Document Information",
       "docType": "Document Type",
@@ -4137,7 +4138,8 @@
       "poCount": "{count} PO(s)",
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
-      "deleteProductLine": "Remove this line"
+      "deleteProductLine": "Remove this line",
+      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is"
     },
     "approval": {
       "entity": "Approval",
@@ -4784,7 +4786,9 @@
     "expiredTitle": "Subscription Expired",
     "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew.",
     "seatTitle": "Seat Limit Exceeded",
-    "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats."
+    "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats.",
+    "featureLabel": "Feature:",
+    "buLabel": "Business unit:"
   },
   "license": {
     "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
@@ -5214,5 +5218,10 @@
     "markAllRead": "Mark all as read",
     "emptyUnreadTitle": "You're all caught up",
     "emptyUnreadDesc": "You have no unread notifications."
+  },
+  "period": {
+    "outsideOpenPeriod": "This document is dated outside the open period ({from} – {to}). Pick the date it should carry.",
+    "useOpenPeriodDate": "Move it into the open period ({date})",
+    "useDocumentDate": "Keep the date on the document ({date})"
   }
 }

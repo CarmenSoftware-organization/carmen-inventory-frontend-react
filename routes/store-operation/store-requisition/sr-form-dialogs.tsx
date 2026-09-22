@@ -80,6 +80,9 @@ export function SrFormDialogs({
         srNo={storeRequisition?.sr_no}
         isPending={actions.submitIsPending}
         onConfirm={actions.confirmSubmitSr}
+        srDate={form.getValues("sr_date")}
+        periodDateChoice={actions.periodDateChoice}
+        onPeriodDateChoiceChange={actions.setPeriodDateChoice}
       />
 
       <SrDatePatternDialog

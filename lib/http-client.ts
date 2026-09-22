@@ -1,4 +1,9 @@
-import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "@/lib/api-error";
+import {
+  ApiError,
+  ERROR_CODES,
+  licenseContextFrom,
+  licenseErrorCodeFrom,
+} from "@/lib/api-error";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
@@ -250,6 +255,9 @@ const handleClientErrors = async (
     const licenseCode = licenseErrorCodeFrom(body);
 
     if (licenseCode) {
+      // ส่ง `feature` + `bu_codes` ต่อเข้า dialog ด้วย — 403 ของ license เด้งได้จากคำขอเบื้องหลัง
+      // ที่ผู้ใช้ไม่เห็น (lookup เติม dropdown) ข้อความอย่างเดียวจึงไม่พอให้ใครสาวกลับได้ว่า
+      // คีย์ไหนของ BU ไหนที่ขาด ผู้ใช้ต้องกลับมาถาม dev ทุกครั้ง
       dispatchPermissionDenied(
         undefined,
         undefined,
@@ -258,6 +266,7 @@ const handleClientErrors = async (
           : licenseCode === "SEAT_LIMIT_EXCEEDED"
             ? "seat"
             : "license",
+        licenseContextFrom(body),
       );
     } else if (!silentForbidden) {
       // `silentForbidden` ปิดเฉพาะกล่อง — ApiError ยังถูกโยนเหมือนเดิม caller จึงรู้ผลเสมอ

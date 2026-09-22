@@ -12,6 +12,11 @@ import {
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { useProfile } from "@/hooks/use-profile";
+import {
+  resolvePeriodDate,
+  type PeriodDateChoice as PeriodDateChoiceValue,
+} from "@/components/share/period-date-choice";
 import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
 import { reportApiError } from "@/lib/api-error-handler";
@@ -100,6 +105,10 @@ export function useSrFormActions({
   const [datePattern, setDatePattern] = useState<PendingDatePattern | null>(
     null,
   );
+  // วันที่บนใบอยู่นอกงวดที่เปิดอยู่ → dialog ส่งใบถามว่าจะย้ายเข้างวดหรือคงวันเดิม
+  // (`PeriodDateChoice` เรนเดอร์เองเฉพาะตอนต้องถาม) default = คงวันเดิม
+  const [periodDateChoice, setPeriodDateChoice] =
+    useState<PeriodDateChoiceValue>("document");
 
   // mutations
   const createSr = useCreateStoreRequisition();
@@ -152,6 +161,7 @@ export function useSrFormActions({
 
   const currentRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
   const buCode = useBuCode();
+  const { currentPeriod } = useProfile();
 
   // GET SR สดจาก DB ก่อนยิง save/workflow event — กัน 409 optimistic lock จาก
   // doc_version ที่ค้างเก่าใน prop หลัง bump (แบบเดียวกับ PO)
@@ -356,6 +366,18 @@ export function useSrFormActions({
   const handleSubmitSr = async (values: SrFormValues) => {
     // ปิด guard ก่อนยิง mutation → sentinel ถูกลบทันการ navigate(list) ตอนสำเร็จ
     setIsSubmitting(true);
+    // เลือก "ย้ายเข้างวด" → เขียน sr_date ลงค่าที่กำลังจะส่ง (ทั้งตัวที่ save และ
+    // ตัวที่ฟอร์มถือไว้) ให้ create/update พามันขึ้นไปเอง · ตั้งใน values ตรง ๆ
+    // ด้วยเพราะ buildSaveDetails อ่านจากตัวนี้ ไม่ได้อ่านจากฟอร์มอีกรอบ
+    const periodDate = resolvePeriodDate(
+      periodDateChoice,
+      values.sr_date,
+      currentPeriod,
+    );
+    if (periodDate) {
+      values.sr_date = periodDate;
+      form.setValue("sr_date", periodDate, { shouldDirty: true });
+    }
     let srId = storeRequisition?.id;
     try {
       if (!srId) {
@@ -521,6 +543,8 @@ export function useSrFormActions({
     setShowComment,
     actionDialog,
     setActionDialog,
+    periodDateChoice,
+    setPeriodDateChoice,
     datePattern,
     closeDatePattern: () => setDatePattern(null),
     // discard

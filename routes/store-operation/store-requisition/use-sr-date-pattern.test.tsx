@@ -28,6 +28,13 @@ vi.mock("@/lib/api-error-handler", () => ({
 
 vi.mock("@/hooks/use-bu-code", () => ({ useBuCode: () => "BU1" }));
 
+// fetch ปลอมด้านล่างคืน object ของใบเบิกให้ทุก request รวม /user/profile ด้วย —
+// ปล่อยไว้ useProfile จะอ่าน business_unit ที่ไม่มีแล้วพัง · เทสต์นี้ไม่ได้สนใจ
+// งวดบัญชี (ไม่มี currentPeriod = ไม่มีคำถามเรื่องวันที่)
+vi.mock("@/hooks/use-profile", () => ({
+  useProfile: () => ({ currentPeriod: undefined, dateFormat: "DD/MM/YYYY" }),
+}));
+
 type MutateOpts = {
   onSuccess?: (res: unknown) => void;
   onError?: (err: unknown) => void;

@@ -23,6 +23,7 @@ import {
   LocationCell,
   QtyUnitCell,
   ComputedPricingCell,
+  type PrSource,
 } from "./po-item-cells";
 import { PriceCell, ProductHeaderCell, StatusCell } from "./po-item-cells";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
@@ -115,6 +116,8 @@ interface UsePoItemTableOptions {
   showStatusBadge: boolean;
   canResetStatus: boolean;
   isViewMode: boolean;
+  /** id ของแถว PO → ใบขอซื้อต้นทาง (อ่านจาก response ของ GET ไม่ใช่จากฟอร์ม) */
+  prSourcesByDetailId: Map<string, PrSource[]>;
   onDelete: (index: number) => void;
 }
 
@@ -130,6 +133,7 @@ export function usePoItemTable({
   showStatusBadge,
   canResetStatus,
   isViewMode,
+  prSourcesByDetailId,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -160,6 +164,7 @@ export function usePoItemTable({
             isDisabled={viewMode}
             placeholder={tfl("comment")}
             leadingWidth={PO_LEADING_COL}
+            prSourcesByDetailId={prSourcesByDetailId}
             renderLeading={(index) =>
               // โหมดแก้ไข = ปุ่มลบ · โหมดอ่าน = ประวัติของแถว (ถ้ามี)
               // สองอย่างนี้ไม่มีวันต้องใช้พร้อมกัน จึงใช้ที่เดียวกันสลับกันไป
@@ -247,6 +252,8 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            // ยอดที่รับแล้วโชว์เฉพาะโหมดอ่าน เกณฑ์เดียวกับคอลัมน์ Order / GRN
+            showReceived={isViewMode}
           />
         ),
       },

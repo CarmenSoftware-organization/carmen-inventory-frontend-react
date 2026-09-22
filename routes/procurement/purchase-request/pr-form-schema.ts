@@ -597,7 +597,13 @@ export function prepareApproveDetails(
 
 /**
  * สร้าง payload สำหรับ stage role purchase — ใช้ทั้ง /save และ /approve
- * (backend ใช้ schema เดียวกันสองที่ ต่างแค่ /save ตัด stage_status/stage_message ทิ้ง)
+ *
+ * backend ใช้ schema เดียวกันสองที่ ต่างแค่ /save destructure ทิ้งแค่
+ * `stage_status` กับ `stage_message` — **`current_stage_status` ไม่ถูกทิ้ง**
+ * มันลอดเข้า `pickDetailColumns` ไปเขียน DB ตรง ๆ ค่าที่ใส่มาในนี้จึงกลายเป็น
+ * สถานะจริงของแถวทันทีที่กด Save · ฝั่งฟอร์มห้ามเซ็ต `current_stage_status` เอง
+ * เวลาผู้ใช้ทำอะไรที่ยังไม่ใช่การอนุมัติ (เช่นเลือกผู้ขาย) ให้เซ็ต `stage_status`
+ * อย่างเดียว ซึ่ง `resolveApproveStageStatus` อ่านไปใช้ตอนกดอนุมัติอยู่แล้ว
  * คำนวณ subtotal/discount/tax/total ด้วย qty เดียวกับที่จอโชว์ (resolveApprovedQty)
  * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id)
  * @param purchaseRequestId - id ของ PR — backend บังคับให้มีในทุก detail

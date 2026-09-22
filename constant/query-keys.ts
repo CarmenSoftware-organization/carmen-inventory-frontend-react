@@ -44,6 +44,7 @@ export const QUERY_KEYS = {
   GOODS_RECEIVE_NOTES_BY_VENDOR: "goods-receive-notes-by-vendor",
   GOODS_RECEIVE_NOTES_BY_VENDOR_FOR_CN: "goods-receive-notes-by-vendor-for-cn",
   GOODS_RECEIVE_NOTE_PRODUCTS: "goods-receive-note-products",
+  GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: "goods-receive-note-stock-movements",
   GOODS_RECEIVE_NOTE_PRODUCT_LOCATIONS: "goods-receive-note-product-locations",
   GOODS_RECEIVE_NOTE_LOCATIONS: "goods-receive-note-locations",
   GOODS_RECEIVE_NOTE_LOCATION_PRODUCTS: "goods-receive-note-location-products",

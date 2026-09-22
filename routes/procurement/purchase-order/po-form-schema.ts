@@ -69,6 +69,7 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     delivery_point_name: z.string(),
     comment: z.string(),
     received_qty: z.coerce.number(),
+    foc_received_qty: z.coerce.number(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
     stage_message: z.string().optional(),
@@ -167,6 +168,7 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   comment: "",
   received_qty: 0,
   foc_qty: 0,
+  foc_received_qty: 0,
   foc_unit_id: null as string | null,
   foc_unit_name: "",
   is_tax_adjustment: false,
@@ -287,6 +289,9 @@ export function getDefaultValues(
             (sum, pr) => sum + (pr.received_qty ?? 0),
             0,
           ),
+          // ?? 0 ทั้งที่ type บอกว่าเป็น number เสมอ — ใบเก่าที่บันทึกก่อน backend
+          // เพิ่มฟิลด์นี้ยังไม่มีมันบน wire ปล่อย undefined เข้าฟอร์มแล้วจะโชว์ NaN
+          foc_received_qty: d.foc_received_qty ?? 0,
           is_tax_adjustment: d.is_tax_adjustment ?? false,
           is_discount_adjustment: d.is_discount_adjustment ?? false,
         })) ?? [],

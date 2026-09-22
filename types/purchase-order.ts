@@ -56,6 +56,9 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
    */
   comment?: string | null;
   foc_qty: number;
+  /** ของแถมที่รับเข้ามาแล้ว — อยู่บนแถวตรง ๆ ต่างจาก `received_qty` ของยอดสั่งซื้อ
+   *  ที่ต้องไปรวมเอาจาก `pr_details[]` */
+  foc_received_qty: number;
   // ไม่มี foc_unit บน wire เลย (ยืนยัน 8/8 เอกสารจริง — มีแค่ foc_qty ไม่มี
   // foc_unit_id/foc_unit_name หรือ foc_unit object คู่กัน) ของเดิมมี
   // foc_unit_id?/foc_unit_name? เป็น phantom field มาก่อนแล้ว ลบทิ้งตามจริง
@@ -79,10 +82,22 @@ export interface PoItemHistoryEntry {
 
 export interface PrDetailRef {
   pr_detail: EntityRef | null;
+  /** ใบขอซื้อต้นทาง — `null` เมื่อแถวนี้ไม่ได้มาจาก PR (manual / price list) */
+  pr_id: string | null;
+  pr_no: string | null;
+  /**
+   * ใบรับสินค้าที่อ้างแถวนี้
+   *
+   * **ยังไม่รู้ทรงของสมาชิก** — เอกสารตัวอย่างที่เคยเห็นส่งมาเป็น array ว่างทุกแถว
+   * ประกาศเป็น `unknown[]` ตามที่รู้จริง ไม่ใช่เดาเอา · จะอ่านค่าข้างในต้องไปดู
+   * response ที่มีข้อมูลจริงก่อนแล้วค่อยประกาศ type ให้ตรง
+   */
+  grn: unknown[];
   order_qty: number;
   order_base_qty: number;
   received_qty: number;
   foc_qty: number;
+  foc_received_qty: number;
 }
 
 /**
