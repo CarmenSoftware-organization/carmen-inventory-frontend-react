@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-# Carmen Frontend UI Rules
-
-For every new or substantially changed React page, apply the `carmen-ui-consistency` skill.
-
-- Start from the closest existing page and reuse its skeleton.
-- Prefer shared Carmen components over raw HTML controls or one-off styling.
-- Match existing header, toolbar, spacing, typography, table, form, and responsive patterns.
-- Before handoff, test loading/empty/error/view/edit/mobile states and run `bunx tsc --noEmit` plus React Doctor.
-=======
 # AGENTS.md
 
 CARMEN BLUE frontend — **Vite + React Router SPA port** of the legacy Next.js app
@@ -187,4 +177,3 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
   ลำดับเสมอ — deploy backend → `db:seed.license-feature` ของ env นั้น → assign feature
   ให้ทุก BU ที่ carmen-platform → ค่อย deploy FE (ตรวจงาน license ในเครื่องด้วยการสลับ
   `LICENSE_ENFORCEMENT` เป็น `false` ชั่วคราวแล้วคืนค่า)
->>>>>>> main
