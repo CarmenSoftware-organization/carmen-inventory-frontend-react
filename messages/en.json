@@ -3939,7 +3939,10 @@
       },
       "fromPrCount": "{count} PRs",
       "fromPrLabel": "Open the purchase requests this line came from ({count})",
-      "noPrSource": "No source purchase request"
+      "noPrSource": "No source purchase request",
+      "grnSource": "Goods receive notes",
+      "grnCount": "{count} GRNs",
+      "grnLabel": "Open the goods receive notes for this line ({count})"
     },
     "creditNote": {
       "tabItems": "Items",

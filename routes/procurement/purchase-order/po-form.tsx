@@ -25,7 +25,7 @@ import {
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
-import { buildPrSourceMap } from "./po-item-cells";
+import { buildGrnSourceMap, buildPrSourceMap } from "./po-item-cells";
 import { PoFooterAction } from "./po-footer-action";
 import {
   createPoSchema,
@@ -215,6 +215,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     () => buildPrSourceMap(purchaseOrder),
     [purchaseOrder],
   );
+  const grnSourcesByDetailId = useMemo(
+    () => buildGrnSourceMap(purchaseOrder),
+    [purchaseOrder],
+  );
 
   return (
     <div className="flex min-h-full flex-col space-y-4">
@@ -259,6 +263,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         <PoItemFields
           form={form}
           prSourcesByDetailId={prSourcesByDetailId}
+          grnSourcesByDetailId={grnSourcesByDetailId}
           disabled={contentLocked}
           locationsDisabled={locationsDisabled}
           role={role}

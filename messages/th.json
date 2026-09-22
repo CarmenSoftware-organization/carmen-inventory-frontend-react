@@ -3934,7 +3934,10 @@
       },
       "fromPrCount": "{count} ใบ",
       "fromPrLabel": "เปิดใบขอซื้อต้นทางของรายการนี้ ({count} ใบ)",
-      "noPrSource": "ยังไม่มีใบขอซื้อต้นทาง"
+      "noPrSource": "ยังไม่มีใบขอซื้อต้นทาง",
+      "grnSource": "ใบรับสินค้า",
+      "grnCount": "{count} ใบ",
+      "grnLabel": "เปิดใบรับสินค้าของรายการนี้ ({count} ใบ)"
     },
     "creditNote": {
       "tabItems": "รายการ",

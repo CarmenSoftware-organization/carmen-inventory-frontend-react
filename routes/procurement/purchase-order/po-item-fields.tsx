@@ -46,6 +46,8 @@ interface PoItemFieldsProps {
   isPending?: boolean;
   /** id ของแถว PO → ใบขอซื้อต้นทาง (มาจาก response ของ GET ไม่ได้อยู่ในฟอร์ม) */
   prSourcesByDetailId: Map<string, PrSource[]>;
+  /** id ของแถว PO → ใบรับสินค้าที่รับของแถวนี้เข้ามา (ที่มาเดียวกัน) */
+  grnSourcesByDetailId: Map<string, PrSource[]>;
 }
 
 export function PoItemFields({
@@ -61,6 +63,7 @@ export function PoItemFields({
   onClose,
   isPending,
   prSourcesByDetailId,
+  grnSourcesByDetailId,
 }: PoItemFieldsProps) {
   "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
@@ -101,6 +104,7 @@ export function PoItemFields({
     canResetStatus: isApprover && isEditMode,
     isViewMode,
     prSourcesByDetailId,
+    grnSourcesByDetailId,
     onDelete: setDeleteIndex,
   });
 
