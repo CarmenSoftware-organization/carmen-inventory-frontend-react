@@ -4,6 +4,7 @@ import { httpClient } from "@/lib/http-client";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CACHE_NONE } from "@/lib/cache-config";
+import type { LastPrice } from "@/types/last-price";
 
 export interface OnOrderRow {
   po_id: string | null;
@@ -32,6 +33,7 @@ export interface ProductOnOrderResponse {
   total_on_order: number;
   total_order_amount: number;
   orders: OnOrderRow[];
+  last_price?: LastPrice | null;
 }
 
 export function useProductOnOrder(productId: string | undefined) {

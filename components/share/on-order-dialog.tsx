@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import EmptyComponent from "@/components/empty-component";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { LastPriceChip } from "@/components/share/last-price-chip";
 import {
   DataGrid,
   DataGridContainer,
@@ -212,6 +213,10 @@ export function OnOrderDialog({ open, onOpenChange, productId }: Props) {
                           {data.product_local_name}
                         </p>
                       )}
+                    <LastPriceChip
+                      lastPrice={data?.last_price}
+                      className="pt-0.5"
+                    />
                   </div>
                 </DialogDescription>
               </div>
