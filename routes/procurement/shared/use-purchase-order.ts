@@ -41,13 +41,11 @@ export function usePurchaseOrder(
       if (!res.ok)
         throw await ApiError.from(res, "Failed to fetch purchase orders");
       const json = await res.json();
-      // envelope ซ้อน multi-BU: แถวจริงอยู่ที่ `data[0].data` พร้อม paginate ของ
-      // BU นั้น (ท่าเดียวกับ PR/SR และ my-pending ข้างล่าง)
-      const entry = json.data?.[0];
-
+      // envelope แบน: แถวอยู่ที่ `data` ตรง ๆ และ `paginate` อยู่ระดับบนสุด
+      // (my-pending ข้างล่างยังเป็น multi-BU ซ้อน `data[0].data` อยู่ — คนละทรง)
       return {
-        data: entry?.data ?? [],
-        paginate: entry?.paginate ?? {
+        data: json.data ?? [],
+        paginate: json.paginate ?? {
           total: 0,
           page: 1,
           perpage: 10,
@@ -463,7 +461,7 @@ export function useExportPurchaseOrder() {
         if (!res.ok)
           throw await ApiError.from(res, "Failed to fetch purchase orders");
         const json = await res.json();
-        return json.data?.[0]?.data ?? [];
+        return json.data ?? [];
       },
       columns,
       sheetName: "Purchase Orders",
