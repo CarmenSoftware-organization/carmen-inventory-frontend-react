@@ -12,8 +12,10 @@
 # Uploads dist/ to the shared staging bucket under carmen-web/${SHORT_SHA}/, then invokes
 # "carmen-web-deploy" (approval_required=true) with that same SHA.
 #
-# Manual-dispatch only for now — run with:
-#   gcloud builds triggers run carmen-web-build --region=asia-southeast3 --branch=main
+# Auto-fires on every push/merge to the `prod` branch (repository_event_config in
+# carmen-infra-gcp/cloudbuild.tf) — merge to `prod` when ready to ship, not to `main`.
+# Can still be run manually too:
+#   gcloud builds triggers run carmen-web-build --region=asia-southeast3 --branch=prod
 
 steps:
   - id: install-and-build
@@ -49,7 +51,7 @@ steps:
       - |
         set -e
         gcloud builds triggers run carmen-web-deploy \
-          --region=${_REGION} --branch=main \
+          --region=${_REGION} --branch=prod \
           --substitutions=_ARTIFACT_SHA=${SHORT_SHA}
         curl -sS -X POST -H "Content-Type: application/json" \
           -d @- "$$DISCORD_WEBHOOK_URL" <<'PAYLOAD'
