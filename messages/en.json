@@ -3705,6 +3705,7 @@
       "priceListLoadFailed": "Failed to load price lists",
       "noPriceList": "No Price List Found",
       "noPriceListDesc": "No price list found for this item.",
+      "lastPrice": "Last price",
       "pricelistNo": "Pricelist No",
       "preferred": "Preferred",
       "best": "Best",

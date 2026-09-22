@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "use-intl";
-import { Crown, FileText, Package, Receipt } from "lucide-react";
+import { Crown, FileText, History, Package, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import {
   type ColumnDef,
@@ -28,6 +28,14 @@ import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { formatCurrency } from "@/lib/currency-utils";
 import { formatDate } from "@/lib/date-utils";
+
+/** ต้นทุนต่อหน่วยครั้งล่าสุดของสินค้านี้ — สกุลเงินตั้งต้นของ BU เสมอ ไม่ใช่สกุลของใบ */
+export interface LastPrice {
+  cost_per_unit: number;
+  doc_type: string;
+  doc_id: string;
+  at: string;
+}
 
 export interface PricelistEntry {
   vendor_id: string;
@@ -207,11 +215,12 @@ export function PrPricelistDialog({
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
-  const { buCode, dateFormat } = useProfile();
+  const { buCode, dateFormat, defaultCurrencyCode } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [lists, setLists] = useState<PricelistEntry[]>([]);
   // pricelist ที่ถูกเลือกอยู่ (data.selected) — แยกจาก lists จึงต้องรวมมาแสดงเอง
   const [selected, setSelected] = useState<PricelistEntry | null>(null);
+  const [lastPrice, setLastPrice] = useState<LastPrice | null>(null);
 
   useEffect(() => {
     if (!open || !productId || !unitId || !currencyId || !buCode) return;
@@ -220,6 +229,7 @@ export function PrPricelistDialog({
       setIsLoading(true);
       setLists([]);
       setSelected(null);
+      setLastPrice(null);
       try {
         const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(buCode), {
           product_id: productId,
@@ -236,6 +246,7 @@ export function PrPricelistDialog({
         const json = await res.json();
         setLists(json.data?.lists ?? []);
         setSelected(json.data?.selected ?? null);
+        setLastPrice(json.data?.last_price ?? null);
       } catch {
         toast.error(t("priceListLoadFailed"));
       } finally {
@@ -320,6 +331,19 @@ export function PrPricelistDialog({
                     <span className="text-foreground font-semibold tabular-nums">
                       {approvedQty} {approvedUnitName}
                     </span>
+                  </span>
+                </>
+              )}
+              {lastPrice && (
+                <>
+                  <span className="bg-border h-3 w-px" />
+                  <span className="inline-flex items-center gap-1">
+                    <History className="size-3" />
+                    {t("lastPrice")}:{" "}
+                    <span className="text-foreground font-semibold tabular-nums">
+                      {formatCurrency(lastPrice.cost_per_unit)}
+                    </span>
+                    {defaultCurrencyCode}
                   </span>
                 </>
               )}

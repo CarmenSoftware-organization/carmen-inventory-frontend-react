@@ -3700,6 +3700,7 @@
       "priceListLoadFailed": "โหลดรายการราคาไม่สำเร็จ",
       "noPriceList": "ไม่พบรายการราคา",
       "noPriceListDesc": "ไม่พบรายการราคาสำหรับสินค้านี้",
+      "lastPrice": "ราคาซื้อล่าสุด",
       "pricelistNo": "เลขที่รายการราคา",
       "preferred": "แนะนำ",
       "best": "ดีสุด",
