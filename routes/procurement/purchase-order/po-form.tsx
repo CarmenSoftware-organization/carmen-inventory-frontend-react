@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
@@ -20,10 +20,12 @@ import {
 import {
   countInvalidItems,
   scrollToFirstInvalidField,
+  draftSaveHandler,
 } from "@/lib/form-helpers";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
+import { buildPrSourceMap } from "./po-item-cells";
 import { PoFooterAction } from "./po-footer-action";
 import {
   createPoSchema,
@@ -207,6 +209,12 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // combobox แทนข้อความ ทั้งที่ยังไม่ได้กด Edit — โหมดอ่านคือโหมดอ่านทุก role
   const locationsDisabled = isDisabled || isFromPr || isView;
   const departmentName = defaultBu?.department?.name ?? "";
+  // ใบขอซื้อต้นทางรายแถว — อ่านจาก response ตรง ๆ ไม่ผ่านฟอร์ม เพราะเป็นข้อมูล
+  // อ่านอย่างเดียวที่ไม่เคยถูกส่งกลับขึ้นไป (ลากเข้า PoFormValues จะรั่วขึ้น payload)
+  const prSourcesByDetailId = useMemo(
+    () => buildPrSourceMap(purchaseOrder),
+    [purchaseOrder],
+  );
 
   return (
     <div className="flex min-h-full flex-col space-y-4">
@@ -231,7 +239,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       />
       <form
         id="po-form"
-        onSubmit={form.handleSubmit(onSubmit, revealErrors)}
+        onSubmit={draftSaveHandler(form, onSubmit)}
         className="flex flex-1 flex-col gap-4 px-4"
       >
         <PoGeneralFields
@@ -250,11 +258,13 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
         <PoItemFields
           form={form}
+          prSourcesByDetailId={prSourcesByDetailId}
           disabled={contentLocked}
           locationsDisabled={locationsDisabled}
           role={role}
           poStatus={purchaseOrder?.po_status}
           isEditMode={isEditMode}
+          isViewMode={isView}
           isPending={isPending}
           onApprove={purchaseOrder ? handleApprovePo : undefined}
           onReject={

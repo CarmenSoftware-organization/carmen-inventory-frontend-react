@@ -1,4 +1,9 @@
-import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "@/lib/api-error";
+import {
+  ApiError,
+  ERROR_CODES,
+  licenseContextFrom,
+  licenseErrorCodeFrom,
+} from "@/lib/api-error";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
@@ -8,6 +13,17 @@ type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
   body?: unknown;
+  /**
+   * ไม่ต้องเด้ง `PermissionDeniedDialog` เมื่อได้ 403 เรื่องสิทธิ์ (RBAC) จากคำขอนี้
+   *
+   * ใช้กับคำขอ **เสริม** ที่หน้ามีทางลงอย่างนุ่มนวลอยู่แล้ว เช่น lookup ที่เติม dropdown —
+   * กล่อง modal ทับทั้งหน้าเพราะ dropdown ตัวเดียวโหลดไม่ได้นั้นเกินกว่าเหตุ และยังกลบ
+   * ส่วนที่เหลือของหน้าที่ยังใช้งานได้ปกติ caller ที่ตั้ง flag นี้ต้องรับผิดชอบแสดงอาการเอง
+   *
+   * ครอบเฉพาะ 403 ของสิทธิ์เท่านั้น — 403 เรื่อง license/สัญญาหมดอายุ/เกินโควตาที่นั่ง
+   * ยังเด้งเหมือนเดิม เพราะเป็นเรื่องระดับสัญญาที่ผู้ใช้ต้องรู้ ไม่ใช่ข้อจำกัดของหน้าใดหน้าหนึ่ง
+   */
+  silentForbidden?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,6 +202,7 @@ const handleClientErrors = async (
   url: string,
   init: RequestInit,
   isRetry = false,
+  silentForbidden = false,
 ): Promise<Response> => {
   // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
   // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
@@ -203,7 +220,7 @@ const handleClientErrors = async (
         // ส่ง retry response กลับเข้า handler อีกรอบ (isRetry=true) เพื่อให้
         // 401/403/429 รอบสองถูกจัดการแทนที่จะคืน response ดิบ
         const retried = await safeFetch(url, init);
-        return handleClientErrors(retried, url, init, true);
+        return handleClientErrors(retried, url, init, true, silentForbidden);
       }
     }
 
@@ -238,6 +255,9 @@ const handleClientErrors = async (
     const licenseCode = licenseErrorCodeFrom(body);
 
     if (licenseCode) {
+      // ส่ง `feature` + `bu_codes` ต่อเข้า dialog ด้วย — 403 ของ license เด้งได้จากคำขอเบื้องหลัง
+      // ที่ผู้ใช้ไม่เห็น (lookup เติม dropdown) ข้อความอย่างเดียวจึงไม่พอให้ใครสาวกลับได้ว่า
+      // คีย์ไหนของ BU ไหนที่ขาด ผู้ใช้ต้องกลับมาถาม dev ทุกครั้ง
       dispatchPermissionDenied(
         undefined,
         undefined,
@@ -246,8 +266,10 @@ const handleClientErrors = async (
           : licenseCode === "SEAT_LIMIT_EXCEEDED"
             ? "seat"
             : "license",
+        licenseContextFrom(body),
       );
-    } else {
+    } else if (!silentForbidden) {
+      // `silentForbidden` ปิดเฉพาะกล่อง — ApiError ยังถูกโยนเหมือนเดิม caller จึงรู้ผลเสมอ
       dispatchAuthError(message);
     }
 
@@ -280,7 +302,7 @@ const request = async (
 ): Promise<Response> => {
   checkRateLimit();
 
-  const { body, headers, ...rest } = options ?? {};
+  const { body, headers, silentForbidden, ...rest } = options ?? {};
 
   // FormData (multipart) ต้องปล่อยให้ browser ตั้ง Content-Type + boundary เอง
   // และห้าม JSON.stringify — ไม่งั้น payload จะเสีย
@@ -301,7 +323,7 @@ const request = async (
 
   const response = await safeFetch(url, init);
 
-  return handleClientErrors(response, url, init);
+  return handleClientErrors(response, url, init, false, silentForbidden);
 };
 
 /**

@@ -26,6 +26,9 @@ interface PoCardProps {
  * อยู่แถวไหน ครบเท่าคอลัมน์ของตาราง PO · ยอดเงินใช้ `currency_code` ของใบนั้น
  * (PO มีสกุลเงินต่อใบ ไม่ใช่สกุลของ BU เหมือนโมดูลอื่น)
  *
+ * ไม่มีแถว credit term เพราะ list endpoint ไม่ส่ง `credit_term_value` (ดู
+ * `PurchaseOrder`) — เคยมีแถวนี้ตอนที่คิดว่ามันส่งมา
+ *
  * @param props.item - ข้อมูลใบสั่งซื้อ
  * @param props.onEdit - callback เมื่อคลิกการ์ด
  * @param props.onDelete - callback เมื่อกดปุ่มลบ
@@ -72,16 +75,6 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
         <ListCardRow label={tfl("deliveryDate")}>
           <span className="tabular-nums">
             {formatDate(item.delivery_date, dateFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.credit_term_value != null && (
-        <ListCardRow label={tfl("creditTerm")}>
-          <span className="tabular-nums">
-            {item.credit_term_value}{" "}
-            <span className="text-muted-foreground font-normal">
-              {tfl("creditTermDays")}
-            </span>
           </span>
         </ListCardRow>
       )}

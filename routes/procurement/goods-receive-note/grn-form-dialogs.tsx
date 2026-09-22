@@ -3,6 +3,10 @@ import { useTranslations } from "use-intl";
 import { Ban, Check } from "lucide-react";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  PeriodDateChoice,
+  type PeriodDateChoice as PeriodDateChoiceValue,
+} from "@/components/share/period-date-choice";
 import { grnCommentCrud } from "@/hooks/use-goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 
@@ -24,6 +28,11 @@ interface GrnFormDialogsProps {
   setShowCommit: (open: boolean) => void;
   isCommitPending: boolean;
   onConfirmCommit: () => void;
+  /** ใบร่างเท่านั้นที่ยังเลือกวันที่ได้ — saved ลงสต๊อกไปตั้งแต่ /save แล้ว */
+  isDraft: boolean;
+  grnDate?: string;
+  periodDateChoice: PeriodDateChoiceValue;
+  onPeriodDateChoiceChange: (value: PeriodDateChoiceValue) => void;
   showVoid: boolean;
   setShowVoid: (open: boolean) => void;
   isVoidPending: boolean;
@@ -42,6 +51,10 @@ export function GrnFormDialogs({
   setShowCommit,
   isCommitPending,
   onConfirmCommit,
+  isDraft,
+  grnDate,
+  periodDateChoice,
+  onPeriodDateChoiceChange,
   showVoid,
   setShowVoid,
   isVoidPending,
@@ -70,7 +83,21 @@ export function GrnFormDialogs({
         open={showCommit}
         onOpenChange={setShowCommit}
         title={t("commitTitle")}
-        description={t("commitConfirm", { grnNo })}
+        // commit ของใบร่างจะลงสต๊อกตามวันที่บนใบ — ถ้าวันนั้นอยู่นอกงวดที่เปิด
+        // ต้องถามก่อนว่าจะย้ายเข้างวดหรือคงวันเดิม (ใบที่ saved แล้วลงสต๊อกไป
+        // ตั้งแต่ /save จึงไม่ต้องถาม เปลี่ยนวันตอนนี้ก็ไม่มีความหมาย)
+        description={
+          <>
+            {t("commitConfirm", { grnNo })}
+            {isDraft && (
+              <PeriodDateChoice
+                docDate={grnDate}
+                value={periodDateChoice}
+                onChange={onPeriodDateChoiceChange}
+              />
+            )}
+          </>
+        }
         isPending={isCommitPending}
         confirmText={t("commit")}
         confirmIcon={<Check />}

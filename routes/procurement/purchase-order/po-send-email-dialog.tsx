@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useProfile } from "@/hooks/use-profile";
-import { useEmailProfiles } from "@/hooks/use-email-profiles";
-import { useEmailTemplates } from "@/hooks/use-email-templates";
+import { useEmailSenders } from "@/hooks/use-email-senders";
+import { useEmailMessages } from "@/hooks/use-email-messages";
 import { useVendorById } from "@/hooks/use-vendor";
 import {
   EMAIL_PLACEHOLDERS,
@@ -36,7 +36,7 @@ import {
 } from "@/lib/email-template";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import type { EmailProfile } from "@/types/email-profile";
+import type { EmailSender } from "@/hooks/use-email-senders";
 import type { EmailTemplate } from "@/types/email-template";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { usePoSendEmail } from "./use-po-send-email";
@@ -171,9 +171,9 @@ export function PoSendEmailDialog({
     value: emailProfiles,
     isLoading: profilesLoading,
     isError: profilesError,
-  } = useEmailProfiles();
+  } = useEmailSenders();
   const { value: emailTemplates, isLoading: templatesLoading } =
-    useEmailTemplates();
+    useEmailMessages();
   const vendorQuery = useVendorById(purchaseOrder.vendor?.id ?? "");
   const sendEmail = usePoSendEmail(purchaseOrder.id);
 
@@ -347,9 +347,9 @@ export function PoSendEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-xl">
-        <DialogHeader className="gap-0 pb-1">
-          <DialogTitle className="flex items-center gap-2 text-sm">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-xl">
+        <DialogHeader className="shrink-0 gap-1 px-5 pt-5 pr-12 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-base">
             <Mail className="size-4" aria-hidden="true" />
             {t("title")}
           </DialogTitle>
@@ -358,147 +358,151 @@ export function PoSendEmailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading && (
-          <div className="flex items-center justify-center py-10">
-            <Loader2
-              className="text-muted-foreground size-5 animate-spin"
-              aria-hidden="true"
-            />
-          </div>
-        )}
+        {/* หัว/ท้ายอยู่กับที่ เลื่อนเฉพาะเนื้อหาตรงกลาง — รายชื่อผู้รับกับข้อความ
+            ยาวจนปุ่มส่งเลื่อนหายถ้าปล่อยให้ทั้งกล่องเลื่อนด้วยกัน */}
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto border-y px-5 py-4">
+          {isLoading && (
+            <div className="flex items-center justify-center py-10">
+              <Loader2
+                className="text-muted-foreground size-5 animate-spin"
+                aria-hidden="true"
+              />
+            </div>
+          )}
 
-        {!isLoading && hasNoProfiles && (
-          <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <Settings
-              className="text-muted-foreground size-8"
-              aria-hidden="true"
-            />
-            <p className="text-muted-foreground text-sm">
-              {profilesError ? t("loadError") : t("noProfiles")}
-            </p>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/system-admin/email-profile">{t("goToSettings")}</Link>
-            </Button>
-          </div>
-        )}
+          {!isLoading && hasNoProfiles && (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <Settings
+                className="text-muted-foreground size-8"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground text-sm">
+                {profilesError ? t("loadError") : t("noProfiles")}
+              </p>
+              <Button asChild size="sm" variant="outline">
+                <Link to="/system-admin/email-profile">{t("goToSettings")}</Link>
+              </Button>
+            </div>
+          )}
 
-        {!isLoading && !hasNoProfiles && (
-          <div className="space-y-4">
-            <Field>
-              <FieldLabel htmlFor="pse-profile" required>
-                {t("profile")}
-              </FieldLabel>
-              <Select value={profileId} onValueChange={setProfileId}>
-                <SelectTrigger id="pse-profile" className="w-full">
-                  <SelectValue placeholder={t("profilePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {enabledProfiles.map((profile: EmailProfile) => (
-                    <SelectItem key={profile.id} value={profile.id}>
-                      {profile.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            {poTemplates.length > 0 && (
+          {!isLoading && !hasNoProfiles && (
+            <div className="space-y-4">
               <Field>
-                <FieldLabel htmlFor="pse-template">{t("template")}</FieldLabel>
-                <Select value={templateId} onValueChange={handleTemplateChange}>
-                  <SelectTrigger id="pse-template" className="w-full">
-                    <SelectValue placeholder={t("templatePlaceholder")} />
+                <FieldLabel htmlFor="pse-profile" required>
+                  {t("profile")}
+                </FieldLabel>
+                <Select value={profileId} onValueChange={setProfileId}>
+                  <SelectTrigger id="pse-profile" className="w-full">
+                    <SelectValue placeholder={t("profilePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {poTemplates.map((template: EmailTemplate) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
+                    {enabledProfiles.map((profile: EmailSender) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
-            )}
 
-            <Field data-invalid={toError}>
-              <FieldLabel htmlFor="pse-to" required>
-                {t("to")}
-              </FieldLabel>
-              <EmailChipField
-                id="pse-to"
-                value={to}
-                onChange={(next) => {
-                  setTo(next);
-                  if (next.length > 0) setToError(false);
-                }}
-                placeholder={t("toPlaceholder")}
-                disabled={sendEmail.isPending}
-              />
-              {toError && <FieldError>{t("toRequired")}</FieldError>}
-            </Field>
+              {poTemplates.length > 0 && (
+                <Field>
+                  <FieldLabel htmlFor="pse-template">{t("template")}</FieldLabel>
+                  <Select value={templateId} onValueChange={handleTemplateChange}>
+                    <SelectTrigger id="pse-template" className="w-full">
+                      <SelectValue placeholder={t("templatePlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {poTemplates.map((template: EmailTemplate) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
 
-            <Field>
-              <FieldLabel htmlFor="pse-cc">{t("cc")}</FieldLabel>
-              <EmailChipField
-                id="pse-cc"
-                value={cc}
-                onChange={setCc}
-                placeholder={t("ccPlaceholder")}
-                disabled={sendEmail.isPending}
-              />
-            </Field>
+              <Field data-invalid={toError}>
+                <FieldLabel htmlFor="pse-to" required>
+                  {t("to")}
+                </FieldLabel>
+                <EmailChipField
+                  id="pse-to"
+                  value={to}
+                  onChange={(next) => {
+                    setTo(next);
+                    if (next.length > 0) setToError(false);
+                  }}
+                  placeholder={t("toPlaceholder")}
+                  disabled={sendEmail.isPending}
+                />
+                {toError && <FieldError>{t("toRequired")}</FieldError>}
+              </Field>
 
-            <Field data-invalid={subjectError}>
-              <FieldLabel htmlFor="pse-subject" required>
-                {t("subject")}
-              </FieldLabel>
-              <Input
-                id="pse-subject"
-                value={subject}
-                onChange={(e) => {
-                  isSubjectDirtyRef.current = true;
-                  setSubject(e.target.value);
-                  if (e.target.value.trim().length > 0) setSubjectError(false);
-                }}
-                aria-invalid={subjectError}
-                disabled={sendEmail.isPending}
-              />
-              {subjectError && <FieldError>{t("subjectRequired")}</FieldError>}
-            </Field>
+              <Field>
+                <FieldLabel htmlFor="pse-cc">{t("cc")}</FieldLabel>
+                <EmailChipField
+                  id="pse-cc"
+                  value={cc}
+                  onChange={setCc}
+                  placeholder={t("ccPlaceholder")}
+                  disabled={sendEmail.isPending}
+                />
+              </Field>
 
-            <Field data-invalid={bodyError}>
-              <FieldLabel htmlFor="pse-body" required>
-                {t("body")}
-              </FieldLabel>
-              <RichTextEditor
-                id="pse-body"
-                value={body}
-                onChange={(html) => {
-                  isBodyDirtyRef.current = true;
-                  setBody(html);
-                  if (htmlToPlainText(html).length > 0) setBodyError(false);
-                }}
-                placeholders={EMAIL_PLACEHOLDERS.po}
-                placeholderLabel={t("insertVariable")}
-                ariaInvalid={bodyError}
-                disabled={sendEmail.isPending}
-              />
-              {bodyError && <FieldError>{t("bodyRequired")}</FieldError>}
-            </Field>
+              <Field data-invalid={subjectError}>
+                <FieldLabel htmlFor="pse-subject" required>
+                  {t("subject")}
+                </FieldLabel>
+                <Input
+                  id="pse-subject"
+                  value={subject}
+                  onChange={(e) => {
+                    isSubjectDirtyRef.current = true;
+                    setSubject(e.target.value);
+                    if (e.target.value.trim().length > 0) setSubjectError(false);
+                  }}
+                  aria-invalid={subjectError}
+                  disabled={sendEmail.isPending}
+                />
+                {subjectError && <FieldError>{t("subjectRequired")}</FieldError>}
+              </Field>
 
-            <Field orientation="horizontal">
-              <Checkbox
-                id="pse-attach-pdf"
-                checked={attachPdf}
-                onCheckedChange={(v) => setAttachPdf(v === true)}
-                disabled={sendEmail.isPending}
-              />
-              <FieldLabel htmlFor="pse-attach-pdf">{t("attachPdf")}</FieldLabel>
-            </Field>
-          </div>
-        )}
+              <Field data-invalid={bodyError}>
+                <FieldLabel htmlFor="pse-body" required>
+                  {t("body")}
+                </FieldLabel>
+                <RichTextEditor
+                  id="pse-body"
+                  value={body}
+                  onChange={(html) => {
+                    isBodyDirtyRef.current = true;
+                    setBody(html);
+                    if (htmlToPlainText(html).length > 0) setBodyError(false);
+                  }}
+                  placeholders={EMAIL_PLACEHOLDERS.po}
+                  placeholderLabel={t("insertVariable")}
+                  ariaInvalid={bodyError}
+                  disabled={sendEmail.isPending}
+                />
+                {bodyError && <FieldError>{t("bodyRequired")}</FieldError>}
+              </Field>
 
-        <DialogFooter className="pt-1">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="pse-attach-pdf"
+                  checked={attachPdf}
+                  onCheckedChange={(v) => setAttachPdf(v === true)}
+                  disabled={sendEmail.isPending}
+                />
+                <FieldLabel htmlFor="pse-attach-pdf">{t("attachPdf")}</FieldLabel>
+              </Field>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="shrink-0 gap-2 px-5 py-3">
           <Button
             type="button"
             variant="outline"

@@ -56,6 +56,9 @@ interface PurchaseOrderDetail extends ItemMoneyFields {
    */
   comment?: string | null;
   foc_qty: number;
+  /** ของแถมที่รับเข้ามาแล้ว — อยู่บนแถวตรง ๆ ต่างจาก `received_qty` ของยอดสั่งซื้อ
+   *  ที่ต้องไปรวมเอาจาก `pr_details[]` */
+  foc_received_qty: number;
   // ไม่มี foc_unit บน wire เลย (ยืนยัน 8/8 เอกสารจริง — มีแค่ foc_qty ไม่มี
   // foc_unit_id/foc_unit_name หรือ foc_unit object คู่กัน) ของเดิมมี
   // foc_unit_id?/foc_unit_name? เป็น phantom field มาก่อนแล้ว ลบทิ้งตามจริง
@@ -79,10 +82,22 @@ export interface PoItemHistoryEntry {
 
 export interface PrDetailRef {
   pr_detail: EntityRef | null;
+  /** ใบขอซื้อต้นทาง — `null` เมื่อแถวนี้ไม่ได้มาจาก PR (manual / price list) */
+  pr_id: string | null;
+  pr_no: string | null;
+  /**
+   * ใบรับสินค้าที่อ้างแถวนี้
+   *
+   * **ยังไม่รู้ทรงของสมาชิก** — เอกสารตัวอย่างที่เคยเห็นส่งมาเป็น array ว่างทุกแถว
+   * ประกาศเป็น `unknown[]` ตามที่รู้จริง ไม่ใช่เดาเอา · จะอ่านค่าข้างในต้องไปดู
+   * response ที่มีข้อมูลจริงก่อนแล้วค่อยประกาศ type ให้ตรง
+   */
+  grn: unknown[];
   order_qty: number;
   order_base_qty: number;
   received_qty: number;
   foc_qty: number;
+  foc_received_qty: number;
 }
 
 /**
@@ -173,41 +188,49 @@ export interface CreatePoDto {
 
 export interface PurchaseOrder {
   id: string;
-  role: string;
   po_no: string;
   po_status: PO_STATUS;
   po_type: string;
-  // list endpoint: display-only string, ไม่มี workflow_id คู่กัน (ยืนยันจาก payload จริง)
-  workflow_name?: string;
-  workflow_current_stage: string | null;
-  workflow_previous_stage: string | null;
-  workflow_next_stage: string | null;
-  workflow_history?: WorkflowHistoryEntry[];
-  last_action?: LastAction | null;
-  vendor: EntityRef | null;
-  delivery_date: string;
-  currency: EntityRef | null;
-  exchange_rate: number;
   description: string;
   order_date: string;
-  credit_term: EntityRef | null;
-  credit_term_value: number;
-  // list endpoint: display-only string, ไม่มี buyer_id คู่กัน (ยืนยันจาก payload จริง)
-  buyer_name?: string;
-  email: string;
-  remarks: string;
-  approval_date: string | null;
-  // detail endpoint เท่านั้น — list ไม่ส่งมาเลย (ไม่มี buyer_name คู่กันแบบ object)
-  buyer?: EntityRef | null;
-  workflow?: EntityRef | null;
-  user_action?: Record<string, unknown>;
-  info?: Record<string, unknown>;
+  delivery_date: string;
+  exchange_rate: number;
   doc_version: number;
   total_amount: number;
-  // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
-  // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
+  last_action?: LastAction | null;
+  workflow_current_stage: string | null;
+  workflow_next_stage: string | null;
+  // ส่งมาทั้ง list (`GET /api/{bu}/purchase-orders` — แถวจริงอยู่ที่ `data[].data[]`
+  // ของ multi-BU envelope) และ detail · `@CollapseRefs()` กับ `@EnrichAuditUsers()`
+  // เดินถึงแถวที่ซ้อนแล้วตั้งแต่ 2026-09-18 จึงเป็น object จริงทั้งคู่ ไม่ใช่คู่ flat
+  // `_id`/`_name` อีก (ยืนยันจาก payload จริง 5/5 แถว)
+  vendor: EntityRef | null;
+  currency: EntityRef | null;
   audit?: Audit;
-  purchase_order_detail: PurchaseOrderDetail[];
+  // display-only string ไม่มี workflow_id / buyer_id คู่กัน
+  workflow_name?: string;
+  buyer_name?: string;
+  // ยอดรวมระดับหัวเอกสารที่ list คำนวณมาให้ (detail ไม่ส่ง — คิดจาก line item)
+  total_qty?: number;
+  total_price?: number;
+  total_tax?: number;
+  net_amount?: number;
+  base_net_amount?: number;
+  base_total_amount?: number;
+  // detail endpoint (`GET /api/{bu}/purchase-orders/{id}`) เท่านั้น — list ไม่ส่ง
+  buyer?: EntityRef | null;
+  workflow?: EntityRef | null;
+  credit_term?: EntityRef | null;
+  credit_term_value?: number;
+  role?: string;
+  workflow_previous_stage?: string | null;
+  workflow_history?: WorkflowHistoryEntry[];
+  email?: string;
+  remarks?: string;
+  approval_date?: string | null;
+  user_action?: Record<string, unknown>;
+  info?: Record<string, unknown>;
+  purchase_order_detail?: PurchaseOrderDetail[];
 }
 
 // --- PO for GRN (from /purchase-order/grn endpoint) ---

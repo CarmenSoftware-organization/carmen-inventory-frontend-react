@@ -5,6 +5,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "../grn-form-schema";
@@ -51,9 +52,7 @@ export function GrnItemDiscountCell({
     return <RateSubtext amount={amount} rate={Number(rate) || 0} />;
   }
   return (
-    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
-    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-col gap-0.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -68,21 +67,30 @@ export function GrnItemDiscountCell({
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
       />
-      <OverrideToggle
-        checked={isAdj}
-        hint={tfl("overrideHintDiscount")}
-        onCheckedChange={(on) => {
-          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-          if (on) {
-            form.setValue(`${base}.discount_amount`, amount, {
+      {/* แถวล่าง: % ที่ใช้คิด คู่กับสวิตช์ override — ท่าเดียวกับคอลัมน์ส่วนลดของ PO
+          ช่องกรอกได้ความกว้างเต็มเซลล์ และ % ไม่หายไปตอน override เปิด */}
+      <div className="flex items-center justify-end gap-1.5">
+        {Number(rate) > 0 && (
+          <span className="text-muted-foreground text-micro-legal tabular-nums">
+            {rate}%
+          </span>
+        )}
+        <OverrideToggle
+          checked={isAdj}
+          hint={tfl("overrideHintDiscount")}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
               shouldDirty: true,
             });
-          }
-          form.setValue(`${base}.is_discount_adjustment`, on, {
-            shouldDirty: true,
-          });
-        }}
-      />
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -113,23 +121,29 @@ export function GrnItemTaxCell({
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
+      <TaxOverrideInput
+        rate={Number(rate) || 0}
+        amount={amount}
+        isAdjustment={isAdj}
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
+      />
+      {/* แถวล่าง: โปรไฟล์ภาษีคู่กับสวิตช์ override — ท่าเดียวกับคอลัมน์ภาษีของ PO */}
       <div className="flex items-center gap-1.5">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
-              shouldDirty: true,
-              shouldValidate: true,
-            });
-            form.setValue(`${base}.tax_rate`, r);
-          }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-          }
-        />
+        <div className="min-w-0 flex-1">
+          <LookupTaxProfile
+            value={taxProfileId ?? ""}
+            onValueChange={(value, r) => {
+              form.setValue(`${base}.tax_profile_id`, value || null, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+              form.setValue(`${base}.tax_rate`, r);
+            }}
+            className="h-8 w-full text-xs"
+          />
+        </div>
         <OverrideToggle
           checked={isAdj}
           hint={tfl("overrideHintTax")}
@@ -145,11 +159,6 @@ export function GrnItemTaxCell({
           }}
         />
       </div>
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro-legal text-right tabular-nums">
-          {rate}%
-        </span>
-      )}
     </div>
   );
 }

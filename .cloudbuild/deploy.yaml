@@ -1,0 +1,126 @@
+# Cloud Build config for the "carmen-web-deploy" trigger (see carmen-infra-gcp/cloudbuild.tf).
+# approval_required=true — never runs until a human with roles/cloudbuild.builds.approver
+# approves it, whether invoked by carmen-web-build's last step or run standalone.
+#
+# Downloads the exact SHA folder carmen-web-build staged in the shared GCS bucket, syncs it
+# to the live bucket (excluding index.html and config*.json — same exclusion
+# scripts/deploy-gcs.sh applies locally, so a redeploy never clobbers the environment's real
+# runtime config), writes a fresh config.json from Terraform-managed substitutions, then
+# invalidates the CDN.
+#
+# Rollback: run this trigger again with an older _ARTIFACT_SHA (still within the staging
+# bucket's 30-day retention, carmen-infra-gcp/storage.tf) — identify it from Discord
+# notification history or Cloud Build History, no separate tracking mechanism. Note this
+# only rolls back the *build* (JS/HTML/CSS) — config.json is rewritten from the trigger's
+# current substitutions every run regardless of which SHA you pick.
+#   gcloud builds triggers run carmen-web-deploy --region=asia-southeast3 --branch=prod \
+#     --substitutions=_ARTIFACT_SHA=<older-short-sha>
+
+steps:
+  - id: download-artifact
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - storage
+      - rsync
+      - gs://${_STAGING_BUCKET}/carmen-web/${_ARTIFACT_SHA}/
+      - dist
+      - --recursive
+
+  - id: sync-to-live
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        gcloud storage rsync dist gs://${_LIVE_BUCKET} \
+          --recursive \
+          --delete-unmatched-destination-objects \
+          --exclude="^index\.html$$|^config[^/]*\.json$$"
+        gcloud storage objects update "gs://${_LIVE_BUCKET}/assets/**" \
+          --cache-control="public,max-age=31536000,immutable"
+        gcloud storage cp dist/index.html "gs://${_LIVE_BUCKET}/index.html" \
+          --cache-control="no-cache"
+    waitFor: ['download-artifact']
+
+  # config.json is per-environment runtime config, deliberately excluded from the sync
+  # above — written fresh from Terraform-managed substitutions every deploy instead, same
+  # values the old GitHub Actions "Write and upload config.json" step used to write from
+  # repo variables. WS_URL is included only when non-empty: the runtime reads an absent
+  # key as "real-time deliberately off", an empty string as "configured but broken"
+  # (lib/runtime-config.ts) — see carmen_web_ws_url's comment in carmen-infra-gcp/variables.tf.
+  - id: write-runtime-config
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        WS_URL="${_WS_URL}"
+        WS_FIELD=""
+        if [ -n "$$WS_URL" ]; then
+          WS_FIELD=", \"WS_URL\": \"$$WS_URL\""
+        fi
+        cat > /tmp/config.json <<CONFIGJSON
+        {"BACKEND_URL": "${_BACKEND_URL}", "X_APP_ID": "${_X_APP_ID}", "LICENSE_ENFORCEMENT": ${_LICENSE_ENFORCEMENT}, "OTEL_ENABLED": ${_OTEL_ENABLED}$${WS_FIELD}}
+        CONFIGJSON
+        gcloud storage cp /tmp/config.json "gs://${_LIVE_BUCKET}/config.json" --cache-control="no-cache"
+    waitFor: ['sync-to-live']
+
+  - id: invalidate-cdn
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - compute
+      - url-maps
+      - invalidate-cdn-cache
+      - ${_CDN_URL_MAP}
+      - --path=/index.html
+    waitFor: ['write-runtime-config']
+
+  # Only reached if everything above actually succeeded — a sync/write/invalidate failure
+  # gets no Discord notification, same gap noted in build.yaml's invoke-deploy step.
+  - id: notify-deploy-success
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        curl -sS -X POST -H "Content-Type: application/json" \
+          -d @- "$$DISCORD_WEBHOOK_URL" <<'PAYLOAD'
+        {
+          "embeds": [{
+            "title": "✅ carmen-web (carmen-inventory-frontend-react) deploy สำเร็จ",
+            "color": 3066993,
+            "fields": [
+              {"name": "Commit (SHA)", "value": "${_ARTIFACT_SHA}", "inline": true}
+            ]
+          }]
+        }
+        PAYLOAD
+    secretEnv: ['DISCORD_WEBHOOK_URL']
+    waitFor: ['invalidate-cdn']
+
+substitutions:
+  _STAGING_BUCKET: (unset)
+  _LIVE_BUCKET: (unset)
+  _CDN_URL_MAP: carmen-url-map
+  # Overridden by carmen-web-build's invoke-deploy step (--substitutions=_ARTIFACT_SHA=...).
+  # "latest" only applies if this trigger is ever run standalone without that override, and
+  # no such folder exists in the staging bucket — pass a real SHA explicitly (see the rollback
+  # note above) rather than relying on this default.
+  _ARTIFACT_SHA: latest
+  _BACKEND_URL: (unset)
+  _X_APP_ID: (unset)
+  _WS_URL: ""
+  _LICENSE_ENFORCEMENT: "true"
+  _OTEL_ENABLED: "false"
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/${PROJECT_ID}/secrets/discord-webhook-url/versions/latest
+      env: 'DISCORD_WEBHOOK_URL'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

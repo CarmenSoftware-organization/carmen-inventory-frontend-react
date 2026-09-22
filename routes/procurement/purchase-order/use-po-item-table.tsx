@@ -23,6 +23,7 @@ import {
   LocationCell,
   QtyUnitCell,
   ComputedPricingCell,
+  type PrSource,
 } from "./po-item-cells";
 import { PriceCell, ProductHeaderCell, StatusCell } from "./po-item-cells";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
@@ -114,6 +115,9 @@ interface UsePoItemTableOptions {
   showApproveCheckbox: boolean;
   showStatusBadge: boolean;
   canResetStatus: boolean;
+  isViewMode: boolean;
+  /** id ของแถว PO → ใบขอซื้อต้นทาง (อ่านจาก response ของ GET ไม่ใช่จากฟอร์ม) */
+  prSourcesByDetailId: Map<string, PrSource[]>;
   onDelete: (index: number) => void;
 }
 
@@ -128,6 +132,8 @@ export function usePoItemTable({
   showApproveCheckbox,
   showStatusBadge,
   canResetStatus,
+  isViewMode,
+  prSourcesByDetailId,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -158,6 +164,7 @@ export function usePoItemTable({
             isDisabled={viewMode}
             placeholder={tfl("comment")}
             leadingWidth={PO_LEADING_COL}
+            prSourcesByDetailId={prSourcesByDetailId}
             renderLeading={(index) =>
               // โหมดแก้ไข = ปุ่มลบ · โหมดอ่าน = ประวัติของแถว (ถ้ามี)
               // สองอย่างนี้ไม่มีวันต้องใช้พร้อมกัน จึงใช้ที่เดียวกันสลับกันไป
@@ -226,6 +233,10 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            // ยอดที่รับแล้วโชว์เฉพาะโหมดอ่าน — ตอนกรอก (add/edit) ตัวเลข GRN
+            // ใต้ช่องอ่านปนกับสิ่งที่ตัวเองเพิ่งพิมพ์ และใบที่เพิ่งสร้างก็เป็น 0
+            // ทุกแถวอยู่แล้ว
+            showReceived={isViewMode}
           />
         ),
       },
@@ -241,6 +252,8 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
+            // ยอดที่รับแล้วโชว์เฉพาะโหมดอ่าน เกณฑ์เดียวกับคอลัมน์ Order / GRN
+            showReceived={isViewMode}
           />
         ),
       },
@@ -362,6 +375,7 @@ export function usePoItemTable({
     showApproveCheckbox,
     showStatusBadge,
     canResetStatus,
+    isViewMode,
     onDelete,
     tfl,
     showAction,
@@ -373,5 +387,10 @@ export function usePoItemTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: showApproveCheckbox,
+    // ไม่ให้ลากขอบหัวคอลัมน์ — ความกว้างที่ลากไม่ถูกจำ ออกจากหน้าแล้วกลับมาได้
+    // ค่าเดิมทุกครั้ง · `columnsResizable` ของ DataGrid ยังต้องเปิดไว้เพราะมัน
+    // คุมอีกเรื่องด้วย: table width = getTotalSize() (คอลัมน์กว้างตาม size px
+    // แล้วเลื่อนแนวนอน) ปิดไปตารางจะกลับเป็น w-full บีบ 11 คอลัมน์ลงในจอ
+    enableColumnResizing: false,
   });
 }

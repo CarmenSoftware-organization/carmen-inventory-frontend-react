@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
+import { draftSaveHandler } from "@/lib/form-helpers";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/hooks/use-profile";
@@ -237,7 +238,7 @@ export function StoreRequisitionForm({
 
       <form
         id="store-requisition-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, actions.revealInvalid)}
+        onSubmit={draftSaveHandler(form, actions.onSubmit)}
         className="space-y-4 px-4"
       >
         <SrRequestDetails

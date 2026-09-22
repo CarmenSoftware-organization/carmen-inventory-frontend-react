@@ -228,14 +228,27 @@ export interface SrStageDetail {
   issued_qty?: number;
 }
 
+export type SrDatePattern = "open-period" | "today";
+
 export interface SrActionPayload {
   id: string;
   stage_role: string;
   doc_version?: number;
   des_stage?: string;
   details: SrStageDetail[];
+  /** ตอบ `SR_DATE_PATTERN_REQUIRED` ของ submit — ลงวันที่ใบเบิกในงวดที่เปิด หรือวันนี้ */
+  sr_date_pattern?: SrDatePattern;
+  /** ตอบ `SR_ISSUE_DATE_PATTERN_REQUIRED` ของขั้นจ่ายของ — เรื่องเดียวกันแต่คนละวัน */
+  issue_date_pattern?: SrDatePattern;
 }
 
+/**
+ * ทุก action ของ workflow **ไม่ใช้ toast กลาง** — `useSrFormActions` เรียก
+ * `reportApiError` เองทุกกรณี ยกเว้นสองรหัสที่ backend ขอให้เลือกวันที่ก่อน
+ * (`SR_DATE_PATTERN_REQUIRED` / `SR_ISSUE_DATE_PATTERN_REQUIRED`) ซึ่งเปิด dialog
+ * ให้เลือกแล้วยิงซ้ำแทน — ปล่อย toast กลางไว้จะได้ทั้ง toast และ dialog พร้อมกัน
+ * ถามเรื่องเดียวกันสองที่
+ */
 export function useSrAction(action: SrAction) {
   return useApiMutation<SrActionPayload>({
     mutationFn: ({ id, ...data }, buCode) =>
@@ -245,6 +258,7 @@ export function useSrAction(action: SrAction) {
       ),
     invalidateKeys: SR_INVALIDATE_KEYS,
     errorMessage: `Failed to ${action} store requisition`,
+    meta: { skipGlobalErrorToast: true },
   });
 }
 

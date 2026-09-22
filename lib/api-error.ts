@@ -60,6 +60,14 @@ export class ApiError extends Error {
    */
   public readonly fieldErrors?: readonly string[];
 
+  /**
+   * ค่าแทน placeholder ของข้อความใน catalog (`body.params`) เช่น `{blocked}` `{total}`
+   *
+   * backend แทนค่าลง `message` ของมันเองไปแล้ว แต่เราไม่ได้เอา message นั้นมาโชว์ —
+   * เราแปลจาก `appCode` เอง จึงต้องได้ค่าพวกนี้มาเติมในข้อความฝั่งเรา
+   */
+  public readonly appParams?: Readonly<Record<string, string | number>>;
+
   constructor(
     public readonly code: ErrorCode,
     message: string,
@@ -69,12 +77,14 @@ export class ApiError extends Error {
     serverMessage?: string,
     appCode?: string,
     fieldErrors?: readonly string[],
+    appParams?: Readonly<Record<string, string | number>>,
   ) {
     super(message);
     this.name = "ApiError";
     this.serverMessage = serverMessage;
     this.appCode = appCode;
     this.fieldErrors = fieldErrors;
+    this.appParams = appParams;
   }
 
   /**
@@ -122,6 +132,7 @@ export class ApiError extends Error {
       data,
       appCode,
       fieldErrors,
+      appParams,
     } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
@@ -136,6 +147,7 @@ export class ApiError extends Error {
       serverMessage,
       appCode,
       fieldErrors,
+      appParams,
     );
   }
 }
@@ -214,6 +226,25 @@ export function isTransportError(error: unknown): boolean {
  *
  * คืน message เป็น undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */
+/**
+ * `body.params` ของ error catalog — เอาเฉพาะค่าที่เติมลงข้อความได้จริง
+ *
+ * ค่าที่เป็น object/array ถูกทิ้ง เพราะ ICU จะ render มันเป็น "[object Object]"
+ * กลางประโยค (`SR_DEPARTMENT_AMBIGUOUS` ส่ง departments มาเป็น string อยู่แล้ว)
+ */
+const readParams = (
+  raw: unknown,
+): Readonly<Record<string, string | number>> | undefined => {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return undefined;
+  }
+  const out: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (typeof v === "string" || typeof v === "number") out[k] = v;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+};
+
 const readErrorBody = async (
   res: Response,
 ): Promise<{
@@ -221,6 +252,7 @@ const readErrorBody = async (
   data: unknown;
   appCode?: string;
   fieldErrors?: readonly string[];
+  appParams?: Readonly<Record<string, string | number>>;
 }> => {
   try {
     const body = await res.clone().json();
@@ -244,6 +276,7 @@ const readErrorBody = async (
             )
             .filter((f: string | undefined): f is string => !!f)
         : undefined,
+      appParams: readParams(body?.params),
     };
   } catch {
     return { message: undefined, data: undefined };
@@ -279,4 +312,52 @@ function statusToCode(status: number): ErrorCode {
         ? ERROR_CODES.INTERNAL_ERROR
         : ERROR_CODES.VALIDATION_ERROR;
   }
+}
+
+/**
+ * รายละเอียดประกอบของ 403 ฝั่ง license — `feature` (คีย์ที่ BU ไม่มีสิทธิ์) กับ `bu_codes` /
+ * `bu_names` (หน่วยงานที่ถูกบล็อก) ที่ `LicenseInterceptor` วางไว้ **ระดับบนสุด** ของ error body
+ * ไม่ใช่ใน `error` (ดู `throw new ForbiddenException({ code, feature, bu_codes, bu_names })`)
+ *
+ * ข้อความอย่างเดียว ("หน่วยงานของคุณยังไม่ได้เปิดใช้งานความสามารถนี้") ไม่บอกว่า *ความสามารถไหน*
+ * ผู้ดูแลจึงเอาไปสั่งงานต่อไม่ได้ ต้องถาม dev ทุกครั้ง — สามฟิลด์นี้คือสิ่งที่ตอบคำถามนั้นได้
+ *
+ * `bu_names` เป็นของใหม่ที่ gateway เพิ่งเริ่มส่ง — gateway รุ่นก่อนหน้าจะไม่มีฟิลด์นี้เลย
+ * ผู้เรียกจึงต้องมีทางลงของตัวเองเสมอ (ดู `PermissionDeniedDialog` ที่แปลงจาก profile ต่อ)
+ *
+ * @param body - error body ที่ parse แล้ว (ชนิดอะไรก็ได้)
+ * @returns ฟิลด์ที่ไม่มีหรือรูปไม่ตรงถูกตัดทิ้งเป็น undefined
+ * @example
+ * ```ts
+ * licenseContextFrom({ feature: "configuration.currency", bu_codes: ["GR2VYNKQ"] });
+ * // { feature: "configuration.currency", buCodes: ["GR2VYNKQ"] }
+ * licenseContextFrom(null); // {}
+ * ```
+ */
+export function licenseContextFrom(body: unknown): {
+  feature?: string;
+  buCodes?: string[];
+  buNames?: string[];
+} {
+  if (typeof body !== "object" || body === null) return {};
+  const {
+    feature,
+    bu_codes: buCodes,
+    bu_names: buNames,
+  } = body as {
+    feature?: unknown;
+    bu_codes?: unknown;
+    bu_names?: unknown;
+  };
+  const stringList = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((v) => typeof v === "string")
+      ? (value as string[])
+      : undefined;
+  return {
+    feature: typeof feature === "string" && feature ? feature : undefined,
+    buCodes: stringList(buCodes),
+    buNames: stringList(buNames),
+  };
 }

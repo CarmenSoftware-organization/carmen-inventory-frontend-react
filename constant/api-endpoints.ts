@@ -48,6 +48,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/test-email-profile`,
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
+  EMAIL_SENDERS: (buCode: string) => `/api/proxy/api/${buCode}/email-senders`,
+  EMAIL_MESSAGES: (buCode: string) => `/api/proxy/api/${buCode}/email-messages`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
   BUSINESS_UNIT_AVATAR: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/avatar`,
@@ -69,6 +71,8 @@ export const API_ENDPOINTS = {
   CONFIG_USER_BY_ID: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/users/${userId}`,
   CREDIT_NOTE: (buCode: string) => `/api/proxy/api/${buCode}/credit-notes`,
+  CREDIT_NOTE_STOCK_MOVEMENTS: (buCode: string, cnId: string) =>
+    `/api/proxy/api/${buCode}/credit-notes/${cnId}/stock-movements`,
   CREDIT_NOTE_COMMENT: (buCode: string, cnId?: string) =>
     cnId
       ? `/api/proxy/api/${buCode}/credit-note-comments/${cnId}`
@@ -128,6 +132,8 @@ export const API_ENDPOINTS = {
     action: "process" | "generate",
   ) =>
     `/api/proxy/api/${buCode}/accounting/journal-staging/batches/${toSafePathSegment(id)}/${action}`,
+  GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
+    `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>

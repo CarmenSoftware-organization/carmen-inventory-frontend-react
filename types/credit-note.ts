@@ -179,3 +179,39 @@ export interface CreditNoteDetail {
   audit?: AuditInfo;
   credit_note_detail: CreditNoteDetailItem[];
 }
+
+/**
+ * แถวเคลื่อนไหวสต๊อกของใบลดหนี้ (`GET .../credit-notes/{id}/stock-movements`)
+ *
+ * **ประกาศเฉพาะฟิลด์ที่ตารางวาดจริง** — response ยังไม่เคยถูกยิงดูของจริง (ทรงนี้
+ * ลอกมาจาก `SrStockMovement` ที่ backend ชุดเดียวกันทำไว้ก่อน) ฟิลด์ที่เกินมาไม่
+ * กระทบอะไร ส่วนฟิลด์ที่หายจะขึ้นเป็นช่องว่าง ไม่ใช่จอขาว
+ */
+export interface CnStockMovementItem {
+  id: string;
+  sequence_no: number;
+  location_name: string;
+  product_name: string;
+  product_local_name?: string | null;
+  inventory_unit_name: string;
+  lot_no?: string | null;
+  /** จำนวนที่ใบบอกว่าคืน — มีค่าเสมอ ต่างจาก `qty_out` ที่ว่างจนกว่าจะตัดสต๊อกจริง */
+  return_qty: number;
+  return_unit_name?: string | null;
+  /** จำนวนที่สต๊อกขยับจริง — `0` ตราบใดที่ `is_posted` ยังไม่เป็น true */
+  qty_out: number;
+  cost_per_unit: number;
+  total_cost: number;
+}
+
+export interface CnStockMovement {
+  credit_note_id: string;
+  /**
+   * `false` = ตัวเลขเป็นการคาดการณ์จากตัวใบ ยังไม่ได้ตัดสต๊อกจริง · `undefined` =
+   * backend ไม่ได้ส่งมา ซึ่งต่างจาก false — ห้ามเช็คด้วย `!is_posted`
+   */
+  is_posted?: boolean;
+  /** `inventory_transaction` = ของขยับจริง · `document_detail` = อ่านจากตัวใบ */
+  source?: string;
+  items: CnStockMovementItem[];
+}

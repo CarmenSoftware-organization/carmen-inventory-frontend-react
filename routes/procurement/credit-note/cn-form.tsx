@@ -7,6 +7,7 @@ import {
   buildItemChanges,
   countInvalidItems,
   scrollToFirstInvalidField,
+  draftSaveHandler,
 } from "@/lib/form-helpers";
 import { toast } from "sonner";
 import {
@@ -398,7 +399,7 @@ export function CnForm({ creditNote }: CnFormProps) {
 
       <form
         id="cn-form"
-        onSubmit={form.handleSubmit(onSubmit, revealInvalid)}
+        onSubmit={draftSaveHandler(form, onSubmit)}
         className="space-y-3 px-4"
       >
         <CnGeneralFields
@@ -419,7 +420,10 @@ export function CnForm({ creditNote }: CnFormProps) {
           </TabsContent>
 
           <TabsContent value="stock">
-            <CnStockTable docStatus={creditNote?.doc_status} />
+            <CnStockTable
+              cnId={creditNote?.id}
+              docStatus={creditNote?.doc_status}
+            />
           </TabsContent>
         </Tabs>
       </form>

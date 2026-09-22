@@ -10,6 +10,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "../../shared/discount-tax-override";
+import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
@@ -223,29 +224,31 @@ export function ItemTaxCell({
   }
   return (
     <div className="flex flex-col gap-0.5">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r, name) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
-              shouldDirty: true,
-              shouldValidate: true,
-            });
-            form.setValue(`${base}.tax_rate`, r);
-            form.setValue(`${base}.tax_profile_name`, name);
-          }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-          }
-        />
-      {/* แถวล่าง: % คู่กับสวิตช์ override — ตำแหน่งเดียวกับคอลัมน์ส่วนลด */}
-      <div className="flex items-center justify-end gap-1.5">
-        {rate > 0 && (
-          <span className="text-muted-foreground text-micro-legal tabular-nums">
-            {rate}%
-          </span>
-        )}
+      <TaxOverrideInput
+        rate={Number(rate) || 0}
+        amount={amount}
+        isAdjustment={isAdj}
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
+      />
+      {/* แถวล่าง: โปรไฟล์ภาษีคู่กับสวิตช์ override — ตัวเลือกยาว ชื่อโปรไฟล์เลยได้
+          ความกว้างเต็มเซลล์แทนที่จะโดนบีบอยู่ข้างช่องยอดเงิน */}
+      <div className="flex items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <LookupTaxProfile
+            value={taxProfileId ?? ""}
+            onValueChange={(value, r, name) => {
+              form.setValue(`${base}.tax_profile_id`, value || null, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+              form.setValue(`${base}.tax_rate`, r);
+              form.setValue(`${base}.tax_profile_name`, name);
+            }}
+            className="h-8 w-full text-xs"
+          />
+        </div>
         <OverrideToggle
           checked={isAdj}
           hint={tfl("overrideHintTax")}

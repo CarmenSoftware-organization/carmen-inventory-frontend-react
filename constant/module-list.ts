@@ -78,11 +78,12 @@ export interface ModuleDto {
    * License feature key ของ leaf นี้ — ระบุตรง ๆ เมื่อ key ที่คำนวณจาก `permission`
    * ไม่ตรงกับ catalog ของ backend
    *
-   * **ทำไมต้องมีฟิลด์นี้:** namespace ของ *permission* (RBAC) กับของ *license feature*
-   * **ไม่ใช่ตัวเดียวกัน** เช่น หน้า Unit ใช้ permission `product_management.unit.view`
-   * แต่ backend คิดค่า license เป็น `configuration.unit`; หน้า Report ใช้
-   * `report_analytics.view` แต่ feature จริงคือ `report.list` การปล่อยให้คำนวณเอง
-   * จะได้ key ที่ไม่มีอยู่ใน catalog → หน้านั้นถูกล็อกถาวรตอนเปิด
+   * **ทำไมต้องมีฟิลด์นี้:** resource ของ *permission* (RBAC) กับของ *license feature*
+   * **ไม่ใช่ตัวเดียวกันเสมอ** เช่น Company Profile ใช้ permission
+   * `system_admin.business_unit.view` แต่ license ผูกกับ module key `system_admin`
+   * เพราะ `/api/business-units` ไม่แมตช์ `LICENSE_ROUTE_FEATURES` เลย; หน้า Report
+   * Schedule ใช้ `report.schedule.view` แต่ feature ที่ผูกไว้คือ `report.list`
+   * การปล่อยให้คำนวณเองจะได้ key ที่ไม่มีอยู่ใน catalog → หน้านั้นถูกล็อกถาวรตอนเปิด
    * `LICENSE_ENFORCEMENT` และ license **ไม่มี admin bypass** จึงไม่มีใครเข้าไปแก้ได้
    *
    * ค่าที่ใส่ต้องมาจาก `LICENSE_ROUTE_FEATURES` ของ backend (map จาก URL path จริง
@@ -251,8 +252,16 @@ export const moduleList: ModuleDto[] = [
     icon: ShoppingCart,
     subModules: [
       {
+        // กล่องอนุมัติรวม PR/PO/SR ยิง /api/my-pending ซึ่งไม่อยู่ใน
+        // LICENSE_ROUTE_FEATURES จึงไม่มีคีย์ระดับ resource ให้ผูก — ใช้คีย์ระดับ
+        // module ของ Procurement แทน
+        //
+        // เกณฑ์คือ "backend ไม่มีคีย์ให้ผูกจริง ๆ" ไม่ใช่ "ยังไม่ได้หา" — ถ้า catalog
+        // มีคีย์ระดับ resource อยู่ ต้องผูกคีย์นั้น ไม่งั้นเมนูเปิดได้แต่ API ตอบ 403
+        // (เคยเกิดกับ /config/shelf ที่เคยถูกยกเป็นตัวอย่างตรงนี้)
         name: "myApproval",
         path: "/procurement/approval",
+        licenseFeature: "procurement",
         icon: FileCheck,
       },
       {
@@ -485,21 +494,21 @@ export const moduleList: ModuleDto[] = [
         path: "/report/list",
         licenseFeature: "report.list", // app:reports
         icon: Files,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.list.view,
       },
       {
         name: "reportSchedule",
         path: "/report/schedules",
         licenseFeature: "report.list", // app:reports (/api/{bu}/reports/schedules -> segment 'reports')
         icon: Calendar,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.schedule.view,
       },
       {
         name: "reportHistory",
         path: "/report/history",
         licenseFeature: "report.list", // app:reports (/api/{bu}/reports/history -> segment 'reports')
         icon: Clock,
-        permission: PERMISSIONS.report_analytics.view,
+        permission: PERMISSIONS.report.history.view,
       },
     ],
   },
@@ -515,12 +524,9 @@ export const moduleList: ModuleDto[] = [
     icon: Settings2,
     subModules: [
       {
-        // ยังไม่ผูก permission/licenseFeature โดยตั้งใจ — โมดูลนี้เพิ่งวางโครง
-        // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
-        // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
-        // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
         name: "chartOfAccounts",
         path: "/config/chart-of-accounts",
+        licenseFeature: "configuration.chart_of_accounts", // config:chart-of-accounts
         icon: BookText,
       },
       {
@@ -534,9 +540,12 @@ export const moduleList: ModuleDto[] = [
         icon: UserRoundSearch,
       },
       {
-        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ chartOfAccounts
-        name: "accountMapping",
-        path: "/config/account-mapping",
+        // คีย์นี้มาจาก `LICENSE_ONLY_RESOURCES` ของ backend (ไม่มี endpoint รองรับ
+        // เพราะหน้า list ยังอ่าน mock) การล็อกจึงเกิดที่ FE จาก `license.features`
+        // ไม่ใช่ที่ `LicenseInterceptor`
+        name: "chartOfAccountMapping",
+        path: "/config/chart-of-account-mapping",
+        licenseFeature: "configuration.chart_of_account_mapping",
         icon: Link2,
       },
       {
@@ -562,14 +571,14 @@ export const moduleList: ModuleDto[] = [
         path: "/config/unit",
         licenseFeature: "configuration.unit", // config:units
         icon: Scale,
-        permission: PERMISSIONS.product_management.unit.view,
+        permission: PERMISSIONS.configuration.unit.view,
       },
       {
         name: "shelf",
         path: "/config/shelf",
-        licenseFeature: "configuration",
+        licenseFeature: "configuration.location_shelf",
         icon: Rows3,
-        permission: PERMISSIONS.configuration.shelf.view,
+        permission: PERMISSIONS.configuration.location_shelf.view,
       },
       {
         name: "adjustmentType",
@@ -621,7 +630,7 @@ export const moduleList: ModuleDto[] = [
         path: "/config/extra-cost",
         licenseFeature: "configuration.extra_cost_type", // config:extra-cost-types
         icon: Coins,
-        permission: PERMISSIONS.configuration.extra_cost.view,
+        permission: PERMISSIONS.configuration.extra_cost_type.view,
       },
     ],
   },
@@ -638,7 +647,7 @@ export const moduleList: ModuleDto[] = [
         // ซึ่งล็อกเฉพาะ BU ที่ไม่ได้ซื้อ System Admin ทั้งโมดูล (over-lock น้อยที่สุด)
         licenseFeature: "system_admin",
         icon: Briefcase,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.business_unit.view,
       },
       {
         name: "defaultSetting",
@@ -647,7 +656,7 @@ export const moduleList: ModuleDto[] = [
         // ซึ่งอยู่นอกขอบเขต license ทั้งคู่
         licenseFeature: "system_admin",
         icon: SlidersHorizontal,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.business_unit.view,
       },
       {
         name: "inventoryPeriod",
@@ -655,14 +664,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.inventory_period", // app:inventory-periods
         icon: Calendar,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.inventory_period.view,
       },
       {
         name: "workflow",
         path: "/system-admin/workflow",
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.workflow.view,
         // สามชนิดเอกสารเป็น route จริงของตัวเอง เพราะแต่ละชนิดยิงคนละ endpoint
         // (`GET /config/{bu}/workflows/{slug}`) ไม่ใช่กรองจากชุดเดียวกัน
         //
@@ -678,51 +687,57 @@ export const moduleList: ModuleDto[] = [
             path: "/system-admin/workflow/purchase-request",
             licenseFeature: "system_admin.workflow",
             icon: ShoppingCart,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.system_admin.workflow.purchase_request.view,
           },
           {
             name: "workflowPurchaseOrder",
             path: "/system-admin/workflow/purchase-order",
             licenseFeature: "system_admin.workflow",
             icon: Receipt,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.system_admin.workflow.purchase_order.view,
           },
           {
             name: "workflowStoreRequisition",
             path: "/system-admin/workflow/store-requisition",
             licenseFeature: "system_admin.workflow",
             icon: Store,
-            permission: PERMISSIONS.system_configuration.view,
+            permission:
+              PERMISSIONS.system_admin.workflow.store_requisition.view,
           },
           {
             name: "notificationTemplate",
             path: "/system-admin/notification-template",
             licenseFeature: "configuration.notification_template", // config:notification-templates
             icon: BellRing,
-            permission: PERMISSIONS.system_configuration.view,
+            permission: PERMISSIONS.configuration.notification_template.view,
           },
         ],
       },
       {
         name: "interface",
         path: "/system-admin/interface",
-        licenseFeature: "configuration.app_config", // config:app-config
+        // ย้ายจาก `configuration.app_config` (2026-09-20) — Interface ขายแยกผ่านใบ INF
+        // (`tb_business_unit_interface_license`) ไม่ใช่กลุ่มของสัญญา ดู spec
+        // docs/superpowers/specs/2026-09-20-app-config-license-split-design.md
+        licenseFeature: "interface",
+        // **ไม่มี `permission` โดยตั้งใจ** — backend ไม่มี resource `interface` ใน
+        // permission catalog เลย (เป็น `LICENSE_ONLY_RESOURCES`) หน้านี้คุมด้วยใบ INF
+        // อย่างเดียว การใส่คีย์ที่ไม่มีอยู่จริงกลับเข้ามาเท่ากับปิดหน้านี้ถาวรสำหรับ non-admin
         icon: Cable,
-        permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "emailProfile",
         path: "/system-admin/email-profile",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_profile",
         icon: Mail,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.config_email.view,
       },
       {
         name: "emailTemplate",
         path: "/system-admin/email-template",
-        licenseFeature: "configuration.app_config", // เก็บใน app-config เหมือน interface
+        licenseFeature: "configuration.email_template",
         icon: MailOpen,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.config_email.view,
       },
       {
         name: "role",
@@ -730,14 +745,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.role", // config:application-roles
         icon: ShieldCheck,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.role.view,
       },
       {
         name: "user",
         path: "/system-admin/user",
         licenseFeature: "system_admin.user", // app:users
         icon: UserCheck,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.user.view,
       },
       {
         name: "runningCode",
@@ -745,14 +760,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.running_code", // config:running-codes
         icon: Hash,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.running_code.view,
       },
       {
         name: "document",
         path: "/system-admin/document",
         licenseFeature: "system_admin.document", // app:documents
         icon: FileCheck,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.document.view,
       },
       {
         name: "userActivity",
@@ -760,14 +775,14 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: UserRoundSearch,
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.user_activity.view,
       },
       {
         name: "activityLog",
         path: "/system-admin/activity-log",
         licenseFeature: "system_admin.activity_log", // app:activity-logs
         icon: Activity,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.system_admin.activity_log.view,
       },
       {
         name: "dashboardDataset",
@@ -777,7 +792,7 @@ export const moduleList: ModuleDto[] = [
         // เส้นคั่นเคยมาจาก notificationTemplate ที่เคยอยู่เหนือมัน — ย้ายตัวนั้นไป
         // ใต้ workflow แล้ว ถ้าไม่ถือเส้นเอง มันจะไหลไปติดกลุ่ม activity
         separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
+        permission: PERMISSIONS.dashboard.dataset.view,
       },
     ],
   },

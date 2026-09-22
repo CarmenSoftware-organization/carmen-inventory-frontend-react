@@ -112,14 +112,25 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
 กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`
 (โหลดเองเมื่อทำงานใต้ `routes/`)
 
-## UI consistency for new pages
+## Design system (`/design-system`)
 
-ก่อนสร้างหรือแก้หน้า React ขนาดใหญ่ ให้ใช้ skill `carmen-ui-consistency`
-(`.agents/skills/carmen-ui-consistency/SKILL.md`) และเริ่มจากหน้าอ้างอิงที่ใกล้ที่สุด
-เสมอ ต้อง reuse shared components ของระบบ เช่น `DocumentListHeader`, `DataGrid`,
-`SearchInput`, `StatusFilter`, `SettingSection` และ `Field` ก่อนสร้าง component หรือ
-markup แบบเฉพาะกิจ รายละเอียดเป็น checklist อยู่ใน skill และกฎระดับ repo อยู่ใน
-`AGENTS.md`.
+กฎอยู่ใน `docs/DESIGN.md` · ของจริงอยู่ที่หน้า **`/design-system`** ซึ่งเรนเดอร์ token จาก
+`styles/globals.css` และ primitive จาก `components/ui/` ตรง ๆ (โค้ดหน้าอยู่ที่
+`routes/design-system/` — dev tool: อยู่หลัง auth แต่ไม่อยู่ใน `constant/module-list.ts`
+จึงไม่ขึ้นเมนู ไม่ผูก permission/license และไม่ผ่าน i18n) ก่อนเพิ่มหรือแก้ UI
+ให้หยิบของที่มีอยู่ อย่าตั้งค่าสี/ขนาดใหม่ที่ call site
+
+สี่กับดักที่พลาดกันบ่อย:
+
+- token สถานะ (`--success` `--warning` …) เป็น **สีพื้น** ใช้เป็น `text-*` แล้วตก WCAG AA
+  — ข้อความต้องใช้ `text-success-ink` / `text-warning-ink` (`lib/__tests__/status-ink-contrast.test.ts` ดักอยู่)
+- utility `bg-status-*` **ไม่มีจริง** ต้องเขียน `bg-[var(--status-draft)]` (บล็อก `@theme inline` ท้าย `styles/badge-status.css` เป็นโค้ดที่ไม่มีผล)
+- ห้ามประกาศ `--spacing-md` (รวมถึง sm/lg/xl/2xl) — Tailwind v4 ใช้คีย์ร่วมกับสเกล container แล้ว `max-w-md` ทั้งแอปจะยุบ
+- ขนาดตัวอักษรดิบนอก ladder เป็นบั๊ก design system — `components/ui/type-ladder.test.ts` แดงทันที
+
+**dark mode ทั้งแอปยังไม่มีสวิตช์จริง** — CSS ครบทั้งชุดแต่ไม่มีโค้ดไหนตั้งคลาส `.dark`
+ที่ `<html>` เลย ปุ่มสลับธีมในหน้า `/design-system` จึงผูกคลาสไว้ที่ container ของหน้าเอง
+(`&:is(.dark *)` ต้องการแค่ ancestor) ใช้ดูงานได้ แต่ไม่ใช่การเปิด dark mode ให้ผู้ใช้
 
 ## Known open items
 
@@ -155,10 +166,14 @@ markup แบบเฉพาะกิจ รายละเอียดเป็
   `LICENSE_ROUTE_FEATURES` ของ backend เท่านั้น และ
   `constant/module-list.license-feature.test.ts` จะแดงถ้า key ที่ผลิตได้ไม่มีใน catalog
   (สำเนา catalog อยู่ที่ `constant/__fixtures__/license-catalog.ts` พร้อมวิธีอัปเดต)
-- **สวิตช์ `LICENSE_ENFORCEMENT` ต้องเปิดเองตอน rollout** — เป็น optional key ใน
-  `RuntimeConfig` (`lib/runtime-config.ts`), default `false` (shadow mode: banner/ปุ่ม
-  เขียนไม่ล็อกอะไรเลยแม้ `state` จะเป็น `expired`/`inactive`/`none`) ไฟล์
-  `public/config.{local,dev,uat,prod}.json` ของแต่ละ environment จริงถูก **gitignore**
-  (`public/config*.json` ยกเว้น `public/config.sample.json` ซึ่งมีคีย์นี้เป็นตัวอย่างอยู่แล้ว)
-  จึงต้อง**เติมคีย์ `LICENSE_ENFORCEMENT: true` ด้วยมือ** ในไฟล์ config ของ environment
-  นั้นเมื่อพร้อมเปิดใช้งานจริง — ไม่มีทางเปิดผ่าน env var หรือ build flag
+- **`LICENSE_ENFORCEMENT` เปิดอยู่จริงแล้วทุก environment** (ตรวจ 2026-09-20) — เป็น
+  optional key ใน `RuntimeConfig` (`lib/runtime-config.ts`) ที่ default `false`
+  (shadow mode) แต่ `public/config.{local,dev,uat,prod}.json` **ตั้ง `true` ครบทุกไฟล์
+  แล้ว** ไฟล์พวกนี้ถูก gitignore (`public/config*.json` ยกเว้น `public/config.sample.json`)
+  จึงอ่านจากรีโปไม่เห็น — **อย่าอ่านค่า default ว่า "ยังไม่มีผล"** และไม่มีทางเปิด/ปิด
+  ผ่าน env var หรือ build flag ต้องแก้ที่ไฟล์ config ของ environment นั้น
+  ผลที่ตามมา: การผูก leaf กับ **license feature key ใหม่ล็อกหน้านั้นทันทีที่ deploy**
+  สำหรับ BU ที่ยังไม่ถูก assign feature การเพิ่มคีย์ระดับ resource จึงต้องทำสามขั้นตาม
+  ลำดับเสมอ — deploy backend → `db:seed.license-feature` ของ env นั้น → assign feature
+  ให้ทุก BU ที่ carmen-platform → ค่อย deploy FE (ตรวจงาน license ในเครื่องด้วยการสลับ
+  `LICENSE_ENFORCEMENT` เป็น `false` ชั่วคราวแล้วคืนค่า)

@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
@@ -14,12 +14,60 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { findAccountingSection, moduleList } from "@/constant/module-list";
-import { useVisibleModules } from "@/hooks/use-visible-modules";
+import {
+  useVisibleModules,
+  type ModuleWithAccess,
+} from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { AppTile } from "@/components/icons/tiles";
 import { cn } from "@/lib/utils";
 
 const ACCENT = "var(--primary)";
+
+/**
+ * ตัวห่อของ node หนึ่งตัวในเมนู — `Link` เมื่อเข้าได้ ปุ่มที่เด้ง dialog เมื่อ
+ * `locked`/`denied`
+ *
+ * **ต้องใช้ทั้งชั้นสองและชั้นสาม** — เดิมชั้นสาม (ลูกของ Accounts Payable/Receivable
+ * และของ Workflow) render `<Link>` ตรง ๆ เสมอโดยไม่ดู flag เลย พอ leaf พวกนั้นถูกผูก
+ * `licenseFeature` มันจึงเป็นรายการเดียวในเมนูที่ยังดูกดได้ทั้งที่ล็อก (RouteGuard
+ * บล็อกให้อยู่แล้ว แต่เมนูบอกคนละเรื่องกับที่กดแล้วเจอ)
+ *
+ * เป็นฟังก์ชันคืน element ไม่ใช่คอมโพเนนต์ — `SidebarMenuButton asChild` ใช้ `Slot`
+ * ที่ต้องได้ element จริงไปโคลน ถ้าห่อเป็นคอมโพเนนต์ props จะไปจบที่ตัวมันแทน DOM node
+ */
+function navAction(
+  mod: ModuleWithAccess,
+  label: string,
+  content: ReactNode,
+): ReactNode {
+  if (!mod.locked && !mod.denied) return <Link to={mod.path}>{content}</Link>;
+  return (
+    <button
+      type="button"
+      onClick={() =>
+        dispatchPermissionDenied(
+          mod.permission,
+          undefined,
+          mod.locked ? "license" : "permission",
+        )
+      }
+      title={label}
+      className="opacity-50"
+    >
+      {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ —
+          locked ชนะ denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) */}
+      {mod.locked ? (
+        <span className="flex items-center gap-2">
+          {content}
+          <Lock className="size-3 shrink-0 opacity-70" aria-hidden />
+        </span>
+      ) : (
+        content
+      )}
+    </button>
+  );
+}
 
 export function SideMain() {
   const pathname = useLocation().pathname;
@@ -140,36 +188,7 @@ export function SideMain() {
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >
-                      {sub.locked || sub.denied ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            dispatchPermissionDenied(
-                              sub.permission,
-                              undefined,
-                              sub.locked ? "license" : "permission",
-                            )
-                          }
-                          title={t(sub.name)}
-                          className="opacity-50"
-                        >
-                          {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ —
-                              locked ชนะ denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) */}
-                          {sub.locked ? (
-                            <span className="flex items-center gap-2">
-                              {content}
-                              <Lock
-                                className="size-3 shrink-0 opacity-70"
-                                aria-hidden
-                              />
-                            </span>
-                          ) : (
-                            content
-                          )}
-                        </button>
-                      ) : (
-                        <Link to={sub.path}>{content}</Link>
-                      )}
+                      {navAction(sub, t(sub.name), content)}
                     </SidebarMenuButton>
                     {sub.subModules && sub.subModules.length > 0 && (
                       <SidebarMenuSub className="group-data-[collapsible=icon]:hidden">
@@ -241,25 +260,29 @@ export function SideMain() {
                           isActive={childActive}
                           className="ms-4 w-auto rounded-md"
                         >
-                          <Link to={child.path}>
-                            <child.icon
-                              aria-hidden="true"
-                              className={cn(
-                                "shrink-0",
-                                childActive
-                                  ? "text-primary"
-                                  : "text-muted-foreground",
-                              )}
-                            />
-                            <span
-                              className={cn(
-                                "text-xs",
-                                childActive && "text-primary",
-                              )}
-                            >
-                              {t(child.name)}
-                            </span>
-                          </Link>
+                          {navAction(
+                            child,
+                            t(child.name),
+                            <>
+                              <child.icon
+                                aria-hidden="true"
+                                className={cn(
+                                  "shrink-0",
+                                  childActive
+                                    ? "text-primary"
+                                    : "text-muted-foreground",
+                                )}
+                              />
+                              <span
+                                className={cn(
+                                  "text-xs",
+                                  childActive && "text-primary",
+                                )}
+                              >
+                                {t(child.name)}
+                              </span>
+                            </>,
+                          )}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );

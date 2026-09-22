@@ -10,7 +10,6 @@ import {
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
-import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 
 /**
  * Shared discount/tax override controls — ใช้ร่วมกันระหว่าง PR (item-level) และ
@@ -113,38 +112,33 @@ export function DiscountOverrideInput({
 }
 
 export function TaxOverrideInput({
-  taxProfileId,
+  rate,
   amount,
   isAdjustment,
   decimals,
   error,
-  onTaxChange,
   onAmountChange,
 }: {
-  readonly taxProfileId: string | null;
+  readonly rate: number;
   readonly amount: number;
   readonly isAdjustment: boolean;
   readonly decimals?: number;
   readonly error?: boolean;
-  readonly onTaxChange: (value: string, rate: number, name: string) => void;
   readonly onAmountChange: (amount: number) => void;
 }) {
   const tfl = useTranslations("field");
   return (
     <InputSuffixField className="w-full" error={!!error}>
-      <div className="min-w-0 flex-1">
-        <LookupTaxProfile
-          value={taxProfileId ?? ""}
-          onValueChange={onTaxChange}
-          className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-        />
-      </div>
-      <div className="bg-border h-4 w-px shrink-0" aria-hidden="true" />
+      {/* เรตเป็น prefix อ่านอย่างเดียว — มันมาจากโปรไฟล์ภาษีที่เลือกไว้ ไม่ใช่ค่าที่
+          พิมพ์เองได้เหมือน % ส่วนลด วางติดยอดเงินเพื่อให้เห็นที่มาของตัวเลขในที่เดียว */}
+      <span className="bg-muted text-muted-foreground border-border text-micro-legal flex shrink-0 items-center self-stretch border-r px-2 tabular-nums">
+        {rate}%
+      </span>
       <InputAmount
         decimals={decimals}
         disabled={!isAdjustment}
         aria-label={tfl("taxAmt")}
-        className="disabled:bg-muted disabled:text-muted-foreground h-8 w-20 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+        className="disabled:bg-muted disabled:text-muted-foreground h-8 min-w-0 flex-1 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
         value={amount}
         onValueChange={onAmountChange}
       />

@@ -88,7 +88,9 @@ describe("createCnSchema — เงื่อนไขต่อแถวแยก
     const result = schema.safeParse(
       form({
         credit_note_type: "amount_discount",
-        items: [item({ quantity: 0, net_amount: 500 })],
+        items: [
+          item({ quantity: 0, _grn_net_amount: 500, net_amount: 500 }),
+        ],
       }),
     );
     expect(result.success).toBe(true);
@@ -105,11 +107,57 @@ describe("createCnSchema — เงื่อนไขต่อแถวแยก
     expect(firstItemIssuePath(result)).toBe("items.0.net_amount");
   });
 
+  it("amount_discount: ลดหนี้เกินยอดสุทธิที่รับมาไม่ผ่าน", () => {
+    const result = schema.safeParse(
+      form({
+        credit_note_type: "amount_discount",
+        items: [
+          item({ _grn_received_qty: 4, _grn_net_amount: 500, net_amount: 501 }),
+        ],
+      }),
+    );
+    expect(result.success).toBe(false);
+    expect(firstItemIssuePath(result)).toBe("items.0.net_amount");
+  });
+
+  it("amount_discount: เท่ายอดสุทธิที่รับมาพอดีผ่าน", () => {
+    const result = schema.safeParse(
+      form({
+        credit_note_type: "amount_discount",
+        items: [
+          item({ _grn_received_qty: 4, _grn_net_amount: 500, net_amount: 500 }),
+        ],
+      }),
+    );
+    expect(result.success).toBe(true);
+  });
+
+  // ยอดฝั่ง GRN ยังมาไม่ถึง (ใบเก่าที่เพิ่งเปิด) — ห้ามบล็อก ไม่งั้นฟอร์มตันโดย
+  // ไม่มีอะไรให้แก้ เพดานจริงยังมี backend เช็คอีกชั้น
+  it("amount_discount: ยังไม่รู้ยอด GRN ไม่บังคับเพดาน", () => {
+    const result = schema.safeParse(
+      form({
+        credit_note_type: "amount_discount",
+        items: [
+          item({ _grn_received_qty: null, _grn_net_amount: 0, net_amount: 999 }),
+        ],
+      }),
+    );
+    expect(result.success).toBe(true);
+  });
+
   it("amount_discount: ไม่สนเพดานจำนวนคืน (จำนวนเป็นแค่ค่าอ้างอิง)", () => {
     const result = schema.safeParse(
       form({
         credit_note_type: "amount_discount",
-        items: [item({ quantity: 99, _grn_received_qty: 4, net_amount: 500 })],
+        items: [
+          item({
+            quantity: 99,
+            _grn_received_qty: 4,
+            _grn_net_amount: 500,
+            net_amount: 500,
+          }),
+        ],
       }),
     );
     expect(result.success).toBe(true);

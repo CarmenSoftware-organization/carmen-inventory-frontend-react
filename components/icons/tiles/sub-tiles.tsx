@@ -1665,7 +1665,7 @@ export const SubTiles: Record<string, TileRenderer> = {
       </Glyph>
     </>
   ),
-  accountMapping: ({ palette }) => (
+  chartOfAccountMapping: ({ palette }) => (
     <>
       <TileBase palette={palette} />
       <rect x="7" y="12" width="8" height="7" rx="1.2" fill="currentColor" />
