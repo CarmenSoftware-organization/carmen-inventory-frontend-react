@@ -245,11 +245,13 @@ export default function PoComponent() {
 
   const queryParams = { ...params, filter: lf.filterParam };
 
+  // gate แต่ละ query ตาม viewMode ด้วย — ก่อนหน้านี้ทั้งสอง query ยิงพร้อมกันทุก
+  // ครั้งที่ search/filter/page เปลี่ยน ทั้งที่ render แค่อันเดียว (เปลือง network)
   const myPendingQuery = useMyPendingPurchaseOrder(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode === "my-pending",
   });
   const allDocumentQuery = usePurchaseOrder(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode !== "my-pending",
   });
 
   const { data, isLoading, error, refetch } =
