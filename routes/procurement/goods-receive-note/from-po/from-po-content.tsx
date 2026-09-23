@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check, ClipboardCheck } from "lucide-react";
@@ -51,7 +51,7 @@ const COMPLETED_INDICATOR = <Check className="size-3" aria-hidden="true" />;
  * ฟอร์มต้องรอดจากการรีเฟรชหน้าด้วย (ดู grn-form.tsx ที่เคลียร์คีย์นี้ตอน unmount)
  */
 export function FromPoContent() {
-  const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(GRN_LIST_PATH);
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
 
@@ -69,7 +69,7 @@ export function FromPoContent() {
   const discard = useDiscardConfirm({ isDirty });
   // ปุ่มยกเลิกกับลูกศรย้อนกลับเรียก navigate() ตรง ๆ ซึ่ง useNavigationGuard
   // ดักไม่ได้ (ดักแค่คลิกลิงก์กับปุ่ม Back ของเบราว์เซอร์)
-  const handleCancel = () => discard.confirm(() => navigate(GRN_LIST_PATH));
+  const handleCancel = () => discard.confirm(() => toList());
   const navGuard = useNavigationGuard(isDirty);
 
   const handleSelectVendor = (next: VendorForGrn) => {
@@ -112,7 +112,7 @@ export function FromPoContent() {
     // ไปหน้าฟอร์มด้วย leave() ไม่ใช่ navigate() — guard ยังถืออยู่และ sentinel
     // ของมันอยู่บนสุด push ทับแล้วจะโดน history.back() ของ teardown ดึงกลับมา
     // ที่ wizard ทันที (= กด confirm แล้วหน้าไม่ไปไหน)
-    navGuard.leave(GRN_NEW_PATH);
+    navGuard.leave(GRN_NEW_PATH, returnState?.state);
   };
 
   return (

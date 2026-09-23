@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { summarizeVariance } from "../shared/variance-summary";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ export function ScReviewComponent({
 }: ScReviewComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const navigate = useNavigate();
+  const { toList } = useListReturn("/inventory-management/spot-check");
   const submitSc = useSubmitSpotCheck(review.id);
 
   const { data: unitsData } = useUnit({ perpage: -1 });
@@ -55,7 +57,7 @@ export function ScReviewComponent({
       {
         onSuccess: () => {
           toast.success(t("submitSuccess"));
-          navigate("/inventory-management/spot-check");
+          toList();
         },
       },
     );

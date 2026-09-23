@@ -187,7 +187,10 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate(`/config/department/${id}`, { replace: true });
+          navigate(`/config/department/${id}`, {
+            replace: true,
+            ...f.returnState,
+          });
           f.setMode("view");
         },
       });

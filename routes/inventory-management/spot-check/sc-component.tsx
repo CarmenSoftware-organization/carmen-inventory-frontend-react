@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { ClipboardCheck, History, MapPin, PauseCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -172,18 +173,24 @@ export default function ScComponent() {
   ];
 
   const handleStart = (item: SpotCheckLocation) => {
-    navigate(`/inventory-management/spot-check/location/${item.location_id}`);
+    navigate(
+      `/inventory-management/spot-check/location/${item.location_id}`,
+      listReturnState(),
+    );
   };
 
   const handleResume = (
     _item: SpotCheckLocation,
     latest: SpotCheckLocationLatest,
   ) => {
-    navigate(`/inventory-management/spot-check/${latest.id}`);
+    navigate(
+      `/inventory-management/spot-check/${latest.id}`,
+      listReturnState(),
+    );
   };
 
   const handleHistoryClick = (sc: SpotCheck) => {
-    navigate(`/inventory-management/spot-check/${sc.id}`);
+    navigate(`/inventory-management/spot-check/${sc.id}`, listReturnState());
   };
 
   const isLocationsView = view === "locations";

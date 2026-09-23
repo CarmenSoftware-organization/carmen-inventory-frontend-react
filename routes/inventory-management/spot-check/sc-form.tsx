@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -61,6 +62,9 @@ export function ScForm({
   const tc = useTranslations("common");
   const tform = useTranslations("form");
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(
+    "/inventory-management/spot-check",
+  );
   const createSc = useCreateSpotCheck();
   const isPending = createSc.isPending;
 
@@ -119,22 +123,22 @@ export function ScForm({
       onSuccess: (res) => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
         const newId = (res as { data?: { id?: string } } | undefined)?.data?.id;
-        navigate(
-          newId
-            ? `/inventory-management/spot-check/${newId}`
-            : "/inventory-management/spot-check",
-        );
+        if (newId) {
+          navigate(`/inventory-management/spot-check/${newId}`, returnState);
+        } else {
+          toList();
+        }
       },
     });
   };
 
   const handleCancel = () => {
-    discard.confirm(() => navigate("/inventory-management/spot-check"));
+    discard.confirm(() => toList());
   };
 
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
-  const goBack = () => navigate("/inventory-management/spot-check");
+  const goBack = () => toList();
 
   const handleBack = () => discard.confirm(goBack);
 

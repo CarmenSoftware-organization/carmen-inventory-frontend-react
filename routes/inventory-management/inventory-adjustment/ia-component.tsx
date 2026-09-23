@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Download, Loader2, MoreHorizontal, Printer } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -237,6 +238,7 @@ export default function InventoryAdjustmentComponent() {
   const navigateToItem = (item: InventoryAdjustment) =>
     navigate(
       `${INVENTORY_ADJUSTMENT_BASE_PATH}/${item.id}?type=${getAdjustmentType(item)}`,
+      listReturnState(),
     );
 
   const table = useInventoryAdjustmentTable({
@@ -298,6 +300,7 @@ export default function InventoryAdjustmentComponent() {
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
+                        listReturnState(),
                       )
                     }
                   >
@@ -313,6 +316,7 @@ export default function InventoryAdjustmentComponent() {
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
+                        listReturnState(),
                       )
                     }
                   >

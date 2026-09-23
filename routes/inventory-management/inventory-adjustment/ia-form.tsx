@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useFormatter, useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -55,6 +56,7 @@ export function InventoryAdjustmentForm({
   inventoryAdjustment,
 }: InventoryAdjustmentFormProps) {
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(INVENTORY_ADJUSTMENT_BASE_PATH);
   const [mode, setMode] = useState<FormMode>(
     inventoryAdjustment ? "view" : "add",
   );
@@ -177,11 +179,11 @@ export function InventoryAdjustmentForm({
     if (newId) {
       navigate(
         `${INVENTORY_ADJUSTMENT_BASE_PATH}/${newId}?type=${adjustmentType}`,
-        { replace: true },
+        { replace: true, ...returnState },
       );
       return;
     }
-    navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+    toList();
   };
 
   const buildBasePayload = (values: AdjFormValues) => {
@@ -269,7 +271,7 @@ export function InventoryAdjustmentForm({
             );
             const newId = created?.data?.id;
             if (!newId) {
-              navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+              toList();
               return;
             }
             await commitAdj.mutateAsync({
@@ -278,7 +280,7 @@ export function InventoryAdjustmentForm({
               doc_version: created?.data?.doc_version,
             });
             toast.success(tt("createSuccess", { entity: t("entity") }));
-            navigate(INVENTORY_ADJUSTMENT_BASE_PATH, { replace: true });
+            toList({ replace: true });
             return;
           }
 
@@ -297,7 +299,7 @@ export function InventoryAdjustmentForm({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           // reset ก่อนออกจากหน้า ไม่งั้น isDirty ค้างแล้วโดน discard ขวางตอน navigate
           form.reset(form.getValues());
-          navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+          toList();
         } catch (err) {
           handleMutationError(err);
         }
@@ -313,14 +315,14 @@ export function InventoryAdjustmentForm({
         setMode("view");
         return;
       }
-      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+      toList();
     });
   };
 
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+    toList();
   };
 
   const handleBack = () => {
@@ -427,7 +429,7 @@ export function InventoryAdjustmentForm({
               {
                 onSuccess: () => {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+                  toList();
                 },
                 onError: errorToast,
               },
@@ -459,7 +461,7 @@ export function InventoryAdjustmentForm({
               {
                 onSuccess: () => {
                   toast.success(tt("voidSuccess", { entity: t("entity") }));
-                  navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+                  toList();
                 },
                 onError: errorToast,
               },

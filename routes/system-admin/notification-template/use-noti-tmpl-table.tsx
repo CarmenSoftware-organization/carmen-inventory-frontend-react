@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
@@ -33,6 +34,7 @@ export function useNotiTmplTable({
       cell: ({ row }) => (
         <Link
           to={`/system-admin/notification-template/${row.original.id}`}
+          state={listReturnState().state}
           className="focus-visible:ring-ring/50 text-primary font-semibold hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none"
         >
           {row.original.name || "..."}

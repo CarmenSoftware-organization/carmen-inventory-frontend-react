@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { CheckCircle2, Trash2, XCircle, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -207,7 +208,8 @@ export default function PurchaseRequestComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) => navigate(`/procurement/purchase-request/${item.id}`),
+    onEdit: (item) =>
+      navigate(`/procurement/purchase-request/${item.id}`, listReturnState()),
     onDelete: requestDelete,
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
@@ -346,7 +348,10 @@ export default function PurchaseRequestComponent() {
               items={items}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(item) =>
-                navigate(`/procurement/purchase-request/${item.id}`)
+                navigate(
+                  `/procurement/purchase-request/${item.id}`,
+                  listReturnState(),
+                )
               }
               onApprove={setApproveTarget}
               onReject={setRejectTarget}

@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router";
 import { Calendar, Clock } from "lucide-react";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_DOT_CHIP } from "@/constant/status-config";
@@ -28,17 +28,14 @@ export function PcEntryHeader({
   lastSaved,
 }: PcEntryHeaderProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const navigate = useNavigate();
+  const { toList } = useListReturn("/inventory-management/physical-count");
 
   return (
     <div className="border-border/60 bg-card mb-3 rounded-xl border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           {/* mt-0.5 ให้ปุ่มตรงกับบรรทัดแรกของ title ที่มีบรรทัดย่อยใต้ลงมา */}
-          <BackButton
-            onClick={() => navigate("/inventory-management/physical-count")}
-            className="mt-0.5"
-          />
+          <BackButton onClick={() => toList()} className="mt-0.5" />
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="text-foreground mt-1 text-base leading-tight font-semibold tracking-tight">

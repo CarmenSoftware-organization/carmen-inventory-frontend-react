@@ -3,6 +3,7 @@ import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { WarningDialog } from "@/components/ui/warning-dialog";
@@ -88,6 +89,7 @@ export function PrFormDialogs({
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const { toList } = useListReturn("/procurement/purchase-request");
 
   const actionDialogConfig = {
     reject: {
@@ -113,7 +115,7 @@ export function PrFormDialogs({
             deletePr.mutate(purchaseRequest.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/procurement/purchase-request");
+                toList();
               },
             });
           }}

@@ -214,7 +214,10 @@ export function LocationForm({ location }: LocationFormProps) {
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate(`/config/location/${id}`, { replace: true });
+          navigate(`/config/location/${id}`, {
+            replace: true,
+            ...f.returnState,
+          });
           f.setMode("view");
         },
       });

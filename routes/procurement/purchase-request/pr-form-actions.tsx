@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function PrFormActions({
   const tc = useTranslations("common");
   const t = useTranslations("procurement.purchaseRequest");
   const navigate = useNavigate();
+  const { returnState } = useListReturn("/procurement/purchase-request");
   // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่ม Add: ต้องมี workflow ที่เริ่มได้
   // (PR ไม่มี permission .create ใน catalog) กดไม่ผ่านเด้ง dialog บอกเหตุผล
   const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
@@ -51,7 +53,10 @@ export function PrFormActions({
       dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
       return;
     }
-    navigate(`/procurement/purchase-request/new?duplicate_id=${prId}`);
+    navigate(
+      `/procurement/purchase-request/new?duplicate_id=${prId}`,
+      returnState,
+    );
   };
   const { data: comments } = usePurchaseRequestComments(
     hasRecord ? prId : undefined,

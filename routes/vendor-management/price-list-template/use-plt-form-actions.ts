@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -32,7 +32,7 @@ export function usePltFormActions({
   mode,
   setMode,
 }: UsePltFormActionsParams) {
-  const navigate = useNavigate();
+  const { toList } = useListReturn("/vendor-management/price-list-template");
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tt = useTranslations("toast");
 
@@ -121,7 +121,7 @@ export function usePltFormActions({
         onError: () => setIsSubmitting(false),
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate("/vendor-management/price-list-template");
+          toList();
         },
       });
     }
@@ -133,14 +133,14 @@ export function usePltFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/vendor-management/price-list-template");
+        toList();
       }
     });
   };
 
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
-  const goBack = () => navigate("/vendor-management/price-list-template");
+  const goBack = () => toList();
 
   const handleBack = () => {
     if (isEdit || isAdd) {
@@ -155,7 +155,7 @@ export function usePltFormActions({
     deleteTemplate.mutate(priceListTemplate.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/vendor-management/price-list-template");
+        toList();
       },
     });
   };

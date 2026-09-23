@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -88,9 +89,10 @@ export function useSrFormActions({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(SR_LIST_PATH);
 
   const goList = () => {
-    navigate(SR_LIST_PATH);
+    toList();
   };
   const queryClient = useQueryClient();
 
@@ -233,7 +235,10 @@ export function useSrFormActions({
             const { id } = (res as { data: { id: string } }).data;
             toast.success(tt("createSuccess", { entity: t("entity") }));
             // ไม่ setMode("view") — route /:id mount SrForm view mode เอง (เลี่ยง churn)
-            navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
+            navigate(`${SR_LIST_PATH}/${id}`, {
+              replace: true,
+              ...returnState,
+            });
           },
           onError: () => setIsSubmitting(false),
         },
@@ -493,7 +498,7 @@ export function useSrFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate(SR_LIST_PATH);
+        toList();
       }
     });
   };
@@ -501,7 +506,7 @@ export function useSrFormActions({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate(SR_LIST_PATH);
+    toList();
   };
 
   const handleBack = () => {
@@ -517,7 +522,7 @@ export function useSrFormActions({
     deleteSr.mutate(storeRequisition.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate(SR_LIST_PATH);
+        toList();
       },
     });
   };
