@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   Controller,
   useWatch,
@@ -62,6 +62,10 @@ const TotalCostCell = memo(function TotalCostCell({
   );
 });
 
+/** ชุดค่าที่ราคาจาก API ผูกอยู่ด้วย — ต่างจากเดิมเมื่อไหร่ถึงจะเขียนราคาทับ */
+const costKey = (productId: string, locationId: string, qty: number) =>
+  `${productId}|${locationId}|${qty}`;
+
 const CostProbe = memo(function CostProbe({
   form,
   index,
@@ -76,14 +80,35 @@ const CostProbe = memo(function CostProbe({
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const qty = useWatch({ control, name: `items.${index}.qty` });
+  const probeQty = typeof qty === "number" ? qty : 0;
   const { data } = useProductCostByLocationQty(
     buCode,
     productId || undefined,
     locationId || undefined,
-    typeof qty === "number" ? qty : 0,
+    probeQty,
+  );
+  // ชุดค่าที่ราคาผูกอยู่ด้วยของรอบที่เขียนไปล่าสุด — ref อยู่กับ component instance
+  // ซึ่งติดไปกับแถวเดิมเพราะตาราง getRowId ด้วย id ของ field array (ไม่ใช่ index)
+  //
+  // แถวที่มีราคาอยู่แล้วตอน mount ถือว่า "เขียนแล้ว" ตั้งแต่ต้น ไม่งั้น probe จะทับ
+  // ราคาที่เซฟไว้ทันทีที่ตัวเองเกิดใหม่ — ซึ่งเกิดทุกครั้งที่ฟอร์มปลดล็อก เพราะ
+  // CostProbe ถูก render เฉพาะตอน `disabled` เป็น false: เปิดใบเก่าอยู่โหมด view
+  // (ไม่มี probe) กด Edit ทีเดียว probe เกิดใหม่แล้วดูดราคาจาก cache มาทับ ราคาที่
+  // ส่งตอนกด Commit จึงเป็นราคาที่ fetch มา ไม่ใช่ราคาที่พิมพ์ไว้
+  const mountedItem = form.getValues(`items.${index}`);
+  const appliedKey = useRef<string | null>(
+    mountedItem?.id || mountedItem?.cost_per_unit
+      ? costKey(productId, locationId, probeQty)
+      : null,
   );
   useEffect(() => {
     if (!data) return;
+    const key = costKey(productId, locationId, probeQty);
+    // เขียนทับเฉพาะตอน สินค้า/คลัง/จำนวน เปลี่ยนจริง — effect ตัวนี้ยิงซ้ำได้จาก
+    // หลายทางที่ไม่ใช่การแก้ข้อมูล (กดเพิ่มแถวซึ่ง prepend ดัน index ของทุกแถว +1,
+    // ลบแถว, refetch ตาม staleTime: 0) ทุกครั้งมันเคยลบราคาที่ผู้ใช้พิมพ์เองทิ้ง
+    if (appliedKey.current === key) return;
+    appliedKey.current = key;
     form.setValue(`items.${index}.cost_per_unit`, data.average_cost_per_unit, {
       shouldDirty: true,
     });
@@ -102,7 +127,7 @@ const CostProbe = memo(function CostProbe({
     if (unitName && !form.getValues(`items.${index}.unit_name`)) {
       form.setValue(`items.${index}.unit_name`, unitName);
     }
-  }, [data, form, index]);
+  }, [data, form, index, productId, locationId, probeQty]);
   return null;
 });
 
