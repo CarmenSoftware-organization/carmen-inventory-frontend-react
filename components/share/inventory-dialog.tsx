@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 
@@ -22,6 +24,8 @@ interface InventoryDialogProps {
   readonly buCode?: string;
   readonly locationId?: string;
   readonly productId?: string;
+  readonly productName?: string;
+  readonly productLocalName?: string;
   readonly unitName?: string;
   readonly icon?: "box" | "package";
   readonly className?: string;
@@ -83,6 +87,8 @@ export const InventoryDialog = memo(function InventoryDialog({
   buCode,
   locationId,
   productId,
+  productName,
+  productLocalName,
   unitName,
   icon = "box",
   className,
@@ -102,6 +108,7 @@ export const InventoryDialog = memo(function InventoryDialog({
     on_order_qty = 0,
     re_order_qty = 0,
     re_stock_qty = 0,
+    last_price,
   } = data ?? {};
   const pct =
     re_stock_qty > 0
@@ -147,6 +154,14 @@ export const InventoryDialog = memo(function InventoryDialog({
       >
         <DialogHeader>
           <DialogTitle>{t("inventoryInfo")}</DialogTitle>
+          {/* ยอดพวกนี้เป็นของสินค้าตัวไหน — กล่องเปิดจากไอคอนเล็ก ๆ ในแถว พอเปิด
+              ขึ้นมาเต็มจอแล้วไม่มีอะไรบอกว่ามาจากแถวไหน ยิ่งใบที่มีสิบกว่ารายการ */}
+          {hasProduct && productName && (
+            <NameWithSubtext
+              primary={productName}
+              secondary={productLocalName}
+            />
+          )}
         </DialogHeader>
         {!hasProduct && (
           <p className="text-muted-foreground text-micro">
@@ -200,6 +215,14 @@ export const InventoryDialog = memo(function InventoryDialog({
                 {t("stockLevel", { pct: pct.toFixed(1) })}
               </span>
             </div>
+
+            {/* ยังไม่เคยมีของเข้าคลังนี้ = ขีด ไม่ใช่ 0.00 ซึ่งอ่านได้ว่า "ของฟรี" */}
+            <p className="text-muted-foreground mt-2 text-xs">
+              {t("lastPrice")}{" "}
+              <span className="text-foreground font-semibold tabular-nums">
+                {last_price ? formatCurrency(last_price.cost_per_unit) : "—"}
+              </span>
+            </p>
           </>
         )}
       </DialogContent>

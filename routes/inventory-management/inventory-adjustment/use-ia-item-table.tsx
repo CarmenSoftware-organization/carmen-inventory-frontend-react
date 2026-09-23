@@ -37,11 +37,17 @@ const ProductInventoryDialog = memo(function ProductInventoryDialog({
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   return (
     <InventoryDialog
       buCode={buCode}
       locationId={locationId}
       productId={productId}
+      productName={productName}
+      productLocalName={productLocalName}
     />
   );
 });

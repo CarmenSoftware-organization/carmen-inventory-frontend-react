@@ -3725,6 +3725,7 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
+      "lastPrice": "Last price",
       "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
