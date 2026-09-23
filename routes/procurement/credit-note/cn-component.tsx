@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -100,7 +101,8 @@ export default function CnComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (cn) => navigate(`/procurement/credit-note/${cn.id}`),
+    onEdit: (cn) =>
+      navigate(`/procurement/credit-note/${cn.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -118,7 +120,9 @@ export default function CnComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => navigate("/procurement/credit-note/new")}
+            onAdd={() =>
+              navigate("/procurement/credit-note/new", listReturnState())
+            }
             addLabel={t("add")}
           />
         </div>
@@ -165,7 +169,9 @@ export default function CnComponent() {
             <CnCardList
               items={creditNotes}
               isLoading={grid.isLoading}
-              onEdit={(cn) => navigate(`/procurement/credit-note/${cn.id}`)}
+              onEdit={(cn) =>
+                navigate(`/procurement/credit-note/${cn.id}`, listReturnState())
+              }
               onDelete={setDeleteTarget}
             />
             {grid.hasMore && (
@@ -201,7 +207,12 @@ export default function CnComponent() {
                 <CnCardList
                   items={creditNotes}
                   isLoading={isLoading}
-                  onEdit={(cn) => navigate(`/procurement/credit-note/${cn.id}`)}
+                  onEdit={(cn) =>
+                    navigate(
+                      `/procurement/credit-note/${cn.id}`,
+                      listReturnState(),
+                    )
+                  }
                   onDelete={setDeleteTarget}
                 />
               </div>

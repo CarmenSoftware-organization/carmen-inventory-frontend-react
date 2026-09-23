@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useCreatePhysicalCount } from "./use-physical-count";
@@ -44,6 +45,7 @@ export function useOpenPhysicalCount(): UseOpenPhysicalCountResult {
     if (item.physical_count_id) {
       navigate(
         `/inventory-management/physical-count/${item.physical_count_id}/entry`,
+        listReturnState(),
       );
       return;
     }
@@ -63,7 +65,10 @@ export function useOpenPhysicalCount(): UseOpenPhysicalCountResult {
             toast.error(t("startFailed"));
             return;
           }
-          navigate(`/inventory-management/physical-count/${id}/entry`);
+          navigate(
+            `/inventory-management/physical-count/${id}/entry`,
+            listReturnState(),
+          );
         },
         onSettled: () => setPendingLocationId(null),
       },

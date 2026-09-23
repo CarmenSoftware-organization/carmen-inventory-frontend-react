@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -55,7 +56,8 @@ export default function RoleComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) => navigate(`/system-admin/role/${item.id}`),
+    onEdit: (item) =>
+      navigate(`/system-admin/role/${item.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -73,7 +75,9 @@ export default function RoleComponent() {
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
-              onClick={() => navigate("/system-admin/role/new")}
+              onClick={() =>
+                navigate("/system-admin/role/new", listReturnState())
+              }
             >
               <Plus aria-hidden="true" />
               {t("add")}
@@ -104,7 +108,9 @@ export default function RoleComponent() {
                   <RoleCard
                     key={item.id}
                     item={item}
-                    onEdit={(r) => navigate(`/system-admin/role/${r.id}`)}
+                    onEdit={(r) =>
+                      navigate(`/system-admin/role/${r.id}`, listReturnState())
+                    }
                     onDelete={setDeleteTarget}
                   />
                 ))}

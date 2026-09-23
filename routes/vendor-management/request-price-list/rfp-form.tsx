@@ -128,6 +128,7 @@ export function RequestPriceListForm({
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate(`/vendor-management/request-price-list/${id}`, {
             replace: true,
+            ...f.returnState,
           });
         },
       });

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import {
@@ -136,7 +137,8 @@ export default function CuisineComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (cuisine) => navigate(`/operation-plan/cuisine/${cuisine.id}`),
+    onEdit: (cuisine) =>
+      navigate(`/operation-plan/cuisine/${cuisine.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -174,7 +176,9 @@ export default function CuisineComponent() {
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate("/operation-plan/cuisine/new")}
+              onClick={() =>
+                navigate("/operation-plan/cuisine/new", listReturnState())
+              }
             >
               <Plus aria-hidden="true" />
               {t("add")}
@@ -225,7 +229,12 @@ export default function CuisineComponent() {
                 <CuisineCard
                   key={item.id}
                   item={item}
-                  onEdit={(c) => navigate(`/operation-plan/cuisine/${c.id}`)}
+                  onEdit={(c) =>
+                    navigate(
+                      `/operation-plan/cuisine/${c.id}`,
+                      listReturnState(),
+                    )
+                  }
                   onDelete={setDeleteTarget}
                 />
               ))}

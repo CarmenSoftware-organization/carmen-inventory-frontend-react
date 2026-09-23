@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -156,7 +157,10 @@ export default function PrtComponent() {
     params,
     tableConfig,
     onEdit: (template) =>
-      navigate(`/procurement/purchase-request-template/${template.id}`),
+      navigate(
+        `/procurement/purchase-request-template/${template.id}`,
+        listReturnState(),
+      ),
     onDelete: setDeleteTarget,
   });
 
@@ -199,7 +203,10 @@ export default function PrtComponent() {
             <Button
               size="sm"
               onClick={() =>
-                navigate("/procurement/purchase-request-template/new")
+                navigate(
+                  "/procurement/purchase-request-template/new",
+                  listReturnState(),
+                )
               }
             >
               <Plus aria-hidden="true" />
@@ -263,7 +270,10 @@ export default function PrtComponent() {
                     key={item.id}
                     item={item}
                     onEdit={(t) =>
-                      navigate(`/procurement/purchase-request-template/${t.id}`)
+                      navigate(
+                        `/procurement/purchase-request-template/${t.id}`,
+                        listReturnState(),
+                      )
                     }
                     onDelete={setDeleteTarget}
                   />
@@ -315,6 +325,7 @@ export default function PrtComponent() {
                         onEdit={(t) =>
                           navigate(
                             `/procurement/purchase-request-template/${t.id}`,
+                            listReturnState(),
                           )
                         }
                         onDelete={setDeleteTarget}

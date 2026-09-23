@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { FieldErrors, UseFormReturn } from "react-hook-form";
@@ -63,6 +64,9 @@ export function usePrFormActions({
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(
+    "/procurement/purchase-request",
+  );
   const buCode = useBuCode();
   const { defaultBu } = useProfile();
 
@@ -186,7 +190,7 @@ export function usePrFormActions({
 
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-request");
+    toList();
   };
 
   const toSubmitStageDetails = (
@@ -307,6 +311,7 @@ export function usePrFormActions({
             if (data?.data?.id) {
               navigate(`/procurement/purchase-request/${data.data.id}`, {
                 replace: true,
+                ...returnState,
               });
             }
           },
@@ -322,7 +327,7 @@ export function usePrFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/procurement/purchase-request");
+        toList();
       }
     });
   };
@@ -330,7 +335,7 @@ export function usePrFormActions({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/procurement/purchase-request");
+    toList();
   };
 
   const handleBack = () => {

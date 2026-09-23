@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router";
 import { Calendar, ClipboardCheck, MapPin } from "lucide-react";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -34,7 +34,7 @@ export function ScEntryHeader({
 }: ScEntryHeaderProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const ts = useTranslations("status");
-  const navigate = useNavigate();
+  const { toList } = useListReturn("/inventory-management/spot-check");
   const { dateFormat } = useProfile();
 
   const status = STATUS_VISUAL[docStatus ?? "pending"] ?? STATUS_VISUAL.pending;
@@ -47,10 +47,7 @@ export function ScEntryHeader({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           {/* mt-0.5 ให้ปุ่มตรงกับบรรทัดแรกของ title ที่มีบรรทัดย่อยใต้ลงมา */}
-          <BackButton
-            onClick={() => navigate("/inventory-management/spot-check")}
-            className="mt-0.5"
-          />
+          <BackButton onClick={() => toList()} className="mt-0.5" />
           <div className="min-w-0">
             <span className="bg-primary/10 text-primary text-micro-eyebrow inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-semibold tracking-widest uppercase">
               <ClipboardCheck className="size-2.5" />
