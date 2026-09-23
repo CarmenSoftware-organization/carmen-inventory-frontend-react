@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -325,7 +326,8 @@ export default function PoComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (po) => navigate(`/procurement/purchase-order/${po.id}`),
+    onEdit: (po) =>
+      navigate(`/procurement/purchase-order/${po.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -406,7 +408,12 @@ export default function PoComponent() {
             <PoCardList
               items={purchaseOrders}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(po) => navigate(`/procurement/purchase-order/${po.id}`)}
+              onEdit={(po) =>
+                navigate(
+                  `/procurement/purchase-order/${po.id}`,
+                  listReturnState(),
+                )
+              }
               onDelete={setDeleteTarget}
             />
             {useInfiniteScroll && grid.hasMore && (

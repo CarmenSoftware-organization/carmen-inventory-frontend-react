@@ -6,7 +6,7 @@ interface UseNavigationGuardReturn {
   readonly confirm: () => void;
   readonly cancel: () => void;
   readonly back: () => void;
-  readonly leave: (href: string) => void;
+  readonly leave: (href: string, state?: unknown) => void;
 }
 
 export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
@@ -130,8 +130,11 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
   // the page they just left. Overwriting the sentinel leaves nothing to undo.
   // (jsdom drops the queued traversal once a pushState intervenes, so a test
   // can only observe the leftover entry, not the bounce.)
-  const leave = (href: string) => {
-    navigate(href, { replace: window.history.state?.__navGuard === true });
+  const leave = (href: string, state?: unknown) => {
+    navigate(href, {
+      replace: window.history.state?.__navGuard === true,
+      state,
+    });
   };
 
   return {

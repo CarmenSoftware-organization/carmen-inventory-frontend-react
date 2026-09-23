@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -226,9 +227,12 @@ export default function GrnComponent() {
   const handleSelectDocType = (docType: string) => {
     setShowCreateDialog(false);
     if (docType === "purchase_order") {
-      navigate("/procurement/goods-receive-note/from-po");
+      navigate("/procurement/goods-receive-note/from-po", listReturnState());
     } else {
-      navigate(`/procurement/goods-receive-note/new?doc_type=${docType}`);
+      navigate(
+        `/procurement/goods-receive-note/new?doc_type=${docType}`,
+        listReturnState(),
+      );
     }
   };
 
@@ -237,7 +241,8 @@ export default function GrnComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (grn) => navigate(`/procurement/goods-receive-note/${grn.id}`),
+    onEdit: (grn) =>
+      navigate(`/procurement/goods-receive-note/${grn.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -303,7 +308,10 @@ export default function GrnComponent() {
               items={goodsReceiveNotes}
               isLoading={grid.isLoading}
               onEdit={(grn) =>
-                navigate(`/procurement/goods-receive-note/${grn.id}`)
+                navigate(
+                  `/procurement/goods-receive-note/${grn.id}`,
+                  listReturnState(),
+                )
               }
               onDelete={setDeleteTarget}
             />
@@ -341,7 +349,10 @@ export default function GrnComponent() {
                   items={goodsReceiveNotes}
                   isLoading={isLoading}
                   onEdit={(grn) =>
-                    navigate(`/procurement/goods-receive-note/${grn.id}`)
+                    navigate(
+                      `/procurement/goods-receive-note/${grn.id}`,
+                      listReturnState(),
+                    )
                   }
                   onDelete={setDeleteTarget}
                 />

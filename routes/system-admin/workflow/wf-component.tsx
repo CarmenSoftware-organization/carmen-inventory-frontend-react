@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -78,7 +79,8 @@ export default function WorkflowComponent({
     totalRecords,
     params,
     tableConfig,
-    onEdit: (workflow) => navigate(`/system-admin/workflow/${workflow.id}`),
+    onEdit: (workflow) =>
+      navigate(`/system-admin/workflow/${workflow.id}`, listReturnState()),
     onDelete: setDeleteTarget,
     onToggleActive: toggleActive,
     onDuplicate: duplicate,
@@ -100,7 +102,10 @@ export default function WorkflowComponent({
             <Button
               size="sm"
               onClick={() =>
-                navigate(`/system-admin/workflow/new?type=${docType}`)
+                navigate(
+                  `/system-admin/workflow/new?type=${docType}`,
+                  listReturnState(),
+                )
               }
             >
               <Plus aria-hidden="true" />
@@ -132,7 +137,12 @@ export default function WorkflowComponent({
                   key={wf.id}
                   item={wf}
                   index={i}
-                  onEdit={(w) => navigate(`/system-admin/workflow/${w.id}`)}
+                  onEdit={(w) =>
+                    navigate(
+                      `/system-admin/workflow/${w.id}`,
+                      listReturnState(),
+                    )
+                  }
                   onToggleActive={toggleActive}
                   onDuplicate={duplicate}
                   onDelete={setDeleteTarget}

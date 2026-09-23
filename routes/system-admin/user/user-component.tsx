@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Download, MoreHorizontal, Printer } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -100,7 +101,8 @@ export default function UserComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (user) => navigate(`/system-admin/user/${user.user_id}`),
+    onEdit: (user) =>
+      navigate(`/system-admin/user/${user.user_id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -192,7 +194,10 @@ export default function UserComponent() {
                     key={u.user_id}
                     item={u}
                     onEdit={(user) =>
-                      navigate(`/system-admin/user/${user.user_id}`)
+                      navigate(
+                        `/system-admin/user/${user.user_id}`,
+                        listReturnState(),
+                      )
                     }
                     onDelete={setDeleteTarget}
                   />

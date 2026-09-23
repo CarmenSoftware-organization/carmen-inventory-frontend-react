@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -242,14 +243,15 @@ export default function ProductComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (product) => navigate(`/product-management/product/${product.id}`),
+    onEdit: (product) =>
+      navigate(`/product-management/product/${product.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleAddItem = () => {
-    navigate("/product-management/product/new");
+    navigate("/product-management/product/new", listReturnState());
   };
 
   return (
@@ -303,7 +305,10 @@ export default function ProductComponent() {
                     key={item.id}
                     item={item}
                     onEdit={(p) =>
-                      navigate(`/product-management/product/${p.id}`)
+                      navigate(
+                        `/product-management/product/${p.id}`,
+                        listReturnState(),
+                      )
                     }
                     onDelete={setDeleteTarget}
                   />

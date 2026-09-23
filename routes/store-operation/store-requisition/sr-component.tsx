@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -74,7 +75,7 @@ export default function StoreRequisitionComponent() {
       dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
       return;
     }
-    navigate("/store-operation/store-requisition/new");
+    navigate("/store-operation/store-requisition/new", listReturnState());
   };
   const [viewModeParam] = useURL("view", {
     defaultValue: "my-pending",
@@ -358,7 +359,11 @@ export default function StoreRequisitionComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) => navigate(`/store-operation/store-requisition/${item.id}`),
+    onEdit: (item) =>
+      navigate(
+        `/store-operation/store-requisition/${item.id}`,
+        listReturnState(),
+      ),
     onDelete: setDeleteTarget,
   });
 
@@ -494,7 +499,10 @@ export default function StoreRequisitionComponent() {
               items={items}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(item) =>
-                navigate(`/store-operation/store-requisition/${item.id}`)
+                navigate(
+                  `/store-operation/store-requisition/${item.id}`,
+                  listReturnState(),
+                )
               }
               onDelete={setDeleteTarget}
             />

@@ -8,6 +8,7 @@ import type {
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import {
   MoreHorizontal,
   CheckCircle2,
@@ -90,7 +91,10 @@ export function usePrTable({
       dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
       return;
     }
-    navigate(`/procurement/purchase-request/new?duplicate_id=${item.id}`);
+    navigate(
+      `/procurement/purchase-request/new?duplicate_id=${item.id}`,
+      listReturnState(),
+    );
   };
 
   const dataColumns: ColumnDef<PurchaseRequest>[] = [

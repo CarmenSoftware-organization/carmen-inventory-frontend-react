@@ -1,5 +1,6 @@
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { Package, RefreshCw, Save, SendHorizontal } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -42,6 +43,9 @@ const ROW_GAP = 8; // gap-2
 export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(
+    "/inventory-management/spot-check",
+  );
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -252,7 +256,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
       {
         onSuccess: () => {
           toast.success(t("saveSuccess"));
-          navigate("/inventory-management/spot-check");
+          toList();
         },
       },
     );
@@ -273,7 +277,10 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
           const newId =
             (res as { data?: { id?: string } } | undefined)?.data?.id ??
             spotCheckId;
-          navigate(`/inventory-management/spot-check/${newId}/review`);
+          navigate(
+            `/inventory-management/spot-check/${newId}/review`,
+            returnState,
+          );
         },
       },
     );
