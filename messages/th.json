@@ -3718,8 +3718,6 @@
       "restock": "เติมสต็อก",
       "stockLevel": "ระดับสต็อก: {pct}%",
       "inventoryInfo": "ข้อมูลสต็อก",
-      "lots": "ล็อต",
-      "movements": "ความเคลื่อนไหว",
       "selectProductForInventory": "เลือกสินค้าก่อนเพื่อดูข้อมูลสต็อก",
       "summary": "สรุปยอด",
       "needsReorder": "ต้องสั่งซื้อเพิ่ม",

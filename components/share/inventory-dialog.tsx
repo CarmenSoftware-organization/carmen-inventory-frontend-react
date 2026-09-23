@@ -15,12 +15,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  InventoryLotTable,
-  InventoryMovementTable,
-} from "./inventory-detail-tables";
-import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 
@@ -96,7 +90,6 @@ export const InventoryDialog = memo(function InventoryDialog({
   onOnOrderClick,
 }: InventoryDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
-  const tfl = useTranslations("field");
 
   const { data, refetch } = useProductInventory(
     buCode || undefined,
@@ -109,11 +102,7 @@ export const InventoryDialog = memo(function InventoryDialog({
     on_order_qty = 0,
     re_order_qty = 0,
     re_stock_qty = 0,
-    cost_layers = [],
-    transactions = [],
   } = data ?? {};
-  // ต้นทุนเฉลี่ยเป็นค่าของสินค้า ไม่ใช่ของล็อต — ทุกแถวส่งเลขเดียวกันมา หยิบแถวแรกพอ
-  const avgCost = cost_layers[0]?.average_cost_per_unit ?? 0;
   const pct =
     re_stock_qty > 0
       ? Math.min(Math.round((on_hand_qty / re_stock_qty) * 1000) / 10, 100)
@@ -127,8 +116,8 @@ export const InventoryDialog = memo(function InventoryDialog({
   const hasProduct = !!productId;
 
   return (
-    // เปิดด้วยการคลิก ไม่ใช่ hover — ในนี้มีตารางล็อต/ความเคลื่อนไหวกับปุ่มให้กดต่อ
-    // ซึ่ง hover bubble รับไม่ไหว (หลุดง่ายระหว่างเลื่อนเมาส์เข้าไป และใช้ไม่ได้บนจอสัมผัส)
+    // เปิดด้วยการคลิก ไม่ใช่ hover — ในนี้มีปุ่มให้กดต่อ (คงเหลือ/กำลังสั่ง) ซึ่ง
+    // hover bubble รับไม่ไหว (หลุดง่ายระหว่างเลื่อนเมาส์เข้าไป และใช้ไม่ได้บนจอสัมผัส)
     <Dialog
       onOpenChange={(open) => {
         if (open && buCode && locationId && productId) refetch();
@@ -154,19 +143,10 @@ export const InventoryDialog = memo(function InventoryDialog({
         <TooltipContent>{t("inventoryInfo")}</TooltipContent>
       </Tooltip>
       <DialogContent
-        className={
-          hasProduct ? "max-h-[90vh] sm:max-w-5xl" : "sm:max-w-sm"
-        }
+        className={hasProduct ? "sm:max-w-lg" : "sm:max-w-sm"}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-baseline justify-between gap-2">
-            {t("inventoryInfo")}
-            {hasProduct && (
-              <span className="text-muted-foreground text-micro font-normal tabular-nums">
-                {tfl("avgCost")} {formatCurrency(avgCost)}
-              </span>
-            )}
-          </DialogTitle>
+          <DialogTitle>{t("inventoryInfo")}</DialogTitle>
         </DialogHeader>
         {!hasProduct && (
           <p className="text-muted-foreground text-micro">
@@ -220,32 +200,6 @@ export const InventoryDialog = memo(function InventoryDialog({
                 {t("stockLevel", { pct: pct.toFixed(1) })}
               </span>
             </div>
-
-            {/* ล็อตกับความเคลื่อนไหวเป็นคนละคำถามกัน ("ของที่มีอยู่แยกเป็นล็อตไหน"
-                กับ "ของเข้าออกเมื่อไหร่") วางซ้อนกันในแท็บ ไม่ใช่ต่อกันลงมา
-                ไม่งั้นแผงยาวจนเลื่อนหาสรุปด้านบนไม่เจอ */}
-            <Tabs defaultValue="lots">
-              <TabsList variant="line">
-                <TabsTrigger value="lots">
-                  {t("lots")}
-                  <span className="text-muted-foreground ml-1 tabular-nums">
-                    {cost_layers.length}
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger value="movements">
-                  {t("movements")}
-                  <span className="text-muted-foreground ml-1 tabular-nums">
-                    {transactions.length}
-                  </span>
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="lots">
-                <InventoryLotTable rows={cost_layers} />
-              </TabsContent>
-              <TabsContent value="movements">
-                <InventoryMovementTable rows={transactions} />
-              </TabsContent>
-            </Tabs>
           </>
         )}
       </DialogContent>

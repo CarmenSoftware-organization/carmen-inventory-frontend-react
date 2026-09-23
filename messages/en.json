@@ -3723,8 +3723,6 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
-      "lots": "Lots",
-      "movements": "Movements",
       "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
