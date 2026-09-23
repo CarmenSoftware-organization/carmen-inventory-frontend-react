@@ -112,9 +112,12 @@ export function getDefaultValues(
     return {
       description: adj.description ?? "",
       doc_status: adj.doc_status ?? "draft",
-      adjustment_type_id: adj.adjustment_type_id ?? null,
+      // endpoint รายละเอียด (stock-ins/{id}) ยุบเป็นก้อนแล้ว ส่วน endpoint list
+      // ยังคืน flat — type ประกาศไว้ทั้งสองทรง อ่านก้อนก่อนแล้วตกไป flat
+      adjustment_type_id:
+        adj.adjustment_type?.id ?? adj.adjustment_type_id ?? null,
       date: adj.si_date ?? adj.so_date ?? "",
-      location_id: adj.location_id ?? "",
+      location_id: adj.location?.id ?? adj.location_id ?? "",
       items: details.map((d) => ({
         id: d.id,
         doc_version: d.doc_version,

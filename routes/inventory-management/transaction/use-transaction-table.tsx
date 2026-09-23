@@ -45,6 +45,22 @@ const DOC_TYPE_CONFIG: Record<
   purchase_order: { label: "PO", tone: "neutral" },
 };
 
+/**
+ * ชื่อที่ไม่ซ้ำจาก `details[]` ต่อกันด้วย ", " — ใบเดียวมีได้หลายสินค้า/หลายคลัง
+ *
+ * gateway ยุบ `product_*` / `location_*` เป็นก้อน `product` / `location` ให้แล้ว
+ * และก้อนนั้นเป็น null ได้ถ้า id เป็น null — กรองตัวที่ไม่มีชื่อออกก่อนต่อสตริง
+ * ไม่งั้นได้ ", , " ลอยมา
+ */
+function joinDetailNames(
+  details: Transaction["details"],
+  pick: (d: Transaction["details"][number]) => string | null | undefined,
+): string {
+  return [...new Set(details.map(pick).filter((n): n is string => !!n))].join(
+    ", ",
+  );
+}
+
 export function useTransactionTable({
   items,
   totalRecords,
@@ -111,10 +127,11 @@ export function useTransactionTable({
         <DataGridColumnHeader column={column} title={tfl("product")} />
       ),
       cell: ({ row }) => {
-        const products = [
-          ...new Set(row.original.details.map((d) => d.product_name)),
-        ];
-        const text = products.join(", ");
+        const text = joinDetailNames(
+          row.original.details,
+          (d) => d.product?.name,
+        );
+        if (!text) return "-";
         // ใบเดียวมีได้หลายสินค้า ต่อกันแล้วยาวจนดันแถวสูงกว่าเพื่อนหลายเท่า —
         // ตัดที่ 2 บรรทัดแล้วใส่จุดไข่ปลา · ตัวเต็มดูได้จาก tooltip ของเบราว์เซอร์
         return (
@@ -132,10 +149,11 @@ export function useTransactionTable({
         <DataGridColumnHeader column={column} title={tfl("location")} />
       ),
       cell: ({ row }) => {
-        const locations = [
-          ...new Set(row.original.details.map((d) => d.location_name)),
-        ];
-        const text = locations.join(", ");
+        const text = joinDetailNames(
+          row.original.details,
+          (d) => d.location?.name,
+        );
+        if (!text) return "-";
         return (
           <span className="line-clamp-2 break-words" title={text}>
             {text}
