@@ -841,6 +841,7 @@
   "validation": {
     "required": "กรุณากรอก{field}",
     "minNumber": "{field}ต้องมีค่าอย่างน้อย {min}",
+    "maxNumber": "{field}ต้องไม่เกิน {max}",
     "minZero": "{field}ต้องมีค่า 0 ขึ้นไป",
     "positive": "{field}ต้องมีค่ามากกว่า 0",
     "qtyOrFoc": "ใส่จำนวนที่ขอ ถ้าของชิ้นนี้ได้ฟรีให้ใส่จำนวน FOC แทน",
