@@ -63,7 +63,7 @@ steps:
           WS_FIELD=", \"WS_URL\": \"$$WS_URL\""
         fi
         cat > /tmp/config.json <<CONFIGJSON
-        {"BACKEND_URL": "${_BACKEND_URL}", "X_APP_ID": "${_X_APP_ID}", "LICENSE_ENFORCEMENT": ${_LICENSE_ENFORCEMENT}, "OTEL_ENABLED": ${_OTEL_ENABLED}$${WS_FIELD}}
+        {"BACKEND_URL": "${_BACKEND_URL}", "X_APP_ID": "${_X_APP_ID}", "LICENSE_ENFORCEMENT": ${_LICENSE_ENFORCEMENT}, "OTEL_ENABLED": ${_OTEL_ENABLED}, "OTEL_ENVIRONMENT": "${_OTEL_ENVIRONMENT}"$${WS_FIELD}}
         CONFIGJSON
         gcloud storage cp /tmp/config.json "gs://${_LIVE_BUCKET}/config.json" --cache-control="no-cache"
     waitFor: ['sync-to-live']
@@ -116,6 +116,7 @@ substitutions:
   _WS_URL: ""
   _LICENSE_ENFORCEMENT: "true"
   _OTEL_ENABLED: "false"
+  _OTEL_ENVIRONMENT: "dev"
 
 availableSecrets:
   secretManager:
