@@ -31,6 +31,7 @@ export function CnGeneralFields({
   disabled,
   vendorName,
 }: CnGeneralFieldsProps) {
+  "use no memo";
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
