@@ -121,6 +121,25 @@ export default defineConfig(() => ({
   },
   build: {
     rollupOptions: {
+      // กรองคำเตือนที่ไม่มีผลกับ output ออก 2 แบบ ที่เหลือส่งต่อตามปกติ:
+      // - `"use no memo"` ระดับไฟล์: React Compiler (ขั้น babel) อ่านไปแล้วก่อนถึง
+      //   Rollup — ตรวจแล้วว่าไฟล์พวกนั้นไม่ถูก memo จริง ห้ามลบ directive ตามคำเตือน
+      // - comment `@__PURE__` ผิดตำแหน่งใน zod: Rollup แค่ลบ comment ทิ้ง แก้ต้นทางไม่ได้
+      onwarn(warning, defaultHandler) {
+        if (
+          warning.code === "MODULE_LEVEL_DIRECTIVE" &&
+          warning.message.includes('"use no memo"')
+        ) {
+          return;
+        }
+        if (
+          warning.code === "INVALID_ANNOTATION" &&
+          /[\\/]node_modules[\\/]zod[\\/]/.test(warning.id ?? "")
+        ) {
+          return;
+        }
+        defaultHandler(warning);
+      },
       output: {
         // แยก vendor ที่เสถียร (react ecosystem / tanstack) ออกจาก shared chunk
         // เพื่อ caching ที่ดีขึ้น — deploy โค้ดแอปใหม่ผู้ใช้เก่าไม่ต้องโหลด vendor
