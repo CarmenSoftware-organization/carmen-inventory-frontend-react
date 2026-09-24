@@ -1,18 +1,10 @@
 import { Link } from "react-router";
-import { useLocale } from "use-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
 import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
 import { EyeBrow } from "@/components/ui/eye-brow";
-import { useLocaleSwitch } from "@/hooks/use-locale-switch";
-import { SUPPORTED_LOCALES, type SupportedLocale } from "@/i18n/config";
-import { cn } from "@/lib/utils";
+import { LocaleToggle } from "@/components/locale-toggle";
 import type { LegalDocument } from "./legal-content";
-
-const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  en: "EN",
-  th: "ไทย",
-};
 
 /**
  * โครงหน้าเอกสารกฎหมาย ใช้ร่วมกันระหว่าง /terms กับ /privacy
@@ -114,33 +106,6 @@ function LegalHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-function LocaleToggle() {
-  const locale = useLocale() as SupportedLocale;
-  const { switchLocale, isPending } = useLocaleSwitch();
-
-  return (
-    <div className="bg-muted/60 flex items-center gap-0.5 rounded-md p-0.5">
-      {SUPPORTED_LOCALES.map((loc) => (
-        <button
-          key={loc}
-          type="button"
-          disabled={isPending}
-          onClick={() => switchLocale(loc)}
-          aria-pressed={locale === loc}
-          className={cn(
-            "text-micro rounded-sm px-2 py-1 font-semibold transition-colors",
-            locale === loc
-              ? "bg-card text-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {LOCALE_LABELS[loc]}
-        </button>
-      ))}
-    </div>
   );
 }
 
