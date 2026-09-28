@@ -22,7 +22,7 @@ Implementation must extend the existing Carmen React patterns and accounting doc
 | Accounting foundation          | Designed                      | Backend/runtime contracts still need end-to-end verification                             |
 | GL Journal Voucher             | Interactive UI prototype      | Save Draft, balanced Submit, Copy, Void and Reverse use the in-memory repository; HTTP adapter and production integration pending |
 | AP Dashboard, Invoice, Payment | Interactive UI prototype      | Invoice mock checks duplicate vendor numbers, generates input-tax fields at Submit and links posted open invoices to Payment; Payment mock posts at Submit/final approval. Backend integration pending |
-| AR Invoice and Receipt         | Generic document mockup       | No AR domain repository, five-document lifecycle, tax/folio/settlement contract          |
+| AR Invoice and Receipt         | ARIV-specific UI preview; Receipt generic | No AR domain repository, server actions, five-document lifecycle, tax/folio/settlement contract |
 | COA                            | Existing config CRUD          | Model is limited to code, descriptions, nature, type, status, and control-account fields |
 | Department                     | Existing shared config module | Must be reused as the Cost Center base instead of duplicated blindly                     |
 | Remaining accounting masters   | Not implemented               | No routes, types, hooks, API adapters, permissions, or dependency checks                 |
@@ -199,7 +199,11 @@ Do not copy the Drive GL page's Supabase setup, dark-mode implementation, Swagge
 
 ### Slice 7 — AR contract and implementation (new 2026-09-27)
 
-The AR FRD v1.07 adds five document kinds: Invoice (ARIV), Credit Note (ARCN), Debit Note (ARDN), Advance Deposit (ARDP), and Receipt/Tax Invoice (ARRC). Current `/accounting/accounts-receivable/invoice` and `/receipt` routes use the generic `accounting-document-*` mock; they do not implement this lifecycle. Build AR only after its backend owner confirms the posting and settlement contracts.
+The AR FRD v1.07 adds five document kinds: Invoice (ARIV), Credit Note (ARCN), Debit Note (ARDN), Advance Deposit (ARDP), and Receipt/Tax Invoice (ARRC). The `/accounting/accounts-receivable/receipt` route still uses the generic `accounting-document-*` mock; the ARIV route has a domain UI preview without server actions. Complete the AR lifecycle only after its backend owner confirms the posting and settlement contracts.
+
+**UI progress 2026-09-28:** `/accounting/accounts-receivable/invoice` now has an ARIV-specific list and detail preview. The detail includes the FRD header, item grid/detail sheet, tax register, deposit reference, receipt/open balance, Manual GL preview, PMS no-repost message, and two-currency footer in the Carmen shell. The screen explicitly marks server actions as pending; no ARIV Submit, tax-number allocation, approval, deposit settlement, receipt creation, or GL posting is simulated as a successful backend operation. Existing legacy `Carmen.WebApi/Controllers/ArInvoiceController.cs` is available for contract comparison but must not be assumed to implement the v1.07 rules.
+
+**FRD correction needed before Deposit JV:** §6.4 example says Dr `3,370.50 + 727.60 = 4,098.10` and Cr `3,150 + 220.50 + 749 + 21.40 = 4,098.10`, but that credit sum is `4,140.90`. The stated FX gain sign also does not balance the entry. Confirm the offset posting direction and FX account sign with Accounting before implementing or exposing it as a balanced JV.
 
 1. Agree on AR Profile/customer, PMS folio ingestion, tax invoice running, period policy, LOA capabilities, open items and idempotent GL event contracts. Preserve the existing source-generated JV read-only rule. PMS folio invoices must not post revenue/AR twice after night audit.
 2. Replace the generic AR mock with domain list/detail and a repository boundary. Start with ARIV and ARRC, then ARDP and document application, then ARCN/ARDN. Add routes for the latter three only with their domain operations and permissions.

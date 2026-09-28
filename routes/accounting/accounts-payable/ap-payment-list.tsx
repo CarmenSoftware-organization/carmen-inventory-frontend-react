@@ -26,7 +26,6 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { multiplyDecimal } from "./ap-decimal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ApPayment } from "@/types/accounts-payable";
@@ -217,21 +216,6 @@ export default function ApPaymentList() {
             New Payment
           </Button>
         </div>
-        <Tabs
-          value={filters.lifecycle || "all"}
-          onValueChange={(value) =>
-            setFilter("lifecycle", value === "all" ? "" : value)
-          }
-        >
-          <div className="overflow-x-auto">
-            <TabsList variant="line">
-              <TabsTrigger value="all">All payments</TabsTrigger>
-              <TabsTrigger value="draft">Draft</TabsTrigger>
-              <TabsTrigger value="submitted">Pending approval</TabsTrigger>
-              <TabsTrigger value="posted">Posted</TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-1 flex-wrap gap-3">
             <div className="min-w-52 flex-1 sm:flex-initial">

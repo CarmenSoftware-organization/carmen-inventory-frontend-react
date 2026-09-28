@@ -342,44 +342,7 @@ function ApPaymentEditor({
     }
   };
   return (
-    <div className="space-y-5 pb-24">
-      {loaded?.lifecycle === "submitted" && (
-        <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-          <WorkflowTrack
-            previousStage="Prepared"
-            currentStage={loaded.current_stage ?? "Approval"}
-            nextStage="Posted"
-          />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              disabled={busy || !loaded.capabilities.can_approve}
-              onClick={() => setConfirmation("approve")}
-            >
-              <Check className="size-4" />
-              Approve & post
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy || !loaded.capabilities.can_return}
-              onClick={() => setConfirmation("clarify")}
-            >
-              <Undo2 className="size-4" />
-              Request clarification
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={busy || !loaded.capabilities.can_reject}
-              onClick={() => setConfirmation("reject")}
-            >
-              <X className="size-4" />
-              Reject
-            </Button>
-          </div>
-        </div>
-      )}
+    <div className="flex min-h-[calc(100dvh-3rem)] flex-col gap-5 pb-24">
       <DocFormHeader
         title={loaded?.pv_no ?? "New Payment Voucher"}
         subtitle={approvalContext ? "Approval review" : "Supplier disbursement"}
@@ -387,6 +350,36 @@ function ApPaymentEditor({
         onBack={() => navigate("/accounting/accounts-payable/payment")}
         actions={
           <>
+            {loaded?.lifecycle === "submitted" && (
+              <>
+                <Button
+                  size="sm"
+                  disabled={busy || !loaded.capabilities.can_approve}
+                  onClick={() => setConfirmation("approve")}
+                >
+                  <Check className="size-4" />
+                  Approve & post
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy || !loaded.capabilities.can_return}
+                  onClick={() => setConfirmation("clarify")}
+                >
+                  <Undo2 className="size-4" />
+                  Request clarification
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy || !loaded.capabilities.can_reject}
+                  onClick={() => setConfirmation("reject")}
+                >
+                  <X className="size-4" />
+                  Reject
+                </Button>
+              </>
+            )}
             {loaded?.capabilities.can_edit && !editing && (
               <Button size="sm" onClick={() => setEditing(true)}>
                 Edit
@@ -458,6 +451,15 @@ function ApPaymentEditor({
           </>
         }
       />
+      {loaded?.lifecycle === "submitted" && (
+        <div className="border-b pb-3">
+          <WorkflowTrack
+            previousStage="Prepared"
+            currentStage={loaded.current_stage ?? "Approval"}
+            nextStage="Posted"
+          />
+        </div>
+      )}
       <section className="space-y-4 border-b pb-4">
         <div>
           <div className="flex items-center justify-between">
@@ -612,7 +614,6 @@ function ApPaymentEditor({
       />
       <SummaryFooterBar
         hasRecord
-        className="static!"
         items={[
           {
             key: "applied",

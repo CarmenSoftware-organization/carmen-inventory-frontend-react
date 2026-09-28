@@ -598,7 +598,7 @@ export default function AccountingDocumentDetail() {
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
+    <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-4">
       {usesVoucherDetailPattern ? (
         <DocFormHeader
           title={number}
@@ -961,7 +961,11 @@ export default function AccountingDocumentDetail() {
 
       <form
         id={FORM_ID}
-        className="space-y-4"
+        className={
+          usesVoucherDetailPattern
+            ? "flex min-h-0 flex-1 flex-col gap-4"
+            : "space-y-4"
+        }
         onSubmit={(event) => {
           event.preventDefault();
           const intent = (
@@ -1279,9 +1283,11 @@ export default function AccountingDocumentDetail() {
               ? "border-0 bg-transparent py-0 shadow-none"
               : "py-4"
           } ${
-            config.kind === "financialReports"
-              ? "h-[calc(100dvh-25rem)] min-h-64"
-              : "h-[calc(100dvh-21rem)] min-h-80"
+            usesVoucherDetailPattern
+              ? "min-h-80 flex-1"
+              : config.kind === "financialReports"
+                ? "h-[calc(100dvh-25rem)] min-h-64"
+                : "h-[calc(100dvh-21rem)] min-h-80"
           }`}
         >
           <CardHeader className={usesVoucherDetailPattern ? "px-0" : "px-4"}>

@@ -871,12 +871,12 @@ export const router = createBrowserRouter([
               {
                 path: "accounts-receivable/invoice",
                 lazy: () =>
-                  import("./accounting/documents/accounting-document-list.route"),
+                  import("./accounting/accounts-receivable/ar-invoice-list.route"),
               },
               {
                 path: "accounts-receivable/invoice/:id",
                 lazy: () =>
-                  import("./accounting/documents/accounting-document-detail.route"),
+                  import("./accounting/accounts-receivable/ar-invoice-detail.route"),
               },
               {
                 path: "accounts-receivable/receipt",

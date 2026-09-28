@@ -305,7 +305,7 @@ function ApInvoiceEditor({
     }
   };
   return (
-    <div className="space-y-4 pb-24">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {loaded?.lifecycle === "submitted" && (
         <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
           <WorkflowTrack
@@ -603,7 +603,7 @@ function ApInvoiceEditor({
           </Field>
         </div>
       </section>
-      <Tabs defaultValue="items" className="gap-3">
+      <Tabs defaultValue="items" className="min-h-0 flex-1 gap-3">
         <div className="overflow-x-auto overflow-y-hidden">
           <TabsList variant="line">
             <TabsTrigger value="items">Item Details</TabsTrigger>
@@ -613,7 +613,7 @@ function ApInvoiceEditor({
             <TabsTrigger value="journal">Journal Preview</TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="items">
+        <TabsContent value="items" className="min-h-0 overflow-auto border-t">
           <div>
             <InvoiceLines
               lines={lines}
@@ -762,7 +762,6 @@ function ApInvoiceEditor({
       )}
       <SummaryFooterBar
         hasRecord
-        className="static!"
         items={[
           {
             key: "subtotal",
