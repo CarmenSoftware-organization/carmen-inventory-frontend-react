@@ -87,7 +87,7 @@ describe("SI config registry", () => {
     expect(item?.labelKey).toBe("config.siCostFrom");
   });
 
-  it("declares 3 options in order, with average gated on average costing", () => {
+  it("declares 3 options in order, with average gated on both average costing methods", () => {
     const item = SEEDED_ITEMS.find((i) => i.key === "si.cost-from");
     expect(item?.options?.map((o) => o.value)).toEqual([
       "average",
@@ -95,7 +95,10 @@ describe("SI config registry", () => {
       "last_cost",
     ]);
     const avg = item?.options?.find((o) => o.value === "average");
-    expect(avg?.visibleWhenCalcMethod).toBe("average");
+    expect(avg?.visibleWhenCalcMethod).toEqual([
+      "average",
+      "average_per_location",
+    ]);
     expect(avg?.labelKey).toBe("config.siCostFromOptions.average");
     // non-conditional options have no gate
     expect(
