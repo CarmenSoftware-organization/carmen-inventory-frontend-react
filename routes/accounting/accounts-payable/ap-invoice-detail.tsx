@@ -343,114 +343,111 @@ function ApInvoiceEditor({
           </div>
         </div>
       )}
-      <div className="ml-10">
-        <DocFormHeader
-          title={loaded?.ap_no ?? "New AP Invoice"}
-          subtitle="Standard supplier invoice"
-          backLabel="Back to AP Invoice Directory"
-          onBack={() => navigate("/accounting/accounts-payable/invoice")}
-          badges={
-            loaded ? (
-              <>
-                <ApStatusBadge value={loaded.lifecycle} />
-                <ApStatusBadge value={loaded.settlement_status} />
-              </>
-            ) : undefined
-          }
-          flush
-          actions={
+      <DocFormHeader
+        title={loaded?.ap_no ?? "New AP Invoice"}
+        subtitle="Standard supplier invoice"
+        backLabel="Back to AP Invoice Directory"
+        onBack={() => navigate("/accounting/accounts-payable/invoice")}
+        badges={
+          loaded ? (
             <>
-              {loaded?.capabilities.can_edit && !editing && (
-                <Button size="sm" onClick={() => setEditing(true)}>
-                  Edit
+              <ApStatusBadge value={loaded.lifecycle} />
+              <ApStatusBadge value={loaded.settlement_status} />
+            </>
+          ) : undefined
+        }
+        actions={
+          <>
+            {loaded?.capabilities.can_edit && !editing && (
+              <Button size="sm" onClick={() => setEditing(true)}>
+                Edit
+              </Button>
+            )}
+            {editing && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(false);
+                    if (id === "new")
+                      navigate("/accounting/accounts-payable/invoice");
+                    else setForm(initialInvoiceForm(loaded ?? undefined));
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => void save()}
+                  disabled={saveMutation.isPending}
+                >
+                  <Save className="size-4" />
+                  Save
+                </Button>
+              </>
+            )}
+            {loaded?.lifecycle === "posted" &&
+              compareDecimal(loaded.open_amount, "0") > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    navigate(
+                      `/accounting/accounts-payable/payment/new?invoice_ids=${encodeURIComponent(loaded.id)}`,
+                    )
+                  }
+                >
+                  Pay invoice
                 </Button>
               )}
-              {editing && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditing(false);
-                      if (id === "new")
-                        navigate("/accounting/accounts-payable/invoice");
-                      else setForm(initialInvoiceForm(loaded ?? undefined));
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => void save()}
-                    disabled={saveMutation.isPending}
-                  >
-                    <Save className="size-4" />
-                    Save
-                  </Button>
-                </>
-              )}
-              {loaded?.lifecycle === "posted" &&
-                compareDecimal(loaded.open_amount, "0") > 0 && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
+            {loaded?.capabilities.can_void && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void runAction("void")}
+              >
+                <Ban className="size-4" />
+                Void
+              </Button>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="size-4" />
+                  More
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    navigate("/accounting/accounts-payable/invoice/new")
+                  }
+                >
+                  <Plus className="size-4" /> New
+                </DropdownMenuItem>
+                {loaded && (
+                  <DropdownMenuItem
+                    onSelect={() =>
                       navigate(
-                        `/accounting/accounts-payable/payment/new?invoice_ids=${encodeURIComponent(loaded.id)}`,
+                        `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
                       )
                     }
                   >
-                    Pay invoice
-                  </Button>
+                    <Copy className="size-4" /> Copy
+                  </DropdownMenuItem>
                 )}
-              {loaded?.capabilities.can_void && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void runAction("void")}
-                >
-                  <Ban className="size-4" />
-                  Void
-                </Button>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <MoreHorizontal className="size-4" />
-                    More
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      navigate("/accounting/accounts-payable/invoice/new")
-                    }
-                  >
-                    <Plus className="size-4" /> New
-                  </DropdownMenuItem>
-                  {loaded && (
-                    <DropdownMenuItem
-                      onSelect={() =>
-                        navigate(
-                          `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
-                        )
-                      }
-                    >
-                      <Copy className="size-4" /> Copy
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onSelect={() => setSheet("attachments")}>
-                    <Paperclip className="size-4" /> Attachments
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setSheet("activity")}>
-                    <FileClock className="size-4" /> Log
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          }
-        />
-      </div>
+                <DropdownMenuItem onSelect={() => setSheet("attachments")}>
+                  <Paperclip className="size-4" /> Attachments
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSheet("activity")}>
+                  <FileClock className="size-4" /> Log
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
       {!editable && loaded && (
         <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
           <ApStatusBadge value={loaded.lifecycle} />
