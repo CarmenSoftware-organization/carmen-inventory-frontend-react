@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -211,7 +212,10 @@ export default function RequestPriceListComponent() {
     params,
     tableConfig,
     onEdit: (item) =>
-      navigate(`/vendor-management/request-price-list/${item.id}`),
+      navigate(
+        `/vendor-management/request-price-list/${item.id}`,
+        listReturnState(),
+      ),
     onDelete: setDeleteTarget,
   });
 
@@ -229,7 +233,12 @@ export default function RequestPriceListComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => navigate("/vendor-management/request-price-list/new")}
+            onAdd={() =>
+              navigate(
+                "/vendor-management/request-price-list/new",
+                listReturnState(),
+              )
+            }
             addLabel={t("add")}
           />
         </div>
@@ -303,7 +312,10 @@ export default function RequestPriceListComponent() {
                   key={item.id}
                   item={item}
                   onEdit={(rfp) =>
-                    navigate(`/vendor-management/request-price-list/${rfp.id}`)
+                    navigate(
+                      `/vendor-management/request-price-list/${rfp.id}`,
+                      listReturnState(),
+                    )
                   }
                   onDelete={setDeleteTarget}
                 />

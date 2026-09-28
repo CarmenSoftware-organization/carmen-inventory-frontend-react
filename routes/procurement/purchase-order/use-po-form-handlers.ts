@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -50,6 +51,7 @@ export function usePoFormHandlers({
   revealErrors,
 }: UsePoFormHandlersOptions) {
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn("/procurement/purchase-order");
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
@@ -185,9 +187,10 @@ export function usePoFormHandlers({
             // view mode เอง (setMode จะ re-render + churn item table โดยไม่จำเป็น)
             navigate(`/procurement/purchase-order/${newId}`, {
               replace: true,
+              ...returnState,
             });
           } else {
-            navigate("/procurement/purchase-order");
+            toList();
           }
         },
         onError: () => setIsSubmitting(false), // create fail → guard กลับมาเฝ้า
@@ -201,7 +204,7 @@ export function usePoFormHandlers({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/procurement/purchase-order");
+        toList();
       }
     });
   };
@@ -209,7 +212,7 @@ export function usePoFormHandlers({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/procurement/purchase-order");
+    toList();
   };
 
   const handleBack = () => {
@@ -271,7 +274,7 @@ export function usePoFormHandlers({
    */
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-order");
+    toList();
   };
 
   const runSubmitPo = async () => {
@@ -546,7 +549,7 @@ export function usePoFormHandlers({
     deletePo.mutate(purchaseOrder.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/procurement/purchase-order");
+        toList();
       },
     });
   };

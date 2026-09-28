@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import {
   Building2,
@@ -101,6 +102,7 @@ export function SrHeader({
     role === STAGE_ROLE.ISSUE;
 
   const navigate = useNavigate();
+  const { returnState } = useListReturn("/store-operation/store-requisition");
   // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่มสร้าง: ต้องมี workflow ที่เริ่มได้
   // (แนวเดียวกับ PR) กดไม่ผ่านเด้ง dialog บอกเหตุผล ไม่ซ่อนปุ่มเงียบ ๆ
   const { canCreate: canCreateSr } = useCreatableWorkflows(WORKFLOW_TYPE.SR);
@@ -111,6 +113,7 @@ export function SrHeader({
     }
     navigate(
       `/store-operation/store-requisition/new?duplicate_id=${storeRequisition?.id}`,
+      returnState,
     );
   };
 

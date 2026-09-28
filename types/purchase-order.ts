@@ -80,19 +80,18 @@ export interface PoItemHistoryEntry {
   message?: string | null;
 }
 
+export interface PoGrnRef {
+  grn_id: string | null;
+  grn_no: string | null;
+}
+
 export interface PrDetailRef {
   pr_detail: EntityRef | null;
   /** ใบขอซื้อต้นทาง — `null` เมื่อแถวนี้ไม่ได้มาจาก PR (manual / price list) */
   pr_id: string | null;
   pr_no: string | null;
-  /**
-   * ใบรับสินค้าที่อ้างแถวนี้
-   *
-   * **ยังไม่รู้ทรงของสมาชิก** — เอกสารตัวอย่างที่เคยเห็นส่งมาเป็น array ว่างทุกแถว
-   * ประกาศเป็น `unknown[]` ตามที่รู้จริง ไม่ใช่เดาเอา · จะอ่านค่าข้างในต้องไปดู
-   * response ที่มีข้อมูลจริงก่อนแล้วค่อยประกาศ type ให้ตรง
-   */
-  grn: unknown[];
+  /** ใบรับสินค้าที่อ้างแถวนี้ */
+  grn: PoGrnRef[];
   order_qty: number;
   order_base_qty: number;
   received_qty: number;
@@ -200,8 +199,7 @@ export interface PurchaseOrder {
   last_action?: LastAction | null;
   workflow_current_stage: string | null;
   workflow_next_stage: string | null;
-  // ส่งมาทั้ง list (`GET /api/{bu}/purchase-orders` — แถวจริงอยู่ที่ `data[].data[]`
-  // ของ multi-BU envelope) และ detail · `@CollapseRefs()` กับ `@EnrichAuditUsers()`
+  // ส่งมาทั้ง list (`GET /api/{bu}/purchase-orders` — แถวอยู่ที่ `data[]` ตรง ๆ) และ detail · `@CollapseRefs()` กับ `@EnrichAuditUsers()`
   // เดินถึงแถวที่ซ้อนแล้วตั้งแต่ 2026-09-18 จึงเป็น object จริงทั้งคู่ ไม่ใช่คู่ flat
   // `_id`/`_name` อีก (ยืนยันจาก payload จริง 5/5 แถว)
   vendor: EntityRef | null;

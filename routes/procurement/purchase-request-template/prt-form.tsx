@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -41,6 +42,9 @@ export function PrtForm({ template }: PrtFormProps) {
   const tfl = useTranslations("field");
   const { defaultBu } = useProfile();
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(
+    "/procurement/purchase-request-template",
+  );
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -124,6 +128,7 @@ export function PrtForm({ template }: PrtFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate(`/procurement/purchase-request-template/${data.data.id}`, {
             replace: true,
+            ...returnState,
           });
           setMode("view");
         },
@@ -138,7 +143,7 @@ export function PrtForm({ template }: PrtFormProps) {
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/procurement/purchase-request-template");
+        toList();
       }
     });
   };
@@ -146,7 +151,7 @@ export function PrtForm({ template }: PrtFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/procurement/purchase-request-template");
+    toList();
   };
 
   const handleBack = () => {
@@ -223,7 +228,7 @@ export function PrtForm({ template }: PrtFormProps) {
             deletePrt.mutate(template.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                navigate("/procurement/purchase-request-template");
+                toList();
               },
             });
           }}

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -245,11 +246,13 @@ export default function PoComponent() {
 
   const queryParams = { ...params, filter: lf.filterParam };
 
+  // gate แต่ละ query ตาม viewMode ด้วย — ก่อนหน้านี้ทั้งสอง query ยิงพร้อมกันทุก
+  // ครั้งที่ search/filter/page เปลี่ยน ทั้งที่ render แค่อันเดียว (เปลือง network)
   const myPendingQuery = useMyPendingPurchaseOrder(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode === "my-pending",
   });
   const allDocumentQuery = usePurchaseOrder(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode !== "my-pending",
   });
 
   const { data, isLoading, error, refetch } =
@@ -323,7 +326,8 @@ export default function PoComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (po) => navigate(`/procurement/purchase-order/${po.id}`),
+    onEdit: (po) =>
+      navigate(`/procurement/purchase-order/${po.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -404,7 +408,12 @@ export default function PoComponent() {
             <PoCardList
               items={purchaseOrders}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(po) => navigate(`/procurement/purchase-order/${po.id}`)}
+              onEdit={(po) =>
+                navigate(
+                  `/procurement/purchase-order/${po.id}`,
+                  listReturnState(),
+                )
+              }
               onDelete={setDeleteTarget}
             />
             {useInfiniteScroll && grid.hasMore && (

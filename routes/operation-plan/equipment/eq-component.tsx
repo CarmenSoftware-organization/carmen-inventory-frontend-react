@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import {
   DropdownMenu,
@@ -143,7 +144,7 @@ export default function EquipmentComponent() {
     params,
     tableConfig,
     onEdit: (equipment) =>
-      navigate(`/operation-plan/equipment/${equipment.id}`),
+      navigate(`/operation-plan/equipment/${equipment.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -181,7 +182,9 @@ export default function EquipmentComponent() {
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate("/operation-plan/equipment/new")}
+              onClick={() =>
+                navigate("/operation-plan/equipment/new", listReturnState())
+              }
             >
               <Plus aria-hidden="true" />
               {t("add")}
@@ -238,7 +241,10 @@ export default function EquipmentComponent() {
                       : undefined
                   }
                   onEdit={(eq) =>
-                    navigate(`/operation-plan/equipment/${eq.id}`)
+                    navigate(
+                      `/operation-plan/equipment/${eq.id}`,
+                      listReturnState(),
+                    )
                   }
                   onDelete={setDeleteTarget}
                 />

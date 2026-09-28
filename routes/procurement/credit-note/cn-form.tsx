@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -69,6 +70,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn("/procurement/credit-note");
   const buCode = useBuCode();
   const [mode, setMode] = useState<FormMode>(creditNote ? "view" : "add");
   const isView = mode === "view";
@@ -200,9 +202,12 @@ export function CnForm({ creditNote }: CnFormProps) {
           const newId = data?.data?.id;
           if (newId) {
             // ไม่ setMode("view") — route /:id mount CnForm view mode เอง (เลี่ยง churn)
-            navigate(`/procurement/credit-note/${newId}`, { replace: true });
+            navigate(`/procurement/credit-note/${newId}`, {
+              replace: true,
+              ...returnState,
+            });
           } else {
-            navigate("/procurement/credit-note");
+            toList();
           }
         },
         onError: () => setIsSubmitting(false),
@@ -216,7 +221,7 @@ export function CnForm({ creditNote }: CnFormProps) {
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/procurement/credit-note");
+        toList();
       }
     });
   };
@@ -224,7 +229,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/procurement/credit-note");
+    toList();
   };
 
   const handleBack = () => {
@@ -306,7 +311,7 @@ export function CnForm({ creditNote }: CnFormProps) {
       {
         onSuccess: () => {
           toast.success(tt("submitSuccess", { entity: t("entity") }));
-          navigate("/procurement/credit-note");
+          toList();
         },
         onError: abortSubmit,
       },
@@ -474,7 +479,7 @@ export function CnForm({ creditNote }: CnFormProps) {
               deleteCn.mutate(creditNote.id, {
                 onSuccess: () => {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  navigate("/procurement/credit-note");
+                  toList();
                 },
               });
             }}

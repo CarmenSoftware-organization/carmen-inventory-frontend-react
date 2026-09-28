@@ -84,7 +84,12 @@ export function DocumentInfo({
           <PlainReasonValue
             control={form.control}
             adjTypes={adjTypes}
-            fallback={inventoryAdjustment?.adjustment_type_name}
+            fallback={
+              // ก้อนของ endpoint รายละเอียดมีแค่ id+code (ไม่มี name) ต่างจาก list
+              inventoryAdjustment?.adjustment_type?.name ??
+              inventoryAdjustment?.adjustment_type?.code ??
+              inventoryAdjustment?.adjustment_type_name
+            }
           />
         ) : (
           <Controller
@@ -115,7 +120,10 @@ export function DocumentInfo({
       <Field className="sm:col-span-2">
         <FieldLabel required={!isView}>{tfl("location")}</FieldLabel>
         {isView ? (
-          <FieldPlainText>{inventoryAdjustment?.location_name}</FieldPlainText>
+          <FieldPlainText>
+            {inventoryAdjustment?.location?.name ??
+              inventoryAdjustment?.location_name}
+          </FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -130,7 +138,10 @@ export function DocumentInfo({
                   INVENTORY_TYPE.INVENTORY,
                   INVENTORY_TYPE.CONSIGNMENT,
                 ]}
-                defaultLabel={inventoryAdjustment?.location_name}
+                defaultLabel={
+                  inventoryAdjustment?.location?.name ??
+                  inventoryAdjustment?.location_name
+                }
                 error={form.formState.errors.location_id?.message}
                 lazy
               />

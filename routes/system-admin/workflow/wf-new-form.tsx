@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { Info, Plus } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export default function WorkflowNewForm({
   lockedType,
 }: WorkflowNewFormProps = {}) {
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn("/system-admin/workflow");
   const createWorkflow = useCreateWorkflow();
   const isPending = createWorkflow.isPending;
   const t = useTranslations("systemAdmin.workflow");
@@ -67,7 +69,7 @@ export default function WorkflowNewForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navGuard = useNavigationGuard(form.formState.isDirty && !isSubmitting);
 
-  const backToList = () => navigate("/system-admin/workflow");
+  const backToList = () => toList();
   const handleLeave = () => discard.confirm(backToList);
 
   const onSubmit = (values: WorkflowFormValues) => {
@@ -80,7 +82,10 @@ export default function WorkflowNewForm({
         toast.success(tt("createSuccess", { entity: t("entity") }));
         const data = res as unknown as { data?: { id?: string } };
         const id = data?.data?.id ?? payload.id;
-        navigate(`/system-admin/workflow/${id}`, { replace: true });
+        navigate(`/system-admin/workflow/${id}`, {
+          replace: true,
+          ...returnState,
+        });
       },
     });
   };

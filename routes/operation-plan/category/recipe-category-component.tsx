@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
 import {
@@ -146,7 +147,8 @@ export default function RecipeCategoryComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (category) => navigate(`/operation-plan/category/${category.id}`),
+    onEdit: (category) =>
+      navigate(`/operation-plan/category/${category.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -184,7 +186,9 @@ export default function RecipeCategoryComponent() {
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate("/operation-plan/category/new")}
+              onClick={() =>
+                navigate("/operation-plan/category/new", listReturnState())
+              }
             >
               <Plus aria-hidden="true" />
               {t("add")}
@@ -236,11 +240,14 @@ export default function RecipeCategoryComponent() {
                   key={item.id}
                   item={item}
                   parentName={
-                    item.parent?.id
-                      ? parentMap.get(item.parent.id)
-                      : undefined
+                    item.parent?.id ? parentMap.get(item.parent.id) : undefined
                   }
-                  onEdit={(c) => navigate(`/operation-plan/category/${c.id}`)}
+                  onEdit={(c) =>
+                    navigate(
+                      `/operation-plan/category/${c.id}`,
+                      listReturnState(),
+                    )
+                  }
                   onDelete={setDeleteTarget}
                 />
               ))}

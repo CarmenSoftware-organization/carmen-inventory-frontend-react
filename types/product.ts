@@ -245,8 +245,16 @@ export function createProductSchema(tv: TranslationFn, tf: TranslationFn) {
         (v) => v != null && v >= 0,
         tv("minNumber", { field: tf("price"), min: 0 }),
       ),
-    price_deviation_limit: z.coerce.number().min(0).max(100).nullable(),
-    qty_deviation_limit: z.coerce.number().min(0).max(100).nullable(),
+    price_deviation_limit: z.coerce
+      .number()
+      .min(0, tv("minZero", { field: tf("priceDeviation") }))
+      .max(100, tv("maxNumber", { field: tf("priceDeviation"), max: 100 }))
+      .nullable(),
+    qty_deviation_limit: z.coerce
+      .number()
+      .min(0, tv("minZero", { field: tf("qtyDeviation") }))
+      .max(100, tv("maxNumber", { field: tf("qtyDeviation"), max: 100 }))
+      .nullable(),
     info: z.array(
       z.object({
         label: z.string().min(1, tv("required", { field: tf("name") })),

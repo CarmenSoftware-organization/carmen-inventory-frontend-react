@@ -228,6 +228,15 @@ describe("byCode messages", () => {
     ).toBe("byCode.PR_DELETE_FORBIDDEN");
   });
 
+  // 409 มีข้อความกลางของตัวเอง ("documentChanged") ซึ่งพูดถึงเอกสารถูกแก้ไปแล้ว
+  // คนละเรื่องกับของซ้ำ — รหัสจาก catalog ต้องชนะ ไม่งั้นคนสร้างสินค้าซ้ำจะได้
+  // คำแนะนำให้ไปรีเฟรชหน้า แทนที่จะรู้ว่ามีสินค้านี้อยู่แล้ว
+  it("beats the 409 generic message", () => {
+    expect(
+      getUserErrorMessage(catalogError("PRODUCT_ALREADY_EXISTS", 409), tHas),
+    ).toBe("byCode.PRODUCT_ALREADY_EXISTS");
+  });
+
   it("keeps APP_CODE_TO_KEY winning over the code-named key", () => {
     expect(
       getUserErrorMessage(catalogError("SR_DATE_OUTSIDE_OPEN_PERIOD", 422), tHas),

@@ -28,6 +28,8 @@ import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { formatCurrency } from "@/lib/currency-utils";
 import { formatDate } from "@/lib/date-utils";
+import { LastPriceChip } from "@/components/share/last-price-chip";
+import type { LastPrice } from "@/types/last-price";
 
 export interface PricelistEntry {
   vendor_id: string;
@@ -212,6 +214,7 @@ export function PrPricelistDialog({
   const [lists, setLists] = useState<PricelistEntry[]>([]);
   // pricelist ที่ถูกเลือกอยู่ (data.selected) — แยกจาก lists จึงต้องรวมมาแสดงเอง
   const [selected, setSelected] = useState<PricelistEntry | null>(null);
+  const [lastPrice, setLastPrice] = useState<LastPrice | null>(null);
 
   useEffect(() => {
     if (!open || !productId || !unitId || !currencyId || !buCode) return;
@@ -220,6 +223,7 @@ export function PrPricelistDialog({
       setIsLoading(true);
       setLists([]);
       setSelected(null);
+      setLastPrice(null);
       try {
         const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(buCode), {
           product_id: productId,
@@ -236,6 +240,7 @@ export function PrPricelistDialog({
         const json = await res.json();
         setLists(json.data?.lists ?? []);
         setSelected(json.data?.selected ?? null);
+        setLastPrice(json.data?.last_price ?? null);
       } catch {
         toast.error(t("priceListLoadFailed"));
       } finally {
@@ -321,6 +326,12 @@ export function PrPricelistDialog({
                       {approvedQty} {approvedUnitName}
                     </span>
                   </span>
+                </>
+              )}
+              {lastPrice && (
+                <>
+                  <span className="bg-border h-3 w-px" />
+                  <LastPriceChip lastPrice={lastPrice} />
                 </>
               )}
             </div>

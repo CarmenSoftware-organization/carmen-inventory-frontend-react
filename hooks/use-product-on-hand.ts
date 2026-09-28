@@ -5,6 +5,7 @@ import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CACHE_NONE } from "@/lib/cache-config";
+import type { LastPrice } from "@/types/last-price";
 
 export interface OnHandLocationRow {
   location_id: string | null;
@@ -28,6 +29,7 @@ export interface ProductOnHandResponse {
   total_on_hand: number;
   locations: OnHandLocationRow[];
   transactions: unknown[];
+  last_price?: LastPrice | null;
 }
 
 export function useProductOnHand(

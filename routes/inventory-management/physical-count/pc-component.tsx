@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import {
   Calendar,
   CalendarRange,
@@ -224,6 +225,7 @@ export default function PcComponent() {
     if (item.physical_count_id) {
       navigate(
         `/inventory-management/physical-count/${item.physical_count_id}/entry`,
+        listReturnState(),
       );
       return;
     }

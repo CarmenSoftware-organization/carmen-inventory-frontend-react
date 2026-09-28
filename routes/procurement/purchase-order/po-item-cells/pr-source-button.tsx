@@ -1,6 +1,7 @@
+import { type ReactNode } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
-import { FileText } from "lucide-react";
+import { FileText, PackageCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -29,12 +30,40 @@ export interface PrSource {
 export function buildPrSourceMap(
   purchaseOrder?: PurchaseOrder,
 ): Map<string, PrSource[]> {
+  return buildSourceMap(purchaseOrder, (detail) =>
+    (detail.pr_details ?? []).map((pr) => [pr.pr_id, pr.pr_no]),
+  );
+}
+
+/**
+ * ใบรับสินค้าที่อ้างแต่ละแถว — ซ้อนอยู่ใน `pr_details[].grn[]` ของ response เดียวกัน
+ *
+ * **แถว manual / price list จะไม่มีวันมี** เพราะ `grn` แขวนอยู่ใต้ `pr_details`
+ * ซึ่งแถวที่ไม่ได้มาจาก PR ส่งมาว่าง — ไม่ใช่ว่ายังไม่ได้รับของ แต่ backend
+ * ไม่มีที่ให้มันอยู่ ถ้าต้องโชว์ GRN ของแถว manual ด้วยต้องขอ field ใหม่
+ */
+export function buildGrnSourceMap(
+  purchaseOrder?: PurchaseOrder,
+): Map<string, PrSource[]> {
+  return buildSourceMap(purchaseOrder, (detail) =>
+    (detail.pr_details ?? []).flatMap((pr) =>
+      (pr.grn ?? []).map((g) => [g.grn_id, g.grn_no] as const),
+    ),
+  );
+}
+
+function buildSourceMap(
+  purchaseOrder: PurchaseOrder | undefined,
+  pick: (
+    detail: NonNullable<PurchaseOrder["purchase_order_detail"]>[number],
+  ) => readonly (readonly [string | null, string | null])[],
+): Map<string, PrSource[]> {
   const map = new Map<string, PrSource[]>();
   for (const detail of purchaseOrder?.purchase_order_detail ?? []) {
     const seen = new Map<string, string>();
-    for (const pr of detail.pr_details ?? []) {
-      if (!pr.pr_id || seen.has(pr.pr_id)) continue;
-      seen.set(pr.pr_id, pr.pr_no ?? pr.pr_id);
+    for (const [id, no] of pick(detail)) {
+      if (!id || seen.has(id)) continue;
+      seen.set(id, no ?? id);
     }
     if (seen.size > 0) {
       map.set(
@@ -64,11 +93,71 @@ export function PrSourceButton({
   const list = sources ?? [];
 
   return (
+    <SourceBadge
+      list={list}
+      icon={<FileText aria-hidden="true" className="size-3" />}
+      ariaLabel={t("fromPrLabel", { count: list.length })}
+      title={t("fromPr")}
+      emptyText={t("noPrSource")}
+      countText={t("fromPrCount", { count: list.length })}
+      hrefFor={(id) => `/procurement/purchase-request/${id}`}
+    />
+  );
+}
+
+/**
+ * ป้ายบอกใบรับสินค้าที่รับของแถวนี้เข้ามา
+ *
+ * **ซ่อนทั้งป้ายเมื่อยังไม่มีใบ** ต่างจากป้ายใบขอซื้อที่โชว์ค้างไว้ — แถวที่ยัง
+ * ไม่ได้รับของคือสถานะปกติของ PO เกือบทุกใบ โชว์ป้ายเปล่าทุกแถวคือ noise
+ * และคอลัมน์จำนวนที่รับแล้วบอกเรื่องเดียวกันอยู่แล้ว
+ */
+export function GrnSourceButton({
+  sources,
+}: {
+  readonly sources?: PrSource[];
+}) {
+  const t = useTranslations("procurement.purchaseOrder");
+  const list = sources ?? [];
+
+  if (list.length === 0) return null;
+
+  return (
+    <SourceBadge
+      list={list}
+      icon={<PackageCheck aria-hidden="true" className="size-3" />}
+      ariaLabel={t("grnLabel", { count: list.length })}
+      title={t("grnSource")}
+      emptyText=""
+      countText={t("grnCount", { count: list.length })}
+      hrefFor={(id) => `/procurement/goods-receive-note/${id}`}
+    />
+  );
+}
+
+function SourceBadge({
+  list,
+  icon,
+  ariaLabel,
+  title,
+  emptyText,
+  countText,
+  hrefFor,
+}: {
+  readonly list: PrSource[];
+  readonly icon: ReactNode;
+  readonly ariaLabel: string;
+  readonly title: string;
+  readonly emptyText: string;
+  readonly countText: string;
+  readonly hrefFor: (id: string) => string;
+}) {
+  return (
     <Popover>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={t("fromPrLabel", { count: list.length })}
+          aria-label={ariaLabel}
           className="focus-visible:ring-ring shrink-0 rounded-sm outline-none focus-visible:ring-2"
         >
           <Badge
@@ -79,32 +168,32 @@ export function PrSourceButton({
               list.length === 0 && "text-muted-foreground",
             )}
           >
-            <FileText aria-hidden="true" className="size-3" />
+            {icon}
             {/* ใบเดียวโชว์เลขที่ไปเลย ไม่ต้องกดก็รู้ว่ามาจากใบไหน — หลายใบถึงจะ
                 นับให้ เพราะเลขที่ทุกใบเรียงกันในป้ายเล็ก ๆ อ่านไม่ออกอยู่ดี */}
             {list.length === 0 && "—"}
             {list.length === 1 && list[0].no}
-            {list.length > 1 && t("fromPrCount", { count: list.length })}
+            {list.length > 1 && countText}
           </Badge>
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-1.5">
         <p className="text-muted-foreground text-micro-legal px-2 py-1 font-semibold tracking-wider uppercase">
-          {t("fromPr")}
+          {title}
         </p>
         {list.length === 0 && (
           <p className="text-muted-foreground px-2 py-1.5 text-xs">
-            {t("noPrSource")}
+            {emptyText}
           </p>
         )}
         <ul>
-          {list.map((pr) => (
-            <li key={pr.id}>
+          {list.map((doc) => (
+            <li key={doc.id}>
               <Link
-                to={`/procurement/purchase-request/${pr.id}`}
+                to={hrefFor(doc.id)}
                 className="hover:bg-accent focus-visible:bg-accent block truncate rounded-sm px-2 py-1.5 text-xs outline-none"
               >
-                {pr.no}
+                {doc.no}
               </Link>
             </li>
           ))}

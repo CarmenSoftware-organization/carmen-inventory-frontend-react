@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
-  categorySchema,
+  createCategorySchema,
   stripAutoCode,
   type CategoryFormValues,
 } from "./category-form-schema";
+
+// schema รับตัวแปลมาแล้วคืนคีย์ดิบ — เทสต์สนใจว่ากฎไหนไม่ผ่าน ไม่ใช่สำนวนภาษาไทย
+const t = ((key: string) => key) as never;
+const categorySchema = createCategorySchema(t, t);
 
 const baseValues: CategoryFormValues = {
   code: "",
@@ -29,6 +33,33 @@ describe("categorySchema — code is optional (server-assigned)", () => {
     const { code: _code, ...withoutCode } = baseValues;
     const result = categorySchema.safeParse(withoutCode);
     expect(result.success).toBe(true);
+  });
+});
+
+describe("categorySchema — เพดานส่วนเบี่ยงเบน", () => {
+  it("เกิน 100% ไม่ผ่าน และได้ข้อความจากระบบแปล ไม่ใช่ของ zod", () => {
+    const result = categorySchema.safeParse({
+      ...baseValues,
+      price_deviation_limit: 150,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe("maxNumber");
+  });
+
+  it("ติดลบไม่ผ่านเหมือนกัน", () => {
+    const result = categorySchema.safeParse({
+      ...baseValues,
+      qty_deviation_limit: -1,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe("minZero");
+  });
+
+  it("0–100 ผ่าน", () => {
+    expect(
+      categorySchema.safeParse({ ...baseValues, price_deviation_limit: 100 })
+        .success,
+    ).toBe(true);
   });
 });
 

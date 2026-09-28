@@ -97,6 +97,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0",
+    "vercel": "^59.25.4",
     "vite": "^7.3.6",
     "vitest": "^4.1.11"
   },

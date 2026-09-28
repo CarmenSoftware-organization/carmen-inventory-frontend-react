@@ -19,6 +19,10 @@ export const PoInventoryDialog = memo(function PoInventoryDialog({
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
   const [onHandOpen, setOnHandOpen] = useState(false);
@@ -30,6 +34,8 @@ export const PoInventoryDialog = memo(function PoInventoryDialog({
         buCode={buCode}
         locationId={locationId}
         productId={productId}
+        productName={productName}
+        productLocalName={productLocalName}
         unitName={unitName}
         icon="package"
         className={productId ? "text-primary" : "text-muted-foreground"}

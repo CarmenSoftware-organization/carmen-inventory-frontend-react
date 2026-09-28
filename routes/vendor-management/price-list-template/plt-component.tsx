@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -172,7 +173,10 @@ export default function PriceListTemplateComponent() {
     params,
     tableConfig,
     onEdit: (template) =>
-      navigate(`/vendor-management/price-list-template/${template.id}`),
+      navigate(
+        `/vendor-management/price-list-template/${template.id}`,
+        listReturnState(),
+      ),
     onDelete: setDeleteTarget,
   });
 
@@ -190,7 +194,12 @@ export default function PriceListTemplateComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => navigate("/vendor-management/price-list-template/new")}
+            onAdd={() =>
+              navigate(
+                "/vendor-management/price-list-template/new",
+                listReturnState(),
+              )
+            }
             addLabel={t("add")}
           />
         </div>
@@ -217,7 +226,10 @@ export default function PriceListTemplateComponent() {
                   key={item.id}
                   item={item}
                   onEdit={(tpl) =>
-                    navigate(`/vendor-management/price-list-template/${tpl.id}`)
+                    navigate(
+                      `/vendor-management/price-list-template/${tpl.id}`,
+                      listReturnState(),
+                    )
                   }
                   onDelete={setDeleteTarget}
                 />

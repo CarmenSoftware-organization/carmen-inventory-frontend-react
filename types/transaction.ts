@@ -9,15 +9,21 @@ export type TransactionDocType =
   | "good_received_note"
   | "store_requisition";
 
+/**
+ * อ้างอิงเอนทิตีแบบยุบก้อน — gateway ยุบ `<base>_id/_code/_name` ให้เป็น `<base>: {...}`
+ * ผ่าน `@CollapseRefs` แล้ว (ดู inventory-transaction.serializer.ts) ถ้า `<base>_id`
+ * เป็น null จะได้ทั้งก้อนเป็น null ไม่ใช่ object ว่าง
+ */
+interface EntityRef {
+  id: string | null;
+  code: string | null;
+  name: string | null;
+}
+
 interface TransactionDetail {
   id: string;
-  location_id: string;
-  location_code: string;
-  location_name: string;
-  product_id: string;
-  product_code: string;
-  product_name: string;
-  product_local_name: string;
+  location: EntityRef | null;
+  product: (EntityRef & { local_name: string | null }) | null;
   qty_in: number;
   qty_out: number;
   cost_per_unit: number;

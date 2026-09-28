@@ -192,7 +192,10 @@ export function VendorForm({ vendor }: VendorFormProps) {
           const data = res as unknown as { data?: { id?: string } };
           const id = data?.data?.id;
           if (id) {
-            navigate(`/vendor-management/vendor/${id}`, { replace: true });
+            navigate(`/vendor-management/vendor/${id}`, {
+              replace: true,
+              ...f.returnState,
+            });
           } else {
             f.backToList();
           }

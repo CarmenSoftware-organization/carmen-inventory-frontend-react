@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -53,6 +54,9 @@ export function useGrnFormActions({
   revealErrors,
 }: UseGrnFormActionsParams) {
   const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(
+    "/procurement/goods-receive-note",
+  );
   const t = useTranslations("procurement.goodsReceiveNote");
   const tt = useTranslations("toast");
 
@@ -166,7 +170,7 @@ export function useGrnFormActions({
 
   const onSavedToList = () => {
     toast.success(tt("updateSuccess", { entity: t("entity") }));
-    navigate("/procurement/goods-receive-note");
+    toList();
   };
 
   /**
@@ -374,6 +378,7 @@ export function useGrnFormActions({
               // mount GrnForm เป็น view mode เอง (ไม่ setMode ที่นี่ เลี่ยง churn)
               navigate(`/procurement/goods-receive-note/${newId}`, {
                 replace: true,
+                ...returnState,
               });
             }
           };
@@ -425,7 +430,7 @@ export function useGrnFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        navigate("/procurement/goods-receive-note");
+        toList();
       }
     });
   };
@@ -433,7 +438,7 @@ export function useGrnFormActions({
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/procurement/goods-receive-note");
+    toList();
   };
 
   const handleBack = () => {
@@ -449,7 +454,7 @@ export function useGrnFormActions({
     deleteGrn.mutate(goodsReceiveNote.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        navigate("/procurement/goods-receive-note");
+        toList();
       },
       onError: () => setShowDelete(false),
     });

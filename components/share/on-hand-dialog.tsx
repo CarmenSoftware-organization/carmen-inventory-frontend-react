@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import EmptyComponent from "@/components/empty-component";
 import { NameWithSubtext } from "./name-with-sub-text";
+import { LastPriceChip } from "./last-price-chip";
 import {
   DataGrid,
   DataGridContainer,
@@ -163,6 +164,10 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
                           {data.product_local_name}
                         </p>
                       )}
+                    <LastPriceChip
+                      lastPrice={data?.last_price}
+                      className="pt-0.5"
+                    />
                   </div>
                 </DialogDescription>
               </div>

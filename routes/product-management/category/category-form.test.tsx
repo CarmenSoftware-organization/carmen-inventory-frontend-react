@@ -47,7 +47,10 @@ describe("CategoryForm — auto-generated code field", () => {
     renderForm({ mode: "add", onSubmit });
     await user.click(screen.getByRole("button", { name: en.common.create }));
     expect(
-      await screen.findByText("Tax profile is required"),
+      // ข้อความมาจากระบบแปลแล้ว ไม่ใช่สตริงอังกฤษที่ฝังใน schema
+      await screen.findByText(
+        en.validation.required.replace("{field}", en.field.taxProfile),
+      ),
     ).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });

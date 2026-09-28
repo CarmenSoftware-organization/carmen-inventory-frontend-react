@@ -19,7 +19,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import type { CategoryNode, CategoryType } from "@/types/category";
 import type { FormMode } from "@/types/form";
 import {
-  categorySchema,
+  createCategorySchema,
   stripAutoCode,
   type CategoryFormValues,
 } from "./category-form-schema";
@@ -46,6 +46,7 @@ export function CategoryForm({
   const t = useTranslations("productManagement.category");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const tv = useTranslations("validation");
   const tf = useTranslations("form");
   const tp = useTranslations("productManagement.product");
 
@@ -96,7 +97,9 @@ export function CategoryForm({
   })();
 
   const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema) as Resolver<CategoryFormValues>,
+    resolver: zodResolver(
+      createCategorySchema(tv, tfl),
+    ) as Resolver<CategoryFormValues>,
     defaultValues,
   });
 
@@ -203,12 +206,12 @@ export function CategoryForm({
 
         {/* Deviation limits */}
         <div className="grid grid-cols-2 gap-3">
-          <Field>
+          <Field data-invalid={!!form.formState.errors.qty_deviation_limit}>
             <FieldLabel htmlFor="qty_deviation_limit">
               {tfl("qtyDeviation")}
             </FieldLabel>
             <div className="relative">
-              <Input
+              <FieldInput
                 id="qty_deviation_limit"
                 type="number"
                 inputMode="decimal"
@@ -216,6 +219,8 @@ export function CategoryForm({
                 min={0}
                 max={100}
                 disabled={isPending}
+                error={form.formState.errors.qty_deviation_limit?.message}
+                errorIconAlign="left"
                 {...form.register("qty_deviation_limit", {
                   valueAsNumber: true,
                 })}
@@ -223,12 +228,12 @@ export function CategoryForm({
               <Percent className="text-muted-foreground/50 absolute top-1/2 right-1.5 h-2.5 w-2.5 -translate-y-1/2" />
             </div>
           </Field>
-          <Field>
+          <Field data-invalid={!!form.formState.errors.price_deviation_limit}>
             <FieldLabel htmlFor="price_deviation_limit">
               {tfl("priceDeviation")}
             </FieldLabel>
             <div className="relative">
-              <Input
+              <FieldInput
                 id="price_deviation_limit"
                 type="number"
                 inputMode="decimal"
@@ -236,6 +241,8 @@ export function CategoryForm({
                 min={0}
                 max={100}
                 disabled={isPending}
+                error={form.formState.errors.price_deviation_limit?.message}
+                errorIconAlign="left"
                 {...form.register("price_deviation_limit", {
                   valueAsNumber: true,
                 })}

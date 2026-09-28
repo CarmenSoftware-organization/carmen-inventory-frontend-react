@@ -373,7 +373,7 @@ export function ProductForm({ product }: ProductFormProps) {
         const newId = (res as { data?: { id?: string } })?.data?.id;
         if (newId) {
           await flushPendingImages(newId);
-          navigate(`/product-management/product/${newId}`);
+          navigate(`/product-management/product/${newId}`, f.returnState);
         } else {
           f.backToList();
         }

@@ -65,7 +65,8 @@ describe("ScForm — characterization", () => {
     await act(async () => submitForm("sc-form"));
 
     expect(createMut.mutate).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith(
+    // อาร์กิวเมนต์ที่สองคือ list return state (use-list-return) — ไม่มีใน test นี้
+    expect(navigate.mock.calls[0]?.[0]).toBe(
       "/inventory-management/spot-check/sc-new",
     );
   });

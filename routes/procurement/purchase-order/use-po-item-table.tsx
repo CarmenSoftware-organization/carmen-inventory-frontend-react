@@ -118,6 +118,8 @@ interface UsePoItemTableOptions {
   isViewMode: boolean;
   /** id ของแถว PO → ใบขอซื้อต้นทาง (อ่านจาก response ของ GET ไม่ใช่จากฟอร์ม) */
   prSourcesByDetailId: Map<string, PrSource[]>;
+  /** id ของแถว PO → ใบรับสินค้าที่รับของแถวนี้เข้ามา (ที่มาเดียวกัน) */
+  grnSourcesByDetailId: Map<string, PrSource[]>;
   onDelete: (index: number) => void;
 }
 
@@ -134,6 +136,7 @@ export function usePoItemTable({
   canResetStatus,
   isViewMode,
   prSourcesByDetailId,
+  grnSourcesByDetailId,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -165,6 +168,7 @@ export function usePoItemTable({
             placeholder={tfl("comment")}
             leadingWidth={PO_LEADING_COL}
             prSourcesByDetailId={prSourcesByDetailId}
+            grnSourcesByDetailId={grnSourcesByDetailId}
             renderLeading={(index) =>
               // โหมดแก้ไข = ปุ่มลบ · โหมดอ่าน = ประวัติของแถว (ถ้ามี)
               // สองอย่างนี้ไม่มีวันต้องใช้พร้อมกัน จึงใช้ที่เดียวกันสลับกันไป

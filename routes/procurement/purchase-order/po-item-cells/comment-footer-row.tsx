@@ -2,7 +2,11 @@ import { type FieldArrayWithId, type UseFormReturn } from "react-hook-form";
 import { memo, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { PoInventoryDialog } from "./inventory-dialog-cell";
-import { PrSourceButton, type PrSource } from "./pr-source-button";
+import {
+  PrSourceButton,
+  GrnSourceButton,
+  type PrSource,
+} from "./pr-source-button";
 import type { PoFormValues } from "../po-form-schema";
 
 export const CommentFooterRow = memo(function CommentFooterRow({
@@ -14,6 +18,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
   leadingWidth,
   renderLeading,
   prSourcesByDetailId,
+  grnSourcesByDetailId,
 }: {
   form: UseFormReturn<PoFormValues>;
   itemFields: FieldArrayWithId<PoFormValues, "items", "id">[];
@@ -26,6 +31,8 @@ export const CommentFooterRow = memo(function CommentFooterRow({
   renderLeading?: (index: number) => ReactNode;
   /** id ของแถว PO → ใบขอซื้อต้นทาง (อ่านจาก response ของ GET ไม่ได้อยู่ในฟอร์ม) */
   prSourcesByDetailId: Map<string, PrSource[]>;
+  /** id ของแถว PO → ใบรับสินค้าที่รับของแถวนี้เข้ามา (ที่มาเดียวกัน) */
+  grnSourcesByDetailId: Map<string, PrSource[]>;
 }) {
   "use no memo";
   const index = itemFields.findIndex((f) => f.id === item.id);
@@ -56,6 +63,9 @@ export const CommentFooterRow = memo(function CommentFooterRow({
       <PoInventoryDialog control={form.control} index={index} />
       <PrSourceButton
         sources={detailId ? prSourcesByDetailId.get(detailId) : undefined}
+      />
+      <GrnSourceButton
+        sources={detailId ? grnSourcesByDetailId.get(detailId) : undefined}
       />
     </div>
   );

@@ -15,11 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  InventoryLotTable,
-  InventoryMovementTable,
-} from "./inventory-detail-tables";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import { useProductInventory } from "@/hooks/use-product-inventory";
@@ -28,6 +24,8 @@ interface InventoryDialogProps {
   readonly buCode?: string;
   readonly locationId?: string;
   readonly productId?: string;
+  readonly productName?: string;
+  readonly productLocalName?: string;
   readonly unitName?: string;
   readonly icon?: "box" | "package";
   readonly className?: string;
@@ -89,6 +87,8 @@ export const InventoryDialog = memo(function InventoryDialog({
   buCode,
   locationId,
   productId,
+  productName,
+  productLocalName,
   unitName,
   icon = "box",
   className,
@@ -96,7 +96,6 @@ export const InventoryDialog = memo(function InventoryDialog({
   onOnOrderClick,
 }: InventoryDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
-  const tfl = useTranslations("field");
 
   const { data, refetch } = useProductInventory(
     buCode || undefined,
@@ -109,11 +108,8 @@ export const InventoryDialog = memo(function InventoryDialog({
     on_order_qty = 0,
     re_order_qty = 0,
     re_stock_qty = 0,
-    cost_layers = [],
-    transactions = [],
+    last_price,
   } = data ?? {};
-  // ต้นทุนเฉลี่ยเป็นค่าของสินค้า ไม่ใช่ของล็อต — ทุกแถวส่งเลขเดียวกันมา หยิบแถวแรกพอ
-  const avgCost = cost_layers[0]?.average_cost_per_unit ?? 0;
   const pct =
     re_stock_qty > 0
       ? Math.min(Math.round((on_hand_qty / re_stock_qty) * 1000) / 10, 100)
@@ -127,8 +123,8 @@ export const InventoryDialog = memo(function InventoryDialog({
   const hasProduct = !!productId;
 
   return (
-    // เปิดด้วยการคลิก ไม่ใช่ hover — ในนี้มีตารางล็อต/ความเคลื่อนไหวกับปุ่มให้กดต่อ
-    // ซึ่ง hover bubble รับไม่ไหว (หลุดง่ายระหว่างเลื่อนเมาส์เข้าไป และใช้ไม่ได้บนจอสัมผัส)
+    // เปิดด้วยการคลิก ไม่ใช่ hover — ในนี้มีปุ่มให้กดต่อ (คงเหลือ/กำลังสั่ง) ซึ่ง
+    // hover bubble รับไม่ไหว (หลุดง่ายระหว่างเลื่อนเมาส์เข้าไป และใช้ไม่ได้บนจอสัมผัส)
     <Dialog
       onOpenChange={(open) => {
         if (open && buCode && locationId && productId) refetch();
@@ -154,19 +150,18 @@ export const InventoryDialog = memo(function InventoryDialog({
         <TooltipContent>{t("inventoryInfo")}</TooltipContent>
       </Tooltip>
       <DialogContent
-        className={
-          hasProduct ? "max-h-[90vh] sm:max-w-5xl" : "sm:max-w-sm"
-        }
+        className={hasProduct ? "sm:max-w-lg" : "sm:max-w-sm"}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-baseline justify-between gap-2">
-            {t("inventoryInfo")}
-            {hasProduct && (
-              <span className="text-muted-foreground text-micro font-normal tabular-nums">
-                {tfl("avgCost")} {formatCurrency(avgCost)}
-              </span>
-            )}
-          </DialogTitle>
+          <DialogTitle>{t("inventoryInfo")}</DialogTitle>
+          {/* ยอดพวกนี้เป็นของสินค้าตัวไหน — กล่องเปิดจากไอคอนเล็ก ๆ ในแถว พอเปิด
+              ขึ้นมาเต็มจอแล้วไม่มีอะไรบอกว่ามาจากแถวไหน ยิ่งใบที่มีสิบกว่ารายการ */}
+          {hasProduct && productName && (
+            <NameWithSubtext
+              primary={productName}
+              secondary={productLocalName}
+            />
+          )}
         </DialogHeader>
         {!hasProduct && (
           <p className="text-muted-foreground text-micro">
@@ -221,31 +216,13 @@ export const InventoryDialog = memo(function InventoryDialog({
               </span>
             </div>
 
-            {/* ล็อตกับความเคลื่อนไหวเป็นคนละคำถามกัน ("ของที่มีอยู่แยกเป็นล็อตไหน"
-                กับ "ของเข้าออกเมื่อไหร่") วางซ้อนกันในแท็บ ไม่ใช่ต่อกันลงมา
-                ไม่งั้นแผงยาวจนเลื่อนหาสรุปด้านบนไม่เจอ */}
-            <Tabs defaultValue="lots">
-              <TabsList variant="line">
-                <TabsTrigger value="lots">
-                  {t("lots")}
-                  <span className="text-muted-foreground ml-1 tabular-nums">
-                    {cost_layers.length}
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger value="movements">
-                  {t("movements")}
-                  <span className="text-muted-foreground ml-1 tabular-nums">
-                    {transactions.length}
-                  </span>
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="lots">
-                <InventoryLotTable rows={cost_layers} />
-              </TabsContent>
-              <TabsContent value="movements">
-                <InventoryMovementTable rows={transactions} />
-              </TabsContent>
-            </Tabs>
+            {/* ยังไม่เคยมีของเข้าคลังนี้ = ขีด ไม่ใช่ 0.00 ซึ่งอ่านได้ว่า "ของฟรี" */}
+            <p className="text-muted-foreground mt-2 text-xs">
+              {t("lastPrice")}{" "}
+              <span className="text-foreground font-semibold tabular-nums">
+                {last_price ? formatCurrency(last_price.cost_per_unit) : "—"}
+              </span>
+            </p>
           </>
         )}
       </DialogContent>

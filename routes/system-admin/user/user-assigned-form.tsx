@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { useNavigate } from "react-router";
 import { Loader2, Pencil, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -33,7 +33,7 @@ interface UserAssignedFormProps {
 }
 
 export function UserAssignedForm({ user }: UserAssignedFormProps) {
-  const navigate = useNavigate();
+  const { toList } = useListReturn("/system-admin/user");
   const tt = useTranslations("toast");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
@@ -80,7 +80,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     try {
       await updateUser.mutateAsync({ user_id: user.user_id, ...payload });
       toast.success(tt("updateSuccess", { entity: tfl("user") }));
-      navigate("/system-admin/user");
+      toList();
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ไม่ navigate ออกจากฟอร์ม
       // ต้องเปิด guard กลับ ไม่งั้นฟอร์มที่ยัง dirty อยู่จะออกได้โดยไม่ถาม
@@ -113,7 +113,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
   const goBack = () => {
-    navigate("/system-admin/user");
+    toList();
   };
 
   const handleBack = () => {

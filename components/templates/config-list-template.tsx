@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import {
   Columns3,
   LayoutGrid,
@@ -236,7 +237,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const handleEdit = (entity: TEntity) => {
     if (getEditPath) {
-      navigate(getEditPath(entity));
+      navigate(getEditPath(entity), listReturnState());
       return;
     }
     setEditEntity(entity);
@@ -245,7 +246,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const handleAdd = () => {
     if (addPath) {
-      navigate(addPath);
+      navigate(addPath, listReturnState());
       return;
     }
     setEditEntity(null);

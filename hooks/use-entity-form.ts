@@ -6,7 +6,7 @@ import {
   type Resolver,
   type UseFormReturn,
 } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type { FormMode } from "@/types/form";
@@ -53,7 +53,7 @@ export function useEntityForm<TValues extends FieldValues>({
   extraDirty = false,
   onResetExtra,
 }: UseEntityFormOptions<TValues>) {
-  const navigate = useNavigate();
+  const { toList, returnState } = useListReturn(listPath);
   const [mode, setMode] = useState<FormMode>(entity ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -76,7 +76,8 @@ export function useEntityForm<TValues extends FieldValues>({
     (isAdd || isEdit) && isFormDirty && !isSubmitting,
   );
 
-  const backToList = () => navigate(listPath);
+  // ทางออกไป list ทุกทางผ่าน toList — พก query ของ list (filter/sort/page) กลับไปด้วย
+  const backToList = () => toList();
 
   // Back = กลับหน้า list เสมอ ไม่ใช่ history back — history คือเส้นทางที่เดินผ่านมา
   // ไม่ใช่ที่ที่อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละหน้า
@@ -153,6 +154,8 @@ export function useEntityForm<TValues extends FieldValues>({
     discard,
     navGuard,
     backToList,
+    /** spread ลง options ของ navigate() ตอน create สำเร็จแล้ว replace ไป /:id */
+    returnState,
     handleBack,
     handleEdit,
     handleCancel,

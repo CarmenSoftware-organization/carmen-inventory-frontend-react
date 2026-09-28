@@ -1,5 +1,6 @@
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { Save, SendHorizontal, RefreshCw, Package } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ const ROW_GAP = 8; // gap-2
 export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const navigate = useNavigate();
+  const { returnState } = useListReturn("/inventory-management/physical-count");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [countFilter, setCountFilter] = useState<CountFilter>("all");
@@ -251,7 +253,10 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
           const newId =
             (res as { data?: { id?: string } } | undefined)?.data?.id ??
             physicalCountId;
-          navigate(`/inventory-management/physical-count/${newId}/review`);
+          navigate(
+            `/inventory-management/physical-count/${newId}/review`,
+            returnState,
+          );
         },
       },
     );

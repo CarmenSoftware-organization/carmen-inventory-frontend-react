@@ -2,6 +2,7 @@ import { useTranslations } from "use-intl";
 import { Hotel, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
 import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
+import { LocaleToggle } from "@/components/locale-toggle";
 
 /**
  * โครงหน้า auth แบบแบ่งครึ่ง — ซ้ายเป็นการ์ดฟอร์ม ขวาเป็น hero (ซ่อนบนจอเล็ก)
@@ -32,6 +33,9 @@ export function AuthSplitShell({
           100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
+
+      {/* สลับภาษาได้ก่อน login — หน้านี้อยู่นอก app shell จึงไม่มีเมนูผู้ใช้ให้เปลี่ยน */}
+      <LocaleToggle className="absolute top-3 right-3 z-20 sm:top-4 sm:right-4" />
 
       {/* ── 50/50 split ──────────────────────────────────── */}
       <div className="relative grid min-h-svh lg:grid-cols-2">

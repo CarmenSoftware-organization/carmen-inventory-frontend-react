@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { PurchaseOrder } from "@/types/purchase-order";
-import { buildPrSourceMap } from "./pr-source-button";
+import { buildPrSourceMap, buildGrnSourceMap } from "./pr-source-button";
 
 const po = (details: unknown[]) =>
   ({ purchase_order_detail: details }) as unknown as PurchaseOrder;
@@ -45,5 +45,59 @@ describe("buildPrSourceMap", () => {
 
   it("ไม่มีใบเลย → แมปว่าง", () => {
     expect(buildPrSourceMap(undefined).size).toBe(0);
+  });
+});
+
+const grn = (grn_id: string | null, grn_no: string | null) => ({
+  grn_id,
+  grn_no,
+});
+
+describe("buildGrnSourceMap", () => {
+  // grn แขวนใต้ pr_details อีกชั้น — แถวเดียวรับของมาหลายครั้ง/หลายใบขอซื้อได้
+  it("รวบใบรับสินค้าข้ามทุกบรรทัดของแถวเดียวกัน", () => {
+    const map = buildGrnSourceMap(
+      po([
+        {
+          id: "d1",
+          pr_details: [
+            { pr_id: "p1", grn: [grn("g1", "GRN-001")] },
+            { pr_id: "p2", grn: [grn("g2", "GRN-002")] },
+          ],
+        },
+      ]),
+    );
+    expect(map.get("d1")).toEqual([
+      { id: "g1", no: "GRN-001" },
+      { id: "g2", no: "GRN-002" },
+    ]);
+  });
+
+  it("ใบเดียวกันโผล่หลายบรรทัด นับเป็นใบเดียว", () => {
+    const map = buildGrnSourceMap(
+      po([
+        {
+          id: "d1",
+          pr_details: [
+            { pr_id: "p1", grn: [grn("g1", "GRN-001")] },
+            { pr_id: "p2", grn: [grn("g1", "GRN-001")] },
+          ],
+        },
+      ]),
+    );
+    expect(map.get("d1")).toHaveLength(1);
+  });
+
+  // แถวที่ยังไม่ได้รับของ กับแถว manual ที่ไม่มี pr_details เลย — ต้องไม่ติดมา
+  // ในแมป ป้ายจะได้ไม่โผล่ (ต่างจากป้ายใบขอซื้อที่โชว์ค้างไว้)
+  it("ยังไม่ได้รับของ → ไม่ติดมาในแมป", () => {
+    const map = buildGrnSourceMap(
+      po([
+        { id: "d1", pr_details: [{ pr_id: "p1", grn: [] }] },
+        { id: "d2", pr_details: [] },
+        { id: "d3" },
+      ]),
+    );
+    expect(map.size).toBe(0);
   });
 });

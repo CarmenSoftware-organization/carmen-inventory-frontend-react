@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useListReturn } from "@/hooks/use-list-return";
 import { History, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -32,7 +32,7 @@ export function WfHeader({
   onCancel,
   formId,
 }: WfHeaderProps) {
-  const navigate = useNavigate();
+  const { toList } = useListReturn("/system-admin/workflow");
   const deleteWorkflow = useDeleteWorkflow();
   const [showDelete, setShowDelete] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
@@ -170,7 +170,7 @@ export function WfHeader({
         title={isEditing ? t("editWorkflow") : workflow.name}
         subtitle={subtitle}
         backLabel={tc("goBack")}
-        onBack={() => navigate("/system-admin/workflow")}
+        onBack={() => toList()}
         badges={badges}
         actions={actions}
         flush
@@ -199,7 +199,7 @@ export function WfHeader({
             onSuccess: () => {
               setShowDelete(false);
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
-              navigate("/system-admin/workflow");
+              toList();
             },
           });
         }}

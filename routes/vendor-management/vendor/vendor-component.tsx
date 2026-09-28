@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -159,7 +160,8 @@ export default function VendorComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (vendor) => navigate(`/vendor-management/vendor/${vendor.id}`),
+    onEdit: (vendor) =>
+      navigate(`/vendor-management/vendor/${vendor.id}`, listReturnState()),
     onDelete: setDeleteTarget,
   });
 
@@ -177,7 +179,9 @@ export default function VendorComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => navigate("/vendor-management/vendor/new")}
+            onAdd={() =>
+              navigate("/vendor-management/vendor/new", listReturnState())
+            }
             addLabel={t("add")}
           />
         </div>
@@ -203,7 +207,12 @@ export default function VendorComponent() {
                 <VendorCard
                   key={item.id}
                   item={item}
-                  onEdit={(v) => navigate(`/vendor-management/vendor/${v.id}`)}
+                  onEdit={(v) =>
+                    navigate(
+                      `/vendor-management/vendor/${v.id}`,
+                      listReturnState(),
+                    )
+                  }
                   onDelete={setDeleteTarget}
                 />
               ))}

@@ -145,6 +145,10 @@ export const InventoryDialogCell = memo(function InventoryDialogCell({
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const unitName =
     useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
 
@@ -153,6 +157,8 @@ export const InventoryDialogCell = memo(function InventoryDialogCell({
       buCode={buCode}
       locationId={locationId}
       productId={productId}
+      productName={productName}
+      productLocalName={productLocalName}
       unitName={unitName}
       icon="package"
       className={productId ? "text-primary" : "text-muted-foreground"}
