@@ -18,6 +18,9 @@ const crud = createConfigCrud<InventoryPeriod, CreateInventoryPeriodDto>({
   endpoint: API_ENDPOINTS.INVENTORY_PERIODS,
   label: "inventory period",
   updateMethod: "PATCH",
+  // backend ของรอบยังตอบบางกรณีเป็นข้อความดิบไม่มีรหัส catalog (ปี/เดือนซ้ำ,
+  // วันที่ไม่ถูกต้อง) — ให้ toast แสดงข้อความนั้นแทนข้อความกลางที่ผิดเรื่อง
+  mutationMeta: { preferServerMessage: true },
 });
 
 export const useInventoryPeriod = crud.useList;
@@ -49,6 +52,7 @@ export function useGenerateNextInventoryPeriod() {
       httpClient.post(API_ENDPOINTS.INVENTORY_PERIOD_NEXT(buCode), data),
     invalidateKeys: [QUERY_KEYS.INVENTORY_PERIODS],
     errorMessage: "Failed to generate next inventory periods",
+    meta: { preferServerMessage: true },
   });
 }
 

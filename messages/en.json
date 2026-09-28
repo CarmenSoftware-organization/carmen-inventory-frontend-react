@@ -840,7 +840,13 @@
       "SR_ISSUE_DATE_TODAY_OUTSIDE_PERIOD": "Today is outside every open accounting period, so the issue cannot be dated today. Date it inside the open period instead.",
       "SR_DEPARTMENT_AMBIGUOUS": "You belong to more than one department, so the requisition department cannot be filled in for you. Pick one: {departments}",
       "SR_DEPARTMENT_NOT_FOUND": "You are not in any department yet, so the requisition department cannot be filled in. Ask your administrator to add you to one.",
-      "PRODUCT_ALREADY_EXISTS": "This product is already in the system. Search for it by name or SKU and edit that one instead of creating it again."
+      "PRODUCT_ALREADY_EXISTS": "This product is already in the system. Search for it by name or SKU and edit that one instead of creating it again.",
+      "PERIOD_CLOSED_NOT_EDITABLE": "This inventory period is closed and can't be edited or deleted.",
+      "PERIOD_COUNTING_NOT_EDITABLE": "A stock count is in progress for this inventory period, so it can't be edited or deleted.",
+      "PERIOD_CURRENT_NOT_EDITABLE": "The current inventory period can't be edited or deleted.",
+      "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "An inventory period's status can only be changed on the Period End page.",
+      "COMMON_DOC_VERSION_REQUIRED": "This record is out of date. Refresh the page and try again.",
+      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0."
     }
   },
   "validation": {

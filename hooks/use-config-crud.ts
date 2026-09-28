@@ -9,6 +9,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { createConfigApi } from "@/lib/config-crud";
 import { CACHE_STATIC, type CacheProfile } from "@/lib/cache-config";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
+import type { ApiErrorMeta } from "@/lib/api-error-handler";
 
 interface ConfigCrudOptions {
   queryKey: string;
@@ -16,6 +17,8 @@ interface ConfigCrudOptions {
   label: string;
   updateMethod?: "PUT" | "PATCH";
   cacheProfile?: CacheProfile;
+  /** ส่งต่อให้ create/update/delete — เช่น `{ preferServerMessage: true }` */
+  mutationMeta?: ApiErrorMeta;
 }
 
 /**
@@ -45,6 +48,7 @@ export function createConfigCrud<T, TCreate>({
   label,
   updateMethod = "PUT",
   cacheProfile = CACHE_STATIC,
+  mutationMeta,
 }: ConfigCrudOptions): {
   useList: (
     params?: ParamsDto,
@@ -126,6 +130,7 @@ export function createConfigCrud<T, TCreate>({
       mutationFn: (data, buCode) => api.create(buCode, data),
       invalidateKeys: [queryKey],
       errorMessage: `Failed to create ${label}`,
+      meta: mutationMeta,
     });
   }
 
@@ -135,6 +140,7 @@ export function createConfigCrud<T, TCreate>({
         api.update(buCode, id, data as TCreate),
       invalidateKeys: [queryKey],
       errorMessage: `Failed to update ${label}`,
+      meta: mutationMeta,
     });
   }
 
@@ -143,6 +149,7 @@ export function createConfigCrud<T, TCreate>({
       mutationFn: (id, buCode) => api.remove(buCode, id),
       invalidateKeys: [queryKey],
       errorMessage: `Failed to delete ${label}`,
+      meta: mutationMeta,
     });
   }
 
