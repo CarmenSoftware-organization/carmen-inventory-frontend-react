@@ -25,7 +25,8 @@ import {
  * สีแท่งต่อ phase — สี lifecycle มาจาก `--status-*` (badge-status.css) ส่วน "ค้างปิด"
  * ใช้ `--warning` เป็นสีพื้น (ไม่ใช่ข้อความ จึงไม่ติดกฎ ink) และรอบที่ยังไม่ถึงใช้สี
  * open แบบจาง เพื่อแยก "เปิดไว้รอ" ออกจาก "กำลังใช้อยู่"
- * — `bg-status-*` ไม่มีจริง ต้องเขียน `bg-[var(--status-*)]`
+ * — utility `bg-status-…` ไม่มีจริง ต้องห่อ token ด้วย var() แบบ arbitrary value
+ *   (ห้ามเขียนตัวอย่างคลาสเต็มในคอมเมนต์ — Tailwind กวาดไปเป็น candidate แล้ว CSS เตือน)
  */
 const PHASE_BAR: Record<InventoryPeriodPhase, string> = {
   closed: "bg-[var(--status-closed)]",
