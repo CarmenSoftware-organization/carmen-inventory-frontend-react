@@ -8,7 +8,11 @@ import { ApiErrorToaster } from "@/components/api-error-toaster";
 import { PermissionDeniedDialog } from "@/components/permission-denied-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiError } from "@/lib/api-error";
-import { reportApiError, skipsGlobalErrorToast } from "@/lib/api-error-handler";
+import {
+  prefersServerMessage,
+  reportApiError,
+  skipsGlobalErrorToast,
+} from "@/lib/api-error-handler";
 
 export const makeQueryClient = () =>
   new QueryClient({
@@ -19,7 +23,9 @@ export const makeQueryClient = () =>
     mutationCache: new MutationCache({
       onError: (error, _vars, _ctx, mutation) => {
         if (skipsGlobalErrorToast(mutation.meta)) return;
-        reportApiError(error);
+        reportApiError(error, {
+          preferServerMessage: prefersServerMessage(mutation.meta),
+        });
       },
     }),
     defaultOptions: {

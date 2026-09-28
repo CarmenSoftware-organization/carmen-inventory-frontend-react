@@ -151,6 +151,30 @@ export function getUserErrorMessage(
   return key ? t(key) : t("unexpected");
 }
 
+/** ยาวกว่านี้ถือว่าไม่ใช่ประโยคที่ตั้งใจเขียนให้คนอ่าน (มักเป็น trace/SQL) */
+const MAX_SERVER_MESSAGE_LENGTH = 160;
+
+/**
+ * ข้อความจาก backend ที่แสดงบน toast ได้ — ใช้กับหน้าที่ opt-in
+ * `meta.preferServerMessage` เท่านั้น ไม่ใช่ค่าเริ่มต้นของแอป
+ *
+ * คืน `undefined` (ให้ตกไป `getUserErrorMessage`) เมื่อ:
+ * - มี `appCode` — รหัส catalog แปลเป็นภาษาของผู้ใช้ได้ ดีกว่าข้อความอังกฤษดิบ
+ * - เป็น 5xx — `userFacingServerMessage` กรองไว้แล้ว
+ * - หลายบรรทัดหรือยาวเกิน — ลักษณะของ Prisma stack trace ที่เคยหลุดขึ้น toast
+ *
+ * @param err - error ที่จับได้
+ * @returns ข้อความจาก backend หรือ undefined
+ */
+export function getDisplayableServerMessage(err: unknown): string | undefined {
+  if (!(err instanceof ApiError) || err.appCode) return undefined;
+  const msg = err.userFacingServerMessage?.trim();
+  if (!msg || msg.length > MAX_SERVER_MESSAGE_LENGTH || /[\r\n]/.test(msg)) {
+    return undefined;
+  }
+  return msg;
+}
+
 export function getErrorId(err: unknown): string | undefined {
   if (err instanceof ApiError && err.statusCode) {
     const ts = Date.now().toString(36).slice(-6).toUpperCase();
