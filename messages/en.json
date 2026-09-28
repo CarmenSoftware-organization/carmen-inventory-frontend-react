@@ -121,8 +121,6 @@
       "amountFormatDesc": "Language and minimum decimal places for monetary amounts.",
       "quantityFormat": "Quantity Format",
       "quantityFormatDesc": "Language and minimum decimal places for quantities.",
-      "perpageFormat": "Per-Page Format",
-      "perpageFormatDesc": "Language and minimum decimal places for per-page counts.",
       "recipeFormat": "Recipe Format",
       "recipeFormatDesc": "Language and minimum decimal places for recipe quantities.",
       "isActive": "Active",

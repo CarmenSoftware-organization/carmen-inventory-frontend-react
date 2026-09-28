@@ -85,7 +85,6 @@ interface BusinessUnitConfig {
   long_time_format: string;
   short_time_format: string;
   timezone: string;
-  perpage_format: NumberFormat;
   amount_format: NumberFormat;
   quantity_format: NumberFormat;
   recipe_format: NumberFormat;
