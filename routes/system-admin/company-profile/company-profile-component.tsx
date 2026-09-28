@@ -43,6 +43,22 @@ import {
 } from "./company-profile-form-schema";
 
 /**
+ * i18n key (relative to `companyProfile.fields`) ของแต่ละค่า `calculation_method`
+ * ที่รู้จัก — ใช้แปลค่าดิบจาก backend เป็น label ที่แปลแล้วในหน้า view-only
+ * ค่าที่ไม่อยู่ใน map นี้ (unknown/ว่าง) จะ fallback ไปแสดงค่าดิบแทน
+ *
+ * i18n key (relative to `companyProfile.fields`) for each known
+ * `calculation_method` value — translates the raw backend value into a
+ * localized label on the read-only view. A value not in this map (unknown/
+ * empty) falls back to showing the raw value.
+ */
+const CALCULATION_METHOD_LABEL_KEYS: Readonly<Record<string, string>> = {
+  average: "calculationMethodOptions.average",
+  fifo: "calculationMethodOptions.fifo",
+  average_per_location: "calculationMethodOptions.averagePerLocation",
+};
+
+/**
  * หน้า Company Profile (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
  * (จาก `useProfile().defaultBu`) จัดเป็น section ตาม layout settings
  *
@@ -268,7 +284,12 @@ export default function CompanyProfileComponent() {
             <SettingField
               label={t("fields.calculationMethod")}
               description={t("fields.calculationMethodDesc")}
-              value={data.calculation_method}
+              value={
+                data.calculation_method &&
+                CALCULATION_METHOD_LABEL_KEYS[data.calculation_method]
+                  ? tf(CALCULATION_METHOD_LABEL_KEYS[data.calculation_method])
+                  : data.calculation_method
+              }
             />
             <div className="min-w-0 space-y-1">
               <div className="text-foreground text-xs font-semibold">
