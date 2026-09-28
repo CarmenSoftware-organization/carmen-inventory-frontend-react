@@ -20,14 +20,10 @@ Accounting UI
        -> JournalVoucherRepository
             -> current: in-memory mock repository
             -> target: HTTP repository through backend-gateway
-  -> Journal Staging Workbench
-       -> current: in-memory mock repository
-       -> target: asynchronous batch/record/status APIs
 
 Source modules
   -> AP / AR / Inventory / Asset Accounting Event
-  -> Journal Staging
-  -> Group + Map + Validate + Duplicate Check
+  -> Validate + Duplicate Check
   -> Generated Journal Voucher
   -> Optional GL workflow for Manual JV only by default
   -> Posting Engine
@@ -48,7 +44,6 @@ design_only | ui_prototype | frontend_ready | backend_ready | integrated | produ
 | Repository boundary                  | `frontend_ready`                    | Mock implementation only; HTTP adapter pending                                   | `integrated`          |
 | Manual JV lifecycle                  | `ui_prototype`                      | Local transition is not canonical validation/posting                             | `integrated`          |
 | Source-generated JV read-only policy | `frontend_ready`                    | Types, fallback capabilities and source trace exist; backend enforcement pending | `integrated`          |
-| Journal Staging                      | `ui_prototype`                      | Mock batch processing; no worker/revision/error records                          | `integrated`          |
 | Posting/idempotency                  | `backend_ready` per backend runbook | Frontend/runtime integration not verified in this repository                     | `production_verified` |
 | Control-account policy               | `design_only`                       | Account master/backend validation pending                                        | `integrated`          |
 | Source-to-JV trace                   | `frontend_ready`                    | Mock AP source link; canonical response pending                                  | `integrated`          |
@@ -65,15 +60,12 @@ Frontend:
 /accounting/journal-voucher
 /accounting/journal-voucher/new
 /accounting/journal-voucher/:id
-/accounting/journal-staging
-/accounting/settings
 ```
 
 Gateway API:
 
 ```text
 /api/:bu_code/accounting/journal-vouchers
-/api/:bu_code/accounting/journal-staging/...
 /api/:bu_code/accounting/posting-events/...
 /api/:bu_code/accounting/reconciliation/...
 ```
@@ -82,64 +74,7 @@ Frontend constants ใช้ proxy form `/api/proxy/api/:bu_code/accounting/...`
 
 ## 5. Accounting Event contract
 
-ทุก subledger ส่ง canonical event ผ่าน Journal Staging ห้ามสร้าง JV/Ledger Entry โดยตรง
-
-```text
-event:
-  bu_id
-  source_system
-  source_type
-  source_id
-  source_no
-  source_version
-  event_type: post | reverse | correct
-  posting_rule_code
-  posting_date
-  transaction_currency_code
-  functional_currency_code
-  idempotency_key
-  correlation_id
-  payload_hash
-
-lines[]:
-  source_line_id
-  account_role or resolved account_id according to source policy
-  department_id
-  dimensions[]
-  transaction_debit / transaction_credit
-  exchange_rate_snapshot
-  functional_debit / functional_credit
-  tax_posting_ref
-
-control_totals:
-  record_count
-  transaction_totals_by_currency[]
-  functional_debit
-  functional_credit
-```
-
-Response/status:
-
-```text
-accepted_event_id
-staging_batch_id
-staging_attempt_id
-generated_journal_id
-generated_journal_no
-generated_revision
-posting_event_id
-status
-validation_errors[]
-correlation_id
-```
-
-Exact identity default:
-
-```text
-bu_id + source_system + source_type + source_id + source_version + event_type
-```
-
-หรือใช้ deterministic idempotency key ที่มี unique constraint ภายใน BU Retry เดิมต้องคืน event/JV/posting result เดิม
+Source module ต้องเก็บ source identity/version และ idempotency key; JV ที่สร้างจาก source ต้อง link กลับ source และ posting event ได้
 
 ## 6. Manual and source-generated policy
 
@@ -153,11 +88,10 @@ bu_id + source_system + source_type + source_id + source_version + event_type
 ### Source-generated JV
 
 - Source module เป็นเจ้าของ business document, approval และ correction
-- GL แสดง header, lines, mapping snapshot, source version, staging attempt และ posting event แบบ read-only
+- GL แสดง header, lines, source version และ posting event แบบ read-only
 - ห้าม Edit, Copy, Void หรือ Reverse จาก GL UI/API
 - `Open source` นำผู้ใช้กลับ document owner เมื่อ route/permission พร้อม
 - การ correct/reverse ส่ง event/version ใหม่จาก source owner และ link กับ original event/JV
-- ไม่ใช้ GL workflow ซ้ำโดย default; Strict Staging release เป็น accounting control gate ไม่ใช่ source business approval
 - Backend ส่ง `capabilities` เป็น canonical action policy; frontend fallback ใช้เพื่อ safe read-only เท่านั้น
 
 ## 7. Control-account policy
@@ -182,7 +116,6 @@ requires_reconciliation
 | Event                      | Owner               | Result                                   |
 | -------------------------- | ------------------- | ---------------------------------------- |
 | Approve AP Invoice/Payment | AP Workflow         | AP business document พร้อมส่ง event      |
-| Release Strict Staging     | Accounting operator | Generated JV พร้อม submit/post           |
 | Approve Manual JV          | GL Workflow         | Manual JV พร้อม post/schedule            |
 | Post Journal Voucher       | Posting Engine      | Posting Event + immutable Ledger Entries |
 | Correct AP posting         | AP                  | AP correction/reversal event             |
@@ -199,7 +132,7 @@ source_system, source_type, source_id, source_no, source_version
 event_type, posting_rule_code
 is_source_generated
 source_links[]
-staging_batch_id, staging_attempt_id, generated_revision
+generated_revision
 posting_event_id
 capabilities:
   can_edit_accounting_fields
@@ -259,7 +192,7 @@ current_document/current_doc_version when allowed
 dependency
 ```
 
-- Staging/process/posting อาจตอบ `202 Accepted` พร้อม status URL
+- Posting อาจตอบ `202 Accepted` พร้อม status URL
 - Unknown outcome ห้าม blind retry ให้ query ด้วย correlation/idempotency reference
 - Duplicate/idempotent retry คืน original result
 - Per-Journal Processing คืนผลต่อ JV ห้ามซ่อน partial failure ใน Batch status เดียว
@@ -272,7 +205,6 @@ dependency
 - Workflow assigned/not-assigned actions
 - Post failed/retry และ unknown outcome/check status
 - Version conflict โดยไม่ทิ้ง user draft
-- Strict Staging partial success/error/revision states
 - Thai/English, BU timezone, currency precision, keyboard และ mobile overflow
 
 ### Canonical JV UI shell
@@ -286,7 +218,7 @@ dependency
 
 ## 13. Delivery sequence
 
-1. HTTP `JournalVoucherRepository` และ Journal Staging repository adapters
+1. HTTP `JournalVoucherRepository` adapter
 2. Final OpenAPI alignment, server-side directory และ error/capability mapping
 3. Source-generated JV trace/read-only enforcement ทั้ง frontend/backend
 4. Control-account metadata, account lookup filtering และ Posting Engine validation
@@ -301,5 +233,5 @@ dependency
 - Manual/source-generated behavior และ capabilities ถูก backend enforce
 - AP post/retry/reversal ไม่สร้าง JV/Ledger Entry ซ้ำและไม่ทำ open-item/tax state แยกขาดจาก ledger
 - AP control-account balance reconcile กับ AP read model หรือมี actionable exceptions ครบ
-- source → staging attempt → generated JV → posting event → ledger trace ได้สองทาง
+- source → generated JV → posting event → ledger trace ได้สองทาง
 - TypeScript, relevant tests, React Doctor, backend transaction tests และ production-like smoke test ผ่าน

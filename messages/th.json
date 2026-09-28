@@ -1465,6 +1465,14 @@
         "income_statement": "งบกำไรขาดทุน",
         "statistic": "สถิติ"
       },
+      "accountCategory": {
+        "asset": "สินทรัพย์",
+        "liability": "หนี้สิน",
+        "equity": "ส่วนของเจ้าของ",
+        "revenue": "รายได้",
+        "expense": "ค่าใช้จ่าย",
+        "statistic": "สถิติ"
+      },
       "importCarmenGl": {
         "action": "นำเข้าจาก Carmen GL",
         "importing": "กำลังนำเข้า…",

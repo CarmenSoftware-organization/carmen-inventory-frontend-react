@@ -42,6 +42,7 @@ const rows: ChartOfAccount[] = [
     description_2: "ครัวร้อน",
     nature: ACCOUNT_NATURE.DEBIT,
     type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+    category: "asset",
     is_active: true,
   },
 ];

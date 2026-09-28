@@ -1465,6 +1465,14 @@
         "income_statement": "Income statement",
         "statistic": "Statistic"
       },
+      "accountCategory": {
+        "asset": "Asset",
+        "liability": "Liability",
+        "equity": "Equity",
+        "revenue": "Revenue",
+        "expense": "Expense",
+        "statistic": "Statistic"
+      },
       "importCarmenGl": {
         "action": "Import from Carmen GL",
         "importing": "Importing…",

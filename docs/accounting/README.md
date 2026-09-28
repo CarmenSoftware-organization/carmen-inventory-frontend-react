@@ -2,9 +2,11 @@
 
 เอกสารชุดนี้กำหนดฐานของโมดูล Accounting ที่จะทำงานร่วมกับ Carmen Inventory โดยไม่สร้าง master data และ infrastructure ซ้ำโดยไม่จำเป็น
 
-> สถานะ: Phase 1 implementation (dev2) — Foundation และ General Ledger/JV มี backend schema/contract ตามเอกสาร backend แต่ frontend JV/Staging ยังใช้ mock repository ที่แยกผ่าน adapter boundary; Accounts Payable มี interactive UI prototype สำหรับ Dashboard, Invoice และ Payment แต่ยังใช้ browser-local mock repository และยังไม่เชื่อม AP backend; migration/runtime integration verification และ Strict Staging Workbench เต็มรูปแบบยังเป็นงานถัดไป
+> สถานะ: Phase 1 implementation (dev2) — Foundation และ General Ledger/JV มี backend schema/contract ตามเอกสาร backend แต่ frontend JV ยังใช้ mock repository ที่แยกผ่าน adapter boundary; Accounts Payable มี interactive UI prototype สำหรับ Dashboard, Invoice และ Payment แต่ยังใช้ browser-local mock repository และยังไม่เชื่อม AP backend; migration/runtime integration verification ยังเป็นงานถัดไป
 
 ## เอกสาร
+
+สถานะ API เทียบกับ mock ล่าสุด: [Accounting API integration checklist](api-integration-checklist.md)
 
 | เอกสาร                                                                             | เนื้อหา                                                                                                          |
 | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -41,7 +43,6 @@ AP, AR และ Fixed Assets ต้องส่งรายการเข้�
 - Accounting Journal Voucher backend อยู่ใน `apps/micro-business` และเปิดผ่าน `apps/backend-gateway`
 - Frontend route หลักคือ `/accounting/journal-voucher`
 - Workflow เป็น optional ต่อ BU; เมื่อปิดจะไม่สร้างสถานะ approval ที่ไม่จำเป็น
-- Journal Staging ยังคงเป็น technical boundary ตาม Foundation โดย default `standard`; Phase 1 มี Batch/Record API, process validation และ Generate JV endpoint/Workbench ขั้นต้นแล้ว ส่วน normalize/mapping/release worker แบบเต็มจะส่งมอบใน increment ถัดไป
 
 ## ขอบเขตของ repository
 
@@ -59,4 +60,3 @@ Repository นี้เป็น Vite/React SPA และไม่มี applica
 - Accounting เป็นเจ้าของ ledger, posting state, rate snapshot และการปิดงวด
 - รายการที่ post แล้วแก้ไม่ได้ การแก้ต้องทำผ่าน reversal หรือ adjusting journal
 - ทุกยอดต้องอธิบายย้อนกลับถึง source document, ผู้ทำรายการ, approval และ posting event ได้
-- Journal Staging validation ทำงานภายในเสมอ แต่ default `standard` mode ซ่อนเมนูและ auto-generate JV; `strict` mode จึงแสดง Workbench และเพิ่ม manual release gate

@@ -16,6 +16,16 @@ export enum CHART_OF_ACCOUNT_TYPE {
   STATISTIC = "statistic",
 }
 
+export const ACCOUNT_CATEGORIES = [
+  "asset",
+  "liability",
+  "equity",
+  "revenue",
+  "expense",
+  "statistic",
+] as const;
+export type AccountCategory = (typeof ACCOUNT_CATEGORIES)[number];
+
 /** Subledger that owns a control account. Manual JV lines must not use owned accounts. */
 export type CONTROL_ACCOUNT_TYPE =
   | "accounts_payable"
@@ -45,6 +55,7 @@ export interface ChartOfAccount {
   description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
+  category: AccountCategory;
   is_active: boolean;
   control_account_type?: CONTROL_ACCOUNT_TYPE | null;
   manual_posting_allowed?: boolean;
@@ -59,6 +70,7 @@ export interface CreateChartOfAccountDto {
   description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
+  category: AccountCategory;
   is_active: boolean;
   control_account_type?: CONTROL_ACCOUNT_TYPE | null;
   manual_posting_allowed?: boolean;

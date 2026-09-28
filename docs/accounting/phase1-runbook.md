@@ -1,6 +1,6 @@
 # Accounting Phase 1 Runbook
 
-เอกสารนี้ใช้สำหรับ deploy และตรวจสอบ General Ledger / Journal Voucher บน branch `dev2` Backend verification และ frontend integration verification เป็นคนละ gate; frontend JV/Staging ที่ยังใช้ mock repository ห้ามนับว่า runtime API integration สำเร็จ
+เอกสารนี้ใช้สำหรับ deploy และตรวจสอบ General Ledger / Journal Voucher บน branch `dev2` Backend verification และ frontend integration verification เป็นคนละ gate; frontend JV ที่ยังใช้ mock repository ห้ามนับว่า runtime API integration สำเร็จ
 
 Accounts Payable ยังเป็น frontend UI prototype ณ 2026-09-11 และยังไม่รวมอยู่ใน migration/runtime smoke test ด้านล่าง ดูสถานะ, target contract และ AP integration checklist ที่ [Accounts Payable — Implementation Readiness](specs/accounts-payable-implementation-readiness.md)
 
@@ -21,7 +21,7 @@ bun run db:generate
 bun run db:deploy
 ```
 
-Migration ที่เกี่ยวข้องคือ `20260831120000_add_general_ledger_phase1` และสร้าง JV/GL/Staging tables รวมถึง indexes และ idempotency constraints
+Migration ที่เกี่ยวข้องคือ `20260831120000_add_general_ledger_phase1` และสร้าง JV/GL tables รวมถึง indexes และ idempotency constraints
 
 ## 3. Smoke test sequence
 
@@ -30,16 +30,13 @@ Migration ที่เกี่ยวข้องคือ `20260831120000_add_g
 3. เปิด workflow แล้วตรวจ `submitted → approve → posting/posted`
 4. ตรวจ Schedule Post และ `processDue`
 5. ตรวจ Auto-Reverse/Manual Reverse และ linked JV
-6. ตั้ง `accounting_gl.journal_staging_mode = strict`
-7. สร้าง Staging Batch, Process, แก้ duplicate/error แล้ว Generate JV
-8. ตรวจว่า generated JV มี `source_type=batch-generated` และแก้ accounting fields ไม่ได้
 
 ## 4. Verification commands
 
 ```text
 cd apps/micro-business
 bun run build
-bunx vitest run src/accounting/journal-staging/dto/journal-staging.dto.spec.ts src/accounting/journal-voucher/journal-voucher.validation.spec.ts
+bunx vitest run src/accounting/journal-voucher/journal-voucher.validation.spec.ts
 
 cd ../backend-gateway
 bun run build

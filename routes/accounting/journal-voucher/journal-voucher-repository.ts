@@ -5,11 +5,6 @@ import type {
   JournalVoucherInput,
 } from "@/types/journal-voucher";
 
-export interface JournalVoucherSettings {
-  workflow_enabled: boolean;
-  journal_staging_mode: "standard" | "strict";
-}
-
 export type JournalVoucherCommand =
   | "submit"
   | "approve"
@@ -26,7 +21,6 @@ export interface JournalVoucherRepository {
     params?: ParamsDto,
   ): Promise<PaginatedResponse<JournalVoucher>>;
   get(buCode: string, id: string): Promise<JournalVoucher | null>;
-  settings(buCode: string): Promise<JournalVoucherSettings>;
   create(buCode: string, input: JournalVoucherInput): Promise<JournalVoucher>;
   update(
     buCode: string,

@@ -31,7 +31,7 @@ Required backend collaborators
   -> PO / GRN / service acceptance and matching policy
   -> Currency / exchange rate / accounting period
   -> Workflow / permission / activity / attachment services
-  -> Journal Staging and Accounting posting engine
+  -> Accounting posting engine
   -> Tax/WHT register and bank execution adapter when enabled
 ```
 
@@ -99,7 +99,7 @@ Phase 1 ใช้ route เดิมของ frontend เพื่อรัก�
 | Capabilities      | Render only actions returned/allowed                          | Permission, workflow assignment, SoD and state validation        |
 | Matching          | Display source, comparison and exception                      | Fetch source, tolerance evaluation and override authorization    |
 | Workflow          | Display current stage/tasks/history                           | Snapshot definition and execute workflow transition              |
-| Posting           | Display preview and generated JV link                         | Journal Staging, posting transaction and ledger integrity        |
+| Posting           | Display preview and generated JV link                         | Posting transaction and ledger integrity        |
 | Open item         | Display carrying/open/reserved/available amounts              | Lock, reserve, apply, release and restore amounts atomically     |
 | Payment execution | Confirm user intent and display result/uncertainty            | Idempotent submission, status query, callback and reconciliation |
 | Audit             | Display activity timeline                                     | Immutable actor/time/before-after/reason/correlation evidence    |

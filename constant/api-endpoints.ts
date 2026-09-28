@@ -120,18 +120,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}`,
   JOURNAL_VOUCHER_ACTION: (buCode: string, id: string, action: string) =>
     `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}/${toSafePathSegment(action)}`,
-  JOURNAL_VOUCHER_SETTINGS: (buCode: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-vouchers/settings`,
-  JOURNAL_STAGING_BATCHES: (buCode: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-staging/batches`,
-  JOURNAL_STAGING_BATCH: (buCode: string, id: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-staging/batches/${toSafePathSegment(id)}`,
-  JOURNAL_STAGING_BATCH_ACTION: (
-    buCode: string,
-    id: string,
-    action: "process" | "generate",
-  ) =>
-    `/api/proxy/api/${buCode}/accounting/journal-staging/batches/${toSafePathSegment(id)}/${action}`,
   GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>

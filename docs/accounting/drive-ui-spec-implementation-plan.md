@@ -191,7 +191,7 @@ Verification follows `accounts-payable-implementation-readiness.md`; no capabili
 - replace JV mock repository with HTTP adapter
 - bind JV prefix, COA, Department/Cost Center, and Dimension lookups to active/effective master data
 - enforce source-generated JV read-only policy
-- connect AP Accounting Events through Journal Staging
+- connect AP Accounting Events through the posting contract
 - add AP control-account reconciliation drill-down
 - verify schedule, auto-reverse, period lock, idempotency, and source trace
 

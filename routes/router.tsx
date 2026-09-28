@@ -790,16 +790,6 @@ export const router = createBrowserRouter([
                   import("./accounting/journal-voucher/journal-voucher-form.route"),
               },
               {
-                path: "journal-staging",
-                lazy: () =>
-                  import("./accounting/journal-staging/journal-staging.route"),
-              },
-              {
-                path: "settings",
-                lazy: () =>
-                  import("./accounting/settings/accounting-settings.route"),
-              },
-              {
                 path: "template-voucher",
                 lazy: () =>
                   import("./accounting/documents/accounting-document-list.route"),

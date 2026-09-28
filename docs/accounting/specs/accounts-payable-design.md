@@ -110,7 +110,7 @@ Route ต้องอยู่ใต้ `ProtectedShell` และมี section
 | Workflow | optional ต่อ BU + AP document type/payment type; snapshot definition ตอน Submit |
 | Running Code | extend sequence ต่อ BU + document type + fiscal policy เช่น `IV`, `CN`, `DN`, `DP`, `PV` |
 | Attachments | verify/reuse shared file service พร้อม permission, malware/content validation และ retention |
-| Posting | AP ส่ง immutable source payload/version เข้า Journal Staging/posting contract; ห้ามเขียน ledger โดยตรง |
+| Posting | AP ส่ง immutable source payload/version เข้า posting contract; ห้ามเขียน ledger โดยตรง |
 
 ### AP-owned records
 

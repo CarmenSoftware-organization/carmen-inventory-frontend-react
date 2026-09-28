@@ -17,6 +17,8 @@ import {
   CHART_OF_ACCOUNT_TYPES,
   ACCOUNT_NATURE,
   ACCOUNT_NATURES,
+  ACCOUNT_CATEGORIES,
+  type AccountCategory,
   type ChartOfAccount,
 } from "@/types/chart-of-accounts";
 import { createCoaSchema, type CoaFormValues } from "./coa-form-schema";
@@ -34,6 +36,7 @@ type CoaPayload = {
   description_2: string | null;
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
+  category: AccountCategory;
   is_active: boolean;
 };
 
@@ -67,6 +70,7 @@ export function CoaDialog({
               description_2: e.description_2 ?? "",
               nature: e.nature,
               type: e.type,
+              category: e.category,
               is_active: e.is_active,
             }
           : {
@@ -75,6 +79,7 @@ export function CoaDialog({
               description_2: "",
               nature: ACCOUNT_NATURE.DEBIT,
               type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+              category: "asset",
               is_active: true,
             }
       }
@@ -84,6 +89,7 @@ export function CoaDialog({
         description_2: v.description_2 || null,
         nature: v.nature,
         type: v.type,
+        category: v.category,
         is_active: v.is_active,
       })}
     >
@@ -164,6 +170,30 @@ export function CoaDialog({
                       {CHART_OF_ACCOUNT_TYPES.map((value) => (
                         <SelectItem key={value} value={value}>
                           {t(`accountType.${value}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </FieldSelect>
+                )}
+              />
+            </Field>
+            <Field>
+              <FieldLabel required>{tfl("category")}</FieldLabel>
+              <Controller
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FieldSelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={disabled}
+                    error={form.formState.errors.category?.message}
+                    className="h-8 text-sm"
+                  >
+                    <SelectContent>
+                      {ACCOUNT_CATEGORIES.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {t(`accountCategory.${value}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>

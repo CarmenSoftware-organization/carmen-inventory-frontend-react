@@ -24,20 +24,12 @@ _Avoid_: Sheet name, row group, voucher guess
 นโยบายที่ประมวลผล Journal Voucher แต่ละใบใน Journal Batch เป็นอิสระ โดยใบที่ผ่านเดินหน้าต่อได้และใบที่ผิดค้างให้แก้หรือ retry
 _Avoid_: Partial row posting, best-effort posting
 
-**Journal Staging**:
-ขอบเขตภายในที่รับ Accounting Events เพื่อจัดกลุ่ม ตรวจ mapping ตรวจความถูกต้อง และป้องกันข้อมูลซ้ำก่อนสร้าง Journal Voucher โดยจะแสดงเป็นเมนูให้ผู้ใช้จัดการเฉพาะเมื่อเปิด Strict Staging
-_Avoid_: Optional validation, direct ledger posting, Excel buffer
-
-**Journal Staging Mode**:
-การตั้งค่าต่อ Business Unit ที่เลือก `standard` เพื่อซ่อน Staging และสร้าง JV อัตโนมัติหลังตรวจผ่าน หรือ `strict` เพื่อแสดง Workbench และให้ผู้ใช้ release รายการที่ตรวจผ่านก่อนสร้าง JV
-_Avoid_: Bypass validation, workflow mode
-
 **Original Payload**:
-ข้อมูลต้นฉบับที่ Journal Staging รับจาก source และเก็บแบบแก้ไขไม่ได้เพื่อใช้ตรวจสอบเทียบกับ mapped หรือ overridden values
+ข้อมูลต้นฉบับที่ระบบรับจาก source และเก็บแบบแก้ไขไม่ได้เพื่อใช้ตรวจสอบเทียบกับ mapped หรือ overridden values
 _Avoid_: Editable import data, current row values
 
 **Mapping Override**:
-ค่าทางบัญชีที่ผู้มีสิทธิ์กำหนดแทนผลจาก Mapping Rule สำหรับ staged JV โดยไม่แก้ Original Payload และต้องระบุเหตุผล
+ค่าทางบัญชีที่ผู้มีสิทธิ์กำหนดแทนผลจาก Mapping Rule สำหรับ generated JV โดยไม่แก้ Original Payload และต้องระบุเหตุผล
 _Avoid_: Fix source data, silent correction
 
 **Bulk Command**:
@@ -65,7 +57,7 @@ Accounting Event ที่มี source identity, version, event type หรื�
 _Avoid_: Similar journal, repeated amount
 
 **Probable Duplicate**:
-Staged JV ที่มี fingerprint ทางบัญชีคล้ายรายการเดิมและต้องให้ผู้ใช้ตรวจหรือยืนยันเหตุผล แต่ไม่ถูก block โดยอัตโนมัติ
+JV ที่มี fingerprint ทางบัญชีคล้ายรายการเดิมและต้องให้ผู้ใช้ตรวจหรือยืนยันเหตุผล แต่ไม่ถูก block โดยอัตโนมัติ
 _Avoid_: Exact duplicate, guaranteed duplicate
 
 **Declared Control Totals**:
@@ -76,20 +68,12 @@ _Avoid_: Carmen-calculated balance, functional total
 จำนวนและยอดที่ Carmen คำนวณจากข้อมูลที่รับ, จัดกลุ่ม, map, generate และ post เพื่อ reconcile กับ source และแต่ละขั้นของ Batch
 _Avoid_: Source totals, user-entered expected amount
 
-**Staging Attempt**:
-รอบการประมวลผล Journal Batch แบบ asynchronous ที่เก็บผล grouping, mapping, validation และ reconciliation แยกจากรอบก่อนหน้า
-_Avoid_: Page request, overwritten retry
-
-**Batch-Generated Journal Voucher**:
-Journal Voucher ที่เป็น immutable projection จาก Journal Staging และต้องแก้ข้อมูลบัญชีโดยกลับไปแก้ staging/mapping แล้ว regenerate
-_Avoid_: Editable imported JV, detached journal
-
 **Draft Reference**:
-รหัสติดตามชั่วคราวของ staged/generated JV ก่อน Submit ซึ่งไม่ใช่เลขเอกสารบัญชีทางการ
+รหัสติดตามชั่วคราวของ generated JV ก่อน Submit ซึ่งไม่ใช่เลขเอกสารบัญชีทางการ
 _Avoid_: Voucher number, running code
 
 **Mapping Snapshot**:
-สำเนาและ hash ภายในของ Mapping Rule ที่ Staging Attempt ใช้ เพื่ออธิบายผล mapping ย้อนหลังโดยไม่เป็น business version ที่ผู้ใช้ต้องจัดการ
+สำเนาและ hash ภายในของ Mapping Rule ที่การสร้าง JV ใช้ เพื่ออธิบายผล mapping ย้อนหลังโดยไม่เป็น business version ที่ผู้ใช้ต้องจัดการ
 _Avoid_: Approved mapping version, editable rule reference
 
 **Optional Workflow**:
@@ -141,7 +125,7 @@ _Avoid_: User-selected status, informal note, duplicate invoice
 _Avoid_: Acknowledge checkbox, silent tolerance change, PO correction
 
 **Source-Generated Journal Voucher**:
-Journal Voucher ที่เป็น immutable projection จาก Accounting Event ของ AP, AR, Inventory หรือ Asset และ trace กลับ source version, staging attempt และ posting event ได้ การแก้หรือกลับรายการต้องเริ่มจาก source owner
+Journal Voucher ที่เป็น immutable projection จาก Accounting Event ของ AP, AR, Inventory หรือ Asset และ trace กลับ source version และ posting event ได้ การแก้หรือกลับรายการต้องเริ่มจาก source owner
 _Avoid_: Editable draft JV, detached journal, manual correction in GL
 
 **Subledger Control Account**:

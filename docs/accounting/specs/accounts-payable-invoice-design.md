@@ -167,7 +167,7 @@ Cr Trade Accounts Payable                  document payable
 
 - Preview ต้องแสดง transaction currency, rate และ functional amount
 - ผู้ใช้ทั่วไปแก้ generated journal lines ไม่ได้; ต้องแก้ invoice/source แล้ว regenerate ก่อน post
-- Generated JV ส่งผ่าน Journal Staging/posting contract และ link กลับ Invoice
+- Generated JV ส่งผ่าน posting contract และ link กลับ Invoice
 - Post Invoice, create open item, tax detail, source links และ posting event ใน transaction เดียวกัน
 
 ## 9. Lifecycle, Workflow and actions

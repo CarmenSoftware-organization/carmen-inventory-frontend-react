@@ -6,7 +6,7 @@
 
 เอกสารนี้เป็น functional design ยังไม่ใช่ implementation plan หรือ API contract ฉบับสุดท้าย
 
-> Implementation note (2026-09-11): JV และ Journal Staging frontend ปัจจุบันยังใช้ mock repositories แม้ backend schema/contract จะมีงานเริ่มต้นแล้ว Types/hooks ถูกแยกด้วย repository boundary เพื่อสลับเป็น HTTP adapter ในอนาคต ให้ใช้ [General Ledger — Implementation Readiness](general-ledger-implementation-readiness.md) เป็น source of truth สำหรับ integration status, subledger-generated JV และ AP-to-GL contract
+> Implementation note (2026-09-11): JV frontend ปัจจุบันยังใช้ mock repository แม้ backend schema/contract จะมีงานเริ่มต้นแล้ว Types/hooks ถูกแยกด้วย repository boundary เพื่อสลับเป็น HTTP adapter ในอนาคต ให้ใช้ [General Ledger — Implementation Readiness](general-ledger-implementation-readiness.md) เป็น source of truth สำหรับ integration status, subledger-generated JV และ AP-to-GL contract
 
 > Canonical UI baseline (2026-09-11): หน้า Journal Voucher ต้อง reuse detail shell และ interaction pattern ของหน้า Template Voucher เป็นหลัก ได้แก่ toolbar, document summary card, accounting-entry grid, line-detail actions, balance summary และ responsive behavior ห้ามสร้าง JV-specific page shell คู่ขนาน ส่วนที่เพิ่มเฉพาะ JV ให้จำกัดอยู่ที่ status/workflow, schedule/auto-reverse, source trace และ capability-based actions
 
@@ -113,7 +113,7 @@ Saved views/filter sheet ควร reuse framework ของ list pages เม�
 | Workflow/Approval   | optional; resolve toggle และ workflow ตาม BU+journal type                  |
 | Status              | read-only derived state                                                    |
 
-สำหรับ system/subledger-generated JV ต้องเก็บ `source_system`, `source_type`, `source_id`, `source_no`, `source_version`, `event_type`, `posting_rule_code`, `staging_batch_id`, `staging_attempt_id`, `generated_revision` และ `posting_event_id` เพื่อ trace กลับ source และป้องกัน duplicate/revision drift
+สำหรับ system/subledger-generated JV ต้องเก็บ `source_system`, `source_type`, `source_id`, `source_no`, `source_version`, `event_type`, `posting_rule_code`, `generated_revision` และ `posting_event_id` เพื่อ trace กลับ source และป้องกัน duplicate/revision drift
 
 Schedule Post และ Auto-Reverse เป็นอิสระต่อกัน แต่เมื่อเปิดทั้งคู่ต้องผ่าน cross-field validation ตาม Accounting Foundation
 
@@ -125,12 +125,12 @@ Schedule Post และ Auto-Reverse เป็นอิสระต่อกั�
 | ---------------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
 | Edit accounting header/lines | Draft และมี permission       | ห้ามแก้ใน GL ทุกสถานะ                                                             |
 | Workflow                     | GL Optional Workflow         | Source module เป็นเจ้าของ business approval; ห้ามสร้าง GL approval ซ้ำโดย default |
-| Submit/Post                  | ผ่าน GL commands             | Journal Staging/Posting Engine ทำตาม source event และ staging mode                |
+| Submit/Post                  | ผ่าน GL commands             | Posting Engine ทำตาม source event และ policy                |
 | Copy                         | สร้าง Manual JV draft ได้    | ห้าม copy; ให้ copy/correct ที่ source                                            |
 | Reverse/Correct              | GL สร้าง linked reversal ได้ | เริ่มจาก source owner แล้วส่ง reversal/correction event                           |
 | Schedule/Auto-Reverse        | ตั้งใน Manual JV ทีละใบ      | ไม่รับค่าจาก subledger event โดย default                                          |
 
-Strict Journal Staging release เป็น accounting control gate ไม่ใช่การ approve AP Invoice/Payment รอบที่สอง Generated JV ต้องแสดง source trace และ action `Open source`; capability ทุก action มาจาก backend
+Generated JV ต้องแสดง source trace และ action `Open source`; capability ทุก action มาจาก backend
 
 ### UI composition policy
 
@@ -251,7 +251,7 @@ Auto-Reverse ใช้ Workflow toggle ของ reversal journal type:
 
 ชื่อ endpoint เป็นข้อเสนอ ต้อง align กับ backend conventions ก่อน implementation
 
-Phase 1 gateway ใช้ prefix `/api/:bu_code/accounting` และมี Journal Staging endpoints ดังนี้:
+API ด้านล่างเป็นข้อเสนอเดิม ต้องเทียบกับ OpenAPI ปัจจุบันก่อนใช้:
 
 ```text
 GET    /api/:bu_code/accounting/journal-vouchers
@@ -272,15 +272,7 @@ POST   /api/:bu_code/accounting/exchange-rates/resolve
 POST   /api/:bu_code/accounting/budget/check
 ```
 
-```text
-POST /api/:bu_code/accounting/journal-staging/batches                 # 202 Accepted
-GET  /api/:bu_code/accounting/journal-staging/batches
-GET  /api/:bu_code/accounting/journal-staging/batches/:id
-POST /api/:bu_code/accounting/journal-staging/batches/:id/process
-POST /api/:bu_code/accounting/journal-staging/batches/:id/generate
-PUT  /api/:bu_code/accounting/journal-staging/records/:id
-GET  /api/:bu_code/accounting/journal-vouchers/settings
-```
+
 
 Action endpoints ต้องรับ `doc_version` และ idempotency key ตามความเหมาะสม
 
@@ -320,4 +312,4 @@ Frontend ต้องแสดง field errors ที่ line/header และ�
 5. Tax/WHT และ Budget Check อยู่ใน Phase 1 release แรกหรือ feature flag
 6. Dimension definitions มาจาก service/table ใด และ dimension ใดมีอยู่จริงใน Carmen backend
 7. Manual exchange-rate override ใช้ permission และ approval แบบใด
-8. **Decided:** JV ที่มาจาก AP/AR/Inventory/Asset เป็น immutable projection และดูอย่างเดียวใน GL การแก้/Reverse/Correct เริ่มจาก source owner แล้วส่ง source version/event ใหม่ผ่าน Journal Staging
+8. **Decided:** JV ที่มาจาก AP/AR/Inventory/Asset เป็น immutable projection และดูอย่างเดียวใน GL การแก้/Reverse/Correct เริ่มจาก source owner แล้วส่ง source version/event ใหม่ผ่าน posting contract

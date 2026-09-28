@@ -159,7 +159,7 @@ Journal Batch หนึ่งชุดอยู่ใน accounting period เ�
 - Batch ต้อง resolve และเก็บ `accounting_period_id` ก่อน generate JV
 - Event ที่อยู่นอก period ของ Batch ต้องถูก reject หรือแยกไป Batch ใหม่ ห้ามเปลี่ยน Journal Date เพื่อให้เข้ากับ Batch
 - Payload ที่ข้ามหลาย periods ต้องแยก Batch อัตโนมัติและใช้ `ingestion_correlation_id` เดียวกัน
-- Period status เปลี่ยนระหว่าง staging กับ posting ได้ จึงต้องตรวจ period ใหม่ต่อ JV ตอน post
+- Period status เปลี่ยนระหว่างการสร้าง JV กับ posting ได้ จึงต้องตรวจ period ใหม่ต่อ JV ตอน post
 - Control totals และ reconciliation ของ Batch ต้องระบุ accounting period ชัดเจน
 
 Excel/XLSX เป็นเพียงหนึ่ง input adapter สำหรับ compatibility ไม่ใช่ domain model หรือช่องทางหลักของ Accounting
@@ -183,19 +183,19 @@ Batch B001
 
 ### Per-Journal Processing
 
-Journal Batch ใช้ policy `per_journal`: แต่ละ JV เป็น validation, generation และ posting transaction boundary อิสระ ใบที่ผ่านสามารถเดินหน้าต่อได้ ส่วนใบที่ผิดค้างใน staging เพื่อแก้และ retry
+Journal Batch ใช้ policy `per_journal`: แต่ละ JV เป็น validation, generation และ posting transaction boundary อิสระ ใบที่ผ่านสามารถเดินหน้าต่อได้ ส่วนใบที่ผิดต้องแก้ที่ต้นทางก่อน retry
 
 - ห้าม partial success ภายใน JV; header, lines, ledger และ related records ต้องสำเร็จหรือ rollback ทั้งใบ
 - Batch ที่มีทั้งสำเร็จและล้มเหลวใช้สถานะ `partially_completed`
 - UI/API ต้องแสดง error แยกตาม `journal_group_key` และห้ามข้ามรายการผิดแบบเงียบ ๆ
 - Retry เฉพาะ JV ที่ผิดต้องใช้ idempotency key เดิมและไม่สร้าง JV/ledger ของใบที่สำเร็จแล้วซ้ำ
-- Batch ต้องเก็บ control totals อย่างน้อยจำนวน JV, จำนวน lines, total debit และ total credit ในแต่ละช่วง: received, staged, generated และ posted
+- Batch ต้องเก็บ control totals อย่างน้อยจำนวน JV, จำนวน lines, total debit และ total credit หลังสร้างและหลัง post
 - การ approve หรือ post แบบ batch เป็นเพียงคำสั่งหลายรายการ แต่ผลลัพธ์และ audit ต้องบันทึกแยกต่อ JV
 - Schedule Post และ Auto-Reverse ตั้งค่าได้เฉพาะภายใน JV ทีละใบ ไม่ใช่ Batch setting และไม่มี bulk action สำหรับสองค่านี้
 
 ### Bulk Commands
 
-Journal Batch Workbench รองรับ `Submit`, `Approve` และ `Post/Retry Post` หลาย JV พร้อมกัน แต่ Bulk Command ไม่เปลี่ยน transaction boundary จาก `per_journal`; `Approve` แสดงเฉพาะ JV ที่เปิด Workflow
+Bulk JV actions รองรับ `Submit`, `Approve` และ `Post/Retry Post` หลาย JV พร้อมกัน แต่ Bulk Command ไม่เปลี่ยน transaction boundary จาก `per_journal`; `Approve` แสดงเฉพาะ JV ที่เปิด Workflow
 
 - ก่อนยืนยันต้องแสดงจำนวน JV, จำนวน lines, total debit/credit และรายการที่จะถูก skipped
 - ระบบตรวจ permission, workflow stage เมื่อเปิดใช้, segregation of duties, period, balance และ validation แยกต่อ JV
@@ -204,66 +204,6 @@ Journal Batch Workbench รองรับ `Submit`, `Approve` และ `Post/R
 - Post ใช้ idempotency key แยกต่อ JV และ retry เฉพาะใบที่ล้มเหลวได้
 - Bulk Command ห้ามรวม Schedule Post และ Auto-Reverse
 - Activity log บันทึกทั้ง bulk command correlation ID และ action/result ของ JV แต่ละใบ
-
-### Optional Journal Staging operation mode
-
-ทุก Accounting Event ต้องผ่าน Journal Staging pipeline ภายในเพื่อ grouping, mapping, validation, duplicate check และ audit เสมอ แต่ Business Unit เลือกได้ว่าจะให้ผู้ใช้เห็นและควบคุม Staging หรือไม่
-
-```text
-gl.journal_staging_mode = standard | strict
-default = standard
-```
-
-Setting นี้อยู่ใน Accounting Settings/Default Setting ระดับ BU และแก้ได้เฉพาะ Accounting Admin การเปลี่ยนค่าต้องมี Activity Log
-
-| Mode | Navigation/UI | เมื่อ validation ผ่าน | เมื่อ validation ไม่ผ่าน |
-| --- | --- | --- | --- |
-| `standard` (default) | ซ่อนเมนู Journal Staging | auto-generate JV แล้วแสดงใน Journal Voucher | ไม่สร้าง JV; เก็บ exception ภายในและแจ้ง source/integration monitor/notification |
-| `strict` | แสดงเมนู Journal Staging และ Workbench | ค้างสถานะ `ready` จนผู้ใช้ตรวจและ Release/Generate JV | แสดง errors ใน Workbench ให้แก้/revalidate ตาม source policy |
-
-ดังนั้น Journal Staging เป็น mandatory technical boundary แต่เป็น optional operational step การตั้งค่าไม่มีโหมดที่ข้าม mapping, validation, reconciliation, duplicate check หรือ posting engine
-
-```text
-Accounting Event
--> Journal Staging
--> Group + Map + Validate + Duplicate Check
--> [standard: Auto-generate | strict: Review and Release]
--> Generate Journal Voucher
--> Approval or Auto-approval
--> Post or Schedule Post
-```
-
-ใน `standard` mode ผู้ใช้จะเห็นเหมือน Accounting Event เข้า Journal Voucher โดยตรง แต่ backend ยังสร้าง Staging Attempt และเก็บ audit/control totals ก่อน auto-generate JV คำว่า direct ในบริบทนี้จึงไม่ใช่การเขียน JV หรือ ledger โดยข้าม validation
-
-- `standard` mode เปิด `auto_generate` โดยนิยาม แต่ `auto_submit` เป็น policy แยกและ default เป็น false
-- `strict` mode ห้าม auto-generate; ต้อง Release/Generate จาก Workbench หลัง validation/reconciliation ผ่าน
-- `auto_post` ต้องขึ้นกับ source, journal type, workflow และ segregation-of-duties policy
-- Staging ต้องเก็บ original payload, source identity/version, mapping version, validation result และ idempotency key
-- การแก้ Mapping Rule แล้ว revalidate ต้องไม่ทำ payload ต้นฉบับหรือ audit trail หาย
-- Posting engine รับเฉพาะ generated JV ที่ผ่าน validation และ satisfy Optional Workflow policy แล้ว ไม่รับ source payload โดยตรง
-- Setting เป็น BU-level configuration และต้อง snapshot ลง Staging Attempt
-- การเปลี่ยน mode มีผลกับ Accounting Events/Staging Attempts ใหม่เท่านั้น ห้าม auto-release หรือย้อนเปลี่ยน attempt เดิม
-- เมื่อเปลี่ยนจาก `standard` เป็น `strict` เมนู Workbench จะแสดง retained staging history และ unresolved exceptions เดิมตาม retention/permission
-- เมื่อเปลี่ยนจาก `strict` เป็น `standard` รายการที่ค้างอยู่ยังคง strict behavior จน resolve; ห้าม generate อัตโนมัติจากการเปลี่ยน setting
-- ใน `standard` mode ผู้ส่ง manual/import เห็น validation result และดาวน์โหลด error report จากหน้าต้นทาง ส่วน system/API source รับผลผ่าน integration response/status และ notification โดยไม่ต้องแสดง Staging navigation
-- Event ที่ fail validation ต้องไม่ปรากฏเป็น Draft JV เปล่าและห้ามถูกนับเป็น JV ที่สร้างสำเร็จ
-
-### Correction policy by source
-
-สิทธิ์แก้ข้อมูลใน Journal Staging แยกตาม source:
-
-| Source | แก้ staged values | วิธีแก้เมื่อผิด |
-| --- | --- | --- |
-| Manual entry, Copy/Paste, CSV, Excel | ได้ | `standard`: แก้จาก import/result surface; `strict`: แก้ใน Workbench โดยเก็บ before/after และ actor |
-| Inventory, AP, AR, Fixed Assets | แก้ Original Payload ไม่ได้ | แก้ source document แล้ว resend ด้วย source version ใหม่ |
-| POS/PMS/external API | แก้ Original Payload ไม่ได้ | source resend หรือผู้มีสิทธิ์ทำ Mapping Override |
-| Mapping Rule | ไม่แก้ Original Payload | แก้ rule แล้ว revalidate payload เดิมโดยเก็บ Mapping Snapshot ใหม่ |
-
-- Original Payload จาก system/API source เป็น immutable
-- Mapping Override ต้องมี permission, reason, before/after, actor และ timestamp
-- Generated JV ต้อง trace ได้ทั้ง original value, mapped value, mapping version และ override
-- Source version ใหม่ต้องผ่าน duplicate/supersession rules; ห้ามทับ staging/JV เดิมแบบไม่มีประวัติ
-- JV ที่ post แล้วไม่เปลี่ยนตาม source version ใหม่ การแก้ต้องสร้าง reversal/adjustment ตาม accounting policy
 
 ### Duplicate and idempotency policy
 
@@ -281,28 +221,12 @@ bu_id + source_system + source_type + source_id + source_version + event_type
 Source สามารถส่ง deterministic `idempotency_key` ที่มี unique constraint ภายใน BU แทน composite identity ได้
 
 - Inventory, AP, AR, Fixed Assets และ external API ต้องส่ง deterministic idempotency key
-- Retry ใช้ key เดิมและห้ามสร้าง staging/JV/ledger ซ้ำ
+- Retry ใช้ key เดิมและห้ามสร้าง JV/ledger ซ้ำ
 - Correction/resend ใช้ source version ใหม่และ link ไป event version ก่อนหน้า
 - Manual entry, Copy/Paste, CSV และ Excel สร้าง `submission_id` ใหม่ แต่ระบบคำนวณ canonical fingerprint จาก BU, period, group key, journal date, accounts, amounts และ dimensions
 - Fingerprint match เป็น probable duplicate ไม่ใช่ exact duplicate เพราะ recurring/accrual อาจเหมือนกันโดยชอบด้วยเหตุผล
 - ผู้ใช้ที่ยืนยัน probable duplicate ต้องระบุ reason และระบบเก็บ actor/timestamp
 - Re-upload ไฟล์เดิมด้วย file hash และ mapping version เดิมต้องเตือนระดับ Batch แต่ไม่ใช้ชื่อไฟล์เป็น duplicate key
-
-### Staging and payload retention
-
-| Record | Default retention |
-| --- | --- |
-| Original/normalized payload ที่สร้าง posted JV | เท่าอายุเอกสารบัญชี; default 10 ปี หรือ policy ของประเทศ/ลูกค้า |
-| Mapping version, payload hash, source/JV trace | เท่า ledger retention |
-| Excel/CSV source file | ตาม secure attachment/file-retention policy และ audit requirement |
-| Failed/abandoned staging ที่ยังไม่สร้าง JV | 90 วัน แล้ว archive/delete ตาม customer policy |
-| Exact-duplicate/idempotency record ที่เคย generate JV | ห้ามลบก่อน ledger retention หมด |
-
-- Retention เป็น deployment/customer policy ผู้ใช้ทั่วไปเปลี่ยนไม่ได้
-- Original Payload ต้องผ่าน allowlist/redaction และห้ามเก็บ API token, password หรือ secret ที่ไม่เกี่ยวกับบัญชี
-- File storage ต้องควบคุม permission, encryption, content validation และ download audit
-- การ purge ต้องเก็บ payload hash, source identity, final disposition, purge timestamp และ audit event
-- Legal hold ต้องระงับการ purge สำหรับ Batch/JV ที่เกี่ยวข้องได้
 
 ### Control totals and reconciliation
 
@@ -312,7 +236,7 @@ Journal Batch เก็บ control totals สองชุด:
 - `computed_control_totals` — Carmen คำนวณใหม่ในแต่ละ stage
 
 ```text
-received -> staged -> generated -> submitted -> posted
+received -> generated -> submitted -> posted
 ```
 
 ขั้นต่ำต้อง reconcile:
@@ -329,51 +253,31 @@ System/API integration ต้องส่ง declared record count เป็น�
 - Declared กับ computed ไม่ตรงให้ Batch เป็น `reconciliation_failed` และ block generate/post จน resolve
 - Functional totals เป็นค่าที่ Carmen คำนวณเท่านั้น source ห้าม override
 - Reconciliation ต้อง trace จาก Batch -> `journal_group_key` -> JV -> Journal Lines ได้
-- Retry/reprocess ต้องเก็บ control totals แยกตาม attempt ห้ามทับประวัติเดิม
-
-### Asynchronous staging pipeline
-
-ทุก input channel ใช้ asynchronous staging pipeline เดียวกัน ไม่ผูกอายุงานกับ HTTP request หรือจำนวนแถวที่ browser render ได้
-
-1. Backend รับ payload/file metadata และสร้าง Journal Batch
-2. API ตอบ `202 Accepted` พร้อม `batch_id` และ status URL
-3. Background workers ทำ normalize, split BU/period, group, map, duplicate check, validate และ reconcile
-4. `standard` auto-generates valid groups; `strict` แสดง progress/result ใน Workbench และรอ Release
-5. Invalid groups เก็บ exception; ผู้ใช้หรือ source แก้ตาม correction policy แล้วสร้าง Staging Attempt ใหม่
-6. Generate JV เฉพาะ groups ที่ผ่านและยังไม่เคย generate สำเร็จ
-
-- Browser ทำ pre-validation สำหรับ Copy/Paste หรือไฟล์เล็กได้เพื่อ feedback แต่ผล backend เป็น canonical
-- Preview ใช้ server-side pagination/virtualization ห้ามโหลด Batch ทั้งหมดเข้า browser
-- Cancel ได้ก่อน generate JV; หลัง generate ต้องใช้ lifecycle action ที่กำหนด
-- Retry เริ่มจาก stage ที่ผิดและไม่ประมวลผล JV ที่สำเร็จแล้วซ้ำ
-- ทุก attempt เก็บ input hash, mapping version, progress, errors, control totals, started/finished timestamp และ worker/correlation ID
-- Background workers ต้องใช้ idempotency, bounded concurrency, distributed lock และ resumable jobs
-- File/request limits เป็น operational configuration ไม่ใช่ domain limit ของจำนวน Journal Lines
 
 ### Generated-JV edit policy
 
-Batch-Generated Journal Voucher เป็น immutable projection จาก Journal Staging แม้ยังไม่ Submit ผู้ใช้ห้ามแก้ header/lines ที่มีผลต่อ accounting, mapping, currency, dimensions หรือ control totals ตรงหน้า JV
+Source-generated Journal Voucher เป็น immutable projection ของ source document แม้ยังไม่ Submit ผู้ใช้ห้ามแก้ header/lines ที่มีผลต่อ accounting, mapping, currency, dimensions หรือ control totals ตรงหน้า JV
 
-- หากข้อมูลผิด ให้กลับไปแก้ staged value หรือ Mapping Override ตาม source correction policy แล้ว revalidate/regenerate
+- หากข้อมูลผิด ให้แก้ source document แล้วสร้าง correction/reversal ตาม source policy
 - Generated JV revision เดิมเปลี่ยนเป็น `superseded` และ link ไป revision ใหม่; ห้ามลบหรือทับข้อมูลเดิม
-- Original Payload, mapping version, override, Staging Attempt และ generated revision ต้อง trace ถึงกันได้
+- Source identity/version และ generated JV ต้อง trace ถึงกันได้
 - Fields ที่ไม่กระทบ accounting เช่น internal note หรือ attachment แก้ได้ตาม permission โดยไม่ทำให้ control totals เปลี่ยน
 - Manual JV ที่สร้างทีละใบแก้ header/lines ได้ขณะเป็น Draft
 - หลัง Submit การแก้ต้องผ่าน workflow return-to-draft เมื่อเปิด Workflow หรือ lifecycle action ที่มี audit; หลัง Post ใช้ reversal/adjustment เท่านั้น
 
 ### Voucher-number allocation
 
-- Staging และ generated-but-not-submitted JV ใช้ `draft_reference` เช่น `BATCH-202608-001/G00042/R2`
+- JV ที่ยังไม่ Submit ใช้ `draft_reference` แยกจากเลขเอกสารทางการ
 - Running-code engine ออก `voucher_no` ทางการแบบ atomic เมื่อ Submit สำเร็จ
 - Submit retry ด้วย idempotency key เดิมต้องคืน voucher number เดิม
-- Validation failure, cancelled staging และ superseded revision ก่อน Submit ไม่ใช้ voucher number ทางการ
+- Validation failure ก่อน Submit ไม่ใช้ voucher number ทางการ
 - หลังออกเลขแล้วห้ามคืนหรือนำเลขไปใช้ใหม่; Reject/return-to-draft ยังคงเลขเดิม
 - Running-code sequence แยกตาม BU, journal type/prefix และ fiscal policy ที่กำหนด
 - Activity/audit ต้อง link `draft_reference`, voucher number และ Batch/group key ได้
 
 ### Input channels
 
-ทุกช่องทางต่อไปนี้สร้าง Accounting Event และผ่าน Journal Staging pipeline ภายใน พฤติกรรม auto-generate หรือรอตรวจขึ้นกับ Journal Staging Mode:
+ช่องทางที่สร้าง Journal Voucher ต้องผ่าน backend validation และ posting policy เดียวกัน:
 
 | Channel | Use case | หมายเหตุ |
 | --- | --- | --- |
@@ -384,90 +288,10 @@ Batch-Generated Journal Voucher เป็น immutable projection จาก Jour
 | Allocation | กระจายยอดตามเปอร์เซ็นต์, revenue, headcount หรือฐานอื่น | เก็บ allocation rule/version และผลคำนวณ |
 | Bulk-entry Wizard | Generate lines/JVs จาก pattern ที่ผู้ใช้กำหนด | เหมาะกับหลาย departments/dimensions |
 | Copy/Paste Grid | วางช่วงข้อมูลจาก Excel/Google Sheets | Validate ใน browser เพื่อ feedback ได้ แต่ backend เป็น source of truth |
-| JSON/CSV ingestion | Integration และข้อมูลปริมาณมาก | ประมวลผล asynchronous ผ่าน staging |
+| JSON/CSV ingestion | Integration และข้อมูลปริมาณมาก | Backend ต้องตรวจข้อมูลก่อนสร้าง JV |
 | Excel/XLSX import | Compatibility และ ad-hoc migration | เป็น adapter เท่านั้น ใช้ pipeline เดียวกับ channel อื่น |
 
 AI สามารถแนะนำ account, mapping หรือ anomaly ได้ แต่ไม่ใช่ input channel ที่มีสิทธิ์ post เอง ผลทุกอย่างต้องเป็น suggestion ที่ผู้ใช้ยืนยันและผ่าน validation/approval ตามปกติ
-
-### Journal Batch model
-
-```text
-JournalBatch
-- id / batch_no / bu_id / accounting_period_id
-- ingestion_correlation_id
-- source_channel / source_system / source_reference
-- submission_id / original_file_id / original_payload_hash
-- status
-- declared_control_totals / computed_control_totals
-- total_records / total_groups / total_jvs / total_lines
-- succeeded_count / failed_count / skipped_count
-- current_attempt_id
-- created_at / created_by / completed_at
-
-JournalStagedRecord
-- id / batch_id / source_record_no
-- source_type / source_id / source_version / event_type
-- idempotency_key
-- journal_group_key
-- original_payload / normalized_payload
-- mapped_values / mapping_snapshot_hash
-- override_values / override_reason / overridden_by
-- canonical_fingerprint
-- validation_status / validation_errors / warnings
-- generated_journal_id / generated_revision
-```
-
-Batch status model:
-
-```text
-received
--> queued
--> processing
-    -> reconciliation_failed
-    -> validation_failed
-    -> ready
-ready
--> generating
-    -> partially_completed
-    -> completed
-received | queued | validation_failed | ready
--> cancelled
-```
-
-Approval และ posting status ไม่ควรถูกยุบเป็น status เดียวของ Batch เพราะใช้ `per_journal`; Batch แสดง derived summary ของ JV states แทน
-
-### Mapping Rule governance
-
-Mapping Rule ไม่ใช้ approval workflow และไม่มี business version ที่ผู้ใช้ต้องจัดการ ผู้มี permission แก้ rule แล้วมีผลกับ Staging Attempt ใหม่ทันที
-
-- Backend เก็บ internal revision/hash และ Mapping Snapshot อัตโนมัติทุกครั้งที่ save/use
-- Staging Attempt เก็บ rule identity, revision/hash และ snapshot ที่ใช้
-- Rule ที่เปลี่ยนไม่มีผลต่อ attempt เดิมจนผู้ใช้สั่ง Revalidate
-- Generated/Submitted/Posted JV ไม่เปลี่ยนย้อนหลังตาม rule ใหม่
-- Activity Log เก็บ before/after, actor และ timestamp ของการแก้ rule
-- Mapping Override ต่อ staged JV ยังต้องมี permission และ reason
-
-### Journal Batch Workbench
-
-Workbench แสดงใน navigation เฉพาะเมื่อ BU ตั้ง `gl.journal_staging_mode = strict` และผู้ใช้มี permission ที่เกี่ยวข้อง ใน `standard` mode ระบบยังเก็บ Batch/Attempt เหมือนเดิมแต่ซ่อนเมนู
-
-Workbench ต้องรองรับ:
-
-- เลือก input channel และสร้าง/เปิด Batch
-- Upload, Copy/Paste หรือดูสถานะ API/system ingestion
-- แสดง progress ของแต่ละ Staging Attempt
-- แสดง declared/computed control totals และ reconciliation variance
-- Filter ตาม valid, warning, error, duplicate, generated และ posted
-- Drill down Batch -> `journal_group_key` -> staged records -> generated JV
-- Map source fields และ preview normalized/mapped values
-- แก้ manual staged values หรือ Mapping Override ตาม source policy
-- Revalidate เฉพาะ groups ที่แก้และสร้าง attempt ใหม่โดยไม่ทับประวัติ
-- Generate JV สำหรับ valid groups
-- Bulk Submit/Approve/Post พร้อมผลแยกต่อ JV
-- Retry failed JVs โดยไม่สร้างรายการสำเร็จแล้วซ้ำ
-- Export error/reconciliation report สำหรับการแก้ที่ source
-
-Workbench ห้ามมี Batch Schedule Post, Batch Auto-Reverse หรือการแก้ accounting fields ของ Batch-Generated JV
 
 ## 6. Core domain model
 
@@ -698,11 +522,6 @@ Auto-Reverse เป็นคำสั่งระดับ Journal Voucher เ�
 - `gl.jv.void`
 - `gl.jv.view_attachments`
 - `gl.jv.manage_attachments`
-- `gl.staging.view` (มีผลต่อเมนูเมื่อเปิด Strict Staging)
-- `gl.staging.correct`
-- `gl.staging.override_mapping`
-- `gl.staging.release`
-- `gl.settings.manage_staging_mode`
 - `gl.period.close`
 - `gl.period.reopen`
 

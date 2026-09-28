@@ -104,8 +104,6 @@ export interface JournalVoucher extends JournalVoucherInput {
   workflow_enabled_snapshot: boolean;
   is_source_generated?: boolean;
   posting_event_id?: string | null;
-  staging_batch_id?: string | null;
-  staging_attempt_id?: string | null;
   generated_revision?: number | null;
   source_links?: JournalVoucherSourceLink[];
   capabilities?: JournalVoucherCapabilities;

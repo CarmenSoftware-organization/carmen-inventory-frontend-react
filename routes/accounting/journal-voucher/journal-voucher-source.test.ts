@@ -52,6 +52,7 @@ describe("Journal Voucher source policy", () => {
       description_1: "Accounts payable control",
       nature: ACCOUNT_NATURE.CREDIT,
       type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+      category: "liability",
       is_active: true,
       control_account_type: "accounts_payable",
       manual_posting_allowed: false,

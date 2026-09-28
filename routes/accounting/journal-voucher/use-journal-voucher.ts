@@ -8,8 +8,6 @@ import type {
 import { journalVoucherMockRepository } from "./journal-voucher-mock-repository";
 import type { JournalVoucherCommand } from "./journal-voucher-repository";
 
-export { MOCK_SETTINGS_KEY } from "./journal-voucher-mock-repository";
-
 // Swap this implementation for an HTTP JournalVoucherRepository when the
 // gateway contract is deployed; page components remain unchanged.
 const repository = journalVoucherMockRepository;
@@ -20,8 +18,6 @@ export const JOURNAL_VOUCHER_QUERY_KEYS = {
     [...JOURNAL_VOUCHER_QUERY_KEYS.root(buCode), "list", params] as const,
   detail: (buCode: string, id?: string) =>
     [...JOURNAL_VOUCHER_QUERY_KEYS.root(buCode), "detail", id] as const,
-  settings: (buCode: string) =>
-    [...JOURNAL_VOUCHER_QUERY_KEYS.root(buCode), "settings"] as const,
 };
 
 function useRepositoryContext() {
@@ -33,14 +29,6 @@ export function useJournalVouchers(params?: ParamsDto) {
   return useQuery({
     queryKey: JOURNAL_VOUCHER_QUERY_KEYS.list(context.buCode, params),
     queryFn: () => context.repository.list(context.buCode, params),
-  });
-}
-
-export function useJournalVoucherSettings() {
-  const context = useRepositoryContext();
-  return useQuery({
-    queryKey: JOURNAL_VOUCHER_QUERY_KEYS.settings(context.buCode),
-    queryFn: () => context.repository.settings(context.buCode),
   });
 }
 

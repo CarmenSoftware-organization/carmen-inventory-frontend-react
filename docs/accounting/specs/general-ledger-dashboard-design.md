@@ -7,7 +7,7 @@
 - KPI: Unposted JV, Posting failures, Scheduled today และ Auto-reversals due
 - Posting health: สัดส่วน draft/submitted/scheduled/posted/failed
 - Subledger posting backlog แยก AP, AR, Inventory และ Asset พร้อม oldest event age
-- Journal Staging exceptions, source events ที่ยังไม่สร้าง JV และ source-to-JV trace coverage
+- Source events ที่ยังไม่สร้าง JV และ source-to-JV trace coverage
 - Period-close readiness: checklist พร้อม owner และ due state
 - Action queue: posting error, unbalanced interface batch, reversal และ accrual review
 - Reconciliation: total debit/credit, subledger control accounts และ variance

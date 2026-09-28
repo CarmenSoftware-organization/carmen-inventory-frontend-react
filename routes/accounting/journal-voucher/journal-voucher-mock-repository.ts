@@ -16,7 +16,6 @@ import {
   sourceLinksForJournal,
 } from "./journal-voucher-source";
 
-export const MOCK_SETTINGS_KEY = "carmen-accounting-mock-settings";
 const stateByBu = new Map<string, JournalVoucher[]>();
 const clone = <T>(value: T): T => structuredClone(value);
 
@@ -75,8 +74,6 @@ const seed = (): JournalVoucher[] => [
     posting_rule_code: "AP_INVOICE_STANDARD",
     is_source_generated: true,
     posting_event_id: "posting-ap-1-v1",
-    staging_batch_id: "mock-batch-ap-1",
-    staging_attempt_id: "mock-attempt-ap-1",
     generated_revision: 1,
     schedule_post: false,
     scheduled_post_at: null,
@@ -236,14 +233,6 @@ export const journalVoucherMockRepository: JournalVoucherRepository = {
   async get(buCode, id) {
     const journal = state(buCode).find((item) => item.id === id);
     return journal ? clone(withDerivedFields(journal)) : null;
-  },
-
-  async settings() {
-    const mode = globalThis.window?.localStorage.getItem(MOCK_SETTINGS_KEY);
-    return {
-      workflow_enabled: false,
-      journal_staging_mode: mode === "standard" ? "standard" : "strict",
-    };
   },
 
   async create(buCode, input) {
