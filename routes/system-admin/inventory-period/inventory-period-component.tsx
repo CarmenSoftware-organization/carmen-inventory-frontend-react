@@ -20,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -51,6 +52,13 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useProfile } from "@/hooks/use-profile";
+import { InventoryPeriodTimeline } from "./inventory-period-timeline";
+import { todayDateInput } from "./inventory-period-phase";
+
+/** จำนวนรอบที่เปิดอยู่ที่ปุ่ม "เติมรอบ" จะเติมให้ครบ */
+const GENERATE_TARGET = 12;
 
 export default function InventoryPeriodComponent() {
   const generateNext = useGenerateNextInventoryPeriod();
@@ -58,6 +66,9 @@ export default function InventoryPeriodComponent() {
   const isMobile = useIsMobile();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const { currentPeriod } = useProfile();
+  const today = todayDateInput();
   const [editInventoryPeriod, setEditInventoryPeriod] = useState<InventoryPeriod | null>(null);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const t = useTranslations("systemAdmin.inventoryPeriod");
@@ -142,6 +153,20 @@ export default function InventoryPeriodComponent() {
     }
   };
 
+  // แถบไทม์ไลน์และจำนวนรอบที่ปุ่ม "เติมรอบ" จะสร้าง ต้องเห็นรอบ **ทั้งหมด**
+  // ไม่ใช่หน้าปัจจุบันของตาราง — รอบมีปีละ 12 แถว ดึงทั้งหมดได้สบาย
+  const { data: allData } = useInventoryPeriod({ perpage: -1 });
+  const allPeriods = allData?.data ?? [];
+  // backend เติมรอบที่เปิดอยู่ให้ครบ count ไม่ใช่สร้างเพิ่ม count รอบ
+  // (micro-business inventory-period.service.ts generateNextPeriods)
+  const openCount = allPeriods.filter((p) => p.status === "open").length;
+  const toCreate = Math.max(0, GENERATE_TARGET - openCount);
+
+  const openEdit = (period: InventoryPeriod) => {
+    setEditInventoryPeriod(period);
+    setDialogOpen(true);
+  };
+
   const periods = useInfiniteScroll ? grid.items : (data?.data ?? []);
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
@@ -152,10 +177,9 @@ export default function InventoryPeriodComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (period) => {
-      setEditInventoryPeriod(period);
-      setDialogOpen(true);
-    },
+    onEdit: openEdit,
+    currentPeriodId: currentPeriod?.id,
+    today,
   });
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -172,49 +196,7 @@ export default function InventoryPeriodComponent() {
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
-              variant="outline"
-              disabled={generateNext.isPending}
-              onClick={() => {
-                generateNext.mutate(
-                  { count: 12, start_day: 1 },
-                  {
-                    onSuccess: () =>
-                      toast.success(
-                        tt("createSuccess", { entity: t("entity") }),
-                      ),
-                  },
-                );
-              }}
-              className="hidden sm:inline-flex"
-            >
-              <CalendarPlus aria-hidden="true" />
-              {t("generateNext")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <Button
-              size="sm"
+              className="flex-1 sm:flex-none"
               onClick={() => {
                 setEditInventoryPeriod(null);
                 setDialogOpen(true);
@@ -223,36 +205,36 @@ export default function InventoryPeriodComponent() {
               <Plus aria-hidden="true" />
               {t("add")}
             </Button>
+            {/* งานรอง (เติมรอบ/ส่งออก/พิมพ์) อยู่ในเมนูเดียวกันทุกขนาดจอ — หน้า config
+                ที่เปิดเดือนละครั้งไม่ควรมีปุ่มน้ำหนักเท่ากันสี่ปุ่มแย่งสายตา */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
+                  className="size-11 shrink-0 sm:size-8"
                   aria-label={tc("aria.moreActions")}
                 >
                   <MoreHorizontal aria-hidden="true" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="min-w-60">
                 <DropdownMenuItem
-                  disabled={generateNext.isPending}
-                  onSelect={() =>
-                    generateNext.mutate(
-                      { count: 12, start_day: 1 },
-                      {
-                        onSuccess: () =>
-                          toast.success(
-                            tt("createSuccess", { entity: t("entity") }),
-                          ),
-                      },
-                    )
-                  }
+                  disabled={generateNext.isPending || toCreate === 0}
+                  onSelect={() => setGenerateOpen(true)}
                 >
                   <CalendarPlus aria-hidden="true" />
-                  {t("generateNext")}
+                  <span className="flex flex-col">
+                    {t("generateNext")}
+                    {toCreate === 0 && (
+                      <span className="text-muted-foreground text-xs">
+                        {t("generateNothing")}
+                      </span>
+                    )}
+                  </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleExport} disabled={isExporting}>
                   {isExporting ? (
                     <Loader2 className="animate-spin" aria-hidden="true" />
                   ) : (
@@ -260,7 +242,7 @@ export default function InventoryPeriodComponent() {
                   )}
                   {isExporting ? tc("exporting") : tc("export")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
+                <DropdownMenuItem onSelect={() => globalThis.print()}>
                   <Printer aria-hidden="true" />
                   {tc("print")}
                 </DropdownMenuItem>
@@ -268,6 +250,16 @@ export default function InventoryPeriodComponent() {
             </DropdownMenu>
           </div>
         </div>
+
+        {allPeriods.length > 0 && (
+          <InventoryPeriodTimeline
+            periods={allPeriods}
+            currentPeriodId={currentPeriod?.id}
+            currentFiscalYear={currentPeriod?.fiscal_year}
+            today={today}
+            onSelect={openEdit}
+          />
+        )}
 
         <ListToolbar
           variant="row"
@@ -295,10 +287,9 @@ export default function InventoryPeriodComponent() {
                   <InventoryPeriodCard
                     key={p.id}
                     item={p}
-                    onEdit={(period) => {
-                      setEditInventoryPeriod(period);
-                      setDialogOpen(true);
-                    }}
+                    onEdit={openEdit}
+                    isCurrent={p.id === currentPeriod?.id}
+                    today={today}
                   />
                 ))}
               </div>
@@ -348,6 +339,26 @@ export default function InventoryPeriodComponent() {
           period={editInventoryPeriod}
         />
       </Suspense>
+
+      <ConfirmDialog
+        open={generateOpen}
+        onOpenChange={setGenerateOpen}
+        title={t("generateTitle")}
+        description={t("generateDesc", { open: openCount, create: toCreate })}
+        confirmIcon={<CalendarPlus aria-hidden="true" />}
+        isPending={generateNext.isPending}
+        onConfirm={() =>
+          generateNext.mutate(
+            { count: GENERATE_TARGET, start_day: 1 },
+            {
+              onSuccess: () => {
+                setGenerateOpen(false);
+                toast.success(tt("createSuccess", { entity: t("entity") }));
+              },
+            },
+          )
+        }
+      />
 
       <SaveViewDialog
         open={saveViewDialogOpen}
