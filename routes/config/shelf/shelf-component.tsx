@@ -32,7 +32,6 @@ export default function ShelfComponent() {
       useList={useShelf}
       useDelete={useDeleteShelf}
       useTable={useShelfTable}
-      permissionPrefix="configuration.shelf"
       pageKey={LIST_PAGE_KEYS.SHELF}
       filterFields={SHELF_FILTER_FIELDS}
       defaultSort="code:asc"

@@ -25,7 +25,6 @@ export default function ExtraCostComponent() {
       useList={useExtraCost}
       useDelete={useDeleteExtraCost}
       useTable={useExtraCostTable}
-      permissionPrefix="configuration.extra_cost"
       pageKey={LIST_PAGE_KEYS.EXTRA_COST}
       filterFields={EXTRA_COST_FILTER_FIELDS}
       defaultSort="name:asc"

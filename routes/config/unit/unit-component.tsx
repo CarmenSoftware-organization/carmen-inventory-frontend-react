@@ -18,7 +18,6 @@ export default function UnitComponent() {
       useList={useUnit}
       useDelete={useDeleteUnit}
       useTable={useUnitTable}
-      permissionPrefix="product_management.unit"
       pageKey={LIST_PAGE_KEYS.UNIT}
       filterFields={UNIT_FILTER_FIELDS}
       exportColumns={[
