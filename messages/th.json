@@ -32,7 +32,12 @@
       "info": "ข้อมูลเพิ่มเติม",
       "infoDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับหน่วยธุรกิจ",
       "calculationMethod": "วิธีคำนวณต้นทุน",
-      "calculationMethodDesc": "วิธีคิดต้นทุนสินค้าคงคลัง (เช่น average, FIFO)",
+      "calculationMethodDesc": "วิธีคิดต้นทุนสินค้าคงคลัง (average, FIFO หรือเฉลี่ยแยกตาม Location)",
+      "calculationMethodOptions": {
+        "average": "เฉลี่ย",
+        "fifo": "FIFO",
+        "averagePerLocation": "เฉลี่ยแยกตาม Location"
+      },
       "defaultCurrencyId": "สกุลเงินเริ่มต้น",
       "defaultCurrencyIdDesc": "สกุลเงินเริ่มต้นของหน่วยธุรกิจ",
       "docVersion": "เวอร์ชันเอกสาร",

@@ -5,7 +5,7 @@ import type { BusinessUnitConfigItem } from "@/types/business-unit";
 export interface ConfigOption {
   value: string;
   labelKey: string;
-  visibleWhenCalcMethod?: string;
+  visibleWhenCalcMethod?: string | readonly string[];
 }
 
 /**
@@ -63,7 +63,7 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
           {
             value: "average",
             labelKey: "config.siCostFromOptions.average",
-            visibleWhenCalcMethod: "average",
+            visibleWhenCalcMethod: ["average", "average_per_location"],
           },
           {
             value: "last_receiving",
@@ -198,7 +198,9 @@ export function groupConfigForRender(
 /**
  * คืน options ที่ควรแสดงใน dropdown — ตัด option ที่มี visibleWhenCalcMethod
  * ไม่ตรงกับ calculationMethod ยกเว้น option ที่ value === currentValue
- * (คงค่าที่ backend เก็บไว้ ไม่ทำข้อมูลหาย)
+ * (คงค่าที่ backend เก็บไว้ ไม่ทำข้อมูลหาย) — visibleWhenCalcMethod รับได้ทั้ง
+ * string เดี่ยว (ต้องตรงเป๊ะ) หรือ array (แสดงเมื่อ calculationMethod ตรงตัวใดตัวหนึ่ง)
+ * ไม่มี visibleWhenCalcMethod เลย = แสดงเสมอ (ไม่มีเงื่อนไข)
  *
  * @param options - จาก registry (ConfigOption[])
  * @param calculationMethod - BU.calculation_method (อาจเป็น null)
@@ -209,10 +211,15 @@ export function resolveConfigOptions(
   calculationMethod: string | null | undefined,
   currentValue: string,
 ): ConfigOption[] {
-  return options.filter(
-    (o) =>
-      !o.visibleWhenCalcMethod ||
-      o.visibleWhenCalcMethod === calculationMethod ||
-      o.value === currentValue,
-  );
+  return options.filter((o) => {
+    if (!o.visibleWhenCalcMethod) return true;
+    if (o.value === currentValue) return true;
+    if (Array.isArray(o.visibleWhenCalcMethod)) {
+      return (
+        calculationMethod != null &&
+        o.visibleWhenCalcMethod.includes(calculationMethod)
+      );
+    }
+    return o.visibleWhenCalcMethod === calculationMethod;
+  });
 }

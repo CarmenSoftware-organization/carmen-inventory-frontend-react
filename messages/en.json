@@ -32,7 +32,12 @@
       "info": "Info",
       "infoDesc": "Additional information about the business unit.",
       "calculationMethod": "Costing Method",
-      "calculationMethodDesc": "Inventory costing method (e.g. average, FIFO).",
+      "calculationMethodDesc": "Inventory costing method (average, FIFO, or average per location).",
+      "calculationMethodOptions": {
+        "average": "Average",
+        "fifo": "FIFO",
+        "averagePerLocation": "Average per location"
+      },
       "defaultCurrencyId": "Default Currency",
       "defaultCurrencyIdDesc": "The default currency for this unit.",
       "docVersion": "Document Version",
