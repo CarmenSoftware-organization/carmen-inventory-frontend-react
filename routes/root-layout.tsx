@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
+import { BuCurrencyBanner } from "@/components/bu-currency-banner";
 import { CommandPalette } from "@/components/command-palette";
 import { StatusBar } from "@/components/footer/status-bar";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
@@ -29,6 +30,8 @@ export default function RootLayout() {
         {/* แดงเห็นทุกคน (ไม่ใช่แค่แอดมิน) เพราะคนที่บันทึกไม่ได้ต้องรู้ว่าทำไม — ดู
             SeatQuotaBannerHost ใน components/seat-quota-banner.tsx */}
         <SeatQuotaBannerHost />
+        {/* ขึ้นทุกคนเมื่อ BU ไม่มี default currency ที่ใช้ได้ (ยอดเงิน fallback เป็น THB) */}
+        <BuCurrencyBanner />
         <div
           id="main-content"
           className="m-3 flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4"

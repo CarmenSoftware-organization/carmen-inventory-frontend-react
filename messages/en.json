@@ -5233,5 +5233,11 @@
     "outsideOpenPeriod": "This document is dated outside the open period ({from} – {to}). Pick the date it should carry.",
     "useOpenPeriodDate": "Move it into the open period ({date})",
     "useDocumentDate": "Keep the date on the document ({date})"
+  },
+  "buCurrency": {
+    "missing": "Business unit {bu} has no default currency set — amounts are shown in THB until one is set.",
+    "invalid": "The default currency of business unit {bu} no longer exists — amounts are shown in THB until it is fixed.",
+    "goToSettings": "Set it in Company Profile",
+    "contactAdmin": "Please contact your administrator."
   }
 }
