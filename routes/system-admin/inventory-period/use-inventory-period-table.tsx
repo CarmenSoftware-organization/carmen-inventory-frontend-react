@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
@@ -10,6 +11,7 @@ import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { INVENTORY_PERIOD_STATUS_CONFIG } from "@/constant/inventory-period";
+import { getInventoryPeriodPhase } from "./inventory-period-phase";
 
 interface UseInventoryPeriodTableOptions {
   periods: InventoryPeriod[];
@@ -17,6 +19,10 @@ interface UseInventoryPeriodTableOptions {
   params: ParamsDto;
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
   onEdit: (period: InventoryPeriod) => void;
+  /** id ของรอบปัจจุบันจาก `useProfile().currentPeriod` */
+  currentPeriodId?: string;
+  /** วันนี้ `YYYY-MM-DD` ใช้ตัดสินว่ารอบไหนค้างปิด */
+  today: string;
 }
 
 export function useInventoryPeriodTable({
@@ -25,6 +31,8 @@ export function useInventoryPeriodTable({
   params,
   tableConfig,
   onEdit,
+  currentPeriodId,
+  today,
 }: UseInventoryPeriodTableOptions) {
   const t = useTranslations("systemAdmin.inventoryPeriod");
   const { dateFormat } = useProfile();
@@ -33,88 +41,63 @@ export function useInventoryPeriodTable({
     {
       accessorKey: "period",
       header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={t("period")}
-          className="justify-center"
-        />
+        <DataGridColumnHeader column={column} title={t("period")} />
       ),
-      cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("period")}
-        </CellAction>
-      ),
-      size: 140,
-      meta: { cellClassName: "text-center" },
+      cell: ({ row }) => {
+        const p = row.original;
+        const isCurrent = p.id === currentPeriodId;
+        const isOverdue = getInventoryPeriodPhase(p, today) === "overdue";
+        return (
+          // data-slot = หลุดจาก line-clamp ของ DataGrid ซึ่งตั้งลูกเป็น -webkit-box
+          // จน flex/gap หาย (data-grid-table.tsx ตัวครอบ clamp)
+          <div data-slot="period-cell" className="flex items-center gap-2">
+            <CellAction onClick={() => onEdit(p)}>
+              <span className="tabular-nums">{p.period}</span>
+            </CellAction>
+            {isCurrent && (
+              <span className="bg-primary/10 text-primary rounded px-1.5 py-0.5 text-xs font-medium">
+                {t("current")}
+              </span>
+            )}
+            {isOverdue && (
+              <span className="text-warning-ink inline-flex items-center gap-1 text-xs font-medium">
+                <AlertTriangle className="size-3.5" aria-hidden="true" />
+                {t("overdue")}
+              </span>
+            )}
+          </div>
+        );
+      },
+      size: 240,
     },
     {
-      accessorKey: "fiscal_year",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={t("fiscalYear")}
-          className="justify-center"
-        />
-      ),
-      size: 120,
-      meta: { cellClassName: "text-center" },
-    },
-    {
-      accessorKey: "fiscal_month",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={t("fiscalMonth")}
-          className="justify-center"
-        />
-      ),
-      size: 120,
-      meta: { cellClassName: "text-center" },
-    },
-    {
+      // ปี/เดือนบัญชีซ้ำกับรหัสรอบ (`2026-05`) จึงไม่มีคอลัมน์ของตัวเอง — ยังอยู่ใน
+      // export ครบ ส่วนช่วงวันที่รวมเป็นคอลัมน์เดียว sort ตาม start_at
       accessorKey: "start_at",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("startAt")} />
+        <DataGridColumnHeader column={column} title={t("dateRange")} />
       ),
-      cell: ({ row }) => formatDate(row.getValue("start_at"), dateFormat),
-      size: 140,
-    },
-    {
-      accessorKey: "end_at",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("endAt")} />
+      cell: ({ row }) => (
+        <span className="tabular-nums">
+          {formatDate(row.original.start_at, dateFormat)}
+          <span className="text-muted-foreground px-1.5">–</span>
+          {formatDate(row.original.end_at, dateFormat)}
+        </span>
       ),
-      cell: ({ row }) => formatDate(row.getValue("end_at"), dateFormat),
-      size: 140,
+      size: 260,
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={t("status")}
-          className="justify-center"
-        />
+        <DataGridColumnHeader column={column} title={t("status")} />
       ),
       cell: ({ row }) => {
         const status = row.getValue("status") as InventoryPeriodStatus;
         const config =
           INVENTORY_PERIOD_STATUS_CONFIG[status] ?? INVENTORY_PERIOD_STATUS_CONFIG.open;
-        return (
-          <StatusIconLabel
-            status={status}
-            label={config.label}
-            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
-            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
-            className="flex w-full justify-center"
-          />
-        );
+        return <StatusIconLabel status={status} label={config.label} />;
       },
-      size: 100,
-      meta: {
-        cellClassName: "text-center",
-        headerClassName: "text-center",
-      },
+      size: 120,
     },
   ];
 
