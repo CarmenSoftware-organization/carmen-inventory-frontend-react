@@ -9,9 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { findAccountingSection, moduleList } from "@/constant/module-list";
 import {
@@ -79,6 +76,15 @@ export function SideMain() {
       ? findAccountingSection(pathname)
       : activeModule;
   const visibleSubs = useVisibleModules(sidebarModule?.subModules ?? []);
+  const activeSub = visibleSubs
+    .filter(
+      (sub) => pathname === sub.path || pathname.startsWith(sub.path + "/"),
+    )
+    .reduce<ModuleWithAccess | undefined>(
+      (best, sub) =>
+        !best || sub.path.length > best.path.length ? sub : best,
+      undefined,
+    );
 
   if (!sidebarModule) {
     return null;
@@ -132,15 +138,13 @@ export function SideMain() {
         <SidebarGroup className="pt-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu>
             {visibleSubs.map((sub) => {
-              const onPath =
-                pathname === sub.path || pathname.startsWith(sub.path + "/");
               // อยู่หน้าของลูกตัวไหนอยู่ไหม — ลูกมี path ของตัวเองซึ่งซ้อนอยู่ใต้
               // path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออก
               // จะสว่างพร้อมกันสองอัน
               const activeChild = sub.subModules?.find(
                 (c) => pathname === c.path || pathname.startsWith(c.path + "/"),
               );
-              const isActive = onPath && !activeChild;
+              const isActive = activeSub === sub && !activeChild;
               // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
               // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
               const content = (
@@ -190,57 +194,6 @@ export function SideMain() {
                     >
                       {navAction(sub, t(sub.name), content)}
                     </SidebarMenuButton>
-                    {sub.subModules && sub.subModules.length > 0 && (
-                      <SidebarMenuSub className="group-data-[collapsible=icon]:hidden">
-                        {sub.subModules.map((child) => {
-                          const childActive =
-                            pathname === child.path ||
-                            (child.path !== sub.path &&
-                              pathname.startsWith(child.path + "/"));
-                          const childContent = (
-                            <>
-                              <child.icon
-                                aria-hidden="true"
-                                className="size-3.5"
-                              />
-                              <span>{t(child.name)}</span>
-                              {child.locked && (
-                                <Lock
-                                  className="ml-auto size-3 opacity-70"
-                                  aria-hidden
-                                />
-                              )}
-                            </>
-                          );
-                          return (
-                            <SidebarMenuSubItem key={child.path}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={childActive}
-                              >
-                                {child.locked || child.denied ? (
-                                  <button
-                                    type="button"
-                                    className="w-full opacity-50"
-                                    onClick={() =>
-                                      dispatchPermissionDenied(
-                                        child.permission,
-                                        undefined,
-                                        child.locked ? "license" : "permission",
-                                      )
-                                    }
-                                  >
-                                    {childContent}
-                                  </button>
-                                ) : (
-                                  <Link to={child.path}>{childContent}</Link>
-                                )}
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
-                      </SidebarMenuSub>
-                    )}
                   </SidebarMenuItem>
 
                   {/* เมนูย่อยอีกชั้น — เยื้องเข้าไปและซ่อนตอนย่อ sidebar เป็นไอคอน

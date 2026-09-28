@@ -8,6 +8,7 @@ import {
 } from "./ap-mock-repository";
 import type { ApPayment } from "@/types/accounts-payable";
 import { IntlProvider } from "use-intl";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import messages from "@/messages/en.json";
 
 const state = vi.hoisted(() => ({
@@ -37,17 +38,19 @@ vi.mock("@/components/ui/date-picker", () => ({
 
 function mount(path: string) {
   return render(
-    <IntlProvider locale="en" messages={messages}>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route path="/payment/:id" element={<ApPaymentDetail />} />
-          <Route
-            path="/accounting/accounts-payable/payment"
-            element={<h1>Payment directory</h1>}
-          />
-        </Routes>
-      </MemoryRouter>
-    </IntlProvider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <IntlProvider locale="en" messages={messages}>
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path="/payment/:id" element={<ApPaymentDetail />} />
+            <Route
+              path="/accounting/accounts-payable/payment"
+              element={<h1>Payment directory</h1>}
+            />
+          </Routes>
+        </MemoryRouter>
+      </IntlProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -93,6 +96,19 @@ describe("Payment document interaction", () => {
     expect(
       screen.queryByRole("button", { name: "Add method" }),
     ).not.toBeInTheDocument();
+  });
+  it("confirms immediate posting when workflow is disabled", async () => {
+    const repository = createApMockRepository("AP-UI-TEST");
+    const draft = await repository.paymentAction("pv-1", "return", 1);
+    state.payment = await repository.savePayment(
+      { ...draft, workflow_enabled: false },
+      draft.id,
+      draft.doc_version,
+    );
+    mount("/payment/pv-1");
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit & post" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("Post payment?");
   });
   it("renders recoverable loading errors", () => {
     state.error = true;

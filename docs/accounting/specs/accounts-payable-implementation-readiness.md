@@ -61,7 +61,7 @@ production_verified migration, security, observability and operational checks pa
 | Payment proposal/grouping         | `ui_prototype` | Creates one local group; does not return multiple proposals               | `integrated`                                    |
 | Payment Voucher/WHT/FX preview    | `ui_prototype` | Decimal calculation exists for preview; backend is not source of truth    | `integrated`                                    |
 | Payment approval queue            | `ui_prototype` | Derived from document lifecycle, not workflow assignments                 | `integrated`                                    |
-| Release/execution/posting         | `ui_prototype` | Local mock collapses execution and posting                                | `integrated` with explicit posting-point policy |
+| Payment posting/JV/application    | `ui_prototype` | Local mock has no canonical atomic posting                                | `integrated` at Submit/Post or final approval   |
 | Open-item reservation/application | `ui_prototype` | Local mutation only; no database locking/concurrency                      | `integrated`                                    |
 | Permission/SoD                    | `design_only`  | Capabilities derive from lifecycle, not authenticated grants              | `integrated`                                    |
 | Attachments                       | `design_only`  | Read-only placeholder; shared file contract unverified                    | optional capability gate                        |
@@ -134,14 +134,14 @@ Payment
   createPayment(command)
   updatePayment(id, command)
   getPaymentPostingPreview(id, version)
-  submit / approve / return / reject / release
-  getExecutionStatus(id, correlationId)
-  retryExecution / retryPost / cancel / reverse
+  submitPost / approve / return / reject
+  retryPost / cancel / reverse
+  getExecutionStatus(id, correlationId) when bank adapter is enabled
 
 Shared
   getActivity(documentType, id)
   batchApprove(command)
-  batchRelease(command)
+  batchPost(command) when batch posting is enabled
 ```
 
 ### 6.1 List contract
@@ -234,31 +234,23 @@ Settlement (`unpaid | partially_paid | paid`), tax, match และ workflow เ
 ```text
 draft
   -> submitted          workflow enabled
-  -> ready_to_release   workflow disabled
+  -> posting            workflow disabled; validated Submit/Post
 submitted
   -> draft              return/reject outcome
-  -> ready_to_release   final approval
-ready_to_release | execution_failed
-  -> processing         release/execute
-processing
-  -> executed
-  -> execution_failed
-executed
-  -> posting
+  -> posting            final approval
 posting
   -> posted
   -> post_failed
 posted
-  -> reconciled         bank/reconciliation axis
   -> reversed           linked reversal
 ```
 
 ข้อบังคับ:
 
-- Final Approval ห้าม execute หรือ post โดยอัตโนมัติ เว้นแต่มี explicit BU/payment-method policy ที่ backend snapshot และ UI แสดงชัดก่อนยืนยัน
-- Release, Retry Execution, Retry Post, Cancel และ Reverse เป็นคนละ command
+- Decision 2026-09-28 (โอม): เมื่อไม่มี LOA, Submit/Post ที่ validate ผ่านต้อง post/JV/apply ทันที; เมื่อมี LOA, final approval ต้อง post/JV/apply ทันที ตาม AP Payment FRD v2.16
+- Retry Post, Cancel และ Reverse เป็นคนละ command; bank execution เป็นแกนติดตามแยก
 - Bank execution status และ accounting lifecycle ต้องไม่เก็บรวมเป็น status เดียว
-- Open-item application ถือว่าสำเร็จตาม configured posting point เท่านั้น; approval อย่างเดียวห้ามเปลี่ยน Invoice เป็น paid
+- Open-item application สำเร็จพร้อม posting เท่านั้น; intermediate approval ห้ามเปลี่ยน Invoice เป็น paid
 
 ## 8. Phase 1 decision defaults
 
@@ -271,9 +263,9 @@ posted
 | Invoice scope         | Standard Invoice ทั้ง PO-based และ non-PO                                                                  |
 | Deposit/CN/DN         | รองรับ schema/reference ที่จำเป็น แต่ full standalone lifecycle เป็น Phase 1.5                             |
 | Invoice posting point | หลัง Submit เมื่อ workflow ปิด หรือหลัง final approval เมื่อ workflow เปิด                                 |
-| Payment approval      | ทำให้เป็น `ready_to_release`; ไม่ถือว่าจ่ายหรือ post แล้ว                                                  |
+| Payment approval      | Intermediate step ยังไม่ post; final approval post/JV/apply ทันทีเมื่อ validation ผ่าน                     |
 | Payment execution     | Phase 1 รองรับ controlled manual execution reference หาก bank adapter ยังไม่พร้อม                          |
-| Payment posting point | กำหนดต่อ payment method; default หลัง confirmed execution                                                  |
+| Payment posting point | Submit/Post เมื่อ workflow ปิด หรือ final approval เมื่อ workflow เปิด ตาม decision 2026-09-28            |
 | Reservation           | เริ่มเมื่อ Payment Draft ถูก save และมี expiry/revalidation policy ฝั่ง backend                            |
 | Currency              | หนึ่ง PV ต่อหนึ่ง vendor legal entity และ payment currency; cross-currency deferred                        |
 | Jurisdiction          | Thailand profile เป็น first configured policy แต่ schema/status ไม่ hardcodeชื่อแบบประเทศไทยใน core domain |
@@ -308,7 +300,7 @@ UI ห้ามแสดง seed/fallback amount เมื่อ backend error �
 1. AP schema, running code, repository HTTP adapter และ server-side directory
 2. Invoice duplicate control, PO/non-PO validation, matching snapshot, tax detail, workflow และ posting/open item
 3. Payment proposal grouping, reservation, Payment Voucher, WHT/FX preview และ workflow
-4. Explicit release/execution/posting, retry/idempotency, application/settlement และ reversal
+4. Atomic Submit/Post หรือ final approval → JV/application/settlement, retry/idempotency และ reversal
 5. Dashboard/aging/tax exceptions จาก canonical read model พร้อม AP-to-GL reconciliation
 6. Permission/SoD, audit, observability, migration และ operational runbook
 
@@ -319,7 +311,7 @@ UI ห้ามแสดง seed/fallback amount เมื่อ backend error �
 - Vendor statement reconciliation
 - Payment run/calendar, remittance advice และ early-payment discount
 - WHT/Input VAT register export และ Thailand electronic tax integration เมื่อพร้อม
-- Payment batch approve/release และ cheque lifecycle เมื่อมี use case ยืนยัน
+- Payment batch approve/post และ cheque lifecycle เมื่อมี use case ยืนยัน
 
 ### Deferred
 
@@ -371,8 +363,8 @@ Integration smoke sequence:
 2. Submit แบบ workflow off/on และยืนยันว่า posting/open item/JV เกิดครั้งเดียว
 3. สร้าง Payment proposal จากหลาย vendor/currency และยืนยันว่าแยกกลุ่มครบโดยไม่ทิ้ง selection เงียบ ๆ
 4. Save Draft reservation สอง session บน Invoice เดียวกันและตรวจ available amount/concurrency
-5. Approve แล้ว Invoice ยังไม่ paid; Release/Execute/Post ตาม policy จึงเปลี่ยน settlement
-6. จำลอง execution success, failed และ unknown; retry ไม่สร้าง bank instruction/WHT/application/JV ซ้ำ
+5. Intermediate approval ยังไม่ paid; final approval หรือ Submit/Post (เมื่อไม่มี workflow) เปลี่ยน settlement และสร้าง JV ครั้งเดียว
+6. จำลอง posting success, failed และ unknown; retry ไม่สร้าง WHT/application/JV ซ้ำ และแยก bank execution status
 7. Partial/full payment และ reversal ทำให้ open amount/AP control account ถูกต้อง
 8. Dashboard outstanding เท่ากับ aging/open items และ AP control account reconcile กับ GL
 9. ตรวจ BU isolation, maker-checker, masked bank data และ unauthorized drill-down

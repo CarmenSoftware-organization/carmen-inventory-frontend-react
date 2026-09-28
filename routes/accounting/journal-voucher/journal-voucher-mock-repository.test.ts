@@ -105,4 +105,32 @@ describe("Journal Voucher mock repository boundary", () => {
       await journalVoucherMockRepository.get("BU-B", created.id),
     ).toBeNull();
   });
+
+  it("saves an unbalanced draft but requires balance to submit", async () => {
+    const input = manualInput();
+    input.lines[1].credit = "90.00";
+    const draft = await journalVoucherMockRepository.create("BU-A", input);
+    expect(draft.total_debit).toBe("100.00");
+    expect(draft.total_credit).toBe("90.00");
+    await expect(
+      journalVoucherMockRepository.action("BU-A", draft.id, "submit", {
+        doc_version: draft.doc_version,
+      }),
+    ).rejects.toThrow("balanced");
+    input.lines[1].credit = "100.00";
+    const updated = await journalVoucherMockRepository.update(
+      "BU-A",
+      draft.id,
+      draft.doc_version,
+      input,
+    );
+    expect(updated.total_credit).toBe("100.00");
+    expect(
+      (
+        await journalVoucherMockRepository.action("BU-A", updated.id, "submit", {
+          doc_version: updated.doc_version,
+        })
+      ).jv_status,
+    ).toBe("posted");
+  });
 });

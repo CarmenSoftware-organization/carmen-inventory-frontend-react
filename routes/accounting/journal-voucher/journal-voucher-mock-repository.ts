@@ -1,4 +1,5 @@
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
+import { addDecimal, compareDecimal } from "../accounts-payable/ap-decimal";
 import type {
   JournalVoucher,
   JournalVoucherAction,
@@ -199,6 +200,13 @@ function toJournalLines(
   }));
 }
 
+function journalTotals(lines: JournalVoucherLine[]) {
+  return {
+    total_debit: addDecimal(lines.map((item) => item.base_debit)),
+    total_credit: addDecimal(lines.map((item) => item.base_credit)),
+  };
+}
+
 export const journalVoucherMockRepository: JournalVoucherRepository = {
   async list(buCode, params?: ParamsDto) {
     const search = String(params?.search ?? "").toLowerCase();
@@ -252,8 +260,7 @@ export const journalVoucherMockRepository: JournalVoucherRepository = {
       jv_date: input.journal_date,
       jv_type: input.journal_type,
       base_currency_id: input.functional_currency_id,
-      total_debit: "0.00",
-      total_credit: "0.00",
+      ...journalTotals(toJournalLines(input)),
       workflow_enabled_snapshot: false,
       is_source_generated: isSourceGenerated({
         source_type: input.source_type,
@@ -278,6 +285,7 @@ export const journalVoucherMockRepository: JournalVoucherRepository = {
       jv_date: input.journal_date,
       base_currency_id: input.functional_currency_id,
       lines: toJournalLines(input, current.lines),
+      ...journalTotals(toJournalLines(input, current.lines)),
     };
     replace(buCode, next);
     return clone(withDerivedFields(next));
@@ -288,6 +296,12 @@ export const journalVoucherMockRepository: JournalVoucherRepository = {
     if (!current) throw new Error("Journal Voucher not found");
     assertVersion(current.doc_version, input.doc_version);
     assertCommandAllowed(current, command);
+    if (
+      command === "submit" &&
+      (current.lines.length === 0 ||
+        compareDecimal(current.total_debit, current.total_credit) !== 0)
+    )
+      throw new Error("Journal Voucher must be balanced before Submit");
     const status =
       command === "submit"
         ? current.workflow_enabled_snapshot

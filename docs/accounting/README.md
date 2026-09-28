@@ -22,6 +22,7 @@
 | [Accounts Payable — Invoice](specs/accounts-payable-invoice-design.md)             | Functional design ของ Invoice, matching, tax, open item และ posting                                              |
 | [Accounts Payable — Payment](specs/accounts-payable-payment-design.md)             | Functional design ของ Payment Voucher, WHT/FX, approval, execution และ settlement                                |
 | [Phase 1 Runbook](phase1-runbook.md)                                               | ขั้นตอน migration, smoke test และ verification สำหรับ dev2                                                       |
+| [Drive UI Specs — Implementation Plan](drive-ui-spec-implementation-plan.md)         | แผนต่อเนื่องและ delta จาก Drive ล่าสุดถึง 2026-09-27 รวม AR FRD v1.07, AP Invoice v4.5.06 และ AP Payment v2.16 |
 
 ## ลำดับการส่งมอบ
 

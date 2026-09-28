@@ -49,7 +49,7 @@ Mockup เป็น feature และ UX reference เท่านั้น ต�
 - Open amount, partial settlement และ paid state
 - Payment proposal จาก invoice ที่มีสิทธิ์จ่าย โดย group ตาม BU, vendor และ payment currency
 - Payment Voucher (PV), invoice application, WHT, bank/payment method และ FX realization
-- Save Draft, Submit, optional Workflow, release/execute และ post payment แบบ idempotent
+- Save Draft, Submit/Post เมื่อไม่มี Workflow หรือ final approval เมื่อมี Workflow แล้วสร้าง JV/ตัดหนี้ทันทีแบบ idempotent ตาม AP Payment FRD v2.16
 - Payment approval queue พร้อม Approve, Return/Request Clarification และ Reject ตาม Workflow
 - Invoice/Payment Activity Log, optimistic concurrency ด้วย `doc_version` และ source-to-JV trace
 - AP Aging และ due-date summary จาก posted open items
@@ -146,11 +146,10 @@ Vendor invoice / PO / GRN
   -> AP open item
   -> payment proposal groups eligible open items
   -> Payment Voucher draft
-  -> optional approval
-  -> release/execute payment
-  -> post AP clearing, WHT, bank and FX
-  -> apply open items
-  -> paid/partially paid + bank reconciliation
+  -> Submit/Post หรือ final approval เมื่อมี workflow
+  -> post AP clearing, WHT, bank and FX + apply open items แบบ atomic
+  -> paid/partially paid
+  -> bank execution/reconciliation tracking
 ```
 
 กติกาสำคัญ:

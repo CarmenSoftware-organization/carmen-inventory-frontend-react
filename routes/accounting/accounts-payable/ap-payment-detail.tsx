@@ -3,21 +3,26 @@ import {
   Ban,
   Check,
   FileClock,
+  MoreHorizontal,
   Paperclip,
   Plus,
   Save,
   Send,
   Undo2,
   X,
-  Zap,
 } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { DocumentListHeader } from "@/components/share/document-list-header";
-import { BackButton } from "@/components/share/back-button";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { ErrorState } from "@/components/ui/error-state";
@@ -63,7 +68,7 @@ import {
 } from "./ap-decimal";
 import { PaymentSections } from "./ap-payment-sections";
 import { paymentSummary } from "./ap-payment-totals";
-import { ApStatusBadge, LabelValue, Money } from "./ap-ui";
+import { ApStatusBadge, Money } from "./ap-ui";
 import {
   useApInvoices,
   useApPayment,
@@ -251,7 +256,7 @@ function ApPaymentEditor({
   const actionMutation = useApPaymentAction();
   const [editing, setEditing] = useState(id === "new");
   const [confirmation, setConfirmation] = useState<
-    "approve" | "void" | "reject" | "clarify" | "release" | null
+    "submit" | "approve" | "void" | "reject" | "clarify" | null
   >(null);
   const [reason, setReason] = useState("");
   const busy = saveMutation.isPending || actionMutation.isPending;
@@ -305,14 +310,7 @@ function ApPaymentEditor({
     }
   };
   const runAction = async (
-    action:
-      | "submit"
-      | "approve"
-      | "return"
-      | "reject"
-      | "release"
-      | "void"
-      | "clarify",
+    action: "submit" | "approve" | "return" | "reject" | "void" | "clarify",
   ) => {
     try {
       let target = loaded;
@@ -322,24 +320,16 @@ function ApPaymentEditor({
           id: loaded?.id,
           docVersion: loaded?.doc_version,
         });
-      let result = await actionMutation.mutateAsync({
+      const result = await actionMutation.mutateAsync({
         id: target.id,
         action,
         docVersion: target.doc_version,
         reason,
         idempotencyKey:
-          action === "release"
-            ? `release:${target.id}:${target.doc_version}`
+          action === "submit" || action === "approve"
+            ? `${action}:${target.id}:${target.doc_version}`
             : undefined,
       });
-      if (action === "approve") {
-        result = await actionMutation.mutateAsync({
-          id: result.id,
-          action: "release",
-          docVersion: result.doc_version,
-          idempotencyKey: `release:${result.id}:${result.doc_version}`,
-        });
-      }
       toast.success(`Payment ${action} completed`);
       navigate(`/accounting/accounts-payable/payment/${result.id}`, {
         replace: true,
@@ -390,118 +380,88 @@ function ApPaymentEditor({
           </div>
         </div>
       )}
-      <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
-        <div className="flex items-center gap-1">
-          <BackButton
-            onClick={() => navigate("/accounting/accounts-payable/payment")}
-            label="Back to AP Payment Directory"
-          />
-          <span className="bg-border mx-1 h-5 w-px" />
-          <DocumentListHeader
-            title={loaded?.pv_no ?? "New Payment Voucher"}
-            description={
-              approvalContext ? "Approval review" : "Supplier disbursement"
-            }
-          />
-        </div>
-        <div className="flex flex-wrap gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/accounting/accounts-payable/payment/new")}
-          >
-            <Plus className="size-4" />
-            New
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSheet("attachments")}
-          >
-            <Paperclip className="size-4" />
-            Attachments
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSheet("activity")}
-          >
-            <FileClock className="size-4" />
-            Log
-          </Button>
-          {loaded?.capabilities.can_void && (
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={busy}
-              onClick={() => setConfirmation("void")}
-            >
-              <Ban className="size-4" />
-              Void
-            </Button>
-          )}
-          {loaded?.capabilities.can_release && (
-            <Button
-              size="sm"
-              disabled={busy}
-              onClick={() => setConfirmation("release")}
-            >
-              <Zap className="size-4" />
-              Release
-            </Button>
-          )}
-          {loaded?.capabilities.can_edit && !editing && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              Edit
-            </Button>
-          )}
-          {editing && (
-            <>
+      <DocFormHeader
+        title={loaded?.pv_no ?? "New Payment Voucher"}
+        subtitle={approvalContext ? "Approval review" : "Supplier disbursement"}
+        backLabel="Back to AP Payment Directory"
+        onBack={() => navigate("/accounting/accounts-payable/payment")}
+        actions={
+          <>
+            {loaded?.capabilities.can_edit && !editing && (
+              <Button size="sm" onClick={() => setEditing(true)}>
+                Edit
+              </Button>
+            )}
+            {editing && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (id === "new")
+                      navigate("/accounting/accounts-payable/payment");
+                    else {
+                      setForm(
+                        initialPaymentForm(
+                          loaded,
+                          eligibleInvoices,
+                          selectedIds,
+                        ),
+                      );
+                      setEditing(false);
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button size="sm" disabled={busy} onClick={() => void save()}>
+                  <Save className="size-4" /> Save
+                </Button>
+              </>
+            )}
+            {loaded?.capabilities.can_void && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  if (id === "new")
-                    navigate("/accounting/accounts-payable/payment");
-                  else {
-                    setForm(
-                      initialPaymentForm(loaded, eligibleInvoices, selectedIds),
-                    );
-                    setEditing(false);
-                  }
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 disabled={busy}
-                onClick={() => void save()}
+                onClick={() => setConfirmation("void")}
               >
-                <Save className="size-4" />
-                Save Draft
+                <Ban className="size-4" /> Void
               </Button>
-              <Button
-                size="sm"
-                disabled={busy || !applications.length}
-                onClick={() => void runAction("submit")}
-              >
-                <Send className="size-4" />
-                Submit
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
-      <Card className="gap-4 py-4">
-        <CardHeader className="px-5">
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="size-4" />
+                  More
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    navigate("/accounting/accounts-payable/payment/new")
+                  }
+                >
+                  <Plus className="size-4" />
+                  New
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSheet("attachments")}>
+                  <Paperclip className="size-4" />
+                  Attachments
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSheet("activity")}>
+                  <FileClock className="size-4" />
+                  Log
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
+      <section className="space-y-4 border-b pb-4">
+        <div>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Payment details</CardTitle>
+            <h2 className="text-base font-semibold">Payment details</h2>
             <div className="flex gap-2">
               {loaded && (
                 <>
@@ -511,8 +471,8 @@ function ApPaymentEditor({
               )}
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 px-5 sm:grid-cols-2 lg:grid-cols-6">
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <Field label="PV no." className="order-1">
             <Input readOnly value={loaded?.pv_no ?? "Auto-generated"} />
           </Field>
@@ -636,8 +596,8 @@ function ApPaymentEditor({
             />
             Urgent payment
           </label>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
       <PaymentSections
         form={form}
         onChange={setForm}
@@ -650,38 +610,48 @@ function ApPaymentEditor({
         )}
         onAddInvoice={addInvoice}
       />
-      <div className="bg-background/95 fixed inset-x-0 bottom-0 z-20 border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:sticky">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:flex sm:flex-wrap sm:justify-end sm:gap-8">
-          <LabelValue label="Applied">
-            <Money
-              value={applied}
-              currency={form.currency_code}
-              className="text-primary"
-            />
-          </LabelValue>
-          <LabelValue label="WHT">
-            <Money
-              value={wht}
-              currency={form.currency_code}
-              className="text-rose-600 dark:text-rose-400"
-            />
-          </LabelValue>
-          <LabelValue label="Net cash">
-            <Money
-              value={netCash}
-              currency={form.currency_code}
-              className="text-primary font-semibold"
-            />
-          </LabelValue>
-          <LabelValue label="Realized FX">
-            <Money
-              value={summary.fx}
-              currency="THB"
-              className="text-emerald-600 dark:text-emerald-400"
-            />
-          </LabelValue>
-        </div>
-      </div>
+      <SummaryFooterBar
+        hasRecord
+        className="static!"
+        items={[
+          {
+            key: "applied",
+            label: "Applied",
+            value: <Money value={applied} currency={form.currency_code} />,
+          },
+          {
+            key: "wht",
+            label: "WHT",
+            value: <Money value={wht} currency={form.currency_code} />,
+          },
+          {
+            key: "net",
+            label: "Net cash",
+            value: <Money value={netCash} currency={form.currency_code} />,
+            emphasis: true,
+          },
+          {
+            key: "fx",
+            label: "Realized FX",
+            value: <Money value={summary.fx} currency="THB" />,
+          },
+        ]}
+      >
+        {editing && (
+          <Button
+            size="sm"
+            disabled={busy || !applications.length}
+            onClick={() =>
+              form.workflow_enabled
+                ? void runAction("submit")
+                : setConfirmation("submit")
+            }
+          >
+            <Send className="size-4" />
+            {form.workflow_enabled ? "Submit" : "Submit & post"}
+          </Button>
+        )}
+      </SummaryFooterBar>
       <Sheet
         open={sheet !== null}
         onOpenChange={(open) => !open && setSheet(null)}
@@ -722,13 +692,13 @@ function ApPaymentEditor({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmation === "approve"
-                ? "Approve and post payment?"
+              {confirmation === "approve" || confirmation === "submit"
+                ? "Post payment?"
                 : `Confirm ${confirmation ?? "action"}`}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {loaded?.pv_no} · {form.vendor_name}.{" "}
-              {confirmation === "approve" || confirmation === "release"
+              {confirmation === "approve" || confirmation === "submit"
                 ? `Post the mock payment using paid date ${form.paid_date ?? form.payment_date} and apply ${applied} ${form.currency_code} to the selected invoices. No real bank transfer is made.`
                 : "This action will be recorded in the document activity log."}
             </AlertDialogDescription>

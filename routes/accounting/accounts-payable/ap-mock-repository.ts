@@ -70,7 +70,8 @@ export function invoiceCapabilities(
 export function paymentCapabilities(
   payment: Pick<ApPayment, "lifecycle" | "workflow_enabled">,
 ): ApDocumentCapabilities {
-  const draft = payment.lifecycle === "draft";
+  const draft =
+    payment.lifecycle === "draft" || payment.lifecycle === "ready_to_release";
   const submitted = payment.lifecycle === "submitted";
   return {
     can_edit: draft,
@@ -81,9 +82,8 @@ export function paymentCapabilities(
     can_void:
       draft ||
       submitted ||
-      payment.lifecycle === "ready_to_release" ||
       payment.lifecycle === "post_failed",
-    can_release: payment.lifecycle === "ready_to_release",
+    can_release: false,
   };
 }
 
@@ -127,6 +127,16 @@ function seedInvoice(
     ap_no: overrides.ap_no,
     input_date: overrides.input_date ?? "2026-08-20",
     vendor_invoice_no: overrides.vendor_invoice_no,
+    tax_invoice_no:
+      overrides.tax_invoice_no ??
+      (lifecycle === "draft" || compareDecimal(vat, "0") <= 0
+        ? null
+        : overrides.vendor_invoice_no),
+    tax_invoice_date:
+      overrides.tax_invoice_date ??
+      (lifecycle === "draft" || compareDecimal(vat, "0") <= 0
+        ? null
+        : overrides.invoice_date ?? "2026-08-18"),
     vendor_id: overrides.vendor_id ?? `vendor-${overrides.id}`,
     vendor_name: overrides.vendor_name,
     invoice_date: overrides.invoice_date ?? "2026-08-18",
@@ -401,7 +411,7 @@ function seedState(): ApMockState {
       pv_no: "PV2609-0002",
       vendor_id: invoices[1].vendor_id,
       vendor_name: invoices[1].vendor_name,
-      lifecycle: "ready_to_release",
+      lifecycle: "draft",
       workflow_enabled: false,
       applied_amount: "80250.00",
       wht_amount: "0.00",
@@ -490,7 +500,6 @@ export interface ApRepository {
       | "approve"
       | "return"
       | "reject"
-      | "release"
       | "void"
       | "clarify",
     docVersion: number,
@@ -589,6 +598,18 @@ export function createApMockRepository(buCode: string): ApRepository {
       const state = load();
       const current = state.invoices.find((item) => item.id === id);
       if (current) assertVersion(current.doc_version, docVersion);
+      const vendorInvoiceNo = input.vendor_invoice_no.trim().toUpperCase();
+      if (
+        vendorInvoiceNo &&
+        state.invoices.some(
+          (item) =>
+            item.id !== id &&
+            item.vendor_id === input.vendor_id &&
+            item.vendor_invoice_no.trim().toUpperCase() === vendorInvoiceNo &&
+            item.lifecycle !== "voided",
+        )
+      )
+        throw new Error("Vendor invoice number already exists for this vendor");
       const subtotal = addDecimal(input.lines.map((line) => line.subtotal));
       const discount = addDecimal(input.lines.map((line) => line.discount));
       const net = addDecimal(input.lines.map((line) => line.net_amount));
@@ -607,9 +628,13 @@ export function createApMockRepository(buCode: string): ApRepository {
             ap_no: `DRAFT-${String(state.invoices.length + 1).padStart(4, "0")}`,
             vendor_invoice_no: input.vendor_invoice_no,
             vendor_name: input.vendor_name,
+            lifecycle: "draft",
           })),
         ...input,
+        vendor_invoice_no: vendorInvoiceNo,
         lifecycle,
+        tax_invoice_no: current?.tax_invoice_no ?? null,
+        tax_invoice_date: current?.tax_invoice_date ?? null,
         settlement_status: current?.settlement_status ?? "unpaid",
         doc_version: (current?.doc_version ?? 0) + 1,
         subtotal,
@@ -661,6 +686,14 @@ export function createApMockRepository(buCode: string): ApRepository {
       const next: ApInvoice = {
         ...current,
         lifecycle,
+        tax_invoice_no:
+          action === "submit" && compareDecimal(current.vat_amount, "0") > 0
+            ? current.vendor_invoice_no
+            : current.tax_invoice_no,
+        tax_invoice_date:
+          action === "submit" && compareDecimal(current.vat_amount, "0") > 0
+            ? current.invoice_date
+            : current.tax_invoice_date,
         doc_version: current.doc_version + 1,
         current_stage:
           lifecycle === "submitted" ? "Financial Controller" : null,
@@ -712,10 +745,6 @@ export function createApMockRepository(buCode: string): ApRepository {
     async listApprovals(filters = {}) {
       const response = await this.listPayments(filters);
       const data = response.data.filter((item) => {
-        if (filters.lifecycle === "all")
-          return ["submitted", "ready_to_release"].includes(item.lifecycle);
-        if (filters.lifecycle === "ready_to_release")
-          return item.lifecycle === "ready_to_release";
         return item.lifecycle === "submitted";
       });
       return {
@@ -904,7 +933,7 @@ export function createApMockRepository(buCode: string): ApRepository {
       const current = state.payments.find((item) => item.id === id);
       if (!current) throw new Error("Payment not found");
       if (
-        action === "release" &&
+        (action === "submit" || action === "approve") &&
         idempotencyKey &&
         state.idempotency_keys.includes(idempotencyKey)
       )
@@ -917,14 +946,14 @@ export function createApMockRepository(buCode: string): ApRepository {
       if (!paymentCapabilities(current)[capability])
         throw new Error(`Cannot ${action} this payment`);
       if (
-        (action === "approve" || action === "release") &&
+        (action === "approve" || action === "submit") &&
         current.paid_date &&
         current.paid_date.slice(0, 7) !== now().slice(0, 7)
       )
         throw new Error(
           "Accounting period is closed (mock: current month is open)",
         );
-      if (action === "submit" || action === "release") {
+      if (action === "submit" || action === "approve") {
         if (!current.applications.length)
           throw new Error("Select at least one invoice");
         if (current.payment_methods) {
@@ -960,16 +989,12 @@ export function createApMockRepository(buCode: string): ApRepository {
       let lifecycle = current.lifecycle;
       let execution = current.execution_status;
       if (action === "submit")
-        lifecycle = current.workflow_enabled ? "submitted" : "ready_to_release";
-      if (action === "approve") lifecycle = "ready_to_release";
+        lifecycle = current.workflow_enabled ? "submitted" : "posted";
+      if (action === "approve") lifecycle = "posted";
       if (action === "return" || action === "reject") lifecycle = "draft";
       if (action === "void") {
         lifecycle = "voided";
         execution = "cancelled";
-      }
-      if (action === "release") {
-        lifecycle = "posted";
-        execution = "executed";
       }
       const next: ApPayment = {
         ...current,
@@ -990,7 +1015,7 @@ export function createApMockRepository(buCode: string): ApRepository {
           ),
         ],
       };
-      if (action === "release") {
+      if (lifecycle === "posted") {
         next.applications.forEach((application) => {
           const invoice = state.invoices.find(
             (item) => item.id === application.invoice_id,
@@ -1005,7 +1030,7 @@ export function createApMockRepository(buCode: string): ApRepository {
             payment_no: next.pv_no,
             payment_date: next.paid_date ?? next.payment_date,
             applied_amount: application.apply_amount,
-            status: "executed",
+            status: "posted",
           };
           state.invoices = state.invoices.map((item) =>
             item.id === invoice.id
@@ -1077,7 +1102,6 @@ export function createApMockRepository(buCode: string): ApRepository {
       const paid = state.payments.filter(
         (item) =>
           item.lifecycle === "posted" &&
-          item.execution_status === "executed" &&
           (item.paid_date ?? item.payment_date) >= paidFrom &&
           (item.paid_date ?? item.payment_date) <= paidTo,
       );

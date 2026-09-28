@@ -228,7 +228,6 @@ export default function ApPaymentList() {
               <TabsTrigger value="all">All payments</TabsTrigger>
               <TabsTrigger value="draft">Draft</TabsTrigger>
               <TabsTrigger value="submitted">Pending approval</TabsTrigger>
-              <TabsTrigger value="ready_to_release">Approved</TabsTrigger>
               <TabsTrigger value="posted">Posted</TabsTrigger>
             </TabsList>
           </div>
@@ -250,7 +249,6 @@ export default function ApPaymentList() {
               options={[
                 "draft",
                 "submitted",
-                "ready_to_release",
                 "posted",
                 "voided",
               ].map((value) => ({ value, label: value.replaceAll("_", " ") }))}

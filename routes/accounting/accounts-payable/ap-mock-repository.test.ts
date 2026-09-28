@@ -74,26 +74,55 @@ describe("AP mock repository", () => {
     expect(submitted.open_amount).toBe(submitted.total_amount);
   });
 
-  it("releases once and applies the payment without duplicate history", async () => {
+  it("posts on final approval and applies the payment only once", async () => {
     const repository = createApMockRepository(BU_A);
-    const approved = await repository.paymentAction("pv-1", "approve", 1);
-    const released = await repository.paymentAction(
-      approved.id,
-      "release",
-      approved.doc_version,
-      "release-test-key",
-    );
-    expect(released.execution_status).toBe("executed");
+    const approved = await repository.paymentAction("pv-1", "approve", 1, "approve-test-key");
+    expect(approved.lifecycle).toBe("posted");
+    expect(approved.execution_status).toBe("not_released");
     const invoice = await repository.getInvoice("ap-1");
     expect(invoice?.open_amount).toBe("0.00");
     expect(invoice?.settlement_status).toBe("paid");
     await repository.paymentAction(
       approved.id,
-      "release",
-      approved.doc_version,
-      "release-test-key",
+      "approve",
+      1,
+      "approve-test-key",
     );
     expect((await repository.getInvoice("ap-1"))?.payments).toHaveLength(1);
+  });
+
+  it("rejects duplicate vendor invoice numbers and creates the input-tax record on Submit", async () => {
+    const repository = createApMockRepository(BU_A);
+    const source = await repository.getInvoice("ap-1");
+    if (!source) throw new Error("Missing seed invoice");
+    await expect(
+      repository.saveInvoice(
+        { ...source, vendor_invoice_no: ` ${source.vendor_invoice_no.toLowerCase()} ` },
+      ),
+    ).rejects.toThrow("already exists");
+    const draft = await repository.saveInvoice({
+      ...source,
+      vendor_invoice_no: "NEW-TAX-001",
+      workflow_enabled: false,
+      match_status: "not_required",
+    });
+    expect(draft.tax_invoice_no).toBeNull();
+    const posted = await repository.invoiceAction(draft.id, "submit", draft.doc_version);
+    expect(posted.tax_invoice_no).toBe("NEW-TAX-001");
+    expect(posted.tax_invoice_date).toBe(source.invoice_date);
+  });
+
+  it("posts on submit when workflow is disabled", async () => {
+    const repository = createApMockRepository(BU_A);
+    const draft = await repository.paymentAction("pv-1", "return", 1);
+    const saved = await repository.savePayment(
+      { ...draft, workflow_enabled: false },
+      draft.id,
+      draft.doc_version,
+    );
+    const posted = await repository.paymentAction(saved.id, "submit", saved.doc_version);
+    expect(posted.lifecycle).toBe("posted");
+    expect((await repository.getInvoice("ap-1"))?.open_amount).toBe("0.00");
   });
 
   it("returns partial batch outcomes through independent mutations", async () => {

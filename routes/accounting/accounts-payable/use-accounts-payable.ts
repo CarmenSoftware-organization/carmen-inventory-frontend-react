@@ -156,7 +156,6 @@ export function useApPaymentAction() {
         | "approve"
         | "return"
         | "reject"
-        | "release"
         | "void"
         | "clarify";
       docVersion: number;

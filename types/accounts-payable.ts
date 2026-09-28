@@ -90,7 +90,7 @@ export interface ApInvoicePaymentHistory {
   payment_no: string;
   payment_date: string;
   applied_amount: DecimalString;
-  status: ApExecutionStatus;
+  status: ApExecutionStatus | "posted";
 }
 
 export interface ApInvoice {
@@ -99,6 +99,8 @@ export interface ApInvoice {
   ap_no: string;
   input_date: string;
   vendor_invoice_no: string;
+  tax_invoice_no?: string | null;
+  tax_invoice_date?: string | null;
   vendor_id: string;
   vendor_name: string;
   invoice_date: string;

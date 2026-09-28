@@ -18,6 +18,7 @@ import {
   History,
   LayoutTemplate,
   ListTree,
+  MoreHorizontal,
   Paperclip,
   Pencil,
   Plus,
@@ -35,6 +36,7 @@ import { toast } from "sonner";
 import type { FormMode } from "@/types/form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Card,
   CardAction,
@@ -44,6 +46,12 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,6 +83,13 @@ import { BackButton } from "@/components/share/back-button";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useJournalVoucher } from "../journal-voucher/use-journal-voucher";
+import {
+  useCopyJournalVoucher,
+  useCreateJournalVoucher,
+  useJournalVoucherAction,
+  useUpdateJournalVoucher,
+} from "../journal-voucher/use-journal-voucher";
+import type { JournalVoucherInput } from "@/types/journal-voucher";
 import {
   isSourceGenerated,
   journalVoucherCapabilities,
@@ -193,8 +208,18 @@ export default function AccountingDocumentDetail() {
     isJournalVoucher ||
     config.kind === "templateVoucher" ||
     config.kind === "recurringVoucher" ||
-    config.kind === "allocationVoucher";
+    config.kind === "allocationVoucher" ||
+    config.kind === "arInvoice" ||
+    config.kind === "arReceipt" ||
+    config.kind === "assetRegister" ||
+    config.kind === "assetDisposal";
   const journalQuery = useJournalVoucher(isJournalVoucher ? id : undefined);
+  const createJournal = useCreateJournalVoucher();
+  const updateJournal = useUpdateJournalVoucher();
+  const submitJournal = useJournalVoucherAction("submit");
+  const voidJournal = useJournalVoucherAction("void");
+  const reverseJournal = useJournalVoucherAction("reverse");
+  const copyJournal = useCopyJournalVoucher();
   const journal = journalQuery.data;
   const sourceGenerated = journal ? isSourceGenerated(journal) : false;
   const journalCapabilities = journal
@@ -224,18 +249,21 @@ export default function AccountingDocumentDetail() {
     isNew ? "Draft" : document.status,
   );
   const [utilityPanel, setUtilityPanel] = useState<UtilityPanel | null>(null);
+  const [journalConfirmation, setJournalConfirmation] = useState<
+    "void" | "reverse" | null
+  >(null);
   const [comments, setComments] = useState<string[]>([
     "Generated from the AP posting source.",
   ]);
   const [commentDraft, setCommentDraft] = useState("");
   const [values, setValues] = useState({
-    date: document.date,
+    date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
     description: isNew ? "" : document.description,
     party: isNew ? "" : document.party,
-    schedulePost: true,
-    scheduleDate: document.date,
-    autoReverse: true,
-    reverseDate: "2026-08-01",
+    schedulePost: false,
+    scheduleDate: isNew ? new Date().toISOString().slice(0, 10) : document.date,
+    autoReverse: false,
+    reverseDate: "",
   });
   const [lines, setLines] = useState<JournalLine[]>(INITIAL_LINES);
   const [selectedLineIds, setSelectedLineIds] = useState<string[]>([]);
@@ -269,7 +297,7 @@ export default function AccountingDocumentDetail() {
         departmentLabel: line.department_code
           ? `${line.department_code} - ${line.department_name ?? ""}`
           : "—",
-        account: line.account_code ?? line.account_id,
+        account: line.account_id,
         accountLabel: line.account_code
           ? `${line.account_code} - ${line.account_name ?? ""}`
           : line.account_id,
@@ -281,7 +309,7 @@ export default function AccountingDocumentDetail() {
         budgetControlled: false,
         budget: "",
         dimension: "",
-        currency: line.currency_code ?? journal.base_currency_id,
+        currency: line.currency_id,
         exchangeRate: Number(line.exchange_rate),
       })),
     );
@@ -295,13 +323,15 @@ export default function AccountingDocumentDetail() {
 
   const resetForm = () => {
     setValues({
-      date: document.date,
+      date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
       description: isNew ? "" : document.description,
       party: isNew ? "" : document.party,
-      schedulePost: true,
-      scheduleDate: document.date,
-      autoReverse: true,
-      reverseDate: "2026-08-01",
+      schedulePost: false,
+      scheduleDate: isNew
+        ? new Date().toISOString().slice(0, 10)
+        : document.date,
+      autoReverse: false,
+      reverseDate: "",
     });
     setLines(INITIAL_LINES);
     setSelectedLineIds([]);
@@ -375,11 +405,68 @@ export default function AccountingDocumentDetail() {
     setMode("view");
   };
 
-  const handleSave = (intent: "draft" | "submit") => {
+  const handleSave = async (intent: "draft" | "submit") => {
     if (
       mode === "edit" &&
       performance.now() - editActivatedAtRef.current < 500
     ) {
+      return;
+    }
+    if (isJournalVoucher) {
+      const input: JournalVoucherInput = {
+        journal_type: journal?.journal_type ?? "general",
+        prefix: journal?.prefix ?? "JV",
+        journal_date: values.date,
+        description: values.description,
+        note: journal?.note ?? null,
+        functional_currency_id: journal?.functional_currency_id ?? "THB",
+        source_system: "general_ledger",
+        source_type: "manual",
+        source_id: null,
+        source_no: null,
+        schedule_post: values.schedulePost,
+        scheduled_post_at: values.schedulePost ? values.scheduleDate : null,
+        auto_reverse: values.autoReverse,
+        reverse_date: values.autoReverse ? values.reverseDate : null,
+        lines: lines.map((line) => ({
+          account_id: line.account,
+          department_id: line.department || null,
+          comment: line.comment || null,
+          currency_id: line.currency ?? "THB",
+          exchange_rate: String(line.exchangeRate ?? 1),
+          rate_date: null,
+          rate_type: null,
+          rate_source: null,
+          debit: line.debit.toFixed(2),
+          credit: line.credit.toFixed(2),
+          dimension: [],
+        })),
+      };
+      try {
+        const saved = isNew
+          ? (await createJournal.mutateAsync(input)).data
+          : (
+              await updateJournal.mutateAsync({
+                ...input,
+                id: journal!.id,
+                doc_version: journal!.doc_version,
+              })
+            ).data;
+        if (intent === "submit")
+          await submitJournal.mutateAsync({
+            id: saved.id,
+            doc_version: saved.doc_version,
+          });
+        setMode("view");
+        toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
+        navigate(`${config.path}/${saved.id}`, { replace: true });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to save Journal Voucher",
+        );
+      }
       return;
     }
     if (mode === "add") {
@@ -393,11 +480,34 @@ export default function AccountingDocumentDetail() {
     toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
+    if (isJournalVoucher && journal) {
+      try {
+        const copied = (await copyJournal.mutateAsync(journal.id)).data;
+        navigate(`${config.path}/${copied.id}`);
+        toast.success(t("copiedToNew"));
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to copy Journal Voucher",
+        );
+      }
+      return;
+    }
     navigate(`${config.path}/new`);
     setDocumentStatus("Draft");
     setMode("add");
     toast.success(t("copiedToNew"));
+  };
+
+  const handleNew = () => {
+    setValues((current) => ({ ...current, description: "", party: "" }));
+    setLines(INITIAL_LINES);
+    setSelectedLineIds([]);
+    setDocumentStatus("Draft");
+    setMode("add");
+    navigate(`${config.path}/new`);
   };
 
   const applyTemplate = () => {
@@ -512,11 +622,86 @@ export default function AccountingDocumentDetail() {
                     {tc("edit")}
                   </Button>
                 )}
-                <DocActionsMenu
-                  onComment={() => setUtilityPanel("comments")}
-                  commentCount={comments.length}
-                  activity={{ id: journal?.id ?? document.id, label: number }}
-                />
+                {isJournalVoucher && journalCapabilities?.can_void && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setJournalConfirmation("void")}
+                  >
+                    {t("void")}
+                  </Button>
+                )}
+                {isJournalVoucher && journalCapabilities?.can_reverse && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setJournalConfirmation("reverse")}
+                  >
+                    Reverse
+                  </Button>
+                )}
+                {!isJournalVoucher && documentStatus !== "Voided" && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setDocumentStatus("Voided");
+                      toast.success(t("voided"));
+                    }}
+                  >
+                    {t("void")}
+                  </Button>
+                )}
+                {isJournalVoucher ? (
+                  <DocActionsMenu
+                    onDuplicate={
+                      !sourceGenerated ? () => void handleCopy() : undefined
+                    }
+                    onComment={() => setUtilityPanel("comments")}
+                    commentCount={comments.length}
+                    activity={{ id: journal?.id ?? document.id, label: number }}
+                  />
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="sm" variant="outline">
+                        <MoreHorizontal className="size-4" />
+                        {tc("more")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={handleNew}>
+                        <FilePlus2 className="size-4" />
+                        {t("new")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => void handleCopy()}>
+                        <Copy className="size-4" />
+                        {t("copy")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={applyTemplate}>
+                        <LayoutTemplate className="size-4" />
+                        {t("template")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={applyAiSuggestion}>
+                        <WandSparkles className="size-4" />
+                        {t("aiSuggest")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setUtilityPanel("attachments")}
+                      >
+                        <Paperclip className="size-4" />
+                        {t("attachments")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setUtilityPanel("log")}>
+                        <History className="size-4" />
+                        {t("log")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </>
             ) : (
               <>
@@ -534,20 +719,43 @@ export default function AccountingDocumentDetail() {
                   form={FORM_ID}
                   size="sm"
                   data-intent="draft"
-                  disabled={!isBalanced}
-                  aria-describedby={
-                    !isBalanced ? "journal-balance-status" : undefined
+                  disabled={
+                    isJournalVoucher
+                      ? createJournal.isPending || updateJournal.isPending
+                      : !isBalanced
                   }
                 >
                   <Save className="size-4" aria-hidden="true" />
                   {tc("save")}
                 </Button>
-                {!isNew && (
+                {!isNew && isJournalVoucher && (
                   <DocActionsMenu
                     onComment={() => setUtilityPanel("comments")}
                     commentCount={comments.length}
                     activity={{ id: journal?.id ?? document.id, label: number }}
                   />
+                )}
+                {!isJournalVoucher && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="sm" variant="outline">
+                        <MoreHorizontal className="size-4" />
+                        {tc("more")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onSelect={() => setUtilityPanel("attachments")}
+                      >
+                        <Paperclip className="size-4" />
+                        {t("attachments")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setUtilityPanel("log")}>
+                        <History className="size-4" />
+                        {t("log")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </>
             )
@@ -580,18 +788,7 @@ export default function AccountingDocumentDetail() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    setValues((current) => ({
-                      ...current,
-                      description: "",
-                      party: "",
-                    }));
-                    setLines(INITIAL_LINES);
-                    setSelectedLineIds([]);
-                    setDocumentStatus("Draft");
-                    setMode("add");
-                    navigate(`${config.path}/new`);
-                  }}
+                  onClick={handleNew}
                 >
                   <FilePlus2 className="size-4" aria-hidden="true" />
                   {t("new")}
@@ -724,7 +921,11 @@ export default function AccountingDocumentDetail() {
                   variant="outline"
                   size="sm"
                   data-intent="draft"
-                  disabled={!isBalanced}
+                  disabled={
+                    isJournalVoucher
+                      ? createJournal.isPending || updateJournal.isPending
+                      : !isBalanced
+                  }
                   aria-describedby={
                     !isBalanced ? "journal-balance-status" : undefined
                   }
@@ -766,7 +967,7 @@ export default function AccountingDocumentDetail() {
           const intent = (
             event.nativeEvent as SubmitEvent
           ).submitter?.getAttribute("data-intent");
-          handleSave(intent === "draft" ? "draft" : "submit");
+          void handleSave(intent === "draft" ? "draft" : "submit");
         }}
       >
         <Card
@@ -1537,6 +1738,35 @@ export default function AccountingDocumentDetail() {
         </Card>
       </form>
 
+      <ConfirmDialog
+        open={journalConfirmation !== null}
+        onOpenChange={(open) => !open && setJournalConfirmation(null)}
+        title={
+          journalConfirmation === "reverse"
+            ? "Reverse Journal Voucher?"
+            : "Void Journal Voucher?"
+        }
+        description="This action changes the Journal Voucher status."
+        confirmText={journalConfirmation === "reverse" ? "Reverse" : "Void"}
+        isPending={voidJournal.isPending || reverseJournal.isPending}
+        onConfirm={() => {
+          if (!journal || !journalConfirmation) return;
+          const action = journalConfirmation;
+          const mutation = action === "void" ? voidJournal : reverseJournal;
+          mutation.mutate(
+            { id: journal.id, doc_version: journal.doc_version },
+            {
+              onSuccess: () => {
+                setJournalConfirmation(null);
+                toast.success(
+                  action === "void" ? t("voided") : "Journal Voucher reversed",
+                );
+              },
+              onError: (error) => toast.error(error.message),
+            },
+          );
+        }}
+      />
       <Sheet
         open={!!selectedLine}
         onOpenChange={(open) => !open && setSelectedLineId(null)}

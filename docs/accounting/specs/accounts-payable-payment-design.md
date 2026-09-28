@@ -2,11 +2,11 @@
 
 ## 1. เป้าหมายและขอบเขต
 
-รองรับการเลือก posted AP open items, สร้าง Payment Voucher (PV), คำนวณ WHT/FX, ผ่าน optional approval, release/execute การจ่าย, post เพื่อล้างเจ้าหนี้ และติดตามผลธนาคาร/การกระทบยอดโดยไม่สร้างรายการซ้ำ
+รองรับการเลือก posted AP open items, สร้าง Payment Voucher (PV), คำนวณ WHT/FX, ผ่าน optional approval แล้ว post/JV/ตัดหนี้ทันทีตาม FRD v2.16 และติดตามผลธนาคาร/การกระทบยอดโดยไม่สร้างรายการซ้ำ
 
 Payment Preparation, Approval, Accounting Posting และ Bank Execution เป็นคนละ responsibility แม้ mockup จะแสดงอยู่ใน flow เดียวกัน
 
-> Implementation note (2026-09-11): Payment UI ปัจจุบันเป็น prototype และจำลอง Release เป็น executed/posted ใน local state พฤติกรรมนี้ไม่ใช่ production contract ห้าม backend รวม Final Approval, Release, Bank Execution และ Posting เป็น action เดียว ให้ใช้ state/command boundary ใน [AP Implementation Readiness](accounts-payable-implementation-readiness.md)
+> Decision (2026-09-28, โอม): ใช้ AP Payment FRD v2.16 เป็น posting-point contract — Submit/Post ที่ validate ผ่านและไม่มี LOA หรือ final approval เมื่อมี LOA ต้องสร้าง PV posting/JV และตัดหนี้ทันทีแบบ atomic ใน backend. Save Draft ไม่ลง GL/ไม่ตัดหนี้. Bank execution/reconciliation เป็นสถานะติดตามแยก และไม่เป็น prerequisite ของ posting. Payment UI ปัจจุบันยังเป็น prototype.
 
 ## 2. Information architecture
 
@@ -93,7 +93,7 @@ BU + vendor legal entity + payment currency + payment method + beneficiary bank 
 | Net Cash | applied payable less credits/deposits/WHT ตาม jurisdiction rule |
 | Match/Evidence | read-only summary + links ไป Invoice/PO/GRN/attachments |
 
-Concurrent payment drafts ต้อง reserve application amount หรือ revalidate ตอน Submit/Execute เพื่อป้องกัน double payment
+Concurrent payment drafts ต้อง reserve application amount หรือ revalidate ตอน Submit/Post หรือ final approval เพื่อป้องกัน double payment
 
 ## 5. WHT rules
 
@@ -109,7 +109,7 @@ Payment detail รองรับอย่างน้อย:
 
 - WHT base ต้องมาจาก eligible pre-VAT/service amount ตาม tax rule ไม่ใช้ยอด invoice รวมทั้งใบโดยอัตโนมัติ
 - Manual WHT override ต้องเก็บ calculated value, overridden value, reason และผู้อนุมัติ
-- Certificate/register สร้างครั้งเดียวเมื่อ payment ถึง configured taxable event โดย Phase 1 แนะนำหลัง payment posting/execution สำเร็จ ไม่ใช่เพียง approval
+- Certificate/register สร้างครั้งเดียวเมื่อ payment Posted สำเร็จตาม tax policy; final approval ที่ post สำเร็จถือเป็น posting point
 - Cancel ก่อน taxable event ต้อง release reservation; หลัง post ใช้ reversal/cancellation document และรักษา certificate audit
 - Retry ต้องใช้ idempotency key เดิมเพื่อไม่ออก certificate number ซ้ำ
 
@@ -164,40 +164,32 @@ Actions:
 ```text
 draft
   -> submitted       (Workflow enabled)
-  -> ready_to_release (Workflow disabled and validation passed)
+  -> posting         (Workflow disabled; validated Submit/Post)
 submitted
   -> draft           (Return/Reject outcome)
-  -> ready_to_release (Final approval)
-ready_to_release
-  -> processing      (release/execute)
-processing
-  -> executed
-  -> execution_failed
-executed
-  -> posting
+  -> posting         (Final approval)
 posting
   -> posted
   -> post_failed
 posted
-  -> reconciled      (bank axis/result)
   -> reversed        (linked reversal)
-draft/submitted/ready_to_release/execution_failed
+draft/submitted
   -> cancelled
 ```
 
-บาง payment method อาจ post ก่อน bank acknowledgement โดยใช้ cash-clearing account แต่ policy ต้องกำหนดชัดต่อ method ห้ามให้ UI เดา
+Bank execution และ reconciliation เป็นแกนสถานะแยกจาก PV posting; backend ต้องเก็บผลลัพธ์และหลักฐานให้ trace ได้
 
 ### Approval vs execution
 
-- Final approval ทำให้ PV พร้อม release แต่ไม่แปลว่าจ่ายสำเร็จ
-- Release/execute ต้อง revalidate version, open amount reservation, vendor hold, bank instruction, rate, period และ approval
+- Final approval ทำให้ PV Posted, สร้าง JV และตัด open item ทันทีเมื่อ validation ผ่าน
+- Backend ต้อง revalidate version, open amount reservation, vendor hold, payment method, rate, period และ approval ใน posting transaction
 - Cheque อาจมี `printed`, `issued`, `cleared`, `voided` เป็น method-specific state แยกจาก lifecycle
-- Bank failure ห้าม mark Invoice paid และห้ามสร้าง final bank credit ถ้า policy ไม่ใช้ clearing flow
-- Post/payment application/open-item update/WHT event ต้อง atomic ตาม configured posting point
+- Bank failure หลัง posting ต้องเป็น exception ที่ติดตามและแก้ด้วย correction/reversal; ห้ามลบ posting event หรือ application เงียบ ๆ
+- Post/payment application/open-item update/WHT event ต้อง atomic เมื่อ Submit/Post หรือ final approval
 
 ## 9. Batch actions
 
-- Batch approve/release แสดงยอดรวมแยกตาม currency ห้ามรวมหลาย currency เป็นยอดเดียว
+- Batch approve/post แสดงยอดรวมแยกตาม currency ห้ามรวมหลาย currency เป็นยอดเดียว
 - Confirm dialog แสดงจำนวน PV, total net ต่อ currency และ exception count
 - Backend ตรวจ permission, workflow assignment, `doc_version`, segregation of duties และ eligibility แยกต่อ PV
 - ผลลัพธ์เป็น per-item success/failure; ใบที่ fail ห้ามทำให้ใบที่ผ่านถูก rollback เว้นแต่ผู้ใช้เลือก atomic batch และ backend รองรับ
@@ -205,11 +197,11 @@ draft/submitted/ready_to_release/execution_failed
 
 ## 10. Payment posting and application
 
-เมื่อ payment ถึง configured posting point backend ต้องทำใน transaction เดียวกัน:
+เมื่อ Submit/Post ผ่านโดยไม่มี LOA หรือ final approval ผ่านเมื่อมี LOA backend ต้องทำใน transaction เดียวกัน:
 
 1. Lock PV และ AP open items
 2. ตรวจ available open amount และ reservation ใหม่
-3. Validate workflow, execution result, period, bank account, rate และ tax
+3. Validate workflow, period, payment method/bank account, rate และ tax
 4. สร้าง/generated JV ผ่าน Accounting posting contract
 5. สร้าง immutable payment applications
 6. Update open amounts และ settlement status
@@ -226,9 +218,8 @@ Retry ด้วย idempotency key เดิมต้องคืนผลเด
 | Save Draft | draft | reserve amount ตาม chosen strategy |
 | Submit | draft | complete, balanced preview, no blocking exception |
 | Approve/Return/Reject | submitted | Workflow enabled only |
-| Release/Execute | ready_to_release, execution_failed | high-risk permission + idempotency |
-| Retry Post | post_failed | ไม่ execute bank ซ้ำ |
-| Cancel | pre-execution states | reason required; release reservations |
+| Retry Post | post_failed | ไม่สร้าง JV/application ซ้ำ |
+| Cancel | draft, submitted | reason required; release reservations |
 | Reverse | posted | linked reversal; restore open items only after reversal post succeeds |
 | Print | method/status-based | cheque number reservation/audit required |
 | Batch Approve | submitted assigned items | per-item result and SoD check |
@@ -246,15 +237,12 @@ POST   /api/:bu_code/accounting/ap/payments/:id/submit
 POST   /api/:bu_code/accounting/ap/payments/:id/approve
 POST   /api/:bu_code/accounting/ap/payments/:id/return
 POST   /api/:bu_code/accounting/ap/payments/:id/reject
-POST   /api/:bu_code/accounting/ap/payments/:id/release
-POST   /api/:bu_code/accounting/ap/payments/:id/retry-execution
 POST   /api/:bu_code/accounting/ap/payments/:id/retry-post
 POST   /api/:bu_code/accounting/ap/payments/:id/cancel
 POST   /api/:bu_code/accounting/ap/payments/:id/reverse
 GET    /api/:bu_code/accounting/ap/payments/:id/activity
 GET    /api/:bu_code/accounting/ap/payments/:id/posting-preview
 POST   /api/:bu_code/accounting/ap/payment-actions/batch-approve
-POST   /api/:bu_code/accounting/ap/payment-actions/batch-release
 ```
 
 Bank submission/callback endpoints ต้องออกแบบร่วมกับ integration owner และไม่ expose secret/account data เกินจำเป็น
@@ -263,7 +251,7 @@ Bank submission/callback endpoints ต้องออกแบบร่วมก
 
 - 400 — zero/negative apply amount, mixed vendor/currency, invalid payment date/method
 - 403 — ไม่มีสิทธิ์, maker-checker violation, bank account scope หรือผิด workflow assignment
-- 409 — `doc_version` conflict, open amount changed, duplicate release, payment already executed/posted, cheque no. conflict
+- 409 — `doc_version` conflict, open amount changed, duplicate Submit/Post or approval, payment already posted, cheque no. conflict
 - 422 — invalid WHT base/rate, missing verified bank instruction, unavailable rate, period locked, vendor/payment hold
 - 424/502/503 — bank/tax/rate/posting dependency failure โดยต้องแยกว่า request ส่งถึงธนาคารแล้วหรือยัง
 
@@ -276,10 +264,10 @@ Frontend ห้ามเสนอ blind retry เมื่อ execution outcome 
 - Credit Note/Deposit application ลด cash โดย link posted open item จริง
 - WHT คำนวณจาก eligible base และ override เก็บ reason/audit
 - Foreign-currency payment สร้าง realized FX ที่ balance ด้วย booking/settlement snapshot
-- Workflow ปิด Submit แล้วเข้าสู่ ready-to-release; Workflow เปิดต้อง final-approved ก่อน release
-- Approval ไม่ทำให้ Invoice เป็น paid และไม่แสดง bank execution สำเร็จ
-- Execute/post สำเร็จแล้ว application, open amount, WHT event และ JV ถูกสร้างเพียงครั้งเดียว
-- Execution failure ไม่ mark paid; retry ตรวจ outcome เดิมก่อนส่งซ้ำ
+- Workflow ปิด Submit/Post แล้ว Posted ทันที; Workflow เปิด final approval แล้ว Posted ทันที
+- Final approval ที่ post สำเร็จทำให้ Invoice paid ตามยอดที่ apply แต่ไม่อ้างว่า bank execution สำเร็จ
+- Submit/Post หรือ final approval ที่สำเร็จสร้าง application, open amount, WHT event และ JV เพียงครั้งเดียว
+- Posting failure ไม่ mark paid; retry ตรวจ outcome เดิมก่อนส่งซ้ำ
 - Batch approve แสดง per-item result และไม่ข้าม SoD/permission/version check
 - Reverse payment แล้ว open item กลับมาเฉพาะเมื่อ reversal post สำเร็จ
 - Approval view แสดง invoice/PO/GRN/tax/bank/posting evidence และ masked sensitive data
@@ -287,11 +275,11 @@ Frontend ห้ามเสนอ blind retry เมื่อ execution outcome 
 
 ## 15. Open questions
 
-1. Payment method ใด post ตอน release, execution acknowledgement หรือ bank reconciliation
+1. หลัง Posted จะติดตาม bank execution failure และแก้ด้วย reversal/correction flow อย่างไร
 2. Phase 1 ต้องสร้าง bank file/API จริงหรือจบที่ PV+manual execution reference
 3. Reservation ของ open amount เริ่มตอน Save Draft หรือ Submit และหมดอายุเมื่อใด
 4. Cross-currency payment และ bank fee อยู่ใน Phase 1 หรือ deferred
 5. Cheque lifecycle/number stock/void/print owner อยู่ใน AP หรือ Cash Management
 6. WHT taxable event และ certificate numbering ของแต่ละ BU/jurisdiction คือจุดใด
-7. Batch release ต้อง atomic หรือ per-PV และรองรับ partial bank failure แบบใด
+7. Batch approve/post ต้อง atomic หรือ per-PV และรองรับ partial failure แบบใด
 8. Payment approval workflow ใช้ชุดเดียวกับ Invoice หรือ configure แยกตาม amount/method/bank account

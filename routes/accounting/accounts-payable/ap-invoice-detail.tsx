@@ -4,6 +4,7 @@ import {
   Check,
   Copy,
   FileClock,
+  MoreHorizontal,
   Paperclip,
   Plus,
   Save,
@@ -16,8 +17,14 @@ import { toast } from "sonner";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
@@ -46,6 +53,7 @@ import type {
 } from "@/types/accounts-payable";
 import {
   addDecimal,
+  compareDecimal,
   multiplyDecimal,
   percentOf,
   subtractDecimal,
@@ -352,46 +360,49 @@ function ApInvoiceEditor({
           flush
           actions={
             <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  navigate("/accounting/accounts-payable/invoice/new")
-                }
-              >
-                <Plus className="size-4" />
-                New
-              </Button>
-              {loaded && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
-                    )
-                  }
-                >
-                  <Copy className="size-4" />
-                  Copy
+              {loaded?.capabilities.can_edit && !editing && (
+                <Button size="sm" onClick={() => setEditing(true)}>
+                  Edit
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSheet("attachments")}
-              >
-                <Paperclip className="size-4" />
-                Attachments
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSheet("activity")}
-              >
-                <FileClock className="size-4" />
-                Log
-              </Button>
+              {editing && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditing(false);
+                      if (id === "new")
+                        navigate("/accounting/accounts-payable/invoice");
+                      else setForm(initialInvoiceForm(loaded ?? undefined));
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => void save()}
+                    disabled={saveMutation.isPending}
+                  >
+                    <Save className="size-4" />
+                    Save
+                  </Button>
+                </>
+              )}
+              {loaded?.lifecycle === "posted" &&
+                compareDecimal(loaded.open_amount, "0") > 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(
+                        `/accounting/accounts-payable/payment/new?invoice_ids=${encodeURIComponent(loaded.id)}`,
+                      )
+                    }
+                  >
+                    Pay invoice
+                  </Button>
+                )}
               {loaded?.capabilities.can_void && (
                 <Button
                   variant="ghost"
@@ -402,29 +413,40 @@ function ApInvoiceEditor({
                   Void
                 </Button>
               )}
-              {loaded?.capabilities.can_edit && !editing && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setEditing(true)}
-                >
-                  Edit
-                </Button>
-              )}
-              {editing && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditing(false);
-                    if (id === "new")
-                      navigate("/accounting/accounts-payable/invoice");
-                    else setForm(initialInvoiceForm(loaded ?? undefined));
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="size-4" />
+                    More
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      navigate("/accounting/accounts-payable/invoice/new")
+                    }
+                  >
+                    <Plus className="size-4" /> New
+                  </DropdownMenuItem>
+                  {loaded && (
+                    <DropdownMenuItem
+                      onSelect={() =>
+                        navigate(
+                          `/accounting/accounts-payable/invoice/new?copy=${loaded.id}`,
+                        )
+                      }
+                    >
+                      <Copy className="size-4" /> Copy
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => setSheet("attachments")}>
+                    <Paperclip className="size-4" /> Attachments
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setSheet("activity")}>
+                    <FileClock className="size-4" /> Log
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           }
         />
@@ -437,10 +459,10 @@ function ApInvoiceEditor({
           </span>
         </div>
       )}
-      <Card className="gap-3 py-4">
-        <CardHeader className="px-4">
+      <section className="space-y-3 border-b pb-4">
+        <div>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Invoice details</CardTitle>
+            <h2 className="text-base font-semibold">Invoice details</h2>
             <div className="flex gap-2">
               {loaded && (
                 <>
@@ -451,8 +473,8 @@ function ApInvoiceEditor({
               )}
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-3 px-4 sm:grid-cols-2 lg:grid-cols-6">
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <Field label="Document no.">
             <Input value={loaded?.ap_no ?? "Auto-generated"} readOnly />
           </Field>
@@ -582,8 +604,8 @@ function ApInvoiceEditor({
               }
             />
           </Field>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
       <Tabs defaultValue="items" className="gap-3">
         <div className="overflow-x-auto overflow-y-hidden">
           <TabsList variant="line">
@@ -595,48 +617,52 @@ function ApInvoiceEditor({
           </TabsList>
         </div>
         <TabsContent value="items">
-          <Card className="py-0">
-            <CardContent className="p-0">
-              <InvoiceLines
-                lines={lines}
-                editable={Boolean(editable)}
-                currency={form.currency_code}
-                rate={form.exchange_rate}
-                onChange={setLine}
-                onConfigure={(index) => {
-                  setSelectedLine(index);
-                  setSheet("line");
-                }}
-                onMove={moveLine}
-                onRemove={(index) =>
-                  setForm({
-                    ...form,
-                    lines: form.lines.filter(
-                      (_, itemIndex) => itemIndex !== index,
-                    ),
-                  })
-                }
-              />
-              {editable && (
-                <div className="p-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setForm({ ...form, lines: [...form.lines, emptyLine()] })
-                    }
-                  >
-                    <Plus className="size-4" />
-                    Add line
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div>
+            <InvoiceLines
+              lines={lines}
+              editable={Boolean(editable)}
+              currency={form.currency_code}
+              rate={form.exchange_rate}
+              onChange={setLine}
+              onConfigure={(index) => {
+                setSelectedLine(index);
+                setSheet("line");
+              }}
+              onMove={moveLine}
+              onRemove={(index) =>
+                setForm({
+                  ...form,
+                  lines: form.lines.filter(
+                    (_, itemIndex) => itemIndex !== index,
+                  ),
+                })
+              }
+            />
+            {editable && (
+              <div className="p-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setForm({ ...form, lines: [...form.lines, emptyLine()] })
+                  }
+                >
+                  <Plus className="size-4" />
+                  Add line
+                </Button>
+              </div>
+            )}
+          </div>
         </TabsContent>
         <TabsContent value="tax">
           <Card>
             <CardContent className="grid gap-3 sm:grid-cols-3">
+              <LabelValue label="Tax invoice no.">
+                {loaded?.tax_invoice_no ?? "Generated on Submit"}
+              </LabelValue>
+              <LabelValue label="Tax invoice date">
+                {loaded?.tax_invoice_date ?? "—"}
+              </LabelValue>
               <LabelValue label="Tax status">
                 <ApStatusBadge value={form.tax_status} />
               </LabelValue>
@@ -739,7 +765,7 @@ function ApInvoiceEditor({
       )}
       <SummaryFooterBar
         hasRecord
-        className="bg-background/95 fixed inset-x-0 backdrop-blur sm:sticky"
+        className="static!"
         items={[
           {
             key: "subtotal",
@@ -806,15 +832,6 @@ function ApInvoiceEditor({
       >
         {editing && (
           <div className="flex shrink-0 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void save()}
-              disabled={saveMutation.isPending}
-            >
-              <Save className="size-4" />
-              Save Draft
-            </Button>
             <Button
               size="sm"
               onClick={() => setSubmitConfirmOpen(true)}

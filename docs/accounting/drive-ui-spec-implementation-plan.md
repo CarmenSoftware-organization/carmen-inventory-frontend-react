@@ -4,11 +4,12 @@ Frontend-only interactive mockup work is scoped separately in [Accounting UI Moc
 
 ## 1. Source and decision
 
-Reviewed the latest usable specification in every folder under the supplied Drive:
+Drive connection verified 2026-09-28. The folder is accessible; this is a reviewed snapshot, not an automatic sync. Inventoried the folder and read the latest FRDs for GL/JV, AP Invoice, AP Payment and AR Invoice. The previously reviewed master-data and dashboard references remain in scope:
 
-- `GL`: latest `index.html`
+- `GL`: Journal Voucher FRD V2.14 and fast-entry HTML
 - `Master Data`: Title, Asset Category, JV Prefix, WHT Service Type, WHT Form, Payment Type, Account Code Grouping, Dimension, Cost Center, and COA
-- `AP`: Dashboard, Invoice, Payment Approval/Payment, plus the latest root AP mockup
+- `AP`: Dashboard, Invoice FRD v4.5.06, Payment FRD v2.16, Payment Approval/Payment, plus the latest root AP mockup
+- `AR`: new Invoice FRD v1.07 and HTML mockup (added 2026-09-27)
 
 The Google Docs FRDs are the business-rule source. The latest HTML in each folder is a visual and interaction reference, not a database or API contract. Older HTML versions are reference history only unless a newer FRD explicitly preserves their behavior.
 
@@ -19,8 +20,9 @@ Implementation must extend the existing Carmen React patterns and accounting doc
 | Area                           | Current state                 | Main gap                                                                                 |
 | ------------------------------ | ----------------------------- | ---------------------------------------------------------------------------------------- |
 | Accounting foundation          | Designed                      | Backend/runtime contracts still need end-to-end verification                             |
-| GL Journal Voucher             | Interactive UI prototype      | Uses in-memory repository; HTTP adapter and production integration pending               |
-| AP Dashboard, Invoice, Payment | Interactive UI prototype      | Uses browser-local mock repository; backend remains source-of-truth gap                  |
+| GL Journal Voucher             | Interactive UI prototype      | Save Draft, balanced Submit, Copy, Void and Reverse use the in-memory repository; HTTP adapter and production integration pending |
+| AP Dashboard, Invoice, Payment | Interactive UI prototype      | Invoice mock checks duplicate vendor numbers, generates input-tax fields at Submit and links posted open invoices to Payment; Payment mock posts at Submit/final approval. Backend integration pending |
+| AR Invoice and Receipt         | Generic document mockup       | No AR domain repository, five-document lifecycle, tax/folio/settlement contract          |
 | COA                            | Existing config CRUD          | Model is limited to code, descriptions, nature, type, status, and control-account fields |
 | Department                     | Existing shared config module | Must be reused as the Cost Center base instead of duplicated blindly                     |
 | Remaining accounting masters   | Not implemented               | No routes, types, hooks, API adapters, permissions, or dependency checks                 |
@@ -83,6 +85,8 @@ Reuse existing configuration routes for shared master data and accounting routes
 /accounting/accounts-payable
 /accounting/accounts-payable/invoice
 /accounting/accounts-payable/payment
+/accounting/accounts-receivable/invoice
+/accounting/accounts-receivable/receipt
 ```
 
 Do not add separate Cost Center storage until backend analysis proves Department cannot carry the required accounting fields. Preferred model: extend Department with accounting group, allowed-account mappings, active/dependency rules, and accounting display metadata.
@@ -175,7 +179,7 @@ Keep the current AP screens, replace only the repository implementation behind `
 - tax invoice and WHT rule resolution from master data
 - workflow assignments and backend capabilities
 - posted open items, reservation/application, payment proposal grouping
-- release/execution/posting as separate idempotent commands
+- Submit/Post (เมื่อไม่มี LOA) หรือ final approval (เมื่อมี LOA) สร้าง PV posting/JV และตัดหนี้ทันทีใน backend transaction เดียวตาม AP Payment FRD v2.16; bank execution/reconciliation ติดตามแยกจาก posting
 - activity, source evidence, generated JV, and reconciliation links
 
 Do not redesign AP screens during adapter integration unless the API exposes a missing required state. This keeps visual changes separate from accounting-integrity changes.
@@ -192,6 +196,27 @@ Verification follows `accounts-payable-implementation-readiness.md`; no capabili
 - verify schedule, auto-reverse, period lock, idempotency, and source trace
 
 Do not copy the Drive GL page's Supabase setup, dark-mode implementation, Swagger screen, or local master editor. Existing Carmen shell, theme, API client, and configuration modules own those concerns.
+
+### Slice 7 — AR contract and implementation (new 2026-09-27)
+
+The AR FRD v1.07 adds five document kinds: Invoice (ARIV), Credit Note (ARCN), Debit Note (ARDN), Advance Deposit (ARDP), and Receipt/Tax Invoice (ARRC). Current `/accounting/accounts-receivable/invoice` and `/receipt` routes use the generic `accounting-document-*` mock; they do not implement this lifecycle. Build AR only after its backend owner confirms the posting and settlement contracts.
+
+1. Agree on AR Profile/customer, PMS folio ingestion, tax invoice running, period policy, LOA capabilities, open items and idempotent GL event contracts. Preserve the existing source-generated JV read-only rule. PMS folio invoices must not post revenue/AR twice after night audit.
+2. Replace the generic AR mock with domain list/detail and a repository boundary. Start with ARIV and ARRC, then ARDP and document application, then ARCN/ARDN. Add routes for the latter three only with their domain operations and permissions.
+3. Implement invoice lines, tax invoice register, document references, receipt history and GL trace in the existing Carmen shell. Tax invoice numbering is separate from document numbering and assigned by the backend. Invoice WHT amount is informational at invoicing; recognize WHT at receipt.
+4. Make application/settlement atomic on the backend: same BU/customer/currency policy, available balance, folio amount cap, realized FX, period validation, tax adjustment and rollback on failure. ARRC must clear the correct open item; ARDP must reduce aging only when applied.
+5. Verify duplicate submission, partial receipt, over-application, closed period, PMS replay/no double posting, tax-number uniqueness, cross-BU isolation, masked guest/card data, AR aging against open items and AR control-account reconciliation against GL.
+
+### Delta and decision log for the newer Drive FRDs
+
+| Source | Change to carry forward | Contract decision before coding |
+| --- | --- | --- |
+| [AR FRD v1.07](https://drive.google.com/file/d/1Fje9Y-DFfRJhLmjhS8_WdJxabM4PxMVl/view) | New AR scope and five document types; tax invoice sequence, PMS folio, deposit application, receipt and realized FX | Define source ownership, posting event types, tax-number allocation and open-item/application schema. |
+| [AP Invoice FRD v4.5.06](https://drive.google.com/file/d/1hrpqTFJbx19WRSKAiDnd-B9X24VlcS7v/view) | Explicit APIV/APDN/APCN/APDP, Tax Invoice and Doc Reference tabs, deposit offset and GL reversal, Excel import | Keep Phase 1 APIV priority; agree sign convention, tax timing, credit/deposit reference and posting rules before enabling other kinds. |
+| [AP Payment FRD v2.16](https://drive.google.com/file/d/1pT3ApXgbpS736LP7IJ9LJ6AQiltcJHrB/view) | Single-voucher settlement, partial payment, Summary/Detail view, multiple bank allocations and up to three WHT services | **Decision 2026-09-28 (โอม):** post PV, create JV and apply open items immediately after valid Submit without LOA or final LOA approval. No Release/Execute prerequisite. Backend owns atomicity and idempotency. |
+| [GL JV FRD V2.14](https://drive.google.com/file/d/1_XUdqEp2bJs_gctSTr8qk2-V9M6fdjFB/view) | Fast-entry actions, account-driven Cost Center/dimensions, period guard and auto-reverse | Align copy/reverse/void semantics and backend capabilities with source-generated JV policy before wiring actions. |
+
+**Priority:** complete AP/GL accounting-integrity contracts before expanding their mock flows. AR contract discovery may run alongside that work, but AR posting cannot be implemented as a UI-only state change. The AP Payment posting-point decision above supersedes the older release/execute-first plan; the backend must still validate period, balance, permissions and duplicate requests before committing.
 
 ## 6. Backend work required
 
@@ -229,6 +254,8 @@ Contract decisions
   -> Title + Asset Category
   -> AP HTTP integration
   -> GL HTTP integration + AP/GL reconciliation
+  -> AR Invoice/Receipt + AR/GL reconciliation
+  -> AR Deposit/Credit Note/Debit Note
 ```
 
-The first implementation PR should be Slice 0 contract decisions plus one vertical master slice, preferably Account Code Grouping. It proves list, form, validation, permission, dependency, audit, and backend integration without coupling the first delivery to AP payment complexity.
+The next implementation PR should close Slice 0 contract decisions for the master data and posting boundaries, then deliver one vertical master slice, preferably Account Code Grouping. It proves list, form, validation, permission, dependency, audit, and backend integration without coupling that delivery to AP payment complexity. AR contract discovery can proceed in parallel; its first vertical slice starts with ARIV/ARRC after the GL event and settlement contracts are agreed.
