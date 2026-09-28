@@ -37,6 +37,8 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { useAdjustmentType } from "@/hooks/use-adjustment-type";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
@@ -71,6 +73,20 @@ export default function InventoryAdjustmentComponent() {
     useExportInventoryAdjustment();
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
+  // ตัวกรองประเภทการปรับปรุง (adjustment type ของ BU เช่น EOP-IN, FN) แยกจากตัวกรอง
+  // Type (SI/SO) ข้างล่าง — ชื่อเป็น literal string จาก API ไม่ใช่ i18n key จึงห่อ
+  // MultiSelectFilter ใน control: "custom" (แบบเดียวกับ template ของหน้า RFP)
+  // ค่าแต่ละตัวเป็น clause เต็ม เลือกหลายตัว gateway รวม key ซ้ำเป็น IN ให้เอง
+  const { data: adjustmentTypeData } = useAdjustmentType({ perpage: -1 });
+  const adjustmentTypeOptions = useMemo(
+    () =>
+      (adjustmentTypeData?.data ?? []).map((at) => ({
+        label: `${at.code} - ${at.name}`,
+        value: `adjustment_type_id|string:${at.id}`,
+      })),
+    [adjustmentTypeData],
+  );
+
   // ของเดิมเก็บ type+status ปนกันใน "filter" ตัวเดียว (CSV) — แยกเป็น 2 URL param
   // ("filter" คง status, "adj_type" ใหม่คง type) ตามชื่อที่ตั้งไว้ในหน้า config
   // adjustment-type (adj_type) เพื่อให้แต่ละ field มี chip ลบเองอิสระได้ (ของเดิม
@@ -99,6 +115,21 @@ export default function InventoryAdjustmentComponent() {
         ),
       },
       {
+        key: "adjustment_type",
+        section: "listView.sectionDocument",
+        control: "custom",
+        labelKey: "field.adjustmentType",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={adjustmentTypeOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+      {
         key: "filter",
         section: "listView.sectionDocument",
         control: "status",
@@ -117,7 +148,7 @@ export default function InventoryAdjustmentComponent() {
         ],
       },
     ],
-    [ts, tfl],
+    [ts, tfl, adjustmentTypeOptions],
   );
 
   const lf = useListFilters({
