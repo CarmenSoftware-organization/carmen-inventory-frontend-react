@@ -614,6 +614,8 @@
     "password": "Password",
     "signIn": "Sign In",
     "signingIn": "Signing in...",
+    "orDivider": "or",
+    "signInWithGoogle": "Sign in with Google",
     "validation": {
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email address",
@@ -626,7 +628,8 @@
       "tooManyAttempts": "Too many login attempts. Try again in {seconds}s.",
       "tooManyAttemptsFallback": "Too many login attempts. Please try again later.",
       "registerConflict": "This email or username is already in use",
-      "networkUnavailable": "Could not reach the server. Check your connection and try again."
+      "networkUnavailable": "Could not reach the server. Check your connection and try again.",
+      "googleAuthFailed": "Google sign-in failed. Please try again."
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",
