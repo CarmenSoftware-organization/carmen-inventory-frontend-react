@@ -230,7 +230,7 @@ export default function CompanyProfileComponent() {
           <SettingSectionSkeleton
             fields={["half", "half", "half", "half", "half", "half"]}
           />
-          <SettingSectionSkeleton fields={["half", "half", "half", "half"]} />
+          <SettingSectionSkeleton fields={["half", "half", "half"]} />
         </div>
       )}
 
@@ -672,17 +672,6 @@ export default function CompanyProfileComponent() {
               // ทศนิยมจริงมาจาก decimal_place ของหน่วย — 2 คือ fallback ของ
               // useQuantityFormatter ไม่ใช่ค่าจากช่องนี้
               example={numberExample(data.quantity_format?.locales, 2)}
-              localeOptions={LOCALES}
-              localesPlaceholder={t("fields.locales")}
-              digitsPlaceholder={t("fields.minimumIntegerDigits")}
-            />
-            <NumberFormatField
-              editing={editing}
-              form={form}
-              name="perpage_format"
-              label={t("fields.perpageFormat")}
-              description={t("fields.perpageFormatDesc")}
-              displayValue={fmtNumber(data.perpage_format)}
               localeOptions={LOCALES}
               localesPlaceholder={t("fields.locales")}
               digitsPlaceholder={t("fields.minimumIntegerDigits")}

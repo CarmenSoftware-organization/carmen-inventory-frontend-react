@@ -341,11 +341,7 @@ export function NumberFormatField({
 }: {
   readonly editing: boolean;
   readonly form: Form;
-  readonly name:
-    | "amount_format"
-    | "quantity_format"
-    | "perpage_format"
-    | "recipe_format";
+  readonly name: "amount_format" | "quantity_format" | "recipe_format";
   readonly label: string;
   readonly description?: string;
   readonly displayValue?: string | null;

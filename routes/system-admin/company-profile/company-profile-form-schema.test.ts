@@ -60,7 +60,6 @@ const baseData: BusinessUnitDetail = {
   timezone: "Asia/Bangkok",
   amount_format: { locales: "th-TH", minimumIntegerDigits: 2 },
   quantity_format: { locales: "th-TH", minimumIntegerDigits: 2 },
-  perpage_format: { locales: "th-TH", minimumIntegerDigits: 2 },
   recipe_format: { locales: "th-TH", minimumIntegerDigits: 2 },
   doc_version: 1,
   cluster_name: "ZEBRA",

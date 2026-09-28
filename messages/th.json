@@ -121,8 +121,6 @@
       "amountFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนเงิน",
       "quantityFormat": "รูปแบบจำนวน",
       "quantityFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวน",
-      "perpageFormat": "รูปแบบต่อหน้า",
-      "perpageFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนต่อหน้า",
       "recipeFormat": "รูปแบบสูตร",
       "recipeFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนในสูตร",
       "isActive": "ใช้งาน",
