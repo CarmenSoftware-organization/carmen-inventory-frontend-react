@@ -141,6 +141,13 @@ export default function GrnComponent() {
         fieldKey: "grn_date",
         section: "listView.sectionDate",
       },
+      {
+        key: "invoice_date",
+        control: "date-range",
+        labelKey: "field.invoiceDate",
+        fieldKey: "invoice_date",
+        section: "listView.sectionDate",
+      },
     ],
     [],
   );
@@ -189,6 +196,11 @@ export default function GrnComponent() {
             header: tfl("invoiceNo"),
             value: (r) => r.invoice_no ?? "",
             width: 16,
+          },
+          {
+            header: tfl("invoiceDate"),
+            value: (r) => r.invoice_date ?? "",
+            width: 12,
           },
           { header: tfl("status"), value: (r) => r.doc_status, width: 14 },
           { header: tfl("type"), value: (r) => r.doc_type, width: 16 },
