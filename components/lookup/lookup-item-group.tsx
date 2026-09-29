@@ -3,6 +3,10 @@ import { useTranslations } from "use-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useItemGroup } from "@/hooks/use-item-group";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { ItemGroupDto } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -32,20 +36,21 @@ export function LookupItemGroup({
 }: LookupItemGroupProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { data, isLoading } = useItemGroup(
-    { perpage: -1 },
-    { enabled: hasOpened || !!value },
-  );
+  const serverFilter = filterSubCategoryId
+    ? `${ACTIVE_ONLY_FILTER},product_subcategory_id|string:${filterSubCategoryId}`
+    : ACTIVE_ONLY_FILTER;
 
-  const itemGroups = (data?.data ?? []).filter((g) => {
-    if (!g.is_active) return false;
-    if (filterSubCategoryId && g.product_subcategory_id !== filterSubCategoryId)
-      return false;
-    return true;
-  });
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<ItemGroupDto>({
+      useListHook: useItemGroup,
+      search,
+      serverFilter,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
     <LookupCombobox
@@ -54,7 +59,13 @@ export function LookupItemGroup({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={itemGroups}
+      items={items}
+      selectedItems={selectedItems}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       getId={(g) => g.id}
       getLabel={(g) => `${g.code} — ${g.name}`}
       getSearchValue={(g) => `${g.code} ${g.name}`}

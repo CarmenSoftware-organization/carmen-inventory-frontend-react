@@ -69,6 +69,7 @@ export function useProductsByLocation(
   locationId: string | undefined,
   params?: ParamsDto,
   workflowId?: string,
+  options?: { enabled?: boolean },
 ) {
   const buCode = useBuCode();
   const useWorkflow = workflowId !== undefined;
@@ -105,7 +106,11 @@ export function useProductsByLocation(
         data: (json.data ?? []).map(normalizeWorkflowProduct),
       } as PaginatedResponse<ProductLookupItem>;
     },
-    enabled: !!buCode && !!locationId && (!useWorkflow || !!workflowId),
+    enabled:
+      !!buCode &&
+      !!locationId &&
+      (!useWorkflow || !!workflowId) &&
+      (options?.enabled ?? true),
     ...CACHE_NORMAL,
   });
 }

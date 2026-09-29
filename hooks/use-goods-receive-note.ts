@@ -101,6 +101,7 @@ export function useGoodsReceiveNoteByVendor(
 export function useGoodsReceiveNoteByVendorForCn(
   vendorId: string | undefined,
   params?: ParamsDto,
+  options?: { enabled?: boolean },
 ) {
   const buCode = useBuCode();
 
@@ -124,7 +125,7 @@ export function useGoodsReceiveNoteByVendorForCn(
         );
       return res.json();
     },
-    enabled: !!buCode && !!vendorId,
+    enabled: !!buCode && !!vendorId && (options?.enabled ?? true),
     ...CACHE_DYNAMIC,
   });
 }

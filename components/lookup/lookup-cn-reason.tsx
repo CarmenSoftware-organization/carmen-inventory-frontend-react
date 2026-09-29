@@ -1,22 +1,10 @@
 import { useState } from "react";
-import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { FieldPlainText } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useCnReason } from "@/hooks/use-cn-reason";
+import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import type { CnReason } from "@/types/cn-reason";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCnReasonProps {
   readonly value: string;
@@ -41,87 +29,43 @@ export function LookupCnReason({
 }: LookupCnReasonProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const [selectOpen, setSelectOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบ ไม่งั้นเหตุผลที่อยู่หลัง 30 ตัวแรกขึ้นว่าง
-  const { data } = useCnReason({ perpage: -1 });
-  const resolvedPlaceholder =
-    placeholder ?? tl("select", { entity: tfl("cnReason") });
-  const reasons = data?.data ?? [];
-  const selectedLabel = reasons.find((r) => r.id === value)?.name;
-  const showErrorTooltip = !!error && !selectOpen;
-  const showTooltip = !error && !selectOpen && !!selectedLabel;
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
 
-  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
-  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
-  if (readOnly) {
-    return (
-      <FieldPlainText className={className}>{selectedLabel}</FieldPlainText>
-    );
-  }
+  // credit-note-reasons ไม่มีคอลัมน์ is_active — ส่ง is_active filter แล้ว 400
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<CnReason>({
+      useListHook: useCnReason,
+      search,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip
-        open={(showErrorTooltip || showTooltip) && tooltipOpen}
-        onOpenChange={setTooltipOpen}
-      >
-        <TooltipTrigger asChild>
-          <div className="relative w-full">
-            <Select
-              value={value}
-              onValueChange={onValueChange}
-              disabled={disabled}
-              onOpenChange={setSelectOpen}
-            >
-              <SelectTrigger
-                aria-invalid={!!error}
-                size={size}
-                className={cn(
-                  "w-full text-xs",
-                  className,
-                  error && "border-destructive pr-7",
-                )}
-              >
-                <SelectValue placeholder={resolvedPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {reasons.map((reason) => (
-                  <SelectItem
-                    key={reason.id}
-                    value={reason.id}
-                    className="text-xs"
-                  >
-                    {reason.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
-                <CircleAlert
-                  className="text-destructive size-4"
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-        </TooltipTrigger>
-        {showErrorTooltip && (
-          <TooltipContent
-            side="top"
-            align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
-          >
-            {error}
-          </TooltipContent>
-        )}
-        {showTooltip && (
-          <TooltipContent side="top">
-            <p className="text-xs font-semibold">{selectedLabel}</p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <LookupCombobox
+      allowDeselect={false}
+      size={size}
+      value={value}
+      onValueChange={(id) => onValueChange(id)}
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(r) => r.id}
+      getLabel={(r) => r.name}
+      placeholder={placeholder ?? tl("select", { entity: tfl("cnReason") })}
+      searchPlaceholder={tl("search", { entity: tfl("cnReason") })}
+      disabled={disabled}
+      className={cn("w-full", className)}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
+      error={error}
+      readOnly={readOnly}
+    />
   );
 }

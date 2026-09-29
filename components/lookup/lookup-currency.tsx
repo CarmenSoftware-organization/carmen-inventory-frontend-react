@@ -1,23 +1,13 @@
 import { useState } from "react";
-import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { FieldPlainText } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useCurrency } from "@/hooks/use-currency";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { Currency } from "@/types/currency";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCurrencyProps {
   readonly value: string;
@@ -50,106 +40,59 @@ export function LookupCurrency({
 }: LookupCurrencyProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const [selectOpen, setSelectOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบไม่มี cap 30 · ค่าที่เลือกอยู่คงไว้แม้ถูก
-  // ปิดใช้งานไปแล้ว (เอกสารเก่าที่บันทึกค่านั้นไว้) ไม่งั้น Select หาไม่เจอแล้วขึ้นว่าง
-  const { data } = useCurrency({ perpage: -1 });
-  const resolvedPlaceholder =
-    placeholder ?? tl("select", { entity: tfl("currency") });
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
 
-  const currencies =
-    data?.data?.filter(
-      (c) => c.id === value || (c.is_active && !excludeIds?.has(c.id)),
-    ) ?? [];
-
-  const selected = currencies.find((c) => c.id === value);
-
-  const handleChange = (id: string) => {
-    onValueChange(id);
-    if (onItemChange) {
-      const item = currencies.find((c) => c.id === id);
-      if (item) onItemChange(item);
-    }
-  };
-
-  const showErrorTooltip = !!error && !selectOpen;
-  const showTooltip = !error && !disableTooltip && !selectOpen && !!selected;
-
-  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
-  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
-  if (readOnly) {
-    return (
-      <FieldPlainText className={className}>{selected?.code}</FieldPlainText>
-    );
-  }
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<Currency>({
+      useListHook: useCurrency,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+      filter: excludeIds ? (c) => !excludeIds.has(c.id) : undefined,
+    });
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip
-        open={(showErrorTooltip || showTooltip) && tooltipOpen}
-        onOpenChange={setTooltipOpen}
-      >
-        <TooltipTrigger asChild>
-          <div className={cn("relative", fullWidth ? "w-full" : "w-fit")}>
-            <Select
-              value={value}
-              onValueChange={handleChange}
-              disabled={disabled}
-              onOpenChange={setSelectOpen}
-            >
-              <SelectTrigger
-                aria-invalid={!!error}
-                size={size}
-                align="end"
-                className={cn(
-                  className,
-                  error && "border-destructive pr-7",
-                  fullWidth ? "w-full" : "w-fit",
-                )}
-              >
-                <SelectValue placeholder={resolvedPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {currencies.map((currency) => (
-                  <SelectItem
-                    key={currency.id}
-                    value={currency.id}
-                    className="text-right text-xs"
-                  >
-                    {currency.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
-                <CircleAlert
-                  className="text-destructive size-4"
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-        </TooltipTrigger>
-        {showErrorTooltip && (
-          <TooltipContent
-            side="top"
-            align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
-          >
-            {error}
-          </TooltipContent>
-        )}
-        {showTooltip && (
-          <TooltipContent side="top">
-            <p className="text-foreground/60 text-micro font-semibold">
-              {selected?.code} ({selected?.symbol})
-            </p>
-            <p className="text-xs font-semibold">{selected?.name}</p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <LookupCombobox
+      allowDeselect={false}
+      size={size}
+      value={value}
+      onValueChange={(id, item) => {
+        onValueChange(id);
+        if (item) onItemChange?.(item);
+      }}
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(c) => c.id}
+      getLabel={(c) => c.code}
+      getSearchValue={(c) => `${c.code} ${c.name}`}
+      renderItem={(c) => (
+        <>
+          <span className="w-10 shrink-0 font-semibold">{c.code}</span>
+          <span className="text-muted-foreground flex-1 truncate text-left">
+            {c.name}
+          </span>
+        </>
+      )}
+      placeholder={placeholder ?? tl("select", { entity: tfl("currency") })}
+      searchPlaceholder={tl("search", { entity: tfl("currency") })}
+      disabled={disabled}
+      disableTooltip={disableTooltip}
+      className={cn(fullWidth ? "w-full" : "w-fit", className)}
+      popoverWidth="w-72"
+      popoverAlign="end"
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
+      error={error}
+      readOnly={readOnly}
+    />
   );
 }
