@@ -12,6 +12,11 @@ interface LookupCuisineProps {
   readonly className?: string;
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
+  /**
+   * ป้ายของ `value` ที่รู้อยู่แล้วจากเอกสาร — list โหลดทีละหน้า ค่าที่อยู่หลังหน้าแรก
+   * จะหาชื่อไม่เจอแล้วขึ้น placeholder ทั้งที่มีค่าอยู่
+   */
+  readonly defaultLabel?: string;
 }
 
 export function LookupCuisine({
@@ -22,6 +27,7 @@ export function LookupCuisine({
   className,
   size,
   error,
+  defaultLabel,
 }: LookupCuisineProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -54,6 +60,7 @@ export function LookupCuisine({
       items={cuisines}
       getId={(c) => c.id}
       getLabel={(c) => c.name}
+      defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("cuisine") })}
       searchPlaceholder={tl("search", { entity: tfl("cuisine") })}
       disabled={disabled}

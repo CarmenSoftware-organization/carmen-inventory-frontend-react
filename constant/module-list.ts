@@ -133,6 +133,9 @@ export function findRouteLeaf(pathname: string): ModuleDto | undefined {
 /**
  * Accounting is split into four launcher modules. Their children are the
  * contextual sidebar entries shown after a launcher module is selected.
+ *
+ * ทุก leaf ต้องผูก `licenseFeature` — leaf ที่ไม่ผูกจะ `locked: false` เสมอ แล้วปลดล็อก
+ * หัวข้อ Accounting ทั้งก้อนให้ BU ที่ไม่ได้ซื้อ (ดู module-list.license-feature.test.ts)
  */
 export const accountingModuleSections: ModuleDto[] = [
   {
@@ -140,25 +143,34 @@ export const accountingModuleSections: ModuleDto[] = [
     path: "/accounting",
     icon: BookOpen,
     subModules: [
-      { name: "glDashboard", path: "/accounting", icon: LayoutDashboard },
+      {
+        name: "glDashboard",
+        path: "/accounting",
+        licenseFeature: "accounting.gl",
+        icon: LayoutDashboard,
+      },
       {
         name: "journalVoucher",
         path: "/accounting/journal-voucher",
+        licenseFeature: "accounting.gl",
         icon: FileText,
       },
       {
         name: "templateVoucher",
         path: "/accounting/template-voucher",
+        licenseFeature: "accounting.gl.jv_template",
         icon: FileSpreadsheet,
       },
       {
         name: "recurringVoucher",
         path: "/accounting/recurring-voucher",
+        licenseFeature: "accounting.gl",
         icon: Clock,
       },
       {
         name: "allocationVoucher",
         path: "/accounting/allocation-voucher",
+        licenseFeature: "accounting.gl",
         icon: ArrowLeftRight,
       },
     ],
@@ -171,16 +183,19 @@ export const accountingModuleSections: ModuleDto[] = [
       {
         name: "apDashboard",
         path: "/accounting/accounts-payable",
+        licenseFeature: "accounting.ap",
         icon: LayoutDashboard,
       },
       {
         name: "apInvoice",
         path: "/accounting/accounts-payable/invoice",
+        licenseFeature: "accounting.ap",
         icon: FileInput,
       },
       {
         name: "apPayment",
         path: "/accounting/accounts-payable/payment",
+        licenseFeature: "accounting.ap",
         icon: DollarSign,
       },
     ],
@@ -193,16 +208,19 @@ export const accountingModuleSections: ModuleDto[] = [
       {
         name: "arDashboard",
         path: "/accounting/accounts-receivable",
+        licenseFeature: "accounting.ar",
         icon: LayoutDashboard,
       },
       {
         name: "arInvoice",
         path: "/accounting/accounts-receivable/invoice",
+        licenseFeature: "accounting.ar",
         icon: FileText,
       },
       {
         name: "arReceipt",
         path: "/accounting/accounts-receivable/receipt",
+        licenseFeature: "accounting.ar",
         icon: BadgeDollarSign,
       },
     ],
@@ -215,16 +233,19 @@ export const accountingModuleSections: ModuleDto[] = [
       {
         name: "assetDashboard",
         path: "/accounting/asset",
+        licenseFeature: "accounting.asset",
         icon: LayoutDashboard,
       },
       {
         name: "assetRegister",
         path: "/accounting/asset/register",
+        licenseFeature: "accounting.asset",
         icon: Boxes,
       },
       {
         name: "assetDisposal",
         path: "/accounting/asset/disposal",
+        licenseFeature: "accounting.asset",
         icon: FileInput,
       },
     ],
@@ -536,13 +557,13 @@ export const moduleList: ModuleDto[] = [
       {
         name: "accountGrouping",
         path: "/config/account-grouping",
-        licenseFeature: "accounting.config.gl",
+        licenseFeature: "configuration.chart_of_accounts", // จัดกลุ่มผังบัญชี — ใช้คีย์เดียวกับหน้า chart-of-accounts
         icon: FolderTree,
       },
       {
         name: "jvPrefix",
         path: "/config/jv-prefix",
-        licenseFeature: "accounting.config.gl",
+        licenseFeature: "accounting.config.gl", // config:prefix-jv
         icon: Bookmark,
       },
       {
@@ -590,7 +611,7 @@ export const moduleList: ModuleDto[] = [
       {
         name: "titleMaster",
         path: "/config/title-master",
-        licenseFeature: "configuration",
+        licenseFeature: "accounting.config", // master ของงานบัญชี (อ่านจาก accounting-master-mock)
         icon: UserRoundSearch,
       },
       {

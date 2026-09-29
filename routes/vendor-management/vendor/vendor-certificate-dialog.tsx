@@ -94,7 +94,11 @@ export function VendorCertificateDialog({
   const tv = useTranslations("validation");
 
   const { data: masterData } = useCertification({ perpage: -1 });
-  const masterCerts = (masterData?.data ?? []).filter((c) => c.is_active);
+  // certificate ที่ผูกไว้คงไว้แม้ master ถูกปิดใช้งานแล้ว ไม่งั้น Select ว่างและติด
+  // validation required จน Save ไม่ได้
+  const masterCerts = (masterData?.data ?? []).filter(
+    (c) => c.is_active || c.id === certificate?.master_certificate_id,
+  );
 
   const form = useForm<VendorCertificateFormValues>({
     resolver: zodResolver(

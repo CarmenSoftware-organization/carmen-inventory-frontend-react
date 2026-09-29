@@ -24,12 +24,18 @@ interface CnGeneralFieldsProps {
   readonly form: UseFormReturn<CnFormValues>;
   readonly disabled: boolean;
   readonly vendorName?: string;
+  /**
+   * GRN ที่ผูกกับใบไว้แล้ว — เป็น `defaultLabel` ของ lookup GRN ซึ่งโหลดทีละหน้า
+   * และแสดงเฉพาะ GRN ที่ยังออก CN ได้ ใบที่ผูกไปแล้วจึงอาจไม่อยู่ในรายการเลย
+   */
+  readonly savedGrn?: { id: string | null; no: string | null } | null;
 }
 
 export function CnGeneralFields({
   form,
   disabled,
   vendorName,
+  savedGrn,
 }: CnGeneralFieldsProps) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");
@@ -77,6 +83,11 @@ export function CnGeneralFields({
                 form.setValue("items", [], { shouldDirty: true });
               }}
               vendorId={vendorId}
+              defaultLabel={
+                field.value && field.value === savedGrn?.id
+                  ? (savedGrn.no ?? undefined)
+                  : undefined
+              }
               disabled={disabled}
               error={errors.grn_id?.message}
               className="text-xs"

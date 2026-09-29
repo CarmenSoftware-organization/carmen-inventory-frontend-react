@@ -54,7 +54,9 @@ export function WfRouting({
   const { fields, append, remove } = fieldArray;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: deptData } = useDepartment();
+  // perpage: -1 — ไม่ส่งแล้ว backend ให้แค่ 10 แผนกแรก เงื่อนไข routing ตามแผนก
+  // จึงเลือกแผนกที่ 11 ขึ้นไปไม่ได้ (เหตุเดียวกับ lookup-department.tsx)
+  const { data: deptData } = useDepartment({ perpage: -1 });
   const departments = deptData?.data ?? [];
   const t = useTranslations("systemAdmin.workflow");
   const tc = useTranslations("common");

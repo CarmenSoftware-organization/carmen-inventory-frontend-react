@@ -294,6 +294,13 @@ export function RequestPriceListForm({
                   <LookupPrt
                     value={field.value ?? ""}
                     onValueChange={(value) => field.onChange(value)}
+                    defaultLabel={
+                      field.value &&
+                      field.value === requestPriceList?.pricelist_template?.id
+                        ? (requestPriceList.pricelist_template.name ??
+                          undefined)
+                        : undefined
+                    }
                     disabled={isDisabled}
                     className="w-full"
                     error={form.formState.errors.pricelist_template_id?.message}

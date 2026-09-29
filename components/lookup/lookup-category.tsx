@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCategory } from "@/hooks/use-category";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { CategoryDto } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -26,15 +30,18 @@ export function LookupCategory({
 }: LookupCategoryProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  const [search, setSearch] = useState("");
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกไว้ดึงตาม id แยก
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { data, isLoading } = useCategory(
-    { perpage: -1 },
-    { enabled: hasOpened || !!value },
-  );
-
-  const categories = (data?.data ?? []).filter((c) => c.is_active);
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<CategoryDto>({
+      useListHook: useCategory,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
     <LookupCombobox
@@ -43,7 +50,13 @@ export function LookupCategory({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={categories}
+      items={items}
+      selectedItems={selectedItems}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       getId={(c) => c.id}
       getLabel={(c) => `${c.code} — ${c.name}`}
       getSearchValue={(c) => `${c.code} ${c.name}`}

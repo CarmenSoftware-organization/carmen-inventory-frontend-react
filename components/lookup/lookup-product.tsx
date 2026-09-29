@@ -18,6 +18,11 @@ interface LookupProductProps {
   readonly error?: string;
   readonly defaultOpen?: boolean;
   readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * ป้ายของ `value` ที่รู้อยู่แล้วจากเอกสาร — list โหลดทีละ 30 และกรองเฉพาะ active
+   * สินค้าที่อยู่หลังหน้าแรกหรือถูกปิดใช้งานไปแล้วจะหาชื่อไม่เจอ แล้วขึ้น placeholder
+   */
+  readonly defaultLabel?: string;
 }
 
 /**
@@ -51,6 +56,7 @@ export function LookupProduct({
   error,
   defaultOpen,
   nextFocusRef,
+  defaultLabel,
 }: LookupProductProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -90,6 +96,7 @@ export function LookupProduct({
       items={products}
       getId={(p) => p.id}
       getLabel={(p) => `${p.code} — ${p.name}`}
+      defaultLabel={defaultLabel}
       getSearchValue={(p) => `${p.code} ${p.name}`}
       serverSideSearch
       onSearchChange={setSearch}

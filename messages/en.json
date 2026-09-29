@@ -4254,7 +4254,8 @@
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
       "deleteProductLine": "Remove this line",
-      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is"
+      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is",
+      "editLockedByAp": "Already on AP invoice {docNos} — can no longer be edited"
     },
     "approval": {
       "entity": "Approval",

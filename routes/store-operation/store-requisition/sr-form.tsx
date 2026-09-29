@@ -246,6 +246,8 @@ export function StoreRequisitionForm({
           readOnly={isView}
           disabled={actions.isPending}
           onToLocInfoChange={setToLocInfo}
+          savedFromLocation={storeRequisition?.from_location}
+          savedToLocation={storeRequisition?.to_location}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
           isDraft={
             !storeRequisition?.doc_status ||

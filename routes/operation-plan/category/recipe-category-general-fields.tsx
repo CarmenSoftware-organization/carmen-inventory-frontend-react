@@ -16,6 +16,11 @@ interface RecipeCategoryGeneralFieldsProps {
   readonly isDisabled: boolean;
   readonly excludeIds?: Set<string>;
   readonly onParentChange: (parentId: string) => void;
+  /**
+   * id → ชื่อหมวด จาก list ครบ (perpage -1) ที่ฟอร์มดึงไว้แล้ว — เป็น `defaultLabel`
+   * ของ lookup หมวดแม่ ซึ่งโหลดทีละ 30 หมวดแม่ที่อยู่หลังหน้าแรกจะขึ้น placeholder
+   */
+  readonly getCategoryName?: (id: string) => string | undefined;
 }
 
 export function RecipeCategoryGeneralFields({
@@ -23,6 +28,7 @@ export function RecipeCategoryGeneralFields({
   isDisabled,
   excludeIds,
   onParentChange,
+  getCategoryName,
 }: RecipeCategoryGeneralFieldsProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tfl = useTranslations("field");
@@ -81,6 +87,9 @@ export function RecipeCategoryGeneralFields({
                 }}
                 disabled={isDisabled}
                 placeholder={t("notSet")}
+                defaultLabel={
+                  field.value ? getCategoryName?.(field.value) : undefined
+                }
                 excludeIds={excludeIds}
                 error={errors.parent_id?.message}
               />

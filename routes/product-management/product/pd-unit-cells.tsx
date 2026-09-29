@@ -50,6 +50,7 @@ export function FromUnitCell({
             <LookupUnit
               value={field.value}
               onValueChange={(v) => onUnitChange(index, v)}
+              defaultLabel={unitMap.get(field.value)}
               disabled={disabled}
               excludeIds={usedIds.filter((id) => id !== field.value)}
               error={error}
@@ -99,6 +100,7 @@ export function ToUnitCell({
             <LookupUnit
               value={field.value}
               onValueChange={(v) => onUnitChange(index, v)}
+              defaultLabel={unitMap.get(field.value)}
               disabled={disabled}
               excludeIds={usedIds.filter((id) => id !== field.value)}
               error={error}

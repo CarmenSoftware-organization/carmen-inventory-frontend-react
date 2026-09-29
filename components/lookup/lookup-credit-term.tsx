@@ -1,22 +1,13 @@
 import { useState } from "react";
-import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useCreditTerm } from "@/hooks/use-credit-term";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { CreditTerm } from "@/types/credit-term";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCreditTermProps {
   readonly value: string;
@@ -34,80 +25,47 @@ export function LookupCreditTerm({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupCreditTermProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const [selectOpen, setSelectOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data } = useCreditTerm({ perpage: 30 });
-  const resolvedPlaceholder =
-    placeholder ?? tl("select", { entity: tfl("creditTerm") });
-  const creditTerms = data?.data?.filter((c) => c.is_active) ?? [];
-  const selectedLabel = creditTerms.find((c) => c.id === value)?.name;
-  const showErrorTooltip = !!error && !selectOpen;
-  const showTooltip = !error && !selectOpen && !!selectedLabel;
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<CreditTerm>({
+      useListHook: useCreditTerm,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip
-        open={(showErrorTooltip || showTooltip) && tooltipOpen}
-        onOpenChange={setTooltipOpen}
-      >
-        <TooltipTrigger asChild>
-          <div className="relative w-full">
-            <Select
-              value={value}
-              onValueChange={(val) => {
-                const item = creditTerms.find((c) => c.id === val);
-                onValueChange(val, item);
-              }}
-              disabled={disabled}
-              onOpenChange={setSelectOpen}
-            >
-              <SelectTrigger
-                aria-invalid={!!error}
-                className={cn(
-                  "w-full text-xs",
-                  className,
-                  error && "border-destructive pr-7",
-                )}
-              >
-                <SelectValue placeholder={resolvedPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {creditTerms.map((ct) => (
-                  <SelectItem key={ct.id} value={ct.id} className="text-xs">
-                    {ct.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
-                <CircleAlert
-                  className="text-destructive size-4"
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-        </TooltipTrigger>
-        {showErrorTooltip && (
-          <TooltipContent
-            side="top"
-            align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
-          >
-            {error}
-          </TooltipContent>
-        )}
-        {showTooltip && (
-          <TooltipContent side="top">
-            <p className="text-xs font-semibold">{selectedLabel}</p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <LookupCombobox
+      allowDeselect={false}
+      size={size}
+      value={value}
+      onValueChange={onValueChange}
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(c) => c.id}
+      getLabel={(c) => c.name}
+      placeholder={placeholder ?? tl("select", { entity: tfl("creditTerm") })}
+      searchPlaceholder={tl("search", { entity: tfl("creditTerm") })}
+      disabled={disabled}
+      className={cn("w-full", className)}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
+      error={error}
+    />
   );
 }

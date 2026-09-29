@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useNotificationTemplates } from "@/hooks/use-notification-template";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type {
   NotificationTemplate,
   NotificationTemplateType,
@@ -34,15 +37,14 @@ export function LookupNotificationTemplate({
   const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { items, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination({
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<NotificationTemplate>({
       useListHook: useNotificationTemplates,
       search,
-      perpage: -1,
-      enabled: hasOpened || !!value,
-      resetDeps: [channelType],
-      filter: (tpl: NotificationTemplate) =>
-        tpl.is_active && tpl.type === channelType,
+      // template ที่ stage ผูกไว้คงแสดงแม้ถูกปิดใช้งาน — มาทาง selectedItems
+      serverFilter: `${ACTIVE_ONLY_FILTER},type|string:${channelType}`,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
     });
 
   return (
@@ -54,6 +56,7 @@ export function LookupNotificationTemplate({
         if (open) setHasOpened(true);
       }}
       items={items}
+      selectedItems={selectedItems}
       renderItem={(tpl) => (
         <span className="flex-1 truncate text-left">{tpl.name}</span>
       )}

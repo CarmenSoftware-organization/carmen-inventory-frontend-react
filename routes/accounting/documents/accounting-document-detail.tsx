@@ -113,7 +113,6 @@ const DEPARTMENTS = [
   { id: "400", label: "400 - Engineering" },
 ];
 
-
 const TAX_CODES = [
   { id: "VAT7", label: "VAT 7%" },
   { id: "NOVAT", label: "Non-VAT" },
@@ -301,9 +300,11 @@ export default function AccountingDocumentDetail() {
   const isPeriodLocked =
     currentPeriod?.status === "closed" || currentPeriod?.status === "locked";
 
-  useEffect(() => {
-    if (!journal || isNew) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  // โหลด journal เสร็จ (หรือเปลี่ยนตัว) → เติมค่าลงฟอร์ม ทำตอน render แทน effect
+  // เพื่อไม่ให้ render สองรอบ (react.dev/learn/you-might-not-need-an-effect)
+  const [syncedJournal, setSyncedJournal] = useState<typeof journal>();
+  if (journal && !isNew && journal !== syncedJournal) {
+    setSyncedJournal(journal);
     setDocumentStatus(
       journal.jv_status
         .split("_")
@@ -347,7 +348,7 @@ export default function AccountingDocumentDetail() {
     );
     setSelectedLineIds([]);
     setMode("view");
-  }, [isNew, journal]);
+  }
   const selectedLine = lines.find((line) => line.id === selectedLineId);
   const allLinesSelected =
     lines.length > 0 && selectedLineIds.length === lines.length;
@@ -524,7 +525,12 @@ export default function AccountingDocumentDetail() {
           debit: line.debit.toFixed(2),
           credit: line.credit.toFixed(2),
           dimension: line.dimension
-            ? [{ dimension_id: line.dimension, dimension_value_id: line.dimension }]
+            ? [
+                {
+                  dimension_id: line.dimension,
+                  dimension_value_id: line.dimension,
+                },
+              ]
             : [],
         })),
       };
@@ -811,7 +817,9 @@ export default function AccountingDocumentDetail() {
                       ? createJournal.isPending || updateJournal.isPending
                       : !isBalanced)
                   }
-                  title={isPeriodLocked ? "Period is closed or locked" : undefined}
+                  title={
+                    isPeriodLocked ? "Period is closed or locked" : undefined
+                  }
                 >
                   <Save className="size-4" aria-hidden="true" />
                   {tc("save")}
@@ -1093,7 +1101,9 @@ export default function AccountingDocumentDetail() {
                     <SelectItem value="AJ">AJ - Adjustment Voucher</SelectItem>
                     <SelectItem value="RV">RV - Receipt Voucher</SelectItem>
                     <SelectItem value="PV">PV - Payment Voucher</SelectItem>
-                    <SelectItem value="JV">JV - General Journal Voucher</SelectItem>
+                    <SelectItem value="JV">
+                      JV - General Journal Voucher
+                    </SelectItem>
                   </SelectContent>
                 </FieldSelect>
               ) : (
@@ -1407,7 +1417,9 @@ export default function AccountingDocumentDetail() {
               </CardTitle>
               {isPeriodLocked && (
                 <Badge variant="destructive" className="gap-1 text-xs">
-                  🔒 งวดบัญชี {currentPeriod?.fiscal_year}-P{currentPeriod?.period_number} ปิดแล้ว ({currentPeriod?.status})
+                  🔒 งวดบัญชี {currentPeriod?.fiscal_year}-P
+                  {currentPeriod?.period_number} ปิดแล้ว (
+                  {currentPeriod?.status})
                 </Badge>
               )}
             </div>
@@ -1844,7 +1856,11 @@ export default function AccountingDocumentDetail() {
                         size="sm"
                         data-intent="submit"
                         disabled={isPeriodLocked || !isBalanced}
-                        title={isPeriodLocked ? "Period is closed or locked" : undefined}
+                        title={
+                          isPeriodLocked
+                            ? "Period is closed or locked"
+                            : undefined
+                        }
                         aria-describedby={
                           !isBalanced ? "journal-balance-status" : undefined
                         }
@@ -2064,7 +2080,9 @@ export default function AccountingDocumentDetail() {
                 <Field>
                   <FieldLabel>{t("currency")}</FieldLabel>
                   {isView ? (
-                    <FieldPlainText>{selectedLine.currency ?? "THB"}</FieldPlainText>
+                    <FieldPlainText>
+                      {selectedLine.currency ?? "THB"}
+                    </FieldPlainText>
                   ) : (
                     <LookupCurrency
                       value={selectedLine.currency ?? "THB"}

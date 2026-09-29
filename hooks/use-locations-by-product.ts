@@ -56,6 +56,7 @@ export function useLocationsByProduct(
   productId: string | undefined,
   params?: ParamsDto,
   workflowId?: string,
+  options?: { enabled?: boolean },
 ) {
   const buCode = useBuCode();
   const scoped = !!workflowId;
@@ -99,7 +100,7 @@ export function useLocationsByProduct(
         data: (raw.data ?? []).map(normalizeWorkflowProductLocation),
       };
     },
-    enabled: !!buCode && !!productId,
+    enabled: !!buCode && !!productId && (options?.enabled ?? true),
     ...CACHE_NORMAL,
   });
 }

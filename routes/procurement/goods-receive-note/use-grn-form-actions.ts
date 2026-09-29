@@ -195,6 +195,38 @@ export function useGrnFormActions({
       },
     );
 
+    // แถวที่ผู้ใช้ไม่ได้แตะ ห้ามนับเป็น update — GrnItemComputedSync เขียนค่า
+    // net/total/ส่วนลด/ภาษีที่คำนวณจาก unit_price (ซึ่งปัดจาก sub_total/qty ตอนโหลด)
+    // กลับลงฟอร์มทุกครั้งที่เปิด ค่าจึงคลาดจากของเดิมได้เป็นสตางค์ ถ้าส่งไป หลังบ้าน
+    // คิดราคาใหม่แล้วลงสต๊อกของใบ saved ใหม่ทั้งที่ไม่มีใครแก้อะไร · เทียบเฉพาะช่องที่
+    // คนกรอก (ส่วนลด/ภาษีนับเมื่อติ๊กปรับเองเท่านั้น) แต่ถ้าแถวไหนถูกแก้จริง ยังส่งทั้งแถว
+    if (goodsReceiveNote && detail.update) {
+      type Line = GrnFormValues["items"][number];
+      const inputOf = (list: Line[], id: string | undefined) => {
+        const item = list.find((i) => i.id === id);
+        if (!item) return "";
+        const {
+          net_amount: _net,
+          total_price: _total,
+          received_base_qty: _baseQty,
+          discount_amount,
+          tax_amount,
+          ...rest
+        } = item;
+        return JSON.stringify({
+          ...rest,
+          sequence: list.indexOf(item),
+          discount_amount: item.is_discount_adjustment ? discount_amount : null,
+          tax_amount: item.is_tax_adjustment ? tax_amount : null,
+        });
+      };
+      const touched = detail.update.filter((u) => {
+        const id = (u as { id?: string }).id;
+        return inputOf(values.items, id) !== inputOf(defaultValues.items, id);
+      });
+      detail.update = touched.length > 0 ? touched : undefined;
+    }
+
     // PATCH: backend ต้องการ good_received_note_id (parent ref) ต่อ item ใน update
     // เกณฑ์เดียวกับสาขา PATCH ข้างล่าง — ผูกกับ "มีใบอยู่แล้ว" ไม่ใช่โหมด
     if (goodsReceiveNote && detail.update) {
@@ -284,8 +316,15 @@ export function useGrnFormActions({
         goodsReceiveNote.doc_status === "draft";
       if (willCallSave) delete patchPayload.doc_status;
 
-      const hasItemChanges = !!(detail.add || detail.update || detail.remove);
-      const hasExtraCostChanges = !!(
+      // ใบ committed แก้ได้แค่หัวใบ — รายการกับ extra cost ล็อกอยู่ในหน้าจอแล้ว แต่กัน
+      // ซ้ำตรงนี้ด้วย ไม่งั้นค่าคำนวณที่คลาดในฟอร์มจะหลุดไปแล้วหลังบ้านตอบ
+      // GRN_COMMITTED_HEADER_ONLY ทุกครั้งที่กดบันทึก
+      const linesLocked = goodsReceiveNote.doc_status === "committed";
+      const hasItemChanges =
+        !linesLocked && !!(detail.add || detail.update || detail.remove);
+      const hasExtraCostChanges =
+        !linesLocked &&
+        !!(
         extraCostDetail.add ||
         extraCostDetail.update ||
         extraCostDetail.remove
@@ -413,6 +452,29 @@ export function useGrnFormActions({
     // (เหตุผลเดียวกับ `draftSaveHandler` ใน lib/form-helpers)
     if (status === "draft") {
       void onSubmit(form.getValues(), onSaved);
+      return;
+    }
+
+    // ใบ committed แก้ได้แค่หัวใบ ตรวจเฉพาะช่องที่แก้ได้ — รายการถูกล็อก ถ้าให้กฎของ
+    // รายการ (เช่น ต้องมีราคา) ตัดสินด้วย ผู้ใช้จะติดอยู่กับ error ที่ไม่มีทางแก้
+    if (status === "committed") {
+      void form
+        .trigger([
+          "invoice_no",
+          "invoice_date",
+          "payment_due_date",
+          "post_type",
+          "credit_term_id",
+          "description",
+        ])
+        .then((ok) => {
+          if (ok) {
+            void onSubmit(form.getValues(), onSaved);
+            return;
+          }
+          finishAction();
+          revealErrors?.(form.formState.errors as Record<string, unknown>);
+        });
       return;
     }
 

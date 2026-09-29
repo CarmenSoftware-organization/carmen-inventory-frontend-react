@@ -3,6 +3,10 @@ import { useTranslations } from "use-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSubCategory } from "@/hooks/use-sub-category";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { SubCategoryDto } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -19,18 +23,6 @@ interface LookupSubCategoryProps {
   readonly error?: string;
 }
 
-export function filterActiveSubCategories(
-  items: SubCategoryDto[],
-  filterCategoryId?: string,
-): SubCategoryDto[] {
-  return items.filter((sc) => {
-    if (!sc.is_active) return false;
-    if (filterCategoryId && sc.product_category?.id !== filterCategoryId)
-      return false;
-    return true;
-  });
-}
-
 export function LookupSubCategory({
   value,
   onValueChange,
@@ -44,17 +36,22 @@ export function LookupSubCategory({
 }: LookupSubCategoryProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
+  const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { data, isLoading } = useSubCategory(
-    { perpage: -1 },
-    { enabled: hasOpened || !!value },
-  );
+  // กรองตามหมวดที่ server — กรองหลังโหลดทีละ 30 แถว หน้าแรกอาจว่างทั้งที่มีข้อมูล
+  const serverFilter = filterCategoryId
+    ? `${ACTIVE_ONLY_FILTER},product_category_id|string:${filterCategoryId}`
+    : ACTIVE_ONLY_FILTER;
 
-  const subCategories = filterActiveSubCategories(
-    data?.data ?? [],
-    filterCategoryId,
-  );
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<SubCategoryDto>({
+      useListHook: useSubCategory,
+      search,
+      serverFilter,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
     <LookupCombobox
@@ -63,7 +60,13 @@ export function LookupSubCategory({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={subCategories}
+      items={items}
+      selectedItems={selectedItems}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       getId={(s) => s.id}
       getLabel={(s) => `${s.code} — ${s.name}`}
       getSearchValue={(s) => `${s.code} ${s.name}`}

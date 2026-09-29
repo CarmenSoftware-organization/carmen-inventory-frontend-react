@@ -65,10 +65,13 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("code")} />
       ),
+      // รหัสเป็นข้อความเฉย ๆ ไม่ใช่ลิงก์ — ลิงก์เปิดรายการมีที่เดียวคือคอลัมน์ Name
+      // (เดิมทั้งสองคอลัมน์เป็นลิงก์สีน้ำเงิน แย่งสายตากันทุกแถว) · tabular-nums
+      // ให้ตัวเลขกว้างเท่ากัน ไล่อ่านเทียบรหัสลงแนวตั้งได้
       cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
+        <span className="text-muted-foreground tabular-nums">
           {row.original.code}
-        </CellAction>
+        </span>
       ),
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.text },
     },

@@ -111,7 +111,8 @@ export function PaymentSections({
   const [selectedDepositId, setSelectedDepositId] = useState<string>("");
   const [offsetAmountInput, setOffsetAmountInput] = useState<string>("");
   const [selectedBankId, setSelectedBankId] = useState<string>("");
-  const [selectedPaymentTypeCode, setSelectedPaymentTypeCode] = useState<string>("TRANSFER");
+  const [selectedPaymentTypeCode, setSelectedPaymentTypeCode] =
+    useState<string>("TRANSFER");
 
   const availableDeposits = [
     {
@@ -319,8 +320,13 @@ export function PaymentSections({
             {item.invoice_no}
           </Link>
           <div>
-            <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium ${compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
-              {compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "Tax Credit" : "Undue VAT"}: {item.vat_amount ?? "0"}
+            <span
+              className={`text-micro-legal inline-flex rounded-md px-1.5 py-0.5 font-medium ${compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}
+            >
+              {compareDecimal(item.vat_amount ?? "0", "0") < 0
+                ? "Tax Credit"
+                : "Undue VAT"}
+              : {item.vat_amount ?? "0"}
             </span>
           </div>
         </div>
@@ -584,7 +590,9 @@ export function PaymentSections({
                   variant="outline"
                   onClick={() => {
                     setSelectedDepositId(availableDeposits[0].id);
-                    setOffsetAmountInput(availableDeposits[0].remaining_deposit_amount);
+                    setOffsetAmountInput(
+                      availableDeposits[0].remaining_deposit_amount,
+                    );
                     setDepositDialog(true);
                   }}
                 >
@@ -607,7 +615,7 @@ export function PaymentSections({
                     id: "deposit_no",
                     header: "Deposit Ref No.",
                     cell: ({ row }) => (
-                      <span className="font-semibold text-primary">
+                      <span className="text-primary font-semibold">
                         {row.original.deposit_no}
                       </span>
                     ),
@@ -620,13 +628,15 @@ export function PaymentSections({
                   {
                     id: "original",
                     header: "Original Deposit",
-                    cell: ({ row }) => money(row.original.original_deposit_amount),
+                    cell: ({ row }) =>
+                      money(row.original.original_deposit_amount),
                     meta: { cellClassName: "text-right" },
                   },
                   {
                     id: "remaining",
                     header: "Remaining",
-                    cell: ({ row }) => money(row.original.remaining_deposit_amount),
+                    cell: ({ row }) =>
+                      money(row.original.remaining_deposit_amount),
                     meta: { cellClassName: "text-right" },
                   },
                   {
@@ -648,27 +658,34 @@ export function PaymentSections({
                     id: "action",
                     header: "",
                     cell: ({ row }) =>
-                      remove(`Remove deposit offset ${row.original.deposit_no}`, () => {
-                        onChange({
-                          ...form,
-                          deposit_offsets: form.deposit_offsets?.filter(
-                            (_, i) => i !== row.index,
-                          ),
-                        });
-                      }),
+                      remove(
+                        `Remove deposit offset ${row.original.deposit_no}`,
+                        () => {
+                          onChange({
+                            ...form,
+                            deposit_offsets: form.deposit_offsets?.filter(
+                              (_, i) => i !== row.index,
+                            ),
+                          });
+                        },
+                      ),
                   },
                 ]}
               />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
-                No advance deposits applied to this payment. Click &quot;Apply Deposit Offset&quot; to deduct pre-paid balances.
+                No advance deposits applied to this payment. Click &quot;Apply
+                Deposit Offset&quot; to deduct pre-paid balances.
               </p>
             )}
             {compareDecimal(summary.deposit_offset_total, "0") > 0 && (
-              <div className="bg-muted/20 flex justify-between items-center border-t px-4 py-2 text-xs">
-                <span className="font-semibold">TOTAL DEPOSIT OFFSET DEDUCTION:</span>
+              <div className="bg-muted/20 flex items-center justify-between border-t px-4 py-2 text-xs">
+                <span className="font-semibold">
+                  TOTAL DEPOSIT OFFSET DEDUCTION:
+                </span>
                 <span className="text-destructive font-semibold">
-                  −{money(summary.deposit_offset_total)} {currency} ({money(summary.deposit_offset_base, "", true)} THB)
+                  −{money(summary.deposit_offset_total)} {currency} (
+                  {money(summary.deposit_offset_base, "", true)} THB)
                 </span>
               </div>
             )}
@@ -718,16 +735,21 @@ export function PaymentSections({
                   id: "method",
                   header: "Payment method / Bank",
                   cell: ({ row: { original: item } }) => (
-                    <div className="grid gap-1 min-w-[200px]">
+                    <div className="grid min-w-[200px] gap-1">
                       {editable ? (
                         <Select
                           value={item.method}
-                          onValueChange={(value: ApPaymentMethodLine["method"]) => {
+                          onValueChange={(
+                            value: ApPaymentMethodLine["method"],
+                          ) => {
                             const matchedType = paymentTypes.find(
-                              (p) => p.payment_method === value || p.code === value,
+                              (p) =>
+                                p.payment_method === value || p.code === value,
                             );
                             patchMethod(item.id, {
-                              method: (matchedType?.payment_method as ApPaymentMethodLine["method"]) ?? value,
+                              method:
+                                (matchedType?.payment_method as ApPaymentMethodLine["method"]) ??
+                                value,
                             });
                           }}
                         >
@@ -743,23 +765,28 @@ export function PaymentSections({
                           </SelectContent>
                         </Select>
                       ) : (
-                        <span className="font-medium text-xs">
-                          {paymentTypes.find((p) => p.payment_method === item.method)?.description ??
-                            item.method.replaceAll("_", " ")}
+                        <span className="text-xs font-medium">
+                          {paymentTypes.find(
+                            (p) => p.payment_method === item.method,
+                          )?.description ?? item.method.replaceAll("_", " ")}
                         </span>
                       )}
                       {editable && bankAccounts.length > 0 ? (
                         <Select
                           value={
-                            bankAccounts.find((b) => b.account_number === item.bank_account)?.id ??
-                            ""
+                            bankAccounts.find(
+                              (b) => b.account_number === item.bank_account,
+                            )?.id ?? ""
                           }
                           onValueChange={(bankId) => {
-                            const selectedBank = bankAccounts.find((b) => b.id === bankId);
+                            const selectedBank = bankAccounts.find(
+                              (b) => b.id === bankId,
+                            );
                             if (selectedBank) {
                               patchMethod(item.id, {
                                 bank_account: `${selectedBank.bank_name.split(" ")[0]} ${selectedBank.account_number}`,
-                                account: selectedBank.gl_account_id ?? item.account,
+                                account:
+                                  selectedBank.gl_account_id ?? item.account,
                               });
                             }
                           }}
@@ -931,7 +958,7 @@ export function PaymentSections({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <span className="h-9 flex items-center font-medium">
+                  <span className="flex h-9 items-center font-medium">
                     {form.wht_form ?? "PND53"}
                   </span>
                 )}
@@ -1011,34 +1038,42 @@ export function PaymentSections({
                     editable && whtServiceTypes.length > 0 ? (
                       <Select
                         value={
-                          whtServiceTypes.find((s) => s.default_rate === item.wht_rate)?.id ??
-                          ""
+                          whtServiceTypes.find(
+                            (s) => s.default_rate === item.wht_rate,
+                          )?.id ?? ""
                         }
                         onValueChange={(typeId) => {
-                          const matched = whtServiceTypes.find((s) => s.id === typeId);
+                          const matched = whtServiceTypes.find(
+                            (s) => s.id === typeId,
+                          );
                           if (matched) {
                             patchWht(item.id, {
                               wht_rate: matched.default_rate,
-                              wht_amount: percentOf(item.wht_base, matched.default_rate),
+                              wht_amount: percentOf(
+                                item.wht_base,
+                                matched.default_rate,
+                              ),
                             });
                           }
                         }}
                       >
-                        <SelectTrigger className="min-w-44 h-8 text-xs">
+                        <SelectTrigger className="h-8 min-w-44 text-xs">
                           <SelectValue placeholder="Select service rate..." />
                         </SelectTrigger>
                         <SelectContent>
                           {whtServiceTypes.map((st) => (
                             <SelectItem key={st.id} value={st.id}>
-                              {st.code} ({st.default_rate}%) · {st.description.split("(")[0]}
+                              {st.code} ({st.default_rate}%) ·{" "}
+                              {st.description.split("(")[0]}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     ) : (
                       <span className="text-xs">
-                        {whtServiceTypes.find((s) => s.default_rate === item.wht_rate)?.description ??
-                          `${item.wht_rate}%`}
+                        {whtServiceTypes.find(
+                          (s) => s.default_rate === item.wht_rate,
+                        )?.description ?? `${item.wht_rate}%`}
                       </span>
                     ),
                 },
@@ -1485,12 +1520,15 @@ export function PaymentSections({
           <DialogHeader>
             <DialogTitle>Add Payment Method</DialogTitle>
             <DialogDescription>
-              Select payment type, bank account, specify Pay to payee and reference.
+              Select payment type, bank account, specify Pay to payee and
+              reference.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <label className="grid gap-1 text-sm">
-              <span className="text-muted-foreground text-xs">Payment Type (Master Table)</span>
+              <span className="text-muted-foreground text-xs">
+                Payment Type (Master Table)
+              </span>
               <Select
                 value={selectedPaymentTypeCode}
                 onValueChange={setSelectedPaymentTypeCode}
@@ -1508,18 +1546,18 @@ export function PaymentSections({
               </Select>
             </label>
             <label className="grid gap-1 text-sm">
-              <span className="text-muted-foreground text-xs">Disbursing Bank Account</span>
-              <Select
-                value={selectedBankId}
-                onValueChange={setSelectedBankId}
-              >
+              <span className="text-muted-foreground text-xs">
+                Disbursing Bank Account
+              </span>
+              <Select value={selectedBankId} onValueChange={setSelectedBankId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select bank account..." />
                 </SelectTrigger>
                 <SelectContent>
                   {bankAccounts.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
-                      {b.bank_name} ({b.account_number}) · {b.branch_name ?? "Head Office"}
+                      {b.bank_name} ({b.account_number}) ·{" "}
+                      {b.branch_name ?? "Head Office"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1531,20 +1569,31 @@ export function PaymentSections({
               defaultValue={form.vendor_name}
             />
             {(() => {
-              const activeBank = bankAccounts.find((b) => b.id === selectedBankId);
+              const activeBank = bankAccounts.find(
+                (b) => b.id === selectedBankId,
+              );
               return (
                 <div className="bg-muted/20 space-y-1 rounded-md border p-3 text-xs">
-                  <p className="font-semibold text-primary">
+                  <p className="text-primary font-semibold">
                     🔒 PRE-MAPPED GL POSTING (MASTER SETTING)
                   </p>
                   <p>
-                    Account Code: <b>{activeBank?.gl_account_id ?? "1011001 : Cash / Bank Account"}</b>
+                    Account Code:{" "}
+                    <b>
+                      {activeBank?.gl_account_id ??
+                        "1011001 : Cash / Bank Account"}
+                    </b>
                   </p>
                   <p>
                     Cost Center: <b>800 : Non-Operating / Finance</b>
                   </p>
                   <p>
-                    Disbursement Bank: <b>{activeBank ? `${activeBank.bank_name} (${activeBank.account_number})` : "General Cash / Bank"}</b>
+                    Disbursement Bank:{" "}
+                    <b>
+                      {activeBank
+                        ? `${activeBank.bank_name} (${activeBank.account_number})`
+                        : "General Cash / Bank"}
+                    </b>
                   </p>
                 </div>
               );
@@ -1569,16 +1618,24 @@ export function PaymentSections({
             </Button>
             <Button
               onClick={() => {
-                const activeBank = bankAccounts.find((b) => b.id === selectedBankId);
-                const activeType = paymentTypes.find((pt) => pt.code === selectedPaymentTypeCode);
+                const activeBank = bankAccounts.find(
+                  (b) => b.id === selectedBankId,
+                );
+                const activeType = paymentTypes.find(
+                  (pt) => pt.code === selectedPaymentTypeCode,
+                );
                 onChange({
                   ...form,
                   payment_methods: [
                     ...methods,
                     {
                       id: crypto.randomUUID(),
-                      method: (activeType?.payment_method as ApPaymentMethodLine["method"]) ?? "bank_transfer",
-                      bank_account: activeBank ? `${activeBank.bank_name.split(" ")[0]} ${activeBank.account_number}` : "",
+                      method:
+                        (activeType?.payment_method as ApPaymentMethodLine["method"]) ??
+                        "bank_transfer",
+                      bank_account: activeBank
+                        ? `${activeBank.bank_name.split(" ")[0]} ${activeBank.account_number}`
+                        : "",
                       payee: form.vendor_name,
                       reference: "",
                       account: activeBank?.gl_account_id ?? "1011001",
@@ -1665,18 +1722,22 @@ export function PaymentSections({
           <DialogHeader>
             <DialogTitle>Apply Advance Deposit Offset</DialogTitle>
             <DialogDescription>
-              Select pre-paid advance deposit (APDP) from {form.vendor_name} to deduct from this payment.
+              Select pre-paid advance deposit (APDP) from {form.vendor_name} to
+              deduct from this payment.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <label className="grid gap-1 text-xs">
-              <span className="text-muted-foreground">Select Advance Deposit</span>
+              <span className="text-muted-foreground">
+                Select Advance Deposit
+              </span>
               <Select
                 value={selectedDepositId}
                 onValueChange={(id) => {
                   setSelectedDepositId(id);
                   const matched = availableDeposits.find((d) => d.id === id);
-                  if (matched) setOffsetAmountInput(matched.remaining_deposit_amount);
+                  if (matched)
+                    setOffsetAmountInput(matched.remaining_deposit_amount);
                 }}
               >
                 <SelectTrigger>
@@ -1685,27 +1746,51 @@ export function PaymentSections({
                 <SelectContent>
                   {availableDeposits.map((dep) => (
                     <SelectItem key={dep.id} value={dep.id}>
-                      {dep.deposit_no} · Rem. {dep.remaining_deposit_amount} THB ({dep.deposit_date})
+                      {dep.deposit_no} · Rem. {dep.remaining_deposit_amount} THB
+                      ({dep.deposit_date})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </label>
             {selectedDepositId && (
-              <div className="bg-muted/30 rounded-md p-2.5 text-xs space-y-1">
+              <div className="bg-muted/30 space-y-1 rounded-md p-2.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Original Deposit Amount:</span>
-                  <span className="font-semibold">{availableDeposits.find((d) => d.id === selectedDepositId)?.original_deposit_amount} {currency}</span>
+                  <span className="text-muted-foreground">
+                    Original Deposit Amount:
+                  </span>
+                  <span className="font-semibold">
+                    {
+                      availableDeposits.find((d) => d.id === selectedDepositId)
+                        ?.original_deposit_amount
+                    }{" "}
+                    {currency}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Available Remaining:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{availableDeposits.find((d) => d.id === selectedDepositId)?.remaining_deposit_amount} {currency}</span>
+                  <span className="text-muted-foreground">
+                    Available Remaining:
+                  </span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    {
+                      availableDeposits.find((d) => d.id === selectedDepositId)
+                        ?.remaining_deposit_amount
+                    }{" "}
+                    {currency}
+                  </span>
                 </div>
-                <p className="text-muted-foreground text-[11px] pt-1">{availableDeposits.find((d) => d.id === selectedDepositId)?.note}</p>
+                <p className="text-muted-foreground pt-1 text-[11px]">
+                  {
+                    availableDeposits.find((d) => d.id === selectedDepositId)
+                      ?.note
+                  }
+                </p>
               </div>
             )}
             <label className="grid gap-1 text-xs">
-              <span className="text-muted-foreground">Offset Deduction Amount</span>
+              <span className="text-muted-foreground">
+                Offset Deduction Amount
+              </span>
               <Input
                 inputMode="decimal"
                 value={offsetAmountInput}
@@ -1723,7 +1808,9 @@ export function PaymentSections({
             </Button>
             <Button
               onClick={() => {
-                const matched = availableDeposits.find((d) => d.id === selectedDepositId);
+                const matched = availableDeposits.find(
+                  (d) => d.id === selectedDepositId,
+                );
                 if (matched && Number(offsetAmountInput) > 0) {
                   const existingOffsets = form.deposit_offsets ?? [];
                   onChange({
@@ -1734,8 +1821,10 @@ export function PaymentSections({
                         id: crypto.randomUUID(),
                         deposit_no: matched.deposit_no,
                         deposit_date: matched.deposit_date,
-                        original_deposit_amount: matched.original_deposit_amount,
-                        remaining_deposit_amount: matched.remaining_deposit_amount,
+                        original_deposit_amount:
+                          matched.original_deposit_amount,
+                        remaining_deposit_amount:
+                          matched.remaining_deposit_amount,
                         offset_amount: offsetAmountInput,
                         note: matched.note,
                       },

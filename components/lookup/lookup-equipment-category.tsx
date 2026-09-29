@@ -13,6 +13,11 @@ interface LookupEquipmentCategoryProps {
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: Set<string>;
   readonly error?: string;
+  /**
+   * ป้ายของ `value` ที่รู้อยู่แล้วจากเอกสาร — list โหลดทีละหน้า ค่าที่อยู่หลังหน้าแรก
+   * จะหาชื่อไม่เจอแล้วขึ้น placeholder ทั้งที่มีค่าอยู่
+   */
+  readonly defaultLabel?: string;
 }
 
 /**
@@ -40,6 +45,7 @@ export function LookupEquipmentCategory({
   size,
   excludeIds,
   error,
+  defaultLabel,
 }: LookupEquipmentCategoryProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -76,6 +82,7 @@ export function LookupEquipmentCategory({
       items={categories}
       getId={(c) => c.id}
       getLabel={(c) => c.name}
+      defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("category") })}
       searchPlaceholder={tl("search", { entity: tfl("category") })}
       disabled={disabled}

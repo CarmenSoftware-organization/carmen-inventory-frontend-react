@@ -52,11 +52,11 @@ export function LookupProductInLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) => useProductsByLocation(locationId || undefined, params, workflowId);
+  const useListHook = (
+    params: { search?: string; perpage: number; page?: number },
+    options?: { enabled?: boolean },
+  ) =>
+    useProductsByLocation(locationId || undefined, params, workflowId, options);
 
   const {
     items: products,

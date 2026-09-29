@@ -411,6 +411,7 @@ export function CnForm({ creditNote }: CnFormProps) {
           form={form}
           disabled={isDisabled || isView}
           vendorName={creditNote?.vendor?.name ?? undefined}
+          savedGrn={creditNote?.grn}
         />
         <hr className="border-border" />
 

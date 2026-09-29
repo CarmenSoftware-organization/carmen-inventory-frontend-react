@@ -80,6 +80,21 @@ export function useGrnTable({
       meta: { headerTitle: tfl("invoiceNo") },
     },
     {
+      accessorKey: "invoice_date",
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("invoiceDate")}
+          className="justify-center"
+        />
+      ),
+      cell: ({ row }) => formatDate(row.getValue("invoice_date"), dateFormat),
+      meta: {
+        headerTitle: tfl("invoiceDate"),
+        cellClassName: "text-center",
+      },
+    },
+    {
       accessorKey: "doc_status",
       header: ({ column }) => (
         <DataGridColumnHeader

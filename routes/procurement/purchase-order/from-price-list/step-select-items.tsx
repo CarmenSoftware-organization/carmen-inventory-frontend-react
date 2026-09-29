@@ -178,9 +178,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     [allRows, search, filter.matches],
   );
 
-  // เรตของสกุลเงินที่เลือก — LookupCurrency ใช้ perpage 30 เหมือนฟอร์ม PO ปกติ
-  // ไม่ดึงมาเทียบ ใบสกุลต่างประเทศจะถูกส่งด้วย exchange_rate 1 ของ EMPTY_FORM
-  const { data: currencyData } = useCurrency({ perpage: 30 });
+  // เรตของสกุลเงินของ price list — ถ้าไม่ดึงมาเทียบ ใบสกุลต่างประเทศจะถูกส่งด้วย
+  // exchange_rate 1 ของ EMPTY_FORM · perpage: -1 (key เดียวกับ LookupCurrency)
+  // เดิม 30 สกุลที่อยู่หลังหน้าแรกหาเรตไม่เจอแล้วเงียบ ๆ ได้ 1
+  const { data: currencyData } = useCurrency({ perpage: -1 });
   const currencies = currencyData?.data ?? [];
 
   const selectedByDetail = useMemo(
@@ -406,6 +407,15 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
               productId={detail.product?.id ?? ""}
               workflowId={workflowId}
               value={selected?.location_id ?? ""}
+              // StepperContent unmount ขั้นที่ไม่ active — ย้อนกลับมาขั้นนี้แล้ว
+              // pickedItem ของ combobox หาย ใช้ชื่อที่ patch เก็บไว้แทน
+              defaultLabel={
+                selected?.location_name
+                  ? selected.location_code
+                    ? `${selected.location_name} - ${selected.location_code}`
+                    : selected.location_name
+                  : undefined
+              }
               onValueChange={(v) => patchItem(detail.id, { location_id: v })}
               onItemChange={(loc) =>
                 patchItem(detail.id, {

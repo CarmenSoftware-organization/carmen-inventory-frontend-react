@@ -18,6 +18,13 @@ import { useProductUnits, useUnitDecimals } from "@/hooks/use-product-units";
 import type { GrnFormValues } from "../grn-form-schema";
 import type { GrnQtyField, GrnUnitField } from "./types";
 
+/** ช่องชื่อหน่วยคู่ของแต่ละช่อง id (แสดงอย่างเดียว ไม่อยู่ใน payload) */
+const UNIT_NAME_FIELD = {
+  foc_unit_id: "foc_unit_name",
+  approved_unit_id: "approved_unit_name",
+  received_unit_id: "received_unit_name",
+} as const satisfies Record<GrnUnitField, string>;
+
 const WatchedProductUnit = memo(function WatchedProductUnit({
   control,
   index,
@@ -30,6 +37,10 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
   "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const savedUnitName = useWatch({
+    control,
+    name: `items.${index}.${UNIT_NAME_FIELD[unitField]}`,
+  });
   return (
     <Controller
       control={control}
@@ -39,6 +50,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
           productId={productId}
           value={field.value ?? ""}
           onValueChange={field.onChange}
+          defaultLabel={savedUnitName || undefined}
           disabled={!productId}
           className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
         />
@@ -64,8 +76,13 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
   const qty = useWatch({ control, name: `items.${index}.${qtyField}` });
   const unitId =
     useWatch({ control, name: `items.${index}.${unitField}` }) ?? "";
+  const savedUnitName = useWatch({
+    control,
+    name: `items.${index}.${UNIT_NAME_FIELD[unitField]}`,
+  });
   const { data: units = [] } = useProductUnits(productId || undefined);
-  const unitName = units.find((u) => u.id === unitId)?.name ?? "";
+  const unitName =
+    units.find((u) => u.id === unitId)?.name ?? savedUnitName ?? "";
   return (
     <InputSuffixPlain
       className="block w-full text-right"

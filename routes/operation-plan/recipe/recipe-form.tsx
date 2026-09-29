@@ -154,7 +154,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           computed={computed}
           gallery={gallery}
         />
-        <RecipeGeneralFields form={form} isDisabled={isDisabled} />
+        <RecipeGeneralFields
+          form={form}
+          isDisabled={isDisabled}
+          recipe={recipe}
+        />
         <RecipeIngredientsFields
           ingredients={ingredients}
           onChange={setIngredients}

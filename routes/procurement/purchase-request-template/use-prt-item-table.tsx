@@ -113,6 +113,7 @@ const ProductCell = ({
           onValueChange={(value, product) =>
             setProductToItem(form, index, value, product)
           }
+          defaultLabel={productName || undefined}
           disabled={disabled}
           readOnly={readOnly}
           className="w-full text-xs"
@@ -150,6 +151,9 @@ const WatchedProductUnit = ({
           productId={productId}
           value={field.value ?? ""}
           onValueChange={field.onChange}
+          defaultLabel={
+            form.getValues(`items.${index}.requested_unit_name`) || undefined
+          }
           disabled={disabled}
           readOnly={readOnly}
           // ความกว้างคงที่ = 4 ตัวอักษร + ที่ของลูกศร (ช่องว่างซ้ายขวา 1rem +

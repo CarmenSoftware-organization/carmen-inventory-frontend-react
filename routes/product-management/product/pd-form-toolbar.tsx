@@ -45,6 +45,7 @@ function FormToolbar({
   const tActivity = useTranslations("activity");
   const tf = useTranslations("form");
   const t = useTranslations("productManagement.product");
+  const tfl = useTranslations("field");
   const isView = mode === "view";
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
@@ -81,8 +82,8 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้แล้ว
-  // มันมีช่อง Code ของตัวเองอยู่ในแท็บ General
+  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้
+  // แต่อยู่ต้นแถบตัวตนใน subtitle ด้านล่าง
   const badges = (
     <>
       <StatusDotBadge tone={statusTone} size="xs">
@@ -96,11 +97,45 @@ function FormToolbar({
     </>
   );
 
-  // subtitle: add → neverSaved · view/edit → local_name (custom Thai font)
+  // subtitle: add → neverSaved · view/edit → แถบตัวตนของสินค้า = รหัส · ชื่อไทย ·
+  // เส้นทางหมวด (category › sub › item group) · หน่วยนับ — อ่านจบได้โดยไม่ต้อง
+  // เปิดแท็บ General · ใช้ค่าจาก `product` (ที่บันทึกแล้ว) ไม่ใช่ค่าที่กำลังแก้
+  // ในฟอร์ม หัวหน้าจึงไม่เปลี่ยนตามทุกการพิมพ์ · รหัสกลับมาอยู่ในแถบนี้ (ไม่ใช่
+  // ข้าง title แบบเดิมที่ถูกเอาออกใน 39a4da71) เพราะคนคลังค้นกันด้วยรหัส
+  const categoryPath = [
+    product?.product_category?.name,
+    product?.product_sub_category?.name,
+    product?.product_item_group?.name,
+  ].filter(Boolean);
+  const unitName = product?.inventory_unit?.name;
+  const identity = [
+    product?.code && (
+      <span key="code" className="text-foreground font-medium tabular-nums">
+        {product.code}
+      </span>
+    ),
+    product?.local_name && <span key="local">{product.local_name}</span>,
+    categoryPath.length > 0 && (
+      <span key="path">{categoryPath.join(" › ")}</span>
+    ),
+    unitName && (
+      <span key="unit">
+        {tfl("unit")}{" "}
+        <span className="text-foreground font-medium">{unitName}</span>
+      </span>
+    ),
+  ].filter(Boolean);
   const subtitle = isAdd ? (
     t("neverSaved")
-  ) : product?.local_name ? (
-    <span>{product.local_name}</span>
+  ) : identity.length > 0 ? (
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+      {identity.map((part, i) => (
+        <span key={i} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden="true">·</span>}
+          {part}
+        </span>
+      ))}
+    </span>
   ) : undefined;
 
   const actions = (
