@@ -107,7 +107,8 @@ export function useLookupPagination<T>({
   }, [data, page]);
 
   const totalPages = Number(data?.paginate?.pages ?? lastPaginate?.pages ?? 1);
-  const hasMore = page < totalPages;
+  // error ต้องหยุดแบ่งหน้า — ไม่งั้น auto-load ของ list จะขยับหน้าต่อไปเรื่อย ๆ โดยข้ามหน้าที่พัง
+  const hasMore = page < totalPages && !error;
 
   const ids = selectedIds ?? [];
   const { items: fetchedSelected } = useEntitiesByIds({
