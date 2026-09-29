@@ -107,7 +107,7 @@ export function createConfigCrud<T, TCreate>({
   }
 
   /**
-   * Hook ดึงทุกแถวของ entity (วนหน้าละ `MAX_PERPAGE` ผ่าน `fetchAllPages`) แทน `perpage=-1`
+   * Hook ดึงทุกแถวของ entity (วนหน้าละ `MAX_PERPAGE` ผ่าน `fetchAllPages`) แทนการขอทั้งทะเบียนในครั้งเดียว
    *
    * ใช้กับทะเบียนที่ต้องได้ครบจริง (จัดกลุ่ม / ติ๊กทั้งกลุ่ม / พิมพ์) เท่านั้น
    * queryKey ขึ้นต้นด้วย `queryKey` เดียวกับ `useList` — mutation ของ crud นี้ invalidate ไปด้วย

@@ -2913,6 +2913,8 @@
       "viewLocations": "สถานที่",
       "viewHistory": "ประวัติ",
       "noHistory": "ยังไม่มีประวัติการสุ่มตรวจ",
+      "loadMoreHistory": "โหลดเพิ่ม",
+      "loadingMoreHistory": "กำลังโหลด…",
       "tabAll": "ทั้งหมด",
       "tabResume": "ดำเนินต่อ",
       "tabInProgress": "กำลังตรวจ",
