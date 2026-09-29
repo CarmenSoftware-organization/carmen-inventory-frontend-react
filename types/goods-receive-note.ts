@@ -107,6 +107,12 @@ interface GrnExtraCost {
 
 type GrnPostType = "ap" | "consignment" | "cash";
 
+export interface GrnApInvoiceRef {
+  id: string;
+  doc_no: string;
+  doc_status: string;
+}
+
 export interface GoodsReceiveNote {
   id: string;
   grn_no: string;
@@ -148,6 +154,9 @@ export interface GoodsReceiveNote {
   last_action: LastAction | null;
   // Audit
   doc_version?: number;
+  // AP Invoice ที่ยังไม่ void ซึ่งดึงใบนี้ไปแล้ว — มีสักใบ = ใบ committed แก้ไม่ได้
+  // (optional: backend รุ่นก่อนไม่ส่งมา)
+  ap_invoices?: GrnApInvoiceRef[];
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
   // Detail items (nested: detail → items[])

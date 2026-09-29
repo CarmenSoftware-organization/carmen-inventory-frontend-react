@@ -24,12 +24,18 @@ interface GrnFormHeaderProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   readonly fromWizard?: boolean;
+  /** ใบ saved: ผู้ขายกับวันที่รับล็อกไว้ แม้ช่องอื่นจะแก้ได้ */
+  readonly lockIdentity?: boolean;
+  /** ใบ committed: สกุลเงิน/เรตล็อก — ต้นทุนสต๊อกลงเป็นสกุลหลักไปแล้วและไม่ถูกลงใหม่ */
+  readonly lockCommercial?: boolean;
 }
 
 export function GrnFormHeader({
   form,
   disabled,
   fromWizard = false,
+  lockIdentity = false,
+  lockCommercial = false,
 }: GrnFormHeaderProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -71,7 +77,7 @@ export function GrnFormHeader({
                 onValueChange={field.onChange}
                 onItemChange={(v) => form.setValue("vendor_name", v.name)}
                 defaultLabel={vendorName || undefined}
-                disabled={disabled || isPo}
+                disabled={disabled || isPo || lockIdentity}
                 error={errors.vendor_id?.message}
                 className="text-xs"
               />
@@ -87,7 +93,9 @@ export function GrnFormHeader({
               <FieldDatePicker
                 value={field.value ?? ""}
                 onValueChange={field.onChange}
-                disabled={disabled}
+                // เลขใบออกตามวันที่นี้ตอน save ไปแล้ว และการลงสต๊อกใหม่หลังแก้
+                // เทียบแค่จำนวน/ต้นทุน วันที่ของรายการเคลื่อนไหวจะไม่ขยับตาม
+                disabled={disabled || lockIdentity}
                 placeholder={tc("selectDate")}
                 className="w-full text-xs"
                 error={errors.grn_date?.message}
@@ -102,7 +110,7 @@ export function GrnFormHeader({
           </FieldLabel>
           <InputSuffixField
             className="w-full"
-            disabled={disabled}
+            disabled={disabled || lockCommercial}
             error={!!errors.currency_id?.message}
           >
             <InputSuffixAddon>
@@ -117,7 +125,7 @@ export function GrnFormHeader({
                       form.setValue("currency_name", currency.code);
                       form.setValue("exchange_rate", currency.exchange_rate);
                     }}
-                    disabled={disabled || fromWizard}
+                    disabled={disabled || fromWizard || lockCommercial}
                     className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
                   />
                 )}
@@ -130,7 +138,7 @@ export function GrnFormHeader({
                 <InputSuffixAmount
                   id="grn-exchange-rate"
                   decimals={5}
-                  disabled={disabled}
+                  disabled={disabled || lockCommercial}
                   value={Number(field.value) || 0}
                   onValueChange={field.onChange}
                 />

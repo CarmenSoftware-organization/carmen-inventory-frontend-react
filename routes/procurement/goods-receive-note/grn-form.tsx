@@ -200,7 +200,11 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         onShowComment={() => actions.setShowComment(true)}
         onShowDelete={() => actions.setShowDelete(true)}
         onSaveDraft={() => actions.handleSubmitWithStatus("draft")}
-        onSave={() => actions.handleSubmitWithStatus("saved")}
+        // ใบ committed ต้องส่งสถานะเดิม — ส่ง "saved" จะทำให้ doc_status นับเป็นค่าที่เปลี่ยน
+        // แล้วหลังบ้านปฏิเสธด้วย GRN_COMMITTED_HEADER_ONLY
+        onSave={() =>
+          actions.handleSubmitWithStatus(isCommitted ? "committed" : "saved")
+        }
       />
 
       <form
@@ -212,6 +216,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           form={form}
           disabled={isDisabled || isView}
           fromWizard={fromWizard}
+          lockIdentity={
+            goodsReceiveNote?.doc_status === "saved" || isCommitted
+          }
+          lockCommercial={isCommitted}
         />
 
         {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO)
@@ -236,10 +244,13 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GrnItemTable form={form} disabled={isDisabled} />
+            <GrnItemTable form={form} disabled={isDisabled || isCommitted} />
           </TabsContent>
           <TabsContent value="extra-cost">
-            <GrnExtraCostFields form={form} disabled={isDisabled} />
+            <GrnExtraCostFields
+              form={form}
+              disabled={isDisabled || isCommitted}
+            />
           </TabsContent>
           <TabsContent value="stock">
             <GrnStockTable
