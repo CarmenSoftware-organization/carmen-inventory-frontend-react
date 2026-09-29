@@ -115,8 +115,12 @@ probe T02 (GET): `filter` รองรับ `doc_status|string:a,b` (IN), `meth
 - ตัวกรอง location: `MultiSelectFilter` ที่ป้อน option จากแถว → `EntityMultiFilter`
   (`fieldKey: "location_id"`, `useListHook: useLocation`, `getLabel: l => \`${l.code} · ${l.name}\``, `bareIds`)
   ค่าใน state ยังเป็น id เปล่าคั่น `,` เหมือนเดิม · ตัวกรอง status / method คง `MultiSelectFilter` (option คงที่)
-- refetch / error ของ view ประวัติยังต้องทำงาน — `useLookupPagination` ไม่คืน `error`/`refetch`
-  → ตัดสินตอนเขียน plan หลังอ่านโค้ด error state จริง (ทางเลือก: invalidate `QUERY_KEYS.SPOT_CHECKS`)
+- refetch / error ของ view ประวัติยังต้องทำงาน — `useLookupPagination` คืน `error` / `refetch`
+  เพิ่ม (`LookupListHook` รับสองค่านี้แบบ optional) แล้ว `ErrorState` เดิมใช้ต่อได้ตรง ๆ
+- ตัวเลือก status เหลือ `pending | in_progress | completed | void` — `HISTORY_STATUS_KEYS` เดิมมี
+  `voided` / `cancelled` ซึ่งไม่อยู่ใน `enum_spot_check_status` ของ backend ส่งไป server แล้วได้ **400**
+  (probe T02) ของเดิมไม่พังเพราะกรองฝั่ง client
+- ค้นด้วย debounce 300ms (ของเดิมกรอง client ทุกตัวอักษรได้ แต่ตอนนี้ทุกตัวอักษร = request)
 
 ข้อเสียที่ user ยอมรับ: พิมพ์รหัส location (เช่น "1EG01") ในช่องค้นประวัติไม่เจอแล้ว —
 ใช้ตัวกรอง location แทน · ตัวเลือก location แสดงทุก location ที่ active ไม่ใช่เฉพาะที่มีประวัติ
