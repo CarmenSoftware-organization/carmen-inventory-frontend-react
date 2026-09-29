@@ -76,16 +76,16 @@ export function LookupLocationPairProduct({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) =>
+  const useListHook = (
+    params: { search?: string; perpage: number; page?: number },
+    options?: { enabled?: boolean },
+  ) =>
     useLocationPairProducts(
       fromLocationId || undefined,
       toLocationId || undefined,
       workflowId || undefined,
       params,
+      options,
     );
 
   const {
@@ -96,6 +96,7 @@ export function LookupLocationPairProduct({
     loadMore,
   } = useLookupPagination<LocationPairProduct>({
     useListHook,
+    getId: (p) => p.product_id,
     search,
     perpage: 30,
     filter: (p: LocationPairProduct) => {

@@ -42,11 +42,10 @@ export function LookupGrnByVendorForCn({
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
 
-  const useListByVendor = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) => useGoodsReceiveNoteByVendorForCn(vendorId, params);
+  const useListByVendor = (
+    params: { search?: string; perpage: number; page?: number },
+    options?: { enabled?: boolean },
+  ) => useGoodsReceiveNoteByVendorForCn(vendorId, params, options);
 
   const {
     items: grns,

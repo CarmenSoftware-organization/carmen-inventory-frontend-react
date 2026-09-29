@@ -8,7 +8,10 @@ import { CACHE_STATIC } from "@/lib/cache-config";
 import type { Location } from "@/types/location";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 
-export function useUserLocation(params?: ParamsDto) {
+export function useUserLocation(
+  params?: ParamsDto,
+  options?: { enabled?: boolean },
+) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<Location>>({
@@ -24,7 +27,7 @@ export function useUserLocation(params?: ParamsDto) {
       if (!res.ok) throw new Error("Failed to fetch user locations");
       return res.json();
     },
-    enabled: !!buCode,
+    enabled: !!buCode && (options?.enabled ?? true),
     ...CACHE_STATIC,
   });
 }

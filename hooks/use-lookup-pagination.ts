@@ -71,12 +71,24 @@ export function useLookupPagination<T>({
   // หรือ placeholder ของหน้าก่อนจะไม่ถูกต่อซ้ำ) และตัดตัวซ้ำด้วย id
   useEffect(() => {
     if (!data) return;
-    if (data.paginate && Number(data.paginate.page) !== page) return;
+    if (data.paginate?.page != null && Number(data.paginate.page) !== page)
+      return;
     const newItems = data.data ?? [];
     setAllItems((prev) => {
       if (page === 1) return newItems;
-      const seen = new Set(prev.map(getId));
-      return [...prev, ...newItems.filter((it) => !seen.has(getId(it)))];
+      // id ว่าง (entity ที่ไม่มี `id` แล้วลืมส่ง getId) ไม่นับเป็นตัวซ้ำ
+      const seen = new Set<string>();
+      for (const it of prev) {
+        const k = getId(it);
+        if (k != null) seen.add(k);
+      }
+      return [
+        ...prev,
+        ...newItems.filter((it) => {
+          const k = getId(it);
+          return k == null || !seen.has(k);
+        }),
+      ];
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, page]);

@@ -27,6 +27,7 @@ export function useLocationPairProducts(
   locationId2: string | undefined,
   workflowId: string | undefined,
   params?: ParamsDto,
+  options?: { enabled?: boolean },
 ) {
   const buCode = useBuCode();
 
@@ -57,7 +58,12 @@ export function useLocationPairProducts(
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
-    enabled: !!buCode && !!locationId1 && !!locationId2 && !!workflowId,
+    enabled:
+      !!buCode &&
+      !!locationId1 &&
+      !!locationId2 &&
+      !!workflowId &&
+      (options?.enabled ?? true),
     // ยิงใหม่เมื่อ "เกณฑ์กรองเปลี่ยน" เท่านั้น — คู่คลังกับ workflow อยู่ใน queryKey
     // อยู่แล้ว เปลี่ยนเมื่อไหร่ก็ไม่มีข้อมูลของ key ใหม่ ยิงทันทีเอง
     //
