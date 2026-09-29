@@ -59,7 +59,7 @@ export function GrnInvoiceFilter({
       useListHook: useGoodsReceiveNote,
       search: debouncedSearch,
       // หลายใบอ้างใบแจ้งหนี้เดียวกันได้ — หน้าละ 50 ใบให้ได้เลขที่พอล้นกล่อง
-      // (VirtualCommandList โหลดหน้าถัดไปเมื่อเลื่อนถึงท้ายเท่านั้น)
+      // (VirtualCommandList โหลดหน้าถัดไปเมื่อเลื่อนถึงท้าย และโหลดต่อเองเมื่อรายการว่างหรือสั้นจนเลื่อนไม่ได้)
       perpage: 50,
       sort: "invoice_no:asc",
       // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย

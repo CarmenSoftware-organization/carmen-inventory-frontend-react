@@ -18,8 +18,10 @@ interface LookupPhysicalCountPeriodProps {
 }
 
 function formatPeriodLabel(period: PhysicalCountPeriod): string {
-  const from = formatDate(period.tb_inventory_period.start_at, "DD MMM YYYY");
-  const to = formatDate(period.tb_inventory_period.end_at, "DD MMM YYYY");
+  const inv = period.tb_inventory_period;
+  if (!inv) return period.id;
+  const from = formatDate(inv.start_at, "DD MMM YYYY");
+  const to = formatDate(inv.end_at, "DD MMM YYYY");
   return `${from} — ${to}`;
 }
 
@@ -50,7 +52,10 @@ export function LookupPhysicalCountPeriod({
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
       // ซ่อนงวดที่ยังไม่เริ่ม (ค่าที่เลือกไว้ผ่านเสมอ)
-      filter: (p) => new Date(p.tb_inventory_period.start_at) <= today,
+      // แถวที่ไม่มี relation tb_inventory_period ตัดทิ้ง (ค่าที่เลือกไว้ยังผ่านเสมอ)
+      filter: (p) =>
+        !!p.tb_inventory_period &&
+        new Date(p.tb_inventory_period.start_at) <= today,
     });
 
   return (
@@ -69,7 +74,7 @@ export function LookupPhysicalCountPeriod({
       getId={(p) => p.id}
       getLabel={formatPeriodLabel}
       getSearchValue={(p) =>
-        `${p.tb_inventory_period.period} ${formatPeriodLabel(p)}`
+        `${p.tb_inventory_period?.period ?? ""} ${formatPeriodLabel(p)}`
       }
       placeholder={
         placeholder ?? tl("select", { entity: tfl("physicalCountPeriod") })
