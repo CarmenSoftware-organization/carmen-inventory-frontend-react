@@ -10,7 +10,6 @@ import {
   useCreateRecipeCategory,
   useUpdateRecipeCategory,
   useDeleteRecipeCategory,
-  useRecipeCategory,
 } from "@/hooks/use-recipe-category";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RecipeCategory } from "@/types/recipe-category";
@@ -35,11 +34,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tt = useTranslations("toast");
 
-  const { data: allCategoryData } = useRecipeCategory({ perpage: -1 });
-  const categoryMap = new Map(
-    (allCategoryData?.data ?? []).map((c) => [c.id, c]),
-  );
-
   const createCategory = useCreateRecipeCategory();
   const updateCategory = useUpdateRecipeCategory();
   const deleteCategory = useDeleteRecipeCategory();
@@ -57,13 +51,8 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   });
   const { form, isEdit, isDisabled } = f;
 
-  const handleParentChange = (parentId: string) => {
-    if (!parentId) {
-      form.setValue("level", 1);
-    } else {
-      const parent = categoryMap.get(parentId);
-      form.setValue("level", parent ? parent.level + 1 : 1);
-    }
+  const handleParentChange = (parent?: RecipeCategory) => {
+    form.setValue("level", parent ? parent.level + 1 : 1);
   };
 
   const onSubmit = (values: RecipeCategoryFormValues) => {
@@ -127,7 +116,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
           isDisabled={isDisabled}
           excludeIds={excludeIds}
           onParentChange={handleParentChange}
-          getCategoryName={(id) => categoryMap.get(id)?.name}
         />
         <RecipeCategoryCostFields form={form} isDisabled={isDisabled} />
         <RecipeCategoryMarginFields form={form} isDisabled={isDisabled} />

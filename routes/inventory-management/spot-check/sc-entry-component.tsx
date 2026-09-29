@@ -21,6 +21,8 @@ import {
   useSpotCheckById,
 } from "./use-sc";
 import { useUnit } from "@/hooks/use-unit";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Unit } from "@/types/unit";
 import { cn } from "@/lib/utils";
 import { CalculatorDialog } from "../shared/calculator-dialog";
 import { EntryImportDialog } from "../shared/entry-import-dialog";
@@ -70,13 +72,6 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const saveSc = useSaveSpotCheck(spotCheckId);
   const reviewSc = useReviewSpotCheck(spotCheckId);
 
-  // โหลด units ทั้งหมดเพื่อ resolve inventory_unit_id → name
-  const { data: unitsData } = useUnit({ perpage: -1 });
-  const unitNameById = new Map<string, string>();
-  for (const u of unitsData?.data ?? []) {
-    unitNameById.set(u.id, u.name);
-  }
-
   // Debounce search 200ms
   useEffect(() => {
     const handle = setTimeout(() => setSearch(searchInput), 200);
@@ -87,6 +82,13 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const deferredFilter = useDeferredValue(countFilter);
 
   const details = spotCheck?.tb_spot_check_detail ?? [];
+
+  // ชื่อหน่วยเฉพาะที่แถวในใบนี้อ้างถึง (ดึงตาม id) — ไม่ลากทะเบียนหน่วยทั้ง BU
+  const { items: units } = useEntitiesByIds<Unit>({
+    useListHook: useUnit,
+    ids: details.map((d) => d.inventory_unit_id),
+  });
+  const unitNameById = new Map(units.map((u) => [u.id, u.name]));
 
   // Counted = มี qty > 0 (0 = ยังไม่ได้นับ — ทำให้สลับ 1 → 0 ลด progress ได้)
   const isCountedFn = (detail: (typeof details)[number]) => {

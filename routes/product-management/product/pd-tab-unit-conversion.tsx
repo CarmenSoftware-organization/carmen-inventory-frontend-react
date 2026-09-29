@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/input/qty-decimals";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useUnit } from "@/hooks/use-unit";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Unit } from "@/types/unit";
 import EmptyComponent from "@/components/empty-component";
 import type { ProductFormInstance, ProductFormValues } from "@/types/product";
 import { FromUnitCell, ToUnitCell, ConversionPreview } from "./pd-unit-cells";
@@ -80,38 +82,9 @@ function PdTabUnitConversion({
     name: "is_used_in_recipe",
   });
 
-  /* ---- Resolve unit names ---- */
-  const { data: unitData } = useUnit({ perpage: -1 });
-  const unitMap = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const u of unitData?.data ?? []) {
-      m.set(u.id, u.name);
-    }
-    return m;
-  }, [unitData?.data]);
-
-  // ทศนิยมที่หน่วยนั้นกรอกได้ — กติกาเดียวกับช่อง qty ของ PR/PO/GRN ที่อ่าน
-  // `decimal_place` จาก master data (EA = 0, kg ให้เศษ) ต่างกันแค่ที่นั่นดึงหน่วย
-  // ของสินค้ารายตัว ส่วนที่นี่หน่วยยังไม่ผูกกับสินค้าเลยอ่านจากทะเบียนหน่วยตรง ๆ
-  const unitDecimalsMap = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const u of unitData?.data ?? []) {
-      const dp = u.decimal_place;
-      m.set(
-        u.id,
-        dp == null || !Number.isFinite(dp)
-          ? DEFAULT_QTY_DECIMALS
-          : Math.min(Math.max(Math.trunc(dp), 0), QTY_MAX_DECIMALS),
-      );
-    }
-    return m;
-  }, [unitData?.data]);
-
-  const inventoryUnitName = unitMap.get(inventoryUnitId) ?? "";
-
-  /* ---- Collect used unit IDs for exclude filtering ---- */
-  // Stable string-key so `usedSelectableIds` reference is preserved when
-  // only qty/desc fields change. Keeps `columns` reference stable so cells
+  /* ---- Collect unit IDs referenced by this table ---- */
+  // Stable string-key so `usedSelectableIds` / `unitIds` keep their reference
+  // when only qty/desc fields change. Keeps `columns` reference stable so cells
   // aren't remounted and inputs keep their focus.
   const watchedUnits = useWatch({ control: form.control, name });
   const usedIdsKey = (watchedUnits ?? [])
@@ -121,6 +94,60 @@ function PdTabUnitConversion({
     () => (usedIdsKey ? usedIdsKey.split("|").filter(Boolean) : []),
     [usedIdsKey],
   );
+
+  /* ---- Resolve unit names ---- */
+  // ดึงเฉพาะหน่วยที่ตารางนี้อ้างถึง (หน่วยนับ + from/to ทุกแถว) ไม่ลากทะเบียนทั้ง BU
+  // — เลือกหน่วยใหม่ในแถวเมื่อไร key เปลี่ยนแล้วยิงใหม่หนึ่งรอบ (ระหว่างนั้นชื่อว่าง)
+  const unitIdsKey = [
+    ...new Set(
+      [
+        inventoryUnitId ?? "",
+        ...(watchedUnits ?? []).flatMap((u) => [
+          u.from_unit_id ?? "",
+          u.to_unit_id ?? "",
+        ]),
+      ].filter(Boolean),
+    ),
+  ]
+    .sort()
+    .join("|");
+  const unitIds = useMemo(
+    () => (unitIdsKey ? unitIdsKey.split("|") : []),
+    [unitIdsKey],
+  );
+  const { items: units } = useEntitiesByIds<Unit>({
+    useListHook: useUnit,
+    ids: unitIds,
+  });
+  // `units` เป็น reference นิ่ง (react-query / EMPTY) — Map ต้อง memo บนมัน ไม่งั้น
+  // `columns` สร้างใหม่ทุก render แล้วตาราง editable วน render (memory
+  // editable-datagrid-must-memoize-columns)
+  const unitMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const u of units) {
+      m.set(u.id, u.name);
+    }
+    return m;
+  }, [units]);
+
+  // ทศนิยมที่หน่วยนั้นกรอกได้ — กติกาเดียวกับช่อง qty ของ PR/PO/GRN ที่อ่าน
+  // `decimal_place` จาก master data (EA = 0, kg ให้เศษ) ต่างกันแค่ที่นั่นดึงหน่วย
+  // ของสินค้ารายตัว ส่วนที่นี่หน่วยยังไม่ผูกกับสินค้าเลยอ่านจากทะเบียนหน่วยตรง ๆ
+  const unitDecimalsMap = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const u of units) {
+      const dp = u.decimal_place;
+      m.set(
+        u.id,
+        dp == null || !Number.isFinite(dp)
+          ? DEFAULT_QTY_DECIMALS
+          : Math.min(Math.max(Math.trunc(dp), 0), QTY_MAX_DECIMALS),
+      );
+    }
+    return m;
+  }, [units]);
+
+  const inventoryUnitName = unitMap.get(inventoryUnitId) ?? "";
 
   /* ---- Add disabled conditions ---- */
   const addDisabled =
