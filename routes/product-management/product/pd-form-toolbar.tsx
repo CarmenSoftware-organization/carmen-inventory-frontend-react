@@ -82,8 +82,8 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้แล้ว
-  // มันมีช่อง Code ของตัวเองอยู่ในแท็บ General
+  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้
+  // แต่อยู่ต้นแถบตัวตนใน subtitle ด้านล่าง
   const badges = (
     <>
       <StatusDotBadge tone={statusTone} size="xs">
@@ -97,10 +97,11 @@ function FormToolbar({
     </>
   );
 
-  // subtitle: add → neverSaved · view/edit → แถบตัวตนของสินค้า = ชื่อไทย ·
+  // subtitle: add → neverSaved · view/edit → แถบตัวตนของสินค้า = รหัส · ชื่อไทย ·
   // เส้นทางหมวด (category › sub › item group) · หน่วยนับ — อ่านจบได้โดยไม่ต้อง
   // เปิดแท็บ General · ใช้ค่าจาก `product` (ที่บันทึกแล้ว) ไม่ใช่ค่าที่กำลังแก้
-  // ในฟอร์ม หัวหน้าจึงไม่เปลี่ยนตามทุกการพิมพ์ · รหัสสินค้าจงใจไม่ใส่ (ดู badges)
+  // ในฟอร์ม หัวหน้าจึงไม่เปลี่ยนตามทุกการพิมพ์ · รหัสกลับมาอยู่ในแถบนี้ (ไม่ใช่
+  // ข้าง title แบบเดิมที่ถูกเอาออกใน 39a4da71) เพราะคนคลังค้นกันด้วยรหัส
   const categoryPath = [
     product?.product_category?.name,
     product?.product_sub_category?.name,
@@ -108,6 +109,11 @@ function FormToolbar({
   ].filter(Boolean);
   const unitName = product?.inventory_unit?.name;
   const identity = [
+    product?.code && (
+      <span key="code" className="text-foreground font-medium tabular-nums">
+        {product.code}
+      </span>
+    ),
     product?.local_name && <span key="local">{product.local_name}</span>,
     categoryPath.length > 0 && (
       <span key="path">{categoryPath.join(" › ")}</span>
