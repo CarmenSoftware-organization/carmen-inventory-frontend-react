@@ -52,6 +52,8 @@ export function useLocationPairProducts(
           perpage: params?.perpage ?? 30,
           page: params?.page,
           search: params?.search,
+          // รับ `product_id|string:a,b` (ใช้ดึงสินค้าที่เลือกไว้ตาม id)
+          filter: params?.filter,
         },
       );
       const res = await httpClient.get(url);

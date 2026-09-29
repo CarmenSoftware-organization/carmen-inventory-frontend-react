@@ -25,7 +25,8 @@ import type { Vendor, VendorDetail } from "@/types/vendor";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type { BusinessType } from "@/types/business-type";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
@@ -37,6 +38,12 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+
+const BUSINESS_TYPE_ENTITY = defineEntitySource<BusinessType>({
+  fieldKey: "business_type_id",
+  useListHook: useBusinessType,
+  getLabel: (bt) => bt.name,
+});
 
 export default function VendorComponent() {
   const navigate = useNavigate();
@@ -56,27 +63,8 @@ export default function VendorComponent() {
 
   const isGridMode = isMobile || displayMode === "grid";
 
-  const { data: btData } = useBusinessType({ perpage: -1 });
-  // ชื่อ business type เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
-  // array reference เปลี่ยนทุก render จน vendorFilterFields memo ข้างล่างไม่เคย hit
-  const btFilterOptions = useMemo(
-    () =>
-      (btData?.data ?? [])
-        .filter((bt) => bt.is_active)
-        .map((bt) => ({
-          label: bt.name,
-          value: `business_type_id|string:${bt.id}`,
-        })),
-    [btData],
-  );
-
-  // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
-  // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ (ts("active")/ts("inactive"))
-  // business_type เป็น literal string จริงจึงต้องใช้ control: "custom" ห่อ
-  // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
-  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
-  // PO_TYPE/CN_TYPE ใน Task 19). ไม่มี `region` filter ในโค้ดเดิม (survey brief
-  // เก่า/ไม่ตรง — grep ทั้งไฟล์ไม่พบ URL param หรือ control นี้เลย)
+  // filter (status) ไม่ส่ง options — ใช้ default is_active|bool:true/false ของ
+  // StatusFilter · business_type เป็น control "entity" (ค้นที่ server, chip ขึ้นชื่อ)
   const vendorFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -88,19 +76,12 @@ export default function VendorComponent() {
       {
         key: "business_type",
         section: "listView.sectionDocument",
-        control: "custom",
+        control: "entity",
+        entity: BUSINESS_TYPE_ENTITY,
         labelKey: "field.businessType",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={btFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [btFilterOptions],
+    [],
   );
 
   const lf = useListFilters({

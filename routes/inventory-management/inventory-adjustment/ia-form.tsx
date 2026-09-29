@@ -12,7 +12,6 @@ import {
   useCommitInventoryAdjustment,
   useVoidInventoryAdjustment,
 } from "./use-inventory-adjustment";
-import { useAdjustmentType } from "@/hooks/use-adjustment-type";
 import { useProfile } from "@/hooks/use-profile";
 import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";
 import {
@@ -88,18 +87,6 @@ export function InventoryAdjustmentForm({
     adjustmentType === "stock-in"
       ? ADJUSTMENT_TYPE.STOCK_IN
       : ADJUSTMENT_TYPE.STOCK_OUT;
-  const { data: adjTypeData } = useAdjustmentType({ perpage: -1 });
-  // เหตุผลที่ใบบันทึกไว้คงไว้แม้ถูกปิดใช้งานแล้ว ไม่งั้น Select ตอนแก้ไขขึ้นว่าง
-  const savedAdjTypeId =
-    inventoryAdjustment?.adjustment_type?.id ??
-    inventoryAdjustment?.adjustment_type_id;
-  const adjTypes =
-    adjTypeData?.data?.filter(
-      (at) =>
-        (at.is_active || at.id === savedAdjTypeId) &&
-        at.type === adjTypeFilter,
-    ) ?? [];
-
   const defaultValues = getDefaultValues(
     inventoryAdjustment,
     currentPeriod?.end_at,
@@ -374,7 +361,7 @@ export function InventoryAdjustmentForm({
           form={form}
           isView={isView}
           isDisabled={isDisabled}
-          adjTypes={adjTypes}
+          adjustmentKind={adjTypeFilter}
           inventoryAdjustment={inventoryAdjustment}
           currentPeriodStart={currentPeriod?.start_at}
           currentPeriodEnd={currentPeriod?.end_at}

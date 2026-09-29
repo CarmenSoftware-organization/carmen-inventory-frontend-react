@@ -30,7 +30,8 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type { PriceListTemplate } from "@/types/price-list-template";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -45,6 +46,14 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+
+// ไม่กรองสถานะ — หน้า list ต้องกรอง RFP เก่าที่อ้าง template ที่ปิดไปแล้วได้
+const TEMPLATE_ENTITY = defineEntitySource<PriceListTemplate>({
+  fieldKey: "pricelist_template_id",
+  useListHook: usePriceListTemplate,
+  getLabel: (tmpl) => tmpl.name,
+  serverFilter: null,
+});
 
 export default function RequestPriceListComponent() {
   const navigate = useNavigate();
@@ -64,38 +73,15 @@ export default function RequestPriceListComponent() {
   const { exportRequestPriceList, isExporting } = useExportRequestPriceList();
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  const { data: templateData } = usePriceListTemplate({ perpage: -1 });
-  // ชื่อ template เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
-  // array reference เปลี่ยนทุก render จน rfpFilterFields memo ข้างล่างไม่เคย hit
-  const templateOptions = useMemo(
-    () =>
-      (templateData?.data ?? []).map((tmpl) => ({
-        label: tmpl.name,
-        value: `pricelist_template_id|string:${tmpl.id}`,
-      })),
-    [templateData],
-  );
-
-  // ไม่มี status/vendor filter ในโค้ดเดิม (grep ทั้งไฟล์ยืนยันแล้ว — brief เก่า/
-  // ไม่ตรง) มีแค่ template เดียว literal string จริง จึงต้องใช้ control: "custom"
-  // ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
-  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  // มีแค่ template (control "entity") กับช่วงวันที่
   const rfpFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "template",
         section: "listView.sectionDocument",
-        control: "custom",
+        control: "entity",
+        entity: TEMPLATE_ENTITY,
         labelKey: "field.template",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={templateOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // กรองที่วันเริ่มเปิดรับราคา (start_date) — คอลัมน์เดียวกับที่ list เรียง
@@ -106,7 +92,7 @@ export default function RequestPriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [templateOptions],
+    [],
   );
 
   const lf = useListFilters({

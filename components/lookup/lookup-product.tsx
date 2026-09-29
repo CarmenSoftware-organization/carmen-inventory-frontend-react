@@ -29,7 +29,7 @@ interface LookupProductProps {
  * Lookup Popover สำหรับเลือกสินค้า (Product)
  *
  * ดึงข้อมูลผ่าน `useProduct` hook พร้อม server-side search และ infinite scroll (perpage 30)
- * filter เฉพาะ `product_status_type === "active"` รองรับ `excludeIds` กัน duplicate ใน item list
+ * กรอง `product_status_type = active` ที่ server รองรับ `excludeIds` กัน duplicate ใน item list
  * onValueChange ส่งทั้ง id และ object `Product` เต็มสำหรับ side effects (set default unit, tax)
  *
  * @param value - product id ที่เลือกอยู่
@@ -61,12 +61,13 @@ export function LookupProduct({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
   const {
     items: products,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -74,13 +75,11 @@ export function LookupProduct({
   } = useLookupPagination<Product>({
     useListHook: useProduct,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value || !!defaultOpen,
-    filter: (p: Product) => {
-      if (p.product_status_type !== "active") return false;
-      if (excludedSet && excludedSet.has(p.id)) return false;
-      return true;
-    },
+    // defaultOpen = เปิด popover ทันทีตอน mount (ฟอร์มพากรอกทีละช่อง) ต้องมีรายการรอ
+    serverFilter: "product_status_type|string:active",
+    enabled: hasOpened || !!defaultOpen,
+    selectedIds: value ? [value] : [],
+    filter: excludedSet ? (p) => !excludedSet.has(p.id) : undefined,
   });
 
   return (
@@ -94,6 +93,7 @@ export function LookupProduct({
         if (open) setHasOpened(true);
       }}
       items={products}
+      selectedItems={selectedItems}
       getId={(p) => p.id}
       getLabel={(p) => `${p.code} — ${p.name}`}
       defaultLabel={defaultLabel}

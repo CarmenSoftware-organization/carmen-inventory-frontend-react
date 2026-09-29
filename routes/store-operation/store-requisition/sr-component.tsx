@@ -42,8 +42,10 @@ import { FieldLabel } from "@/components/ui/field";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
 import { SR_TYPE } from "@/types/store-requisition";
-import { SrFilterFromLocation } from "./sr-filter-from-location";
-import { SrFilterToLocation } from "./sr-filter-to-location";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { ACTIVE_ONLY_FILTER } from "@/hooks/use-lookup-pagination";
+import { useConfigLocation } from "@/hooks/use-location";
+import type { Location } from "@/types/location";
 import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -54,6 +56,24 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import {
+  DEPARTMENT_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
+
+// คลังต้นทางของใบเบิกเป็นได้แค่ inventory/consignment (กติกาเดิมของตัวกรองนี้)
+// location_type|enum: ต้องอยู่ท้าย clause — ค่า enum คั่นด้วย `,`
+const FROM_LOCATION_ENTITY = defineEntitySource<Location>({
+  fieldKey: "from_location_id",
+  useListHook: useConfigLocation,
+  getLabel: (l) => `${l.code} - ${l.name}`,
+  serverFilter: `${ACTIVE_ONLY_FILTER},location_type|enum:inventory,consignment`,
+});
+const TO_LOCATION_ENTITY = defineEntitySource<Location>({
+  fieldKey: "to_location_id",
+  useListHook: useConfigLocation,
+  getLabel: (l) => `${l.code} - ${l.name}`,
+});
 
 export default function StoreRequisitionComponent() {
   const t = useTranslations("storeOperation.storeRequisition");
@@ -203,39 +223,29 @@ export default function StoreRequisitionComponent() {
       },
       {
         key: "from_location",
-        control: "custom",
+        control: "entity",
+        entity: FROM_LOCATION_ENTITY,
         labelKey: "field.fromLocation",
         section: "listView.sectionLocation",
-        render: (value, onChange) => (
-          <SrFilterFromLocation
-            value={value}
-            onChange={onChange}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "to_location",
-        control: "custom",
+        control: "entity",
+        entity: TO_LOCATION_ENTITY,
         labelKey: "field.toLocation",
         section: "listView.sectionLocation",
-        render: (value, onChange) => (
-          <SrFilterToLocation
-            value={value}
-            onChange={onChange}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "user_id",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity(),
         labelKey: "common.requester",
         section: "listView.sectionPeople",
       },
       {
         key: "department",
-        control: "department",
+        control: "entity",
+        entity: DEPARTMENT_ENTITY,
         labelKey: "field.department",
         section: "listView.sectionPeople",
       },

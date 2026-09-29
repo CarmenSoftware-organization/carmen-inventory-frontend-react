@@ -21,21 +21,21 @@ const crud = createConfigCrud<Location, CreateLocationDto>({
  * @returns UseQueryResult ของ PaginatedResponse<Location>
  * @example
  * ```ts
- * const { data } = useLocation({ perpage: -1 });
+ * const { data } = useLocation({ search, perpage: 30, filter: "is_active|boolean:true" });
  * ```
  */
 export const useLocation = crud.useList;
 
 /**
  * Alias ของ {@link useLocation} สื่อความหมายว่าเป็น lookup จาก config endpoint
- * (`/api/config/${buCode}/locations`) ใช้กับ filter/lookup ที่ต้องการ list ทั้งหมด
+ * (`/api/config/${buCode}/locations`) ใช้กับ filter/lookup (โหลดทีละหน้า)
  *
  * @param params - พารามิเตอร์ pagination/search/filter
  * @param options - UseQueryOptions เพิ่มเติม (เช่น `enabled`)
  * @returns UseQueryResult ของ PaginatedResponse<Location>
  * @example
  * ```ts
- * const { data } = useConfigLocation({ perpage: -1 }, { enabled: open });
+ * const { data } = useConfigLocation({ perpage: 30, page }, { enabled: open });
  * ```
  */
 export const useConfigLocation = crud.useList;

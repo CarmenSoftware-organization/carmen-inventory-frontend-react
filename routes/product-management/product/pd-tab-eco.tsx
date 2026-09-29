@@ -19,6 +19,8 @@ import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import EmptyComponent from "@/components/empty-component";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { EcoLabel } from "@/types/eco-label";
 import { useEcoLabel } from "../shared/use-eco-label";
 import {
   useDeleteProductEcoLabel,
@@ -45,9 +47,20 @@ export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
   // render แล้ว useReactTable จะ sync state ไม่จบ (เจอจริงที่ vendor-certificate-section
   // หลังเซฟ vendor สำเร็จ วนไป 245,156 รอบ)
   const items = useMemo(() => data?.data ?? [], [data]);
-  const { data: masterData } = useEcoLabel({ perpage: -1 });
-  const masterMap = new Map(
-    (masterData?.data ?? []).map((c) => [c.id, c] as const),
+  // master เฉพาะที่แถวของสินค้านี้อ้างถึง (ดึงตาม id) · memo บน `items` / `masters`
+  // ที่ reference นิ่ง — masterMap เป็น dep ของ columns ถ้าสร้างใหม่ทุก render
+  // ตารางจะวน render (memory editable-datagrid-must-memoize-columns)
+  const masterIds = useMemo(
+    () => items.map((i) => i.master_eco_label_id),
+    [items],
+  );
+  const { items: masters } = useEntitiesByIds<EcoLabel>({
+    useListHook: useEcoLabel,
+    ids: masterIds,
+  });
+  const masterMap = useMemo(
+    () => new Map(masters.map((c) => [c.id, c] as const)),
+    [masters],
   );
 
   const deleteEcoLabel = useDeleteProductEcoLabel();
@@ -102,8 +115,7 @@ export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
         size: 250,
         cell: ({ row }) => (
           <span className="font-medium">
-            {masterMap.get(row.original.master_eco_label_id)?.name ??
-              row.original.master_eco_label_id}
+            {masterMap.get(row.original.master_eco_label_id)?.name ?? ""}
           </span>
         ),
       },
@@ -179,8 +191,7 @@ export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
             } as ColumnDef<ProductEcoLabel>,
           ]),
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- masterMap สร้างใหม่ทุก render
-    [readOnly, dateFormat, tfl, tc, ts, masterData],
+    [readOnly, dateFormat, tfl, tc, ts, masterMap],
   );
 
   const table = useReactTable({

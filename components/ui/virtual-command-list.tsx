@@ -1,4 +1,4 @@
-import { useCallback, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface VirtualCommandListProps<T> {
@@ -62,6 +62,18 @@ export function VirtualCommandList<T>({
       onLoadMore();
     }
   }, [onLoadMore, hasMore, isLoadingMore]);
+
+  // onScroll ยิงได้เฉพาะเมื่อมีแถบเลื่อน — ถ้ารายการว่าง (ไม่มี scroll element) หรือสั้นจนไม่พอให้เลื่อน
+  // (เช่น กรองฝั่ง client เหลือไม่กี่แถว ทั้งที่ยังมีหน้าถัดไป) จะไม่มีทางโหลดต่อ จึงโหลดหน้าถัดไปเอง
+  // ไล่ทีละหน้าจนกว่าจะเต็มกล่องหรือหมดหน้า · เรียกซ้ำได้ปลอดภัยเพราะ loadMore ของ
+  // useLookupPagination เช็ค hasMore && !isLoading และ effect นี้รันใหม่เฉพาะเมื่อ deps เปลี่ยน
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoadingMore) return;
+    const el = parentRef.current;
+    if (items.length === 0 || (el && el.scrollHeight - el.clientHeight < 50)) {
+      onLoadMore();
+    }
+  }, [items.length, hasMore, isLoadingMore, onLoadMore]);
 
   if (items.length === 0) {
     return (

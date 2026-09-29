@@ -8,6 +8,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { EntityChipValue } from "@/components/list-filter/entity-chip-value";
+import type { AnyEntityFilterSource } from "@/components/filter/entity-filter-source";
 import { FilterFieldControl } from "@/components/list-filter/filter-field-control";
 import { SUBMENU_CLASS } from "@/components/list-filter/list-filter-menu";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
@@ -25,6 +27,8 @@ export interface ActiveFilter {
   readonly rawValue?: string;
   readonly onChange?: (value: string) => void;
   readonly peer?: FilterPeerAccess;
+  /** field `entity` — chip ดึงชื่อตาม id เอง (`value` เป็น fallback ระหว่างโหลด) */
+  readonly entity?: AnyEntityFilterSource;
 }
 
 interface ActiveFilterBarProps {
@@ -49,12 +53,22 @@ export function ActiveFilterBar({ filters, onClearAll }: ActiveFilterBarProps) {
         {tc("activeFilter")}:
       </span>
       {filters.map((filter) => {
-        const chipText = filter.value ? (
+        const valueNode =
+          filter.entity && filter.rawValue ? (
+            <EntityChipValue
+              entity={filter.entity}
+              value={filter.rawValue}
+              fallback={filter.value}
+            />
+          ) : (
+            filter.value
+          );
+        const chipText = valueNode ? (
           <>
             <span className="text-muted-foreground font-normal">
               {filter.label}
             </span>
-            {filter.value}
+            {valueNode}
           </>
         ) : (
           filter.label

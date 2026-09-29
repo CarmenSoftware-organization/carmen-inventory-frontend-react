@@ -23,7 +23,9 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActivityCardSkeletonGrid } from "@/components/loader/activity-card-skeleton";
-import { useAllUsers } from "@/hooks/use-all-users";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useUser } from "@/hooks/use-user";
+import type { User } from "@/types/workflows";
 import { getUserFullName } from "@/components/lookup/lookup-user";
 import { cn } from "@/lib/utils";
 import { useActivityLogTable } from "./use-activity-log-table";
@@ -87,6 +89,18 @@ const ENTITY_TYPE_OPTIONS = [
   { label: "Auth", value: "auth" },
 ];
 
+// actor_id ส่งเป็น query param แยก (`actor_id=a,b`) ไม่ใช่ clause ของ filter —
+// ค่า URL จึงเป็น id เปล่า (bareIds) · users ห้ามส่ง is_active (ได้ 0 แถว)
+const ACTOR_ENTITY = defineEntitySource<User>({
+  fieldKey: "actor_id",
+  useListHook: useUser,
+  getId: (u) => u.user_id,
+  getLabel: getUserFullName,
+  idFilterKey: "user_id",
+  serverFilter: null,
+  bareIds: true,
+});
+
 export default function ActivityLogComponent() {
   const isMobile = useIsMobile();
   const [displayMode, setDisplayMode] = useState<DisplayMode>("list");
@@ -95,24 +109,14 @@ export default function ActivityLogComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "-created_at",
   });
-  const { data: allUsers = [] } = useAllUsers();
   const t = useTranslations("systemAdmin.activityLog");
   const tc = useTranslations("common");
   const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const { exportActivityLog, isExporting } = useExportActivityLog();
 
-  const userOptions = useMemo(
-    () =>
-      allUsers.map((u) => ({
-        label: getUserFullName(u),
-        value: u.user_id,
-      })),
-    [allUsers],
-  );
-
-  // action/entity_type/actor_id เป็น literal string/ชื่อผู้ใช้จริง (ไม่ใช่ i18n
-  // key) จึงต้องใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน
+  // action/entity_type เป็น literal string (ไม่ใช่ i18n key) จึงห่อ custom ·
+  // actor_id เป็น control "entity" แบบ bareIds — เหมือน
   // pattern ของ PO_TYPE/CN_TYPE ใน Task 19 ทั้ง 3 field ไม่ผ่าน
   // filter|type:value clause แบบหน้าอื่น — backend รับเป็น query param แยก
   // (action=, entity_type=, actor_id=) ตรง ๆ จึงอ่านค่าดิบจาก lf.values แทน
@@ -156,22 +160,12 @@ export default function ActivityLogComponent() {
       {
         key: "actor_id",
         section: "listView.sectionPeople",
-        control: "custom",
+        control: "entity",
+        entity: ACTOR_ENTITY,
         labelKey: "systemAdmin.activityLog.user",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={t("user")}
-            options={userOptions}
-            searchable
-            searchPlaceholder={t("searchUser")}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [t, userOptions],
+    [t],
   );
 
   const lf = useListFilters({

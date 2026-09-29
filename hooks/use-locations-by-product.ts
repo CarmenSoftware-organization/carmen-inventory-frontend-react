@@ -84,6 +84,9 @@ export function useLocationsByProduct(
           perpage: params?.perpage ?? 30,
           page: params?.page,
           search: params?.search,
+          // เฉพาะเส้นธรรมดา (user-locations/product) ที่รับ `id|string:` —
+          // เส้น workflow-scoped เมิน filter และไม่ paginate
+          filter: scoped ? undefined : params?.filter,
         },
       );
       const res = await httpClient.get(url);

@@ -19,10 +19,8 @@ import {
   FieldGroup,
   FieldInput,
   FieldLabel,
-  FieldSelect,
 } from "@/components/ui/field";
-import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useEcoLabel } from "../shared/use-eco-label";
+import { LookupEcoLabel } from "./lookup-eco-label";
 import {
   useCreateProductEcoLabel,
   useUpdateProductEcoLabel,
@@ -91,13 +89,6 @@ export function ProductEcoLabelDialog({
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
-
-  const { data: masterData } = useEcoLabel({ perpage: -1 });
-  // label ที่ผูกไว้คงไว้แม้ master ถูกปิดใช้งานแล้ว ไม่งั้น Select ว่างและติด
-  // validation required จน Save ไม่ได้
-  const masterLabels = (masterData?.data ?? []).filter(
-    (c) => c.is_active || c.id === ecoLabel?.master_eco_label_id,
-  );
 
   const form = useForm<ProductEcoLabelFormValues>({
     resolver: zodResolver(
@@ -183,32 +174,22 @@ export function ProductEcoLabelDialog({
                   control={form.control}
                   name="master_eco_label_id"
                   render={({ field }) => (
-                    <FieldSelect
+                    <LookupEcoLabel
                       value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        // เติม certificate_no เป็น code ของ master eco label ที่เลือก
-                        const master = masterLabels.find((c) => c.id === value);
-                        if (master) {
-                          form.setValue("certificate_no", master.code, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }
-                      }}
+                      onValueChange={field.onChange}
+                      // เติม certificate_no เป็น code ของ master eco label ที่เลือก
+                      onItemChange={(master) =>
+                        form.setValue("certificate_no", master.code, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
                       disabled={isPending}
                       placeholder={t("selectEcoLabel")}
-                      className="h-8 text-sm"
+                      className="h-8 w-full text-sm"
                       error={form.formState.errors.master_eco_label_id?.message}
-                    >
-                      <SelectContent>
-                        {masterLabels.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.code} · {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </FieldSelect>
+                      modal
+                    />
                   )}
                 />
               </Field>

@@ -48,6 +48,10 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import {
+  VENDOR_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
 const CreatePODialog = lazy(() =>
@@ -213,17 +217,17 @@ export default function PoComponent() {
       {
         // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
         key: "buyer",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity("created_by_id"),
         labelKey: "field.buyer",
-        fieldKey: "created_by_id",
         section: "listView.sectionPeople",
       },
       {
-        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
-        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
-        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
+        // ทะเบียน vendor ใหญ่หลักร้อย KB — control "entity" ยิงรายการเองตอนเปิด
+        // popover ทีละหน้า ส่วนชื่อบน chip ดึงเฉพาะ id ที่เลือก (EntityChipValue)
         key: "vendor",
-        control: "vendor",
+        control: "entity",
+        entity: VENDOR_ENTITY,
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
       },
@@ -280,7 +284,11 @@ export default function PoComponent() {
         viewMode,
         columns: [
           { header: tfl("poNo"), value: (r) => r.po_no, width: 18 },
-          { header: tfl("vendor"), value: (r) => r.vendor?.name ?? "", width: 26 },
+          {
+            header: tfl("vendor"),
+            value: (r) => r.vendor?.name ?? "",
+            width: 26,
+          },
           { header: tfl("poType"), value: (r) => r.po_type, width: 12 },
           { header: tfl("orderDate"), value: (r) => r.order_date, width: 12 },
           {

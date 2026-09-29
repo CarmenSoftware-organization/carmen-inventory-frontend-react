@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChevronsUpDown, CircleAlert, Warehouse } from "lucide-react";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
@@ -117,8 +120,19 @@ function LookupUserLocationInner({
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
 
+  // location_type|enum: ต้องอยู่ท้ายสุด — ค่า enum คั่นด้วย `,` เหมือนตัวคั่นเงื่อนไข
+  const serverFilter = [
+    ACTIVE_ONLY_FILTER,
+    locationTypes?.length
+      ? `location_type|enum:${locationTypes.join(",")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(",");
+
   const {
     items: locations,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -126,14 +140,9 @@ function LookupUserLocationInner({
   } = useLookupPagination<Location>({
     useListHook: useUserLocation,
     search,
-    perpage: 30,
-    filter: (l: Location) => {
-      if (!l.is_active) return false;
-      if (excludeIds && excludeIds.has(l.id)) return false;
-      if (locationTypes && !locationTypes.includes(l.location_type))
-        return false;
-      return true;
-    },
+    serverFilter,
+    selectedIds: value ? [value] : [],
+    filter: excludeIds ? (l) => !excludeIds.has(l.id) : undefined,
   });
 
   return (
@@ -145,6 +154,7 @@ function LookupUserLocationInner({
         if (item) onItemChange?.(item);
       }}
       items={locations}
+      selectedItems={selectedItems}
       getId={(l) => l.id}
       getLabel={(l) => `${l.code} — ${l.name}`}
       serverSideSearch

@@ -14,6 +14,7 @@ import { VirtualCommandList } from "@/components/ui/virtual-command-list";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { LookupListHook } from "@/hooks/use-entities-by-ids";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import { clauseTokens } from "@/lib/list-filter-encode";
 import { cn } from "@/lib/utils";
 
 interface EntityMultiFilterProps<T> {
@@ -28,6 +29,8 @@ interface EntityMultiFilterProps<T> {
   readonly getLabel: (item: T) => string;
   readonly serverFilter?: string;
   readonly idFilterKey?: string;
+  /** ค่าเป็น id เปล่าคั่น `,` (ไม่มี `<fieldKey>|string:`) — ดู EntityFilterSource.bareIds */
+  readonly bareIds?: boolean;
 }
 
 const ROW_CLASS = cn(
@@ -51,6 +54,7 @@ export function EntityMultiFilter<T>({
   getLabel,
   serverFilter,
   idFilterKey,
+  bareIds,
 }: EntityMultiFilterProps<T>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -58,11 +62,10 @@ export function EntityMultiFilter<T>({
   const inline = useContext(FilterInlineContext);
   const tc = useTranslations("common");
 
-  const prefix = `${fieldKey}|string:`;
-  const selectedIds =
-    value && value.startsWith(prefix)
-      ? value.slice(prefix.length).split(",").filter(Boolean)
-      : [];
+  const prefix = bareIds ? "" : `${fieldKey}|string:`;
+  // อ่านได้ทั้งรูปปัจจุบัน รูปเก่าของ MultiSelectFilter (saved view / ลิงก์ก่อนย้าย
+  // มา entity: `<col>|string:a,<col>|string:b`) และ id เปล่า — เขียนกลับรูปเดียวเสมอ
+  const selectedIds = clauseTokens(value);
   const selectedSet = new Set(selectedIds);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =

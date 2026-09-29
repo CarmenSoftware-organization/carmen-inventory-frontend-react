@@ -32,13 +32,22 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { cn } from "@/lib/utils";
 import { useUserTable } from "./use-user-table";
-import { UserDepartmentFilter } from "./user-department-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useDepartment } from "@/hooks/use-department";
+import type { Department } from "@/types/department";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
+
+// แผนกของผู้ใช้ — `department_id|string:a,b` (users รับ IN) ค่าเดียวของ saved view เดิมอ่านได้
+const USER_DEPARTMENT_ENTITY = defineEntitySource<Department>({
+  fieldKey: "department_id",
+  useListHook: useDepartment,
+  getLabel: (d) => `${d.code} - ${d.name}`,
+});
 
 export default function UserComponent() {
   const navigate = useNavigate();
@@ -51,23 +60,16 @@ export default function UserComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const { printReport, exportCsv, isBusy } = useUserRoleReport();
 
-  // filter (department) เป็น single-select (StatusFilter ไม่ใช่ MultiSelectFilter)
-  // เหมือนโค้ดเดิมทุกประการ — label เป็น literal string จริงจึงต้องใช้
-  // control: "custom" ห่อ StatusFilter ตรง ๆ แทน control: "status" ทั่วไป (ตัวนั้น
-  // เรียก t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
-  //
-  // ทะเบียนแผนกอยู่ใน UserDepartmentFilter ไม่ใช่ตรงนี้ — `render` ถูกเรียกเฉพาะ
-  // ตอนคนเปิดตัวกรองจริง ๆ ทะเบียนจึงถูกยิงตอน hover ไม่ใช่ตอนเปิดหน้า
+  // แผนก = control "entity" — ทะเบียนยิงตอนเปิดตัวกรองเท่านั้น (ค้นที่ server
+  // โหลดทีละหน้า) chip ดึงชื่อตาม id · เดิมเลือกได้ค่าเดียว ตอนนี้หลายค่า
   const userFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "filter",
         section: "listView.sectionDocument",
-        control: "custom",
+        control: "entity",
+        entity: USER_DEPARTMENT_ENTITY,
         labelKey: "systemAdmin.user.department",
-        render: (value, onChange) => (
-          <UserDepartmentFilter value={value} onChange={onChange} />
-        ),
       },
     ],
     [],

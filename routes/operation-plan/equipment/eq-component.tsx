@@ -29,7 +29,9 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { EquipmentCategory } from "@/types/equipment-category";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentTable } from "./use-eq-table";
@@ -39,6 +41,12 @@ import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+
+const EQUIPMENT_CATEGORY_ENTITY = defineEntitySource<EquipmentCategory>({
+  fieldKey: "category_id",
+  useListHook: useEquipmentCategory,
+  getLabel: (c) => c.name,
+});
 
 export default function EquipmentComponent() {
   const t = useTranslations("operationPlan.equipment");
@@ -51,23 +59,9 @@ export default function EquipmentComponent() {
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteEquipment = useDeleteEquipment();
-  const tfl = useTranslations("field");
   const { params, search, setSearch, tableConfig } = useDataGridState();
-  const { data: categoryData } = useEquipmentCategory({ perpage: -1 });
 
   const isGridMode = isMobile || displayMode === "grid";
-
-  const categories = new Map(
-    (categoryData?.data ?? []).map((c) => [c.id, c.name]),
-  );
-
-  const categoryFilterOptions = useMemo(
-    () =>
-      (categoryData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` })),
-    [categoryData],
-  );
 
   const STATUS_OPTIONS = useMemo(
     () => [
@@ -77,9 +71,7 @@ export default function EquipmentComponent() {
     [ts],
   );
 
-  // category เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) จึงต้องใช้
-  // control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern ของ
-  // PO_TYPE/CN_TYPE ใน Task 19
+  // category เป็น control "entity" (ค้นที่ server, chip ขึ้นชื่อ)
   const equipmentFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -99,20 +91,12 @@ export default function EquipmentComponent() {
       {
         key: "category",
         section: "listView.sectionCategory",
-        control: "custom",
+        control: "entity",
+        entity: EQUIPMENT_CATEGORY_ENTITY,
         labelKey: "field.category",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("category")}
-            options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [STATUS_OPTIONS, categoryFilterOptions, tfl],
+    [STATUS_OPTIONS],
   );
 
   const lf = useListFilters({
@@ -136,6 +120,13 @@ export default function EquipmentComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
+
+  // ชื่อหมวดของแถวในหน้านี้เท่านั้น (ดึงตาม id)
+  const { items: categoryItems } = useEntitiesByIds<EquipmentCategory>({
+    useListHook: useEquipmentCategory,
+    ids: equipments.map((e) => e.category_id ?? ""),
+  });
+  const categories = new Map(categoryItems.map((c) => [c.id, c.name]));
 
   const table = useEquipmentTable({
     equipments,

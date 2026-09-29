@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useDeliveryPoint } from "@/hooks/use-delivery-point";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { DeliveryPoint } from "@/types/delivery-point";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupDeliveryPointProps {
@@ -34,21 +38,22 @@ export function LookupDeliveryPoint({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const {
     items: deliveryPoints,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination({
+  } = useLookupPagination<DeliveryPoint>({
     useListHook: useDeliveryPoint,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (d: { is_active: boolean }) => d.is_active,
+    serverFilter: ACTIVE_ONLY_FILTER,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
   });
 
   return (
@@ -63,6 +68,7 @@ export function LookupDeliveryPoint({
         if (open) setHasOpened(true);
       }}
       items={deliveryPoints}
+      selectedItems={selectedItems}
       getId={(d) => d.id}
       getLabel={(d) => d.name}
       placeholder={
