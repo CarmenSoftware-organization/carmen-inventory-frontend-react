@@ -7,6 +7,7 @@ import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { STAGE_ROLE } from "@/types/stage-role";
+import type { EntityRef } from "@/types/entity-ref";
 import type { SrFormValues } from "./sr-form-schema";
 
 interface LocationInfo {
@@ -29,6 +30,25 @@ interface SrRequestDetailsProps {
   readonly role?: string;
   readonly isDraft?: boolean;
   readonly isAdd?: boolean;
+  /**
+   * คลังต้นทาง/ปลายทางที่บันทึกไว้ในใบ — ใช้เป็น `defaultLabel` ของ lookup
+   * list โหลดทีละ 30 คลังที่อยู่หลังหน้าแรกจะหาชื่อไม่เจอแล้วขึ้น placeholder
+   * (รวมถึงโหมดดู ซึ่งวาด lookup ที่ถูก disable)
+   */
+  readonly savedFromLocation?: EntityRef | null;
+  readonly savedToLocation?: EntityRef | null;
+}
+
+/**
+ * ป้ายคลังที่บันทึกไว้ รูปเดียวกับ getLabel ของ LookupUserLocation (`code — name`)
+ * เฉพาะตอนค่าในช่องยังเป็นคลังเดิม
+ */
+function savedLabel(
+  value: string,
+  saved: EntityRef | null | undefined,
+): string | undefined {
+  if (!saved?.name || saved.id !== value) return undefined;
+  return saved.code ? `${saved.code} — ${saved.name}` : saved.name;
 }
 
 export function SrRequestDetails({
@@ -40,6 +60,8 @@ export function SrRequestDetails({
   role,
   isDraft = true,
   isAdd = false,
+  savedFromLocation,
+  savedToLocation,
 }: SrRequestDetailsProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -122,6 +144,7 @@ export function SrRequestDetails({
                   location_type: item?.location_type,
                 })
               }
+              defaultLabel={savedLabel(field.value, savedFromLocation)}
               disabled={fieldDisabled}
               locationTypes={[
                 INVENTORY_TYPE.INVENTORY,
@@ -151,6 +174,7 @@ export function SrRequestDetails({
                   location_type: item?.location_type,
                 })
               }
+              defaultLabel={savedLabel(field.value, savedToLocation)}
               disabled={fieldDisabled || !fromLocationId}
               excludeIds={
                 fromLocationId ? new Set([fromLocationId]) : undefined
