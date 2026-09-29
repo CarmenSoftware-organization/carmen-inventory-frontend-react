@@ -10,8 +10,12 @@ import {
 import { Command, CommandInput } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterInlineContext } from "@/components/ui/filter-inline-context";
+import { VirtualCommandList } from "@/components/ui/virtual-command-list";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useGoodsReceiveNote } from "@/hooks/use-goods-receive-note";
+import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import { cn } from "@/lib/utils";
+import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 
 interface GrnInvoiceFilterProps {
   readonly value: string;
@@ -19,14 +23,21 @@ interface GrnInvoiceFilterProps {
   readonly className?: string;
 }
 
+const PREFIX = "invoice_no|string:";
+
+const ROW_CLASS = cn(
+  "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+  "hover:bg-accent hover:text-accent-foreground",
+);
+
 /**
  * ตัวกรองเลขที่ใบแจ้งหนี้ของหน้า GRN — ค่าที่ส่งออกเป็น clause
  * `invoice_no|string:INV-001,INV-002`
  *
- * ตัวเลือกไม่ได้มาจากทะเบียนของตัวเอง แต่มาจาก **ใบรับของทั้ง BU** (distinct
- * `invoice_no`) ซึ่งเป็นก้อนที่โตขึ้นเรื่อย ๆ ตามจำนวนใบที่คีย์ จึง **ไม่ยิงตอน
- * mount** แต่รอจังหวะเปิด popover เหมือน FilterVendor — หน้า list ที่ผู้ใช้ไม่ได้
- * แตะตัวกรองเลยจะไม่จ่ายค่านี้
+ * ตัวเลือกมาจากใบรับของ (distinct `invoice_no`) — ยิงตอนเปิด popover เท่านั้น
+ * ค้นที่ server (search ของ GRN ครอบทั้ง invoice_no และ grn_no) เรียงตามเลขที่
+ * ใบแจ้งหนี้ แล้วเลื่อนโหลดทีละหน้า — ใบที่ไม่มีเลขที่ (null) ตกไปท้ายสุดเอง
+ * ค่าที่เก็บ *คือ* ป้ายอยู่แล้ว (ไม่ใช่ id) ปุ่มและ chip จึงพูดค่าได้โดยไม่ต้องรอโหลด
  *
  * อยู่ใต้ route ของ GRN ไม่ใช่ `components/filter/` เพราะผูกกับ
  * `useGoodsReceiveNote` ตัวเดียว — ไม่มีหน้าอื่นใช้ได้
@@ -38,30 +49,22 @@ export function GrnInvoiceFilter({
 }: GrnInvoiceFilterProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 150);
   const inline = useContext(FilterInlineContext);
-  // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
-  const { data } = useGoodsReceiveNote(
-    { perpage: -1 },
-    { enabled: open || inline },
-  );
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
-  // distinct + ตัดค่าว่าง แล้วเรียง — ใบหลายใบอ้างใบแจ้งหนี้เดียวกันได้
-  const invoiceNos = (() => {
-    const seen = new Set<string>();
-    for (const g of data?.data ?? []) {
-      const no = g.invoice_no?.trim();
-      if (no) seen.add(no);
-    }
-    return [...seen].sort();
-  })();
-
-  const filteredInvoiceNos = (() => {
-    if (!search) return invoiceNos;
-    const q = search.toLowerCase();
-    return invoiceNos.filter((no) => no.toLowerCase().includes(q));
-  })();
+  const { items: grns, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<GoodsReceiveNote>({
+      useListHook: useGoodsReceiveNote,
+      search: debouncedSearch,
+      // หลายใบอ้างใบแจ้งหนี้เดียวกันได้ — หน้าละ 50 ใบให้ได้เลขที่พอล้นกล่อง
+      // (VirtualCommandList โหลดหน้าถัดไปเมื่อเลื่อนถึงท้ายเท่านั้น)
+      perpage: 50,
+      sort: "invoice_no:asc",
+      // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
+      enabled: open || inline,
+    });
 
   // Parse filter value (format: "invoice_no|string:INV-001,INV-002")
   const selected = (() => {
@@ -71,6 +74,22 @@ export function GrnInvoiceFilter({
     return new Set(match[1].split(","));
   })();
 
+  // distinct ตามลำดับของ server (เรียงเลขที่แล้ว)
+  const invoiceNos = (() => {
+    const seen = new Set<string>();
+    for (const g of grns) {
+      const no = g.invoice_no?.trim();
+      if (no) seen.add(no);
+    }
+    return [...seen];
+  })();
+
+  // ที่เลือกไว้อยู่บนสุดเสมอ — ยกเลิกได้แม้ไม่อยู่ในหน้าที่โหลดมา
+  const rows = [
+    ...selected,
+    ...invoiceNos.filter((no) => !selected.has(no)),
+  ];
+
   const handleToggle = (no: string) => {
     const next = new Set(selected);
     if (next.has(no)) {
@@ -78,18 +97,10 @@ export function GrnInvoiceFilter({
     } else {
       next.add(no);
     }
-
-    if (next.size === 0) {
-      onChange("");
-    } else {
-      onChange(`invoice_no|string:${Array.from(next).join(",")}`);
-    }
+    onChange(next.size === 0 ? "" : `${PREFIX}${Array.from(next).join(",")}`);
   };
 
   const selectedCount = selected.size;
-
-  // ต่างจาก FilterVendor ตรงที่ค่าที่เก็บ *คือ* ป้ายอยู่แล้ว (เลขที่ใบแจ้งหนี้
-  // ไม่ใช่ id) ปุ่มจึงพูดค่าได้ครบโดยไม่ต้องรอทะเบียนโหลด
   const firstNo = [...selected][0];
   const valueText =
     selectedCount > 0
@@ -104,34 +115,43 @@ export function GrnInvoiceFilter({
         value={search}
         onValueChange={setSearch}
       />
-      <div className="max-h-60 overflow-y-auto p-1">
-        <label
-          className={cn(
-            "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-            "hover:bg-accent hover:text-accent-foreground",
-          )}
-        >
+      <div className="p-1">
+        <label className={ROW_CLASS}>
           <Checkbox
             checked={selectedCount === 0}
             onCheckedChange={() => onChange("")}
           />
           <span className="truncate">{tc("all")}</span>
         </label>
-        {filteredInvoiceNos.map((no) => (
-          <label
-            key={no}
-            className={cn(
-              "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-              "hover:bg-accent hover:text-accent-foreground",
-            )}
+        {isLoading ? (
+          <div className="text-muted-foreground px-2 py-1.5 text-xs">
+            {tc("loading")}
+          </div>
+        ) : (
+          <VirtualCommandList
+            items={rows}
+            maxHeight={240}
+            estimateSize={28}
+            onLoadMore={loadMore}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+            emptyMessage={
+              <span className="text-muted-foreground text-xs">
+                {tc("noSearchResult")}
+              </span>
+            }
           >
-            <Checkbox
-              checked={selected.has(no)}
-              onCheckedChange={() => handleToggle(no)}
-            />
-            <span className="truncate">{no}</span>
-          </label>
-        ))}
+            {(no) => (
+              <label key={no} className={ROW_CLASS}>
+                <Checkbox
+                  checked={selected.has(no)}
+                  onCheckedChange={() => handleToggle(no)}
+                />
+                <span className="truncate">{no}</span>
+              </label>
+            )}
+          </VirtualCommandList>
+        )}
       </div>
     </Command>
   );

@@ -95,9 +95,8 @@ export default function GrnComponent() {
         ],
       },
       {
-        // ตัวเลือกมาจากใบรับของทั้ง BU (distinct invoice_no) ซึ่งเป็นก้อนที่โตตาม
-        // จำนวนใบ — GrnInvoiceFilter ยิงเองตอนเปิด popover เท่านั้น หน้านี้จึงไม่
-        // จ่ายค่านั้นตอน mount (ส่วน chip ไม่ต้องรอ fetch: ค่าที่เก็บคือเลขที่จริง
+        // ตัวเลือกมาจากใบรับของ (distinct invoice_no) — GrnInvoiceFilter ยิงตอนเปิด
+        // popover ทีละหน้าเท่านั้น (ส่วน chip ไม่ต้องรอ fetch: ค่าที่เก็บคือเลขที่จริง
         // ไม่ใช่ id chipValueText จึงอ่านออกเองอยู่แล้ว)
         key: "invoice_no",
         control: "custom",
