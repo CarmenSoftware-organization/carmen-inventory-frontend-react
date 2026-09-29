@@ -212,11 +212,22 @@ export interface ApPaymentTaxInvoice {
   vat_amount: DecimalString;
 }
 
+export interface ApDepositOffset {
+  id: string;
+  deposit_no: string;
+  deposit_date: string;
+  original_deposit_amount: DecimalString;
+  remaining_deposit_amount: DecimalString;
+  offset_amount: DecimalString;
+  note?: string;
+}
+
 export interface ApPaymentDetails {
   wht_services?: ApPaymentApplication[];
   tax_allocations?: { invoice_id: string; tax_invoice_id: string; claim_amount: DecimalString }[];
   paid_date?: string;
   payment_methods?: ApPaymentMethodLine[];
+  deposit_offsets?: ApDepositOffset[];
   other_expenses?: ApPaymentExpense[];
   tax_invoices?: ApPaymentTaxInvoice[];
   wht_form?: string;

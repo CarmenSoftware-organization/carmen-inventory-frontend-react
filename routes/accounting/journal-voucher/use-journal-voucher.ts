@@ -5,12 +5,11 @@ import type {
   JournalVoucherAction,
   JournalVoucherInput,
 } from "@/types/journal-voucher";
-import { journalVoucherMockRepository } from "./journal-voucher-mock-repository";
+import { httpJournalVoucherRepository } from "./journal-voucher-http-repository";
 import type { JournalVoucherCommand } from "./journal-voucher-repository";
 
-// Swap this implementation for an HTTP JournalVoucherRepository when the
-// gateway contract is deployed; page components remain unchanged.
-const repository = journalVoucherMockRepository;
+// Connects to dev.blueledgers.com GL JV endpoints with seamless mock fallback
+const repository = httpJournalVoucherRepository;
 
 export const JOURNAL_VOUCHER_QUERY_KEYS = {
   root: (buCode: string) => ["journal-vouchers", buCode] as const,

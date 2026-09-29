@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
@@ -38,9 +39,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { LookupChartOfAccount } from "@/components/lookup/lookup-chart-of-account";
+import { useTitles } from "@/hooks/use-accounting-master";
 import {
   AR_INVOICES,
   AR_INVOICE_PATH,
+  AR_DOC_TYPE_LABELS,
   dueDate,
   invoiceTotals,
   journalPreviewTotals,
@@ -50,6 +54,7 @@ import {
   newArInvoice,
   type ArInvoice,
   type ArInvoiceLine,
+  type ArDocumentType,
 } from "./ar-invoice-model";
 
 const Field = ({
@@ -98,6 +103,7 @@ export default function ArInvoiceDetail() {
   const navigate = useNavigate();
   const original = AR_INVOICES.find((item) => item.id === id);
   const [invoice, setInvoice] = useState<ArInvoice>(() => {
+    const requestedType = (params.get("type") as ArDocumentType) || "ARIV";
     const source =
       id === "new"
         ? AR_INVOICES.find((item) => item.id === params.get("copy"))
@@ -107,6 +113,7 @@ export default function ArInvoiceDetail() {
           ...source,
           id: "new",
           docNo: "Auto-generated",
+          docType: source.docType ?? requestedType,
           status: "Draft",
           source: "Copy",
           taxInvoiceNo: "",
@@ -117,12 +124,13 @@ export default function ArInvoiceDetail() {
             id: crypto.randomUUID(),
           })),
         }
-      : (original ?? newArInvoice());
+      : (original ?? newArInvoice(requestedType));
   });
   const [editing, setEditing] = useState(id === "new");
   const [lineIndex, setLineIndex] = useState<number | null>(null);
   const [folioOpen, setFolioOpen] = useState(false);
   const [depositOpen, setDepositOpen] = useState(false);
+  const { data: titles = [] } = useTitles();
   const totals = useMemo(() => invoiceTotals(invoice), [invoice]);
   const journalTotals = useMemo(() => journalPreviewTotals(invoice), [invoice]);
   const editable = invoice.status === "Draft" && editing;
@@ -150,17 +158,76 @@ export default function ArInvoiceDetail() {
     navigate(`${AR_INVOICE_PATH}/new?copy=${encodeURIComponent(id)}`);
   };
 
+  const availableOriginalInvoices = useMemo(
+    () =>
+      AR_INVOICES.filter(
+        (inv) => inv.id !== invoice.id && (inv.docType === "ARIV" || !inv.docType),
+      ),
+    [invoice.id],
+  );
+
+  const handleSaveDraft = () => {
+    let docNo = invoice.docNo;
+    if (docNo === "Auto-generated" || !docNo) {
+      const type = invoice.docType ?? "ARIV";
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      docNo = `${type}2609${randomNum}`;
+    }
+    setInvoice((prev) => ({
+      ...prev,
+      docNo,
+      status: "Draft",
+    }));
+    setEditing(false);
+    toast.success(`Draft saved: ${docNo}`);
+  };
+
+  const handleSubmit = () => {
+    let docNo = invoice.docNo;
+    const type = invoice.docType ?? "ARIV";
+    if (docNo === "Auto-generated" || !docNo) {
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      docNo = `${type}2609${randomNum}`;
+    }
+
+    let taxInvoiceNo = invoice.taxInvoiceNo;
+    if (invoice.taxInvoice && !taxInvoiceNo) {
+      const prefixMap: Record<ArDocumentType, string> = {
+        ARIV: "TXIV",
+        ARCN: "TXCN",
+        ARDN: "TXDN",
+        ARDP: "TXDP",
+        ARRC: "TXRC",
+      };
+      const prefix = prefixMap[type] ?? "TXIV";
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      taxInvoiceNo = `${prefix}2609${randomNum}`;
+    }
+
+    setInvoice((prev) => ({
+      ...prev,
+      docNo,
+      taxInvoiceNo,
+      status: "Submitted",
+    }));
+    setEditing(false);
+    toast.success(`Document ${docNo} submitted successfully`);
+  };
+
   if (id !== "new" && !original)
     return <p className="text-muted-foreground p-6">AR invoice not found.</p>;
   return (
     <div className="flex min-h-[calc(100dvh-3rem)] flex-col gap-4 pb-24">
       <DocFormHeader
         title={invoice.docNo}
-        subtitle="AR Invoice · City Ledger"
+        subtitle={`${AR_DOC_TYPE_LABELS[invoice.docType ?? "ARIV"]} · City Ledger`}
         backLabel="Back to AR Invoice Directory"
         onBack={() => navigate(AR_INVOICE_PATH)}
         badges={
           <>
+            <Badge variant="secondary" className="font-semibold">
+              {invoice.docType ?? "ARIV"}
+            </Badge>
             <Badge variant="outline">{invoice.status}</Badge>
             <Badge variant="outline">{invoice.source}</Badge>
           </>
@@ -185,30 +252,45 @@ export default function ArInvoiceDetail() {
                 >
                   Cancel
                 </Button>
-                <Button size="sm" disabled title="Requires AR draft API">
+                <Button size="sm" variant="outline" onClick={handleSaveDraft}>
                   <Save className="size-4" />
                   Save Draft
+                </Button>
+                <Button size="sm" onClick={handleSubmit}>
+                  <Send className="size-4" />
+                  Submit
                 </Button>
               </>
             )}
             {invoice.status === "Submitted" && (
               <>
-                <Button size="sm" disabled title="Requires AR approval API">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    set("status", "Approved");
+                    toast.success(`Approved document ${invoice.docNo}`);
+                  }}
+                >
                   Approve
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled
-                  title="Requires AR approval API"
+                  onClick={() => {
+                    set("status", "Draft");
+                    setEditing(true);
+                    toast.info(`Sent back document ${invoice.docNo} to Draft`);
+                  }}
                 >
                   Send Back
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled
-                  title="Requires AR approval API"
+                  onClick={() => {
+                    set("status", "Void");
+                    toast.error(`Rejected document ${invoice.docNo}`);
+                  }}
                 >
                   Reject
                 </Button>
@@ -218,8 +300,10 @@ export default function ArInvoiceDetail() {
               <Button
                 variant="ghost"
                 size="sm"
-                disabled
-                title="Requires backend receipt check"
+                onClick={() => {
+                  set("status", "Void");
+                  toast.warning(`Document ${invoice.docNo} voided`);
+                }}
               >
                 <Ban className="size-4" />
                 Void
@@ -271,6 +355,33 @@ export default function ArInvoiceDetail() {
       <section className="space-y-3 border-b pb-4">
         <h2 className="text-base font-semibold">Invoice details</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
+          <Field label="Doc Type">
+            <Select
+              disabled={!editable || id !== "new"}
+              value={invoice.docType ?? "ARIV"}
+              onValueChange={(val: ArDocumentType) => {
+                setInvoice((prev) => ({
+                  ...prev,
+                  docType: val,
+                  originalInvoiceNo:
+                    val === "ARCN" || val === "ARDN"
+                      ? prev.originalInvoiceNo
+                      : undefined,
+                }));
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ARIV">ARIV (Invoice)</SelectItem>
+                <SelectItem value="ARCN">ARCN (Credit Note)</SelectItem>
+                <SelectItem value="ARDN">ARDN (Debit Note)</SelectItem>
+                <SelectItem value="ARDP">ARDP (Deposit)</SelectItem>
+                <SelectItem value="ARRC">ARRC (Receipt)</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
           <Field label="Doc No.">
             <Input value={invoice.docNo} readOnly />
           </Field>
@@ -281,18 +392,70 @@ export default function ArInvoiceDetail() {
               readOnly={!editable}
             />
           </Field>
+          {(invoice.docType === "ARCN" || invoice.docType === "ARDN") && (
+            <Field label="Original Invoice Ref." className="lg:col-span-2">
+              <Select
+                disabled={!editable}
+                value={invoice.originalInvoiceNo ?? ""}
+                onValueChange={(val) => set("originalInvoiceNo", val)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select original invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableOriginalInvoices.map((inv) => (
+                    <SelectItem key={inv.id} value={inv.docNo}>
+                      {inv.docNo} · {inv.customerName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
           <Field label="Customer (AR)" className="lg:col-span-2">
-            <Input
-              value={invoice.customerName}
-              readOnly={!editable}
-              onChange={(event) =>
-                setInvoice({
-                  ...invoice,
-                  customerName: event.target.value,
-                  customerCode: event.target.value ? "MANUAL" : "",
-                })
-              }
-            />
+            <div className="flex gap-1.5">
+              {editable && titles.length > 0 ? (
+                <Select
+                  value={
+                    titles.find((t) => invoice.customerName.startsWith(t.description) || invoice.customerName.startsWith(t.code))?.code ?? ""
+                  }
+                  onValueChange={(code) => {
+                    const matched = titles.find((t) => t.code === code);
+                    if (matched) {
+                      const clean = invoice.customerName.replace(/^(Mr\.|Mrs\.|Ms\.|Dr\.|Khun)\s*/i, "").trim();
+                      setInvoice({
+                        ...invoice,
+                        customerName: `${matched.description} ${clean}`.trim(),
+                        customerCode: clean ? "MANUAL" : "",
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-24 shrink-0">
+                    <SelectValue placeholder="Title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {titles.map((t) => (
+                      <SelectItem key={t.id} value={t.code}>
+                        {t.code} ({t.description})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+              <Input
+                value={invoice.customerName}
+                readOnly={!editable}
+                placeholder="Customer Name"
+                onChange={(event) =>
+                  setInvoice({
+                    ...invoice,
+                    customerName: event.target.value,
+                    customerCode: event.target.value ? "MANUAL" : "",
+                  })
+                }
+              />
+            </div>
           </Field>
           <Field label="Currency">
             <Select
@@ -1074,23 +1237,36 @@ export default function ArInvoiceDetail() {
               <h3 className="border-t pt-3 font-medium sm:col-span-2">
                 Revenue
               </h3>
-              <Field label="Cr Acc Code (Revenue)">
-                <Input
+              <Field label="Cr Acc Code (Revenue GL)">
+                <LookupChartOfAccount
+                  disabled={!editable}
                   value={invoice.lines[lineIndex].account}
-                  readOnly={!editable}
-                  onChange={(event) =>
-                    updateLine(lineIndex, { account: event.target.value })
+                  onValueChange={(accountCode) =>
+                    updateLine(lineIndex, { account: accountCode })
                   }
                 />
               </Field>
               <Field label="Cost Center (Dept)">
-                <Input
-                  value={invoice.lines[lineIndex].costCenter}
-                  readOnly={!editable}
-                  onChange={(event) =>
-                    updateLine(lineIndex, { costCenter: event.target.value })
-                  }
-                />
+                {editable ? (
+                  <Select
+                    value={invoice.lines[lineIndex].costCenter || "101"}
+                    onValueChange={(value) =>
+                      updateLine(lineIndex, { costCenter: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Dept" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="101">101 - Rooms (Front Office)</SelectItem>
+                      <SelectItem value="201">201 - Food &amp; Beverage</SelectItem>
+                      <SelectItem value="301">301 - Spa &amp; Recreation</SelectItem>
+                      <SelectItem value="GEN">GEN - General / Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={invoice.lines[lineIndex].costCenter} readOnly />
+                )}
               </Field>
               <Field label="Dimensions" className="sm:col-span-2">
                 <Input
@@ -1124,12 +1300,12 @@ export default function ArInvoiceDetail() {
                   value={money(lineTotals(invoice.lines[lineIndex]).tax)}
                 />
               </Field>
-              <Field label="Tax 1 Acc Code">
-                <Input
+              <Field label="Tax 1 Acc Code (GL)">
+                <LookupChartOfAccount
+                  disabled={!editable}
                   value={invoice.lines[lineIndex].tax1Account}
-                  readOnly={!editable}
-                  onChange={(event) =>
-                    updateLine(lineIndex, { tax1Account: event.target.value })
+                  onValueChange={(accountCode) =>
+                    updateLine(lineIndex, { tax1Account: accountCode })
                   }
                 />
               </Field>
@@ -1164,12 +1340,12 @@ export default function ArInvoiceDetail() {
                   value={money(lineTotals(invoice.lines[lineIndex]).tax2)}
                 />
               </Field>
-              <Field label="Tax 2 Acc Code">
-                <Input
+              <Field label="Tax 2 Acc Code (GL)">
+                <LookupChartOfAccount
+                  disabled={!editable}
                   value={invoice.lines[lineIndex].tax2Account}
-                  readOnly={!editable}
-                  onChange={(event) =>
-                    updateLine(lineIndex, { tax2Account: event.target.value })
+                  onValueChange={(accountCode) =>
+                    updateLine(lineIndex, { tax2Account: accountCode })
                   }
                 />
               </Field>
@@ -1187,12 +1363,12 @@ export default function ArInvoiceDetail() {
               <h3 className="border-t pt-3 font-medium sm:col-span-2">
                 Account Receivable
               </h3>
-              <Field label="Dr Acc Code (AR)">
-                <Input
+              <Field label="Dr Acc Code (AR Control)">
+                <LookupChartOfAccount
+                  disabled={!editable}
                   value={invoice.lines[lineIndex].arAccount}
-                  readOnly={!editable}
-                  onChange={(event) =>
-                    updateLine(lineIndex, { arAccount: event.target.value })
+                  onValueChange={(accountCode) =>
+                    updateLine(lineIndex, { arAccount: accountCode })
                   }
                 />
               </Field>

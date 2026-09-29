@@ -65,6 +65,7 @@ import { LookupCombobox } from "@/components/lookup/lookup-combobox";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { useChartOfAccount } from "@/hooks/use-chart-of-account";
 import { DEFAULT_CHART_OF_ACCOUNTS } from "@/components/lookup/lookup-chart-of-account";
+import { useGlPeriods } from "@/hooks/use-accounting-master";
 import { CellAction } from "@/components/ui/cell-action";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import {
@@ -282,11 +283,23 @@ export default function AccountingDocumentDetail() {
     autoReverse: false,
     reverseDate: "",
   });
+  const [fastEntryMode, setFastEntryMode] = useState(false);
   const [lines, setLines] = useState<JournalLine[]>(INITIAL_LINES);
   const [selectedLineIds, setSelectedLineIds] = useState<string[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
+
+  const { data: glPeriods = [] } = useGlPeriods();
+  const currentPeriod = useMemo(() => {
+    const docDate = values.date;
+    return glPeriods.find(
+      (p) => docDate >= p.start_date && docDate <= p.end_date,
+    );
+  }, [glPeriods, values.date]);
+
+  const isPeriodLocked =
+    currentPeriod?.status === "closed" || currentPeriod?.status === "locked";
 
   useEffect(() => {
     if (!journal || isNew) return;
@@ -376,16 +389,61 @@ export default function AccountingDocumentDetail() {
     ]);
   }, []);
 
+  const autoBalanceEntry = useCallback(() => {
+    const curDebit = lines.reduce((sum, line) => sum + line.debit, 0);
+    const curCredit = lines.reduce((sum, line) => sum + line.credit, 0);
+    const diff = curDebit - curCredit;
+    if (Math.abs(diff) < 0.005) {
+      toast.info("ยอดเดบิตและเครดิตสมดุลแล้ว (Already balanced)");
+      return;
+    }
+    setLines((current) => {
+      const last = current[current.length - 1];
+      if (last && last.debit === 0 && last.credit === 0) {
+        return current.map((line, idx) =>
+          idx === current.length - 1
+            ? {
+                ...line,
+                debit: diff < 0 ? Number(Math.abs(diff).toFixed(2)) : 0,
+                credit: diff > 0 ? Number(diff.toFixed(2)) : 0,
+              }
+            : line,
+        );
+      }
+      return [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          department: current[current.length - 1]?.department ?? "100",
+          account: "",
+          comment: "Balancing line",
+          debit: diff < 0 ? Number(Math.abs(diff).toFixed(2)) : 0,
+          credit: diff > 0 ? Number(diff.toFixed(2)) : 0,
+          taxCode: "",
+          whtCode: "NONE",
+          budgetControlled: false,
+          budget: "",
+          dimension: "",
+        },
+      ];
+    });
+    toast.success("คำนวณและปรับยอดให้สมดุลแล้ว (Auto balanced)");
+  }, [lines]);
+
   useEffect(() => {
     if (isView) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!event.altKey || event.key.toLowerCase() !== "a") return;
-      event.preventDefault();
-      addLine();
+      if (event.altKey && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        addLine();
+      } else if (event.altKey && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        autoBalanceEntry();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [addLine, isView]);
+  }, [addLine, autoBalanceEntry, isView]);
 
   const updateLine = (lineId: string, patch: Partial<JournalLine>) => {
     setLines((current) =>
@@ -426,6 +484,12 @@ export default function AccountingDocumentDetail() {
   };
 
   const handleSave = async (intent: "draft" | "submit") => {
+    if (isPeriodLocked) {
+      toast.error(
+        `ไม่สามารถบันทึกได้ เนื่องจากงวดบัญชี ${currentPeriod?.fiscal_year ?? ""}-P${currentPeriod?.period_number ?? ""} ถูกปิดแล้ว (${currentPeriod?.status})`,
+      );
+      return;
+    }
     if (
       mode === "edit" &&
       performance.now() - editActivatedAtRef.current < 500
@@ -742,10 +806,12 @@ export default function AccountingDocumentDetail() {
                   size="sm"
                   data-intent="draft"
                   disabled={
-                    isJournalVoucher
+                    isPeriodLocked ||
+                    (isJournalVoucher
                       ? createJournal.isPending || updateJournal.isPending
-                      : !isBalanced
+                      : !isBalanced)
                   }
+                  title={isPeriodLocked ? "Period is closed or locked" : undefined}
                 >
                   <Save className="size-4" aria-hidden="true" />
                   {tc("save")}
@@ -1334,12 +1400,42 @@ export default function AccountingDocumentDetail() {
           }`}
         >
           <CardHeader className={usesVoucherDetailPattern ? "px-0" : "px-4"}>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-              <ListTree className="text-primary size-4" aria-hidden="true" />
-              {entryTitle}
-            </CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <ListTree className="text-primary size-4" aria-hidden="true" />
+                {entryTitle}
+              </CardTitle>
+              {isPeriodLocked && (
+                <Badge variant="destructive" className="gap-1 text-xs">
+                  🔒 งวดบัญชี {currentPeriod?.fiscal_year}-P{currentPeriod?.period_number} ปิดแล้ว ({currentPeriod?.status})
+                </Badge>
+              )}
+            </div>
             {!isView && (
-              <CardAction className="flex gap-2">
+              <CardAction className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant={fastEntryMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFastEntryMode((v) => !v)}
+                  title="สลับโหมดกรอกด่วน (Fast Entry Mode)"
+                >
+                  ⚡ Fast Entry
+                </Button>
+                {!isBalanced && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={autoBalanceEntry}
+                    title="ปรับยอดให้สมดุลอัตโนมัติ (Alt+B)"
+                  >
+                    Auto Balance
+                    <kbd className="bg-muted-foreground/20 text-micro-legal ml-1 rounded px-1">
+                      Alt+B
+                    </kbd>
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -1519,6 +1615,14 @@ export default function AccountingDocumentDetail() {
                                     debit: Number(event.target.value),
                                   })
                                 }
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    if (lineIndex === lines.length - 1) {
+                                      addLine();
+                                    }
+                                  }
+                                }}
                                 className="min-w-28 text-right tabular-nums"
                               />
                             )}
@@ -1540,6 +1644,14 @@ export default function AccountingDocumentDetail() {
                                     credit: Number(event.target.value),
                                   })
                                 }
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    if (lineIndex === lines.length - 1) {
+                                      addLine();
+                                    }
+                                  }
+                                }}
                                 className="min-w-28 text-right tabular-nums"
                               />
                             )}
@@ -1731,7 +1843,8 @@ export default function AccountingDocumentDetail() {
                         form={FORM_ID}
                         size="sm"
                         data-intent="submit"
-                        disabled={!isBalanced}
+                        disabled={isPeriodLocked || !isBalanced}
+                        title={isPeriodLocked ? "Period is closed or locked" : undefined}
                         aria-describedby={
                           !isBalanced ? "journal-balance-status" : undefined
                         }

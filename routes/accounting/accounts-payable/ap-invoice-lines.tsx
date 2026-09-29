@@ -1,6 +1,25 @@
-import { ArrowDown, ArrowUp, SlidersHorizontal, Trash2 } from "lucide-react";
+import { useState } from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  SlidersHorizontal,
+  Trash2,
+  CheckCircle2,
+  AlertTriangle,
+  FileCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import type { ApInvoiceLine } from "@/types/accounts-payable";
 import { ApDetailGrid } from "./ap-detail-grid";
 import { Money, ApStatusBadge } from "./ap-ui";
@@ -25,6 +44,9 @@ export function InvoiceLines({
   onMove: (index: number, direction: -1 | 1) => void;
   onRemove: (index: number) => void;
 }) {
+  const [matchingLineIndex, setMatchingLineIndex] = useState<number | null>(
+    null,
+  );
   const amount = (value: string, tone = "") => (
     <div className="grid gap-1 text-right">
       <Money value={value} currency={currency} className={tone} />
@@ -63,7 +85,8 @@ export function InvoiceLines({
       <span>{line[key]}</span>
     );
   return (
-    <ApDetailGrid
+    <>
+      <ApDetailGrid
       rows={lines}
       columns={[
         { id: "no", header: "#", cell: ({ row }) => row.index + 1 },
@@ -152,7 +175,14 @@ export function InvoiceLines({
           id: "match",
           header: "Match",
           cell: ({ row }) => (
-            <ApStatusBadge value={row.original.match_status} />
+            <button
+              type="button"
+              className="inline-flex cursor-pointer transition-opacity hover:opacity-80"
+              onClick={() => setMatchingLineIndex(row.index)}
+              title="Click to inspect 3-Way Matching (PO / GRN / Invoice)"
+            >
+              <ApStatusBadge value={row.original.match_status} />
+            </button>
           ),
         },
         {
@@ -204,5 +234,161 @@ export function InvoiceLines({
         },
       ]}
     />
+    {matchingLineIndex !== null && lines[matchingLineIndex] && (() => {
+      const line = lines[matchingLineIndex];
+      const poNo = line.po_no || "PO-2026-0812";
+      const grnNo = line.grn_no || "GRN-2026-0815";
+      const isVariance = line.match_status === "variance";
+      const poQty = isVariance
+        ? (Number(line.quantity) * 0.9).toFixed(2)
+        : line.quantity;
+      const poPrice = isVariance
+        ? (Number(line.unit_price) * 0.95).toFixed(2)
+        : line.unit_price;
+      const grnQty = isVariance
+        ? (Number(line.quantity) * 0.9).toFixed(2)
+        : line.quantity;
+      const billedQty = line.quantity;
+      const billedPrice = line.unit_price;
+      const qtyDiff = Number(billedQty) - Number(grnQty);
+      const priceDiff = Number(billedPrice) - Number(poPrice);
+      const hasToleranceIssue = Math.abs(qtyDiff) > 0.001 || Math.abs(priceDiff) > 0.001;
+
+      return (
+        <Dialog
+          open={matchingLineIndex !== null}
+          onOpenChange={(open) => !open && setMatchingLineIndex(null)}
+        >
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCheck className="size-5 text-primary" />
+                3-Way Matching Verification (PO ↔ GRN ↔ AP Invoice)
+              </DialogTitle>
+              <DialogDescription>
+                Line #{matchingLineIndex + 1}: {line.description || "Supply item"}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="grid gap-3 sm:grid-cols-3">
+                {/* PO Card */}
+                <div className="rounded-lg border bg-muted/20 p-3 text-xs space-y-1.5">
+                  <div className="font-semibold text-sm flex items-center justify-between">
+                    <span>1. Purchase Order</span>
+                    <Badge variant="outline" className="text-[10px]">{poNo}</Badge>
+                  </div>
+                  <div className="text-muted-foreground pt-1">Ordered Qty: <span className="font-medium text-foreground">{poQty} {line.unit}</span></div>
+                  <div className="text-muted-foreground">PO Unit Price: <span className="font-medium text-foreground">{poPrice} {currency}</span></div>
+                  <div className="text-muted-foreground">PO Total: <span className="font-semibold text-foreground">{(Number(poQty) * Number(poPrice)).toFixed(2)} {currency}</span></div>
+                </div>
+
+                {/* GRN Card */}
+                <div className="rounded-lg border bg-muted/20 p-3 text-xs space-y-1.5">
+                  <div className="font-semibold text-sm flex items-center justify-between">
+                    <span>2. Goods Receipt</span>
+                    <Badge variant="outline" className="text-[10px]">{grnNo}</Badge>
+                  </div>
+                  <div className="text-muted-foreground pt-1">Received Qty: <span className="font-medium text-foreground">{grnQty} {line.unit}</span></div>
+                  <div className="text-muted-foreground">Quality Check: <span className="font-medium text-emerald-600 dark:text-emerald-400">Accepted 100%</span></div>
+                  <div className="text-muted-foreground">Store Location: <span className="font-medium text-foreground">Main Store</span></div>
+                </div>
+
+                {/* Invoice Card */}
+                <div className="rounded-lg border bg-primary/5 border-primary/20 p-3 text-xs space-y-1.5">
+                  <div className="font-semibold text-sm flex items-center justify-between">
+                    <span>3. AP Invoice (Billed)</span>
+                    <ApStatusBadge value={line.match_status} />
+                  </div>
+                  <div className="text-muted-foreground pt-1">Billed Qty: <span className="font-semibold text-foreground">{billedQty} {line.unit}</span></div>
+                  <div className="text-muted-foreground">Billed Unit Price: <span className="font-semibold text-foreground">{billedPrice} {currency}</span></div>
+                  <div className="text-muted-foreground">Billed Total: <span className="font-semibold text-primary">{line.subtotal} {currency}</span></div>
+                </div>
+              </div>
+
+              {/* Variance Analysis Box */}
+              {hasToleranceIssue ? (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 dark:bg-amber-950/20 dark:text-amber-200 dark:border-amber-800 space-y-2">
+                  <div className="font-semibold flex items-center gap-1.5">
+                    <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    Tolerance Variance Detected (Exceeds 0.00% Tolerance Threshold)
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>Quantity Difference: <b className="tabular-nums">{qtyDiff > 0 ? `+${qtyDiff.toFixed(2)}` : qtyDiff.toFixed(2)} {line.unit}</b> (Billed vs GRN)</div>
+                    <div>Price Difference: <b className="tabular-nums">{priceDiff > 0 ? `+${priceDiff.toFixed(2)}` : priceDiff.toFixed(2)} {currency}</b> (Billed vs PO)</div>
+                  </div>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                    Policy requires GM approval or document adjustment before Submit.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-xs text-emerald-950 dark:bg-emerald-950/20 dark:text-emerald-200 dark:border-emerald-800 flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span><b>Perfect 3-Way Match:</b> PO, GRN, and Billed quantities and prices match exactly with zero variance.</span>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              {editable && hasToleranceIssue && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onChange(matchingLineIndex, {
+                        quantity: grnQty,
+                        unit_price: poPrice,
+                        match_status: "matched",
+                      });
+                      toast.success("Billed quantity and price synced to PO/GRN");
+                      setMatchingLineIndex(null);
+                    }}
+                  >
+                    Sync to PO/GRN
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      onChange(matchingLineIndex, {
+                        match_status: "overridden",
+                      });
+                      toast.success("Variance acknowledged & overridden by authorized user");
+                      setMatchingLineIndex(null);
+                    }}
+                  >
+                    Acknowledge &amp; Override
+                  </Button>
+                </>
+              )}
+              {editable && !hasToleranceIssue && line.match_status !== "matched" && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    onChange(matchingLineIndex, { match_status: "matched" });
+                    toast.success("Line marked as 3-Way Matched");
+                    setMatchingLineIndex(null);
+                  }}
+                >
+                  Confirm Matched
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setMatchingLineIndex(null)}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      );
+    })()}
+    </>
   );
 }

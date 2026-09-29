@@ -26,7 +26,14 @@ export function paymentSummary(form: ApPaymentInput) {
   const expenses = addDecimal(
     (form.other_expenses ?? []).map((item) => item.base_amount),
   );
-  const netBase = addDecimal([subtractDecimal(paymentBase, whtBase), expenses]);
+  const depositOffsetTotal = addDecimal(
+    (form.deposit_offsets ?? []).map((item) => item.offset_amount),
+  );
+  const depositOffsetBase = multiplyDecimal(depositOffsetTotal, form.exchange_rate);
+  const netBase = subtractDecimal(
+    addDecimal([subtractDecimal(paymentBase, whtBase), expenses]),
+    depositOffsetBase,
+  );
   const vatClaim = addDecimal(
     (form.tax_allocations ?? []).map((item) => item.claim_amount),
   );
@@ -63,6 +70,17 @@ export function paymentSummary(form: ApPaymentInput) {
       debit: item.base_amount,
       credit: "0.00",
     })),
+    ...(compareDecimal(depositOffsetBase, "0") > 0
+      ? [
+          {
+            id: "deposit-offset",
+            account: "1150 - Advance payments to suppliers",
+            description: "Apply advance deposit offset",
+            debit: "0.00",
+            credit: depositOffsetBase,
+          },
+        ]
+      : []),
     {
       id: "wht",
       account: "WHT payable",
@@ -93,6 +111,8 @@ export function paymentSummary(form: ApPaymentInput) {
     wht,
     wht_base: whtBase,
     expenses,
+    deposit_offset_total: depositOffsetTotal,
+    deposit_offset_base: depositOffsetBase,
     net_base: netBase,
     net_cash: divideDecimal(
       netBase,

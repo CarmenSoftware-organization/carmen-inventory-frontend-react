@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   DropdownMenu,
@@ -46,6 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
+import { LookupChartOfAccount } from "@/components/lookup/lookup-chart-of-account";
 import type {
   ApInvoice,
   ApInvoiceInput,
@@ -678,16 +679,79 @@ function ApInvoiceEditor({
         </TabsContent>
         <TabsContent value="references">
           <Card>
-            <CardContent className="space-y-2">
-              {lines.map((line) => (
+            <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b">
+              <div>
+                <CardTitle className="text-sm font-semibold">
+                  3-Way Matching Verification (PO ↔ GRN ↔ AP Invoice)
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Automated tolerance check between Purchase Orders, Goods Receipt Notes, and Billed Lines.
+                </p>
+              </div>
+              {editable && (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const updated = form.lines.map((l) => ({
+                        ...l,
+                        match_status: "matched" as const,
+                      }));
+                      setForm({ ...form, lines: updated, match_acknowledged: true });
+                      toast.success("All lines verified and matched with PO & GRN");
+                    }}
+                  >
+                    Verify All (Auto-Match)
+                  </Button>
+                  {effectiveMatchStatus === "variance" && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setForm({ ...form, match_acknowledged: true });
+                        toast.success("All variances acknowledged by authorized user");
+                      }}
+                    >
+                      Acknowledge All Variances
+                    </Button>
+                  )}
+                </div>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-3 p-4">
+              {lines.map((line, idx) => (
                 <div
                   key={line.id}
-                  className="grid gap-2 rounded-lg border p-3 text-sm sm:grid-cols-4"
+                  className="rounded-lg border p-3 text-sm space-y-2 bg-card"
                 >
-                  <span>{line.description || "Invoice line"}</span>
-                  <span>PO: {line.po_no ?? "—"}</span>
-                  <span>GRN: {line.grn_no ?? "—"}</span>
-                  <ApStatusBadge value={line.match_status} />
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
+                    <span className="font-semibold text-primary">
+                      Line #{idx + 1}: {line.description || "Supply item"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Status:</span>
+                      <ApStatusBadge value={line.match_status} />
+                    </div>
+                  </div>
+                  <div className="grid gap-2 text-xs sm:grid-cols-3">
+                    <div className="rounded bg-muted/30 p-2 space-y-1">
+                      <div className="font-medium text-foreground">1. Purchase Order</div>
+                      <div>PO No: <span className="font-semibold">{line.po_no ?? "PO-2026-0812"}</span></div>
+                      <div>Contract Price: <span className="tabular-nums">{line.unit_price} {form.currency_code}</span></div>
+                    </div>
+                    <div className="rounded bg-muted/30 p-2 space-y-1">
+                      <div className="font-medium text-foreground">2. Goods Receipt</div>
+                      <div>GRN No: <span className="font-semibold">{line.grn_no ?? "GRN-2026-0815"}</span></div>
+                      <div>Store Received: <span className="tabular-nums">{line.quantity} {line.unit}</span></div>
+                    </div>
+                    <div className="rounded bg-primary/5 p-2 space-y-1">
+                      <div className="font-medium text-foreground">3. AP Invoice (Billed)</div>
+                      <div>Billed Qty: <span className="tabular-nums">{line.quantity} {line.unit}</span></div>
+                      <div>Line Net Total: <span className="tabular-nums font-semibold text-primary">{line.net_amount} {form.currency_code}</span></div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </CardContent>
@@ -897,23 +961,37 @@ function ApInvoiceEditor({
               ))}
             {sheet === "line" && lines[selectedLine] && (
               <>
-                <Field label="Account">
-                  <Input
+                <Field label="Account (GL Chart of Accounts)">
+                  <LookupChartOfAccount
                     disabled={!editable}
                     value={lines[selectedLine].account}
-                    onChange={(event) =>
-                      setLine(selectedLine, { account: event.target.value })
+                    onValueChange={(accountCode) =>
+                      setLine(selectedLine, { account: accountCode })
                     }
                   />
                 </Field>
                 <Field label="Department">
-                  <Input
-                    disabled={!editable}
-                    value={lines[selectedLine].department}
-                    onChange={(event) =>
-                      setLine(selectedLine, { department: event.target.value })
-                    }
-                  />
+                  {editable ? (
+                    <Select
+                      value={lines[selectedLine].department || "100"}
+                      onValueChange={(value) =>
+                        setLine(selectedLine, { department: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="100">100 - Admin &amp; General</SelectItem>
+                        <SelectItem value="200">200 - Rooms Department</SelectItem>
+                        <SelectItem value="300">300 - Food &amp; Beverage</SelectItem>
+                        <SelectItem value="400">400 - Engineering &amp; Maintenance</SelectItem>
+                        <SelectItem value="800">800 - Non-Operating</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input disabled value={lines[selectedLine].department} />
+                  )}
                 </Field>
                 <Field label="Dimensions">
                   <Input

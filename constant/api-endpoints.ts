@@ -115,11 +115,39 @@ export const API_ENDPOINTS = {
   GOODS_RECEIVE_NOTE: (buCode: string) =>
     `/api/proxy/api/${buCode}/good-received-notes`,
   JOURNAL_VOUCHERS: (buCode: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-vouchers`,
+    `/api/proxy/api/${buCode}/gl-jv`,
   JOURNAL_VOUCHER: (buCode: string, id: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}`,
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}`,
   JOURNAL_VOUCHER_ACTION: (buCode: string, id: string, action: string) =>
-    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}/${toSafePathSegment(action)}`,
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}/${toSafePathSegment(action)}`,
+  GL_JV_LIST: (buCode: string) =>
+    `/api/proxy/api/${buCode}/gl-jv`,
+  GL_JV_DETAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}`,
+  GL_JV_SUBMIT: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}/submit`,
+  GL_JV_APPROVE: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}/approve`,
+  GL_JV_REJECT: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-jv/${toSafePathSegment(id)}/reject`,
+  GL_POSTING_POST: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-posting/${toSafePathSegment(id)}/post`,
+  GL_POSTING_VOID: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-posting/${toSafePathSegment(id)}/void`,
+  GL_POSTING_REVERSE: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/gl-posting/${toSafePathSegment(id)}/reverse`,
+  GL_JV_TEMPLATES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/gl-jv-templates`,
+  GL_BANK_ACCOUNTS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/bank-accounts`,
+  GL_PERIODS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/gl-periods`,
+  GL_JV_PREFIXES: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/gl-jv-prefixes`,
+  GL_COST_CENTERS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/cost-centers`,
+  GL_DIMENSIONS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/gl-dimensions`,
   GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>
