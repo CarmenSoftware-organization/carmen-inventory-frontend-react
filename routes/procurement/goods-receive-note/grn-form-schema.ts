@@ -45,6 +45,11 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     received_base_qty: z.coerce.number(),
     received_base_unit_id: z.string().nullable(),
     received_unit_conversion_factor: z.coerce.number(),
+    // ชื่อหน่วยที่บันทึกไว้ — แสดงอย่างเดียว (ไม่อยู่ใน payload) เป็น defaultLabel
+    // ของ LookupProductUnit เมื่อหน่วยนั้นไม่อยู่ในรายการหน่วยปัจจุบันของสินค้าแล้ว
+    foc_unit_name: z.string().optional(),
+    approved_unit_name: z.string().optional(),
+    received_unit_name: z.string().optional(),
     // Tax
     tax_profile_id: z.string().nullable().optional(),
     tax_rate: z.coerce.number(),
@@ -287,6 +292,9 @@ export function getDefaultValues(
           foc_unit_conversion_factor: item?.foc_unit_conversion_factor ?? 0,
           approved_qty: item?.order_qty ?? 0,
           approved_unit_id: item?.order_unit?.id ?? null,
+          foc_unit_name: item?.foc_unit?.name ?? "",
+          approved_unit_name: item?.order_unit?.name ?? "",
+          received_unit_name: item?.received_unit?.name ?? "",
           received_qty: item?.received_qty ?? 0,
           received_unit_id: item?.received_unit?.id ?? null,
           received_base_qty: item?.received_base_qty ?? 0,

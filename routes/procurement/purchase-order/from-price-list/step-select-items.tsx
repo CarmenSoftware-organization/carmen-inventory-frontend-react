@@ -407,6 +407,15 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
               productId={detail.product?.id ?? ""}
               workflowId={workflowId}
               value={selected?.location_id ?? ""}
+              // StepperContent unmount ขั้นที่ไม่ active — ย้อนกลับมาขั้นนี้แล้ว
+              // pickedItem ของ combobox หาย ใช้ชื่อที่ patch เก็บไว้แทน
+              defaultLabel={
+                selected?.location_name
+                  ? selected.location_code
+                    ? `${selected.location_name} - ${selected.location_code}`
+                    : selected.location_name
+                  : undefined
+              }
               onValueChange={(v) => patchItem(detail.id, { location_id: v })}
               onItemChange={(loc) =>
                 patchItem(detail.id, {
