@@ -127,6 +127,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
           isDisabled={isDisabled}
           excludeIds={excludeIds}
           onParentChange={handleParentChange}
+          getCategoryName={(id) => categoryMap.get(id)?.name}
         />
         <RecipeCategoryCostFields form={form} isDisabled={isDisabled} />
         <RecipeCategoryMarginFields form={form} isDisabled={isDisabled} />

@@ -140,6 +140,7 @@ const ProductCell = memo(function ProductCell({
               fromLocationId={fromLocationId}
               toLocationId={toLocationId}
               workflowId={workflowId}
+              defaultLabel={productName || undefined}
               disabled={disabled}
               // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
               // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class

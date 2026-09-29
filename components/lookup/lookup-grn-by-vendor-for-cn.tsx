@@ -18,6 +18,11 @@ interface LookupGrnByVendorForCnProps {
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
+  /**
+   * ป้ายของ `value` ที่รู้อยู่แล้วจากเอกสาร — list โหลดทีละหน้า ค่าที่อยู่หลังหน้าแรก
+   * จะหาชื่อไม่เจอแล้วขึ้น placeholder ทั้งที่มีค่าอยู่
+   */
+  readonly defaultLabel?: string;
 }
 
 export function LookupGrnByVendorForCn({
@@ -31,6 +36,7 @@ export function LookupGrnByVendorForCn({
   size,
   error,
   readOnly,
+  defaultLabel,
 }: LookupGrnByVendorForCnProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -66,6 +72,7 @@ export function LookupGrnByVendorForCn({
       items={grns}
       getId={(g) => g.id}
       getLabel={(g) => g.invoice_no || g.grn_no}
+      defaultLabel={defaultLabel}
       getSearchValue={(g) => `${g.grn_no} ${g.invoice_no ?? ""}`}
       renderItem={(g) => (
         <>
