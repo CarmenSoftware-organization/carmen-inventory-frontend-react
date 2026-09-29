@@ -29,6 +29,11 @@ function RoleToggleCard({
     <button
       type="button"
       onClick={() => onChange(!checked)}
+      // การ์ดอยู่ใต้ cmdk Command ซึ่ง preventDefault ทุก Enter ที่ bubble ถึง root —
+      // หยุดที่ปุ่มเพื่อให้ Enter ยัง click การ์ดตามปกติ
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.stopPropagation();
+      }}
       disabled={disabled}
       aria-pressed={checked}
       className={cn(
@@ -90,6 +95,7 @@ export function RolesSection({
   first,
 }: RolesSectionProps) {
   const t = useTranslations("systemAdmin.user");
+  const tc = useTranslations("common");
   return (
     <AssignSection
       title={t("assignRoles")}
@@ -128,6 +134,11 @@ export function RolesSection({
                 title={t("noRolesAvailable")}
                 desc={t("noRolesAvailableDesc")}
               />
+            }
+            noResultMessage={
+              <span className="text-muted-foreground text-xs">
+                {tc("noSearchResult")}
+              </span>
             }
           />
         )}

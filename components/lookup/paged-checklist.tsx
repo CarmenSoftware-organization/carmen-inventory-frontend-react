@@ -37,7 +37,10 @@ interface PagedChecklistProps<T> {
   /** ความสูงแถวโดยประมาณก่อนวัดจริง (px) */
   readonly estimateSize?: number;
   readonly searchPlaceholder?: string;
+  /** แสดงเมื่อทะเบียนว่างจริง (ไม่มีคำค้น) */
   readonly emptyMessage?: ReactNode;
+  /** แสดงเมื่อค้นแล้วไม่พบ — ไม่ส่ง = ใช้ emptyMessage / ข้อความ default */
+  readonly noResultMessage?: ReactNode;
   /** ต่อท้าย class ของกรอบ (ช่องค้น + รายการ) */
   readonly className?: string;
 }
@@ -68,6 +71,7 @@ export function PagedChecklist<T>({
   estimateSize = 28,
   searchPlaceholder,
   emptyMessage,
+  noResultMessage,
   className,
 }: PagedChecklistProps<T>) {
   const tc = useTranslations("common");
@@ -101,12 +105,13 @@ export function PagedChecklist<T>({
   );
 
   // ค่าที่เลือกแต่ยังไม่อยู่ในหน้าที่โหลด (หลังหน้าแรก / ถูกปิดใช้งาน) ขึ้นบนสุด —
-  // แถวที่โหลดแล้วอยู่ที่เดิม ติ๊กแล้วไม่กระโดด
+  // แถวที่โหลดแล้วอยู่ที่เดิม ติ๊กแล้วไม่กระโดด · ปักเฉพาะตอนไม่ได้ค้น: ระหว่างค้น items คือผลค้น
+  // แต่ selectedItems ดึงตาม id ไม่สนคำค้น ปักต่อจะดันผลค้นตกกรอบและ emptyMessage ไม่มีวันขึ้น
   const loadedIds = new Set(items.map((it) => getId(it)));
-  const rows = [
-    ...selectedItems.filter((it) => !loadedIds.has(getId(it))),
-    ...items,
-  ];
+  const pinned = debouncedSearch
+    ? []
+    : selectedItems.filter((it) => !loadedIds.has(getId(it)));
+  const rows = [...pinned, ...items];
 
   return (
     <div className="flex flex-col gap-2">
@@ -156,6 +161,7 @@ export function PagedChecklist<T>({
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}
             emptyMessage={
+              (debouncedSearch ? noResultMessage : undefined) ??
               emptyMessage ?? (
                 <span className="text-muted-foreground text-xs">
                   {tc("noSearchResult")}
