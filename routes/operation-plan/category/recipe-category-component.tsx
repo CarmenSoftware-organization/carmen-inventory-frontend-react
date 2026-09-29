@@ -31,7 +31,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useRecipeCategoryTable } from "./use-recipe-category-table";
@@ -41,6 +41,12 @@ import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+
+const PARENT_ENTITY = defineEntitySource<RecipeCategory>({
+  fieldKey: "parent_id",
+  useListHook: useRecipeCategory,
+  getLabel: (c) => c.name,
+});
 
 export default function RecipeCategoryComponent() {
   const t = useTranslations("operationPlan.recipeCategory");
@@ -53,22 +59,8 @@ export default function RecipeCategoryComponent() {
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteCategory = useDeleteRecipeCategory();
-  const tfl = useTranslations("field");
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const isGridMode = isMobile || displayMode === "grid";
-
-  const { data: allData } = useRecipeCategory({ perpage: -1 });
-  const allCategories = useMemo(() => allData?.data ?? [], [allData]);
-
-  const parentMap = new Map(allCategories.map((c) => [c.id, c.name]));
-
-  const parentFilterOptions = useMemo(
-    () =>
-      allCategories
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `parent_id|string:${c.id}` })),
-    [allCategories],
-  );
 
   const STATUS_OPTIONS = useMemo(
     () => [
@@ -78,9 +70,7 @@ export default function RecipeCategoryComponent() {
     [ts],
   );
 
-  // parent เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) จึงต้องใช้
-  // control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern ของ
-  // PO_TYPE/CN_TYPE ใน Task 19
+  // parent เป็น control "entity" (ค้นที่ server, chip ขึ้นชื่อ)
   const recipeCategoryFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -100,20 +90,12 @@ export default function RecipeCategoryComponent() {
       {
         key: "parent",
         section: "listView.sectionCategory",
-        control: "custom",
+        control: "entity",
+        entity: PARENT_ENTITY,
         labelKey: "field.parent",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("parent")}
-            options={parentFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [STATUS_OPTIONS, parentFilterOptions, tfl],
+    [STATUS_OPTIONS],
   );
 
   const lf = useListFilters({
@@ -143,7 +125,6 @@ export default function RecipeCategoryComponent() {
 
   const table = useRecipeCategoryTable({
     categories,
-    allCategories,
     totalRecords,
     params,
     tableConfig,
@@ -239,9 +220,7 @@ export default function RecipeCategoryComponent() {
                 <RecipeCategoryCard
                   key={item.id}
                   item={item}
-                  parentName={
-                    item.parent?.id ? parentMap.get(item.parent.id) : undefined
-                  }
+                  parentName={item.parent?.name ?? undefined}
                   onEdit={(c) =>
                     navigate(
                       `/operation-plan/category/${c.id}`,

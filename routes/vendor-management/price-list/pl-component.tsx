@@ -23,6 +23,8 @@ import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useCurrency } from "@/hooks/use-currency";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import type { PriceList } from "@/types/price-list";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type { Currency } from "@/types/currency";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
@@ -38,6 +40,15 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 import { VENDOR_ENTITY } from "@/components/filter/entity-sources";
+
+// ค่าที่ URL เก็บคือรหัสสกุล (`currency_code|string:THB,USD`) ไม่ใช่ id — ดึงชื่อตาม `code`
+const CURRENCY_ENTITY = defineEntitySource<Currency>({
+  fieldKey: "currency_code",
+  useListHook: useCurrency,
+  getId: (c) => c.code,
+  getLabel: (c) => c.code,
+  idFilterKey: "code",
+});
 
 export default function PriceListComponent() {
   const navigate = useNavigate();
@@ -56,24 +67,6 @@ export default function PriceListComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "pricelist_no:asc",
   });
-
-  // code ของสกุลเงินเป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
-  // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
-  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
-  // PO_TYPE/CN_TYPE ใน Task 19). filter (status) ใช้ labelKey จริง (status.draft
-  // ฯลฯ) จึงใช้ control: "status" ทั่วไปได้ตรง ๆ
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  // code เป็น literal string จริง — memo กัน reference เปลี่ยนทุก render
-  const currencyOptions = useMemo(
-    () =>
-      (currencyData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({
-          label: c.code,
-          value: `currency_code|string:${c.code}`,
-        })),
-    [currencyData],
-  );
 
   // ป้ายเป็น i18n (ไม่ใช่ createStatusFilterOptions ที่เป็นอังกฤษล้วน) ให้ตรงกับ
   // ป้ายในตาราง — ค่าเป็น clause เต็มต่อตัว MultiSelectFilter join เองเมื่อเลือกหลายตัว
@@ -119,18 +112,10 @@ export default function PriceListComponent() {
       },
       {
         key: "currency",
-        control: "custom",
+        control: "entity",
+        entity: CURRENCY_ENTITY,
         labelKey: "field.currency",
         section: "listView.sectionDocument",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={currencyOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // ทะเบียน vendor ใหญ่หลักร้อย KB — control "entity" ยิงรายการเองตอนเปิด
@@ -151,7 +136,7 @@ export default function PriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [currencyOptions, statusOptions],
+    [statusOptions],
   );
 
   const lf = useListFilters({

@@ -19,6 +19,10 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Cuisine } from "@/types/cuisine";
+import type { RecipeCategory } from "@/types/recipe-category";
 import { useRecipe, useDeleteRecipe } from "./use-recipe";
 import { useCuisine } from "@/hooks/use-cuisine";
 import { useRecipeCategory } from "@/hooks/use-recipe-category";
@@ -42,6 +46,17 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
+const CUISINE_ENTITY = defineEntitySource<Cuisine>({
+  fieldKey: "cuisine_id",
+  useListHook: useCuisine,
+  getLabel: (c) => c.name,
+});
+const RECIPE_CATEGORY_ENTITY = defineEntitySource<RecipeCategory>({
+  fieldKey: "category_id",
+  useListHook: useRecipeCategory,
+  getLabel: (c) => c.name,
+});
+
 export default function RecipeComponent() {
   const t = useTranslations("operationPlan.recipe");
   const tc = useTranslations("common");
@@ -57,26 +72,6 @@ export default function RecipeComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
-
-  const { data: cuisineData } = useCuisine({ perpage: -1 });
-  const { data: categoryData } = useRecipeCategory({ perpage: -1 });
-
-  const cuisineFilterOptions = useMemo(
-    () =>
-      (cuisineData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `cuisine_id|string:${c.id}` })),
-    [cuisineData],
-  );
-
-  const categoryFilterOptions = useMemo(
-    () =>
-      (categoryData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` })),
-    [categoryData],
-  );
-
   const difficultyFilterOptions = useMemo(
     () =>
       RECIPE_DIFFICULTY_OPTIONS.map((o) => ({
@@ -94,10 +89,8 @@ export default function RecipeComponent() {
     [ts],
   );
 
-  // cuisine/category/difficulty เป็นชื่อ/label literal จริง (ไม่ใช่ i18n key)
-  // จึงต้องใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern
-  // ของ PO_TYPE/CN_TYPE ใน Task 19 filter (status) ก็ literal เช่นกันเพราะมา
-  // จาก ts() ที่ resolve เป็น string ธรรมดาแล้วก่อนถึง options
+  // difficulty/status เป็น label literal จึงห่อ custom · cuisine/category เป็น
+  // control "entity" (ค้นที่ server, chip ขึ้นชื่อ)
   const recipeFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -129,42 +122,20 @@ export default function RecipeComponent() {
       },
       {
         key: "cuisine",
-        control: "custom",
+        control: "entity",
+        entity: CUISINE_ENTITY,
         labelKey: "field.cuisine",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("cuisine")}
-            options={cuisineFilterOptions}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "category",
-        control: "custom",
+        control: "entity",
+        entity: RECIPE_CATEGORY_ENTITY,
         labelKey: "field.category",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("category")}
-            options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [
-      STATUS_OPTIONS,
-      cuisineFilterOptions,
-      categoryFilterOptions,
-      difficultyFilterOptions,
-      tfl,
-    ],
+    [STATUS_OPTIONS, difficultyFilterOptions, tfl],
   );
 
   const lf = useListFilters({
@@ -189,10 +160,20 @@ export default function RecipeComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
+  // ชื่อ cuisine/หมวดของแถวในหน้านี้เท่านั้น (ดึงตาม id) — ไม่ลากทะเบียนทั้ง BU
+  const { items: cuisines } = useEntitiesByIds<Cuisine>({
+    useListHook: useCuisine,
+    ids: recipes.map((r) => r.cuisine_id),
+  });
+  const { items: recipeCategories } = useEntitiesByIds<RecipeCategory>({
+    useListHook: useRecipeCategory,
+    ids: recipes.map((r) => r.category_id),
+  });
+
   const table = useRecipeTable({
     recipes,
-    cuisines: cuisineData?.data ?? [],
-    categories: categoryData?.data ?? [],
+    cuisines,
+    categories: recipeCategories,
     totalRecords,
     params,
     tableConfig,
@@ -288,8 +269,8 @@ export default function RecipeComponent() {
                 <RecipeCard
                   key={item.id}
                   item={item}
-                  cuisines={cuisineData?.data ?? []}
-                  categories={categoryData?.data ?? []}
+                  cuisines={cuisines}
+                  categories={recipeCategories}
                   onEdit={(r) =>
                     navigate(
                       `/operation-plan/recipe/${r.id}`,
