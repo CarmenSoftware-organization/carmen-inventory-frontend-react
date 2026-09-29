@@ -313,7 +313,11 @@ function TitleDialog({
               onChange={(event) => setDescription(event.target.value)}
             />
           </Field>
-          <StatusSwitch checked={active} onCheckedChange={setActive} />
+          <StatusSwitch
+            id="title-active"
+            checked={active}
+            onCheckedChange={setActive}
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -52,10 +52,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import {
+  Field,
+  FieldLabel,
+  FieldPlainText,
+  FieldSelect,
+} from "@/components/ui/field";
+import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
+import { LookupCurrency } from "@/components/lookup/lookup-currency";
+import { useChartOfAccount } from "@/hooks/use-chart-of-account";
+import { DEFAULT_CHART_OF_ACCOUNTS } from "@/components/lookup/lookup-chart-of-account";
 import { CellAction } from "@/components/ui/cell-action";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import {
@@ -103,17 +112,6 @@ const DEPARTMENTS = [
   { id: "400", label: "400 - Engineering" },
 ];
 
-const ACCOUNTS = [
-  { id: "51001", label: "51001 - Electricity Expense" },
-  { id: "21100", label: "21100 - Accounts Payable" },
-  { id: "61010", label: "61010 - Operating Supplies" },
-  { id: "41000", label: "41000 - Room Revenue" },
-  { id: "6100", label: "6100 - Expense" },
-  { id: "1150", label: "1150 - Input VAT" },
-  { id: "2110", label: "2110 - Trade accounts payable" },
-  { id: "6200", label: "6200 - Office supplies" },
-  { id: "1100", label: "1100 - Cash" },
-];
 
 const TAX_CODES = [
   { id: "VAT7", label: "VAT 7%" },
@@ -137,6 +135,9 @@ const DIMENSIONS = [
   { id: "ROOM", label: "ROOM - Rooms Division" },
   { id: "FNB", label: "FNB - Food & Beverage" },
   { id: "ENG", label: "ENG - Engineering" },
+  { id: "FB", label: "FB - Food & Beverage (Dept)" },
+  { id: "HK", label: "HK - Housekeeping" },
+  { id: "CORP", label: "CORP - Corporate" },
 ];
 
 interface JournalLine {
@@ -197,6 +198,7 @@ const optionLabel = (
 ) => options.find((option) => option.id === value)?.label ?? value;
 
 export default function AccountingDocumentDetail() {
+  "use no memo";
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -237,6 +239,20 @@ export default function AccountingDocumentDetail() {
   const documents = useMemo(() => documentsFor(config), [config]);
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
+  const { data: coaData } = useChartOfAccount({ perpage: 200 });
+  const accounts = useMemo(() => {
+    const list =
+      coaData?.data && coaData.data.length > 0
+        ? coaData.data
+        : DEFAULT_CHART_OF_ACCOUNTS;
+    return list
+      .filter((a) => a.is_active)
+      .map((a) => ({
+        id: a.code,
+        label: `${a.code} - ${a.description_1}`,
+        category: a.category,
+      }));
+  }, [coaData?.data]);
   const number = isNew
     ? t("autoNumber")
     : (journal?.display_no ?? document.number);
@@ -257,6 +273,7 @@ export default function AccountingDocumentDetail() {
   ]);
   const [commentDraft, setCommentDraft] = useState("");
   const [values, setValues] = useState({
+    prefix: isNew ? "AJ" : (journal?.prefix ?? "JV"),
     date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
     description: isNew ? "" : document.description,
     party: isNew ? "" : document.party,
@@ -273,6 +290,7 @@ export default function AccountingDocumentDetail() {
 
   useEffect(() => {
     if (!journal || isNew) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDocumentStatus(
       journal.jv_status
         .split("_")
@@ -280,6 +298,7 @@ export default function AccountingDocumentDetail() {
         .join(" "),
     );
     setValues({
+      prefix: journal.prefix ?? "JV",
       date: (journal.jv_date ?? journal.journal_date).slice(0, 10),
       description: journal.description,
       party: journal.source_no ?? "",
@@ -323,6 +342,7 @@ export default function AccountingDocumentDetail() {
 
   const resetForm = () => {
     setValues({
+      prefix: isNew ? "AJ" : (journal?.prefix ?? "JV"),
       date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
       description: isNew ? "" : document.description,
       party: isNew ? "" : document.party,
@@ -415,7 +435,7 @@ export default function AccountingDocumentDetail() {
     if (isJournalVoucher) {
       const input: JournalVoucherInput = {
         journal_type: journal?.journal_type ?? "general",
-        prefix: journal?.prefix ?? "JV",
+        prefix: values.prefix || journal?.prefix || "JV",
         journal_date: values.date,
         description: values.description,
         note: journal?.note ?? null,
@@ -439,7 +459,9 @@ export default function AccountingDocumentDetail() {
           rate_source: null,
           debit: line.debit.toFixed(2),
           credit: line.credit.toFixed(2),
-          dimension: [],
+          dimension: line.dimension
+            ? [{ dimension_id: line.dimension, dimension_value_id: line.dimension }]
+            : [],
         })),
       };
       try {
@@ -993,7 +1015,28 @@ export default function AccountingDocumentDetail() {
           >
             <Field>
               <FieldLabel>{t("prefix")}</FieldLabel>
-              <FieldPlainText>{t(`${config.kind}.single`)}</FieldPlainText>
+              {config.kind === "journalVoucher" && !isView ? (
+                <FieldSelect
+                  value={values.prefix}
+                  onValueChange={(prefix) =>
+                    setValues((current) => ({ ...current, prefix }))
+                  }
+                  className="h-8 text-sm"
+                >
+                  <SelectContent>
+                    <SelectItem value="AJ">AJ - Adjustment Voucher</SelectItem>
+                    <SelectItem value="RV">RV - Receipt Voucher</SelectItem>
+                    <SelectItem value="PV">PV - Payment Voucher</SelectItem>
+                    <SelectItem value="JV">JV - General Journal Voucher</SelectItem>
+                  </SelectContent>
+                </FieldSelect>
+              ) : (
+                <FieldPlainText>
+                  {values.prefix
+                    ? `${values.prefix} - ${t(`${config.kind}.single`)}`
+                    : t(`${config.kind}.single`)}
+                </FieldPlainText>
+              )}
             </Field>
             <Field>
               <FieldLabel>{t("number")}</FieldLabel>
@@ -1421,14 +1464,14 @@ export default function AccountingDocumentDetail() {
                           <td className="h-12 px-3 font-medium">
                             {isView ? (
                               (line.accountLabel ??
-                              optionLabel(ACCOUNTS, line.account))
+                              optionLabel(accounts, line.account))
                             ) : (
                               <LookupCombobox
                                 value={line.account}
                                 onValueChange={(account) =>
                                   updateLine(line.id, { account })
                                 }
-                                items={ACCOUNTS}
+                                items={accounts}
                                 getId={(option) => option.id}
                                 getLabel={(option) => option.label}
                                 placeholder={t("selectAccount")}
@@ -1819,7 +1862,7 @@ export default function AccountingDocumentDetail() {
                 <FieldLabel>{t("chartOfAccount")}</FieldLabel>
                 {isView ? (
                   <FieldPlainText>
-                    {optionLabel(ACCOUNTS, selectedLine.account)}
+                    {optionLabel(accounts, selectedLine.account)}
                   </FieldPlainText>
                 ) : (
                   <LookupCombobox
@@ -1827,7 +1870,7 @@ export default function AccountingDocumentDetail() {
                     onValueChange={(account) =>
                       updateLine(selectedLine.id, { account })
                     }
-                    items={ACCOUNTS}
+                    items={accounts}
                     getId={(option) => option.id}
                     getLabel={(option) => option.label}
                     placeholder={t("selectAccount")}
@@ -1897,6 +1940,44 @@ export default function AccountingDocumentDetail() {
                       onChange={(event) =>
                         updateLine(selectedLine.id, {
                           credit: Number(event.target.value),
+                        })
+                      }
+                      className="text-right tabular-nums"
+                    />
+                  )}
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Field>
+                  <FieldLabel>{t("currency")}</FieldLabel>
+                  {isView ? (
+                    <FieldPlainText>{selectedLine.currency ?? "THB"}</FieldPlainText>
+                  ) : (
+                    <LookupCurrency
+                      value={selectedLine.currency ?? "THB"}
+                      onValueChange={(curr) =>
+                        updateLine(selectedLine.id, { currency: curr })
+                      }
+                      size="sm"
+                    />
+                  )}
+                </Field>
+                <Field>
+                  <FieldLabel>Exchange Rate</FieldLabel>
+                  {isView ? (
+                    <FieldPlainText className="tabular-nums">
+                      {selectedLine.exchangeRate ?? 1}
+                    </FieldPlainText>
+                  ) : (
+                    <Input
+                      type="number"
+                      min={0.0001}
+                      step={0.0001}
+                      size="sm"
+                      value={selectedLine.exchangeRate ?? 1}
+                      onChange={(event) =>
+                        updateLine(selectedLine.id, {
+                          exchangeRate: Number(event.target.value) || 1,
                         })
                       }
                       className="text-right tabular-nums"

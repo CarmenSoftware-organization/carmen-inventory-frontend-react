@@ -1,29 +1,15 @@
-import { createConfigCrud } from "@/hooks/use-config-crud";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type {
-  ChartOfAccount,
-  CreateChartOfAccountDto,
-} from "@/types/chart-of-accounts";
 
-const crud = createConfigCrud<ChartOfAccount, CreateChartOfAccountDto>({
-  queryKey: QUERY_KEYS.CHART_OF_ACCOUNTS,
-  endpoint: API_ENDPOINTS.CHART_OF_ACCOUNTS,
-  label: "account code",
-  updateMethod: "PATCH",
-});
-
-export const useChartOfAccount = crud.useList;
-
-export const useChartOfAccountById = crud.useById;
-
-export const useCreateChartOfAccount = crud.useCreate;
-
-export const useUpdateChartOfAccount = crud.useUpdate;
-
-export const useDeleteChartOfAccount = crud.useDelete;
+export {
+  useChartOfAccount,
+  useChartOfAccountById,
+  useCreateChartOfAccount,
+  useUpdateChartOfAccount,
+  useDeleteChartOfAccount,
+} from "@/hooks/use-chart-of-account";
 
 /**
  * ผลลัพธ์ของการนำเข้าผังบัญชี — ตัวนับกับรายการแถวที่ผิด

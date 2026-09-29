@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useAccountingMasterMock } from "../accounting-master-mock";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
@@ -33,6 +35,11 @@ export function useCoaTable({
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
+  const store = useAccountingMasterMock();
+  const groupMap = useMemo(
+    () => new Map(store.accountGroups.map((g) => [g.id, g])),
+    [store.accountGroups],
+  );
 
   const columns: ColumnDef<ChartOfAccount>[] = [
     {
@@ -83,6 +90,29 @@ export function useCoaTable({
       cell: ({ row }) => t(`accountType.${row.original.type}`),
       size: 180,
       meta: { headerTitle: tfl("type"), skeleton: columnSkeletons.text },
+    },
+    {
+      accessorKey: "account_group_id",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title="Account Group" />
+      ),
+      cell: ({ row }) => {
+        const id = row.original.account_group_id;
+        if (!id) return <span className="text-muted-foreground">—</span>;
+        const g = groupMap.get(id);
+        return g ? (
+          <span className="font-mono text-xs">
+            {g.code} — {g.name}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-xs">{id}</span>
+        );
+      },
+      size: 140,
+      meta: {
+        headerTitle: "Account Group",
+        skeleton: columnSkeletons.textShort,
+      },
     },
     statusColumn<ChartOfAccount>(),
     ...auditColumns<ChartOfAccount>(tfl, dateTimeFormat),

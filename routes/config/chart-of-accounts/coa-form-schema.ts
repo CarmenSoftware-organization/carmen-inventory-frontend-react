@@ -23,6 +23,9 @@ export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
     category: z.enum(ACCOUNT_CATEGORIES, {
       error: tv("required", { field: tf("category") }),
     }),
+    account_group_id: z.string().nullable().optional(),
+    allowed_dimensions: z.array(z.string()).optional(),
+    dimension_required: z.boolean().optional(),
     is_active: z.boolean(),
   });
 }

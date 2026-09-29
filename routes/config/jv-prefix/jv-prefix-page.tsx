@@ -1,0 +1,355 @@
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Bookmark, Plus } from "lucide-react";
+import { toast } from "sonner";
+import SearchInput from "@/components/search-input";
+import EmptyComponent from "@/components/empty-component";
+import DisplayTemplate from "@/components/display-template";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CellAction } from "@/components/ui/cell-action";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldInput,
+  FieldLabel,
+} from "@/components/ui/field";
+import { StatusSwitch } from "@/components/ui/status-switch";
+import { Switch } from "@/components/ui/switch";
+import { WarningDialog } from "@/components/ui/warning-dialog";
+import {
+  type JvPrefixMaster,
+  useAccountingMasterMock,
+} from "../accounting-master-mock";
+
+export default function JvPrefixPage() {
+  const store = useAccountingMasterMock();
+  const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<JvPrefixMaster | null | undefined>();
+  const [deleting, setDeleting] = useState<JvPrefixMaster | null>(null);
+  const [warning, setWarning] = useState("");
+
+  const rows = useMemo(
+    () =>
+      store.jvPrefixes.filter((item) =>
+        `${item.code} ${item.description} ${item.description_local ?? ""}`
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      ),
+    [search, store.jvPrefixes],
+  );
+
+  const columns = useMemo<ColumnDef<JvPrefixMaster>[]>(
+    () => [
+      {
+        accessorKey: "code",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Prefix Code" />
+        ),
+        cell: ({ row }) => (
+          <CellAction onClick={() => setEditing(row.original)}>
+            <span className="font-mono font-semibold">{row.original.code}</span>
+          </CellAction>
+        ),
+      },
+      {
+        accessorKey: "description",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Description (EN)" />
+        ),
+        cell: ({ row }) => (
+          <CellAction onClick={() => setEditing(row.original)}>
+            {row.original.description}
+          </CellAction>
+        ),
+      },
+      {
+        accessorKey: "description_local",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Description (TH)" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.description_local || "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "is_default",
+        header: "Default",
+        cell: ({ row }) =>
+          row.original.is_default ? (
+            <Badge variant="outline" size="xs" className="border-primary text-primary">
+              Default
+            </Badge>
+          ) : null,
+      },
+      {
+        accessorKey: "is_system",
+        header: "System",
+        cell: ({ row }) =>
+          row.original.is_system ? (
+            <Badge variant="outline" size="xs">
+              System
+            </Badge>
+          ) : null,
+      },
+      {
+        accessorKey: "is_active",
+        header: "Status",
+        cell: ({ row }) => (
+          <Badge
+            variant={row.original.is_active ? "success-light" : "invert-light"}
+            size="xs"
+          >
+            {row.original.is_active ? "Active" : "Inactive"}
+          </Badge>
+        ),
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <div className="flex justify-end gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditing(row.original)}
+            >
+              Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={row.original.is_system}
+              onClick={() => setDeleting(row.original)}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
+        enableSorting: false,
+      },
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <DisplayTemplate
+      title="Journal Voucher Prefixes"
+      description="Document prefix codes for classifying Journal Vouchers (AJ, PV, RV, etc.)"
+      toolbar={
+        <SearchInput
+          defaultValue={search}
+          onSearch={setSearch}
+          onInputChange={setSearch}
+        />
+      }
+      actions={
+        <Button size="sm" onClick={() => setEditing(null)}>
+          <Plus className="size-4" /> Add JV Prefix
+        </Button>
+      }
+    >
+      <div className="bg-muted/30 flex items-center gap-2 rounded-md px-3 py-2 text-xs">
+        <Bookmark className="text-primary size-4" />
+        <span className="font-medium">System prefixes:</span>
+        <span className="text-muted-foreground">
+          Prefixes flagged as System cannot be deleted because they are used by auto-generated transactions.
+        </span>
+      </div>
+      <DataGrid
+        table={table}
+        recordCount={rows.length}
+        emptyMessage={<EmptyComponent />}
+        tableLayout={{ width: "auto", headerSticky: true }}
+        tableClassNames={{ bodyRow: "h-10" }}
+      >
+        <DataGridContainer scroll className="max-h-[calc(100vh-14rem)]">
+          <DataGridTable />
+        </DataGridContainer>
+      </DataGrid>
+      <JvPrefixDialog
+        key={editing?.id ?? "new"}
+        open={editing !== undefined}
+        item={editing ?? null}
+        onOpenChange={(open) => !open && setEditing(undefined)}
+        onSave={(value) => {
+          try {
+            store.saveJvPrefix(value, editing?.id);
+            toast.success(
+              editing ? "JV Prefix updated" : "JV Prefix created",
+            );
+            setEditing(undefined);
+          } catch (error) {
+            setWarning(
+              error instanceof Error ? error.message : "Unable to save JV prefix",
+            );
+          }
+        }}
+      />
+      <DeleteDialog
+        open={!!deleting}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title="Delete JV prefix?"
+        description={
+          deleting ? `Delete ${deleting.code} — ${deleting.description}?` : undefined
+        }
+        onConfirm={() => {
+          if (!deleting) return;
+          try {
+            store.deleteJvPrefix(deleting);
+            toast.success("JV prefix deleted");
+            setDeleting(null);
+          } catch (error) {
+            setDeleting(null);
+            setWarning(
+              error instanceof Error ? error.message : "Unable to delete JV prefix",
+            );
+          }
+        }}
+      />
+      <WarningDialog
+        open={!!warning}
+        title="Action blocked"
+        description={warning}
+        onConfirm={() => setWarning("")}
+      />
+    </DisplayTemplate>
+  );
+}
+
+function JvPrefixDialog({
+  open,
+  item,
+  onOpenChange,
+  onSave,
+}: {
+  open: boolean;
+  item: JvPrefixMaster | null;
+  onOpenChange: (open: boolean) => void;
+  onSave: (
+    value: Omit<JvPrefixMaster, "id" | "is_system" | "doc_version">,
+  ) => void;
+}) {
+  const [code, setCode] = useState(item?.code ?? "");
+  const [description, setDescription] = useState(item?.description ?? "");
+  const [descriptionLocal, setDescriptionLocal] = useState(
+    item?.description_local ?? "",
+  );
+  const [isDefault, setIsDefault] = useState(item?.is_default ?? false);
+  const [active, setActive] = useState(item?.is_active ?? true);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {item ? "Edit JV Prefix" : "Add JV Prefix"}
+          </DialogTitle>
+          <DialogDescription>
+            Prefix code used as running number prefix in Journal Vouchers.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2">
+          <Field>
+            <FieldLabel htmlFor="jv-code" required>
+              Prefix Code (2-10 Chars)
+            </FieldLabel>
+            <FieldInput
+              id="jv-code"
+              value={code}
+              disabled={!!item}
+              maxLength={10}
+              placeholder="e.g. AJ, RV, PV"
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="jv-desc" required>
+              Description (EN)
+            </FieldLabel>
+            <FieldInput
+              id="jv-desc"
+              value={description}
+              maxLength={100}
+              placeholder="e.g. Adjustment Voucher"
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="jv-desc-local">
+              Description (TH)
+            </FieldLabel>
+            <FieldInput
+              id="jv-desc-local"
+              value={descriptionLocal}
+              maxLength={100}
+              placeholder="e.g. ใบสำคัญปรับปรุง"
+              onChange={(e) => setDescriptionLocal(e.target.value)}
+            />
+          </Field>
+          <div className="flex items-center justify-between rounded-md border p-2.5">
+            <div className="space-y-0.5">
+              <p className="text-sm font-semibold">Default Prefix</p>
+              <p className="text-xs text-muted-foreground">
+                Set as default running prefix for Journal Vouchers
+              </p>
+            </div>
+            <Switch
+              id="jv-default"
+              checked={isDefault}
+              onCheckedChange={setIsDefault}
+              aria-label="Default Prefix"
+            />
+          </div>
+          <StatusSwitch
+            id="jv-active"
+            checked={active}
+            onCheckedChange={setActive}
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!code.trim() || !description.trim()}
+            onClick={() =>
+              onSave({
+                code,
+                description,
+                description_local: descriptionLocal || null,
+                is_default: isDefault,
+                is_active: active,
+              })
+            }
+          >
+            {item ? "Save" : "Create"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

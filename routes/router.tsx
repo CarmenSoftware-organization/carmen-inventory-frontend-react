@@ -96,6 +96,45 @@ export const router = createBrowserRouter([
                   import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
+                path: "account-grouping",
+                lazy: () =>
+                  import("./config/account-grouping/account-grouping.route"),
+              },
+              {
+                path: "jv-prefix",
+                lazy: () => import("./config/jv-prefix/jv-prefix.route"),
+              },
+              {
+                path: "dimension",
+                lazy: () => import("./config/dimension/dimension.route"),
+              },
+              {
+                path: "bank-account",
+                lazy: () => import("./config/bank-account/bank-account.route"),
+              },
+              {
+                path: "gl-period",
+                lazy: () => import("./config/gl-period/gl-period.route"),
+              },
+              {
+                path: "payment-type",
+                lazy: () => import("./config/payment-type/payment-type.route"),
+              },
+              {
+                path: "wht-service-type",
+                lazy: () =>
+                  import("./config/wht-service-type/wht-service-type.route"),
+              },
+              {
+                path: "wht-form",
+                lazy: () => import("./config/wht-form/wht-form.route"),
+              },
+              {
+                path: "asset-category",
+                lazy: () =>
+                  import("./config/asset-category/asset-category.route"),
+              },
+              {
                 path: "title-master",
                 lazy: () => import("./config/title-master/title-master.route"),
               },

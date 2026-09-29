@@ -347,7 +347,7 @@
       "budget": "Budget",
       "selectBudget": "Select budget",
       "searchBudget": "Search budgets",
-      "dimension": "Dimension",
+      "dimension": "Accounting Dimensions",
       "selectDimension": "Select dimension",
       "searchDimension": "Search dimensions",
       "taxDetail": "Tax Detail",
@@ -4845,7 +4845,14 @@
     "chartOfAccounts": "Chart of Accounts",
     "accountGrouping": "Account Code Grouping",
     "titleMaster": "Title Master",
-    "chartOfAccountMapping": "Chart of Account Mapping"
+    "chartOfAccountMapping": "Chart of Account Mapping",
+    "jvPrefix": "Journal Voucher Prefixes",
+    "bankAccount": "Bank Accounts",
+    "glPeriod": "GL Periods",
+    "paymentType": "Payment Types",
+    "whtServiceType": "WHT Service Types",
+    "whtForm": "WHT Forms",
+    "assetCategory": "Asset Categories"
   },
   "commentSheet": {
     "title": "Comments ({count})",

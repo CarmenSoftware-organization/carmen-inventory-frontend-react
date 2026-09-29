@@ -60,6 +60,9 @@ export interface ChartOfAccount {
   control_account_type?: CONTROL_ACCOUNT_TYPE | null;
   manual_posting_allowed?: boolean;
   allowed_source_types?: string[];
+  account_group_id?: string | null;
+  allowed_dimensions?: string[] | null;
+  dimension_required?: boolean;
   audit?: Audit;
 }
 
@@ -75,4 +78,7 @@ export interface CreateChartOfAccountDto {
   control_account_type?: CONTROL_ACCOUNT_TYPE | null;
   manual_posting_allowed?: boolean;
   allowed_source_types?: string[];
+  account_group_id?: string | null;
+  allowed_dimensions?: string[] | null;
+  dimension_required?: boolean;
 }
