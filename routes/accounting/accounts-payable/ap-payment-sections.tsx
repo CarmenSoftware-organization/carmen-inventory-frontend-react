@@ -12,7 +12,6 @@ import {
   Tags,
   ReceiptText,
   BookOpen,
-  ChevronsDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,13 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -103,7 +95,7 @@ export function PaymentSections({
 }) {
   const [activeTab, setActiveTab] = useState("invoices");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [methodEditor, setMethodEditor] = useState<string | null>(
+  const [, setMethodEditor] = useState<string | null>(
     editable ? "primary" : null,
   );
   const [invoiceDialog, setInvoiceDialog] = useState(false);
@@ -291,8 +283,13 @@ export function PaymentSections({
             {item.invoice_no}
           </Link>
           <div>
-            <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium ${compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}>
-              {compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "Tax Credit" : "Undue VAT"}: {item.vat_amount ?? "0"}
+            <span
+              className={`text-micro-legal inline-flex rounded-md px-1.5 py-0.5 font-medium ${compareDecimal(item.vat_amount ?? "0", "0") < 0 ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"}`}
+            >
+              {compareDecimal(item.vat_amount ?? "0", "0") < 0
+                ? "Tax Credit"
+                : "Undue VAT"}
+              : {item.vat_amount ?? "0"}
             </span>
           </div>
         </div>
