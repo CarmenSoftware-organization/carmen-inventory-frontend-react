@@ -1,21 +1,13 @@
 import { useState } from "react";
-import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useExtraCost } from "@/hooks/use-extra-cost";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { ExtraCost } from "@/types/extra-cost";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupExtraCostProps {
   readonly value: string;
@@ -38,70 +30,42 @@ export function LookupExtraCost({
 }: LookupExtraCostProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const [selectOpen, setSelectOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบไม่มี cap 30 · ค่าที่เลือกอยู่คงไว้แม้ถูก
-  // ปิดใช้งานไปแล้ว (เอกสารเก่าที่บันทึกค่านั้นไว้) ไม่งั้น Select หาไม่เจอแล้วขึ้นว่าง
-  const { data } = useExtraCost({ perpage: -1 });
-  const resolvedPlaceholder =
-    placeholder ?? tl("select", { entity: tfl("extraCost") });
-  const extraCosts =
-    data?.data?.filter((c) => c.is_active || c.id === value) ?? [];
-  const showErrorTooltip = !!error && !selectOpen;
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<ExtraCost>({
+      useListHook: useExtraCost,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip
-        open={showErrorTooltip && tooltipOpen}
-        onOpenChange={setTooltipOpen}
-      >
-        <TooltipTrigger asChild>
-          <div className="relative w-full">
-            <Select
-              value={value}
-              onValueChange={onValueChange}
-              disabled={disabled}
-              onOpenChange={setSelectOpen}
-            >
-              <SelectTrigger
-                aria-invalid={!!error}
-                size={size}
-                className={cn(
-                  "w-full text-xs",
-                  className,
-                  error && "border-destructive pr-7",
-                )}
-              >
-                <SelectValue placeholder={resolvedPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {extraCosts.map((ec) => (
-                  <SelectItem key={ec.id} value={ec.id} className="text-xs">
-                    {ec.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
-                <CircleAlert
-                  className="text-destructive size-4"
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-        </TooltipTrigger>
-        {showErrorTooltip && (
-          <TooltipContent
-            side="top"
-            align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
-          >
-            {error}
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <LookupCombobox
+      size={size}
+      value={value}
+      onValueChange={(id) => onValueChange(id)}
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(c) => c.id}
+      getLabel={(c) => c.name}
+      placeholder={placeholder ?? tl("select", { entity: tfl("extraCost") })}
+      searchPlaceholder={tl("search", { entity: tfl("extraCost") })}
+      disabled={disabled}
+      disableTooltip
+      className={cn("w-full", className)}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
+      error={error}
+    />
   );
 }

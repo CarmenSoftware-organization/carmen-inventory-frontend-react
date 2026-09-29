@@ -1,16 +1,14 @@
+import { useState } from "react";
+import { Check } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
 import { useShelf } from "@/hooks/use-shelf";
-import type { Shelf } from "@/types/shelf";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const NONE = "__none__";
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { Shelf } from "@/types/shelf";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupShelfProps {
   readonly value: string;
@@ -33,47 +31,63 @@ export function LookupShelf({
 }: LookupShelfProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
 
-  const { data } = useShelf({
-    perpage: -1,
-  });
-
-  const shelves = (data?.data ?? []).filter((s) => s.is_active);
-  const selected = (data?.data ?? []).find((s) => s.id === value);
-
-  if (readOnly) {
-    return <span className="text-xs">{selected?.name}</span>;
-  }
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<Shelf>({
+      useListHook: useShelf,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
-    <Select
-      value={value || undefined}
-      onValueChange={(v) => {
-        if (v === NONE) {
-          onValueChange("");
-          return;
-        }
-        onValueChange(v);
-        const shelf = shelves.find((s) => s.id === v);
+    <LookupCombobox
+      size="sm"
+      value={value}
+      onValueChange={(id, shelf) => {
+        onValueChange(id);
         if (shelf) onItemChange?.(shelf);
       }}
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(s) => s.id}
+      getLabel={(s) => s.name}
+      placeholder={placeholder ?? tl("select", { entity: tfl("shelf") })}
+      searchPlaceholder={tl("search", { entity: tfl("shelf") })}
       disabled={disabled}
-    >
-      <SelectTrigger size="sm" className={cn("w-full text-xs", className)}>
-        <SelectValue
-          placeholder={placeholder ?? tl("select", { entity: tfl("shelf") })}
+      className={cn("w-full", className)}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
+      readOnly={readOnly}
+      prependItems={
+        <button
+          type="button"
+          aria-pressed={!value}
+          className={cn(
+            "relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-hidden select-none",
+            "hover:bg-accent hover:text-accent-foreground",
+          )}
+          onClick={() => onValueChange("")}
         >
-          {selected?.name}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={NONE}>—</SelectItem>
-        {shelves.map((s) => (
-          <SelectItem key={s.id} value={s.id}>
-            {s.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+          —
+          <Check
+            className={cn(
+              "ml-auto h-4 w-4 shrink-0",
+              value ? "opacity-0" : "opacity-100",
+            )}
+          />
+        </button>
+      }
+    />
   );
 }
