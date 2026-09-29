@@ -48,11 +48,18 @@ export function useLookupPagination<T>({
 }: UseLookupPaginationOptions<T>) {
   const [page, setPage] = useState(1);
   const [allItems, setAllItems] = useState<T[]>([]);
+  // จำ pages/total ล่าสุดที่เห็น — ระหว่าง fetch หน้าถัดไป `data` เป็น undefined
+  // ถ้าไม่จำไว้ hasMore จะกลายเป็น false (ปุ่มโหลดเพิ่มหาย) และ total จะตกเหลือแค่ที่โหลดมา
+  const [lastPaginate, setLastPaginate] = useState<{
+    pages: number;
+    total: number;
+  } | null>(null);
 
   // Reset when search, server filter or parent filter changes
   useEffect(() => {
     setPage(1);
     setAllItems([]);
+    setLastPaginate(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, serverFilter, sort, ...resetDeps]);
 
@@ -73,6 +80,12 @@ export function useLookupPagination<T>({
     if (!data) return;
     if (data.paginate?.page != null && Number(data.paginate.page) !== page)
       return;
+    if (data.paginate) {
+      setLastPaginate({
+        pages: Number(data.paginate.pages),
+        total: Number(data.paginate.total),
+      });
+    }
     const newItems = data.data ?? [];
     setAllItems((prev) => {
       if (page === 1) return newItems;
@@ -93,7 +106,7 @@ export function useLookupPagination<T>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, page]);
 
-  const totalPages = data?.paginate?.pages ?? 1;
+  const totalPages = Number(data?.paginate?.pages ?? lastPaginate?.pages ?? 1);
   const hasMore = page < totalPages;
 
   const ids = selectedIds ?? [];
@@ -132,7 +145,9 @@ export function useLookupPagination<T>({
     hasMore,
     loadMore,
     /** จำนวนแถวที่ตรงเงื่อนไขทั้งหมดบน server (ไม่ใช่แค่ที่โหลดมาแล้ว) */
-    total: Number(data?.paginate?.total ?? allItems.length),
+    total: Number(
+      data?.paginate?.total ?? lastPaginate?.total ?? allItems.length,
+    ),
     error: error ?? null,
     /** ยิงหน้าปัจจุบันซ้ำ — ใช้กับปุ่มลองใหม่ของ ErrorState */
     refetch: () => {
