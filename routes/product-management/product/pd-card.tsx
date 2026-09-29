@@ -23,6 +23,11 @@ export default function ProductCard({
 
   const isActive = item.product_status_type === "active";
   const unitName = item.inventory_unit_name ?? item.inventory_unit?.name;
+  const categoryPath = [
+    item.product_category?.name,
+    item.product_sub_category?.name,
+    item.product_item_group?.name,
+  ].filter(Boolean);
 
   return (
     <ListCard
@@ -35,24 +40,18 @@ export default function ProductCard({
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
-      <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>
+      <ListCardRow label={tfl("code")}>
+        <span className="tabular-nums">{item.code}</span>
+      </ListCardRow>
       {item.local_name && (
         <ListCardRow label={tfl("localName")}>{item.local_name}</ListCardRow>
       )}
       {unitName && <ListCardRow label={tfl("unit")}>{unitName}</ListCardRow>}
-      {item.product_category && (
+      {/* หมวดสามระดับรวมเป็นแถวเดียวแบบเส้นทาง — รูปเดียวกับแถบตัวตนบนหัว
+          หน้ารายละเอียด (pd-form-toolbar) เดิมแยกเป็นสามแถวทำให้การ์ดสูงเกินเนื้อหา */}
+      {categoryPath.length > 0 && (
         <ListCardRow label={tfl("category")}>
-          {item.product_category.name}
-        </ListCardRow>
-      )}
-      {item.product_sub_category && (
-        <ListCardRow label={tfl("subCategory")}>
-          {item.product_sub_category.name}
-        </ListCardRow>
-      )}
-      {item.product_item_group && (
-        <ListCardRow label={tfl("itemGroup")}>
-          {item.product_item_group.name}
+          {categoryPath.join(" › ")}
         </ListCardRow>
       )}
       <ListCardAuditRows audit={item.audit} />
