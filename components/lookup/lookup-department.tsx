@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useDepartment } from "@/hooks/use-department";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { Department } from "@/types/department";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupDepartmentProps {
@@ -50,15 +55,18 @@ export function LookupDepartment({
 }: LookupDepartmentProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  const [search, setSearch] = useState("");
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกไว้ดึงตาม id แยก
   const [hasOpened, setHasOpened] = useState(false);
-  // perpage: -1 = ดึงครบทุกแผนก — ถ้าไม่ส่ง backend ใช้ default 10 และ combobox นี้
-  // ไม่มี load-more แผนกที่ 11 ขึ้นไปจึงเลือกไม่ได้และชื่อของค่าที่บันทึกไว้ไม่ขึ้น
-  // (แบบเดียวกับ filter-department.tsx)
-  const { data, isLoading } = useDepartment({ perpage: -1 }, {
-    enabled: hasOpened || !!value,
-  });
-  const departments = data?.data ?? [];
+
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<Department>({
+      useListHook: useDepartment,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
     <LookupCombobox
@@ -68,7 +76,13 @@ export function LookupDepartment({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={departments}
+      items={items}
+      selectedItems={selectedItems}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       getId={(d) => d.id}
       getLabel={(d) => d.name}
       placeholder={placeholder ?? tl("select", { entity: tfl("department") })}

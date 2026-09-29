@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { UserSearch } from "lucide-react";
-import { useAllUsers } from "@/hooks/use-all-users";
+import { useUser } from "@/hooks/use-user";
+import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { User } from "@/types/workflows";
 import { LookupCombobox } from "./lookup-combobox";
 
@@ -26,7 +27,7 @@ interface LookupUserProps {
 /**
  * Lookup Popover สำหรับเลือกผู้ใช้งานในระบบ (User)
  *
- * ดึงข้อมูลผ่าน `useAllUsers()` (client-side filter ไม่ใช้ pagination)
+ * ดึงทีละหน้าผ่าน `useUser` + ค้นที่ server
  * รองรับ `excludeIds` กัน duplicate (เช่นใน workflow approver list) และค้นหาด้วยชื่อ-email
  * มี `onItemChange` ส่ง object `User` เต็มสำหรับ side effects
  *
@@ -53,13 +54,20 @@ export function LookupUser({
 }: LookupUserProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  // Lazy: โหลด user ทั้งหมดตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
-  const { data: allUsers = [], isLoading } = useAllUsers(hasOpened || !!value);
 
-  const users = excludeIds
-    ? allUsers.filter((u) => !excludeIds.has(u.user_id))
-    : allUsers;
+  // ทะเบียนผู้ใช้ไม่มีคอลัมน์ id / is_active — อ้างด้วย user_id และไม่กรอง active
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<User>({
+      useListHook: useUser,
+      search,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+      getId: (u) => u.user_id,
+      idFilterKey: "user_id",
+      filter: excludeIds ? (u) => !excludeIds.has(u.user_id) : undefined,
+    });
 
   return (
     <LookupCombobox
@@ -72,7 +80,13 @@ export function LookupUser({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={users}
+      items={items}
+      selectedItems={selectedItems}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       getId={(u) => u.user_id}
       getLabel={(u) => getUserFullName(u)}
       getSearchValue={(u) => `${getUserFullName(u)} ${u.email}`}
