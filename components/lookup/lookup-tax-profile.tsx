@@ -29,10 +29,13 @@ export function LookupTaxProfile({
 }: LookupTaxProfileProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const { data } = useTaxProfile({ perpage: 30 });
+  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบไม่มี cap 30 · ค่าที่เลือกอยู่คงไว้แม้ถูก
+  // ปิดใช้งานไปแล้ว (เอกสารเก่าที่บันทึกค่านั้นไว้) ไม่งั้น Select หาไม่เจอแล้วขึ้นว่าง
+  const { data } = useTaxProfile({ perpage: -1 });
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("taxProfile") });
-  const taxProfiles = data?.data?.filter((t) => t.is_active) ?? [];
+  const taxProfiles =
+    data?.data?.filter((t) => t.is_active || t.id === value) ?? [];
 
   return (
     <FieldSelect

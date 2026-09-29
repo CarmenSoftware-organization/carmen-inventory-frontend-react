@@ -52,12 +52,16 @@ export function LookupCurrency({
   const tfl = useTranslations("field");
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data } = useCurrency({ perpage: 30 });
+  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบไม่มี cap 30 · ค่าที่เลือกอยู่คงไว้แม้ถูก
+  // ปิดใช้งานไปแล้ว (เอกสารเก่าที่บันทึกค่านั้นไว้) ไม่งั้น Select หาไม่เจอแล้วขึ้นว่าง
+  const { data } = useCurrency({ perpage: -1 });
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("currency") });
 
   const currencies =
-    data?.data?.filter((c) => c.is_active && !excludeIds?.has(c.id)) ?? [];
+    data?.data?.filter(
+      (c) => c.id === value || (c.is_active && !excludeIds?.has(c.id)),
+    ) ?? [];
 
   const selected = currencies.find((c) => c.id === value);
 
