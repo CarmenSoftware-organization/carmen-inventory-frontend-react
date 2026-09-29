@@ -1,9 +1,10 @@
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Check, Shield } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PagedChecklist } from "@/components/lookup/paged-checklist";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types/role";
+import { useRole } from "../shared/use-role";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
 import type { UserAssignedFormValues } from "./user-assigned-form-schema";
 
@@ -72,17 +73,18 @@ function RoleToggleCard({
 
 interface RolesSectionProps {
   readonly form: UseFormReturn<UserAssignedFormValues>;
-  readonly roles: Role[];
-  readonly isLoading: boolean;
   readonly isDisabled: boolean;
   readonly count: number;
   readonly first?: boolean;
 }
 
+// เส้นคั่นระหว่างการ์ด — แถว virtual เป็นลูกของ div ภายใน VirtualCommandList
+// `divide-y` บนกรอบจึงไม่ถึง ต้องเลือกแถวด้วย data-index แทน
+const ROLE_LIST_CLASS =
+  "rounded-lg [&_[data-index]]:border-border/60 [&_[data-index]:not(:last-child)]:border-b";
+
 export function RolesSection({
   form,
-  roles,
-  isLoading,
   isDisabled,
   count,
   first,
@@ -95,48 +97,41 @@ export function RolesSection({
       count={count}
       first={first}
     >
-      {isLoading ? (
-        <div className="space-y-2">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : roles.length === 0 ? (
-        <EmptyState
-          icon={Shield}
-          title={t("noRolesAvailable")}
-          desc={t("noRolesAvailableDesc")}
-        />
-      ) : (
-        <div className="divide-border/60 divide-y overflow-hidden rounded-lg border">
-          {roles.map((role: Role) => (
-            <Controller
-              key={role.id}
-              control={form.control}
-              name="role_ids"
-              render={({ field }) => {
-                const isChecked = field.value?.includes(role.id);
-                return (
-                  <RoleToggleCard
-                    role={role}
-                    checked={!!isChecked}
-                    disabled={isDisabled}
-                    onChange={(c) => {
-                      if (c) {
-                        field.onChange([...field.value, role.id]);
-                      } else {
-                        field.onChange(
-                          field.value.filter((v) => v !== role.id),
-                        );
-                      }
-                    }}
-                  />
-                );
-              }}
-            />
-          ))}
-        </div>
-      )}
+      <Controller
+        control={form.control}
+        name="role_ids"
+        render={({ field }) => (
+          // การ์ดแสดงสถานะติ๊กเองจึงปิด badge — role ที่ assign ไว้แต่ยังไม่อยู่ในหน้าที่โหลด
+          // (ปิดใช้งาน/หลังหน้าแรก) PagedChecklist ปักไว้บนสุดให้เห็นและเอาออกได้
+          <PagedChecklist<Role>
+            useListHook={useRole}
+            getId={(r) => r.id}
+            getLabel={(r) => r.name}
+            value={field.value ?? []}
+            onChange={field.onChange}
+            disabled={isDisabled}
+            showSelectedBadges={false}
+            maxHeight={360}
+            estimateSize={52}
+            className={ROLE_LIST_CLASS}
+            renderItem={(role, checked, toggle) => (
+              <RoleToggleCard
+                role={role}
+                checked={checked}
+                disabled={isDisabled}
+                onChange={() => toggle()}
+              />
+            )}
+            emptyMessage={
+              <EmptyState
+                icon={Shield}
+                title={t("noRolesAvailable")}
+                desc={t("noRolesAvailableDesc")}
+              />
+            }
+          />
+        )}
+      />
     </AssignSection>
   );
 }
