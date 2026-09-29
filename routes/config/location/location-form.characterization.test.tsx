@@ -27,11 +27,14 @@ vi.mock("@/hooks/use-location", () => ({
   useDeleteLocation: () => deleteMut,
   useLocation: () => ({ data: undefined, isLoading: false }),
 }));
-vi.mock("@/hooks/use-all-users", () => ({
-  useAllUsers: () => ({ data: [], isLoading: false }),
+vi.mock("@/hooks/use-user", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/use-user")>()),
+  useUser: () => ({ data: undefined, isLoading: false }),
+  useUserAll: () => ({ data: [], isLoading: false }),
 }));
-vi.mock("@/hooks/use-all-products", () => ({
-  useAllProducts: () => ({ data: [], isLoading: false }),
+vi.mock("@/hooks/use-product", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/use-product")>()),
+  useProductAll: () => ({ data: [], isLoading: false }),
 }));
 // FormToolbar ปิดปุ่ม Edit เมื่อไม่มีสิทธิ์ — เทสต์นี้สนใจเส้นทางหลัง save
 // ไม่ใช่ permission ให้ผ่านหมดไปเลย

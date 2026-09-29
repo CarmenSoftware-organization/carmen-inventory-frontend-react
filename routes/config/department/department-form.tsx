@@ -26,7 +26,9 @@ import {
   useDeleteDepartment,
   useUpdateDepartment,
 } from "@/hooks/use-department";
-import { useAllUsers } from "@/hooks/use-all-users";
+import { useUser, useUserAll } from "@/hooks/use-user";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import { CACHE_NORMAL } from "@/lib/cache-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { Department } from "@/types/department";
 import { transferHandler } from "@/lib/transfer-handler";
@@ -60,39 +62,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
-
-  // Fetch all users for Transfer
-  const { data: allUsers = [], isLoading: isLoadingUsers } = useAllUsers();
-
-  // Department users source: users without department + users already in this department
-  const currentDeptUserIds = new Set(
-    department?.department_users.map((u) => u.user?.id ?? "") ?? [],
-  );
-  const departmentUserSource: TransferItem[] = allUsers
-    .filter(
-      (user) => !user.department?.id || currentDeptUserIds.has(user.user_id),
-    )
-    .map((user) => ({
-      key: user.user_id,
-      title: `${user.firstname} ${user.lastname}`,
-    }));
-
-  // HOD users source: all users (no filter)
-  const hodUserSource: TransferItem[] = allUsers.map((user) => ({
-    key: user.user_id,
-    title: `${user.firstname} ${user.lastname}`,
-  }));
-
-  // Enrich department users with email from allUsers
-  const emailMap = new Map(allUsers.map((u) => [u.user_id, u.email]));
-  const enrichedDeptUsers = (department?.department_users ?? []).map((u) => ({
-    ...u,
-    email: emailMap.get(u.user?.id ?? "") ?? "",
-  }));
-  const enrichedHodUsers = (department?.hod_users ?? []).map((u) => ({
-    ...u,
-    email: emailMap.get(u.user?.id ?? "") ?? "",
-  }));
 
   // Target keys state
   const [deptUserTargetKeys, setDeptUserTargetKeys] = useState<string[]>(
@@ -139,6 +108,57 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     },
   });
   const { form, isView, isAdd, isEdit, isDisabled } = f;
+
+  // ผู้ใช้ทั้งทะเบียนใช้แค่ Transfer ตอนแก้ไขหรือเพิ่ม — หน้าดูดึงอีเมลเฉพาะคนในแผนกนี้ตาม id
+  const { data: allUsers = [], isLoading: isLoadingUsers } = useUserAll(
+    undefined,
+    { ...CACHE_NORMAL, enabled: !isView },
+  );
+
+  // Department users source: users without department + users already in this department
+  const currentDeptUserIds = new Set(
+    department?.department_users.map((u) => u.user?.id ?? "") ?? [],
+  );
+  const departmentUserSource: TransferItem[] = allUsers
+    .filter(
+      (user) => !user.department?.id || currentDeptUserIds.has(user.user_id),
+    )
+    .map((user) => ({
+      key: user.user_id,
+      title: `${user.firstname} ${user.lastname}`,
+    }));
+
+  // HOD users source: all users (no filter)
+  const hodUserSource: TransferItem[] = allUsers.map((user) => ({
+    key: user.user_id,
+    title: `${user.firstname} ${user.lastname}`,
+  }));
+
+  const viewUserIds = [
+    ...new Set(
+      [
+        ...(department?.department_users ?? []),
+        ...(department?.hod_users ?? []),
+      ]
+        .map((u) => u.user?.id ?? "")
+        .filter(Boolean),
+    ),
+  ];
+  const { items: viewUsers } = useEntitiesByIds({
+    useListHook: useUser,
+    ids: viewUserIds,
+    idFilterKey: "user_id",
+    enabled: isView,
+  });
+  const emailMap = new Map(viewUsers.map((u) => [u.user_id, u.email]));
+  const enrichedDeptUsers = (department?.department_users ?? []).map((u) => ({
+    ...u,
+    email: emailMap.get(u.user?.id ?? "") ?? "",
+  }));
+  const enrichedHodUsers = (department?.hod_users ?? []).map((u) => ({
+    ...u,
+    email: emailMap.get(u.user?.id ?? "") ?? "",
+  }));
 
   // Transfer onChange handlers
   const handleDeptUsersChange = (

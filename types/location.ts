@@ -19,6 +19,9 @@ export interface ProductLocation {
   id: string;
   name: string | null;
   code: string | null;
+  /** จาก backend (GET location by id) — ก่อน backend deploy จะไม่มี */
+  local_name?: string | null;
+  inventory_unit?: { id: string; name?: string | null } | null;
   min_qty: number | null;
   max_qty: number | null;
   re_order_qty: number | null;

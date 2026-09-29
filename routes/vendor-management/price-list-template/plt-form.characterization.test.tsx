@@ -24,8 +24,9 @@ vi.mock("@/hooks/use-price-list-template", () => ({
   useDeletePriceListTemplate: () => deleteMut,
 }));
 
-vi.mock("@/hooks/use-all-products", () => ({
-  useAllProducts: () => ({
+vi.mock("@/hooks/use-product", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/use-product")>()),
+  useProductAll: () => ({
     data: [{ id: "prod-1", code: "P001", name: "Tomato" }],
     isLoading: false,
   }),
