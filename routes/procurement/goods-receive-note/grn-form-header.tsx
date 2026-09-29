@@ -24,12 +24,15 @@ interface GrnFormHeaderProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   readonly fromWizard?: boolean;
+  /** ใบ saved: ผู้ขายกับวันที่รับล็อกไว้ แม้ช่องอื่นจะแก้ได้ */
+  readonly lockIdentity?: boolean;
 }
 
 export function GrnFormHeader({
   form,
   disabled,
   fromWizard = false,
+  lockIdentity = false,
 }: GrnFormHeaderProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -71,7 +74,7 @@ export function GrnFormHeader({
                 onValueChange={field.onChange}
                 onItemChange={(v) => form.setValue("vendor_name", v.name)}
                 defaultLabel={vendorName || undefined}
-                disabled={disabled || isPo}
+                disabled={disabled || isPo || lockIdentity}
                 error={errors.vendor_id?.message}
                 className="text-xs"
               />
@@ -87,7 +90,9 @@ export function GrnFormHeader({
               <FieldDatePicker
                 value={field.value ?? ""}
                 onValueChange={field.onChange}
-                disabled={disabled}
+                // เลขใบออกตามวันที่นี้ตอน save ไปแล้ว และการลงสต๊อกใหม่หลังแก้
+                // เทียบแค่จำนวน/ต้นทุน วันที่ของรายการเคลื่อนไหวจะไม่ขยับตาม
+                disabled={disabled || lockIdentity}
                 placeholder={tc("selectDate")}
                 className="w-full text-xs"
                 error={errors.grn_date?.message}

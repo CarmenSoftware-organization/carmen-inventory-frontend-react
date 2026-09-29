@@ -212,6 +212,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           form={form}
           disabled={isDisabled || isView}
           fromWizard={fromWizard}
+          lockIdentity={goodsReceiveNote?.doc_status === "saved"}
         />
 
         {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO)

@@ -76,10 +76,10 @@ export function GrnHeader({
 
   const isView = mode === "view";
   const isEdit = mode === "edit";
-  // ใบที่พ้นขั้นร่างไปแล้วแก้ไม่ได้ — ซ่อนปุ่มแก้ไขตั้งแต่หน้าอ่าน จะได้ไม่ต้องพา
-  // คนเข้าไปถึงโหมดแก้แล้วค่อยพบว่าไม่มีปุ่มบันทึกให้กด
+  // ใบ saved ยังแก้ได้ระหว่างรอ commit — หลังบ้านลงรายการสต๊อกใหม่ให้ตามที่แก้
+  // (repostGrnLedgerIfChanged) ส่วนผู้ขายกับวันที่รับถูกล็อกที่ GrnFormHeader
   const isSaved = goodsReceiveNote?.doc_status === "saved";
-  const canEdit = !isCommitted && !isVoid && !isSaved;
+  const canEdit = !isCommitted && !isVoid;
 
   const statusCfg = goodsReceiveNote
     ? GRN_FORM_STATUS_CONFIG[goodsReceiveNote.doc_status]
@@ -149,31 +149,30 @@ export function GrnHeader({
             <X aria-hidden="true" />
             {tc("cancel")}
           </Button>
-          {/* ทั้งเก็บร่างและบันทึกใช้กับใบที่ยังเป็นร่างเท่านั้น — หลังบ้านตอบ
-              "Only draft GRN can be saved" ถ้ายิงกับใบที่บันทึกไปแล้ว */}
+          {/* ใบ saved ถอยกลับเป็นร่างไม่ได้ จึงไม่มีปุ่มเก็บร่าง · ปุ่มบันทึกของใบนี้
+              ยิงแค่ PATCH ไม่ยิง /save ซ้ำ (willCallSave ใน use-grn-form-actions
+              เป็นจริงเฉพาะใบร่าง) เลยไม่ชน "Only draft GRN can be saved" */}
           {!isSaved && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isPending}
-                onClick={onSaveDraft}
-              >
-                <FileText aria-hidden="true" />
-                {tc("saveDraft")}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                disabled={isPending}
-                onClick={onSave}
-              >
-                <Save aria-hidden="true" />
-                {isEdit ? tc("save") : tc("create")}
-              </Button>
-            </>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              onClick={onSaveDraft}
+            >
+              <FileText aria-hidden="true" />
+              {tc("saveDraft")}
+            </Button>
           )}
+          <Button
+            type="button"
+            size="sm"
+            disabled={isPending}
+            onClick={onSave}
+          >
+            <Save aria-hidden="true" />
+            {isEdit ? tc("save") : tc("create")}
+          </Button>
           {goodsReceiveNote && (
             <Button
               type="button"
