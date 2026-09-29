@@ -62,14 +62,24 @@ list endpoint ไม่เปลี่ยน
 | `draft` / `saved` | — | ไม่เปลี่ยน |
 
 allowlist ของใบ committed: `id`, `doc_version`, `post_type`, `credit_term_id`,
-`credit_term_name`, `credit_term_days`, `invoice_no`, `invoice_date`, `payment_due_date`,
+`credit_term_name`, `credit_term_days`, `invoice_no`, `invoice_date`, `invoice_f`, `payment_due_date`,
 `description` — เช็คจาก key ที่ **มีค่า (ไม่ใช่ undefined)** ใน payload หลังลบ
 `received_by_*` ออกแล้ว
 
 error code สามตัวใหม่เพิ่มใน `packages/error-catalog/src/catalog.ts` — package นี้มี `dist/`
 ที่ถูกอ่านจริง ต้อง build ใหม่ก่อน micro-business / gateway จะเห็น
 
-### 2.3 สิ่งที่จงใจไม่ทำ
+### 2.3 `invoice_date` หายระหว่างทาง (บั๊กเดิม พบตอนเขียนแผน)
+
+`GoodReceivedNoteUpdateSchema` ทั้งของ gateway (`apps/backend-gateway/src/common/dto/good-received-note/good-received-note.dto.ts`)
+และ micro-business (`.../good-received-note/dto/good-received-note.dto.ts`) ประกาศ `invoice_f`
+แทน `invoice_date` — `ZodValidationPipe` ของ gateway ตัด key ที่ไม่ประกาศทิ้ง PATCH จึงตอบ 200
+แต่วันที่ใบแจ้งหนี้ไม่ขยับ (ทุกสถานะ ไม่ใช่แค่ committed) ช่อง ⑤ ต้องใช้งานได้จริง จึงเพิ่ม
+`invoice_date` เข้าทั้งสอง schema (คง `invoice_f` ไว้ ไม่รู้ว่ามี client ไหนส่งอยู่)
+และเพิ่มใน swagger request type · `exchange_rate` ก็ถูกตัดทิ้งแบบเดียวกัน (schema มีแต่
+`currency_rate`) แต่นอกขอบเขตงานนี้เพราะใบ committed ล็อกเรตอยู่แล้ว
+
+### 2.4 สิ่งที่จงใจไม่ทำ
 
 - ไม่แตะ `repostGrnLedgerIfChanged` — ใบ committed ไม่มี key ที่กระทบ ledger ผ่านด่านได้อยู่แล้ว
 - ไม่กันฝั่ง AP (สร้าง AP Invoice จาก GRN) — การแก้หัวใบเกิดก่อนเสมอ
