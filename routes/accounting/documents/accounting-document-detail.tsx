@@ -271,8 +271,11 @@ export default function AccountingDocumentDetail() {
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
 
-  useEffect(() => {
-    if (!journal || isNew) return;
+  // โหลด journal เสร็จ (หรือเปลี่ยนตัว) → เติมค่าลงฟอร์ม ทำตอน render แทน effect
+  // เพื่อไม่ให้ render สองรอบ (react.dev/learn/you-might-not-need-an-effect)
+  const [syncedJournal, setSyncedJournal] = useState<typeof journal>();
+  if (journal && !isNew && journal !== syncedJournal) {
+    setSyncedJournal(journal);
     setDocumentStatus(
       journal.jv_status
         .split("_")
@@ -315,7 +318,7 @@ export default function AccountingDocumentDetail() {
     );
     setSelectedLineIds([]);
     setMode("view");
-  }, [isNew, journal]);
+  }
   const selectedLine = lines.find((line) => line.id === selectedLineId);
   const allLinesSelected =
     lines.length > 0 && selectedLineIds.length === lines.length;
