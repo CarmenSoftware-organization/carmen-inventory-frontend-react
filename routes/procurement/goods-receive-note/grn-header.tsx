@@ -9,6 +9,11 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
 import { useCan } from "@/hooks/use-can";
@@ -76,10 +81,15 @@ export function GrnHeader({
 
   const isView = mode === "view";
   const isEdit = mode === "edit";
-  // ใบ saved ยังแก้ได้ระหว่างรอ commit — หลังบ้านลงรายการสต๊อกใหม่ให้ตามที่แก้
-  // (repostGrnLedgerIfChanged) ส่วนผู้ขายกับวันที่รับถูกล็อกที่ GrnFormHeader
+  // ใบ saved/committed ยังแก้ได้ — saved แก้ได้เกือบทุกช่อง (หลังบ้านลงสต๊อกใหม่ให้),
+  // committed แก้ได้เฉพาะข้อมูลใบแจ้งหนี้จนกว่า AP จะดึงไป · ช่องที่ล็อกอยู่ที่
+  // GrnFormHeader ส่วนด่านจริงอยู่ที่ update() ของหลังบ้าน
   const isSaved = goodsReceiveNote?.doc_status === "saved";
-  const canEdit = !isCommitted && !isVoid;
+  const apInvoiceNos = (goodsReceiveNote?.ap_invoices ?? []).map((a) => a.doc_no);
+  const apLocked = isCommitted && apInvoiceNos.length > 0;
+  const canEdit = !isVoid && !apLocked;
+  // ใบที่ถอยกลับเป็นร่างไม่ได้ ไม่มีปุ่มเก็บร่าง
+  const isPastDraft = isSaved || isCommitted;
 
   const statusCfg = goodsReceiveNote
     ? GRN_FORM_STATUS_CONFIG[goodsReceiveNote.doc_status]
@@ -136,6 +146,24 @@ export function GrnHeader({
         </Button>
       )}
 
+      {/* ใบ committed ที่ AP ดึงไปแล้ว — ปุ่มกดไม่ได้พร้อมเหตุผล คนที่เคยแก้ใบ
+          committed ได้จะได้ไม่งงว่าทำไมใบนี้แก้ไม่ได้ */}
+      {isView && goodsReceiveNote && apLocked && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span tabIndex={0}>
+              <Button size="sm" variant="outline" disabled>
+                <Pencil aria-hidden="true" />
+                {tc("edit")}
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {t("editLockedByAp", { docNos: apInvoiceNos.join(", ") })}
+          </TooltipContent>
+        </Tooltip>
+      )}
+
       {/* Edit / add mode — cancel / save draft / save / delete */}
       {!isView && (
         <>
@@ -149,10 +177,10 @@ export function GrnHeader({
             <X aria-hidden="true" />
             {tc("cancel")}
           </Button>
-          {/* ใบ saved ถอยกลับเป็นร่างไม่ได้ จึงไม่มีปุ่มเก็บร่าง · ปุ่มบันทึกของใบนี้
-              ยิงแค่ PATCH ไม่ยิง /save ซ้ำ (willCallSave ใน use-grn-form-actions
+          {/* ใบ saved/committed ถอยกลับเป็นร่างไม่ได้ จึงไม่มีปุ่มเก็บร่าง · ปุ่มบันทึกของ
+              ใบพวกนี้ยิงแค่ PATCH ไม่ยิง /save ซ้ำ (willCallSave ใน use-grn-form-actions
               เป็นจริงเฉพาะใบร่าง) เลยไม่ชน "Only draft GRN can be saved" */}
-          {!isSaved && (
+          {!isPastDraft && (
             <Button
               type="button"
               variant="outline"
@@ -173,7 +201,8 @@ export function GrnHeader({
             <Save aria-hidden="true" />
             {isEdit ? tc("save") : tc("create")}
           </Button>
-          {goodsReceiveNote && (
+          {/* ลบได้เฉพาะใบที่ยังไม่ commit — หลังบ้านบังคับอยู่แล้ว ไม่ต้องโชว์ปุ่มที่กดแล้วพัง */}
+          {goodsReceiveNote && !isCommitted && (
             <Button
               type="button"
               variant="outline"
