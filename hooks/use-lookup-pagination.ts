@@ -115,9 +115,12 @@ export function useLookupPagination<T>({
     ? allItems.filter((it) => selectedSet.has(getId(it)) || filter(it))
     : allItems;
 
+  // ใต้ StrictMode effect auto-load ของ VirtualCommandList รันสองรอบใน mount เดียว
+  // ด้วย closure เดิม — `p + 1` เฉย ๆ จะขยับสองหน้าแล้วข้ามหน้า 2 ไป · เทียบกับ `page`
+  // ของ closure ทำให้เรียกซ้ำกี่ครั้งก็ขยับได้แค่หน้าเดียว
   const loadMore = () => {
     if (hasMore && !isLoading) {
-      setPage((p) => p + 1);
+      setPage((p) => (p === page ? p + 1 : p));
     }
   };
 

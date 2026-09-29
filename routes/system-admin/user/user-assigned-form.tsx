@@ -11,7 +11,6 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { useRole } from "../shared/use-role";
 import { useUpdateUser } from "@/hooks/use-user";
 import type { UserDetail } from "@/types/user";
 import type { FormMode } from "@/types/form";
@@ -40,13 +39,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
 
-  // perpage: -1 — ไม่ส่งแล้ว backend ให้แค่ 10 role แรก role ที่ assign ไว้เกินจากนั้น
-  // ไม่ขึ้นใน checklist เลย (เอาออกไม่ได้) และ role ที่ 11+ ก็ assign ไม่ได้
-  const { data: rolesData, isLoading: rolesLoading } = useRole({
-    perpage: -1,
-  });
+  // รายการ role โหลดทีละหน้าใน RolesSection เอง (PagedChecklist)
   const updateUser = useUpdateUser();
-  const roles = rolesData?.data ?? [];
 
   // ค่าตั้งต้นของทั้งสามส่วนมาพร้อมตัวผู้ใช้ในนัดเดียว — เก็บไว้เทียบตอน submit
   // ว่าอะไรเปลี่ยนบ้าง (PATCH รับ diff ไม่ใช่ทั้งชุด)
@@ -219,8 +213,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
           <RolesSection
             first
             form={form}
-            roles={roles}
-            isLoading={rolesLoading}
             isDisabled={isDisabled}
             count={roleCount}
           />
