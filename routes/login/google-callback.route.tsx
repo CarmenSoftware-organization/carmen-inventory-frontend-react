@@ -31,9 +31,18 @@ export function Component() {
 
     tokenStore.set(accessToken);
     refreshTokenStorage.set(refreshToken);
+    // เคลียร์ guard ของ silent SSO check (require-auth.tsx) — login สำเร็จแล้ว รอบหน้าที่ token
+    // หายไปอีก (เช่น หลัง logout) ควรลอง silent check ใหม่ได้อีกครั้ง ไม่ใช่ข้ามไปตลอด tab session
+    try {
+      sessionStorage.removeItem("carmen.silentSsoTried");
+    } catch {
+      // ignore — storage unavailable, nothing to clear
+    }
     queryClient.removeQueries({ queryKey: profileQueryKey });
     // ล้าง fragment ออกจาก URL ก่อนพาไปหน้าเป้าหมาย — token ไม่ควรค้างอยู่ใน history entry นี้
-    navigate(resolveNextPath(null), { replace: true });
+    // next มาจาก authorize's state round-trip (ดู auth.controller.ts's googleCallback) —
+    // deep-link เดิม (เช่นลิงก์คำเชิญ) ที่ผู้ใช้เปิดไว้ก่อนเจอหน้า login
+    navigate(resolveNextPath(params.get("next")), { replace: true });
   }, [navigate, queryClient]);
 
   return null;
