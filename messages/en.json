@@ -2917,6 +2917,8 @@
       "viewLocations": "Locations",
       "viewHistory": "History",
       "noHistory": "No spot check history yet",
+      "loadMoreHistory": "Load more",
+      "loadingMoreHistory": "Loading…",
       "tabAll": "All",
       "tabResume": "Resume",
       "tabInProgress": "In Progress",

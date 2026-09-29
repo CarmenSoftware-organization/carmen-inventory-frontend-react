@@ -1,7 +1,7 @@
 import { useTranslations } from "use-intl";
 import { useWorkflowById } from "@/hooks/use-workflow";
-import { useUser } from "@/hooks/use-user";
-import { useProduct } from "@/hooks/use-product";
+import { useUserAll } from "@/hooks/use-user";
+import { useProductAll } from "@/hooks/use-product";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import { parseWorkflowData } from "./wf-form-schema";
@@ -15,17 +15,15 @@ export function WfEditContent({ id }: { id: string }) {
     error: wfError,
     refetch: wfRefetch,
   } = useWorkflowById(id);
-  // perpage: -1 ดึงทั้งหมด — ไม่งั้น picker เห็นแค่ user/product หน้าแรก (default
-  // pagination ของ backend) ทำให้เลือกคนหรือสินค้าที่อยู่หน้าถัด ๆ ไปไม่ได้
-  const { data: userData, isLoading: userLoading } = useUser({ perpage: -1 });
-  const { data: productData, isLoading: productLoading } = useProduct({
-    perpage: -1,
-  });
+  // ต้องได้ user/product ครบ — picker ของ workflow ยังเลือกจากทะเบียนทั้งก้อน
+  // (ต้นไม้สินค้า / assign all) ช่วง 4b จะเปลี่ยนเป็นแบบโหลดทีละหน้า
+  const { data: userData, isLoading: userLoading } = useUserAll();
+  const { data: productData, isLoading: productLoading } = useProductAll();
 
   const isLoading = wfLoading || userLoading || productLoading;
 
-  const users = userData?.data ?? [];
-  const products = (productData?.data ?? []).map((p) => ({
+  const users = userData ?? [];
+  const products = (productData ?? []).map((p) => ({
     id: p.id,
     code: p.code,
     name: p.name,

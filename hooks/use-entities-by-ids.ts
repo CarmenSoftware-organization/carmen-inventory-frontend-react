@@ -1,4 +1,5 @@
 import type { PaginatedResponse } from "@/types/params";
+import { MAX_PERPAGE } from "@/lib/fetch-all-pages";
 
 export interface LookupListParams {
   search?: string;
@@ -14,6 +15,8 @@ export type LookupListHook<T> = (
 ) => {
   data: PaginatedResponse<T> | undefined;
   isLoading: boolean;
+  error?: Error | null;
+  refetch?: () => unknown;
 };
 
 interface UseEntitiesByIdsOptions<T> {
@@ -38,7 +41,9 @@ export function useEntitiesByIds<T>({
   idFilterKey = "id",
   enabled = true,
 }: UseEntitiesByIdsOptions<T>) {
-  const sorted = [...new Set(ids.filter(Boolean))].sort();
+  // backend จำกัด perpage ที่ 100 — id ที่เกินตัวที่ 100 จะไม่ถูกแปลงเป็นชื่อ
+  // (chip แสดง id ดิบ) กรณีเลือกเกิน 100 รายการพบได้น้อย
+  const sorted = [...new Set(ids.filter(Boolean))].sort().slice(0, MAX_PERPAGE);
   const hasIds = sorted.length > 0;
 
   const { data, isLoading } = useListHook(

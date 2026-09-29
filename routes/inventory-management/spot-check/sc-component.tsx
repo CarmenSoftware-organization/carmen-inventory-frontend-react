@@ -6,6 +6,14 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { EntityMultiFilter } from "@/components/filter/entity-multi-filter";
+import { useLocation } from "@/hooks/use-location";
+import {
+  useLookupPagination,
+  ACTIVE_ONLY_FILTER,
+} from "@/hooks/use-lookup-pagination";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import type { Location } from "@/types/location";
 import { useSpotCheckCurrent } from "./use-sc-current";
 import { useSpotCheck } from "./use-sc";
 import { ErrorState } from "@/components/ui/error-state";
@@ -36,13 +44,12 @@ import { Reveal } from "@/components/share/reveal";
 type StatusKey = "resume" | "not_started";
 type ViewMode = "locations" | "history";
 
+// ค่าที่ server รับจริง (enum_spot_check_status) — ค่าอื่นได้ 400 ทั้ง request
 const HISTORY_STATUS_KEYS: SpotCheckStatus[] = [
   "pending",
   "in_progress",
   "completed",
   "void",
-  "voided",
-  "cancelled",
 ];
 
 export default function ScComponent() {
@@ -65,12 +72,33 @@ export default function ScComponent() {
     refetch: refetchLocations,
   } = useSpotCheckCurrent(includeNotCount);
 
+  const debouncedSearch = useDebouncedValue(search, 300);
+  // ตัวกรองทั้งหมดทำที่ server — หลาย clause คั่นด้วย `,` (AND) ค่าในแต่ละ clause เป็น IN
+  const historyFilter =
+    [
+      historyStatus && `doc_status|string:${historyStatus}`,
+      historyMethod && `method|string:${historyMethod}`,
+      historyLocation && `location_id|string:${historyLocation}`,
+    ]
+      .filter(Boolean)
+      .join(",") || undefined;
   const {
-    data: historyData,
+    items: historyItems,
+    total: historyTotal,
     isLoading: isLoadingHistory,
+    isLoadingMore: isLoadingMoreHistory,
+    hasMore: hasMoreHistory,
+    loadMore: loadMoreHistory,
     error: historyError,
     refetch: refetchHistory,
-  } = useSpotCheck({ perpage: -1 }, { enabled: view === "history" });
+  } = useLookupPagination<SpotCheck>({
+    useListHook: useSpotCheck,
+    // server ค้น spot_check_no + ชื่อ location (ไม่ค้นรหัส location — ใช้ตัวกรอง location แทน)
+    search: view === "history" ? debouncedSearch : "",
+    serverFilter: historyFilter,
+    sort: "created_at:desc",
+    enabled: view === "history",
+  });
 
   const resume: SpotCheckLocation[] = [];
   const notStarted: SpotCheckLocation[] = [];
@@ -118,22 +146,6 @@ export default function ScComponent() {
       (s.items.length > 0 || activeFilter === s.key),
   );
 
-  const historyItems: SpotCheck[] = historyData?.data ?? [];
-
-  const locationOptions = (() => {
-    const seen = new Set<string>();
-    const opts: { value: string; label: string }[] = [];
-    for (const sc of historyItems) {
-      if (seen.has(sc.location_id)) continue;
-      seen.add(sc.location_id);
-      opts.push({
-        value: sc.location_id,
-        label: `${sc.location_code} · ${sc.location_name}`,
-      });
-    }
-    return opts.sort((a, b) => a.label.localeCompare(b.label));
-  })();
-
   const statusOptions = HISTORY_STATUS_KEYS.map((key) => ({
     value: key,
     label: ts(key),
@@ -144,31 +156,13 @@ export default function ScComponent() {
     label: getSpotCheckMethodLabel(t, m),
   }));
 
-  const filteredHistory = (() => {
-    const q = search.trim().toLowerCase();
-    const locSet = historyLocation ? new Set(historyLocation.split(",")) : null;
-    const statSet = historyStatus ? new Set(historyStatus.split(",")) : null;
-    const methSet = historyMethod ? new Set(historyMethod.split(",")) : null;
-    return historyItems.filter((sc) => {
-      if (q) {
-        const hay =
-          `${sc.spot_check_no} ${sc.location_name} ${sc.location_code}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      if (locSet && !locSet.has(sc.location_id)) return false;
-      if (statSet && !statSet.has(sc.doc_status)) return false;
-      if (methSet && !methSet.has(sc.method)) return false;
-      return true;
-    });
-  })();
-
   const historySections: InvStatusSection<SpotCheck>[] = [
     {
       key: "history",
       title: t("viewHistory"),
       icon: History,
       tone: "info" satisfies SectionTone,
-      items: filteredHistory,
+      items: historyItems,
     },
   ];
 
@@ -263,7 +257,6 @@ export default function ScComponent() {
                   <HistoryFilters
                     locationValue={historyLocation}
                     onLocationChange={setHistoryLocation}
-                    locationOptions={locationOptions}
                     statusValue={historyStatus}
                     onStatusChange={setHistoryStatus}
                     statusOptions={statusOptions}
@@ -284,7 +277,7 @@ export default function ScComponent() {
 
         <Reveal delay={120}>
           <StatusHero
-            total={isLocationsView ? counts.all : historyItems.length}
+            total={isLocationsView ? counts.all : historyTotal}
             done={0}
             active={isLocationsView ? counts.resume : 0}
             labels={{
@@ -316,16 +309,33 @@ export default function ScComponent() {
       )}
 
       {!isLocationsView && (
-        <InvStatusSectionsList<SpotCheck>
-          sections={historySections}
-          emptyTitle={t("noHistory")}
-          renderItem={(sc) => (
-            <ScHistoryCard spotCheck={sc} onClick={handleHistoryClick} />
+        <>
+          <InvStatusSectionsList<SpotCheck>
+            sections={historySections}
+            emptyTitle={t("noHistory")}
+            renderItem={(sc) => (
+              <ScHistoryCard spotCheck={sc} onClick={handleHistoryClick} />
+            )}
+            getItemKey={(sc) => sc.id}
+            isLoading={isLoadingHistory}
+            showGlobalEmpty={false}
+          />
+          {hasMoreHistory && (
+            <div className="mt-4 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={loadMoreHistory}
+                disabled={isLoadingMoreHistory}
+              >
+                {isLoadingMoreHistory
+                  ? t("loadingMoreHistory")
+                  : t("loadMoreHistory")}
+              </Button>
+            </div>
           )}
-          getItemKey={(sc) => sc.id}
-          isLoading={isLoadingHistory}
-          showGlobalEmpty={false}
-        />
+        </>
       )}
     </InvListShell>
   );
@@ -339,7 +349,6 @@ interface FilterOption {
 function HistoryFilters({
   locationValue,
   onLocationChange,
-  locationOptions,
   statusValue,
   onStatusChange,
   statusOptions,
@@ -350,7 +359,6 @@ function HistoryFilters({
 }: {
   readonly locationValue: string;
   readonly onLocationChange: (v: string) => void;
-  readonly locationOptions: readonly FilterOption[];
   readonly statusValue: string;
   readonly onStatusChange: (v: string) => void;
   readonly statusOptions: readonly FilterOption[];
@@ -361,12 +369,16 @@ function HistoryFilters({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <MultiSelectFilter
+      <EntityMultiFilter<Location>
         value={locationValue}
         onChange={onLocationChange}
-        placeholder={labels.location}
-        options={[...locationOptions]}
-        searchable
+        fieldKey="location_id"
+        label={labels.location}
+        useListHook={useLocation}
+        getId={(l) => l.id}
+        getLabel={(l) => `${l.code} · ${l.name}`}
+        serverFilter={ACTIVE_ONLY_FILTER}
+        bareIds
       />
       <MultiSelectFilter
         value={statusValue}

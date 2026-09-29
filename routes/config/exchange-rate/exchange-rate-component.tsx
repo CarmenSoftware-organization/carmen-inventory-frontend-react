@@ -34,7 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCurrency } from "@/hooks/use-currency";
+import { useCurrencyAll } from "@/hooks/use-currency";
 import { useProfile } from "@/hooks/use-profile";
 import {
   useExchangeRateQuery,
@@ -105,9 +105,7 @@ export default function ExchangeRateComponent() {
     : (historyData?.paginate?.total ?? 0);
 
   // --- Currencies (internal) ---
-  const { data: currencyData, isLoading: isLoadingCurrencies } = useCurrency({
-    perpage: -1,
-  });
+  const { data: currencyData, isLoading: isLoadingCurrencies } = useCurrencyAll();
 
   const { data: externalRates, isRefetching } =
     useExternalExchangeRates(baseCurrency);
@@ -115,7 +113,7 @@ export default function ExchangeRateComponent() {
   // --- Currency diff ---
   // External API returns "foreign per 1 base" (e.g. base=THB → { USD: 0.028 } means 1 THB = 0.028 USD).
   // We store in direct convention "1 foreign = X base" (e.g. 1 USD = 35.71 THB), so invert before use.
-  const currencies = currencyData?.data;
+  const currencies = currencyData;
   const currencyWithDiff: CurrencyWithDiff[] =
     !currencies || !externalRates
       ? []

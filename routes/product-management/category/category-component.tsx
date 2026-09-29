@@ -7,19 +7,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import SearchInput from "@/components/search-input";
 import {
-  useCategory,
+  useCategoryAll,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
 } from "@/hooks/use-category";
 import {
-  useSubCategory,
+  useSubCategoryAll,
   useCreateSubCategory,
   useUpdateSubCategory,
   useDeleteSubCategory,
 } from "@/hooks/use-sub-category";
 import {
-  useItemGroup,
+  useItemGroupAll,
   useCreateItemGroup,
   useUpdateItemGroup,
   useDeleteItemGroup,
@@ -48,15 +48,9 @@ export default function CategoryComponent() {
   const [deleteTarget, setDeleteTarget] = useState<CategoryNode | null>(null);
 
   // Data
-  const { data: catData, isLoading: catLoading } = useCategory({
-    perpage: -1,
-  });
-  const { data: subData, isLoading: subLoading } = useSubCategory({
-    perpage: -1,
-  });
-  const { data: igData, isLoading: igLoading } = useItemGroup({
-    perpage: -1,
-  });
+  const { data: catData, isLoading: catLoading } = useCategoryAll();
+  const { data: subData, isLoading: subLoading } = useSubCategoryAll();
+  const { data: igData, isLoading: igLoading } = useItemGroupAll();
   const isLoading = catLoading || subLoading || igLoading;
 
   // Mutations
@@ -86,9 +80,9 @@ export default function CategoryComponent() {
   // Tree
   const { categoryData, expanded, expandAll, collapseAll, toggleExpand } =
     useCategoryTree({
-      categories: catData?.data ?? [],
-      subCategories: subData?.data ?? [],
-      itemGroups: igData?.data ?? [],
+      categories: catData ?? [],
+      subCategories: subData ?? [],
+      itemGroups: igData ?? [],
       isLoading,
     });
 
@@ -124,9 +118,9 @@ export default function CategoryComponent() {
 
   // Stats
   const stats = (() => {
-    const cats = catData?.data?.length ?? 0;
-    const subs = subData?.data?.length ?? 0;
-    const igs = igData?.data?.length ?? 0;
+    const cats = catData?.length ?? 0;
+    const subs = subData?.length ?? 0;
+    const igs = igData?.length ?? 0;
     return { cats, subs, igs, total: cats + subs + igs };
   })();
 

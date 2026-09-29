@@ -5,11 +5,11 @@ import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { Product } from "@/types/product";
-import type { PaginatedResponse } from "@/types/params";
+import { fetchAllPages } from "@/lib/fetch-all-pages";
 import { CACHE_NORMAL } from "@/lib/cache-config";
 
 /**
- * Hook ดึงข้อมูลสินค้าทั้งหมด (perpage=-1) สำหรับใช้ใน lookup/dropdown
+ * Hook ดึงสินค้าทั้งหมด (วนหน้าละ 100 ผ่าน fetchAllPages) — ชั่วคราวจนช่วง 4b เปลี่ยนต้นไม้สินค้า
  * ใช้ CACHE_NORMAL (staleTime 5 นาที) เพราะ master data ของสินค้าเปลี่ยนไม่บ่อย
  * คืนค่าเฉพาะ array ของ Product (unwrap จาก PaginatedResponse)
  * @returns UseQueryResult ของ Product[]
@@ -22,13 +22,16 @@ export function useAllProducts() {
 
   return useQuery<Product[]>({
     queryKey: [QUERY_KEYS.PRODUCTS, buCode, "all"],
-    queryFn: async () => {
-      const url = buildUrl(API_ENDPOINTS.PRODUCTS(buCode!), { perpage: -1 });
-      const res = await httpClient.get(url);
-      if (!res.ok) throw new Error("Failed to fetch products");
-      const json: PaginatedResponse<Product> = await res.json();
-      return json.data;
-    },
+    queryFn: () =>
+      fetchAllPages<Product>(async (page, perpage) => {
+        const url = buildUrl(API_ENDPOINTS.PRODUCTS(buCode!), {
+          page,
+          perpage,
+        });
+        const res = await httpClient.get(url);
+        if (!res.ok) throw new Error("Failed to fetch products");
+        return res.json();
+      }),
     enabled: !!buCode,
     ...CACHE_NORMAL,
   });
