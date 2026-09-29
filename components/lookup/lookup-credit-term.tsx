@@ -44,6 +44,7 @@ export function LookupCreditTerm({
 
   return (
     <LookupCombobox
+      allowDeselect={false}
       size={size}
       value={value}
       onValueChange={onValueChange}

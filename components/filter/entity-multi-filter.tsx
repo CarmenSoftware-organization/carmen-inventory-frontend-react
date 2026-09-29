@@ -116,7 +116,9 @@ export function EntityMultiFilter<T>({
           <span className="truncate">{tc("all")}</span>
         </label>
         {isLoading ? (
-          <div className="text-muted-foreground px-2 py-1.5 text-xs">…</div>
+          <div className="text-muted-foreground px-2 py-1.5 text-xs">
+            {tc("loading")}
+          </div>
         ) : (
           <VirtualCommandList
             items={rows}
@@ -125,6 +127,11 @@ export function EntityMultiFilter<T>({
             onLoadMore={loadMore}
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}
+            emptyMessage={
+              <span className="text-muted-foreground text-xs">
+                {tc("noSearchResult")}
+              </span>
+            }
           >
             {(item) => {
               const id = getId(item);

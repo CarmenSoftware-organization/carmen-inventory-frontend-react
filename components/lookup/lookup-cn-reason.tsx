@@ -43,6 +43,7 @@ export function LookupCnReason({
 
   return (
     <LookupCombobox
+      allowDeselect={false}
       size={size}
       value={value}
       onValueChange={(id) => onValueChange(id)}

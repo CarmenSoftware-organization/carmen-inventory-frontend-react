@@ -48,6 +48,7 @@ export function LookupTaxProfile({
 
   return (
     <LookupCombobox
+      allowDeselect={false}
       size={size}
       value={value}
       onValueChange={(id, tp) =>

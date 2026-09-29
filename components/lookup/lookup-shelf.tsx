@@ -46,6 +46,7 @@ export function LookupShelf({
 
   return (
     <LookupCombobox
+      allowDeselect={false}
       size="sm"
       value={value}
       onValueChange={(id, shelf) => {
