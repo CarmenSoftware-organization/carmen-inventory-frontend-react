@@ -33,6 +33,7 @@ export function LookupShelf({
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
     useLookupPagination<Shelf>({
@@ -51,8 +52,10 @@ export function LookupShelf({
         onValueChange(id);
         if (shelf) onItemChange?.(shelf);
       }}
-      onOpenChange={(open) => {
-        if (open) setHasOpened(true);
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setHasOpened(true);
       }}
       items={items}
       selectedItems={selectedItems}
@@ -77,7 +80,10 @@ export function LookupShelf({
             "relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-xs outline-hidden select-none",
             "hover:bg-accent hover:text-accent-foreground",
           )}
-          onClick={() => onValueChange("")}
+          onClick={() => {
+            onValueChange("");
+            setOpen(false);
+          }}
         >
           —
           <Check
