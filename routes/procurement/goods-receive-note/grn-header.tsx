@@ -201,8 +201,8 @@ export function GrnHeader({
             <Save aria-hidden="true" />
             {isEdit ? tc("save") : tc("create")}
           </Button>
-          {/* ลบได้เฉพาะใบที่ยังไม่ commit — หลังบ้านบังคับอยู่แล้ว ไม่ต้องโชว์ปุ่มที่กดแล้วพัง */}
-          {goodsReceiveNote && !isCommitted && (
+          {/* หลังบ้านลบได้เฉพาะใบร่าง — ใบ saved/committed ไม่ต้องโชว์ปุ่มที่กดแล้วพัง */}
+          {goodsReceiveNote && !isPastDraft && (
             <Button
               type="button"
               variant="outline"
