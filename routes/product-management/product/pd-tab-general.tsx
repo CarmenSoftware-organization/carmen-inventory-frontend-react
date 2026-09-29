@@ -483,7 +483,6 @@ function PdTabGeneral({
           <ToggleRow
             title={tfl("status")}
             desc={t("statusToggleDesc")}
-            disabled={isDisabled}
           >
             <Controller
               control={form.control}
@@ -503,7 +502,6 @@ function PdTabGeneral({
           <ToggleRow
             title={t("usedInRecipe")}
             desc={t("usedInRecipeShort")}
-            disabled={isDisabled}
           >
             <Controller
               control={form.control}
@@ -521,7 +519,6 @@ function PdTabGeneral({
           <ToggleRow
             title={t("soldDirectly")}
             desc={t("soldDirectlyShort")}
-            disabled={isDisabled}
           >
             <Controller
               control={form.control}
@@ -656,23 +653,17 @@ export default memo(PdTabGeneral);
 function ToggleRow({
   title,
   desc,
-  disabled,
   children,
 }: Readonly<{
   title: string;
   desc: string;
-  disabled?: boolean;
   children: React.ReactNode;
 }>) {
   "use no memo";
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
-        <div
-          className={`text-sm font-semibold ${disabled ? "text-muted-foreground" : ""}`}
-        >
-          {title}
-        </div>
+        <div className="text-sm font-semibold">{title}</div>
         <div className="text-muted-foreground text-micro">{desc}</div>
       </div>
       {children}
@@ -687,10 +678,13 @@ interface ReadOnlyValueProps {
 }
 
 /**
- * ค่าโหมด view = หน้าตาเหมือน disabled input (ขอบ + พื้น bg-muted + จาง) ตรงกับ
- * disabled input จริงของแอป — จางแบบกดไม่ได้ ต่างจาก input โหมด edit ชัด ·
- * ใช้ค่าที่ resolve มาแล้ว (product.*.name) ไม่ต้องยิง query lookup ในโหมด view ·
- * ค่าว่างแสดง `—` · รองรับ `suffix` (เช่น %) และ `multiline` (สำหรับ description)
+ * ค่าโหมด view = กรอบ + พื้นเหมือนช่อง input แต่ข้อความสีเต็ม ไม่จาง — เป็น
+ * ข้อมูลที่ผู้ใช้เข้ามาอ่านจึงต้องชัดที่สุดในหน้า (เดิมเลียนแบบ disabled input ด้วย
+ * opacity-60 ทำให้ค่าจางกว่า label) ปุ่ม Edit คือตัวบอกว่าโหมดไหนแก้ได้ ·
+ * `min-h-9` + กรอบ คงขนาดเท่า input
+ * ของโหมด edit ไม่ให้หน้ากระโดดตอนสลับโหมด · ใช้ค่าที่ resolve มาแล้ว
+ * (product.*.name) ไม่ต้องยิง query lookup ในโหมด view · ค่าว่างแสดง `—` ·
+ * รองรับ `suffix` (เช่น %) และ `multiline` (สำหรับ description)
  */
 function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
   "use no memo";
@@ -698,7 +692,7 @@ function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
   return (
     <div
       className={cn(
-        "border-input bg-muted/60 min-h-9 cursor-not-allowed rounded-md border px-3 py-1.5 text-sm break-words opacity-60",
+        "border-input bg-muted/30 min-h-9 rounded-md border px-3 py-1.5 text-sm break-words",
         multiline ? "whitespace-pre-wrap" : "flex items-center",
         isEmpty && "text-muted-foreground",
       )}
