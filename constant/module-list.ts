@@ -651,7 +651,7 @@ export const moduleList: ModuleDto[] = [
         path: "/config/credit-note-reason",
         licenseFeature: "configuration.credit_note_reason", // app:credit-note-reasons
         icon: MessageSquareText,
-        permission: PERMISSIONS.configuration.view,
+        permission: PERMISSIONS.configuration.credit_note_reason.view,
       },
       {
         name: "currency",
@@ -677,7 +677,7 @@ export const moduleList: ModuleDto[] = [
         path: "/config/credit-term",
         licenseFeature: "configuration.credit_term", // config:credit-terms
         icon: Clock,
-        permission: PERMISSIONS.configuration.view,
+        permission: PERMISSIONS.configuration.credit_term.view,
       },
       {
         name: "extraCost",

@@ -1,10 +1,9 @@
 name: CI
 
+# รันด้วยมือเท่านั้น (Actions → CI → Run workflow) — ไม่ผูกกับ push/PR แล้ว
+# ก่อน merge ให้รัน typecheck/lint/test:run ในเครื่องแทน
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 # GITHUB_TOKEN ใช้แค่ checkout — ปิดสิทธิ์ที่เหลือทั้งหมด ไม่งั้น token ได้สิทธิ์
 # ตาม default ของ repo ซึ่งอาจกว้างถึงเขียนโค้ด/ปล่อย package (CodeQL #3)

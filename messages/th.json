@@ -6,7 +6,7 @@
     "noImage": "ไม่มีรูป",
     "sections": {
       "general": "ทั่วไป",
-      "generalDesc": "ข้อมูลระบุตัวตนและสิทธิ์การใช้งานของหน่วยธุรกิจ",
+      "generalDesc": "ข้อมูลระบุตัวตนของหน่วยธุรกิจ",
       "branding": "แบรนด์",
       "brandingDesc": "โลโก้และรูปประจำตัวที่แสดงทั่วทั้งแอปและเอกสาร",
       "company": "บริษัท",
@@ -32,7 +32,12 @@
       "info": "ข้อมูลเพิ่มเติม",
       "infoDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับหน่วยธุรกิจ",
       "calculationMethod": "วิธีคำนวณต้นทุน",
-      "calculationMethodDesc": "วิธีคิดต้นทุนสินค้าคงคลัง (เช่น average, FIFO)",
+      "calculationMethodDesc": "วิธีคิดต้นทุนสินค้าคงคลัง (average, FIFO หรือเฉลี่ยแยกตาม Location)",
+      "calculationMethodOptions": {
+        "average": "เฉลี่ย",
+        "fifo": "FIFO",
+        "averagePerLocation": "เฉลี่ยแยกตาม Location"
+      },
       "defaultCurrencyId": "สกุลเงินเริ่มต้น",
       "defaultCurrencyIdDesc": "สกุลเงินเริ่มต้นของหน่วยธุรกิจ",
       "docVersion": "เวอร์ชันเอกสาร",
@@ -116,8 +121,6 @@
       "amountFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนเงิน",
       "quantityFormat": "รูปแบบจำนวน",
       "quantityFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวน",
-      "perpageFormat": "รูปแบบต่อหน้า",
-      "perpageFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนต่อหน้า",
       "recipeFormat": "รูปแบบสูตร",
       "recipeFormatDesc": "ภาษาและจำนวนทศนิยมขั้นต่ำของจำนวนในสูตร",
       "isActive": "ใช้งาน",
@@ -915,7 +918,13 @@
       "SR_ISSUE_DATE_TODAY_OUTSIDE_PERIOD": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ จึงจ่ายของลงวันที่วันนี้ไม่ได้ ให้ลงวันที่ในงวดที่เปิดแทน",
       "SR_DEPARTMENT_AMBIGUOUS": "คุณสังกัดมากกว่าหนึ่งแผนก ระบบจึงเลือกแผนกของใบเบิกให้ไม่ได้ เลือกเอง: {departments}",
       "SR_DEPARTMENT_NOT_FOUND": "คุณยังไม่ได้สังกัดแผนกไหนเลย ระบบจึงเลือกแผนกของใบเบิกให้ไม่ได้ ให้ผู้ดูแลระบบเพิ่มให้ก่อน",
-      "PRODUCT_ALREADY_EXISTS": "สินค้านี้มีอยู่ในระบบแล้ว ลองค้นจากชื่อหรือ SKU แล้วไปแก้ที่ตัวเดิม แทนการสร้างใหม่"
+      "PRODUCT_ALREADY_EXISTS": "สินค้านี้มีอยู่ในระบบแล้ว ลองค้นจากชื่อหรือ SKU แล้วไปแก้ที่ตัวเดิม แทนการสร้างใหม่",
+      "PERIOD_CLOSED_NOT_EDITABLE": "รอบสินค้าคงคลังนี้ปิดแล้ว แก้ไขหรือลบไม่ได้",
+      "PERIOD_COUNTING_NOT_EDITABLE": "รอบสินค้าคงคลังนี้กำลังตรวจนับอยู่ แก้ไขหรือลบไม่ได้",
+      "PERIOD_CURRENT_NOT_EDITABLE": "รอบสินค้าคงคลังปัจจุบันแก้ไขหรือลบไม่ได้",
+      "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "เปลี่ยนสถานะรอบสินค้าคงคลังได้ที่หน้า \"ปิดงวด\" เท่านั้น",
+      "COMMON_DOC_VERSION_REQUIRED": "ข้อมูลนี้ไม่เป็นปัจจุบัน รีเฟรชหน้าแล้วลองอีกครั้ง",
+      "COMMON_COUNT_MUST_BE_POSITIVE": "จำนวนรอบต้องเป็นจำนวนเต็มที่มากกว่า 0"
     }
   },
   "validation": {
@@ -2089,7 +2098,21 @@
       "statusOpen": "เปิด",
       "statusClosed": "ปิด",
       "statusLocked": "ล็อก",
-      "generateNext": "สร้างรอบสินค้าคงคลังถัดไป 12 รอบ"
+      "generateNext": "เติมรอบที่เปิดให้ครบ 12 รอบ",
+      "dateRange": "ช่วงวันที่",
+      "current": "รอบปัจจุบัน",
+      "overdue": "ค้างปิด",
+      "overdueCount": "ค้างปิด {count} รอบ (เลยวันสิ้นรอบแล้วแต่ยังเปิดอยู่)",
+      "allOnTrack": "ไม่มีรอบที่เปิดค้างเกินวันสิ้นรอบ",
+      "phaseActive": "กำลังดำเนินอยู่",
+      "phaseUpcoming": "ยังไม่ถึงรอบ",
+      "noPeriod": "ยังไม่มีรอบ",
+      "fiscalYearLabel": "ปีบัญชี {year}",
+      "prevYear": "ปีบัญชีก่อนหน้า",
+      "nextYear": "ปีบัญชีถัดไป",
+      "generateTitle": "เติมรอบที่เปิดให้ครบ 12 รอบ?",
+      "generateDesc": "ตอนนี้เปิดอยู่ {open} รอบ ระบบจะสร้างรอบรายเดือนเพิ่ม {create} รอบต่อจากรอบล่าสุด เริ่มวันที่ 1 ของทุกเดือน",
+      "generateNothing": "เปิดอยู่ครบ 12 รอบแล้ว"
     },
     "configEmail": {
       "title": "ตั้งค่าอีเมล",
@@ -3790,7 +3813,7 @@
       "priceListLoadFailed": "โหลดรายการราคาไม่สำเร็จ",
       "noPriceList": "ไม่พบรายการราคา",
       "noPriceListDesc": "ไม่พบรายการราคาสำหรับสินค้านี้",
-      "lastPrice": "ราคาซื้อล่าสุด",
+      "lastPrice": "ราคาล่าสุด",
       "pricelistNo": "เลขที่รายการราคา",
       "preferred": "แนะนำ",
       "best": "ดีสุด",
@@ -3808,7 +3831,6 @@
       "restock": "เติมสต็อก",
       "stockLevel": "ระดับสต็อก: {pct}%",
       "inventoryInfo": "ข้อมูลสต็อก",
-      "lastPrice": "ราคาล่าสุด",
       "selectProductForInventory": "เลือกสินค้าก่อนเพื่อดูข้อมูลสต็อก",
       "summary": "สรุปยอด",
       "needsReorder": "ต้องสั่งซื้อเพิ่ม",
@@ -5324,5 +5346,11 @@
     "outsideOpenPeriod": "วันที่บนเอกสารอยู่นอกงวดที่เปิดอยู่ ({from} – {to}) เลือกว่าจะลงวันที่ไหน",
     "useOpenPeriodDate": "ย้ายเข้างวดที่เปิดอยู่ ({date})",
     "useDocumentDate": "คงวันที่บนเอกสารไว้ ({date})"
+  },
+  "buCurrency": {
+    "missing": "หน่วยธุรกิจ {bu} ยังไม่ได้ตั้งสกุลเงินหลัก — ยอดเงินจะแสดงเป็น THB ไปก่อนจนกว่าจะตั้งค่า",
+    "invalid": "สกุลเงินหลักของหน่วยธุรกิจ {bu} ไม่มีอยู่ในระบบแล้ว — ยอดเงินจะแสดงเป็น THB ไปก่อนจนกว่าจะแก้ไข",
+    "goToSettings": "ไปตั้งค่าที่ Company Profile",
+    "contactAdmin": "กรุณาติดต่อผู้ดูแลระบบ"
   }
 }

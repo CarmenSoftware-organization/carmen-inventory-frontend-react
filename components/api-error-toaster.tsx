@@ -1,17 +1,17 @@
 import { useEffect } from "react";
-import { useErrorToast } from "@/hooks/use-error-toast";
+import { useErrorToastWithOptions } from "@/hooks/use-error-toast";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { setApiErrorHandler } from "@/lib/api-error-handler";
 
 export function ApiErrorToaster() {
-  const errorToast = useErrorToast();
+  const errorToast = useErrorToastWithOptions();
 
   useEffect(() => {
-    setApiErrorHandler((error) => {
+    setApiErrorHandler((error, options) => {
       // 401/403 มี UI ของตัวเองอยู่แล้ว (redirect ไป login / PermissionDeniedDialog)
       // — toast ซ้ำจะกลายเป็นเสียงรบกวนที่ user ทำอะไรกับมันไม่ได้
       if (error instanceof ApiError && isHandledElsewhere(error.code)) return;
-      errorToast(error);
+      errorToast(error, options);
     });
     return () => setApiErrorHandler(null);
   }, [errorToast]);

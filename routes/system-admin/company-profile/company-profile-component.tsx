@@ -25,6 +25,7 @@ import {
   EditableField,
   SelectField,
   NumberFormatField,
+  VIEW_BOX_CLASS,
 } from "./company-profile-ui";
 import {
   TIMEZONES,
@@ -41,6 +42,27 @@ import {
   buildPatch,
   type BusinessSettingFormValues,
 } from "./company-profile-form-schema";
+import {
+  datePatternExample,
+  timezoneExample,
+  numberExample,
+} from "./company-profile-examples";
+
+/**
+ * i18n key (relative to `companyProfile.fields`) ของแต่ละค่า `calculation_method`
+ * ที่รู้จัก — ใช้แปลค่าดิบจาก backend เป็น label ที่แปลแล้วในหน้า view-only
+ * ค่าที่ไม่อยู่ใน map นี้ (unknown/ว่าง) จะ fallback ไปแสดงค่าดิบแทน
+ *
+ * i18n key (relative to `companyProfile.fields`) for each known
+ * `calculation_method` value — translates the raw backend value into a
+ * localized label on the read-only view. A value not in this map (unknown/
+ * empty) falls back to showing the raw value.
+ */
+const CALCULATION_METHOD_LABEL_KEYS: Readonly<Record<string, string>> = {
+  average: "calculationMethodOptions.average",
+  fifo: "calculationMethodOptions.fifo",
+  average_per_location: "calculationMethodOptions.averagePerLocation",
+};
 
 /**
  * หน้า Company Profile (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
@@ -63,6 +85,10 @@ export default function CompanyProfileComponent() {
   const { data, isLoading, isError, refetch } = useBusinessUnit(buId);
   const update = useUpdateBusinessUnit(buId);
   const [editing, setEditing] = useState(false);
+  // เวลาอ้างอิงของตัวอย่างวันที่/เวลา — จับครั้งเดียวต่อการเปิดหน้า ไม่ให้ตัวอย่าง
+  // ขยับเองระหว่างอ่าน
+  const [now] = useState(() => new Date());
+  const dateExample = (pattern: string) => datePatternExample(pattern, now);
 
   const form = useForm<BusinessSettingFormValues>({
     resolver: zodResolver(
@@ -204,7 +230,7 @@ export default function CompanyProfileComponent() {
           <SettingSectionSkeleton
             fields={["half", "half", "half", "half", "half", "half"]}
           />
-          <SettingSectionSkeleton fields={["half", "half", "half", "half"]} />
+          <SettingSectionSkeleton fields={["half", "half", "half"]} />
         </div>
       )}
 
@@ -223,6 +249,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.name")}
               description={t("fields.nameDesc")}
               displayValue={data.name}
+              fullWidth
             />
             <EditableField
               editing={editing}
@@ -234,9 +261,52 @@ export default function CompanyProfileComponent() {
             />
             <SettingField
               label={t("fields.clusterName")}
-              description={t("fields.clusterNameDesc")}
+              description={editing ? t("fields.clusterNameDesc") : undefined}
               value={data.cluster_name}
             />
+            {/* costing method: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้)
+                "Max license users" ถูกถอดออกจากหน้านี้ — ที่นั่งไม่ใช่เลขตัวเดียวบน BU อีกแล้ว แต่เป็น
+                ผลรวมของใบ license ที่ยังคุ้มครองอยู่ (tb_business_unit_license → v_business_unit_seat)
+                และจัดการที่ carmen-platform เท่านั้น ช่องนี้จะว่างถาวรเมื่อคอลัมน์เดิมถูกลบ จึงกลาย
+                เป็นการโชว์แนวคิดที่เลิกใช้แล้วให้ผู้ใช้เปล่า ๆ
+                "Max license users" is gone: seats are no longer a single number on the BU but the
+                sum of the licences currently in effect, managed only in carmen-platform. The field
+                would be permanently blank once the old column drops. */}
+            <SettingField
+              label={t("fields.calculationMethod")}
+              description={
+                editing ? t("fields.calculationMethodDesc") : undefined
+              }
+              value={
+                data.calculation_method &&
+                CALCULATION_METHOD_LABEL_KEYS[data.calculation_method]
+                  ? tf(CALCULATION_METHOD_LABEL_KEYS[data.calculation_method])
+                  : data.calculation_method
+              }
+            />
+            <div className="min-w-0 space-y-1">
+              <div className="text-foreground text-xs font-semibold">
+                {t("fields.defaultCurrencyId")}
+              </div>
+              {editing && (
+                <p className="text-muted-foreground/80 text-micro leading-snug">
+                  {t("fields.defaultCurrencyIdDesc")}
+                </p>
+              )}
+              <Controller
+                control={form.control}
+                name="default_currency_id"
+                render={({ field }) => (
+                  <LookupCurrency
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                    readOnly={!editing}
+                    // โหมดดูใช้กรอบเดียวกับช่องอื่น (ค่าตั้งต้นของ FieldPlainText ไม่มีกรอบ)
+                    className={editing ? undefined : VIEW_BOX_CLASS}
+                  />
+                )}
+              />
+            </div>
             <EditableField
               editing={editing}
               form={form}
@@ -257,38 +327,6 @@ export default function CompanyProfileComponent() {
               maxLength={256}
               fullWidth
             />
-            {/* costing method: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้)
-                "Max license users" ถูกถอดออกจากหน้านี้ — ที่นั่งไม่ใช่เลขตัวเดียวบน BU อีกแล้ว แต่เป็น
-                ผลรวมของใบ license ที่ยังคุ้มครองอยู่ (tb_business_unit_license → v_business_unit_seat)
-                และจัดการที่ carmen-platform เท่านั้น ช่องนี้จะว่างถาวรเมื่อคอลัมน์เดิมถูกลบ จึงกลาย
-                เป็นการโชว์แนวคิดที่เลิกใช้แล้วให้ผู้ใช้เปล่า ๆ
-                "Max license users" is gone: seats are no longer a single number on the BU but the
-                sum of the licences currently in effect, managed only in carmen-platform. The field
-                would be permanently blank once the old column drops. */}
-            <SettingField
-              label={t("fields.calculationMethod")}
-              description={t("fields.calculationMethodDesc")}
-              value={data.calculation_method}
-            />
-            <div className="min-w-0 space-y-1">
-              <div className="text-foreground text-xs font-semibold">
-                {t("fields.defaultCurrencyId")}
-              </div>
-              <p className="text-muted-foreground/80 text-micro leading-snug">
-                {t("fields.defaultCurrencyIdDesc")}
-              </p>
-              <Controller
-                control={form.control}
-                name="default_currency_id"
-                render={({ field }) => (
-                  <LookupCurrency
-                    value={field.value ?? ""}
-                    onValueChange={field.onChange}
-                    readOnly={!editing}
-                  />
-                )}
-              />
-            </div>
           </SettingSection>
 
           {/* Hotel */}
@@ -540,6 +578,7 @@ export default function CompanyProfileComponent() {
               description={t("fields.timezoneDesc")}
               placeholder={t("fields.timezone")}
               displayValue={data.timezone}
+              exampleOf={(tz) => timezoneExample(tz, now)}
             />
             <SelectField
               editing={editing}
@@ -550,6 +589,8 @@ export default function CompanyProfileComponent() {
               description={t("fields.dateFormatDesc")}
               placeholder={t("fields.dateFormat")}
               displayValue={data.date_format}
+              exampleOf={dateExample}
+              mono
             />
             <SelectField
               editing={editing}
@@ -560,6 +601,8 @@ export default function CompanyProfileComponent() {
               description={t("fields.dateTimeFormatDesc")}
               placeholder={t("fields.dateTimeFormat")}
               displayValue={data.date_time_format}
+              exampleOf={dateExample}
+              mono
             />
             <SelectField
               editing={editing}
@@ -570,6 +613,8 @@ export default function CompanyProfileComponent() {
               description={t("fields.timeFormatDesc")}
               placeholder={t("fields.timeFormat")}
               displayValue={data.time_format}
+              exampleOf={dateExample}
+              mono
             />
             <SelectField
               editing={editing}
@@ -580,6 +625,8 @@ export default function CompanyProfileComponent() {
               description={t("fields.shortTimeFormatDesc")}
               placeholder={t("fields.shortTimeFormat")}
               displayValue={data.short_time_format}
+              exampleOf={dateExample}
+              mono
             />
             <SelectField
               editing={editing}
@@ -590,6 +637,8 @@ export default function CompanyProfileComponent() {
               description={t("fields.longTimeFormatDesc")}
               placeholder={t("fields.longTimeFormat")}
               displayValue={data.long_time_format}
+              exampleOf={dateExample}
+              mono
             />
           </SettingSection>
 
@@ -610,6 +659,8 @@ export default function CompanyProfileComponent() {
               localesPlaceholder={t("fields.locales")}
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
               showDigits={false}
+              // 2 ตำแหน่งตาม formatAmount
+              example={numberExample(data.amount_format?.locales, 2)}
             />
             <NumberFormatField
               editing={editing}
@@ -618,17 +669,9 @@ export default function CompanyProfileComponent() {
               label={t("fields.quantityFormat")}
               description={t("fields.quantityFormatDesc")}
               displayValue={fmtNumber(data.quantity_format)}
-              localeOptions={LOCALES}
-              localesPlaceholder={t("fields.locales")}
-              digitsPlaceholder={t("fields.minimumIntegerDigits")}
-            />
-            <NumberFormatField
-              editing={editing}
-              form={form}
-              name="perpage_format"
-              label={t("fields.perpageFormat")}
-              description={t("fields.perpageFormatDesc")}
-              displayValue={fmtNumber(data.perpage_format)}
+              // ทศนิยมจริงมาจาก decimal_place ของหน่วย — 2 คือ fallback ของ
+              // useQuantityFormatter ไม่ใช่ค่าจากช่องนี้
+              example={numberExample(data.quantity_format?.locales, 2)}
               localeOptions={LOCALES}
               localesPlaceholder={t("fields.locales")}
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
@@ -640,6 +683,11 @@ export default function CompanyProfileComponent() {
               label={t("fields.recipeFormat")}
               description={t("fields.recipeFormatDesc")}
               displayValue={fmtNumber(data.recipe_format)}
+              // useRecipeFormatter ใช้ minimumIntegerDigits เป็นจำนวนทศนิยม
+              example={numberExample(
+                data.recipe_format?.locales,
+                data.recipe_format?.minimumIntegerDigits ?? 5,
+              )}
               localeOptions={LOCALES}
               localesPlaceholder={t("fields.locales")}
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
