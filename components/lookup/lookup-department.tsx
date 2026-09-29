@@ -52,7 +52,10 @@ export function LookupDepartment({
   const tfl = useTranslations("field");
   // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
   const [hasOpened, setHasOpened] = useState(false);
-  const { data, isLoading } = useDepartment(undefined, {
+  // perpage: -1 = ดึงครบทุกแผนก — ถ้าไม่ส่ง backend ใช้ default 10 และ combobox นี้
+  // ไม่มี load-more แผนกที่ 11 ขึ้นไปจึงเลือกไม่ได้และชื่อของค่าที่บันทึกไว้ไม่ขึ้น
+  // (แบบเดียวกับ filter-department.tsx)
+  const { data, isLoading } = useDepartment({ perpage: -1 }, {
     enabled: hasOpened || !!value,
   });
   const departments = data?.data ?? [];

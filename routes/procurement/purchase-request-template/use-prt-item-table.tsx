@@ -113,6 +113,7 @@ const ProductCell = ({
           onValueChange={(value, product) =>
             setProductToItem(form, index, value, product)
           }
+          defaultLabel={productName || undefined}
           disabled={disabled}
           readOnly={readOnly}
           className="w-full text-xs"

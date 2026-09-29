@@ -247,6 +247,8 @@ export function PrItemExpand({
                   onItemChange={(vendor) =>
                     form.setValue(`items.${index}.vendor_name`, vendor.name)
                   }
+                  // list โหลดทีละ 30 — ผู้ขายที่อยู่หลังหน้าแรกหาชื่อไม่เจอ
+                  defaultLabel={watchVendorName || undefined}
                   className="w-full text-xs"
                   error={vendorError}
                 />
