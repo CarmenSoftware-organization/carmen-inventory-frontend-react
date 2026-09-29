@@ -16,6 +16,12 @@ interface LookupUnitProps {
   readonly excludeIds?: string[];
   readonly size?: "xs" | "sm";
   readonly error?: string;
+  /**
+   * ชื่อหน่วยของ `value` ที่รู้อยู่แล้ว (เช่น `product.inventory_unit.name`) —
+   * list โหลดทีละ 30 เรียงตามตัวอักษร หน่วยที่อยู่หลังหน้าแรก (เช่น LT) จะหาชื่อ
+   * ไม่เจอแล้วขึ้น placeholder ทั้งที่มีค่าอยู่
+   */
+  readonly defaultLabel?: string;
 }
 
 /**
@@ -44,6 +50,7 @@ export function LookupUnit({
   excludeIds,
   size = "sm",
   error,
+  defaultLabel,
 }: LookupUnitProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -83,6 +90,7 @@ export function LookupUnit({
         items={units}
         getId={(u) => u.id}
         getLabel={(u) => u.name}
+        defaultLabel={defaultLabel}
         placeholder={placeholder ?? tl("select", { entity: tfl("unit") })}
         searchPlaceholder={tl("search", { entity: tfl("unit") })}
         disabled={disabled}

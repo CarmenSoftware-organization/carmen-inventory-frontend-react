@@ -334,6 +334,11 @@ function PdTabGeneral({
                 <LookupUnit
                   value={field.value}
                   onValueChange={field.onChange}
+                  defaultLabel={
+                    field.value === product?.inventory_unit?.id
+                      ? (product?.inventory_unit?.name ?? undefined)
+                      : undefined
+                  }
                   error={errors.inventory_unit_id?.message}
                 />
               )}
