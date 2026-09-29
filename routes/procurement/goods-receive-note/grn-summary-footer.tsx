@@ -4,6 +4,8 @@ import { formatCurrency } from "@/lib/currency-utils";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { sumGrnItems } from "./grn-summary";
 import { useCurrency } from "@/hooks/use-currency";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Currency } from "@/types/currency";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnFooterAction } from "./grn-footer-action";
 
@@ -36,8 +38,10 @@ export function GrnSummaryFooter({
   const currencyName =
     useWatch({ control: form.control, name: "currency_name" }) ?? "";
 
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
+  const { items: currencies } = useEntitiesByIds<Currency>({
+    useListHook: useCurrency,
+    ids: currencyId ? [currencyId] : [],
+  });
   const currencyCode =
     currencies.find((c) => c.id === currencyId)?.code || currencyName;
 

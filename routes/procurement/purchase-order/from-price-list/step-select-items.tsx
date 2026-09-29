@@ -32,6 +32,8 @@ import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Currency } from "@/types/currency";
 import { useActivePriceListsByVendor } from "@/hooks/use-price-list";
 import type { PriceList, PriceListDetailItem } from "@/types/price-list";
 import { usePoRowFilter, type PoFilterField } from "../po-row-filter";
@@ -178,11 +180,25 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     [allRows, search, filter.matches],
   );
 
-  // เรตของสกุลเงินของ price list — ถ้าไม่ดึงมาเทียบ ใบสกุลต่างประเทศจะถูกส่งด้วย
-  // exchange_rate 1 ของ EMPTY_FORM · perpage: -1 (key เดียวกับ LookupCurrency)
-  // เดิม 30 สกุลที่อยู่หลังหน้าแรกหาเรตไม่เจอแล้วเงียบ ๆ ได้ 1
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  const currencies = currencyData?.data ?? [];
+  // เรตของสกุลเงินของ price list ที่อยู่ในตาราง (ดึงตาม id) — ถ้าไม่มีเรต ใบสกุล
+  // ต่างประเทศจะถูกส่งด้วย exchange_rate 1 ของ EMPTY_FORM เงียบ ๆ (บั๊กเดิม) จึงถือว่า
+  // แถวที่เรตของสกุลยังไม่มา "ยังไม่พร้อม" — ติ๊กไม่ได้จนกว่าเรตจะมาถึง
+  const currencyIds = useMemo(
+    () => allRows.map((r) => r.currency?.id ?? ""),
+    [allRows],
+  );
+  const { items: rateCurrencies } = useEntitiesByIds<Currency>({
+    useListHook: useCurrency,
+    ids: currencyIds,
+  });
+  const rateById = useMemo(
+    () => new Map(rateCurrencies.map((c) => [c.id, c.exchange_rate] as const)),
+    [rateCurrencies],
+  );
+  const isRateReady = useCallback(
+    (row: PlRow) => !row.currency?.id || rateById.get(row.currency.id) != null,
+    [rateById],
+  );
 
   const selectedByDetail = useMemo(
     () => new Map(items.map((i) => [i.pricelist_detail_id, i] as const)),
@@ -203,8 +219,9 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   const canSelectRow = useCallback(
     (row: PlRow) =>
       row.canUse &&
+      isRateReady(row) &&
       (activeCurrency == null || row.currency?.id === activeCurrency.id),
-    [activeCurrency],
+    [activeCurrency, isRateReady],
   );
 
   const hasUnusableRow = rows.some((r) => !r.canUse);
@@ -249,7 +266,11 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     const kept = current.filter((i) => wanted.has(i.pricelist_detail_id));
     const keptIds = new Set(kept.map((i) => i.pricelist_detail_id));
     const added = allRows.filter(
-      (r) => wanted.has(r.detail.id) && !keptIds.has(r.detail.id) && r.canUse,
+      (r) =>
+        wanted.has(r.detail.id) &&
+        !keptIds.has(r.detail.id) &&
+        r.canUse &&
+        isRateReady(r),
     );
 
     // "เลือกทั้งหมด" กวาดได้ทุกแถวตอนที่ยังไม่มีสกุลตั้งต้น (ยังไม่มีแถวไหนถูกล็อก)
@@ -277,7 +298,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
       form.setValue("currency_code", currency.code ?? "", {
         shouldDirty: true,
       });
-      const rate = currencies.find((c) => c.id === currency.id)?.exchange_rate;
+      const rate = rateById.get(currency.id);
       if (rate != null) {
         form.setValue("exchange_rate", rate, { shouldDirty: true });
       }
