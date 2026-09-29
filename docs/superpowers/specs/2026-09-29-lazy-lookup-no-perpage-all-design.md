@@ -81,11 +81,11 @@ useLookupPagination<T>({
 
 พฤติกรรม:
 
-1. **ดึงรายการที่เลือกไว้** — id ใน `selectedIds` ที่ยังไม่อยู่ในหน้าที่โหลดมาแล้ว ส่งให้ `useEntitiesByIds`
-   ดึงเสมอโดย**ไม่สนใจ `enabled`** เพื่อให้ช่องแสดงชื่อได้ทันทีโดยไม่ต้องรอผู้ใช้เปิด dropdown
-   ถ้าทุก id อยู่ในหน้าที่โหลดแล้วจะไม่ยิง
-2. **`items`** = รายการที่เลือกไว้ (ไม่ผ่าน `filter`) + รายการในหน้าที่โหลดแล้วที่ผ่าน `filter`
-   ตัดตัวซ้ำด้วย `getId` ค่าที่ถูกปิดใช้งานจึงยังแสดงอยู่ แต่ผู้ใช้เลือกค่าที่ปิดใช้งานเพิ่มไม่ได้
+1. **ดึงรายการที่เลือกไว้** — `selectedIds` ทั้งหมดส่งให้ `useEntitiesByIds` ดึงเสมอ (ไม่สนใจ `enabled`)
+   ไม่ตัด id ที่อยู่ในหน้าที่โหลดแล้วออก เพื่อให้ query key ตรงกับ chip ใน `use-list-filters.ts`
+2. **`items`** = รายการในหน้าที่โหลดแล้วที่ผ่าน `filter` (ค่าที่เลือกอยู่ผ่านเสมอ) — **ไม่เอาค่าที่เลือก
+   ไปต่อบนสุด** เพราะจะโผล่ในผลค้นหาที่ไม่ตรงคำค้น label ของค่าที่ไม่อยู่ใน `items` หาจาก prop ใหม่
+   `LookupCombobox.selectedItems` แทน ส่วน filter แบบเลือกหลายค่าแสดง `selectedItems` บนสุดเอง
 3. **`selectedItems`** — รายการที่ตรงกับ `selectedIds` (จากหน้าที่โหลดมาหรือจากการดึงตาม id) เรียงตาม `selectedIds`
 4. **`serverFilter`** — ส่งเป็น `filter` ของหน้า list และนับเป็น reset dep อัตโนมัติ
 5. **ผลคำค้นเก่ามาทีหลัง** — effect ที่ต่อรายการรับข้อมูลเฉพาะเมื่อ `data.paginate.page === page`
@@ -165,4 +165,8 @@ useLookupPagination<T>({
 
 ## 7. บันทึกระหว่างทำ
 
-(เติมตอน implement: endpoint ที่ไม่รับ server filter และทางที่ใช้แทน)
+- `is_active|boolean:true` ใช้ไม่ได้กับ `credit-note-reasons`, `physical-count-periods` (400 Unknown argument)
+  และ `users` (ได้ 0 แถว) → ไม่ส่ง
+- ส่ง `filter` ซ้ำหลายตัวไม่ได้ — หลายเงื่อนไขต้องคั่น `,` ใน filter เดียว (ยืนยันแล้วว่าเป็น AND)
+- `lookup-physical-count-period` ตัดออกจากงานนี้: พังอยู่ก่อนแล้ว — API คืน `tb_inventory_period.start_at/end_at`
+  แต่ FE อ่าน `counting_period_from_date` ที่ไม่มีใน response → รายการว่างเสมอ ต้องแก้แยก

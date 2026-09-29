@@ -49,6 +49,11 @@ interface LookupComboboxProps<T> {
   readonly value: string;
   readonly onValueChange: (value: string, item?: T) => void;
   readonly items: T[];
+  /**
+   * รายการที่เลือกอยู่ซึ่งอาจไม่อยู่ใน `items` (อยู่หลังหน้าแรก / ถูกปิดใช้งาน)
+   * — ใช้หา label บนปุ่มเท่านั้น ไม่แสดงในรายการ
+   */
+  readonly selectedItems?: T[];
   readonly getId: (item: T) => string;
   readonly getLabel: (item: T) => string;
   readonly placeholder?: string;
@@ -102,6 +107,7 @@ export function LookupCombobox<T>({
   value,
   onValueChange,
   items,
+  selectedItems,
   getId,
   getLabel,
   placeholder,
@@ -171,6 +177,7 @@ export function LookupCombobox<T>({
 
   const selectedItem = value
     ? (items.find((item) => getId(item) === value) ??
+      selectedItems?.find((item) => getId(item) === value) ??
       (pickedItem && getId(pickedItem) === value ? pickedItem : undefined))
     : undefined;
   let selectedLabel: string | null = null;
