@@ -10,6 +10,7 @@ const crud = createConfigCrud<ItemGroupDto, CreateItemGroupDto>({
 });
 
 export const useItemGroup = crud.useList;
+export const useItemGroupAll = crud.useListAll;
 
 export const useItemGroupById = crud.useById;
 

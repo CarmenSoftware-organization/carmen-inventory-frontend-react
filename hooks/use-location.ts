@@ -25,6 +25,7 @@ const crud = createConfigCrud<Location, CreateLocationDto>({
  * ```
  */
 export const useLocation = crud.useList;
+export const useLocationAll = crud.useListAll;
 
 /**
  * Alias ของ {@link useLocation} สื่อความหมายว่าเป็น lookup จาก config endpoint

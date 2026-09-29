@@ -11,6 +11,7 @@ const crud = createConfigCrud<Currency, CreateCurrencyDto>({
 });
 
 export const useCurrency = crud.useList;
+export const useCurrencyAll = crud.useListAll;
 
 export const useCreateCurrency = crud.useCreate;
 

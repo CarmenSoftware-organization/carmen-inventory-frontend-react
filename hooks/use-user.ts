@@ -22,6 +22,7 @@ const crud = createConfigCrud<User, never>({
 });
 
 export const useUser = crud.useList;
+export const useUserAll = crud.useListAll;
 
 export const useDeleteUser = crud.useDelete;
 

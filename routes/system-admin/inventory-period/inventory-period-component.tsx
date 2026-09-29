@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   useInventoryPeriod,
+  useInventoryPeriodAll,
   useGenerateNextInventoryPeriod,
   useExportInventoryPeriod,
 } from "./use-inventory-period";
@@ -155,8 +156,8 @@ export default function InventoryPeriodComponent() {
 
   // แถบไทม์ไลน์และจำนวนรอบที่ปุ่ม "เติมรอบ" จะสร้าง ต้องเห็นรอบ **ทั้งหมด**
   // ไม่ใช่หน้าปัจจุบันของตาราง — รอบมีปีละ 12 แถว ดึงทั้งหมดได้สบาย
-  const { data: allData } = useInventoryPeriod({ perpage: -1 });
-  const allPeriods = allData?.data ?? [];
+  const { data: allData } = useInventoryPeriodAll();
+  const allPeriods = allData ?? [];
   // backend เติมรอบที่เปิดอยู่ให้ครบ count ไม่ใช่สร้างเพิ่ม count รอบ
   // (micro-business inventory-period.service.ts generateNextPeriods)
   const openCount = allPeriods.filter((p) => p.status === "open").length;

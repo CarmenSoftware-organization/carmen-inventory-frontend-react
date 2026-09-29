@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { usePermission } from "./use-permission";
+import { usePermissionAll } from "./use-permission";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { escapeHtml as esc, printHtmlDocument } from "@/lib/print-html";
@@ -28,11 +28,11 @@ export function useRolePrint() {
   const t = useTranslations("systemAdmin.role");
   const tc = useTranslations("common");
   const tRes = useTranslations("systemAdmin.role.resources");
-  const { data: permData } = usePermission({ perpage: -1 });
+  const { data: permData } = usePermissionAll();
   const { defaultBu, fullName, dateTimeFormat } = useProfile();
 
   const printRole = (roleName: string, grantedIds: string[]) => {
-    const permissions = (permData?.data ?? []) as PermissionRecord[];
+    const permissions = (permData ?? []) as PermissionRecord[];
     const granted = new Set(grantedIds);
 
     const categoryLabel = (cat: string) => {
