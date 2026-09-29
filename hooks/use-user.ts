@@ -7,6 +7,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/lib/build-query-string";
 import { ApiError } from "@/lib/api-error";
+import { fetchAllPages } from "@/lib/fetch-all-pages";
 import type { User } from "@/types/workflows";
 import type {
   UserDetail,
@@ -79,8 +80,8 @@ export interface UserRoleMatrix {
 
 /**
  * Hook คืนฟังก์ชันดึงตาราง user × role ทั้ง BU จาก
- * `GET /api/config/{bu}/user-application-roles` — ยิงรอบแรกอ่าน `paginate.total`
- * ถ้าหน้าแรกยังไม่ครบค่อยยิงซ้ำด้วย `perpage = total` ให้ได้ครบทุกคน
+ * `GET /api/config/{bu}/user-application-roles` — วนดึงทีละหน้า (perpage สูงสุด 100)
+ * ด้วย `fetchAllPages` ให้ได้ครบทุกคน
  * data คือ user พร้อม role_ids และ summary.roles คือ role catalog ไว้ทำหัวคอลัมน์
  * @returns async fetcher คืน { users, roles }
  * @example
@@ -94,22 +95,21 @@ export function useUserRoleMatrixFetch() {
     if (!buCode) throw new Error("Missing buCode");
     const endpoint = API_ENDPOINTS.USER_APPLICATION_ROLES(buCode);
 
-    const first = await httpClient.get(endpoint);
-    if (!first.ok) {
-      throw await ApiError.from(first, "Failed to fetch user roles");
-    }
-    const firstJson = await first.json();
-    const users: UserApplicationRole[] = firstJson.data ?? [];
-    const total: number = firstJson.paginate?.total ?? users.length;
-    if (users.length >= total) {
-      return { users, roles: firstJson.summary?.roles ?? [] };
-    }
-
-    const res = await httpClient.get(buildUrl(endpoint, { perpage: total }));
-    if (!res.ok) {
-      throw await ApiError.from(res, "Failed to fetch user roles");
-    }
-    const json = await res.json();
-    return { users: json.data ?? [], roles: json.summary?.roles ?? [] };
+    // summary.roles เหมือนกันทุกหน้า (เป็นสรุปทั้ง BU) จึงเก็บจากหน้าแรกครั้งเดียว
+    let roles: UserRoleSummaryRole[] = [];
+    const users = await fetchAllPages<UserApplicationRole>(
+      async (page, perpage) => {
+        const res = await httpClient.get(
+          buildUrl(endpoint, { page, perpage }),
+        );
+        if (!res.ok) {
+          throw await ApiError.from(res, "Failed to fetch user roles");
+        }
+        const json = await res.json();
+        if (page === 1) roles = json.summary?.roles ?? [];
+        return json;
+      },
+    );
+    return { users, roles };
   };
 }
