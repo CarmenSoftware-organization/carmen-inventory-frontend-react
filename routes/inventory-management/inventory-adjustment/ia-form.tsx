@@ -89,9 +89,15 @@ export function InventoryAdjustmentForm({
       ? ADJUSTMENT_TYPE.STOCK_IN
       : ADJUSTMENT_TYPE.STOCK_OUT;
   const { data: adjTypeData } = useAdjustmentType({ perpage: -1 });
+  // เหตุผลที่ใบบันทึกไว้คงไว้แม้ถูกปิดใช้งานแล้ว ไม่งั้น Select ตอนแก้ไขขึ้นว่าง
+  const savedAdjTypeId =
+    inventoryAdjustment?.adjustment_type?.id ??
+    inventoryAdjustment?.adjustment_type_id;
   const adjTypes =
     adjTypeData?.data?.filter(
-      (at) => at.is_active && at.type === adjTypeFilter,
+      (at) =>
+        (at.is_active || at.id === savedAdjTypeId) &&
+        at.type === adjTypeFilter,
     ) ?? [];
 
   const defaultValues = getDefaultValues(
