@@ -40,7 +40,11 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
 
-  const { data: rolesData, isLoading: rolesLoading } = useRole();
+  // perpage: -1 — ไม่ส่งแล้ว backend ให้แค่ 10 role แรก role ที่ assign ไว้เกินจากนั้น
+  // ไม่ขึ้นใน checklist เลย (เอาออกไม่ได้) และ role ที่ 11+ ก็ assign ไม่ได้
+  const { data: rolesData, isLoading: rolesLoading } = useRole({
+    perpage: -1,
+  });
   const updateUser = useUpdateUser();
   const roles = rolesData?.data ?? [];
 

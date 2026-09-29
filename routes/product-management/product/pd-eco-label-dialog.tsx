@@ -93,7 +93,11 @@ export function ProductEcoLabelDialog({
   const tv = useTranslations("validation");
 
   const { data: masterData } = useEcoLabel({ perpage: -1 });
-  const masterLabels = (masterData?.data ?? []).filter((c) => c.is_active);
+  // label ที่ผูกไว้คงไว้แม้ master ถูกปิดใช้งานแล้ว ไม่งั้น Select ว่างและติด
+  // validation required จน Save ไม่ได้
+  const masterLabels = (masterData?.data ?? []).filter(
+    (c) => c.is_active || c.id === ecoLabel?.master_eco_label_id,
+  );
 
   const form = useForm<ProductEcoLabelFormValues>({
     resolver: zodResolver(

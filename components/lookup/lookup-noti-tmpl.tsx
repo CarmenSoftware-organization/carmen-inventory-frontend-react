@@ -41,8 +41,9 @@ export function LookupNotificationTemplate({
       perpage: -1,
       enabled: hasOpened || !!value,
       resetDeps: [channelType],
+      // template ที่ stage ผูกไว้คงไว้แม้ถูกปิดใช้งาน ไม่งั้นขึ้น placeholder
       filter: (tpl: NotificationTemplate) =>
-        tpl.is_active && tpl.type === channelType,
+        (tpl.is_active || tpl.id === value) && tpl.type === channelType,
     });
 
   return (
