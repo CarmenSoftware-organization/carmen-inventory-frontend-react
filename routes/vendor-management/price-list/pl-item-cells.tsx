@@ -122,6 +122,11 @@ export function UnitCell({
           productId={productId}
           value={field.value}
           onValueChange={field.onChange}
+          defaultLabel={
+            field.value && field.value === detailRef?.unit?.id
+              ? (detailRef.unit.name ?? undefined)
+              : undefined
+          }
           disabled={isDisabled}
           className="w-full text-xs"
           error={errors?.unit_id?.message}

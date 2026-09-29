@@ -44,6 +44,7 @@ export function UnitCell({ form, index, isView, isDisabled }: CellProps) {
           productId={productId}
           value={field.value}
           onValueChange={field.onChange}
+          defaultLabel={form.getValues(`details.${index}.unit_name`) || undefined}
           onItemChange={(unit) => {
             if (unit?.name) {
               form.setValue(`details.${index}.unit_name`, unit.name);

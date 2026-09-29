@@ -10,6 +10,13 @@ import type { PrFormValues } from "../pr-form-schema";
 
 type PrUnitField = "requested_unit_id" | "approved_unit_id" | "foc_unit_id";
 
+/** ช่องชื่อหน่วยคู่ของแต่ละช่อง id — ใช้เป็น defaultLabel ของ LookupProductUnit */
+const UNIT_NAME_FIELD = {
+  requested_unit_id: "requested_unit_name",
+  approved_unit_id: "approved_unit_name",
+  foc_unit_id: "foc_unit_name",
+} as const satisfies Record<PrUnitField, string>;
+
 export const STATUS_NORMALIZE: Record<string, string> = {
   approve: "approved",
   submit: "pending",
@@ -194,11 +201,16 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
     control,
     name: `items.${index}.${unitField}`,
   });
+  const unitName = useWatch({
+    control,
+    name: `items.${index}.${UNIT_NAME_FIELD[unitField]}`,
+  });
 
   return (
     <LookupProductUnit
       productId={productId}
       value={field.value ?? ""}
+      defaultLabel={unitName || undefined}
       onValueChange={(id) => {
         field.onChange(id);
         onExtraChange?.(id);
