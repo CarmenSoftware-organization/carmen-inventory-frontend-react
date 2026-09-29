@@ -138,6 +138,9 @@ export interface GoodsReceiveNote {
   // detail endpoint เท่านั้น
   vendor?: EntityRef | null;
   currency: EntityRef | null;
+  // `vendor/:vendor_id/cn` (lookup GRN ของหน้า Credit Note) เคยส่ง currency แบบแบนแทน object —
+  // อ่านผ่าน grnCurrencyId() ที่รับได้ทั้งสองรูป อย่าอ่านตรงจากฟิลด์ใดฟิลด์หนึ่ง
+  currency_id?: string | null;
   exchange_rate: number | null;
   exchange_rate_date: string | null;
   total_amount?: number;

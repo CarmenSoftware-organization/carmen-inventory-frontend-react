@@ -19,6 +19,7 @@ import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupGrnByVendorForCn } from "@/components/lookup/lookup-grn-by-vendor-for-cn";
 import { LookupCnReason } from "@/components/lookup/lookup-cn-reason";
 import type { CnFormValues } from "./cn-form-schema";
+import { grnCurrencyId } from "./cn-grn-currency";
 
 interface CnGeneralFieldsProps {
   readonly form: UseFormReturn<CnFormValues>;
@@ -76,7 +77,7 @@ export function CnGeneralFields({
               onValueChange={field.onChange}
               onItemChange={(grn) => {
                 form.setValue("grn_date", grn.grn_date ?? "");
-                form.setValue("currency_code", grn.currency?.id ?? "");
+                form.setValue("currency_code", grnCurrencyId(grn));
                 form.setValue("exchange_rate", grn.exchange_rate ?? 1);
                 form.setValue("invoice_no", grn.invoice_no ?? "");
                 form.setValue("invoice_date", grn.invoice_date ?? "");
