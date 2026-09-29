@@ -43,7 +43,8 @@ export function LookupCnReason({
   const tfl = useTranslations("field");
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data } = useCnReason({ perpage: 30 });
+  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบ ไม่งั้นเหตุผลที่อยู่หลัง 30 ตัวแรกขึ้นว่าง
+  const { data } = useCnReason({ perpage: -1 });
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("cnReason") });
   const reasons = data?.data ?? [];

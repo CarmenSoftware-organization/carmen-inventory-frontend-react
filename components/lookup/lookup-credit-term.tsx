@@ -40,10 +40,13 @@ export function LookupCreditTerm({
   const tfl = useTranslations("field");
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data } = useCreditTerm({ perpage: 30 });
+  // perpage: -1 — รายการอ้างอิงเล็ก ดึงครบไม่มี cap 30 · ค่าที่เลือกอยู่คงไว้แม้ถูก
+  // ปิดใช้งานไปแล้ว (เอกสารเก่าที่บันทึกค่านั้นไว้) ไม่งั้น Select หาไม่เจอแล้วขึ้นว่าง
+  const { data } = useCreditTerm({ perpage: -1 });
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("creditTerm") });
-  const creditTerms = data?.data?.filter((c) => c.is_active) ?? [];
+  const creditTerms =
+    data?.data?.filter((c) => c.is_active || c.id === value) ?? [];
   const selectedLabel = creditTerms.find((c) => c.id === value)?.name;
   const showErrorTooltip = !!error && !selectOpen;
   const showTooltip = !error && !selectOpen && !!selectedLabel;
