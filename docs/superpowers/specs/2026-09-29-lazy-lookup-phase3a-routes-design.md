@@ -78,6 +78,15 @@ export interface EntityFilterSource<T> {
   })
 ```
 
+เพิ่มระหว่างลงมือ: `bareIds?: boolean` — ค่า URL เป็น id เปล่าคั่น `,` (ตัวกรองผู้ใช้ของ
+activity-log / user-activity ส่งเป็น query param `actor_id=` แยก ไม่ผ่าน `filter=`) ·
+`EntityMultiFilter` อ่านค่าด้วย `clauseTokens` จึงรับได้ทั้งรูป `<col>|string:a,b`, รูปเก่าของ
+`MultiSelectFilter` (`<col>|string:a,<col>|string:b` — backend ตีความเท่ากับ IN, probe 924=924)
+และ id เปล่า
+
+ข้อตกลงที่ user อนุมัติ: รูปค่า URL ของตัวกรอง entity ที่เขียนใหม่เป็น `col|string:A,B` (เขียน) ·
+ฝั่งอ่านยังรับรูปเก่าแบบ prefix ซ้ำ จึงไม่ทำลาย URL/saved view เดิม
+
 ### 3.2 ตัวกรอง
 
 `components/list-filter/filter-field-control.tsx` เพิ่ม `case "entity"` → `<EntityMultiFilter>` จาก
@@ -123,6 +132,17 @@ fallback แบบนับจำนวนเหมือนเดิม · quer
 
 พฤติกรรมที่เปลี่ยน: ลำดับตัวเลือกตาม server (ไม่ sort ในเครื่อง) · ตัวที่ปิดใช้งานไม่อยู่ในรายการ แต่ค่าที่ค้างอยู่ยังขึ้นชื่อ
 
+ผลตอนลงมือ:
+- IA adjustment type และ RFP template ใช้ `serverFilter: null` (โค้ดเดิมไม่กรอง และหน้า list
+  ต้องกรองใบเก่าที่อ้างของที่ถูกปิดไปแล้วได้) — ขัดกับคอลัมน์ serverFilter ของตาราง แต่ตรงกับ
+  กติกา "ตัวที่เดิมไม่กรองให้ใส่ null"
+- price list currency: ค่าที่เก็บคือ **รหัส** (`currency_code|string:THB`) → `getId: c => c.code`,
+  `idFilterKey: "code"` (currencies รับ `code|string:`)
+- user department: เดิมเลือกได้ค่าเดียว → เลือกหลายค่า (users รับ `department_id|string:a,b`) — user อนุมัติ
+- SR คลังต้นทาง: `is_active|boolean:true,location_type|enum:inventory,consignment` (enum ต้องอยู่ท้าย)
+- `grn-invoice-filter` ทำได้โดยไม่เปลี่ยนค่าที่เก็บ: `useLookupPagination` บน GRN list
+  (`sort=invoice_no:asc`, perpage 50, search ที่ server) แล้ว distinct เลขที่ — ไม่ย้ายไปช่วง 4
+
 ## 4. id→ชื่อ / ค่า default
 
 เก็บ id ที่แถวบนหน้านั้นอ้างถึง (unique) → `useEntitiesByIds` → `Map` · ไม่มี id = ไม่ยิง ·
@@ -149,6 +169,11 @@ fallback แบบนับจำนวนเหมือนเดิม · quer
 (memory `editable-datagrid-must-memoize-columns`) · `step-select-items` เดิมเคยพลาดเงียบ ๆ เพราะหาเรตไม่เจอ
 (ได้ 1) — ระหว่างโหลดต้องไม่ปล่อยให้ติ๊กแถวสกุลต่างประเทศด้วยเรต 1: ถือว่า "ยังไม่พร้อม" จนกว่าเรตของสกุลนั้นมาถึง
 
+ผลตอนลงมือ: activity-log / user-activity — แถวมี `actor_firstname/…/username` มาจาก API แล้ว
+ทะเบียนผู้ใช้ทั้งก้อนถูกใช้ทำตัวเลือกของตัวกรองอย่างเดียว จึงไม่มีงาน id→ชื่อ ·
+recipe-category list ใช้ `row.parent.name` ที่มากับแถว · eq-component ต้องดึงชื่อหมวดของแถว
+(ไม่อยู่ในตารางนี้แต่ใช้ทะเบียนเดียวกับตัวกรอง)
+
 ## 5. dropdown ในฟอร์ม
 
 lookup ใหม่วางข้าง feature (ใช้โมดูลเดียว) ใช้ `useLookupPagination` + `selectedIds` + `LookupCombobox` ตามแบบ `lookup-currency.tsx`
@@ -172,6 +197,18 @@ lookup ใหม่วางข้าง feature (ใช้โมดูลเด
 - `enabled: hasOpened || !!value` → `enabled: hasOpened`
 - lookup ที่ endpoint ต้องมี parent (location-pair-product, product-in-location, product-location, grn-by-vendor-for-cn) — ถ้า endpoint ย่อยไม่รับ `id|string:` ให้คงการหา label แบบเดิมและบันทึกในรายงาน (probe ก่อนแก้)
 - `lookup-physical-count-period`: แก้ให้อ่านวันที่จาก `tb_inventory_period.start_at`/`end_at` (บั๊กเดิม — dropdown ว่างเสมอ) · ห้ามส่ง `is_active`
+
+ผล probe endpoint ที่ต้องมี parent (T02 2026-09-29):
+- `good-received-notes/vendor/:v/cn` รับ `id|string:` → ส่ง selectedIds
+- `products-location-workflow/:from/:to/:wf` และ `products-location-workflow/:loc/:wf` รับ
+  `product_id|string:` (ไม่ใช่ `id`) → ส่ง selectedIds + `idFilterKey: "product_id"` และให้ hook ส่ง `filter`
+- `user-locations/product/:p` รับ `id|string:` → ส่ง selectedIds เฉพาะเมื่อไม่มี workflowId
+- `products/locations/:loc` และ `config/workflows/:wf/products/:p/locations` **เมิน filter** →
+  คงการหา label แบบเดิม (`items` + `defaultLabel`)
+- `lookup-dataset` — `dashboard-lab/datasets` ไม่ paginate (registry ใน code คืนทั้งชุด) ไม่มี
+  `-1` และดึงตาม id ไม่ได้ → ไม่แก้
+- `lookup-physical-count-period`: วันที่จาก `tb_inventory_period.start_at/end_at`,
+  sort `tb_inventory_period.start_at:desc` ที่ server, search ของ endpoint ไม่ครอบงวด → ค้นในรายการที่โหลดแล้ว
 
 ## 7. ตรวจในเบราว์เซอร์ (รูปแบบละตัวแทน)
 
