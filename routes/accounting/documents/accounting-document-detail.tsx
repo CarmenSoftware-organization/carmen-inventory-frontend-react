@@ -13,16 +13,19 @@ import {
   ChevronUp,
   CircleDollarSign,
   Copy,
+  ExternalLink,
   FilePlus2,
   History,
   LayoutTemplate,
   ListTree,
+  MoreHorizontal,
   Paperclip,
   Pencil,
   Plus,
   ReceiptText,
   Save,
   Send,
+  ShieldCheck,
   Trash2,
   WandSparkles,
   X,
@@ -33,6 +36,7 @@ import { toast } from "sonner";
 import type { FormMode } from "@/types/form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Card,
   CardAction,
@@ -42,9 +46,18 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
+import { CellAction } from "@/components/ui/cell-action";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import {
   Sheet,
   SheetContent,
@@ -59,12 +72,29 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   accountingDocumentFromPath,
   accountingDetailInitialMode,
   documentsFor,
-} from "./accounting-documents";
+} from "./accounting-document-model";
 import { BackButton } from "@/components/share/back-button";
+import { ErrorState } from "@/components/ui/error-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useJournalVoucher } from "../journal-voucher/use-journal-voucher";
+import {
+  useCopyJournalVoucher,
+  useCreateJournalVoucher,
+  useJournalVoucherAction,
+  useUpdateJournalVoucher,
+} from "../journal-voucher/use-journal-voucher";
+import type { JournalVoucherInput } from "@/types/journal-voucher";
+import {
+  isSourceGenerated,
+  journalVoucherCapabilities,
+  sourceLinksForJournal,
+} from "../journal-voucher/journal-voucher-source";
 
 const DEPARTMENTS = [
   { id: "100", label: "100 - Admin" },
@@ -78,6 +108,11 @@ const ACCOUNTS = [
   { id: "21100", label: "21100 - Accounts Payable" },
   { id: "61010", label: "61010 - Operating Supplies" },
   { id: "41000", label: "41000 - Room Revenue" },
+  { id: "6100", label: "6100 - Expense" },
+  { id: "1150", label: "1150 - Input VAT" },
+  { id: "2110", label: "2110 - Trade accounts payable" },
+  { id: "6200", label: "6200 - Office supplies" },
+  { id: "1100", label: "1100 - Cash" },
 ];
 
 const TAX_CODES = [
@@ -116,10 +151,14 @@ interface JournalLine {
   budgetControlled: boolean;
   budget: string;
   dimension: string;
+  departmentLabel?: string;
+  accountLabel?: string;
+  currency?: string;
+  exchangeRate?: number;
 }
 
 type LineDetailSection = "tax" | "budget" | "dimension";
-type UtilityPanel = "attachments" | "log";
+type UtilityPanel = "attachments" | "comments" | "log";
 
 const FORM_ID = "accounting-document-form";
 
@@ -157,17 +196,40 @@ const optionLabel = (
   value: string,
 ) => options.find((option) => option.id === value)?.label ?? value;
 
-export default function AccountingDetail() {
+export default function AccountingDocumentDetail() {
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const t = useTranslations("accounting.documents");
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
+  const isJournalVoucher = config.kind === "journalVoucher";
+  const usesVoucherDetailPattern =
+    isJournalVoucher ||
+    config.kind === "templateVoucher" ||
+    config.kind === "recurringVoucher" ||
+    config.kind === "allocationVoucher" ||
+    config.kind === "arInvoice" ||
+    config.kind === "arReceipt" ||
+    config.kind === "assetRegister" ||
+    config.kind === "assetDisposal";
+  const journalQuery = useJournalVoucher(isJournalVoucher ? id : undefined);
+  const createJournal = useCreateJournalVoucher();
+  const updateJournal = useUpdateJournalVoucher();
+  const submitJournal = useJournalVoucherAction("submit");
+  const voidJournal = useJournalVoucherAction("void");
+  const reverseJournal = useJournalVoucherAction("reverse");
+  const copyJournal = useCopyJournalVoucher();
+  const journal = journalQuery.data;
+  const sourceGenerated = journal ? isSourceGenerated(journal) : false;
+  const journalCapabilities = journal
+    ? journalVoucherCapabilities(journal)
+    : null;
+  const sourceLink = journal
+    ? sourceLinksForJournal(journal).find((link) => link.href)
+    : undefined;
   const hasWorkflowApproval =
-    config.kind === "journalVoucher" ||
-    config.kind === "apInvoice" ||
-    config.kind === "apPayment" ||
+    (config.kind === "journalVoucher" && !sourceGenerated) ||
     config.kind === "arInvoice" ||
     config.kind === "arReceipt";
   const hasInlineApproval =
@@ -175,30 +237,85 @@ export default function AccountingDetail() {
   const documents = useMemo(() => documentsFor(config), [config]);
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
-  const number = isNew ? t("autoNumber") : document.number;
+  const number = isNew
+    ? t("autoNumber")
+    : (journal?.display_no ?? document.number);
   const [mode, setMode] = useState<FormMode>(() =>
     accountingDetailInitialMode(id),
   );
-  const isView = mode === "view";
+  const isView = mode === "view" || sourceGenerated;
   const editActivatedAtRef = useRef(0);
   const [documentStatus, setDocumentStatus] = useState<string>(
     isNew ? "Draft" : document.status,
   );
   const [utilityPanel, setUtilityPanel] = useState<UtilityPanel | null>(null);
+  const [journalConfirmation, setJournalConfirmation] = useState<
+    "void" | "reverse" | null
+  >(null);
+  const [comments, setComments] = useState<string[]>([
+    "Generated from the AP posting source.",
+  ]);
+  const [commentDraft, setCommentDraft] = useState("");
   const [values, setValues] = useState({
-    date: document.date,
+    date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
     description: isNew ? "" : document.description,
     party: isNew ? "" : document.party,
-    schedulePost: true,
-    scheduleDate: document.date,
-    autoReverse: true,
-    reverseDate: "2026-08-01",
+    schedulePost: false,
+    scheduleDate: isNew ? new Date().toISOString().slice(0, 10) : document.date,
+    autoReverse: false,
+    reverseDate: "",
   });
   const [lines, setLines] = useState<JournalLine[]>(INITIAL_LINES);
   const [selectedLineIds, setSelectedLineIds] = useState<string[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
+
+  useEffect(() => {
+    if (!journal || isNew) return;
+    setDocumentStatus(
+      journal.jv_status
+        .split("_")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" "),
+    );
+    setValues({
+      date: (journal.jv_date ?? journal.journal_date).slice(0, 10),
+      description: journal.description,
+      party: journal.source_no ?? "",
+      schedulePost: journal.schedule_post,
+      scheduleDate:
+        journal.scheduled_post_at?.slice(0, 10) ??
+        journal.journal_date.slice(0, 10),
+      autoReverse: journal.auto_reverse,
+      reverseDate: journal.reverse_date?.slice(0, 10) ?? "",
+    });
+    setLines(
+      journal.lines.map((line) => ({
+        id: line.id,
+        department: line.department_id ?? "",
+        departmentLabel: line.department_code
+          ? `${line.department_code} - ${line.department_name ?? ""}`
+          : "—",
+        account: line.account_id,
+        accountLabel: line.account_code
+          ? `${line.account_code} - ${line.account_name ?? ""}`
+          : line.account_id,
+        comment: line.comment ?? "",
+        debit: Number(line.debit),
+        credit: Number(line.credit),
+        taxCode: "",
+        whtCode: "NONE",
+        budgetControlled: false,
+        budget: "",
+        dimension: "",
+        currency: line.currency_id,
+        exchangeRate: Number(line.exchange_rate),
+      })),
+    );
+    setSelectedLineIds([]);
+    setMode("view");
+  }, [isNew, journal]);
   const selectedLine = lines.find((line) => line.id === selectedLineId);
   const allLinesSelected =
     lines.length > 0 && selectedLineIds.length === lines.length;
@@ -206,13 +323,15 @@ export default function AccountingDetail() {
 
   const resetForm = () => {
     setValues({
-      date: document.date,
+      date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
       description: isNew ? "" : document.description,
       party: isNew ? "" : document.party,
-      schedulePost: true,
-      scheduleDate: document.date,
-      autoReverse: true,
-      reverseDate: "2026-08-01",
+      schedulePost: false,
+      scheduleDate: isNew
+        ? new Date().toISOString().slice(0, 10)
+        : document.date,
+      autoReverse: false,
+      reverseDate: "",
     });
     setLines(INITIAL_LINES);
     setSelectedLineIds([]);
@@ -286,11 +405,68 @@ export default function AccountingDetail() {
     setMode("view");
   };
 
-  const handleSave = (intent: "draft" | "submit") => {
+  const handleSave = async (intent: "draft" | "submit") => {
     if (
       mode === "edit" &&
       performance.now() - editActivatedAtRef.current < 500
     ) {
+      return;
+    }
+    if (isJournalVoucher) {
+      const input: JournalVoucherInput = {
+        journal_type: journal?.journal_type ?? "general",
+        prefix: journal?.prefix ?? "JV",
+        journal_date: values.date,
+        description: values.description,
+        note: journal?.note ?? null,
+        functional_currency_id: journal?.functional_currency_id ?? "THB",
+        source_system: "general_ledger",
+        source_type: "manual",
+        source_id: null,
+        source_no: null,
+        schedule_post: values.schedulePost,
+        scheduled_post_at: values.schedulePost ? values.scheduleDate : null,
+        auto_reverse: values.autoReverse,
+        reverse_date: values.autoReverse ? values.reverseDate : null,
+        lines: lines.map((line) => ({
+          account_id: line.account,
+          department_id: line.department || null,
+          comment: line.comment || null,
+          currency_id: line.currency ?? "THB",
+          exchange_rate: String(line.exchangeRate ?? 1),
+          rate_date: null,
+          rate_type: null,
+          rate_source: null,
+          debit: line.debit.toFixed(2),
+          credit: line.credit.toFixed(2),
+          dimension: [],
+        })),
+      };
+      try {
+        const saved = isNew
+          ? (await createJournal.mutateAsync(input)).data
+          : (
+              await updateJournal.mutateAsync({
+                ...input,
+                id: journal!.id,
+                doc_version: journal!.doc_version,
+              })
+            ).data;
+        if (intent === "submit")
+          await submitJournal.mutateAsync({
+            id: saved.id,
+            doc_version: saved.doc_version,
+          });
+        setMode("view");
+        toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
+        navigate(`${config.path}/${saved.id}`, { replace: true });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to save Journal Voucher",
+        );
+      }
       return;
     }
     if (mode === "add") {
@@ -304,11 +480,34 @@ export default function AccountingDetail() {
     toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
   };
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
+    if (isJournalVoucher && journal) {
+      try {
+        const copied = (await copyJournal.mutateAsync(journal.id)).data;
+        navigate(`${config.path}/${copied.id}`);
+        toast.success(t("copiedToNew"));
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to copy Journal Voucher",
+        );
+      }
+      return;
+    }
     navigate(`${config.path}/new`);
     setDocumentStatus("Draft");
     setMode("add");
     toast.success(t("copiedToNew"));
+  };
+
+  const handleNew = () => {
+    setValues((current) => ({ ...current, description: "", party: "" }));
+    setLines(INITIAL_LINES);
+    setSelectedLineIds([]);
+    setDocumentStatus("Draft");
+    setMode("add");
+    navigate(`${config.path}/new`);
   };
 
   const applyTemplate = () => {
@@ -371,172 +570,421 @@ export default function AccountingDetail() {
     config.kind === "journalVoucher"
       ? t("journalEntryDetails")
       : t("entryDetails");
+  const sourceLabel = isJournalVoucher
+    ? journal?.source_type === "manual"
+      ? "Manual"
+      : (journal?.source_no ?? journal?.source_id ?? "—")
+    : "AP-102934";
+
+  if (isJournalVoucher && journalQuery.isLoading) {
+    return <Skeleton className="h-[70vh] rounded-lg" />;
+  }
+  if (isJournalVoucher && journalQuery.isError) {
+    return (
+      <ErrorState
+        error={journalQuery.error}
+        message="Unable to load Journal Voucher"
+        onRetry={() => void journalQuery.refetch()}
+      />
+    );
+  }
+  if (isJournalVoucher && !isNew && !journal) {
+    return (
+      <ErrorState
+        notFoundMessage="Journal Voucher not found"
+        backTo="/accounting/journal-voucher"
+      />
+    );
+  }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
-        <div className="flex flex-wrap items-center gap-1">
-          <BackButton
-            onClick={() => navigate(config.path)}
-            label={t("back")}
-          />
-          <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setValues((current) => ({
-                ...current,
-                description: "",
-                party: "",
-              }));
-              setLines(INITIAL_LINES);
-              setSelectedLineIds([]);
-              setDocumentStatus("Draft");
-              setMode("add");
-              navigate(`${config.path}/new`);
-            }}
-          >
-            <FilePlus2 className="size-4" aria-hidden="true" />
-            {t("new")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-          >
-            <Copy className="size-4" aria-hidden="true" />
-            {t("copy")}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={applyTemplate}
-          >
-            <LayoutTemplate className="size-4" aria-hidden="true" />
-            {t("template")}
-          </Button>
-          {!isNew && documentStatus !== "Voided" && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => {
-                setDocumentStatus("Voided");
-                setMode("view");
-                toast.success(t("voided"));
-              }}
-            >
-              <Ban className="size-4" aria-hidden="true" />
-              {t("void")}
-            </Button>
-          )}
-          <span className="bg-border mx-1 hidden h-5 w-px sm:block" />
-          <Button
-            type="button"
-            variant="warning"
-            size="sm"
-            onClick={applyAiSuggestion}
-          >
-            <WandSparkles className="size-4" aria-hidden="true" />
-            {t("aiSuggest")}
-          </Button>
-        </div>
+    <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col gap-4">
+      {usesVoucherDetailPattern ? (
+        <DocFormHeader
+          title={number}
+          backLabel={t("back")}
+          onBack={() => navigate(config.path)}
+          actions={
+            isView ? (
+              <>
+                {(!isJournalVoucher ||
+                  journalCapabilities?.can_edit_accounting_fields) && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={documentStatus === "Voided"}
+                    onClick={() => {
+                      editActivatedAtRef.current = performance.now();
+                      setMode("edit");
+                    }}
+                  >
+                    <Pencil className="size-4" aria-hidden="true" />
+                    {tc("edit")}
+                  </Button>
+                )}
+                {isJournalVoucher && journalCapabilities?.can_void && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setJournalConfirmation("void")}
+                  >
+                    {t("void")}
+                  </Button>
+                )}
+                {isJournalVoucher && journalCapabilities?.can_reverse && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setJournalConfirmation("reverse")}
+                  >
+                    Reverse
+                  </Button>
+                )}
+                {!isJournalVoucher && documentStatus !== "Voided" && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setDocumentStatus("Voided");
+                      toast.success(t("voided"));
+                    }}
+                  >
+                    {t("void")}
+                  </Button>
+                )}
+                {isJournalVoucher ? (
+                  <DocActionsMenu
+                    onDuplicate={
+                      !sourceGenerated ? () => void handleCopy() : undefined
+                    }
+                    onComment={() => setUtilityPanel("comments")}
+                    commentCount={comments.length}
+                    activity={{ id: journal?.id ?? document.id, label: number }}
+                  />
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="sm" variant="outline">
+                        <MoreHorizontal className="size-4" />
+                        {tc("more")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={handleNew}>
+                        <FilePlus2 className="size-4" />
+                        {t("new")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => void handleCopy()}>
+                        <Copy className="size-4" />
+                        {t("copy")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={applyTemplate}>
+                        <LayoutTemplate className="size-4" />
+                        {t("template")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={applyAiSuggestion}>
+                        <WandSparkles className="size-4" />
+                        {t("aiSuggest")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setUtilityPanel("attachments")}
+                      >
+                        <Paperclip className="size-4" />
+                        {t("attachments")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setUtilityPanel("log")}>
+                        <History className="size-4" />
+                        {t("log")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  size="sm"
+                  data-intent="draft"
+                  disabled={
+                    isJournalVoucher
+                      ? createJournal.isPending || updateJournal.isPending
+                      : !isBalanced
+                  }
+                >
+                  <Save className="size-4" aria-hidden="true" />
+                  {tc("save")}
+                </Button>
+                {!isNew && isJournalVoucher && (
+                  <DocActionsMenu
+                    onComment={() => setUtilityPanel("comments")}
+                    commentCount={comments.length}
+                    activity={{ id: journal?.id ?? document.id, label: number }}
+                  />
+                )}
+                {!isJournalVoucher && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="sm" variant="outline">
+                        <MoreHorizontal className="size-4" />
+                        {tc("more")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onSelect={() => setUtilityPanel("attachments")}
+                      >
+                        <Paperclip className="size-4" />
+                        {t("attachments")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setUtilityPanel("log")}>
+                        <History className="size-4" />
+                        {t("log")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </>
+            )
+          }
+        />
+      ) : (
+        <header
+          className={
+            isJournalVoucher
+              ? "flex flex-wrap items-center justify-between gap-2"
+              : "bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2"
+          }
+        >
+          <div className="flex flex-wrap items-center gap-1">
+            <BackButton
+              onClick={() => navigate(config.path)}
+              label={t("back")}
+            />
+            {!isJournalVoucher && (
+              <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
+            )}
+            {isJournalVoucher && (
+              <h1 className="max-w-sm min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl">
+                {number}
+              </h1>
+            )}
+            {(!isJournalVoucher || !isView) && (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNew}
+                >
+                  <FilePlus2 className="size-4" aria-hidden="true" />
+                  {t("new")}
+                </Button>
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopy}
+                  >
+                    <Copy className="size-4" aria-hidden="true" />
+                    {t("copy")}
+                  </Button>
+                )}
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={applyTemplate}
+                  >
+                    <LayoutTemplate className="size-4" aria-hidden="true" />
+                    {t("template")}
+                  </Button>
+                )}
+                {!isNew &&
+                  documentStatus !== "Voided" &&
+                  (!isJournalVoucher || journalCapabilities?.can_void) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => {
+                        setDocumentStatus("Voided");
+                        setMode("view");
+                        toast.success(t("voided"));
+                      }}
+                    >
+                      <Ban className="size-4" aria-hidden="true" />
+                      {t("void")}
+                    </Button>
+                  )}
+                <span
+                  className="bg-border mx-1 hidden h-5 w-px sm:block"
+                  aria-hidden="true"
+                />
+                {!sourceGenerated && (
+                  <Button
+                    type="button"
+                    variant="warning"
+                    size="sm"
+                    onClick={applyAiSuggestion}
+                  >
+                    <WandSparkles className="size-4" aria-hidden="true" />
+                    {t("aiSuggest")}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
 
-        <div className="flex flex-wrap items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setUtilityPanel("attachments")}
-          >
-            <Paperclip className="size-4" aria-hidden="true" />
-            {t("attachments")}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setUtilityPanel("log")}
-          >
-            <History className="size-4" aria-hidden="true" />
-            {t("log")}
-          </Button>
-          <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
-          {isView ? (
-            <Button
-              type="button"
-              size="sm"
-              disabled={documentStatus === "Voided"}
-              onClick={() => {
-                editActivatedAtRef.current = performance.now();
-                setMode("edit");
-              }}
-            >
-              <Pencil className="size-4" aria-hidden="true" />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
+          <div className="flex flex-wrap items-center gap-1">
+            {!isJournalVoucher && sourceLink?.href && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleCancel}
+                onClick={() => navigate(sourceLink.href!)}
               >
-                <X className="size-4" aria-hidden="true" />
-                {tc("cancel")}
+                <ExternalLink className="size-4" aria-hidden="true" />
+                Open source
               </Button>
-              <Button
-                type="submit"
-                form={FORM_ID}
-                variant="outline"
-                size="sm"
-                data-intent="draft"
-                disabled={!isBalanced}
-                aria-describedby={
-                  !isBalanced ? "journal-balance-status" : undefined
-                }
-              >
-                <Save className="size-4" aria-hidden="true" />
-                {t("saveDraft")}
-              </Button>
-              <Button
-                type="submit"
-                form={FORM_ID}
-                size="sm"
-                data-intent="submit"
-                disabled={!isBalanced}
-                aria-describedby={
-                  !isBalanced ? "journal-balance-status" : undefined
-                }
-              >
-                <Send className="size-4" aria-hidden="true" />
-                {t("submit")}
-              </Button>
-            </>
-          )}
-        </div>
-      </header>
+            )}
+            {(!isJournalVoucher || !isView) && (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUtilityPanel("attachments")}
+                >
+                  <Paperclip className="size-4" aria-hidden="true" />
+                  {t("attachments")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUtilityPanel("log")}
+                >
+                  <History className="size-4" aria-hidden="true" />
+                  {t("log")}
+                </Button>
+                <span className="bg-border mx-1 h-5 w-px" aria-hidden="true" />
+              </>
+            )}
+            {isView ? (
+              !sourceGenerated &&
+              (!isJournalVoucher ||
+                journalCapabilities?.can_edit_accounting_fields) && (
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={documentStatus === "Voided"}
+                  onClick={() => {
+                    editActivatedAtRef.current = performance.now();
+                    setMode("edit");
+                  }}
+                >
+                  <Pencil className="size-4" aria-hidden="true" />
+                  {tc("edit")}
+                </Button>
+              )
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                >
+                  <X className="size-4" aria-hidden="true" />
+                  {tc("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  variant="outline"
+                  size="sm"
+                  data-intent="draft"
+                  disabled={
+                    isJournalVoucher
+                      ? createJournal.isPending || updateJournal.isPending
+                      : !isBalanced
+                  }
+                  aria-describedby={
+                    !isBalanced ? "journal-balance-status" : undefined
+                  }
+                >
+                  <Save className="size-4" aria-hidden="true" />
+                  {t("saveDraft")}
+                </Button>
+                <Button
+                  type="submit"
+                  form={FORM_ID}
+                  size="sm"
+                  data-intent="submit"
+                  disabled={!isBalanced}
+                  aria-describedby={
+                    !isBalanced ? "journal-balance-status" : undefined
+                  }
+                >
+                  <Send className="size-4" aria-hidden="true" />
+                  {t("submit")}
+                </Button>
+              </>
+            )}
+            {isJournalVoucher && isView && (
+              <DocActionsMenu
+                onComment={() => setUtilityPanel("comments")}
+                commentCount={comments.length}
+                activity={{ id: journal?.id ?? document.id, label: number }}
+              />
+            )}
+          </div>
+        </header>
+      )}
 
       <form
         id={FORM_ID}
-        className="space-y-4"
+        className={
+          usesVoucherDetailPattern
+            ? "flex min-h-0 flex-1 flex-col gap-4"
+            : "space-y-4"
+        }
         onSubmit={(event) => {
           event.preventDefault();
           const intent = (
             event.nativeEvent as SubmitEvent
           ).submitter?.getAttribute("data-intent");
-          handleSave(intent === "draft" ? "draft" : "submit");
+          void handleSave(intent === "draft" ? "draft" : "submit");
         }}
       >
-        <Card className="gap-3 py-4">
+        <Card
+          className={
+            usesVoucherDetailPattern
+              ? "gap-3 border-0 bg-transparent py-0 shadow-none"
+              : "gap-3 py-4"
+          }
+        >
           <CardContent
-            className={`grid gap-4 px-4 sm:grid-cols-2 ${
+            className={`grid gap-4 sm:grid-cols-2 ${
+              usesVoucherDetailPattern ? "px-0" : "px-4"
+            } ${
               config.kind === "journalVoucher" ||
               config.kind === "financialReports"
                 ? "lg:grid-cols-6"
@@ -639,29 +1087,26 @@ export default function AccountingDetail() {
             )}
           </CardContent>
           {config.kind !== "financialReports" && (
-            <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t px-4 pt-3">
+            <CardContent
+              className={`flex flex-wrap items-center gap-x-3 gap-y-2 border-t pt-3 ${
+                usesVoucherDetailPattern ? "px-0" : "px-4"
+              }`}
+            >
               {config.kind === "journalVoucher" && (
                 <>
                   <div className="flex min-h-8 min-w-52 items-center gap-3">
-                    {isView ? (
-                      <Badge
-                        variant={values.schedulePost ? "secondary" : "outline"}
-                      >
-                        {values.schedulePost ? tc("yes") : tc("no")}
-                      </Badge>
-                    ) : (
-                      <Switch
-                        id="schedule-post"
-                        aria-label={t("schedulePost")}
-                        checked={values.schedulePost}
-                        onCheckedChange={(schedulePost) =>
-                          setValues((current) => ({
-                            ...current,
-                            schedulePost,
-                          }))
-                        }
-                      />
-                    )}
+                    <Checkbox
+                      id="schedule-post"
+                      aria-label={t("schedulePost")}
+                      checked={values.schedulePost}
+                      disabled={isView}
+                      onCheckedChange={(checked) =>
+                        setValues((current) => ({
+                          ...current,
+                          schedulePost: checked === true,
+                        }))
+                      }
+                    />
                     <FieldLabel htmlFor="schedule-post" className="shrink-0">
                       {t("schedulePost")}
                     </FieldLabel>
@@ -684,22 +1129,18 @@ export default function AccountingDetail() {
                   />
 
                   <div className="flex min-h-8 min-w-52 items-center gap-3">
-                    {isView ? (
-                      <Badge
-                        variant={values.autoReverse ? "secondary" : "outline"}
-                      >
-                        {values.autoReverse ? tc("yes") : tc("no")}
-                      </Badge>
-                    ) : (
-                      <Switch
-                        id="auto-reverse"
-                        aria-label={t("autoReverse")}
-                        checked={values.autoReverse}
-                        onCheckedChange={(autoReverse) =>
-                          setValues((current) => ({ ...current, autoReverse }))
-                        }
-                      />
-                    )}
+                    <Checkbox
+                      id="auto-reverse"
+                      aria-label={t("autoReverse")}
+                      checked={values.autoReverse}
+                      disabled={isView}
+                      onCheckedChange={(checked) =>
+                        setValues((current) => ({
+                          ...current,
+                          autoReverse: checked === true,
+                        }))
+                      }
+                    />
                     <FieldLabel htmlFor="auto-reverse" className="shrink-0">
                       {t("autoReverse")}
                     </FieldLabel>
@@ -788,11 +1229,36 @@ export default function AccountingDetail() {
                 />
               )}
 
+              {sourceGenerated && journal && (
+                <div className="flex min-h-8 flex-wrap items-center gap-2 text-xs">
+                  <ShieldCheck
+                    className="text-primary size-4"
+                    aria-hidden="true"
+                  />
+                  <span className="font-medium">
+                    Source-generated · Read-only
+                  </span>
+                  <span className="text-muted-foreground">
+                    v{journal.source_version ?? "—"} ·{" "}
+                    {journal.event_type ?? "—"}
+                    {journal.posting_rule_code
+                      ? ` · ${journal.posting_rule_code}`
+                      : ""}
+                  </span>
+                </div>
+              )}
+
               <div className="ml-auto flex min-h-8 items-center gap-3 text-xs">
                 <span className="text-muted-foreground">{t("source")}</span>
-                <span className="text-primary font-medium tabular-nums">
-                  AP-102934
-                </span>
+                {sourceLink?.href ? (
+                  <CellAction onClick={() => navigate(sourceLink.href!)}>
+                    {sourceLabel}
+                  </CellAction>
+                ) : (
+                  <span className="font-medium tabular-nums">
+                    {sourceLabel}
+                  </span>
+                )}
                 <span className="bg-border h-4 w-px" aria-hidden="true" />
                 <span className="text-muted-foreground">{t("status")}</span>
                 <Badge
@@ -812,13 +1278,19 @@ export default function AccountingDetail() {
         </Card>
 
         <Card
-          className={`gap-3 py-4 ${
-            config.kind === "financialReports"
-              ? "h-[calc(100dvh-25rem)] min-h-64"
-              : "h-[calc(100dvh-21rem)] min-h-80"
+          className={`gap-3 ${
+            usesVoucherDetailPattern
+              ? "border-0 bg-transparent py-0 shadow-none"
+              : "py-4"
+          } ${
+            usesVoucherDetailPattern
+              ? "min-h-80 flex-1"
+              : config.kind === "financialReports"
+                ? "h-[calc(100dvh-25rem)] min-h-64"
+                : "h-[calc(100dvh-21rem)] min-h-80"
           }`}
         >
-          <CardHeader className="px-4">
+          <CardHeader className={usesVoucherDetailPattern ? "px-0" : "px-4"}>
             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
               <ListTree className="text-primary size-4" aria-hidden="true" />
               {entryTitle}
@@ -881,7 +1353,7 @@ export default function AccountingDetail() {
                       {t("department")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {t("accountCode")}
+                      {t("chartOfAccount")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
                       {t("comment")}
@@ -929,7 +1401,8 @@ export default function AccountingDetail() {
                           </td>
                           <td className="h-12 px-3">
                             {isView ? (
-                              optionLabel(DEPARTMENTS, line.department)
+                              (line.departmentLabel ??
+                              optionLabel(DEPARTMENTS, line.department))
                             ) : (
                               <LookupCombobox
                                 value={line.department}
@@ -947,7 +1420,8 @@ export default function AccountingDetail() {
                           </td>
                           <td className="h-12 px-3 font-medium">
                             {isView ? (
-                              optionLabel(ACCOUNTS, line.account)
+                              (line.accountLabel ??
+                              optionLabel(ACCOUNTS, line.account))
                             ) : (
                               <LookupCombobox
                                 value={line.account}
@@ -979,9 +1453,11 @@ export default function AccountingDetail() {
                               />
                             )}
                           </td>
-                          <td className="h-12 px-3">THB</td>
+                          <td className="h-12 px-3">
+                            {line.currency ?? "THB"}
+                          </td>
                           <td className="h-12 px-3 text-right tabular-nums">
-                            1
+                            {line.exchangeRate ?? 1}
                           </td>
                           <td className="h-12 px-3 text-right tabular-nums">
                             {isView ? (
@@ -1192,48 +1668,111 @@ export default function AccountingDetail() {
                 </tbody>
               </table>
             </div>
-            <div
-              id="journal-balance-status"
-              className={`flex shrink-0 items-center justify-between gap-4 overflow-x-auto border-b px-3 py-2 font-medium ${
-                isBalanced ? "bg-success/10" : "bg-destructive/10"
-              }`}
-              aria-live="polite"
-            >
-              <div className="flex shrink-0 items-center gap-2">
-                <Badge variant="outline" size="sm">
-                  {t("rowCount", { count: lines.length })}
-                </Badge>
-                <Badge
-                  variant={isBalanced ? "success-light" : "destructive-light"}
-                  size="sm"
+            {usesVoucherDetailPattern ? (
+              <div id="journal-balance-status" aria-live="polite">
+                <SummaryFooterBar
+                  hasRecord
+                  items={summaryMetrics.map((metric) => ({
+                    key: metric.label,
+                    label: metric.label,
+                    value: metric.value.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    }),
+                    valueClassName: metric.color,
+                  }))}
                 >
-                  {isBalanced ? t("balanced") : t("unbalanced")}
-                </Badge>
+                  {!isView && (
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        type="submit"
+                        form={FORM_ID}
+                        size="sm"
+                        data-intent="submit"
+                        disabled={!isBalanced}
+                        aria-describedby={
+                          !isBalanced ? "journal-balance-status" : undefined
+                        }
+                      >
+                        <Send className="size-4" aria-hidden="true" />
+                        {t("submit")}
+                      </Button>
+                    </div>
+                  )}
+                </SummaryFooterBar>
               </div>
-              <div className="grid min-w-[40rem] shrink-0 grid-cols-5 divide-x">
-                {summaryMetrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="grid justify-items-end gap-0.5 px-3"
+            ) : (
+              <div
+                id="journal-balance-status"
+                className={`flex shrink-0 items-center justify-between gap-4 overflow-x-auto border-b px-3 py-2 font-medium ${
+                  isBalanced ? "bg-success/10" : "bg-destructive/10"
+                }`}
+                aria-live="polite"
+              >
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge variant="outline" size="sm">
+                    {t("rowCount", { count: lines.length })}
+                  </Badge>
+                  <Badge
+                    variant={isBalanced ? "success-light" : "destructive-light"}
+                    size="sm"
                   >
-                    <span className="text-muted-foreground text-micro-legal font-medium">
-                      {metric.label}
-                    </span>
-                    <span
-                      className={`${metric.color} font-semibold tabular-nums`}
+                    {isBalanced ? t("balanced") : t("unbalanced")}
+                  </Badge>
+                </div>
+                <div className="grid min-w-[40rem] shrink-0 grid-cols-5 divide-x">
+                  {summaryMetrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="grid justify-items-end gap-0.5 px-3"
                     >
-                      {metric.value.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                ))}
+                      <span className="text-muted-foreground text-micro-legal font-medium">
+                        {metric.label}
+                      </span>
+                      <span
+                        className={`${metric.color} font-semibold tabular-nums`}
+                      >
+                        {metric.value.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </form>
 
+      <ConfirmDialog
+        open={journalConfirmation !== null}
+        onOpenChange={(open) => !open && setJournalConfirmation(null)}
+        title={
+          journalConfirmation === "reverse"
+            ? "Reverse Journal Voucher?"
+            : "Void Journal Voucher?"
+        }
+        description="This action changes the Journal Voucher status."
+        confirmText={journalConfirmation === "reverse" ? "Reverse" : "Void"}
+        isPending={voidJournal.isPending || reverseJournal.isPending}
+        onConfirm={() => {
+          if (!journal || !journalConfirmation) return;
+          const action = journalConfirmation;
+          const mutation = action === "void" ? voidJournal : reverseJournal;
+          mutation.mutate(
+            { id: journal.id, doc_version: journal.doc_version },
+            {
+              onSuccess: () => {
+                setJournalConfirmation(null);
+                toast.success(
+                  action === "void" ? t("voided") : "Journal Voucher reversed",
+                );
+              },
+              onError: (error) => toast.error(error.message),
+            },
+          );
+        }}
+      />
       <Sheet
         open={!!selectedLine}
         onOpenChange={(open) => !open && setSelectedLineId(null)}
@@ -1277,7 +1816,7 @@ export default function AccountingDetail() {
                 )}
               </Field>
               <Field>
-                <FieldLabel>{t("accountCode")}</FieldLabel>
+                <FieldLabel>{t("chartOfAccount")}</FieldLabel>
                 {isView ? (
                   <FieldPlainText>
                     {optionLabel(ACCOUNTS, selectedLine.account)}
@@ -1508,12 +2047,18 @@ export default function AccountingDetail() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader>
             <SheetTitle>
-              {utilityPanel === "attachments" ? t("attachments") : t("log")}
+              {utilityPanel === "attachments"
+                ? t("attachments")
+                : utilityPanel === "comments"
+                  ? "Comments"
+                  : t("log")}
             </SheetTitle>
             <SheetDescription>
               {utilityPanel === "attachments"
                 ? t("attachmentsDescription")
-                : t("logDescription")}
+                : utilityPanel === "comments"
+                  ? "Notes and discussion for this Journal Voucher."
+                  : t("logDescription")}
             </SheetDescription>
           </SheetHeader>
 
@@ -1559,6 +2104,38 @@ export default function AccountingDetail() {
                   </Button>
                 </div>
               ))}
+            </div>
+          ) : utilityPanel === "comments" ? (
+            <div className="grid gap-4 px-4 pb-6">
+              <div className="grid gap-3">
+                {comments.map((comment, index) => (
+                  <div
+                    key={`${comment}-${index}`}
+                    className="rounded-lg border p-3"
+                  >
+                    <p className="text-sm">{comment}</p>
+                  </div>
+                ))}
+              </div>
+              <Textarea
+                value={commentDraft}
+                placeholder="Add a comment"
+                onChange={(event) => setCommentDraft(event.target.value)}
+              />
+              <Button
+                type="button"
+                size="sm"
+                className="justify-self-end"
+                disabled={!commentDraft.trim()}
+                onClick={() => {
+                  setComments((current) => [...current, commentDraft.trim()]);
+                  setCommentDraft("");
+                  toast.success("Comment added");
+                }}
+              >
+                <Send className="size-4" />
+                Add comment
+              </Button>
             </div>
           ) : (
             <ol className="grid gap-4 px-4 pb-6">

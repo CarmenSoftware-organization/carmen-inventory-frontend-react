@@ -4,10 +4,10 @@ export type AccountingDocumentKind =
   | "recurringVoucher"
   | "allocationVoucher"
   | "financialReports"
-  | "apInvoice"
-  | "apPayment"
   | "arInvoice"
-  | "arReceipt";
+  | "arReceipt"
+  | "assetRegister"
+  | "assetDisposal";
 
 export interface AccountingDocument {
   id: string;
@@ -54,16 +54,6 @@ export const ACCOUNTING_DOCUMENTS: Record<
     path: "/accounting/financial-reports",
     prefix: "FR",
   },
-  apInvoice: {
-    kind: "apInvoice",
-    path: "/accounting/accounts-payable/invoice",
-    prefix: "AP",
-  },
-  apPayment: {
-    kind: "apPayment",
-    path: "/accounting/accounts-payable/payment",
-    prefix: "PV",
-  },
   arInvoice: {
     kind: "arInvoice",
     path: "/accounting/accounts-receivable/invoice",
@@ -73,6 +63,16 @@ export const ACCOUNTING_DOCUMENTS: Record<
     kind: "arReceipt",
     path: "/accounting/accounts-receivable/receipt",
     prefix: "RC",
+  },
+  assetRegister: {
+    kind: "assetRegister",
+    path: "/accounting/asset/register",
+    prefix: "FA",
+  },
+  assetDisposal: {
+    kind: "assetDisposal",
+    path: "/accounting/asset/disposal",
+    prefix: "FD",
   },
 };
 
@@ -106,12 +106,7 @@ export function documentsFor(
     date: `2026-07-${String(index + 1).padStart(2, "0")}`,
     description: DESCRIPTIONS[index % DESCRIPTIONS.length],
     party: PARTIES[index % PARTIES.length],
-    status:
-      config.kind === "apPayment" && index === 0
-        ? "Paid"
-        : config.kind === "apInvoice" && index === 1
-          ? "Overdue"
-          : STATUSES[index % STATUSES.length],
+    status: STATUSES[index % STATUSES.length],
     amount: 10000 + index * 3750,
   }));
 }

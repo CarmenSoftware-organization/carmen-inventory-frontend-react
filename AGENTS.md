@@ -114,6 +114,8 @@ inline script ใน `index.html`** แก้สคริปต์นั้น�
 
 ## Design system (`/design-system`)
 
+หน้า Accounting detail ที่แก้หรือเพิ่มใหม่ (JV, Payment, AR Invoice/Receipt, Asset) → skill `accounting-detail-shell` ใน `.agents/skills/` เพื่อเทียบ form, action และ footer กับ JV detail ทั้ง view/create/edit ก่อนส่งงาน
+
 กฎอยู่ใน `docs/DESIGN.md` · ของจริงอยู่ที่หน้า **`/design-system`** ซึ่งเรนเดอร์ token จาก
 `styles/globals.css` และ primitive จาก `components/ui/` ตรง ๆ (โค้ดหน้าอยู่ที่
 `routes/design-system/` — dev tool: อยู่หลัง auth แต่ไม่อยู่ใน `constant/module-list.ts`

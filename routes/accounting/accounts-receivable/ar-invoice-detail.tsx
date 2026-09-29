@@ -1,0 +1,1249 @@
+import { Fragment, useMemo, useState } from "react";
+import {
+  Ban,
+  Copy,
+  MoreHorizontal,
+  Plus,
+  Save,
+  Send,
+  Trash2,
+} from "lucide-react";
+import { useNavigate, useParams, useSearchParams } from "react-router";
+import { DocFormHeader } from "@/components/share/doc-form-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  AR_INVOICES,
+  AR_INVOICE_PATH,
+  dueDate,
+  invoiceTotals,
+  journalPreviewTotals,
+  lineTotals,
+  lineUnpaid,
+  money,
+  newArInvoice,
+  type ArInvoice,
+  type ArInvoiceLine,
+} from "./ar-invoice-model";
+
+const Field = ({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <label className={`grid gap-1 text-sm ${className}`}>
+    <span className="text-muted-foreground text-xs">{label}</span>
+    {children}
+  </label>
+);
+
+const blankLine = (): ArInvoiceLine => ({
+  id: crypto.randomUUID(),
+  description: "",
+  unit: "ROOM",
+  quantity: 1,
+  unitPrice: 0,
+  discount: 0,
+  taxRate: 7,
+  tax2Rate: 0,
+  tax1Account: "2151000",
+  tax1CostCenter: "GEN",
+  tax2Account: "2180000",
+  tax2CostCenter: "GEN",
+  account: "4110000",
+  costCenter: "101",
+  arAccount: "1130000",
+  arCostCenter: "GEN",
+  dimensions: "",
+  reference: "",
+  dateFrom: "",
+  dateTo: "",
+  groupNo: 1,
+  source: "Manual",
+});
+
+export default function ArInvoiceDetail() {
+  const { id = "new" } = useParams<{ id: string }>();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const original = AR_INVOICES.find((item) => item.id === id);
+  const [invoice, setInvoice] = useState<ArInvoice>(() => {
+    const source =
+      id === "new"
+        ? AR_INVOICES.find((item) => item.id === params.get("copy"))
+        : undefined;
+    return source
+      ? {
+          ...source,
+          id: "new",
+          docNo: "Auto-generated",
+          status: "Draft",
+          source: "Copy",
+          taxInvoiceNo: "",
+          receiptAmount: 0,
+          depositAmount: 0,
+          lines: source.lines.map((line) => ({
+            ...line,
+            id: crypto.randomUUID(),
+          })),
+        }
+      : (original ?? newArInvoice());
+  });
+  const [editing, setEditing] = useState(id === "new");
+  const [lineIndex, setLineIndex] = useState<number | null>(null);
+  const [folioOpen, setFolioOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
+  const totals = useMemo(() => invoiceTotals(invoice), [invoice]);
+  const journalTotals = useMemo(() => journalPreviewTotals(invoice), [invoice]);
+  const editable = invoice.status === "Draft" && editing;
+  const rate = invoice.exchangeRate;
+  const set = <K extends keyof ArInvoice>(key: K, value: ArInvoice[K]) =>
+    setInvoice((current) => ({ ...current, [key]: value }));
+  const updateLine = (index: number, patch: Partial<ArInvoiceLine>) =>
+    setInvoice((current) => ({
+      ...current,
+      lines: current.lines.map((line, i) => {
+        if (i !== index) return line;
+        const next = { ...line, ...patch };
+        next.quantity = Math.max(0.01, next.quantity);
+        next.unitPrice = Math.max(0, next.unitPrice);
+        next.discount = Math.min(
+          Math.max(0, next.discount),
+          next.quantity * next.unitPrice,
+        );
+        next.taxRate = Math.min(100, Math.max(0, next.taxRate));
+        next.tax2Rate = Math.min(100, Math.max(0, next.tax2Rate));
+        return next;
+      }),
+    }));
+  const copy = () => {
+    navigate(`${AR_INVOICE_PATH}/new?copy=${encodeURIComponent(id)}`);
+  };
+
+  if (id !== "new" && !original)
+    return <p className="text-muted-foreground p-6">AR invoice not found.</p>;
+  return (
+    <div className="flex min-h-[calc(100dvh-3rem)] flex-col gap-4 pb-24">
+      <DocFormHeader
+        title={invoice.docNo}
+        subtitle="AR Invoice · City Ledger"
+        backLabel="Back to AR Invoice Directory"
+        onBack={() => navigate(AR_INVOICE_PATH)}
+        badges={
+          <>
+            <Badge variant="outline">{invoice.status}</Badge>
+            <Badge variant="outline">{invoice.source}</Badge>
+          </>
+        }
+        actions={
+          <>
+            {invoice.status === "Draft" && !editing && (
+              <Button size="sm" onClick={() => setEditing(true)}>
+                Edit
+              </Button>
+            )}
+            {editable && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(false);
+                    if (id === "new") navigate(AR_INVOICE_PATH);
+                    else setInvoice(original!);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button size="sm" disabled title="Requires AR draft API">
+                  <Save className="size-4" />
+                  Save Draft
+                </Button>
+              </>
+            )}
+            {invoice.status === "Submitted" && (
+              <>
+                <Button size="sm" disabled title="Requires AR approval API">
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled
+                  title="Requires AR approval API"
+                >
+                  Send Back
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled
+                  title="Requires AR approval API"
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+            {id !== "new" && invoice.status !== "Void" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled
+                title="Requires backend receipt check"
+              >
+                <Ban className="size-4" />
+                Void
+              </Button>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="size-4" />
+                  More
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setInvoice(newArInvoice());
+                    setEditing(true);
+                    navigate(`${AR_INVOICE_PATH}/new`);
+                  }}
+                >
+                  <Plus className="size-4" />
+                  New
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={id === "new"} onSelect={copy}>
+                  <Copy className="size-4" />
+                  Copy
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  Print · report pending
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
+      <p className="text-muted-foreground text-xs">
+        ARIV interface preview · Save, Submit, tax numbering, approval and
+        posting require the AR backend contract.
+      </p>
+      {invoice.status === "Submitted" && (
+        <div className="flex flex-wrap items-center gap-3 border-b pb-3 text-xs">
+          <span className="text-success-ink">✓ Submitted</span>
+          <span className="font-medium">Senior Accountant Review</span>
+          <span className="text-muted-foreground">
+            Financial Controller Approval
+          </span>
+        </div>
+      )}
+      <section className="space-y-3 border-b pb-4">
+        <h2 className="text-base font-semibold">Invoice details</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
+          <Field label="Doc No.">
+            <Input value={invoice.docNo} readOnly />
+          </Field>
+          <Field label="Input Date">
+            <DatePicker
+              value={invoice.inputDate}
+              onValueChange={(value) => set("inputDate", value.slice(0, 10))}
+              readOnly={!editable}
+            />
+          </Field>
+          <Field label="Customer (AR)" className="lg:col-span-2">
+            <Input
+              value={invoice.customerName}
+              readOnly={!editable}
+              onChange={(event) =>
+                setInvoice({
+                  ...invoice,
+                  customerName: event.target.value,
+                  customerCode: event.target.value ? "MANUAL" : "",
+                })
+              }
+            />
+          </Field>
+          <Field label="Currency">
+            <Select
+              disabled={!editable}
+              value={invoice.currency}
+              onValueChange={(value) =>
+                setInvoice({
+                  ...invoice,
+                  currency: value,
+                  exchangeRate: value === "THB" ? 1 : invoice.exchangeRate,
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="THB">THB</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="EUR">EUR</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Exch Rate">
+            <Input
+              type="number"
+              min="0.00001"
+              step="0.00001"
+              value={invoice.exchangeRate}
+              readOnly={!editable || invoice.currency === "THB"}
+              onChange={(event) =>
+                set(
+                  "exchangeRate",
+                  Math.max(0.00001, Number(event.target.value)),
+                )
+              }
+            />
+          </Field>
+          <Field label="Status">
+            <Input value={invoice.status} readOnly />
+          </Field>
+          <Field label="Source">
+            <Input value={invoice.source} readOnly />
+          </Field>
+          <Field label="Source Doc">
+            <Input
+              value={invoice.sourceDoc}
+              readOnly={!editable}
+              onChange={(event) => set("sourceDoc", event.target.value)}
+            />
+          </Field>
+          <label className="flex items-center gap-2 self-end pb-2 text-sm">
+            <Checkbox
+              checked={invoice.taxInvoice}
+              disabled={!editable}
+              onCheckedChange={(checked) => set("taxInvoice", checked === true)}
+            />
+            Issue tax invoice
+          </label>
+          <Field label="Tax Inv No.">
+            <Input
+              value={invoice.taxInvoiceNo || "Assigned on Submit"}
+              readOnly
+            />
+          </Field>
+          <Field label="Credit (days)">
+            <Input
+              type="number"
+              min="0"
+              value={invoice.creditDays}
+              readOnly={!editable}
+              onChange={(event) =>
+                set("creditDays", Math.max(0, Number(event.target.value)))
+              }
+            />
+          </Field>
+          <Field label="Due Date">
+            <Input
+              value={dueDate(invoice.inputDate, invoice.creditDays)}
+              readOnly
+            />
+          </Field>
+          <Field label="Description" className="lg:col-span-3">
+            <Input
+              value={invoice.description}
+              readOnly={!editable}
+              maxLength={255}
+              onChange={(event) => set("description", event.target.value)}
+            />
+          </Field>
+          <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+            <label className="flex items-center gap-2 self-end pb-2 text-sm">
+              <Checkbox
+                checked={invoice.whtRecorded}
+                disabled={!editable}
+                onCheckedChange={(checked) =>
+                  set("whtRecorded", checked === true)
+                }
+              />
+              Record WHT
+            </label>
+            <Field label="WHT Amount">
+              <Input
+                type="number"
+                min="0"
+                value={invoice.whtAmount}
+                readOnly={!editable || !invoice.whtRecorded}
+                onChange={(event) =>
+                  set("whtAmount", Math.max(0, Number(event.target.value)))
+                }
+              />
+            </Field>
+          </div>
+        </div>
+        <p className="text-muted-foreground text-xs">
+          WHT is informational on the invoice and is recognized at receipt.
+        </p>
+      </section>
+      <Tabs defaultValue="items" className="gap-3">
+        <div className="overflow-x-auto">
+          <TabsList variant="line">
+            <TabsTrigger value="items">Item Details</TabsTrigger>
+            <TabsTrigger value="tax">Tax Invoice</TabsTrigger>
+            <TabsTrigger value="references">Doc Reference</TabsTrigger>
+            <TabsTrigger value="receipt">Receipt</TabsTrigger>
+            <TabsTrigger value="journal">Journal (GL)</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="items" className="space-y-2">
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!editable || !invoice.customerCode}
+              onClick={() => setFolioOpen(true)}
+            >
+              Add Folio
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!editable}
+              onClick={() => {
+                set("lines", [...invoice.lines, blankLine()]);
+                setLineIndex(invoice.lines.length);
+              }}
+            >
+              <Plus className="size-4" />
+              Add Item
+            </Button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-muted-foreground border-b text-left text-xs uppercase">
+                <tr>
+                  <th className="p-2">#</th>
+                  <th className="p-2">Description / Comment</th>
+                  <th className="p-2">Unit</th>
+                  <th className="p-2 text-right">Qty</th>
+                  <th className="p-2 text-right">Price / Unit</th>
+                  <th className="p-2 text-right">Sub Total</th>
+                  <th className="p-2 text-right">Discount</th>
+                  <th className="p-2 text-right">Net Amount</th>
+                  <th className="p-2 text-right">Tax</th>
+                  <th className="p-2 text-right">Total / Unpaid</th>
+                  <th className="p-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.lines.map((line, index) => {
+                  const row = lineTotals(line);
+                  return (
+                    <tr key={line.id} className="border-b align-top">
+                      <td className="p-2">{index + 1}</td>
+                      <td className="p-2">
+                        <span className="font-medium">
+                          {line.description || "New item"}
+                        </span>
+                        <span className="text-muted-foreground block text-xs">
+                          {line.account} · Dept {line.costCenter} ·{" "}
+                          {line.reference}
+                        </span>
+                      </td>
+                      <td className="p-2">{line.unit}</td>
+                      <td className="p-2 text-right tabular-nums">
+                        {line.quantity}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(line.unitPrice)}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(row.subtotal)}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(line.discount)}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(row.net)}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(row.tax)}
+                        <span className="text-muted-foreground block text-xs">
+                          VAT {line.taxRate}%
+                        </span>
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {money(row.total)}
+                        <span className="text-warning-ink block text-xs">
+                          Unpaid {money(lineUnpaid(invoice, index))}
+                        </span>
+                      </td>
+                      <td className="p-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setLineIndex(index)}
+                        >
+                          Detail
+                        </Button>
+                        {editable && (
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label={`Remove line ${index + 1}`}
+                            onClick={() =>
+                              set(
+                                "lines",
+                                invoice.lines.filter((_, i) => i !== index),
+                              )
+                            }
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {invoice.lines.length === 0 && (
+            <p className="text-muted-foreground py-8 text-center text-sm">
+              Add an invoice item or PMS folio.
+            </p>
+          )}
+        </TabsContent>
+        <TabsContent value="tax" className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Registered Name">
+              <Input
+                value={invoice.taxName}
+                readOnly={!editable}
+                onChange={(event) => set("taxName", event.target.value)}
+              />
+            </Field>
+            <Field label="Tax ID (13 digits)">
+              <Input
+                value={invoice.taxId}
+                readOnly={!editable}
+                maxLength={13}
+                onChange={(event) => set("taxId", event.target.value)}
+              />
+            </Field>
+            <Field label="Branch No.">
+              <Input
+                value={invoice.branchNo}
+                readOnly={!editable}
+                maxLength={5}
+                onChange={(event) => set("branchNo", event.target.value)}
+              />
+            </Field>
+            <Field label="Tax Invoice No.">
+              <Input
+                value={invoice.taxInvoiceNo || "Assigned on Submit"}
+                readOnly
+              />
+            </Field>
+            <Field label="Address Line 1">
+              <Input
+                value={invoice.address1}
+                readOnly={!editable}
+                onChange={(event) => set("address1", event.target.value)}
+              />
+            </Field>
+            <Field label="Address Line 2">
+              <Input
+                value={invoice.address2}
+                readOnly={!editable}
+                onChange={(event) => set("address2", event.target.value)}
+              />
+            </Field>
+            <Field label="Province">
+              <Input
+                value={invoice.province}
+                readOnly={!editable}
+                onChange={(event) => set("province", event.target.value)}
+              />
+            </Field>
+            <Field label="Postal Code">
+              <Input
+                value={invoice.postalCode}
+                readOnly={!editable}
+                maxLength={5}
+                onChange={(event) => set("postalCode", event.target.value)}
+              />
+            </Field>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-muted-foreground border-b text-left text-xs uppercase">
+                <tr>
+                  <th className="p-2">#</th>
+                  <th className="p-2">Tax Profile</th>
+                  <th className="p-2">Tax Type / Description</th>
+                  <th className="p-2 text-right">Base Amount (THB)</th>
+                  <th className="p-2 text-right">Rate</th>
+                  <th className="p-2 text-right">Tax Amount (THB)</th>
+                  <th className="p-2 text-right">Total (THB)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.lines.map((line, index) => {
+                  const row = lineTotals(line);
+                  return (
+                    <Fragment key={line.id}>
+                      <tr className="border-b">
+                        <td className="p-2">{index + 1}</td>
+                        <td className="p-2">
+                          {line.taxRate ? "VAT07_ADD" : "NONE"}
+                        </td>
+                        <td className="p-2">{line.description}</td>
+                        <td className="p-2 text-right">
+                          {money(row.net * rate)}
+                        </td>
+                        <td className="p-2 text-right">{line.taxRate}%</td>
+                        <td className="p-2 text-right">
+                          {money(row.tax1 * rate)}
+                        </td>
+                        <td className="p-2 text-right">
+                          {money((row.net + row.tax1) * rate)}
+                        </td>
+                      </tr>
+                      {line.tax2Rate > 0 && (
+                        <tr className="border-b">
+                          <td className="p-2">{index + 1}.2</td>
+                          <td className="p-2">TAX2</td>
+                          <td className="p-2">
+                            {line.description} · additional tax
+                          </td>
+                          <td className="p-2 text-right">
+                            {money(row.net * rate)}
+                          </td>
+                          <td className="p-2 text-right">{line.tax2Rate}%</td>
+                          <td className="p-2 text-right">
+                            {money(row.tax2 * rate)}
+                          </td>
+                          <td className="p-2 text-right">
+                            {money((row.net + row.tax2) * rate)}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+              <tfoot className="font-semibold">
+                <tr>
+                  <td colSpan={3} className="p-2">
+                    Total THB
+                  </td>
+                  <td className="p-2 text-right">{money(totals.net * rate)}</td>
+                  <td />
+                  <td className="p-2 text-right">{money(totals.tax * rate)}</td>
+                  <td className="p-2 text-right">
+                    {money(totals.total * rate)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </TabsContent>
+        <TabsContent value="references" className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-sm">
+              Advance deposits applied to this invoice
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!editable || !invoice.customerCode}
+              onClick={() => setDepositOpen(true)}
+            >
+              Apply Deposit
+            </Button>
+          </div>
+          {invoice.depositAmount ? (
+            <div className="flex flex-wrap justify-between gap-3 border-b py-3 text-sm">
+              <span>ARDP26090005 · {invoice.customerName}</span>
+              <span className="text-destructive tabular-nums">
+                −{money(invoice.depositAmount)} {invoice.currency}
+              </span>
+              <span className="text-muted-foreground">
+                Original rate {invoice.depositRate.toFixed(5)} · Current rate{" "}
+                {rate.toFixed(5)}
+              </span>
+            </div>
+          ) : (
+            <p className="text-muted-foreground py-8 text-center text-sm">
+              No document references
+            </p>
+          )}
+        </TabsContent>
+        <TabsContent value="receipt" className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-sm">
+              Receipt history and open balance
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled
+              title="Requires ARRC creation API"
+            >
+              Get Receipt
+            </Button>
+          </div>
+          <div className="border-b py-3 text-sm">
+            Unpaid Amount{" "}
+            <strong className="ml-3 tabular-nums">
+              {money(totals.unpaid)} {invoice.currency}
+            </strong>
+          </div>
+          <p className="text-muted-foreground py-6 text-center text-sm">
+            No receipts recorded for this invoice
+          </p>
+        </TabsContent>
+        <TabsContent value="journal" className="space-y-3">
+          {invoice.source === "PMS Folio" ||
+          invoice.lines.some((line) => line.source === "PMS Folio") ? (
+            <p className="bg-muted/40 rounded-md p-4 text-sm">
+              PMS Folio lines: revenue and AR were posted by Night Audit. No
+              direct GL posting is previewed for this invoice.
+            </p>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-xs">
+                Preview of full invoice recognition. Deposit offset JV awaits
+                the backend posting contract.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-muted-foreground border-b text-left text-xs uppercase">
+                    <tr>
+                      <th className="p-2">#</th>
+                      <th className="p-2">Account Code</th>
+                      <th className="p-2">Cost Center</th>
+                      <th className="p-2">Comment</th>
+                      <th className="p-2">Cur.</th>
+                      <th className="p-2 text-right">Rate</th>
+                      <th className="p-2 text-right">Debit</th>
+                      <th className="p-2 text-right">Credit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="p-2">1</td>
+                      <td className="p-2">
+                        {invoice.lines[0]?.arAccount ?? "1130000"} · Trade
+                        Accounts Receivable
+                      </td>
+                      <td className="p-2">
+                        {invoice.lines[0]?.arCostCenter ?? "GEN"}
+                      </td>
+                      <td className="p-2">Full invoice</td>
+                      <td className="p-2">{invoice.currency}</td>
+                      <td className="p-2 text-right">{rate.toFixed(5)}</td>
+                      <td className="p-2 text-right">
+                        {money(totals.total * rate)}
+                      </td>
+                      <td className="p-2 text-right">—</td>
+                    </tr>
+                    {invoice.lines.map((line, index) => (
+                      <tr key={line.id} className="border-b">
+                        <td className="p-2">{index + 2}</td>
+                        <td className="p-2">
+                          {line.account} · Revenue
+                          <span className="text-muted-foreground block text-xs">
+                            {line.dimensions ||
+                              "Market · Sales · Project · Event · Location · Channel: —"}
+                          </span>
+                        </td>
+                        <td className="p-2">{line.costCenter}</td>
+                        <td className="p-2">{line.description}</td>
+                        <td className="p-2">{invoice.currency}</td>
+                        <td className="p-2 text-right">{rate.toFixed(5)}</td>
+                        <td className="p-2 text-right">—</td>
+                        <td className="p-2 text-right">
+                          {money(lineTotals(line).net * rate)}
+                        </td>
+                      </tr>
+                    ))}
+                    {totals.tax1 > 0 && (
+                      <tr className="border-b">
+                        <td className="p-2">{invoice.lines.length + 2}</td>
+                        <td className="p-2">
+                          {invoice.lines[0]?.tax1Account ?? "2151000"} · Output
+                          VAT Pending
+                        </td>
+                        <td className="p-2">
+                          {invoice.lines[0]?.tax1CostCenter ?? "GEN"}
+                        </td>
+                        <td className="p-2">Output tax</td>
+                        <td className="p-2">{invoice.currency}</td>
+                        <td className="p-2 text-right">{rate.toFixed(5)}</td>
+                        <td className="p-2 text-right">—</td>
+                        <td className="p-2 text-right">
+                          {money(totals.tax1 * rate)}
+                        </td>
+                      </tr>
+                    )}
+                    {totals.tax2 > 0 && (
+                      <tr className="border-b">
+                        <td className="p-2">{invoice.lines.length + 3}</td>
+                        <td className="p-2">
+                          {invoice.lines[0]?.tax2Account ?? "2180000"} ·
+                          Additional Output Tax
+                        </td>
+                        <td className="p-2">
+                          {invoice.lines[0]?.tax2CostCenter ?? "GEN"}
+                        </td>
+                        <td className="p-2">Additional tax</td>
+                        <td className="p-2">{invoice.currency}</td>
+                        <td className="p-2 text-right">{rate.toFixed(5)}</td>
+                        <td className="p-2 text-right">—</td>
+                        <td className="p-2 text-right">
+                          {money(totals.tax2 * rate)}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="bg-primary text-primary-foreground flex flex-wrap justify-between gap-3 rounded-md px-4 py-3 text-xs">
+                <span>
+                  {invoice.lines.length +
+                    1 +
+                    Number(totals.tax1 > 0) +
+                    Number(totals.tax2 > 0)}{" "}
+                  Rows ·{" "}
+                  {journalTotals.variance === 0
+                    ? "Base Balanced"
+                    : "Base Variance"}
+                </span>
+                <span>
+                  Trans Dr / Cr {money(totals.total)} / {money(totals.total)}{" "}
+                  {invoice.currency}
+                </span>
+                <span>
+                  Base Dr / Cr {money(journalTotals.debit)} /{" "}
+                  {money(journalTotals.credit)} THB
+                </span>
+                <span>Variance {money(journalTotals.variance)}</span>
+              </div>
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+      <SummaryFooterBar
+        hasRecord
+        items={[
+          {
+            key: "currency",
+            label: "Currency",
+            value: (
+              <>
+                <span className="block">{invoice.currency}</span>
+                <span className="block">THB</span>
+              </>
+            ),
+          },
+          ...(
+            [
+              ["subtotal", "Subtotal", totals.subtotal],
+              ["discount", "Discount", totals.discount],
+              ["net", "Net", totals.net],
+              ["tax", "Tax 1", totals.tax1],
+              ["tax2", "Tax 2", totals.tax2],
+              ["total", "Grand Total", totals.total],
+              ["unpaid", "Unpaid", totals.unpaid],
+            ] as const
+          ).map(([key, label, amount]) => ({
+            key,
+            label,
+            value: (
+              <>
+                <span className="block">{money(amount)}</span>
+                <span className="block">{money(amount * rate)}</span>
+              </>
+            ),
+            emphasis: key === "total" || key === "unpaid",
+          })),
+        ]}
+      >
+        {invoice.status === "Draft" && (
+          <Button
+            size="sm"
+            disabled
+            title="Requires AR submission API and tax-number allocation"
+          >
+            <Send className="size-4" />
+            Submit
+          </Button>
+        )}
+      </SummaryFooterBar>
+      <Sheet
+        open={lineIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setLineIndex(null);
+        }}
+      >
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>Invoice item detail</SheetTitle>
+            <SheetDescription>
+              Booking, discount, revenue and output tax
+            </SheetDescription>
+          </SheetHeader>
+          {lineIndex !== null && invoice.lines[lineIndex] && (
+            <div className="grid gap-3 p-4 sm:grid-cols-2">
+              <h3 className="font-medium sm:col-span-2">
+                Booking & Reference Details
+              </h3>
+              <Field label="Group No">
+                <Input
+                  type="number"
+                  value={invoice.lines[lineIndex].groupNo}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      groupNo: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Unit">
+                <Input
+                  value={invoice.lines[lineIndex].unit}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { unit: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Description" className="sm:col-span-2">
+                <Input
+                  value={invoice.lines[lineIndex].description}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { description: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Reference" className="sm:col-span-2">
+                <Textarea
+                  value={invoice.lines[lineIndex].reference}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { reference: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Date From">
+                <Input
+                  type="date"
+                  value={invoice.lines[lineIndex].dateFrom}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { dateFrom: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Date To">
+                <Input
+                  type="date"
+                  value={invoice.lines[lineIndex].dateTo}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { dateTo: event.target.value })
+                  }
+                />
+              </Field>
+              <h3 className="border-t pt-3 font-medium sm:col-span-2">
+                Discount
+              </h3>
+              <Field label="Qty">
+                <Input
+                  type="number"
+                  min="0.01"
+                  value={invoice.lines[lineIndex].quantity}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      quantity: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Price / Unit">
+                <Input
+                  type="number"
+                  min="0"
+                  value={invoice.lines[lineIndex].unitPrice}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      unitPrice: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Discount Amount">
+                <Input
+                  type="number"
+                  min="0"
+                  max={
+                    invoice.lines[lineIndex].quantity *
+                    invoice.lines[lineIndex].unitPrice
+                  }
+                  value={invoice.lines[lineIndex].discount}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      discount: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Discount %">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={
+                    invoice.lines[lineIndex].quantity *
+                      invoice.lines[lineIndex].unitPrice >
+                    0
+                      ? Number(
+                          (
+                            (invoice.lines[lineIndex].discount /
+                              (invoice.lines[lineIndex].quantity *
+                                invoice.lines[lineIndex].unitPrice)) *
+                            100
+                          ).toFixed(2),
+                        )
+                      : 0
+                  }
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      discount:
+                        (invoice.lines[lineIndex].quantity *
+                          invoice.lines[lineIndex].unitPrice *
+                          Math.min(
+                            100,
+                            Math.max(0, Number(event.target.value)),
+                          )) /
+                        100,
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Net Amount">
+                <Input
+                  readOnly
+                  value={money(lineTotals(invoice.lines[lineIndex]).net)}
+                />
+              </Field>
+              <h3 className="border-t pt-3 font-medium sm:col-span-2">
+                Revenue
+              </h3>
+              <Field label="Cr Acc Code (Revenue)">
+                <Input
+                  value={invoice.lines[lineIndex].account}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { account: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Cost Center (Dept)">
+                <Input
+                  value={invoice.lines[lineIndex].costCenter}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { costCenter: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Dimensions" className="sm:col-span-2">
+                <Input
+                  value={invoice.lines[lineIndex].dimensions}
+                  readOnly={!editable}
+                  placeholder="Market · Sales · Project · Event · Location · Channel"
+                  onChange={(event) =>
+                    updateLine(lineIndex, { dimensions: event.target.value })
+                  }
+                />
+              </Field>
+              <h3 className="border-t pt-3 font-medium sm:col-span-2">
+                Output Tax
+              </h3>
+              <Field label="Tax 1 Profile (%)">
+                <Input
+                  type="number"
+                  min="0"
+                  value={invoice.lines[lineIndex].taxRate}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      taxRate: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Tax Amount 1">
+                <Input
+                  readOnly
+                  value={money(lineTotals(invoice.lines[lineIndex]).tax)}
+                />
+              </Field>
+              <Field label="Tax 1 Acc Code">
+                <Input
+                  value={invoice.lines[lineIndex].tax1Account}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { tax1Account: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Tax 1 Cost Center">
+                <Input
+                  value={invoice.lines[lineIndex].tax1CostCenter}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      tax1CostCenter: event.target.value,
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Tax 2 Profile (%)">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={invoice.lines[lineIndex].tax2Rate}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      tax2Rate: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+              <Field label="Tax Amount 2">
+                <Input
+                  readOnly
+                  value={money(lineTotals(invoice.lines[lineIndex]).tax2)}
+                />
+              </Field>
+              <Field label="Tax 2 Acc Code">
+                <Input
+                  value={invoice.lines[lineIndex].tax2Account}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { tax2Account: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Tax 2 Cost Center">
+                <Input
+                  value={invoice.lines[lineIndex].tax2CostCenter}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, {
+                      tax2CostCenter: event.target.value,
+                    })
+                  }
+                />
+              </Field>
+              <h3 className="border-t pt-3 font-medium sm:col-span-2">
+                Account Receivable
+              </h3>
+              <Field label="Dr Acc Code (AR)">
+                <Input
+                  value={invoice.lines[lineIndex].arAccount}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { arAccount: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Dr Cost Center">
+                <Input
+                  value={invoice.lines[lineIndex].arCostCenter}
+                  readOnly={!editable}
+                  onChange={(event) =>
+                    updateLine(lineIndex, { arCostCenter: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Total Amount">
+                <Input
+                  readOnly
+                  value={money(lineTotals(invoice.lines[lineIndex]).total)}
+                />
+              </Field>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+      <Sheet open={folioOpen} onOpenChange={setFolioOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Add Folios from PMS</SheetTitle>
+            <SheetDescription>
+              Customer {invoice.customerName} · Folio date must be on or before{" "}
+              {invoice.inputDate}
+            </SheetDescription>
+          </SheetHeader>
+          <p className="text-muted-foreground p-4 text-sm">
+            PMS folio search requires the AR backend interface. No folios can be
+            imported from sample data.
+          </p>
+        </SheetContent>
+      </Sheet>
+      <Sheet open={depositOpen} onOpenChange={setDepositOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Apply Deposit</SheetTitle>
+            <SheetDescription>
+              Customer and currency must match this invoice.
+            </SheetDescription>
+          </SheetHeader>
+          <p className="text-muted-foreground p-4 text-sm">
+            Deposit balance and atomic settlement require the AR backend
+            contract.
+          </p>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}

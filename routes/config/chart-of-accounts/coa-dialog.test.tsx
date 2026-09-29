@@ -37,6 +37,7 @@ const existing: ChartOfAccount = {
   description_2: "F&B outlets",
   nature: ACCOUNT_NATURE.CREDIT,
   type: CHART_OF_ACCOUNT_TYPE.INCOME_STATEMENT,
+  category: "revenue",
   is_active: false,
 };
 
@@ -76,7 +77,7 @@ describe("CoaDialog — โหมดสร้างใหม่", () => {
 
   it("ตั้งต้นที่ Debit + Balance sheet ซึ่งเป็นชุดที่กรอกบ่อยสุด", () => {
     renderDialog();
-    expect(selectValues()).toEqual(["Debit", "Balance sheet"]);
+    expect(selectValues()).toEqual(["Debit", "Balance sheet", "Asset"]);
   });
 
   it("กรอกครบแล้วส่ง body ตรงตามสัญญา", async () => {
@@ -97,6 +98,7 @@ describe("CoaDialog — โหมดสร้างใหม่", () => {
       description_2: null,
       nature: "debit",
       type: "balance_sheet",
+      category: "asset",
       is_active: true,
     });
   });
@@ -136,7 +138,7 @@ describe("CoaDialog — โหมดแก้ไข", () => {
     expect(input("coa-code")?.value).toBe("4100-002");
     expect(input("coa-description-1")?.value).toBe("Food Revenue");
     expect(input("coa-description-2")?.value).toBe("F&B outlets");
-    expect(selectValues()).toEqual(["Credit", "Income statement"]);
+    expect(selectValues()).toEqual(["Credit", "Income statement", "Revenue"]);
   });
 
   it("ส่ง id + doc_version ไปด้วย (optimistic lock ของ backend)", async () => {
@@ -155,6 +157,7 @@ describe("CoaDialog — โหมดแก้ไข", () => {
       description_2: "F&B outlets",
       nature: "credit",
       type: "income_statement",
+      category: "revenue",
       is_active: false,
     });
   });

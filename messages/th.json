@@ -217,6 +217,20 @@
         "monthEndMeta": "ต้องตรวจสอบการตั้งค่ารายการ"
       }
     },
+    "sectionDashboards": {
+      "generalLedger": {
+        "title": "แดชบอร์ดบัญชีแยกประเภททั่วไป",
+        "description": "ฐานะการเงิน สถานะการผ่านรายการ และงานที่ต้องดำเนินการ"
+      },
+      "accountsReceivable": {
+        "title": "แดชบอร์ดลูกหนี้การค้า",
+        "description": "ลูกหนี้ การรับชำระจากลูกค้า และสถานะการผ่านรายการ"
+      },
+      "asset": {
+        "title": "แดชบอร์ดสินทรัพย์",
+        "description": "มูลค่าสินทรัพย์ถาวร การขึ้นทะเบียน และการจำหน่าย"
+      }
+    },
     "documents": {
       "journalVoucher": {
         "title": "รายการใบสำคัญรายวัน",
@@ -262,6 +276,16 @@
         "title": "รายการรับชำระลูกหนี้",
         "description": "การรับชำระและจัดสรรยอดลูกค้า",
         "single": "การรับชำระลูกหนี้"
+      },
+      "assetRegister": {
+        "title": "ทะเบียนสินทรัพย์",
+        "description": "รายการสินทรัพย์ถาวรและมูลค่าปัจจุบัน",
+        "single": "สินทรัพย์"
+      },
+      "assetDisposal": {
+        "title": "รายการจำหน่ายสินทรัพย์",
+        "description": "การเลิกใช้ ขาย และตัดจำหน่ายสินทรัพย์",
+        "single": "การจำหน่ายสินทรัพย์"
       },
       "export": "ส่งออก",
       "new": "สร้างใหม่",
@@ -366,6 +390,62 @@
       "logCreated": "ฝ่ายบัญชีสร้างใบสำคัญ",
       "logUpdated": "ปรับปรุงรายการสมุดรายวัน",
       "logReviewed": "ส่งให้ผู้ควบคุมการเงินตรวจสอบ"
+    },
+    "ap": {
+      "dashboardTitle": "แดชบอร์ดเจ้าหนี้การค้า",
+      "dashboardDescription": "ยอดหนี้คงค้าง กำหนดชำระ งานอนุมัติ และข้อยกเว้นภาษี",
+      "invoiceTitle": "รายการใบแจ้งหนี้เจ้าหนี้",
+      "paymentTitle": "รายการใบสำคัญจ่าย",
+      "approvalTitle": "อนุมัติการชำระเงิน",
+      "empty": "ไม่พบเอกสารเจ้าหนี้การค้า",
+      "loadError": "ไม่สามารถโหลดข้อมูลเจ้าหนี้การค้าได้",
+      "stale": "ข้อมูลอาจไม่เป็นปัจจุบัน",
+      "actions": {
+        "newInvoice": "สร้างใบแจ้งหนี้",
+        "newPayment": "สร้างรายการชำระเงิน",
+        "paySelected": "ชำระรายการที่เลือก",
+        "saveDraft": "บันทึกร่าง",
+        "submit": "ส่งอนุมัติ",
+        "approve": "อนุมัติ",
+        "return": "ส่งกลับ",
+        "reject": "ปฏิเสธ",
+        "void": "ยกเลิกเอกสาร",
+        "release": "ดำเนินการจ่าย",
+        "clarify": "ขอข้อมูลเพิ่มเติม"
+      },
+      "fields": {
+        "documentNo": "เลขที่เอกสาร",
+        "vendor": "ผู้ขาย",
+        "inputDate": "วันที่บันทึก",
+        "invoiceDate": "วันที่ใบแจ้งหนี้",
+        "dueDate": "วันครบกำหนด",
+        "currency": "สกุลเงิน",
+        "exchangeRate": "อัตราแลกเปลี่ยน",
+        "description": "รายละเอียด",
+        "originalAmount": "ยอดเริ่มต้น",
+        "openAmount": "ยอดคงค้าง",
+        "appliedAmount": "ยอดตัดชำระ",
+        "wht": "ภาษีหัก ณ ที่จ่าย",
+        "netPay": "ยอดจ่ายสุทธิ",
+        "paymentMethod": "วิธีชำระเงิน",
+        "reference": "เลขอ้างอิง",
+        "status": "สถานะ"
+      },
+      "status": {
+        "draft": "ร่าง",
+        "submitted": "ส่งอนุมัติแล้ว",
+        "posted": "บันทึกบัญชีแล้ว",
+        "readyToRelease": "พร้อมจ่าย",
+        "executed": "จ่ายแล้ว",
+        "voided": "ยกเลิกแล้ว",
+        "unpaid": "ยังไม่ชำระ",
+        "partiallyPaid": "ชำระบางส่วน",
+        "paid": "ชำระแล้ว",
+        "matched": "จับคู่แล้ว",
+        "variance": "มียอดต่าง",
+        "pending": "รอดำเนินการ",
+        "urgent": "เร่งด่วน"
+      }
     }
   },
   "dashboardWidget": {
@@ -1392,6 +1472,14 @@
         "header": "หัวข้อ (ไม่ลงรายการ)",
         "balance_sheet": "งบแสดงฐานะการเงิน",
         "income_statement": "งบกำไรขาดทุน",
+        "statistic": "สถิติ"
+      },
+      "accountCategory": {
+        "asset": "สินทรัพย์",
+        "liability": "หนี้สิน",
+        "equity": "ส่วนของเจ้าของ",
+        "revenue": "รายได้",
+        "expense": "ค่าใช้จ่าย",
         "statistic": "สถิติ"
       },
       "importCarmenGl": {
@@ -4732,16 +4820,25 @@
     "reportSchedule": "กำหนดการ",
     "reportHistory": "ประวัติ",
     "accounting": "บัญชี",
+    "generalLedger": "บัญชีแยกประเภททั่วไป",
+    "glDashboard": "แดชบอร์ด",
     "journalVoucher": "ใบสำคัญรายวัน",
     "templateVoucher": "แม่แบบใบสำคัญ",
     "recurringVoucher": "ใบสำคัญประจำ",
     "allocationVoucher": "ใบสำคัญปันส่วน",
     "accountsPayable": "เจ้าหนี้การค้า",
+    "apDashboard": "แดชบอร์ด",
     "apInvoice": "ใบแจ้งหนี้",
     "apPayment": "การชำระเงิน",
+    "apPaymentApproval": "อนุมัติการชำระเงิน",
     "accountsReceivable": "ลูกหนี้การค้า",
+    "arDashboard": "แดชบอร์ด",
     "arInvoice": "ใบแจ้งหนี้",
     "arReceipt": "ใบรับชำระ",
+    "asset": "สินทรัพย์",
+    "assetDashboard": "แดชบอร์ด",
+    "assetRegister": "ทะเบียนสินทรัพย์",
+    "assetDisposal": "จำหน่ายสินทรัพย์",
     "financialReports": "รายงานทางการเงิน",
     "accountingDesc": "รายการบัญชี ระบบใบสำคัญอัตโนมัติ และการวิเคราะห์ทางการเงิน",
     "configDesc": "ข้อมูลหลักและการตั้งค่าระบบ",
@@ -4758,7 +4855,9 @@
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
     "chartOfAccounts": "ผังบัญชี",
-    "chartOfAccountMapping": "การผูกผังบัญชี"
+    "accountGrouping": "การจัดกลุ่มรหัสบัญชี",
+    "titleMaster": "คำนำหน้าชื่อ",
+    "chartOfAccountMapping": "การผูกบัญชี"
   },
   "commentSheet": {
     "title": "ความคิดเห็น ({count})",
