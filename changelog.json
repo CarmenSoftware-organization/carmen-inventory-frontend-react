@@ -1,7 +1,2863 @@
 {
-  "current": "2.2.0",
-  "generated_at": "2026-08-23T08:56:00.517Z",
+  "current": "2.3.0",
+  "generated_at": "2026-09-29T03:26:21.062Z",
   "versions": [
+    {
+      "version": "2.3.0",
+      "build": "2.3.0-build.20260929.10e755a8",
+      "date": "2026-09-29",
+      "commit": "10e755a8",
+      "changes": {
+        "added": [
+          {
+            "scope": null,
+            "summary": "add account categories and remove journal staging feature",
+            "hash": "4dd3d5af",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "add AR invoice list component and model with related tests",
+            "hash": "f781d65c",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "update payment lifecycle and capabilities, enhance invoice handling",
+            "hash": "0aefd2fb",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "add accounting document model and tests",
+            "hash": "c66f3d8f",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": "accounting",
+            "summary": "add General Ledger implementation readiness documentation and mock repository for Journal Vouchers",
+            "hash": "de39ea6d",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "add cash forecast functionality and dashboard access control",
+            "hash": "10e70dd2",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "add payment tax allocation component and related functionality",
+            "hash": "6638b1db",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "enhance UI consistency guidelines and refactor Accounting Settings page",
+            "hash": "b3666165",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "refactor journal voucher and staging functionalities with mock data",
+            "hash": "27ea0fad",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": "accounting",
+            "summary": "implement Journal Voucher and Journal Staging features",
+            "hash": "9102b486",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": "company-profile",
+            "summary": "ปรับโหมดดูให้อ่านง่าย + ตัวอย่างสดของรูปแบบวันที่/ตัวเลข",
+            "hash": "2b878d00",
+            "author": "Thammanoon Semapru",
+            "pr": 183
+          },
+          {
+            "scope": "inventory-period",
+            "summary": "toast แสดงข้อความ error จาก backend",
+            "hash": "6e09a459",
+            "author": "Thammanoon Semapru",
+            "pr": 182
+          },
+          {
+            "scope": "inventory-period",
+            "summary": "แถบปีบัญชีบอกรอบปัจจุบันและรอบค้างปิด",
+            "hash": "54d095d1",
+            "author": "Thammanoon Semapru",
+            "pr": 179
+          },
+          {
+            "scope": "inventory-adjustment",
+            "summary": "เพิ่มตัวกรองประเภทการปรับปรุง (adjustment type)",
+            "hash": "0ef5dc79",
+            "author": "Khafang",
+            "pr": 178
+          },
+          {
+            "scope": "profile",
+            "summary": "เตือนเมื่อ BU ไม่มี default currency ที่ใช้ได้",
+            "hash": "827cd967",
+            "author": "Thammanoon Semapru",
+            "pr": 177
+          },
+          {
+            "scope": "company-profile",
+            "summary": "รองรับวิธีคิดต้นทุน average_per_location",
+            "hash": "83bb0624",
+            "author": "Thammanoon Semapru",
+            "pr": 176
+          },
+          {
+            "scope": "auth",
+            "summary": "สลับภาษา EN/ไทย ได้จากหน้า login และหน้า auth อื่น ๆ",
+            "hash": "a6b366f8",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "design-system",
+            "summary": "หน้าอ้างอิง /design-system ของระบบที่มีอยู่แล้ว",
+            "hash": "d565ea73",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email",
+            "summary": "dialog ส่งอีเมลอ่านผู้ส่ง/ข้อความผ่าน endpoint ไร้ความลับ",
+            "hash": "4eedd245",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "แยกเมนู interface/email-profile/email-template ออกจาก app_config",
+            "hash": "959a7373",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "เปลี่ยนชื่อหน้า Account Mapping เป็น Chart of Account Mapping",
+            "hash": "11ec09a3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "footer",
+            "summary": "แสดงรอบบัญชีปัจจุบันและเวอร์ชัน backend บนแถบสถานะ",
+            "hash": "ad213a11",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "nav",
+            "summary": "ย้ายเมนูคลังข้อความแจ้งเตือนไปอยู่ใต้กลุ่ม Workflows",
+            "hash": "00f2196d",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification-template",
+            "summary": "เหลือช่องทางแอปอย่างเดียว + ทำให้ตัวแปรในข้อความมีตัวตน",
+            "hash": "541690f5",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "rfp",
+            "summary": "ส่งคำขอราคาให้ผู้ขายทางอีเมลได้จริง + ใช้ข้อความจากคลัง",
+            "hash": "a3b308df",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-template",
+            "summary": "คลังข้อความอีเมลต่อชนิดเอกสาร + หน้าตั้งค่า",
+            "hash": "2b80f83c",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "ranked ที่สลับเป็นตารางแล้วกดแถวเปิดเอกสารได้",
+            "hash": "92fc00e2",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "กดแถวในตารางแล้วเปิดเอกสารนั้นได้",
+            "hash": "3bd0b68f",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "categorical/ranked เป็นตารางได้ และ time_series เป็นกราฟแท่งได้",
+            "hash": "37cc7906",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "gauge + กริด 12 คอลัมน์ที่ตั้งขนาดต่อ widget ได้",
+            "hash": "493c78f0",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "inventory-period",
+            "summary": "ยิง endpoint และคีย์ license ชุดใหม่ของ backend",
+            "hash": "1caecb42",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "purchase-request-template",
+            "summary": "เรียงตามชื่อผู้สร้างได้",
+            "hash": "9325fec3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "purchase-request",
+            "summary": "หน้ารายการ PR เรียงตามวันที่เป็นค่าเริ่มต้น",
+            "hash": "1b3a106d",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "approval",
+            "summary": "หัวคอลัมน์หน้าอนุมัติคลิกเรียงได้ทุกช่อง",
+            "hash": "e5962f53",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "approval",
+            "summary": "หน้าอนุมัติใช้ /api/my-pending แทนการรวมสามกลุ่มฝั่ง client",
+            "hash": "9bd21427",
+            "author": "Thammanoon Semapru",
+            "pr": 140
+          },
+          {
+            "scope": "po",
+            "summary": "รองรับสถานะ approved และ sent_or_print",
+            "hash": "0fa6c51a",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ย้าย license จาก user profile ไปอ่าน GET /api/license",
+            "hash": "bebd5f75",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "เตือนใต้ช่อง Authorize token ว่าห้ามใส่ \"direct \" นำหน้า",
+            "hash": "1640cb95",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "โหมด read/edit + กลับหน้ารายการหลัง Save และแก้ค่า Select หายหลังโหลด",
+            "hash": "dc9c0e0f",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "เพิ่มปุ่มตาแสดง/ซ่อนค่าในช่อง secret ของฟอร์ม interface",
+            "hash": "465cde31",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "chart-of-accounts",
+            "summary": "เพิ่มปุ่มนำเข้าผังบัญชีจาก Carmen GL และตัวเลือกนโยบายซิงก์",
+            "hash": "9b1ebd43",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "activity-log",
+            "summary": "เพิ่มตัวกรอง action ให้ครบทุกค่าของ enum พร้อมไอคอนประจำ action",
+            "hash": "c07d6805",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-profile",
+            "summary": "จัดฟอร์มใหม่ + ให้ระบุปลายทางตอนทดสอบส่ง และแก้การอ่าน response ที่ผิดชั้น",
+            "hash": "b026b061",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "purchase-order",
+            "summary": "ปุ่มส่งใบสั่งซื้อให้ผู้ขายทางอีเมล",
+            "hash": "8ae33e33",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-profile",
+            "summary": "หน้าตั้งค่าโปรไฟล์อีเมลของหน่วยธุรกิจ",
+            "hash": "67b8a8c1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-profile",
+            "summary": "types และ hook อ่าน/เขียนโปรไฟล์อีเมลของหน่วยธุรกิจ",
+            "hash": "7f191f08",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "deploy",
+            "summary": "รองรับ deploy บน Vercel ผ่าน env var APP_CONFIG_JSON",
+            "hash": "943f3b1e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "อ่านสิทธิ์ interface จาก license แทน enabled_interfaces",
+            "hash": "84096bc9",
+            "author": "Thammanoon Semapru",
+            "pr": 130
+          },
+          {
+            "scope": "dashboard",
+            "summary": "สลับชนิดกราฟของ widget ได้เอง เลิก hardcode ว่า shape ไหนวาดอะไรได้",
+            "hash": "74e3c795",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "ติ๊กรับลายเซ็นจาก PR ต้นทางได้ในหน้า workflow ของ PO",
+            "hash": "409fcc81",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "report",
+            "summary": "เตือนเมื่อเวลาแจ้งเตือนห่างจากเวลารันไม่ถึง 10 นาที",
+            "hash": "5b8117b8",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "report",
+            "summary": "ตั้งเวลาแจ้งเตือนของ schedule ได้ พร้อม badge +1 เมื่อข้ามวัน",
+            "hash": "2671e866",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "ล็อกเฉพาะ stage กับเส้นทาง แทนที่จะปิดทั้งฟอร์มตอนมีเอกสารค้าง",
+            "hash": "8cac942d",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "กันเข้าโหมดแก้เมื่อยังมีเอกสารดำเนินการ พร้อมบอกเหตุผลด้วย dialog",
+            "hash": "c60430ea",
+            "author": "Khafang",
+            "pr": 118
+          },
+          {
+            "scope": "workflow",
+            "summary": "บอกเหตุผลจริงตอนแก้ workflow ไม่ได้ + แสดงจำนวนเอกสารบน header",
+            "hash": "613e649c",
+            "author": "Khafang",
+            "pr": 118
+          },
+          {
+            "scope": "route-guard",
+            "summary": "deep link เข้าหน้าที่ปลดระวางแล้วให้เด้งกลับเงียบ ๆ",
+            "hash": "177b39fe",
+            "author": "Thammanoon Semapru",
+            "pr": 117
+          },
+          {
+            "scope": "license",
+            "summary": "ตัดโมดูลที่ปลดระวางออกจากเมนูจริง ไม่ใช่ใส่แม่กุญแจ",
+            "hash": "2addc658",
+            "author": "Thammanoon Semapru",
+            "pr": 117
+          },
+          {
+            "scope": "period-end",
+            "summary": "ปุ่มเริ่มรอบตรวจนับ + ปลดล็อกปุ่ม Start ของ physical count",
+            "hash": "77ac4083",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "เพิ่มโมดูล Account Mapping — หน้า list อ่านอย่างเดียว",
+            "hash": "1fef98ec",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "เพิ่มโมดูล Account Code — master data รหัสบัญชี",
+            "hash": "1b6016ad",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "inventory",
+            "summary": "กล่องข้อมูลสต็อกบอกราคาล่าสุดและบอกว่าเป็นของสินค้าตัวไหน",
+            "hash": "644ce449",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "บอกให้ชัดว่าสินค้าซ้ำ ไม่ใช่ \"เอกสารถูกแก้ไปแล้ว\"",
+            "hash": "49b523e9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "inventory",
+            "summary": "โชว์ราคาซื้อล่าสุดใน dialog on hand กับ on order",
+            "hash": "20568ba8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "โชว์ราคาซื้อล่าสุดในหน้าเทียบราคา",
+            "hash": "0713cbc9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ป้ายใบรับสินค้าของแต่ละรายการ",
+            "hash": "60a10d74",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ปุ่มดูใบขอซื้อต้นทางของแต่ละรายการ",
+            "hash": "6ea5c39f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เก็บร่างไม่บังคับกรอกครบ",
+            "hash": "b67c6a38",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn,sr",
+            "summary": "ถามก่อนว่าจะลงวันที่ไหน เมื่อเอกสารอยู่นอกงวดที่เปิดอยู่",
+            "hash": "8cf47f87",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ใบร่างกด Commit ได้เลย ไม่ต้องกด Save ก่อน",
+            "hash": "5b562107",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "แท็บ stock movement ของใบรับสินค้ายิง API จริงแล้ว",
+            "hash": "fa2be01b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "ปุ่ม Save ของเอกสารร่างไม่บังคับกรอกครบแล้ว",
+            "hash": "a848865f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "โชว์ของแถมที่รับแล้วใต้คอลัมน์ FOC / GRN",
+            "hash": "90a7ecd4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "on-order",
+            "summary": "โชว์คลังปลายทางในตารางของที่สั่งแล้ว",
+            "hash": "d5a36677",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "ลดหนี้เกินยอดสุทธิที่รับมาไม่ได้ บล็อกตั้งแต่ในฟอร์ม",
+            "hash": "039e3523",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "แท็บ stock movement ของใบลดหนี้ยิง API จริงแล้ว",
+            "hash": "8e217ff3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "errors",
+            "summary": "แปล error code ของ backend เองฝั่ง client + ถามวันที่ใบเบิกแทนที่จะตัน",
+            "hash": "cff396cb",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "errors",
+            "summary": "400 validation บอกชื่อช่องที่ผิดเป็นภาษาคน",
+            "hash": "9fa6e4f0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "inventory",
+            "summary": "ยกแผงสต๊อกเป็น dialog เต็มตัว โชว์ล็อตกับความเคลื่อนไหวจาก response ใหม่",
+            "hash": "fc074315",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "คอลัมน์ action สลับปุ่มตามโหมด — อ่านเห็นเอกสารต้นทาง แก้เห็นถังขยะ",
+            "hash": "dab3505d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เพิ่มแท็บ Stock Movement ทรงเดียวกับ CN (ยังไม่มีข้อมูล รอ backend)",
+            "hash": "18a71ea6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "เพิ่มแท็บ Stock Movement เกณฑ์เดียวกับ SR (ยังไม่มีข้อมูล รอ backend)",
+            "hash": "f26f5553",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "แยกหน้าตามชนิดใบให้สุด เลิกมีหน้ารายการรวม",
+            "hash": "f3e13d30",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ส่ง qty ไปด้วยตอนเรียก price-compare",
+            "hash": "5a8c3dc3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list",
+            "summary": "สถานะเป็นไอคอน+ข้อความทั้ง pl และ plt แทนชิปจุดสี",
+            "hash": "f214cee4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "data-grid",
+            "summary": "สลับสีแถวเป็นค่าเริ่มต้นของทุกตาราง",
+            "hash": "0c54c5d4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "data-grid",
+            "summary": "สลับสีแถวคิดจากลำดับข้อมูล แถวย่อยได้สีเดียวกับแถวแม่",
+            "hash": "e79e4d77",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "step 2 ของสร้าง PO จาก PR บอกด้วยว่าใบทั้งชุดเดินตาม workflow ไหน",
+            "hash": "bccb95c4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "สร้าง PO จาก PR มีกล่องยืนยัน หน้าสรุปผล และกันเลือกข้าม workflow",
+            "hash": "96b4c700",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "errors",
+            "summary": "วันที่รับของนอกงวดบัญชี ขึ้นข้อความที่แก้ตามได้ ไม่ใช่ \"กรอกไม่ถูกต้อง\"",
+            "hash": "c8dd9361",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "ช่อง To Qty คุมทศนิยมตามหน่วย + submit แล้วเด้งไปแท็บที่กรอกผิด",
+            "hash": "816dac5c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ปุ่มตัดสินเหนือตารางไม่หายไปแล้ว + HOD กด Edit ติ๊กทุกแถวให้เลย",
+            "hash": "d798d333",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "กดเรียงคลังกับสินค้าได้ที่ตารางกรอกจำนวนและตารางรายการเทมเพลต",
+            "hash": "585e7e81",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "สร้างใบจากเทมเพลตเป็นหน้าเต็ม มีขั้นกรอกจำนวนก่อนเข้าฟอร์ม",
+            "hash": "ce998f07",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "หัว dialog เทียบราคาบอกว่ากำลังทำอะไร ชื่อสินค้าลงมาเป็นบรรทัดรอง",
+            "hash": "f0add135",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ช่อง Description โชว์เสมอ + duplicate ตั้งวันส่งเป็นพรุ่งนี้",
+            "hash": "116ae066",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "เรตแลกเปลี่ยนโชว์ทศนิยม 5 ตำแหน่งเสมอ",
+            "hash": "35391bf5",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "หน่วยไปอยู่ท้ายจำนวน + ยอดเงินดึงต้นทุนจริงจาก backend",
+            "hash": "54590c76",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ยอดรวมทั้งสิ้นใต้ตารางตรวจสอบใบสั่งซื้อที่จะสร้างจากใบขอซื้อ",
+            "hash": "e12b5732",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "บันทึกร่างไม่ต้องมีจำนวน/ราคา แต่ส่งใบต้องมี",
+            "hash": "0cce4cac",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "prt",
+            "summary": "รื้อรายการในแม่แบบให้ทำงานแบบเดียวกับ PR/PO",
+            "hash": "447079d1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เลือกคลังก่อนแล้วค่อยเลือกสินค้า + เรียงคอลัมน์คลัง/สินค้าได้",
+            "hash": "edfb9f5b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "เพิ่มจุดส่งของหัวใบ หมายเหตุรายแถว และของแถมพร้อมหน่วย",
+            "hash": "a05f6958",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "can_use ของใบสั่งซื้อสามชั้น และกางคลังให้เห็นในขั้นเลือกใบ",
+            "hash": "d85b4de5",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "rfp",
+            "summary": "ปุ่มส่งอีเมลในคอลัมน์การกระทำของผู้ขาย เปิด dialog แบบเดียวกับใบสั่งซื้อ",
+            "hash": "d8d5f18e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "รายการราคาใน wizard ส่ง workflow ไปกรอง และปิดรายการที่ใช้ไม่ได้",
+            "hash": "b40aa166",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ปุ่มส่งใบใช้เงื่อนไขเดียวกับ PR และกดส่งได้ตั้งแต่ใบยังไม่เคยเซฟ",
+            "hash": "5b879df4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "เลือกคลังก่อนแล้วค่อยเลือกสินค้า แบบเดียวกับ PR",
+            "hash": "9b6e5f02",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "จำนวนในรายการสินค้า — ใส่ 0 ได้ กันตอนส่ง และแสดงตามหน่วยจริง",
+            "hash": "81755474",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "กรองแถวรายการสินค้าในฟอร์ม PR ด้วยตัวกรองฝั่ง client",
+            "hash": "8b66fb03",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ตารางรายการ PO ใช้ท่าเดียวกับ GRN",
+            "hash": "cb70889a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ตัดวันที่รับของ (received_at) ออกจากใบรับสินค้า",
+            "hash": "076ec828",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ราคาต่อหน่วยกรอกที่แถวสินค้าที่เดียว คลังใช้ราคาเดียวกันหมด",
+            "hash": "7426675b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "หน้าผู้ใช้รับ response ก้อนเดียว แล้วเปิดให้แก้คลังกับแผนก",
+            "hash": "39ae1bba",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "role",
+            "summary": "permissions ใน list เป็น count และรับ audit เข้ามา",
+            "hash": "3d339913",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "ย้ายอ่าน/แก้ผู้ใช้ไป /config/{bu}/users/{user_id}",
+            "hash": "a5038c84",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "tab สินค้าโหมดอ่าน เปลี่ยนจาก tree เป็นตาราง",
+            "hash": "53a4b0ee",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "กันเพิ่มรายการก่อนเลือก workflow + รับ response location รูปใหม่",
+            "hash": "35d93ab1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ช่อง location ในฟอร์ม PO ดึงจาก endpoint ที่ผูกกับ workflow",
+            "hash": "f4344d92",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "เมนูย่อยแต่ละชนิดยิง endpoint ของตัวเอง แทนการกรองหน้าเดิม",
+            "hash": "293009f0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "menu",
+            "summary": "เมนู workflow แตกเมนูย่อยตามชนิดใบ (ขอซื้อ/สั่งซื้อ/เบิกของ)",
+            "hash": "a5b49e68",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "account-code",
+            "summary": "กรองตามด้านบัญชี (เดบิต/เครดิต) และประเภทได้แล้ว",
+            "hash": "492915c0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "account-code",
+            "summary": "เพิ่มช่อง description_2 (คำอธิบายเพิ่มเติม)",
+            "hash": "6f4802aa",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "account-code",
+            "summary": "ย้ายไป chart-of-accounts พร้อมสัญญาใหม่ nature/type",
+            "hash": "be2fba2b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "ช่องเลือกสินค้ากรองด้วย workflow ด้วย ย้ายไป products-location-workflow",
+            "hash": "c1fe91cf",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "lint",
+            "summary": "ล็อกเส้นแบ่งโมดูลด้วย eslint — routes/A ห้ามล้วงของ routes/B",
+            "hash": "43f31946",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ป้ายเตือนราคาบอกต่อว่ามีเจ้าไหนถูกกว่า",
+            "hash": "cb7f3b45",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ทักเองเมื่อราคาแพงกว่าครั้งก่อน ไม่ต้องรอให้คนสงสัย",
+            "hash": "23364ab8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "running-code",
+            "summary": "แก้รูปแบบเลขเอกสารแบบต่อชิ้นส่วน แทนการพิมพ์ JSON เอง",
+            "hash": "704f1f9f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "แท็บ stock movement ดึงจาก API แทนการเดาจากฟอร์ม",
+            "hash": "f077c3dc",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "location",
+            "summary": "ประเภทคลังเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี",
+            "hash": "73a5c453",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "ชนิดใบเลิกใช้ badge สี เปลี่ยนเป็นไอคอนไม่มีสี",
+            "hash": "92c0c960",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี",
+            "hash": "bff65a87",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี",
+            "hash": "9f176b90",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี",
+            "hash": "b281da7f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "report-history",
+            "summary": "เปลี่ยนสถานะงานออกรายงานเป็นไอคอน + ป้าย",
+            "hash": "73499174",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "approval",
+            "summary": "คิวรออนุมัติใช้สถานะแบบไอคอน + ป้าย ให้ตรงกับหน้า PR",
+            "hash": "af0dc719",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "period-end",
+            "summary": "เปลี่ยนสถานะรอบเป็นไอคอน + ป้าย",
+            "hash": "0990e50a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "period",
+            "summary": "เปลี่ยนสถานะรอบบัญชีเป็นไอคอน + ป้าย",
+            "hash": "26a403d4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "inventory-adjustment",
+            "summary": "เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามชุดเดียวกับ procurement",
+            "hash": "0e6ea3fe",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO/GRN/CN",
+            "hash": "5ca64bac",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO/GRN",
+            "hash": "42f9e5cd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO",
+            "hash": "1f03cf7b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR",
+            "hash": "3fdb90e4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "status",
+            "summary": "เลิกใช้ dot chip เปลี่ยนเป็นไอคอน + ป้ายตัวใหญ่ เริ่มที่ PR",
+            "hash": "9b451508",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "data-grid",
+            "summary": "แถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ ยาวกว่านั้นตัด ellipsis",
+            "hash": "d16f5493",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "stock-replenishment",
+            "summary": "Create PR ติ๊กข้ามคลังได้ ยิงทีละคลังได้ใบละคลัง",
+            "hash": "56ccddc2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "stock-replenishment",
+            "summary": "เปลี่ยน Create PR/SR เป็น wizard ที่พาไปกรอกต่อในฟอร์มจริง",
+            "hash": "8ec230bf",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "กด \"คงเหลือ\"/\"กำลังสั่ง\" ใน tooltip ของคอลัมน์ Product เปิด dialog ได้",
+            "hash": "6c250bae",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "doc-sequence",
+            "summary": "ปุ่ม ↑↓ ใน my-pending เดินได้ทุกใบ ไม่ใช่แค่หน้าที่เปิดค้าง",
+            "hash": "1c5b1f5d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ],
+        "fixed": [
+          {
+            "scope": "accounting",
+            "summary": "แก้ lint/เทสต์ที่ติดมาจาก dev2 และเพิ่ม route account-grouping",
+            "hash": "a8652ef9",
+            "author": "Thammanoon Semapru",
+            "pr": 189
+          },
+          {
+            "scope": "accounting",
+            "summary": "ผูก license feature ให้เมนูบัญชีและ config ใหม่จาก dev2",
+            "hash": "28c87fd4",
+            "author": "Thammanoon Semapru",
+            "pr": 187
+          },
+          {
+            "scope": "config",
+            "summary": "แก้ permission key ที่ไม่มีอยู่จริงใน 5 หน้า config",
+            "hash": "86c05b22",
+            "author": "Thammanoon Semapru",
+            "pr": 185
+          },
+          {
+            "scope": "inventory-period",
+            "summary": "เลิกเขียนตัวอย่างคลาส Tailwind ในคอมเมนต์",
+            "hash": "3b20840c",
+            "author": "Thammanoon Semapru",
+            "pr": 180
+          },
+          {
+            "scope": "cn",
+            "summary": "กรอก Tax Invoice # แล้ว Submit ยังฟ้องว่าว่าง",
+            "hash": "960725e5",
+            "author": "Khafang",
+            "pr": 175
+          },
+          {
+            "scope": "build",
+            "summary": "กรองคำเตือน build ที่ไม่มีผล และย้าย vercel ไป devDependencies",
+            "hash": "6b70a4d1",
+            "author": "Thammanoon Semapru",
+            "pr": 174
+          },
+          {
+            "scope": "inventory",
+            "summary": "ราคาที่พิมพ์เองในใบปรับปรุงโดน probe เขียนทับ",
+            "hash": "e143643b",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "inventory",
+            "summary": "หน้า transaction กับใบปรับปรุงว่างเปล่า หลัง gateway ยุบ entity เป็นก้อน",
+            "hash": "84de9fd4",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "list",
+            "summary": "จำ filter/sort/page ของหน้า list ตอนกด Back จากหน้า detail",
+            "hash": "5aeb9eb7",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ตามการถอด system_admin.query_dataset ออกจาก catalog ของ backend",
+            "hash": "02bfff7a",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-dialogs",
+            "summary": "ตรึงหัวและท้ายกล่อง ปุ่มบันทึก/ส่งจะได้ไม่เลื่อนหาย",
+            "hash": "7b3a943c",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "บอกให้ชัดว่าความสามารถไหนของหน่วยงานไหนที่ถูกบล็อก",
+            "hash": "d16e339e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "default-setting",
+            "summary": "403 ของ lookup แบบฟอร์มไม่ต้องเด้งกล่องทับทั้งหน้า",
+            "hash": "ee8c75bf",
+            "author": "Thammanoon Semapru",
+            "pr": 167
+          },
+          {
+            "scope": "bu-switcher",
+            "summary": "ปลดล็อกผู้ใช้ที่ไม่มี BU ตั้งเป็น default",
+            "hash": "34096059",
+            "author": "Thammanoon Semapru",
+            "pr": 166
+          },
+          {
+            "scope": "pr-form",
+            "summary": "ปรับเทสต์ dirty state ให้ตรงกับ react-hook-form 7.88",
+            "hash": "430a0ea7",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "permissions",
+            "summary": "เก็บคีย์ผีที่เหลือทั้งหมดให้ตรงกับ tb_permission ของ backend",
+            "hash": "91b2b274",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "แก้ namespace permission widget.* เป็น dashboard.* ตาม catalog จริง",
+            "hash": "0f20a634",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "system-admin",
+            "summary": "เลิกใช้คีย์ผี system_configuration เปลี่ยนไปใช้ permission ที่มีจริง",
+            "hash": "b9e2de5f",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ปิด finding จาก final review ฝั่ง frontend",
+            "hash": "6c079a4c",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "invalidate config ทีละคีย์ แบบ exact เพื่อหลีกเลี่ยงผลข้าง",
+            "hash": "2a4d14e0",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ผูก /config/shelf กับ configuration.location_shelf",
+            "hash": "aae188e1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "sidebar",
+            "summary": "เมนูชั้นที่สามต้องเคารพ locked/denied เหมือนชั้นสอง",
+            "hash": "6a9e2cc3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ผูก license feature ให้ leaf ที่ยังไม่มีคีย์ ปิดรูเมนูที่ไม่ถูกล็อก",
+            "hash": "6b89fa77",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เลิกดึงใบรับของทั้ง BU ตอนเปิดหน้ารายการ",
+            "hash": "c0cfeb9e",
+            "author": "Thammanoon Semapru",
+            "pr": 157
+          },
+          {
+            "scope": "grn,price-list",
+            "summary": "เลิกดึงทะเบียนผู้ขายทั้ง BU ตอนเปิดหน้ารายการ",
+            "hash": "54b45609",
+            "author": "Thammanoon Semapru",
+            "pr": 157
+          },
+          {
+            "scope": "po",
+            "summary": "เลิกดึงทะเบียนผู้ขายทั้ง BU ตอนเปิดหน้าใบสั่งซื้อ",
+            "hash": "05ba31b8",
+            "author": "Thammanoon Semapru",
+            "pr": 157
+          },
+          {
+            "scope": "cn",
+            "summary": "เลิกดึงทะเบียนทั้ง BU ตอนเปิดหน้าใบลดหนี้",
+            "hash": "c2ce1271",
+            "author": "Thammanoon Semapru",
+            "pr": 157
+          },
+          {
+            "scope": "po",
+            "summary": "เรียงหน้ารายการใบสั่งซื้อตามวันที่สั่งซื้อเป็นค่าเริ่มต้น",
+            "hash": "b121e014",
+            "author": "Thammanoon Semapru",
+            "pr": 156
+          },
+          {
+            "scope": "product-management",
+            "summary": "แก้คอลัมน์ Unit ของ product list ที่ว่างเงียบ ๆ (review round 1)",
+            "hash": "e5a4df2b",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "config",
+            "summary": "exchange rate list อ่าน currency จาก object (บั๊กที่มีอยู่ก่อน task นี้)",
+            "hash": "75244fde",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "product-management",
+            "summary": "category tree อ่าน product_category/tax_profile จาก object (บั๊กที่มีอยู่ก่อน task นี้)",
+            "hash": "f8d4026c",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "operation-plan",
+            "summary": "recipe category อ่าน parent จาก object (บั๊กที่มีอยู่ก่อน task นี้)",
+            "hash": "768af593",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "config",
+            "summary": "แก้ department form อ่าน user จาก object (บั๊กที่มีอยู่ก่อน task นี้)",
+            "hash": "b55294b3",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "แก้คอลัมน์ workflow ของ PR template list ที่หายเงียบ ๆ",
+            "hash": "f38e456d",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "types",
+            "summary": "แก้ 2 Critical จาก review — list กับ detail คนละ shape",
+            "hash": "dbb93361",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "Phase 4 ทำฝั่งอ่านอย่างเดียวก่อน ฝั่งเขียนไม่บังคับ",
+            "hash": "295fe1b9",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "เขียน Task 14 ใหม่ — ขยาย @ExpandRefs ตามฝั่งอ่านให้ทัน",
+            "hash": "e7c243d4",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "เขียน Task 13 ใหม่ — กลไกฝั่งเขียนต้องเป็น interceptor ไม่ใช่ DTO transform",
+            "hash": "a8b3743a",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "Task 9 ทำเฉพาะ runtime · งานเอกสาร 594 group แยกเป็นการตัดสินใจต่างหาก",
+            "hash": "9f97c873",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "scripts",
+            "summary": "เลิกนับ reference ที่ null ทั้งสองฝั่งเป็น false positive",
+            "hash": "8b51a3df",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "scripts",
+            "summary": "แก้ flatten() ให้เดิน list ระดับบนสุดและ dict ทุกชั้น (รวม OPAQUE)",
+            "hash": "002cf8c7",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "ให้ Task 9 ขยาย regex ของตัวตรวจ + แปลงไฟล์ swagger/example",
+            "hash": "93fe6180",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "ขยาย glob ของตัวตรวจให้ครอบ swagger/example ด้วย",
+            "hash": "8fac45a3",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "ระบุให้ชัดว่าฟิลด์ที่มีแต่ _name ไม่มี _id คู่ ไม่ต้องแปลง",
+            "hash": "08bd347a",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "scripts",
+            "summary": "ดัมพ์ SR ด้วย route ที่มีอยู่จริง (list ข้าม BU + bu_code param)",
+            "hash": "b139b63d",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "plan",
+            "summary": "แก้คำสั่งรันเทสต์และ endpoint ของ SR ที่เขียนผิด",
+            "hash": "37da944f",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "entity-form",
+            "summary": "กด Discard แล้วค่าที่ยกเลิกไปแล้วค้างอยู่บนหน้าจอ",
+            "hash": "1b500d85",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "email-template",
+            "summary": "แก้สองจุดที่เจอตอนตรวจด้วยเบราว์เซอร์",
+            "hash": "50c2d7e1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "list-toolbar",
+            "summary": "ติ๊ก Toggle Columns แล้วเครื่องหมายถูกในเมนูไม่อัปเดต",
+            "hash": "9bcd193d",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "ลากการ์ดแล้วไปลงตรงที่เล็ง เมื่อการ์ดขนาดไม่เท่ากัน",
+            "hash": "bc38a34c",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "กราฟวงกลมหายทั้งวง + gauge โดนตัดขอบ หลังเปลี่ยนเป็นกริดที่กำหนดความสูง",
+            "hash": "3e872fda",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "preview ในหน้าตั้งค่าไม่โชว์กราฟ + ตรึงข้อมูลตารางไม่ให้สร้างใหม่ทุก render",
+            "hash": "cd0be5ef",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "เปลี่ยนเป็น gauge แล้ว widget หายทั้งใบ — รวม switch ที่ซ้ำกันเหลือตัวเดียว",
+            "hash": "8d6f1c9c",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "เติมป้ายชื่อของ gauge ในเมนูสลับกราฟ",
+            "hash": "f77dbf1d",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "physical-count",
+            "summary": "อ่าน key tb_inventory_period แทน tb_period",
+            "hash": "e298dcfb",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "interface",
+            "summary": "กลับด้าน hint ของ Authorize token ให้ตรงกับ header ที่ backend ส่งจริง",
+            "hash": "730cc5d4",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "chart-of-accounts",
+            "summary": "ให้ toast นำเข้าแสดงสาเหตุจริงเมื่อเรียก Carmen 4 ไม่สำเร็จ",
+            "hash": "0f478730",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "po-send-email",
+            "summary": "เช็ค subject/body ว่างก่อนส่ง ป้องกัน 400 งง ๆ",
+            "hash": "2004cf53",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "purchase-order",
+            "summary": "mount send-email dialog เฉพาะตอนเปิดจริง",
+            "hash": "8612c3a7",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "auth",
+            "summary": "401 ต้อง refresh ก่อนเสมอ ไม่ลัดไป dialog เพราะคำว่า permission",
+            "hash": "a6fcb277",
+            "author": "Khafang",
+            "pr": 127
+          },
+          {
+            "scope": "tiles",
+            "summary": "เติม SubTile ที่ขาด 10 ตัว + กันไอคอนเปล่าโผล่บนหัวหน้า list",
+            "hash": "da7d5073",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "role",
+            "summary": "หน้าจอสิทธิ์ตกสิทธิ์ระดับโมดูล 11 ตัว และยังโชว์สิทธิ์ที่ถูกลบแล้ว",
+            "hash": "9877bfa8",
+            "author": "Thitiphong Srisavat",
+            "pr": 116
+          },
+          {
+            "scope": "pr,po",
+            "summary": "list เลื่อนแนวนอนได้ ไม่บีบคอลัมน์จนอ่านไม่ออก",
+            "hash": "9c78c49c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "ช่องส่วนเบี่ยงเบนเคยเตือนเป็นอังกฤษดิบ ที่หมวดคือไม่เตือนเลย",
+            "hash": "80703096",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "tab All Documents ขึ้น \"No data found\" ทั้งที่มีของ 668 ใบ",
+            "hash": "a085cd92",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "หน้า list เลิกยิง API ทั้งสอง tab พร้อมกัน",
+            "hash": "14c0c702",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "เลือกผู้ขายแล้วเซฟ ชื่อผู้ขายไม่หายจนต้อง refresh",
+            "hash": "44afbf6c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "เลือกผู้ขายแล้วกด Save ไม่ทำให้รายการกลายเป็นอนุมัติ",
+            "hash": "ca4fe721",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ช่องที่มี suffix ไม่เด้งโฟกัสทิ้งตอน error โผล่",
+            "hash": "94836ae3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ซ่อนชื่อท้องถิ่นในคอลัมน์สินค้าตอน add/edit",
+            "hash": "2ae7017d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "เลิกให้ลากขอบหัวคอลัมน์ในตารางรายการ",
+            "hash": "60914e3d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ยอดที่รับแล้วในคอลัมน์ Order/GRN โชว์เฉพาะโหมดอ่าน",
+            "hash": "b1e578f2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ถอยฟิลด์ flat กลับเป็น object หลังหลังบ้านแก้ decorator แล้ว",
+            "hash": "af5164f4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ตามหน้ารายการให้ทัน response ใหม่ที่หลังบ้านเปลี่ยนทรง",
+            "hash": "0a1b8e2d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "แถวกางของรายการเลิกยุบเป็นเสาตอนจอแคบ",
+            "hash": "530cb937",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "แปลข้อความ 422 วันที่เบิกอยู่นอกงวดบัญชี",
+            "hash": "09328cbd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "สกุลเงินล็อกตาม GRN ที่เลือก เลิกเติม default จากโปรไฟล์",
+            "hash": "98a46e4e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "vendor/currency ของ PO อ่านจาก object ทางเดียว + CN โชว์ชื่อ vendor ตอน edit",
+            "hash": "ea580541",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "data-grid",
+            "summary": "สระหน้าไทยในเซลล์ไม่โดนเฉือนหัว",
+            "hash": "10fcc3ce",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "lookup",
+            "summary": "หน่วยนับในตารางกว้างตามที่ผู้เรียกสั่ง ไม่ใช่ตามชื่อหน่วย",
+            "hash": "d238dfc1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "คอลัมน์ในตารางรายการ — เปลี่ยนชื่อหัวสองอัน และให้ชื่อ workflow ขึ้นบรรทัดใหม่",
+            "hash": "e06a007b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "แถวหมายเหตุใน item table ไม่ชนเส้นคั่นแถว",
+            "hash": "7c1d6980",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list",
+            "summary": "ขยายคอลัมน์สถานะให้ป้าย lg มีที่หายใจ",
+            "hash": "580adc80",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "isView กลับด้าน ทำให้ตารางรายการสลับโหมดผิดทั้งใบ",
+            "hash": "b1b49581",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "จุดสถานะแถวย้ายไปคอลัมน์คลังเหมือน PR + โหมดอ่านไม่โชว์ combobox อีก",
+            "hash": "1b0bfdd9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ช่องกรอกจำนวนไม่หลุด focus ตอนพิมพ์ + หน่วยชิดขวาจริง",
+            "hash": "2dd8f0a5",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ยอดคงเหลือ/ของกำลังสั่ง/ราคา เลิก cache ยิงสดทุกครั้งที่เปิด",
+            "hash": "4077b4ea",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "dialog เทียบราคาใส่คอลัมน์ปุ่ม Assign ให้เลือกราคาได้จริง",
+            "hash": "4fd925a1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "ตารางรายการชิดบนได้จริง + สถานะเลิกใช้ป้ายพื้นทึบ",
+            "hash": "317f2911",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "items",
+            "summary": "ชิดบนให้ได้ผลจริงที่ CN/SR + คอลัมน์สุดท้ายเรียก Total",
+            "hash": "b46dce95",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ชื่อไทยในตารางโดนเฉือนหัวท้าย — เผื่อที่ให้วรรณยุกต์กับสระล่าง",
+            "hash": "e7547158",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "คืนราคาครั้งก่อนให้แถวที่เพิ่งเลือกสินค้า + เลิกใช้ป้ายกลับสี",
+            "hash": "3b0bdd9d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "กด confirm ใน wizard สร้างใบรับสินค้าจากใบสั่งซื้อแล้วหน้าไม่ไปไหน",
+            "hash": "d725e84d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "form",
+            "summary": "ผูก discard guard ให้ฟอร์มเต็มหน้าอีก 4 ตัวที่ยังไม่มี",
+            "hash": "f714ee2a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "rfp",
+            "summary": "ลบผู้ขายแล้วเพิ่มกลับในการแก้ไขรอบเดียว ไม่ส่ง add กับ remove ซ้อนกันอีก",
+            "hash": "4e455aea",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list",
+            "summary": "ช่องราคาเลิกไฮไลต์กรอบสูง/ต่ำ ขยายคอลัมน์ MOQ และบังคับกรอกวันที่มีผล",
+            "hash": "1fca0b7d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ไอคอนเตือนของช่องตัวเลขชิดขวา ย้ายไปอยู่ซ้ายไม่ให้ทับตัวเลข",
+            "hash": "f4265618",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list",
+            "summary": "แถวสินค้าที่ติด validate ขึ้นกรอบแดงจริง ไม่ใช่เงียบแล้วหน้าไม่ขยับ",
+            "hash": "72fe5e09",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ไอคอนในเมนูตัวกรองของหน้าสร้างจากใบขอซื้อ ให้สื่อคนละอย่าง",
+            "hash": "0a9ad8b8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "items",
+            "summary": "doc_version ราย row ต้องสดด้วย ไม่ใช่แค่ของหัวเอกสาร",
+            "hash": "364e6faf",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po,cn,grn",
+            "summary": "เอา doc_version สดมาก่อนยิงทุก mutation ไม่ใช่แค่ workflow action",
+            "hash": "9ebc8494",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "/save ต้องเอา doc_version สดมาก่อนยิง เหมือน action อื่นทุกตัว",
+            "hash": "950a1b24",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "items",
+            "summary": "เลิกส่งตัวเลขจำนวนดิบ ๆ ออกจอ ทั้ง GRN/PO/CN/SR",
+            "hash": "ac1050cd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "เปลี่ยนสกุลเงินของแถวแล้วเอาเรตของสกุลใหม่มาด้วย",
+            "hash": "3f926bef",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ลบใบขอซื้อของคนอื่น บอกตั้งแต่ตอนกด ไม่ใช่หลังกดยืนยัน",
+            "hash": "9fb747c2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "permission",
+            "summary": "ปุ่มลบเช็คสิทธิ์ให้ครบ ทั้งแถวในตารางและการ์ด",
+            "hash": "65751027",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "delivery point ของแถวสินค้า — โชว์ให้เห็น ล้างให้เกลี้ยง และสืบทอดให้แถวใหม่",
+            "hash": "b0ea8b25",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "มงกุฎ HOD ในคอลัมน์ flow ให้อ่านออกและตรงกับฟอร์ม",
+            "hash": "8d2fed11",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "เติม deps ที่ขาดของ columns useMemo กับ filter fields",
+            "hash": "44a9a110",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "บันทึกแล้วยังนับว่ามีของค้าง กด Back เลยโดนถามซ้ำ",
+            "hash": "0bcd32aa",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "กด Edit แล้วอย่าเด้ง lookup ของรอบก่อน",
+            "hash": "449cbd3e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ช่องราคาบนแถวสินค้าไม่หลุดโฟกัส และพาไปช่องถัดไปให้ถูก",
+            "hash": "4b808a53",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "list-filter",
+            "summary": "submenu ของเมนู filter ไม่ทะลุจอแล้ว",
+            "hash": "4572991b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "checkbox สถานะติ๊กบางส่วน มองไม่เห็นมาตลอด",
+            "hash": "7eeef1b1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "vendor",
+            "summary": "เซฟ vendor สำเร็จแล้วหน้าค้าง — render loop ใน certificate section",
+            "hash": "da660649",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "combobox สินค้าใน PR ขึ้นแถวเปล่า และเลือกแล้วบันทึก id ผิดตัว",
+            "hash": "d4381086",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "กดเมนู sidebar ตอนฟอร์มยังไม่เซฟแล้วหลุดออกไปเงียบ ๆ (12 ฟอร์มที่เหลือ)",
+            "hash": "dfbbfc9a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "แปลปุ่มในหน้า user + ลบ badge Active ที่เขียวตลอดกาล",
+            "hash": "7da35776",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "currency",
+            "summary": "เลิกยัดอัตราแลกเปลี่ยนหลอกตอนเลือกสกุลเงิน",
+            "hash": "651e9cd9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "location",
+            "summary": "กดเมนู sidebar ตอนฟอร์มยังไม่เซฟแล้วหลุดออกไปเงียบ ๆ",
+            "hash": "701aea61",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sidebar",
+            "summary": "เมนูย่อย workflow active ไม่ถูก — เทียบ path แทน query",
+            "hash": "88ca2dca",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "เลิกตะโกนใส่ console ของผู้ใช้ — ลบ log ที่รั่ว ย้าย schema drift ไป SigNoz",
+            "hash": "b6323172",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "security-headers-test",
+            "summary": "end tag ของ script มี attribute ได้ ต้องรับด้วย",
+            "hash": "f018641e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "comment-sheet",
+            "summary": "บังคับกติกา URL ที่ตัว <img> เอง ไม่ฝากไว้กับผู้เรียก",
+            "hash": "279b6be1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "security-headers-test",
+            "summary": "regexp จับ script tag ให้ครบเท่าที่ browser เห็น",
+            "hash": "ec01b081",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "role",
+            "summary": "หน้าจอสิทธิ์ตกสิทธิ์ระดับโมดูล 11 ตัว และยังโชว์สิทธิ์ที่ถูกลบแล้ว",
+            "hash": "bad71662",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "เพิ่มรายการไม่ได้ต้องบอกเป็น dialog และบอกให้ตรงว่าติดเพราะอะไร",
+            "hash": "f6f8546f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "แถบสรุปแท็บ Stock ว่างเปล่า + เลขหน้าของ my-pending ขึ้น 0 รายการ",
+            "hash": "a223f92d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ลบ route dev/toast ที่ชี้ไปไฟล์ที่ลบไปแล้ว + disable ช่อง new_password ตอนกำลังบันทึก",
+            "hash": "c8bee059",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "prompt ของปุ่ม Ask AI ถามให้ตอบได้จริง แทนที่จะโยนชื่อสินค้าไปเฉย ๆ",
+            "hash": "7f0f7641",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "จุดแจ้งเตือนคอมเมนต์บนปุ่ม More ย้ายมาอยู่ในแถว เลิกลอยที่มุมปุ่ม",
+            "hash": "1e3b6be3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "vendor",
+            "summary": "ชิป Business Type ล้นออกนอกกรอบเมื่อชื่อประเภทยาว",
+            "hash": "0edc0222",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "role",
+            "summary": "ปุ่มย้อนกลับคร่อมเส้นขอบการ์ด — ถอดการ์ดออกตามท่าของ workflow",
+            "hash": "488e90ad",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "rfp",
+            "summary": "dialog เลือกผู้ขาย ยุบคอลัมน์รหัสไปซ้อนใต้ชื่อ",
+            "hash": "e8b3f1a8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pl-external",
+            "summary": "หน้า vendor พังใน dark mode + ปุ่มพูดภาษาซอฟต์แวร์",
+            "hash": "07c88caf",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "badge นับ notification ใช้ text-white ตรง ๆ",
+            "hash": "93ce4eb6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "stock movement ดูได้เฉพาะใบที่ปิดจบแล้ว และไม่ยิง API ถ้ายังไม่ถึง",
+            "hash": "f300e302",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ป้าย \"ส่งกลับ\" เลิกใช้ chip เปลี่ยนเป็นไอคอน + ข้อความทรงเดียวกับสถานะ",
+            "hash": "5cba88c4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "i18n",
+            "summary": "ปุ่มสร้างเอกสารใช้ภาษาที่คนโรงแรมพูดจริง เลิก \"เพิ่ม\" กับเอกสาร",
+            "hash": "192c463c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "security",
+            "summary": "อุด OWASP Top 10 — ใส่ security header ทุกปลายทาง, ถอน dep ที่ไม่มีใครใช้, pin xlsx",
+            "hash": "6efa09bf",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "filter",
+            "summary": "ตัวกรองที่ประกาศ options เองก็ได้ไอคอนด้วย",
+            "hash": "99eaff8a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "stock-replenishment",
+            "summary": "กลับไปยิง POST /stock-replenishments/{pr,sr} ให้ตรง contract",
+            "hash": "c6627bb0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "form",
+            "summary": "ปุ่ม Back กลับหน้า list เสมอ ไม่ใช่ถอย history",
+            "hash": "77002718",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "หน่วงรวบสัญญาณ WS ไม่ให้ยิง /unread ซ้ำเท่าจำนวนใบค้าง",
+            "hash": "dd7f811d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ],
+        "changed": [
+          {
+            "scope": null,
+            "summary": "streamline DocFormHeader actions and improve readability",
+            "hash": "4d343423",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": null,
+            "summary": "remove outdated UI rules section from AGENTS.md",
+            "hash": "a7fe2ab6",
+            "author": "llHorizonll",
+            "pr": 186
+          },
+          {
+            "scope": "company-profile",
+            "summary": "ลบ perpage_format ที่ไม่มีโค้ดไหนอ่านออกจากหน้าและ type",
+            "hash": "ca482157",
+            "author": "Thammanoon Semapru",
+            "pr": 184
+          },
+          {
+            "scope": "interface",
+            "summary": "อ่าน app-config รายคีย์แทน list ก้อนรวม",
+            "hash": "51ac179c",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "inventory-management",
+            "summary": "stock adjustment ฟอร์มอ่าน product จาก object",
+            "hash": "e228b80e",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "vendor-management",
+            "summary": "vendor form เติม tax_profile ที่ type เพิ่มมาใหม่",
+            "hash": "e6f4a7e3",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "vendor-management",
+            "summary": "RFP อ่าน vendor จาก object",
+            "hash": "23a68a06",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "PO from-pr เลือกใบขอซื้ออ่าน requestor/department/workflow จาก object",
+            "hash": "79be34ca",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "vendor-management",
+            "summary": "price list ฟอร์มอ่าน product/unit/vendor จาก object",
+            "hash": "9be9cb30",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "product-management",
+            "summary": "product form อ่าน category/unit/tax/location จาก object",
+            "hash": "4fe8e393",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "CN อ่าน GRN reference จาก object ตอนหยิบรายการมาเครดิต",
+            "hash": "aea93c49",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "store-operation",
+            "summary": "SR ฟอร์มอ่าน workflow/requestor/department/location จาก object",
+            "hash": "ac0633e3",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "vendor-management",
+            "summary": "price list template อ่าน product/unit จาก object",
+            "hash": "96c5d5b5",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "PO from-price-list อ่าน price list detail จาก object",
+            "hash": "3b214180",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "GRN อ่าน entity reference จาก object",
+            "hash": "d7258c2f",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "PO อ่าน entity reference จาก object",
+            "hash": "3b1905f1",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "PR อ่าน entity reference จาก object + แก้ type header",
+            "hash": "f303dd96",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "procurement",
+            "summary": "PR template อ่าน entity reference จาก object",
+            "hash": "16069088",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "types",
+            "summary": "entity reference เป็น object ตาม contract ใหม่",
+            "hash": "bf9f2c3a",
+            "author": "Thammanoon Semapru",
+            "pr": 154
+          },
+          {
+            "scope": "email-profile",
+            "summary": "ตัดเทมเพลต/reply-to/สำเนาถึง/หมายเหตุ ออกจากโปรไฟล์ผู้ส่ง",
+            "hash": "e98ef3ee",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "ขนาด widget เลือกเป็น \"กว้าง × สูง\" ทีเดียว พร้อมขอบล่างต่อชนิด",
+            "hash": "d8ff0e12",
+            "author": "Khafang",
+            "pr": null
+          },
+          {
+            "scope": "system-admin",
+            "summary": "เปลี่ยนชื่อ Period เป็น Inventory Period",
+            "hash": "06c68975",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "select highest-versioned graft candidate and expand hook matchers",
+            "hash": "a1895dda",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "เปลี่ยนชื่อ chart-of-account เป็น chart-of-accounts",
+            "hash": "821646dd",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "แต่ละ widget โหลดของตัวเองตอนเลื่อนถึง ไม่รอก้อนเดียวทั้งหน้า",
+            "hash": "db046517",
+            "author": "Khafang",
+            "pr": 127
+          },
+          {
+            "scope": "tabs",
+            "summary": "ให้ขนาด tab มาจาก design system จุดเดียว เลิก override รายหน้า",
+            "hash": "d143a1dd",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "รวมปุ่มย้อนกลับทุกหน้าไว้ที่ BackButton ตัวเดียว",
+            "hash": "9cef7683",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "list",
+            "summary": "รวมหัวหน้า list ทุกโมดูลไว้ที่ DocumentListHeader ตัวเดียว",
+            "hash": "12e095c6",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "claude-md",
+            "summary": "ย้ายเนื้อหาเฉพาะงานออกจาก CLAUDE.md ไปเป็น skill",
+            "hash": "d8574380",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "inventory",
+            "summary": "ตัดตารางล็อต/ความเคลื่อนไหวกับต้นทุนเฉลี่ยออกจากกล่องข้อมูลสต็อก",
+            "hash": "413718b0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "คอลัมน์ discount ใช้ทรงเดียวกับ PO",
+            "hash": "3a1505e1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po,grn",
+            "summary": "สลับที่คอลัมน์ tax — เรตขึ้นไปติดยอดเงิน โปรไฟล์ลงไปข้าง checkbox",
+            "hash": "2eb0240e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ปุ่มลบกับประวัติแถวย้ายมาอยู่แนวคอลัมน์ # ของแถวหมายเหตุ",
+            "hash": "8780ae95",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "ยกฝั่งคืนขึ้นแถวหลัก ยอด GRN ลงไปอยู่แถวกาง",
+            "hash": "a4dc6632",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ล้าง JSDoc พรรณนาออกทั้ง repo",
+            "hash": "74d75532",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ไฟล์ที่ export hook ของตาราง ใช้ชื่อ use-*-table.tsx ให้หมด",
+            "hash": "c1e2dfb6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "stock-replenishment",
+            "summary": "ตาราง wizard PR/SR ใช้ DataGrid แทนที่จะปั้น table เอง",
+            "hash": "64bf56bb",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ตารางรายการคืนที่ให้ช่องที่กรอกจริง",
+            "hash": "5c506a79",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ความกว้างคอลัมน์ไปอยู่ที่ size ตรง ๆ + ชื่อท้องถิ่นครบทุกกรณี",
+            "hash": "40d1b9c6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "แยกขั้นกรอกจำนวนออกเป็น qty-step + เพิ่มคอลัมน์จุดส่งกับสกุลเงิน",
+            "hash": "87b3720d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ถอด doc-sequence กับป้ายเตือนราคาออก",
+            "hash": "a4ad92fd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "items",
+            "summary": "ตารางรายการทุกโมดูลใช้ NameWithSubtext + ชิดบนในโหมดอ่าน",
+            "hash": "3df0ff9d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ส่วนลด/ภาษีโหมดอ่านใช้ NameWithSubtext ตัวเดียวกับคอลัมน์อื่น",
+            "hash": "55f8f668",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn,po",
+            "summary": "ลบคอลัมน์หน่วยออกจากตารางรายการ",
+            "hash": "4e749c37",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "dialog เพิ่มใบสั่งซื้อใช้ลิสต์ตัวเดียวกับ wizard สร้างจากใบสั่งซื้อ",
+            "hash": "b8a22a54",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "form",
+            "summary": "รวบ getSubmitLabel ที่ก๊อปกัน 4 ที่ไปไว้ lib/form-utils",
+            "hash": "07cdc7f4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "rfp",
+            "summary": "ฟอร์มเก็บรายชื่อผู้ขายจริง ไม่เก็บ delta ของ API แล้ว",
+            "hash": "2f9e3969",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list-template",
+            "summary": "ลบ getSubmitLabel กับ ToolbarLabels ที่ไม่มีใครเรียก",
+            "hash": "d3c9a9f6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list-template",
+            "summary": "ยุบตรรกะรายการสินค้าไว้ใน plt-item-fields ให้ตรง pattern",
+            "hash": "497237d7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "price-list",
+            "summary": "ย้ายรายการสินค้าไปอยู่ใน pl-item-fields ให้ตรงทรงเดียวกับโมดูลอื่น",
+            "hash": "14e41d5a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "สร้างใบรับสินค้าจากใบสั่งซื้อเป็นหน้าเต็ม ใช้ขั้นตอนแบบเดียวกับฝั่งใบสั่งซื้อ",
+            "hash": "d7668c9f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "รวมตัวกรองของสอง wizard เป็นตัวเดียว และเติมตัวกรองให้ขั้นเลือกใบขอซื้อ",
+            "hash": "94e24fe4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "สร้างใบสั่งซื้อจากใบขอซื้อเป็นหน้าเต็ม ไม่ใช่ dialog ซ้อน dialog",
+            "hash": "c9495d99",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ตารางรับของเลิกจัดกลุ่มสินค้า เหลือ 1 แถวต่อ 1 บรรทัด",
+            "hash": "d0411778",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "wizard from-price-list รวมขั้นผู้ขายเข้ากับรายละเอียด และถามก่อนทิ้งของ",
+            "hash": "c00b5b34",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "step เลือกสินค้าใน wizard เหลือตารางเดียว อิงบรรทัดใบราคาไม่ใช่สินค้า",
+            "hash": "7587faa8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ถอดสีประจำ module/sub-module ทิ้ง เหลือ accent เดียวทั้งแอป",
+            "hash": "91e6e2ec",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "แถวหนึ่ง = คลังเดียว ตาม response ใหม่ ตัดแถวขยายทิ้ง",
+            "hash": "926243f0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ใช้ NameWithSubtext แทนบล็อกชื่อ+ชื่อรองที่เขียนเอง",
+            "hash": "603760e7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "เก็บ tab general/routing/products ให้เข้าชุดกับ stages",
+            "hash": "49778952",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "แบน chrome ของฟอร์ม แก้ตัวหนังสือหาย และเลิกให้ breakpoint โกหก",
+            "hash": "7ed51567",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cuisine",
+            "summary": "คอลัมน์ Region เป็นข้อความล้วน เลิกใช้ badge 6 สี",
+            "hash": "3174e9df",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "recipe",
+            "summary": "ล้าง neon กับ eyebrow ที่ฟอร์มสูตรประดิษฐ์ขึ้นเอง แล้วถอด \"use no memo\"",
+            "hash": "29a064f0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "po",
+            "summary": "ยุบ cell ของตารางรายการเข้า po-item-cells ตามแบบ PR/GRN",
+            "hash": "c734c1a1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "ย้ายเทอมเครดิตขึ้นก่อนเลขที่ใบแจ้งหนี้",
+            "hash": "f032566b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "แยก cell ของตารางรายการออกเป็น grn-item-cells ตามแบบ PR",
+            "hash": "c08c1167",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "grn",
+            "summary": "เรียงลำดับช่องในหัวใบใหม่",
+            "hash": "1a84fb89",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "list-filter",
+            "summary": "เลิกลากทะเบียนแผนก/ผู้ใช้มาทิ้งตอนเปิดหน้า",
+            "hash": "5e7475a8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "ทะเบียนแผนกยิงตอน hover ตัวกรอง ไม่ใช่ตอนเปิดหน้า",
+            "hash": "c92e3af6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "เก็บของค้าง 5 อย่างจากรอบที่แล้ว",
+            "hash": "7a86a031",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "system-admin",
+            "summary": "เก็บชิป action ที่เหลือในการ์ดกับ detail sheet",
+            "hash": "86446384",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "system-admin",
+            "summary": "ทิ้งชิปในตาราง activity log, user activity, notification template",
+            "hash": "72d6cd34",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "ตัดบล็อกหัวหน้าแผนกออก แล้วเก็บ i18n กับปุ่ม back ที่ค้าง",
+            "hash": "5684f93e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "คอลัมน์ชนิด workflow เป็นไอคอน+ข้อความ และล้าง validation panel ตาม DESIGN.md",
+            "hash": "8df5e1d8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "list",
+            "summary": "ListToolbar ครอบอีก 7 หน้า ด้วย variant row กับ bare",
+            "hash": "6321f678",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "list",
+            "summary": "สกัด ListToolbar — 17 หน้าเลิกก๊อปแถบเครื่องมือเดียวกัน",
+            "hash": "c8e990b8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "ยุบ product กับ vendor เข้า useEntityForm",
+            "hash": "27a64ea2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "ยุบ location · physical-count · price-list · rfp เข้า useEntityForm",
+            "hash": "faea2fa1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "ยุบ equipment กับ recipe เข้า useEntityForm",
+            "hash": "e9820d33",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "ยุบ department กับ role เข้า useEntityForm",
+            "hash": "58bc29a8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "forms",
+            "summary": "เพิ่ม useEntityForm แล้วยุบ 3 ฟอร์มแรกเข้าใช้",
+            "hash": "85457893",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "spot-check",
+            "summary": "ลบเส้น edit ของ ScForm ที่ตายมาตั้งแต่วันแรก",
+            "hash": "0647b32e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "hooks",
+            "summary": "ย้าย use-certification / use-eco-label เข้า shared ของโมดูล",
+            "hash": "750ac662",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ย้าย certification ไป vendor-management และ eco ไป product-management",
+            "hash": "ac1e7c56",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "เปลี่ยนชื่อโมดูล account code เป็น chart of account (prefix coa)",
+            "hash": "8b4fb99d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ชื่อไฟล์ในโมดูลใช้ prefix เดียวกับเพื่อน (6 โมดูลสุดท้าย)",
+            "hash": "6d7a4ff7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "ชื่อไฟล์ในโมดูลใช้ prefix เดียวกับเพื่อนในโฟลเดอร์ (16 โมดูล)",
+            "hash": "af9cfdd2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "ผ่า cn-component + เก็บของตายใน useCnItemTable",
+            "hash": "01afbd0c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "คลังในหน้า user เป็นดูอย่างเดียว ตัดฝั่งเขียนออกหมด",
+            "hash": "2ee5b2c1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "เปลี่ยนชื่อ content file ให้ขึ้นต้นด้วย cn- เหมือนเพื่อนในโฟลเดอร์",
+            "hash": "86923b19",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "cn",
+            "summary": "แยก cell ออกเป็น cn-item-cells/ ตามท่าเดียวกับ PR",
+            "hash": "3b2cb7a7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "เปลี่ยนชื่อ content file ให้ขึ้นต้นด้วย pr- เหมือนเพื่อนในโฟลเดอร์",
+            "hash": "b8a9d48c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ผ่า pr-component 854 บรรทัดออกเป็น 4 ก้อน",
+            "hash": "e447b43d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "types",
+            "summary": "ลบ type ที่ตาย 9 ตัว · ถอด export ที่ไม่มีใครใช้ 100 ตัว",
+            "hash": "8f9b9d01",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "comments",
+            "summary": "ซ่อม createCommentCrud ให้ตรง contract แล้วยุบของซ้ำห้าโมดูล",
+            "hash": "4dfb6756",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "account-code",
+            "summary": "dialog สองคอลัมน์ + description_2 เป็น textarea",
+            "hash": "66e49920",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ย้าย 5 คอมโพเนนต์ที่รู้จัก domain ออกจาก ui/ ไป share/",
+            "hash": "f3f2bb88",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ลบ cascader/ กับ filters/ ที่ vendor มาแล้วไม่เคยได้เสียบ — 18,350 บรรทัด",
+            "hash": "e2dc5c09",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "structure",
+            "summary": "ย้าย hook ที่เป็นของโมดูลไปอยู่กับโมดูล — hooks/ 131 เหลือ 93",
+            "hash": "0d9757f3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "structure",
+            "summary": "เก็บกวาดของนอกโมดูล — ลบ dead code, ยุบ utils/ เข้า lib/",
+            "hash": "def74dcb",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "system-admin",
+            "summary": "ลบ FilterChip ที่ไม่มีใครใช้แล้ว",
+            "hash": "f5fd7312",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "tooltip แถบขั้นตอน workflow พูดภาษาคน + ยุบสามที่เหลือคอมโพเนนต์เดียว",
+            "hash": "96f4e8fb",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "user",
+            "summary": "section คลังที่ผูกกับผู้ใช้ ย้ายไป DataGrid + ค้นหา/เรียง/กรอง",
+            "hash": "96e569ad",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ถอด card ซ้อนของ section รายการ IA กับ PR template — จบชุด",
+            "hash": "4bb8d907",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "vendor-management",
+            "summary": "ถอด card ซ้อนของ section สินค้า/ผู้ขาย อีกสามที่",
+            "hash": "d3f3c9b6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "vendor",
+            "summary": "ถอด card ซ้อนใน 4 section + certificate ย้ายไป DataGrid",
+            "hash": "ec14611e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "ถอด card ของสามแท็บ + คอลัมน์ประเภทคลังใช้ทรงเดียวกับหน้ารายการ",
+            "hash": "7a1fc125",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ถอด card ของ section สมาชิก/หัวหน้าแผนก ในฟอร์ม department",
+            "hash": "7739ae0d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ถอดกรอบซ้อนกรอบในฟอร์ม location + เลิกก๊อป search/highlight ซ้ำสองที่",
+            "hash": "ddca36bd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "การ์ดข้อมูลตั้งต้นย้ายสถานะลงมาเป็นแถว + เลิกเรียก badge ในสิ่งที่ไม่ใช่ badge",
+            "hash": "84c233ac",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "ย้ายสถานะการ์ดเอกสารลงมาเป็นแถว แยกแถวส่งกลับออกมาต่างหาก",
+            "hash": "b976212e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update graft helpers to resolve dist paths and expand bash permission scopes for internal tooling",
+            "hash": "add997e7",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "doc",
+            "summary": "ยุบ duplicate/comment/activity/print ลงเมนู ⋯ ทั้ง PR/PO/GRN/CN/SR",
+            "hash": "34f0bc79",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ]
+      }
+    },
     {
       "version": "2.2.0",
       "build": "2.2.0-build.20260823.93b5d950",

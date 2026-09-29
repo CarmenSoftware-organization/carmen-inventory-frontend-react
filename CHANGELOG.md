@@ -4,6 +4,420 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.3.0] - 2026-09-29
+
+### Added
+- add account categories and remove journal staging feature (#186) — llHorizonll `4dd3d5af`
+- add AR invoice list component and model with related tests (#186) — llHorizonll `f781d65c`
+- update payment lifecycle and capabilities, enhance invoice handling (#186) — llHorizonll `0aefd2fb`
+- add accounting document model and tests (#186) — llHorizonll `c66f3d8f`
+- **accounting:** add General Ledger implementation readiness documentation and mock repository for Journal Vouchers (#186) — llHorizonll `de39ea6d`
+- add cash forecast functionality and dashboard access control (#186) — llHorizonll `10e70dd2`
+- add payment tax allocation component and related functionality (#186) — llHorizonll `6638b1db`
+- enhance UI consistency guidelines and refactor Accounting Settings page (#186) — llHorizonll `b3666165`
+- refactor journal voucher and staging functionalities with mock data (#186) — llHorizonll `27ea0fad`
+- **accounting:** implement Journal Voucher and Journal Staging features (#186) — llHorizonll `9102b486`
+- **company-profile:** ปรับโหมดดูให้อ่านง่าย + ตัวอย่างสดของรูปแบบวันที่/ตัวเลข (#183) — Thammanoon Semapru `2b878d00`
+- **inventory-period:** toast แสดงข้อความ error จาก backend (#182) — Thammanoon Semapru `6e09a459`
+- **inventory-period:** แถบปีบัญชีบอกรอบปัจจุบันและรอบค้างปิด (#179) — Thammanoon Semapru `54d095d1`
+- **inventory-adjustment:** เพิ่มตัวกรองประเภทการปรับปรุง (adjustment type) (#178) — Khafang `0ef5dc79`
+- **profile:** เตือนเมื่อ BU ไม่มี default currency ที่ใช้ได้ (#177) — Thammanoon Semapru `827cd967`
+- **company-profile:** รองรับวิธีคิดต้นทุน average_per_location (#176) — Thammanoon Semapru `83bb0624`
+- **auth:** สลับภาษา EN/ไทย ได้จากหน้า login และหน้า auth อื่น ๆ — Thammanoon Semapru `a6b366f8`
+- **design-system:** หน้าอ้างอิง /design-system ของระบบที่มีอยู่แล้ว — Thammanoon Semapru `d565ea73`
+- **email:** dialog ส่งอีเมลอ่านผู้ส่ง/ข้อความผ่าน endpoint ไร้ความลับ — Thammanoon Semapru `4eedd245`
+- **license:** แยกเมนู interface/email-profile/email-template ออกจาก app_config — Thammanoon Semapru `959a7373`
+- **config:** เปลี่ยนชื่อหน้า Account Mapping เป็น Chart of Account Mapping — Thammanoon Semapru `11ec09a3`
+- **footer:** แสดงรอบบัญชีปัจจุบันและเวอร์ชัน backend บนแถบสถานะ — Thammanoon Semapru `ad213a11`
+- **nav:** ย้ายเมนูคลังข้อความแจ้งเตือนไปอยู่ใต้กลุ่ม Workflows — Thammanoon Semapru `00f2196d`
+- **notification-template:** เหลือช่องทางแอปอย่างเดียว + ทำให้ตัวแปรในข้อความมีตัวตน — Thammanoon Semapru `541690f5`
+- **rfp:** ส่งคำขอราคาให้ผู้ขายทางอีเมลได้จริง + ใช้ข้อความจากคลัง — Thammanoon Semapru `a3b308df`
+- **email-template:** คลังข้อความอีเมลต่อชนิดเอกสาร + หน้าตั้งค่า — Thammanoon Semapru `2b80f83c`
+- **dashboard:** ranked ที่สลับเป็นตารางแล้วกดแถวเปิดเอกสารได้ — Khafang `92fc00e2`
+- **dashboard:** กดแถวในตารางแล้วเปิดเอกสารนั้นได้ — Khafang `3bd0b68f`
+- **dashboard:** categorical/ranked เป็นตารางได้ และ time_series เป็นกราฟแท่งได้ — Khafang `37cc7906`
+- **dashboard:** gauge + กริด 12 คอลัมน์ที่ตั้งขนาดต่อ widget ได้ — Khafang `493c78f0`
+- **inventory-period:** ยิง endpoint และคีย์ license ชุดใหม่ของ backend — Thammanoon Semapru `1caecb42`
+- **purchase-request-template:** เรียงตามชื่อผู้สร้างได้ — Thammanoon Semapru `9325fec3`
+- **purchase-request:** หน้ารายการ PR เรียงตามวันที่เป็นค่าเริ่มต้น — Thammanoon Semapru `1b3a106d`
+- **approval:** หัวคอลัมน์หน้าอนุมัติคลิกเรียงได้ทุกช่อง — Thammanoon Semapru `e5962f53`
+- **approval:** หน้าอนุมัติใช้ /api/my-pending แทนการรวมสามกลุ่มฝั่ง client (#140) — Thammanoon Semapru `9bd21427`
+- **po:** รองรับสถานะ approved และ sent_or_print — Thammanoon Semapru `0fa6c51a`
+- **license:** ย้าย license จาก user profile ไปอ่าน GET /api/license — Thammanoon Semapru `bebd5f75`
+- **interface:** เตือนใต้ช่อง Authorize token ว่าห้ามใส่ "direct " นำหน้า — Thammanoon Semapru `1640cb95`
+- **interface:** โหมด read/edit + กลับหน้ารายการหลัง Save และแก้ค่า Select หายหลังโหลด — Thammanoon Semapru `dc9c0e0f`
+- **interface:** เพิ่มปุ่มตาแสดง/ซ่อนค่าในช่อง secret ของฟอร์ม interface — Thammanoon Semapru `465cde31`
+- **chart-of-accounts:** เพิ่มปุ่มนำเข้าผังบัญชีจาก Carmen GL และตัวเลือกนโยบายซิงก์ — Thammanoon Semapru `9b1ebd43`
+- **activity-log:** เพิ่มตัวกรอง action ให้ครบทุกค่าของ enum พร้อมไอคอนประจำ action — Thammanoon Semapru `c07d6805`
+- **email-profile:** จัดฟอร์มใหม่ + ให้ระบุปลายทางตอนทดสอบส่ง และแก้การอ่าน response ที่ผิดชั้น — Thammanoon Semapru `b026b061`
+- **purchase-order:** ปุ่มส่งใบสั่งซื้อให้ผู้ขายทางอีเมล — Thammanoon Semapru `8ae33e33`
+- **email-profile:** หน้าตั้งค่าโปรไฟล์อีเมลของหน่วยธุรกิจ — Thammanoon Semapru `67b8a8c1`
+- **email-profile:** types และ hook อ่าน/เขียนโปรไฟล์อีเมลของหน่วยธุรกิจ — Thammanoon Semapru `7f191f08`
+- **deploy:** รองรับ deploy บน Vercel ผ่าน env var APP_CONFIG_JSON — Thammanoon Semapru `943f3b1e`
+- **interface:** อ่านสิทธิ์ interface จาก license แทน enabled_interfaces (#130) — Thammanoon Semapru `84096bc9`
+- **dashboard:** สลับชนิดกราฟของ widget ได้เอง เลิก hardcode ว่า shape ไหนวาดอะไรได้ — Khafang `74e3c795`
+- **workflow:** ติ๊กรับลายเซ็นจาก PR ต้นทางได้ในหน้า workflow ของ PO — Khafang `409fcc81`
+- **report:** เตือนเมื่อเวลาแจ้งเตือนห่างจากเวลารันไม่ถึง 10 นาที — Khafang `5b8117b8`
+- **report:** ตั้งเวลาแจ้งเตือนของ schedule ได้ พร้อม badge +1 เมื่อข้ามวัน — Khafang `2671e866`
+- **workflow:** ล็อกเฉพาะ stage กับเส้นทาง แทนที่จะปิดทั้งฟอร์มตอนมีเอกสารค้าง — Khafang `8cac942d`
+- **workflow:** กันเข้าโหมดแก้เมื่อยังมีเอกสารดำเนินการ พร้อมบอกเหตุผลด้วย dialog (#118) — Khafang `c60430ea`
+- **workflow:** บอกเหตุผลจริงตอนแก้ workflow ไม่ได้ + แสดงจำนวนเอกสารบน header (#118) — Khafang `613e649c`
+- **route-guard:** deep link เข้าหน้าที่ปลดระวางแล้วให้เด้งกลับเงียบ ๆ (#117) — Thammanoon Semapru `177b39fe`
+- **license:** ตัดโมดูลที่ปลดระวางออกจากเมนูจริง ไม่ใช่ใส่แม่กุญแจ (#117) — Thammanoon Semapru `2addc658`
+- **period-end:** ปุ่มเริ่มรอบตรวจนับ + ปลดล็อกปุ่ม Start ของ physical count — Khafang `77ac4083`
+- **config:** เพิ่มโมดูล Account Mapping — หน้า list อ่านอย่างเดียว — Thitiphong Srisavat `1fef98ec`
+- **config:** เพิ่มโมดูล Account Code — master data รหัสบัญชี — Thitiphong Srisavat `1b6016ad`
+- **inventory:** กล่องข้อมูลสต็อกบอกราคาล่าสุดและบอกว่าเป็นของสินค้าตัวไหน — Thitiphong Srisavat `644ce449`
+- **product:** บอกให้ชัดว่าสินค้าซ้ำ ไม่ใช่ "เอกสารถูกแก้ไปแล้ว" — Thitiphong Srisavat `49b523e9`
+- **inventory:** โชว์ราคาซื้อล่าสุดใน dialog on hand กับ on order — Thitiphong Srisavat `20568ba8`
+- **pr:** โชว์ราคาซื้อล่าสุดในหน้าเทียบราคา — Thitiphong Srisavat `0713cbc9`
+- **po:** ป้ายใบรับสินค้าของแต่ละรายการ — Thitiphong Srisavat `60a10d74`
+- **po:** ปุ่มดูใบขอซื้อต้นทางของแต่ละรายการ — Thitiphong Srisavat `6ea5c39f`
+- **grn:** เก็บร่างไม่บังคับกรอกครบ — Thitiphong Srisavat `b67c6a38`
+- **grn,sr:** ถามก่อนว่าจะลงวันที่ไหน เมื่อเอกสารอยู่นอกงวดที่เปิดอยู่ — Thitiphong Srisavat `8cf47f87`
+- **grn:** ใบร่างกด Commit ได้เลย ไม่ต้องกด Save ก่อน — Thitiphong Srisavat `5b562107`
+- **grn:** แท็บ stock movement ของใบรับสินค้ายิง API จริงแล้ว — Thitiphong Srisavat `fa2be01b`
+- **forms:** ปุ่ม Save ของเอกสารร่างไม่บังคับกรอกครบแล้ว — Thitiphong Srisavat `a848865f`
+- **po:** โชว์ของแถมที่รับแล้วใต้คอลัมน์ FOC / GRN — Thitiphong Srisavat `90a7ecd4`
+- **on-order:** โชว์คลังปลายทางในตารางของที่สั่งแล้ว — Thitiphong Srisavat `d5a36677`
+- **cn:** ลดหนี้เกินยอดสุทธิที่รับมาไม่ได้ บล็อกตั้งแต่ในฟอร์ม — Thitiphong Srisavat `039e3523`
+- **cn:** แท็บ stock movement ของใบลดหนี้ยิง API จริงแล้ว — Thitiphong Srisavat `8e217ff3`
+- **errors:** แปล error code ของ backend เองฝั่ง client + ถามวันที่ใบเบิกแทนที่จะตัน — Thitiphong Srisavat `cff396cb`
+- **errors:** 400 validation บอกชื่อช่องที่ผิดเป็นภาษาคน — Thitiphong Srisavat `9fa6e4f0`
+- **inventory:** ยกแผงสต๊อกเป็น dialog เต็มตัว โชว์ล็อตกับความเคลื่อนไหวจาก response ใหม่ — Thitiphong Srisavat `fc074315`
+- **grn:** คอลัมน์ action สลับปุ่มตามโหมด — อ่านเห็นเอกสารต้นทาง แก้เห็นถังขยะ — Thitiphong Srisavat `dab3505d`
+- **grn:** เพิ่มแท็บ Stock Movement ทรงเดียวกับ CN (ยังไม่มีข้อมูล รอ backend) — Thitiphong Srisavat `18a71ea6`
+- **cn:** เพิ่มแท็บ Stock Movement เกณฑ์เดียวกับ SR (ยังไม่มีข้อมูล รอ backend) — Thitiphong Srisavat `f26f5553`
+- **workflow:** แยกหน้าตามชนิดใบให้สุด เลิกมีหน้ารายการรวม — Thitiphong Srisavat `f3e13d30`
+- **pr:** ส่ง qty ไปด้วยตอนเรียก price-compare — Thitiphong Srisavat `5a8c3dc3`
+- **price-list:** สถานะเป็นไอคอน+ข้อความทั้ง pl และ plt แทนชิปจุดสี — Thitiphong Srisavat `f214cee4`
+- **data-grid:** สลับสีแถวเป็นค่าเริ่มต้นของทุกตาราง — Thitiphong Srisavat `0c54c5d4`
+- **data-grid:** สลับสีแถวคิดจากลำดับข้อมูล แถวย่อยได้สีเดียวกับแถวแม่ — Thitiphong Srisavat `e79e4d77`
+- **po:** step 2 ของสร้าง PO จาก PR บอกด้วยว่าใบทั้งชุดเดินตาม workflow ไหน — Thitiphong Srisavat `bccb95c4`
+- **po:** สร้าง PO จาก PR มีกล่องยืนยัน หน้าสรุปผล และกันเลือกข้าม workflow — Thitiphong Srisavat `96b4c700`
+- **errors:** วันที่รับของนอกงวดบัญชี ขึ้นข้อความที่แก้ตามได้ ไม่ใช่ "กรอกไม่ถูกต้อง" — Thitiphong Srisavat `c8dd9361`
+- **product:** ช่อง To Qty คุมทศนิยมตามหน่วย + submit แล้วเด้งไปแท็บที่กรอกผิด — Thitiphong Srisavat `816dac5c`
+- **pr:** ปุ่มตัดสินเหนือตารางไม่หายไปแล้ว + HOD กด Edit ติ๊กทุกแถวให้เลย — Thitiphong Srisavat `d798d333`
+- **pr:** กดเรียงคลังกับสินค้าได้ที่ตารางกรอกจำนวนและตารางรายการเทมเพลต — Thitiphong Srisavat `585e7e81`
+- **pr:** สร้างใบจากเทมเพลตเป็นหน้าเต็ม มีขั้นกรอกจำนวนก่อนเข้าฟอร์ม — Thitiphong Srisavat `ce998f07`
+- **pr:** หัว dialog เทียบราคาบอกว่ากำลังทำอะไร ชื่อสินค้าลงมาเป็นบรรทัดรอง — Thitiphong Srisavat `f0add135`
+- **pr:** ช่อง Description โชว์เสมอ + duplicate ตั้งวันส่งเป็นพรุ่งนี้ — Thitiphong Srisavat `116ae066`
+- **ui:** เรตแลกเปลี่ยนโชว์ทศนิยม 5 ตำแหน่งเสมอ — Thitiphong Srisavat `35391bf5`
+- **sr:** หน่วยไปอยู่ท้ายจำนวน + ยอดเงินดึงต้นทุนจริงจาก backend — Thitiphong Srisavat `54590c76`
+- **po:** ยอดรวมทั้งสิ้นใต้ตารางตรวจสอบใบสั่งซื้อที่จะสร้างจากใบขอซื้อ — Thitiphong Srisavat `e12b5732`
+- **po:** บันทึกร่างไม่ต้องมีจำนวน/ราคา แต่ส่งใบต้องมี — Thitiphong Srisavat `0cce4cac`
+- **prt:** รื้อรายการในแม่แบบให้ทำงานแบบเดียวกับ PR/PO — Thitiphong Srisavat `447079d1`
+- **grn:** เลือกคลังก่อนแล้วค่อยเลือกสินค้า + เรียงคอลัมน์คลัง/สินค้าได้ — Thitiphong Srisavat `edfb9f5b`
+- **po:** เพิ่มจุดส่งของหัวใบ หมายเหตุรายแถว และของแถมพร้อมหน่วย — Thitiphong Srisavat `a05f6958`
+- **grn:** can_use ของใบสั่งซื้อสามชั้น และกางคลังให้เห็นในขั้นเลือกใบ — Thitiphong Srisavat `d85b4de5`
+- **rfp:** ปุ่มส่งอีเมลในคอลัมน์การกระทำของผู้ขาย เปิด dialog แบบเดียวกับใบสั่งซื้อ — Thitiphong Srisavat `d8d5f18e`
+- **po:** รายการราคาใน wizard ส่ง workflow ไปกรอง และปิดรายการที่ใช้ไม่ได้ — Thitiphong Srisavat `b40aa166`
+- **po:** ปุ่มส่งใบใช้เงื่อนไขเดียวกับ PR และกดส่งได้ตั้งแต่ใบยังไม่เคยเซฟ — Thitiphong Srisavat `5b879df4`
+- **po:** เลือกคลังก่อนแล้วค่อยเลือกสินค้า แบบเดียวกับ PR — Thitiphong Srisavat `9b6e5f02`
+- **pr:** จำนวนในรายการสินค้า — ใส่ 0 ได้ กันตอนส่ง และแสดงตามหน่วยจริง — Thitiphong Srisavat `81755474`
+- **pr:** กรองแถวรายการสินค้าในฟอร์ม PR ด้วยตัวกรองฝั่ง client — Thitiphong Srisavat `8b66fb03`
+- **po:** ตารางรายการ PO ใช้ท่าเดียวกับ GRN — Thitiphong Srisavat `cb70889a`
+- **grn:** ตัดวันที่รับของ (received_at) ออกจากใบรับสินค้า — Thitiphong Srisavat `076ec828`
+- **grn:** ราคาต่อหน่วยกรอกที่แถวสินค้าที่เดียว คลังใช้ราคาเดียวกันหมด — Thitiphong Srisavat `7426675b`
+- **user:** หน้าผู้ใช้รับ response ก้อนเดียว แล้วเปิดให้แก้คลังกับแผนก — Thitiphong Srisavat `39ae1bba`
+- **role:** permissions ใน list เป็น count และรับ audit เข้ามา — Thitiphong Srisavat `3d339913`
+- **user:** ย้ายอ่าน/แก้ผู้ใช้ไป /config/{bu}/users/{user_id} — Thitiphong Srisavat `a5038c84`
+- **workflow:** tab สินค้าโหมดอ่าน เปลี่ยนจาก tree เป็นตาราง — Thitiphong Srisavat `53a4b0ee`
+- **po:** กันเพิ่มรายการก่อนเลือก workflow + รับ response location รูปใหม่ — Thitiphong Srisavat `35d93ab1`
+- **po:** ช่อง location ในฟอร์ม PO ดึงจาก endpoint ที่ผูกกับ workflow — Thitiphong Srisavat `f4344d92`
+- **workflow:** เมนูย่อยแต่ละชนิดยิง endpoint ของตัวเอง แทนการกรองหน้าเดิม — Thitiphong Srisavat `293009f0`
+- **menu:** เมนู workflow แตกเมนูย่อยตามชนิดใบ (ขอซื้อ/สั่งซื้อ/เบิกของ) — Thitiphong Srisavat `a5b49e68`
+- **account-code:** กรองตามด้านบัญชี (เดบิต/เครดิต) และประเภทได้แล้ว — Thitiphong Srisavat `492915c0`
+- **account-code:** เพิ่มช่อง description_2 (คำอธิบายเพิ่มเติม) — Thitiphong Srisavat `6f4802aa`
+- **account-code:** ย้ายไป chart-of-accounts พร้อมสัญญาใหม่ nature/type — Thitiphong Srisavat `be2fba2b`
+- **sr:** ช่องเลือกสินค้ากรองด้วย workflow ด้วย ย้ายไป products-location-workflow — Thitiphong Srisavat `c1fe91cf`
+- **lint:** ล็อกเส้นแบ่งโมดูลด้วย eslint — routes/A ห้ามล้วงของ routes/B — Thitiphong Srisavat `43f31946`
+- **pr:** ป้ายเตือนราคาบอกต่อว่ามีเจ้าไหนถูกกว่า — Thitiphong Srisavat `cb7f3b45`
+- **pr:** ทักเองเมื่อราคาแพงกว่าครั้งก่อน ไม่ต้องรอให้คนสงสัย — Thitiphong Srisavat `23364ab8`
+- **running-code:** แก้รูปแบบเลขเอกสารแบบต่อชิ้นส่วน แทนการพิมพ์ JSON เอง — Thitiphong Srisavat `704f1f9f`
+- **sr:** แท็บ stock movement ดึงจาก API แทนการเดาจากฟอร์ม — Thitiphong Srisavat `f077c3dc`
+- **location:** ประเภทคลังเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี — Thitiphong Srisavat `73a5c453`
+- **sr:** ชนิดใบเลิกใช้ badge สี เปลี่ยนเป็นไอคอนไม่มีสี — Thitiphong Srisavat `92c0c960`
+- **cn:** ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี — Thitiphong Srisavat `bff65a87`
+- **grn:** ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี — Thitiphong Srisavat `9f176b90`
+- **po:** ชนิดใบเลิกใช้ dot badge เปลี่ยนเป็นไอคอนไม่มีสี — Thitiphong Srisavat `b281da7f`
+- **report-history:** เปลี่ยนสถานะงานออกรายงานเป็นไอคอน + ป้าย — Thitiphong Srisavat `73499174`
+- **approval:** คิวรออนุมัติใช้สถานะแบบไอคอน + ป้าย ให้ตรงกับหน้า PR — Thitiphong Srisavat `af0dc719`
+- **period-end:** เปลี่ยนสถานะรอบเป็นไอคอน + ป้าย — Thitiphong Srisavat `0990e50a`
+- **period:** เปลี่ยนสถานะรอบบัญชีเป็นไอคอน + ป้าย — Thitiphong Srisavat `26a403d4`
+- **inventory-adjustment:** เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามชุดเดียวกับ procurement — Thitiphong Srisavat `0e6ea3fe`
+- **sr:** เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO/GRN/CN — Thitiphong Srisavat `5ca64bac`
+- **cn:** เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO/GRN — Thitiphong Srisavat `42f9e5cd`
+- **grn:** เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR/PO — Thitiphong Srisavat `1f03cf7b`
+- **po:** เปลี่ยนสถานะเป็นไอคอน + ป้าย ตามที่ทำไว้กับ PR — Thitiphong Srisavat `3fdb90e4`
+- **status:** เลิกใช้ dot chip เปลี่ยนเป็นไอคอน + ป้ายตัวใหญ่ เริ่มที่ PR — Thitiphong Srisavat `9b451508`
+- **data-grid:** แถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ ยาวกว่านั้นตัด ellipsis — Thitiphong Srisavat `d16f5493`
+- **stock-replenishment:** Create PR ติ๊กข้ามคลังได้ ยิงทีละคลังได้ใบละคลัง — Thitiphong Srisavat `56ccddc2`
+- **stock-replenishment:** เปลี่ยน Create PR/SR เป็น wizard ที่พาไปกรอกต่อในฟอร์มจริง — Thitiphong Srisavat `8ec230bf`
+- **pr:** กด "คงเหลือ"/"กำลังสั่ง" ใน tooltip ของคอลัมน์ Product เปิด dialog ได้ — Thitiphong Srisavat `6c250bae`
+- **doc-sequence:** ปุ่ม ↑↓ ใน my-pending เดินได้ทุกใบ ไม่ใช่แค่หน้าที่เปิดค้าง — Thitiphong Srisavat `1c5b1f5d`
+
+### Fixed
+- **accounting:** แก้ lint/เทสต์ที่ติดมาจาก dev2 และเพิ่ม route account-grouping (#189) — Thammanoon Semapru `a8652ef9`
+- **accounting:** ผูก license feature ให้เมนูบัญชีและ config ใหม่จาก dev2 (#187) — Thammanoon Semapru `28c87fd4`
+- **config:** แก้ permission key ที่ไม่มีอยู่จริงใน 5 หน้า config (#185) — Thammanoon Semapru `86c05b22`
+- **inventory-period:** เลิกเขียนตัวอย่างคลาส Tailwind ในคอมเมนต์ (#180) — Thammanoon Semapru `3b20840c`
+- **cn:** กรอก Tax Invoice # แล้ว Submit ยังฟ้องว่าว่าง (#175) — Khafang `960725e5`
+- **build:** กรองคำเตือน build ที่ไม่มีผล และย้าย vercel ไป devDependencies (#174) — Thammanoon Semapru `6b70a4d1`
+- **inventory:** ราคาที่พิมพ์เองในใบปรับปรุงโดน probe เขียนทับ — Khafang `e143643b`
+- **inventory:** หน้า transaction กับใบปรับปรุงว่างเปล่า หลัง gateway ยุบ entity เป็นก้อน — Khafang `84de9fd4`
+- **list:** จำ filter/sort/page ของหน้า list ตอนกด Back จากหน้า detail — Thammanoon Semapru `5aeb9eb7`
+- **license:** ตามการถอด system_admin.query_dataset ออกจาก catalog ของ backend — Thammanoon Semapru `02bfff7a`
+- **email-dialogs:** ตรึงหัวและท้ายกล่อง ปุ่มบันทึก/ส่งจะได้ไม่เลื่อนหาย — Thammanoon Semapru `7b3a943c`
+- **license:** บอกให้ชัดว่าความสามารถไหนของหน่วยงานไหนที่ถูกบล็อก — Thammanoon Semapru `d16e339e`
+- **default-setting:** 403 ของ lookup แบบฟอร์มไม่ต้องเด้งกล่องทับทั้งหน้า (#167) — Thammanoon Semapru `ee8c75bf`
+- **bu-switcher:** ปลดล็อกผู้ใช้ที่ไม่มี BU ตั้งเป็น default (#166) — Thammanoon Semapru `34096059`
+- **pr-form:** ปรับเทสต์ dirty state ให้ตรงกับ react-hook-form 7.88 — Thammanoon Semapru `430a0ea7`
+- **permissions:** เก็บคีย์ผีที่เหลือทั้งหมดให้ตรงกับ tb_permission ของ backend — Thammanoon Semapru `91b2b274`
+- **dashboard:** แก้ namespace permission widget.* เป็น dashboard.* ตาม catalog จริง — Thammanoon Semapru `0f20a634`
+- **system-admin:** เลิกใช้คีย์ผี system_configuration เปลี่ยนไปใช้ permission ที่มีจริง — Thammanoon Semapru `b9e2de5f`
+- **license:** ปิด finding จาก final review ฝั่ง frontend — Thammanoon Semapru `6c079a4c`
+- **interface:** invalidate config ทีละคีย์ แบบ exact เพื่อหลีกเลี่ยงผลข้าง — Thammanoon Semapru `2a4d14e0`
+- **license:** ผูก /config/shelf กับ configuration.location_shelf — Thammanoon Semapru `aae188e1`
+- **sidebar:** เมนูชั้นที่สามต้องเคารพ locked/denied เหมือนชั้นสอง — Thammanoon Semapru `6a9e2cc3`
+- **license:** ผูก license feature ให้ leaf ที่ยังไม่มีคีย์ ปิดรูเมนูที่ไม่ถูกล็อก — Thammanoon Semapru `6b89fa77`
+- **grn:** เลิกดึงใบรับของทั้ง BU ตอนเปิดหน้ารายการ (#157) — Thammanoon Semapru `c0cfeb9e`
+- **grn,price-list:** เลิกดึงทะเบียนผู้ขายทั้ง BU ตอนเปิดหน้ารายการ (#157) — Thammanoon Semapru `54b45609`
+- **po:** เลิกดึงทะเบียนผู้ขายทั้ง BU ตอนเปิดหน้าใบสั่งซื้อ (#157) — Thammanoon Semapru `05ba31b8`
+- **cn:** เลิกดึงทะเบียนทั้ง BU ตอนเปิดหน้าใบลดหนี้ (#157) — Thammanoon Semapru `c2ce1271`
+- **po:** เรียงหน้ารายการใบสั่งซื้อตามวันที่สั่งซื้อเป็นค่าเริ่มต้น (#156) — Thammanoon Semapru `b121e014`
+- **product-management:** แก้คอลัมน์ Unit ของ product list ที่ว่างเงียบ ๆ (review round 1) (#154) — Thammanoon Semapru `e5a4df2b`
+- **config:** exchange rate list อ่าน currency จาก object (บั๊กที่มีอยู่ก่อน task นี้) (#154) — Thammanoon Semapru `75244fde`
+- **product-management:** category tree อ่าน product_category/tax_profile จาก object (บั๊กที่มีอยู่ก่อน task นี้) (#154) — Thammanoon Semapru `f8d4026c`
+- **operation-plan:** recipe category อ่าน parent จาก object (บั๊กที่มีอยู่ก่อน task นี้) (#154) — Thammanoon Semapru `768af593`
+- **config:** แก้ department form อ่าน user จาก object (บั๊กที่มีอยู่ก่อน task นี้) (#154) — Thammanoon Semapru `b55294b3`
+- **procurement:** แก้คอลัมน์ workflow ของ PR template list ที่หายเงียบ ๆ (#154) — Thammanoon Semapru `f38e456d`
+- **types:** แก้ 2 Critical จาก review — list กับ detail คนละ shape (#154) — Thammanoon Semapru `dbb93361`
+- **plan:** Phase 4 ทำฝั่งอ่านอย่างเดียวก่อน ฝั่งเขียนไม่บังคับ (#154) — Thammanoon Semapru `295fe1b9`
+- **plan:** เขียน Task 14 ใหม่ — ขยาย @ExpandRefs ตามฝั่งอ่านให้ทัน (#154) — Thammanoon Semapru `e7c243d4`
+- **plan:** เขียน Task 13 ใหม่ — กลไกฝั่งเขียนต้องเป็น interceptor ไม่ใช่ DTO transform (#154) — Thammanoon Semapru `a8b3743a`
+- **plan:** Task 9 ทำเฉพาะ runtime · งานเอกสาร 594 group แยกเป็นการตัดสินใจต่างหาก (#154) — Thammanoon Semapru `9f97c873`
+- **scripts:** เลิกนับ reference ที่ null ทั้งสองฝั่งเป็น false positive (#154) — Thammanoon Semapru `8b51a3df`
+- **scripts:** แก้ flatten() ให้เดิน list ระดับบนสุดและ dict ทุกชั้น (รวม OPAQUE) (#154) — Thammanoon Semapru `002cf8c7`
+- **plan:** ให้ Task 9 ขยาย regex ของตัวตรวจ + แปลงไฟล์ swagger/example (#154) — Thammanoon Semapru `93fe6180`
+- **plan:** ขยาย glob ของตัวตรวจให้ครอบ swagger/example ด้วย (#154) — Thammanoon Semapru `8fac45a3`
+- **plan:** ระบุให้ชัดว่าฟิลด์ที่มีแต่ _name ไม่มี _id คู่ ไม่ต้องแปลง (#154) — Thammanoon Semapru `08bd347a`
+- **scripts:** ดัมพ์ SR ด้วย route ที่มีอยู่จริง (list ข้าม BU + bu_code param) (#154) — Thammanoon Semapru `b139b63d`
+- **plan:** แก้คำสั่งรันเทสต์และ endpoint ของ SR ที่เขียนผิด (#154) — Thammanoon Semapru `37da944f`
+- **entity-form:** กด Discard แล้วค่าที่ยกเลิกไปแล้วค้างอยู่บนหน้าจอ — Thammanoon Semapru `1b500d85`
+- **email-template:** แก้สองจุดที่เจอตอนตรวจด้วยเบราว์เซอร์ — Thammanoon Semapru `50c2d7e1`
+- **list-toolbar:** ติ๊ก Toggle Columns แล้วเครื่องหมายถูกในเมนูไม่อัปเดต — Thammanoon Semapru `9bcd193d`
+- **dashboard:** ลากการ์ดแล้วไปลงตรงที่เล็ง เมื่อการ์ดขนาดไม่เท่ากัน — Khafang `bc38a34c`
+- **dashboard:** กราฟวงกลมหายทั้งวง + gauge โดนตัดขอบ หลังเปลี่ยนเป็นกริดที่กำหนดความสูง — Khafang `3e872fda`
+- **dashboard:** preview ในหน้าตั้งค่าไม่โชว์กราฟ + ตรึงข้อมูลตารางไม่ให้สร้างใหม่ทุก render — Khafang `cd0be5ef`
+- **dashboard:** เปลี่ยนเป็น gauge แล้ว widget หายทั้งใบ — รวม switch ที่ซ้ำกันเหลือตัวเดียว — Khafang `8d6f1c9c`
+- **dashboard:** เติมป้ายชื่อของ gauge ในเมนูสลับกราฟ — Khafang `f77dbf1d`
+- **physical-count:** อ่าน key tb_inventory_period แทน tb_period — Thammanoon Semapru `e298dcfb`
+- **interface:** กลับด้าน hint ของ Authorize token ให้ตรงกับ header ที่ backend ส่งจริง — Thammanoon Semapru `730cc5d4`
+- **chart-of-accounts:** ให้ toast นำเข้าแสดงสาเหตุจริงเมื่อเรียก Carmen 4 ไม่สำเร็จ — Thammanoon Semapru `0f478730`
+- **po-send-email:** เช็ค subject/body ว่างก่อนส่ง ป้องกัน 400 งง ๆ — Thammanoon Semapru `2004cf53`
+- **purchase-order:** mount send-email dialog เฉพาะตอนเปิดจริง — Thammanoon Semapru `8612c3a7`
+- **auth:** 401 ต้อง refresh ก่อนเสมอ ไม่ลัดไป dialog เพราะคำว่า permission (#127) — Khafang `a6fcb277`
+- **tiles:** เติม SubTile ที่ขาด 10 ตัว + กันไอคอนเปล่าโผล่บนหัวหน้า list — Thammanoon Semapru `da7d5073`
+- **role:** หน้าจอสิทธิ์ตกสิทธิ์ระดับโมดูล 11 ตัว และยังโชว์สิทธิ์ที่ถูกลบแล้ว (#116) — Thitiphong Srisavat `9877bfa8`
+- **pr,po:** list เลื่อนแนวนอนได้ ไม่บีบคอลัมน์จนอ่านไม่ออก — Thitiphong Srisavat `9c78c49c`
+- **product:** ช่องส่วนเบี่ยงเบนเคยเตือนเป็นอังกฤษดิบ ที่หมวดคือไม่เตือนเลย — Thitiphong Srisavat `80703096`
+- **po:** tab All Documents ขึ้น "No data found" ทั้งที่มีของ 668 ใบ — Thitiphong Srisavat `a085cd92`
+- **po:** หน้า list เลิกยิง API ทั้งสอง tab พร้อมกัน — Thitiphong Srisavat `14c0c702`
+- **pr:** เลือกผู้ขายแล้วเซฟ ชื่อผู้ขายไม่หายจนต้อง refresh — Thitiphong Srisavat `44afbf6c`
+- **pr:** เลือกผู้ขายแล้วกด Save ไม่ทำให้รายการกลายเป็นอนุมัติ — Thitiphong Srisavat `ca4fe721`
+- **ui:** ช่องที่มี suffix ไม่เด้งโฟกัสทิ้งตอน error โผล่ — Thitiphong Srisavat `94836ae3`
+- **grn:** ซ่อนชื่อท้องถิ่นในคอลัมน์สินค้าตอน add/edit — Thitiphong Srisavat `2ae7017d`
+- **po:** เลิกให้ลากขอบหัวคอลัมน์ในตารางรายการ — Thitiphong Srisavat `60914e3d`
+- **po:** ยอดที่รับแล้วในคอลัมน์ Order/GRN โชว์เฉพาะโหมดอ่าน — Thitiphong Srisavat `b1e578f2`
+- **po:** ถอยฟิลด์ flat กลับเป็น object หลังหลังบ้านแก้ decorator แล้ว — Thitiphong Srisavat `af5164f4`
+- **po:** ตามหน้ารายการให้ทัน response ใหม่ที่หลังบ้านเปลี่ยนทรง — Thitiphong Srisavat `0a1b8e2d`
+- **pr:** แถวกางของรายการเลิกยุบเป็นเสาตอนจอแคบ — Thitiphong Srisavat `530cb937`
+- **sr:** แปลข้อความ 422 วันที่เบิกอยู่นอกงวดบัญชี — Thitiphong Srisavat `09328cbd`
+- **cn:** สกุลเงินล็อกตาม GRN ที่เลือก เลิกเติม default จากโปรไฟล์ — Thitiphong Srisavat `98a46e4e`
+- **po:** vendor/currency ของ PO อ่านจาก object ทางเดียว + CN โชว์ชื่อ vendor ตอน edit — Thitiphong Srisavat `ea580541`
+- **data-grid:** สระหน้าไทยในเซลล์ไม่โดนเฉือนหัว — Thitiphong Srisavat `10fcc3ce`
+- **lookup:** หน่วยนับในตารางกว้างตามที่ผู้เรียกสั่ง ไม่ใช่ตามชื่อหน่วย — Thitiphong Srisavat `d238dfc1`
+- **pr:** คอลัมน์ในตารางรายการ — เปลี่ยนชื่อหัวสองอัน และให้ชื่อ workflow ขึ้นบรรทัดใหม่ — Thitiphong Srisavat `e06a007b`
+- **po:** แถวหมายเหตุใน item table ไม่ชนเส้นคั่นแถว — Thitiphong Srisavat `7c1d6980`
+- **price-list:** ขยายคอลัมน์สถานะให้ป้าย lg มีที่หายใจ — Thitiphong Srisavat `580adc80`
+- **grn:** isView กลับด้าน ทำให้ตารางรายการสลับโหมดผิดทั้งใบ — Thitiphong Srisavat `b1b49581`
+- **po:** จุดสถานะแถวย้ายไปคอลัมน์คลังเหมือน PR + โหมดอ่านไม่โชว์ combobox อีก — Thitiphong Srisavat `1b0bfdd9`
+- **pr:** ช่องกรอกจำนวนไม่หลุด focus ตอนพิมพ์ + หน่วยชิดขวาจริง — Thitiphong Srisavat `2dd8f0a5`
+- **pr:** ยอดคงเหลือ/ของกำลังสั่ง/ราคา เลิก cache ยิงสดทุกครั้งที่เปิด — Thitiphong Srisavat `4077b4ea`
+- **pr:** dialog เทียบราคาใส่คอลัมน์ปุ่ม Assign ให้เลือกราคาได้จริง — Thitiphong Srisavat `4fd925a1`
+- **sr:** ตารางรายการชิดบนได้จริง + สถานะเลิกใช้ป้ายพื้นทึบ — Thitiphong Srisavat `317f2911`
+- **items:** ชิดบนให้ได้ผลจริงที่ CN/SR + คอลัมน์สุดท้ายเรียก Total — Thitiphong Srisavat `b46dce95`
+- **ui:** ชื่อไทยในตารางโดนเฉือนหัวท้าย — เผื่อที่ให้วรรณยุกต์กับสระล่าง — Thitiphong Srisavat `e7547158`
+- **pr:** คืนราคาครั้งก่อนให้แถวที่เพิ่งเลือกสินค้า + เลิกใช้ป้ายกลับสี — Thitiphong Srisavat `3b0bdd9d`
+- **grn:** กด confirm ใน wizard สร้างใบรับสินค้าจากใบสั่งซื้อแล้วหน้าไม่ไปไหน — Thitiphong Srisavat `d725e84d`
+- **form:** ผูก discard guard ให้ฟอร์มเต็มหน้าอีก 4 ตัวที่ยังไม่มี — Thitiphong Srisavat `f714ee2a`
+- **rfp:** ลบผู้ขายแล้วเพิ่มกลับในการแก้ไขรอบเดียว ไม่ส่ง add กับ remove ซ้อนกันอีก — Thitiphong Srisavat `4e455aea`
+- **price-list:** ช่องราคาเลิกไฮไลต์กรอบสูง/ต่ำ ขยายคอลัมน์ MOQ และบังคับกรอกวันที่มีผล — Thitiphong Srisavat `1fca0b7d`
+- **ui:** ไอคอนเตือนของช่องตัวเลขชิดขวา ย้ายไปอยู่ซ้ายไม่ให้ทับตัวเลข — Thitiphong Srisavat `f4265618`
+- **price-list:** แถวสินค้าที่ติด validate ขึ้นกรอบแดงจริง ไม่ใช่เงียบแล้วหน้าไม่ขยับ — Thitiphong Srisavat `72fe5e09`
+- **po:** ไอคอนในเมนูตัวกรองของหน้าสร้างจากใบขอซื้อ ให้สื่อคนละอย่าง — Thitiphong Srisavat `0a9ad8b8`
+- **items:** doc_version ราย row ต้องสดด้วย ไม่ใช่แค่ของหัวเอกสาร — Thitiphong Srisavat `364e6faf`
+- **po,cn,grn:** เอา doc_version สดมาก่อนยิงทุก mutation ไม่ใช่แค่ workflow action — Thitiphong Srisavat `9ebc8494`
+- **pr:** /save ต้องเอา doc_version สดมาก่อนยิง เหมือน action อื่นทุกตัว — Thitiphong Srisavat `950a1b24`
+- **items:** เลิกส่งตัวเลขจำนวนดิบ ๆ ออกจอ ทั้ง GRN/PO/CN/SR — Thitiphong Srisavat `ac1050cd`
+- **pr:** เปลี่ยนสกุลเงินของแถวแล้วเอาเรตของสกุลใหม่มาด้วย — Thitiphong Srisavat `3f926bef`
+- **pr:** ลบใบขอซื้อของคนอื่น บอกตั้งแต่ตอนกด ไม่ใช่หลังกดยืนยัน — Thitiphong Srisavat `9fb747c2`
+- **permission:** ปุ่มลบเช็คสิทธิ์ให้ครบ ทั้งแถวในตารางและการ์ด — Thitiphong Srisavat `65751027`
+- **pr:** delivery point ของแถวสินค้า — โชว์ให้เห็น ล้างให้เกลี้ยง และสืบทอดให้แถวใหม่ — Thitiphong Srisavat `b0ea8b25`
+- **workflow:** มงกุฎ HOD ในคอลัมน์ flow ให้อ่านออกและตรงกับฟอร์ม — Thitiphong Srisavat `8d2fed11`
+- **po:** เติม deps ที่ขาดของ columns useMemo กับ filter fields — Thitiphong Srisavat `44a9a110`
+- **po:** บันทึกแล้วยังนับว่ามีของค้าง กด Back เลยโดนถามซ้ำ — Thitiphong Srisavat `0bcd32aa`
+- **grn:** กด Edit แล้วอย่าเด้ง lookup ของรอบก่อน — Thitiphong Srisavat `449cbd3e`
+- **grn:** ช่องราคาบนแถวสินค้าไม่หลุดโฟกัส และพาไปช่องถัดไปให้ถูก — Thitiphong Srisavat `4b808a53`
+- **list-filter:** submenu ของเมนู filter ไม่ทะลุจอแล้ว — Thitiphong Srisavat `4572991b`
+- **ui:** checkbox สถานะติ๊กบางส่วน มองไม่เห็นมาตลอด — Thitiphong Srisavat `7eeef1b1`
+- **vendor:** เซฟ vendor สำเร็จแล้วหน้าค้าง — render loop ใน certificate section — Thitiphong Srisavat `da660649`
+- **pr:** combobox สินค้าใน PR ขึ้นแถวเปล่า และเลือกแล้วบันทึก id ผิดตัว — Thitiphong Srisavat `d4381086`
+- **forms:** กดเมนู sidebar ตอนฟอร์มยังไม่เซฟแล้วหลุดออกไปเงียบ ๆ (12 ฟอร์มที่เหลือ) — Thitiphong Srisavat `dfbbfc9a`
+- **user:** แปลปุ่มในหน้า user + ลบ badge Active ที่เขียวตลอดกาล — Thitiphong Srisavat `7da35776`
+- **currency:** เลิกยัดอัตราแลกเปลี่ยนหลอกตอนเลือกสกุลเงิน — Thitiphong Srisavat `651e9cd9`
+- **location:** กดเมนู sidebar ตอนฟอร์มยังไม่เซฟแล้วหลุดออกไปเงียบ ๆ — Thitiphong Srisavat `701aea61`
+- **sidebar:** เมนูย่อย workflow active ไม่ถูก — เทียบ path แทน query — Thitiphong Srisavat `88ca2dca`
+- เลิกตะโกนใส่ console ของผู้ใช้ — ลบ log ที่รั่ว ย้าย schema drift ไป SigNoz — Thitiphong Srisavat `b6323172`
+- **security-headers-test:** end tag ของ script มี attribute ได้ ต้องรับด้วย — Thitiphong Srisavat `f018641e`
+- **comment-sheet:** บังคับกติกา URL ที่ตัว <img> เอง ไม่ฝากไว้กับผู้เรียก — Thitiphong Srisavat `279b6be1`
+- **security-headers-test:** regexp จับ script tag ให้ครบเท่าที่ browser เห็น — Thitiphong Srisavat `ec01b081`
+- **role:** หน้าจอสิทธิ์ตกสิทธิ์ระดับโมดูล 11 ตัว และยังโชว์สิทธิ์ที่ถูกลบแล้ว — Thitiphong Srisavat `bad71662`
+- **sr:** เพิ่มรายการไม่ได้ต้องบอกเป็น dialog และบอกให้ตรงว่าติดเพราะอะไร — Thitiphong Srisavat `f6f8546f`
+- **sr:** แถบสรุปแท็บ Stock ว่างเปล่า + เลขหน้าของ my-pending ขึ้น 0 รายการ — Thitiphong Srisavat `a223f92d`
+- ลบ route dev/toast ที่ชี้ไปไฟล์ที่ลบไปแล้ว + disable ช่อง new_password ตอนกำลังบันทึก — Thitiphong Srisavat `c8bee059`
+- **pr:** prompt ของปุ่ม Ask AI ถามให้ตอบได้จริง แทนที่จะโยนชื่อสินค้าไปเฉย ๆ — Thitiphong Srisavat `7f0f7641`
+- **ui:** จุดแจ้งเตือนคอมเมนต์บนปุ่ม More ย้ายมาอยู่ในแถว เลิกลอยที่มุมปุ่ม — Thitiphong Srisavat `1e3b6be3`
+- **vendor:** ชิป Business Type ล้นออกนอกกรอบเมื่อชื่อประเภทยาว — Thitiphong Srisavat `0edc0222`
+- **role:** ปุ่มย้อนกลับคร่อมเส้นขอบการ์ด — ถอดการ์ดออกตามท่าของ workflow — Thitiphong Srisavat `488e90ad`
+- **rfp:** dialog เลือกผู้ขาย ยุบคอลัมน์รหัสไปซ้อนใต้ชื่อ — Thitiphong Srisavat `e8b3f1a8`
+- **pl-external:** หน้า vendor พังใน dark mode + ปุ่มพูดภาษาซอฟต์แวร์ — Thitiphong Srisavat `07c88caf`
+- **ui:** badge นับ notification ใช้ text-white ตรง ๆ — Thitiphong Srisavat `93ce4eb6`
+- **sr:** stock movement ดูได้เฉพาะใบที่ปิดจบแล้ว และไม่ยิง API ถ้ายังไม่ถึง — Thitiphong Srisavat `f300e302`
+- **ui:** ป้าย "ส่งกลับ" เลิกใช้ chip เปลี่ยนเป็นไอคอน + ข้อความทรงเดียวกับสถานะ — Thitiphong Srisavat `5cba88c4`
+- **i18n:** ปุ่มสร้างเอกสารใช้ภาษาที่คนโรงแรมพูดจริง เลิก "เพิ่ม" กับเอกสาร — Thitiphong Srisavat `192c463c`
+- **security:** อุด OWASP Top 10 — ใส่ security header ทุกปลายทาง, ถอน dep ที่ไม่มีใครใช้, pin xlsx — Thitiphong Srisavat `6efa09bf`
+- **filter:** ตัวกรองที่ประกาศ options เองก็ได้ไอคอนด้วย — Thitiphong Srisavat `99eaff8a`
+- **stock-replenishment:** กลับไปยิง POST /stock-replenishments/{pr,sr} ให้ตรง contract — Thitiphong Srisavat `c6627bb0`
+- **form:** ปุ่ม Back กลับหน้า list เสมอ ไม่ใช่ถอย history — Thitiphong Srisavat `77002718`
+- **notification:** หน่วงรวบสัญญาณ WS ไม่ให้ยิง /unread ซ้ำเท่าจำนวนใบค้าง — Thitiphong Srisavat `dd7f811d`
+
+### Changed
+- streamline DocFormHeader actions and improve readability (#186) — llHorizonll `4d343423`
+- remove outdated UI rules section from AGENTS.md (#186) — llHorizonll `a7fe2ab6`
+- **company-profile:** ลบ perpage_format ที่ไม่มีโค้ดไหนอ่านออกจากหน้าและ type (#184) — Thammanoon Semapru `ca482157`
+- **interface:** อ่าน app-config รายคีย์แทน list ก้อนรวม — Thammanoon Semapru `51ac179c`
+- **inventory-management:** stock adjustment ฟอร์มอ่าน product จาก object (#154) — Thammanoon Semapru `e228b80e`
+- **vendor-management:** vendor form เติม tax_profile ที่ type เพิ่มมาใหม่ (#154) — Thammanoon Semapru `e6f4a7e3`
+- **vendor-management:** RFP อ่าน vendor จาก object (#154) — Thammanoon Semapru `23a68a06`
+- **procurement:** PO from-pr เลือกใบขอซื้ออ่าน requestor/department/workflow จาก object (#154) — Thammanoon Semapru `79be34ca`
+- **vendor-management:** price list ฟอร์มอ่าน product/unit/vendor จาก object (#154) — Thammanoon Semapru `9be9cb30`
+- **product-management:** product form อ่าน category/unit/tax/location จาก object (#154) — Thammanoon Semapru `4fe8e393`
+- **procurement:** CN อ่าน GRN reference จาก object ตอนหยิบรายการมาเครดิต (#154) — Thammanoon Semapru `aea93c49`
+- **store-operation:** SR ฟอร์มอ่าน workflow/requestor/department/location จาก object (#154) — Thammanoon Semapru `ac0633e3`
+- **vendor-management:** price list template อ่าน product/unit จาก object (#154) — Thammanoon Semapru `96c5d5b5`
+- **procurement:** PO from-price-list อ่าน price list detail จาก object (#154) — Thammanoon Semapru `3b214180`
+- **procurement:** GRN อ่าน entity reference จาก object (#154) — Thammanoon Semapru `d7258c2f`
+- **procurement:** PO อ่าน entity reference จาก object (#154) — Thammanoon Semapru `3b1905f1`
+- **procurement:** PR อ่าน entity reference จาก object + แก้ type header (#154) — Thammanoon Semapru `f303dd96`
+- **procurement:** PR template อ่าน entity reference จาก object (#154) — Thammanoon Semapru `16069088`
+- **types:** entity reference เป็น object ตาม contract ใหม่ (#154) — Thammanoon Semapru `bf9f2c3a`
+- **email-profile:** ตัดเทมเพลต/reply-to/สำเนาถึง/หมายเหตุ ออกจากโปรไฟล์ผู้ส่ง — Thammanoon Semapru `e98ef3ee`
+- **dashboard:** ขนาด widget เลือกเป็น "กว้าง × สูง" ทีเดียว พร้อมขอบล่างต่อชนิด — Khafang `d8ff0e12`
+- **system-admin:** เปลี่ยนชื่อ Period เป็น Inventory Period — Thammanoon Semapru `06c68975`
+- select highest-versioned graft candidate and expand hook matchers — Thammanoon Semapru `a1895dda`
+- **config:** เปลี่ยนชื่อ chart-of-account เป็น chart-of-accounts — Thammanoon Semapru `821646dd`
+- **dashboard:** แต่ละ widget โหลดของตัวเองตอนเลื่อนถึง ไม่รอก้อนเดียวทั้งหน้า (#127) — Khafang `db046517`
+- **tabs:** ให้ขนาด tab มาจาก design system จุดเดียว เลิก override รายหน้า — Thammanoon Semapru `d143a1dd`
+- **ui:** รวมปุ่มย้อนกลับทุกหน้าไว้ที่ BackButton ตัวเดียว — Thammanoon Semapru `9cef7683`
+- **list:** รวมหัวหน้า list ทุกโมดูลไว้ที่ DocumentListHeader ตัวเดียว — Thammanoon Semapru `12e095c6`
+- **claude-md:** ย้ายเนื้อหาเฉพาะงานออกจาก CLAUDE.md ไปเป็น skill — Thammanoon Semapru `d8574380`
+- **inventory:** ตัดตารางล็อต/ความเคลื่อนไหวกับต้นทุนเฉลี่ยออกจากกล่องข้อมูลสต็อก — Thitiphong Srisavat `413718b0`
+- **grn:** คอลัมน์ discount ใช้ทรงเดียวกับ PO — Thitiphong Srisavat `3a1505e1`
+- **po,grn:** สลับที่คอลัมน์ tax — เรตขึ้นไปติดยอดเงิน โปรไฟล์ลงไปข้าง checkbox — Thitiphong Srisavat `2eb0240e`
+- **po:** ปุ่มลบกับประวัติแถวย้ายมาอยู่แนวคอลัมน์ # ของแถวหมายเหตุ — Thitiphong Srisavat `8780ae95`
+- **cn:** ยกฝั่งคืนขึ้นแถวหลัก ยอด GRN ลงไปอยู่แถวกาง — Thitiphong Srisavat `a4dc6632`
+- ล้าง JSDoc พรรณนาออกทั้ง repo — Thitiphong Srisavat `74d75532`
+- ไฟล์ที่ export hook ของตาราง ใช้ชื่อ use-*-table.tsx ให้หมด — Thitiphong Srisavat `c1e2dfb6`
+- **stock-replenishment:** ตาราง wizard PR/SR ใช้ DataGrid แทนที่จะปั้น table เอง — Thitiphong Srisavat `64bf56bb`
+- **po:** ตารางรายการคืนที่ให้ช่องที่กรอกจริง — Thitiphong Srisavat `5c506a79`
+- **grn:** ความกว้างคอลัมน์ไปอยู่ที่ size ตรง ๆ + ชื่อท้องถิ่นครบทุกกรณี — Thitiphong Srisavat `40d1b9c6`
+- **pr:** แยกขั้นกรอกจำนวนออกเป็น qty-step + เพิ่มคอลัมน์จุดส่งกับสกุลเงิน — Thitiphong Srisavat `87b3720d`
+- **pr:** ถอด doc-sequence กับป้ายเตือนราคาออก — Thitiphong Srisavat `a4ad92fd`
+- **items:** ตารางรายการทุกโมดูลใช้ NameWithSubtext + ชิดบนในโหมดอ่าน — Thitiphong Srisavat `3df0ff9d`
+- **po:** ส่วนลด/ภาษีโหมดอ่านใช้ NameWithSubtext ตัวเดียวกับคอลัมน์อื่น — Thitiphong Srisavat `55f8f668`
+- **grn,po:** ลบคอลัมน์หน่วยออกจากตารางรายการ — Thitiphong Srisavat `4e749c37`
+- **grn:** dialog เพิ่มใบสั่งซื้อใช้ลิสต์ตัวเดียวกับ wizard สร้างจากใบสั่งซื้อ — Thitiphong Srisavat `b8a22a54`
+- **form:** รวบ getSubmitLabel ที่ก๊อปกัน 4 ที่ไปไว้ lib/form-utils — Thitiphong Srisavat `07cdc7f4`
+- **rfp:** ฟอร์มเก็บรายชื่อผู้ขายจริง ไม่เก็บ delta ของ API แล้ว — Thitiphong Srisavat `2f9e3969`
+- **price-list-template:** ลบ getSubmitLabel กับ ToolbarLabels ที่ไม่มีใครเรียก — Thitiphong Srisavat `d3c9a9f6`
+- **price-list-template:** ยุบตรรกะรายการสินค้าไว้ใน plt-item-fields ให้ตรง pattern — Thitiphong Srisavat `497237d7`
+- **price-list:** ย้ายรายการสินค้าไปอยู่ใน pl-item-fields ให้ตรงทรงเดียวกับโมดูลอื่น — Thitiphong Srisavat `14e41d5a`
+- **grn:** สร้างใบรับสินค้าจากใบสั่งซื้อเป็นหน้าเต็ม ใช้ขั้นตอนแบบเดียวกับฝั่งใบสั่งซื้อ — Thitiphong Srisavat `d7668c9f`
+- **po:** รวมตัวกรองของสอง wizard เป็นตัวเดียว และเติมตัวกรองให้ขั้นเลือกใบขอซื้อ — Thitiphong Srisavat `94e24fe4`
+- **po:** สร้างใบสั่งซื้อจากใบขอซื้อเป็นหน้าเต็ม ไม่ใช่ dialog ซ้อน dialog — Thitiphong Srisavat `c9495d99`
+- **grn:** ตารางรับของเลิกจัดกลุ่มสินค้า เหลือ 1 แถวต่อ 1 บรรทัด — Thitiphong Srisavat `d0411778`
+- **po:** wizard from-price-list รวมขั้นผู้ขายเข้ากับรายละเอียด และถามก่อนทิ้งของ — Thitiphong Srisavat `c00b5b34`
+- **po:** step เลือกสินค้าใน wizard เหลือตารางเดียว อิงบรรทัดใบราคาไม่ใช่สินค้า — Thitiphong Srisavat `7587faa8`
+- **ui:** ถอดสีประจำ module/sub-module ทิ้ง เหลือ accent เดียวทั้งแอป — Thitiphong Srisavat `91e6e2ec`
+- **po:** แถวหนึ่ง = คลังเดียว ตาม response ใหม่ ตัดแถวขยายทิ้ง — Thitiphong Srisavat `926243f0`
+- **pr:** ใช้ NameWithSubtext แทนบล็อกชื่อ+ชื่อรองที่เขียนเอง — Thitiphong Srisavat `603760e7`
+- **workflow:** เก็บ tab general/routing/products ให้เข้าชุดกับ stages — Thitiphong Srisavat `49778952`
+- **workflow:** แบน chrome ของฟอร์ม แก้ตัวหนังสือหาย และเลิกให้ breakpoint โกหก — Thitiphong Srisavat `7ed51567`
+- **cuisine:** คอลัมน์ Region เป็นข้อความล้วน เลิกใช้ badge 6 สี — Thitiphong Srisavat `3174e9df`
+- **recipe:** ล้าง neon กับ eyebrow ที่ฟอร์มสูตรประดิษฐ์ขึ้นเอง แล้วถอด "use no memo" — Thitiphong Srisavat `29a064f0`
+- **po:** ยุบ cell ของตารางรายการเข้า po-item-cells ตามแบบ PR/GRN — Thitiphong Srisavat `c734c1a1`
+- **grn:** ย้ายเทอมเครดิตขึ้นก่อนเลขที่ใบแจ้งหนี้ — Thitiphong Srisavat `f032566b`
+- **grn:** แยก cell ของตารางรายการออกเป็น grn-item-cells ตามแบบ PR — Thitiphong Srisavat `c08c1167`
+- **grn:** เรียงลำดับช่องในหัวใบใหม่ — Thitiphong Srisavat `1a84fb89`
+- **list-filter:** เลิกลากทะเบียนแผนก/ผู้ใช้มาทิ้งตอนเปิดหน้า — Thitiphong Srisavat `5e7475a8`
+- **user:** ทะเบียนแผนกยิงตอน hover ตัวกรอง ไม่ใช่ตอนเปิดหน้า — Thitiphong Srisavat `c92e3af6`
+- เก็บของค้าง 5 อย่างจากรอบที่แล้ว — Thitiphong Srisavat `7a86a031`
+- **system-admin:** เก็บชิป action ที่เหลือในการ์ดกับ detail sheet — Thitiphong Srisavat `86446384`
+- **system-admin:** ทิ้งชิปในตาราง activity log, user activity, notification template — Thitiphong Srisavat `72d6cd34`
+- **user:** ตัดบล็อกหัวหน้าแผนกออก แล้วเก็บ i18n กับปุ่ม back ที่ค้าง — Thitiphong Srisavat `5684f93e`
+- **workflow:** คอลัมน์ชนิด workflow เป็นไอคอน+ข้อความ และล้าง validation panel ตาม DESIGN.md — Thitiphong Srisavat `8df5e1d8`
+- **list:** ListToolbar ครอบอีก 7 หน้า ด้วย variant row กับ bare — Thitiphong Srisavat `6321f678`
+- **list:** สกัด ListToolbar — 17 หน้าเลิกก๊อปแถบเครื่องมือเดียวกัน — Thitiphong Srisavat `c8e990b8`
+- **forms:** ยุบ product กับ vendor เข้า useEntityForm — Thitiphong Srisavat `27a64ea2`
+- **forms:** ยุบ location · physical-count · price-list · rfp เข้า useEntityForm — Thitiphong Srisavat `faea2fa1`
+- **forms:** ยุบ equipment กับ recipe เข้า useEntityForm — Thitiphong Srisavat `e9820d33`
+- **forms:** ยุบ department กับ role เข้า useEntityForm — Thitiphong Srisavat `58bc29a8`
+- **forms:** เพิ่ม useEntityForm แล้วยุบ 3 ฟอร์มแรกเข้าใช้ — Thitiphong Srisavat `85457893`
+- **spot-check:** ลบเส้น edit ของ ScForm ที่ตายมาตั้งแต่วันแรก — Thitiphong Srisavat `0647b32e`
+- **hooks:** ย้าย use-certification / use-eco-label เข้า shared ของโมดูล — Thitiphong Srisavat `750ac662`
+- ย้าย certification ไป vendor-management และ eco ไป product-management — Thitiphong Srisavat `ac1e7c56`
+- **config:** เปลี่ยนชื่อโมดูล account code เป็น chart of account (prefix coa) — Thitiphong Srisavat `8b4fb99d`
+- ชื่อไฟล์ในโมดูลใช้ prefix เดียวกับเพื่อน (6 โมดูลสุดท้าย) — Thitiphong Srisavat `6d7a4ff7`
+- ชื่อไฟล์ในโมดูลใช้ prefix เดียวกับเพื่อนในโฟลเดอร์ (16 โมดูล) — Thitiphong Srisavat `af9cfdd2`
+- **cn:** ผ่า cn-component + เก็บของตายใน useCnItemTable — Thitiphong Srisavat `01afbd0c`
+- **user:** คลังในหน้า user เป็นดูอย่างเดียว ตัดฝั่งเขียนออกหมด — Thitiphong Srisavat `2ee5b2c1`
+- **cn:** เปลี่ยนชื่อ content file ให้ขึ้นต้นด้วย cn- เหมือนเพื่อนในโฟลเดอร์ — Thitiphong Srisavat `86923b19`
+- **cn:** แยก cell ออกเป็น cn-item-cells/ ตามท่าเดียวกับ PR — Thitiphong Srisavat `3b2cb7a7`
+- **pr:** เปลี่ยนชื่อ content file ให้ขึ้นต้นด้วย pr- เหมือนเพื่อนในโฟลเดอร์ — Thitiphong Srisavat `b8a9d48c`
+- **pr:** ผ่า pr-component 854 บรรทัดออกเป็น 4 ก้อน — Thitiphong Srisavat `e447b43d`
+- **types:** ลบ type ที่ตาย 9 ตัว · ถอด export ที่ไม่มีใครใช้ 100 ตัว — Thitiphong Srisavat `8f9b9d01`
+- **comments:** ซ่อม createCommentCrud ให้ตรง contract แล้วยุบของซ้ำห้าโมดูล — Thitiphong Srisavat `4dfb6756`
+- **account-code:** dialog สองคอลัมน์ + description_2 เป็น textarea — Thitiphong Srisavat `66e49920`
+- **ui:** ย้าย 5 คอมโพเนนต์ที่รู้จัก domain ออกจาก ui/ ไป share/ — Thitiphong Srisavat `f3f2bb88`
+- **ui:** ลบ cascader/ กับ filters/ ที่ vendor มาแล้วไม่เคยได้เสียบ — 18,350 บรรทัด — Thitiphong Srisavat `e2dc5c09`
+- **structure:** ย้าย hook ที่เป็นของโมดูลไปอยู่กับโมดูล — hooks/ 131 เหลือ 93 — Thitiphong Srisavat `0d9757f3`
+- **structure:** เก็บกวาดของนอกโมดูล — ลบ dead code, ยุบ utils/ เข้า lib/ — Thitiphong Srisavat `def74dcb`
+- **system-admin:** ลบ FilterChip ที่ไม่มีใครใช้แล้ว — Thitiphong Srisavat `f5fd7312`
+- **ui:** tooltip แถบขั้นตอน workflow พูดภาษาคน + ยุบสามที่เหลือคอมโพเนนต์เดียว — Thitiphong Srisavat `96f4e8fb`
+- **user:** section คลังที่ผูกกับผู้ใช้ ย้ายไป DataGrid + ค้นหา/เรียง/กรอง — Thitiphong Srisavat `96e569ad`
+- **ui:** ถอด card ซ้อนของ section รายการ IA กับ PR template — จบชุด — Thitiphong Srisavat `4bb8d907`
+- **vendor-management:** ถอด card ซ้อนของ section สินค้า/ผู้ขาย อีกสามที่ — Thitiphong Srisavat `d3f3c9b6`
+- **vendor:** ถอด card ซ้อนใน 4 section + certificate ย้ายไป DataGrid — Thitiphong Srisavat `ec14611e`
+- **product:** ถอด card ของสามแท็บ + คอลัมน์ประเภทคลังใช้ทรงเดียวกับหน้ารายการ — Thitiphong Srisavat `7a1fc125`
+- **ui:** ถอด card ของ section สมาชิก/หัวหน้าแผนก ในฟอร์ม department — Thitiphong Srisavat `7739ae0d`
+- **ui:** ถอดกรอบซ้อนกรอบในฟอร์ม location + เลิกก๊อป search/highlight ซ้ำสองที่ — Thitiphong Srisavat `ddca36bd`
+- **ui:** การ์ดข้อมูลตั้งต้นย้ายสถานะลงมาเป็นแถว + เลิกเรียก badge ในสิ่งที่ไม่ใช่ badge — Thitiphong Srisavat `84c233ac`
+- **ui:** ย้ายสถานะการ์ดเอกสารลงมาเป็นแถว แยกแถวส่งกลับออกมาต่างหาก — Thitiphong Srisavat `b976212e`
+- update graft helpers to resolve dist paths and expand bash permission scopes for internal tooling — Thammanoon Semapru `add997e7`
+- **doc:** ยุบ duplicate/comment/activity/print ลงเมนู ⋯ ทั้ง PR/PO/GRN/CN/SR — Thitiphong Srisavat `34f0bc79`
+
 ## [2.2.0] - 2026-08-23
 
 _No notable changes._
