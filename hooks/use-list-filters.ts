@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
 import { useDepartment } from "@/hooks/use-department";
 import { useUser } from "@/hooks/use-user";
 import { useVendor } from "@/hooks/use-vendor";
@@ -218,35 +219,26 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
-  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ/ผู้ขาย — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
-  // ทะเบียนกลาง ไม่ใช่ในตัว control
-  //
-  // เงื่อนไขคือ "มี chip ที่ต้องแปลงชื่อจริง ๆ" ไม่ใช่แค่ "หน้านี้มี field ชนิดนั้น" —
-  // เปิดหน้าเปล่าโดยไม่มี filter ค้าง (เกือบทุกครั้งที่เข้าหน้า) จะได้ไม่ลากทะเบียน
-  // ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester/FilterVendor
-  // ยิงเองตอนเปิดอยู่แล้ว และพอเลือกเสร็จ chip ก็มาขอทะเบียนชุดเดียวกัน
-  // (query key เดียวกัน react-query จึงใช้ของที่ cache ไว้ ไม่ยิงซ้ำ)
-  const hasDepartmentField = fields.some(
-    (f) => f.control === "department" && !!values[f.key]?.trim(),
-  );
-  const hasRequesterField = fields.some(
-    (f) => f.control === "requester" && !!values[f.key]?.trim(),
-  );
-  const hasVendorField = fields.some(
-    (f) => f.control === "vendor" && !!values[f.key]?.trim(),
-  );
-  const { data: departmentData } = useDepartment(
-    { perpage: -1 },
-    { enabled: hasDepartmentField },
-  );
-  const { data: userData } = useUser(
-    { perpage: -1 },
-    { enabled: hasRequesterField },
-  );
-  const { data: vendorData } = useVendor(
-    { perpage: -1 },
-    { enabled: hasVendorField },
-  );
+  // id ที่ถูกเลือกอยู่ในทุก field ของแต่ละชนิด — ดึงเฉพาะแถวเหล่านั้นมาทำชื่อบน chip
+  // (query key เดียวกับ EntityMultiFilter เพราะ useEntitiesByIds เรียง id ก่อน
+  // react-query จึงไม่ยิงซ้ำเมื่อเปิด popover)
+  const idsOf = (control: string) =>
+    fields
+      .filter((f) => f.control === control)
+      .flatMap((f) => clauseTokens(values[f.key] ?? ""));
+  const { items: departmentItems } = useEntitiesByIds({
+    useListHook: useDepartment,
+    ids: idsOf("department"),
+  });
+  const { items: userItems } = useEntitiesByIds({
+    useListHook: useUser,
+    ids: idsOf("requester"),
+    idFilterKey: "user_id",
+  });
+  const { items: vendorItems } = useEntitiesByIds({
+    useListHook: useVendor,
+    ids: idsOf("vendor"),
+  });
 
   // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
   // ListFilter ส่งให้ control ใน sheet/เมนู เพื่อให้ field คู่ (linked keys) ทำงานครบ
@@ -277,24 +269,24 @@ export function useListFilters(
           // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
           value: (() => {
             const raw = values[f.key];
-            // แผนก/ผู้ขอ: id → ชื่อจริงจากทะเบียน (ระหว่างโหลดตก fallback เป็นจำนวน)
+            // แผนก/ผู้ขอ/ผู้ขาย: id → ชื่อจริง (ดึงตาม id; ระหว่างโหลดตก fallback เป็นจำนวน)
             let named: string | undefined;
             if (f.control === "department") {
-              const list = departmentData?.data ?? [];
+              const list = departmentItems;
               named = firstPlusRest(
                 clauseTokens(raw)
                   .map((id) => list.find((d) => d.id === id)?.name)
                   .filter((n): n is string => !!n),
               );
             } else if (f.control === "vendor") {
-              const list = vendorData?.data ?? [];
+              const list = vendorItems;
               named = firstPlusRest(
                 clauseTokens(raw)
                   .map((id) => list.find((v) => v.id === id)?.name)
                   .filter((n): n is string => !!n),
               );
             } else if (f.control === "requester") {
-              const list = userData?.data ?? [];
+              const list = userItems;
               named = firstPlusRest(
                 clauseTokens(raw)
                   .map((id) => {
@@ -326,7 +318,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue, peer, departmentData, userData, vendorData],
+    [fields, values, t, setValue, peer, departmentItems, userItems, vendorItems],
   );
 
   const current: SavedView | null = sv
