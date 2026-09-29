@@ -4,10 +4,14 @@ import { Link, useLocation, useSearchParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { profileQueryKey } from "@/hooks/use-profile";
 import { getRuntimeConfig } from "@/lib/runtime-config";
+import { tokenStore } from "@/lib/auth/token-store";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import { AuthFormAlert } from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+
+/** Shared with require-auth.tsx's identical constant — same tab-session guard either path sets. */
+const SILENT_SSO_TRIED_KEY = "carmen.silentSsoTried";
 
 export default function LoginForm() {
   const [searchParams] = useSearchParams();
@@ -38,6 +42,31 @@ export default function LoginForm() {
   useEffect(() => {
     queryClient.removeQueries({ queryKey: profileQueryKey });
   }, [queryClient]);
+
+  // ลอง silent SSO check ก่อนหนึ่งครั้งต่อ tab session แม้กำลังอยู่หน้า /login เอง (ไม่ใช่แค่
+  // protected route ที่ require-auth.tsx เช็ค) — ถ้า Keycloak มี session ที่ยัง live อยู่แล้ว (เช่น
+  // login ผ่าน Platform มา) การมาเปิดหน้า /login ตรงๆ (เช่นจาก bookmark) ก็ควรได้เข้าเลย ไม่ต้องกด
+  // [Sign in] ซ้ำอีกที ไม่ต้องกัน StrictMode double-invoke แบบ require-auth.tsx — ถ้าเคยลองแล้ว
+  // (`alreadyTried`) โค้ดด้านล่างจะ return เฉยๆ ไม่มี branch อื่นที่ทับ navigation กัน
+  useEffect(() => {
+    if (tokenStore.get()) return;
+    let alreadyTried = false;
+    try {
+      alreadyTried = sessionStorage.getItem(SILENT_SSO_TRIED_KEY) === "1";
+    } catch {
+      // storage unavailable — fall through and just attempt the check
+    }
+    if (alreadyTried) return;
+    try {
+      sessionStorage.setItem(SILENT_SSO_TRIED_KEY, "1");
+    } catch {
+      // ignore
+    }
+    const params = new URLSearchParams({ app: "web", locale, silent: "true" });
+    if (next) params.set("next", next);
+    window.location.href = `${getRuntimeConfig().BACKEND_URL}/api/auth/authorize?${params.toString()}`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // แถบยืนยันเหนือฟอร์ม — มาจากเส้นทางที่พาผู้ใช้มาที่นี่ ไม่ใช่จากสถานะของฟอร์มเอง
   // ทั้งสองกรณีเกิดพร้อมกันไม่ได้ (คนละ navigate) จึงเลือกอันเดียวพอ
