@@ -613,8 +613,6 @@
     "email": "Email",
     "password": "Password",
     "signIn": "Sign In",
-    "orDivider": "or",
-    "signInWithGoogle": "Sign in with Google",
     "errors": {
       "registerConflict": "This email or username is already in use",
       "networkUnavailable": "Could not reach the server. Check your connection and try again.",

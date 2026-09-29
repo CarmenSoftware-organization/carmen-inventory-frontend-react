@@ -613,8 +613,6 @@
     "email": "อีเมล",
     "password": "รหัสผ่าน",
     "signIn": "เข้าสู่ระบบ",
-    "orDivider": "หรือ",
-    "signInWithGoogle": "เข้าสู่ระบบด้วย Google",
     "errors": {
       "registerConflict": "อีเมลหรือชื่อผู้ใช้นี้ถูกใช้ไปแล้ว",
       "networkUnavailable": "ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่",

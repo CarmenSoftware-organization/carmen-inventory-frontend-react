@@ -24,9 +24,10 @@ export default function LoginForm() {
   const passwordReset =
     (location.state as { passwordReset?: boolean } | null)?.passwordReset ===
     true;
-  // ตั้งโดย gateway (GET /api/auth/google/callback) ตอน redirect กลับมาหลัง sign-in ล้มเหลว — ค่านี้
-  // ("google_auth_failed") ใช้ร่วมกันทั้ง flow ปุ่ม Google และปุ่ม Sign in ธรรมดา (callback เดียวกัน)
-  // ชื่อ sentinel ยังอิงตามที่ backend ส่งมา แต่ข้อความที่โชว์ใช้คำกลางๆ ไม่เจาะจง Google
+  // ตั้งโดย gateway (GET /api/auth/google/callback) ตอน redirect กลับมาหลัง sign-in ล้มเหลว — ชื่อ
+  // endpoint/sentinel ("google_auth_failed") เป็นของเดิมตั้งแต่ก่อนมีปุ่ม [Sign in] เดียว (ตอนนั้นมี
+  // ปุ่ม Google แยก) ตอนนี้ callback นี้ใช้ร่วมกันทั้ง password และ Google (เลือกที่หน้า Keycloak เอง)
+  // ข้อความที่โชว์จึงใช้คำกลางๆ ไม่เจาะจง Google
   const signInFailed = searchParams.get("error") === "google_auth_failed";
   // เก็บ next ที่ตั้งใจจะไปหลัง login ต่อผ่าน backend (จะได้กลับมาเป็น #next=... ใน
   // google-callback.route.tsx) — ไม่งั้น deep-link (เช่นลิงก์คำเชิญ) หายไปเพราะ full-page redirect
@@ -89,44 +90,6 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <div className="my-1 flex items-center gap-3" aria-hidden>
-          <div className="bg-border h-px flex-1" />
-          <span className="text-muted-foreground text-xs">
-            {t("orDivider")}
-          </span>
-          <div className="bg-border h-px flex-1" />
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="h-10 w-full gap-2"
-          onClick={() => {
-            const params = new URLSearchParams({ app: "web", locale });
-            if (next) params.set("next", next);
-            window.location.href = `${getRuntimeConfig().BACKEND_URL}/api/auth/google/authorize?${params.toString()}`;
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
-            <path
-              fill="#4285F4"
-              d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.8 2.73v2.27h2.92c1.7-1.57 2.68-3.88 2.68-6.64z"
-            />
-            <path
-              fill="#34A853"
-              d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M3.97 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96A8.996 8.996 0 000 9c0 1.45.35 2.83.96 4.04l3.01-2.34z"
-            />
-            <path
-              fill="#EA4335"
-              d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z"
-            />
-          </svg>
-          {t("signInWithGoogle")}
-        </Button>
       </FieldGroup>
 
       <p className="text-muted-foreground mt-4 text-center text-xs">
