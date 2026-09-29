@@ -140,10 +140,8 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
   const [subdistrictCode, setSubdistrictCode] = useState<number | "">("");
   const queryClient = useQueryClient();
 
-  const resolveFromPostalCode = async (postalCode: string) => {
-    if (postalCode.length !== 5) return;
-
-    const [allSub, allDist, allProv] = await Promise.all([
+  const loadThaiData = () =>
+    Promise.all([
       queryClient.ensureQueryData<ThaiSubDistrict[]>({
         queryKey: ["thai-subdistricts-all"],
         queryFn: () =>
@@ -161,6 +159,12 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
         ...CACHE_STATIC,
       }),
     ]);
+
+  // ผู้ใช้พิมพ์รหัสไปรษณีย์เอง → เติมจังหวัด/อำเภอ(/ตำบลถ้ามีตัวเดียว) ลงฟอร์ม
+  const resolveFromPostalCode = async (postalCode: string) => {
+    if (postalCode.length !== 5) return;
+
+    const [allSub, allDist, allProv] = await loadThaiData();
 
     const matches = allSub.filter((d) => d.postalCode === Number(postalCode));
     if (matches.length === 0) return;
@@ -194,32 +198,49 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
     }
   };
 
-  // Resolve dropdown states from existing address data on mount
+  // เปิดที่อยู่เดิม → หา code ของ dropdown จาก "ชื่อที่บันทึกไว้" อย่างเดียว ห้ามเขียนฟอร์ม
+  // เดิมเรียก resolveFromPostalCode ตอน mount (ทั้งโหมดดูและแก้ไข) ซึ่ง setValue ทับ:
+  // รหัสไปรษณีย์ที่ครอบหลายตำบล (พบบ่อย) ทำให้ sub_district กลายเป็น "" แล้วกด Save
+  // ส่งค่าว่างไปโดยไม่มีใครเห็น (dropdown ยังโชว์ตำบลเดิม) และถ้ารหัสคร่อมหลายอำเภอ
+  // จังหวัด/อำเภอถูกทับด้วยของตำบลแรก · ชื่อที่หาไม่เจอ (ข้อมูลเก่า/สะกดต่าง) ปล่อย
+  // dropdown ว่างไว้ ค่าในฟอร์มยังอยู่ครบ
   useEffect(() => {
-    const postalCode =
-      form.getValues(`vendor_address.${index}.postal_code`) ?? "";
+    if (!isThai) return;
+    const savedProvince =
+      form.getValues(`vendor_address.${index}.province`) ?? "";
+    const savedDistrict =
+      form.getValues(`vendor_address.${index}.district`) ?? "";
     const savedSubDistrict =
       form.getValues(`vendor_address.${index}.sub_district`) ?? "";
-    if (postalCode && isThai) {
-      resolveFromPostalCode(postalCode).then(async () => {
-        // If sub_district name was saved, resolve its code for the dropdown
-        if (!savedSubDistrict) return;
-        const allSub = await queryClient.ensureQueryData<ThaiSubDistrict[]>({
-          queryKey: ["thai-subdistricts-all"],
-          queryFn: () =>
-            fetch("/data/thai-subdistricts.json").then((r) => r.json()),
-          ...CACHE_STATIC,
-        });
-        const match = allSub.find(
-          (s) =>
-            s.postalCode === Number(postalCode) &&
-            s.subdistrictNameEn === savedSubDistrict,
-        );
-        if (match) {
-          setSubdistrictCode(match.subdistrictCode);
-        }
-      });
-    }
+    const postalCode =
+      form.getValues(`vendor_address.${index}.postal_code`) ?? "";
+    if (!savedProvince && !postalCode) return;
+
+    let cancelled = false;
+    loadThaiData().then(([allSub, allDist, allProv]) => {
+      if (cancelled) return;
+      const province = allProv.find((p) => p.provinceNameEn === savedProvince);
+      if (!province) return;
+      setProvinceCode(province.provinceCode);
+
+      const district = allDist.find(
+        (d) =>
+          d.provinceCode === province.provinceCode &&
+          d.districtNameEn === savedDistrict,
+      );
+      if (!district) return;
+      setDistrictCode(district.districtCode);
+
+      const sub = allSub.find(
+        (s) =>
+          s.districtCode === district.districtCode &&
+          s.subdistrictNameEn === savedSubDistrict,
+      );
+      if (sub) setSubdistrictCode(sub.subdistrictCode);
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
