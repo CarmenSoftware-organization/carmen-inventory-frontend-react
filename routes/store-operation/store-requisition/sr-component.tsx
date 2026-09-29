@@ -54,6 +54,10 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import {
+  DEPARTMENT_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
 
 export default function StoreRequisitionComponent() {
   const t = useTranslations("storeOperation.storeRequisition");
@@ -229,13 +233,15 @@ export default function StoreRequisitionComponent() {
       },
       {
         key: "user_id",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity(),
         labelKey: "common.requester",
         section: "listView.sectionPeople",
       },
       {
         key: "department",
-        control: "department",
+        control: "entity",
+        entity: DEPARTMENT_ENTITY,
         labelKey: "field.department",
         section: "listView.sectionPeople",
       },

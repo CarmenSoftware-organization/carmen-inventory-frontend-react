@@ -2,14 +2,18 @@ import { useMemo } from "react";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { CN_STATUS_OPTIONS, CN_TYPE_OPTIONS } from "@/constant/credit-note";
 import type { FilterFieldDef } from "@/types/list-filter";
+import {
+  VENDOR_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
 
 /**
  * นิยาม field ของ filter หน้า credit-note
  *
  * hook นี้**ไม่ fetch อะไรเลยโดยตั้งใจ** — ทะเบียน vendor ใหญ่หลักร้อย KB
  * (T02: 858 แถว ≈ 435 KB) การดึงมาทำ option ตอน mount คือจ่ายค่านั้นทุกครั้งที่
- * เข้าหน้า ทั้งที่ dropdown อาจไม่ถูกเปิดเลย control `vendor` ยิงเองตอนเปิด popover
- * (ดู FilterVendor) ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะเมื่อมีค่าค้างจริง
+ * เข้าหน้า ทั้งที่ dropdown อาจไม่ถูกเปิดเลย control `entity` ยิงเองตอนเปิด popover
+ * ส่วนชื่อบน chip ดึงเฉพาะ id ที่เลือก (EntityChipValue)
  */
 export function useCnFilterFields(): FilterFieldDef[] {
   return useMemo<FilterFieldDef[]>(
@@ -54,16 +58,17 @@ export function useCnFilterFields(): FilterFieldDef[] {
       },
       {
         key: "vendor",
-        control: "vendor",
+        control: "entity",
+        entity: VENDOR_ENTITY,
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
       },
       {
         // ผู้สร้าง = คนเปิดใบลดหนี้ (คอลัมน์ Created By ใน list) — กรองที่ created_by_id
         key: "created_by",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity("created_by_id"),
         labelKey: "field.createdBy",
-        fieldKey: "created_by_id",
         section: "listView.sectionPeople",
       },
       {

@@ -37,6 +37,7 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import { VENDOR_ENTITY } from "@/components/filter/entity-sources";
 
 export default function PriceListComponent() {
   const navigate = useNavigate();
@@ -132,12 +133,12 @@ export default function PriceListComponent() {
         ),
       },
       {
-        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
-        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
-        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
+        // ทะเบียน vendor ใหญ่หลักร้อย KB — control "entity" ยิงรายการเองตอนเปิด
+        // popover ทีละหน้า ส่วนชื่อบน chip ดึงเฉพาะ id ที่เลือก (EntityChipValue)
         key: "vendor",
         section: "listView.sectionPeople",
-        control: "vendor",
+        control: "entity",
+        entity: VENDOR_ENTITY,
         labelKey: "field.vendor",
       },
       {
