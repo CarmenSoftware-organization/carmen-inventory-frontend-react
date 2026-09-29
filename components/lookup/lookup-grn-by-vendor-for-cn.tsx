@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { ClipboardList } from "lucide-react";
 import { useGoodsReceiveNoteByVendorForCn } from "@/hooks/use-goods-receive-note";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import type { LookupListParams } from "@/hooks/use-entities-by-ids";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -43,12 +44,13 @@ export function LookupGrnByVendorForCn({
   const [search, setSearch] = useState("");
 
   const useListByVendor = (
-    params: { search?: string; perpage: number; page?: number },
+    params: LookupListParams,
     options?: { enabled?: boolean },
   ) => useGoodsReceiveNoteByVendorForCn(vendorId, params, options);
 
   const {
     items: grns,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -56,8 +58,9 @@ export function LookupGrnByVendorForCn({
   } = useLookupPagination<GoodsReceiveNote>({
     useListHook: useListByVendor,
     search,
-    perpage: 30,
     resetDeps: [vendorId],
+    // endpoint vendor/:id/cn รับ `id|string:` (probe T02) — ใบที่เลือกไว้ขึ้นเลขเสมอ
+    selectedIds: value ? [value] : [],
   });
 
   return (
@@ -69,6 +72,7 @@ export function LookupGrnByVendorForCn({
         if (item) onItemChange?.(item);
       }}
       items={grns}
+      selectedItems={selectedItems}
       getId={(g) => g.id}
       getLabel={(g) => g.invoice_no || g.grn_no}
       defaultLabel={defaultLabel}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { usePhysicalCountPeriod } from "@/hooks/use-physical-count-period";
+import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import { formatDate } from "@/lib/date-utils";
 import type { PhysicalCountPeriod } from "@/types/physical-count-period";
 import { LookupCombobox } from "./lookup-combobox";
@@ -17,8 +18,8 @@ interface LookupPhysicalCountPeriodProps {
 }
 
 function formatPeriodLabel(period: PhysicalCountPeriod): string {
-  const from = formatDate(period.counting_period_from_date, "DD MMM YYYY");
-  const to = formatDate(period.counting_period_to_date, "DD MMM YYYY");
+  const from = formatDate(period.tb_inventory_period.start_at, "DD MMM YYYY");
+  const to = formatDate(period.tb_inventory_period.end_at, "DD MMM YYYY");
   return `${from} — ${to}`;
 }
 
@@ -34,21 +35,23 @@ export function LookupPhysicalCountPeriod({
 }: LookupPhysicalCountPeriodProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
-  const { data, isLoading } = usePhysicalCountPeriod(
-    { perpage: -1 },
-    { enabled: hasOpened || !!value },
-  );
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const periods = (data?.data ?? [])
-    .filter((p) => new Date(p.counting_period_from_date) <= today)
-    .sort(
-      (a, b) =>
-        new Date(b.counting_period_from_date).getTime() -
-        new Date(a.counting_period_from_date).getTime(),
-    );
+
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<PhysicalCountPeriod>({
+      useListHook: usePhysicalCountPeriod,
+      // search ของ endpoint ไม่ครอบเลขงวด/วันที่ (ได้ 0 แถว) — ค้นในรายการที่โหลดมาแทน
+      search: "",
+      // ห้ามส่ง is_active (400) · เรียงงวดล่าสุดก่อนที่ server
+      sort: "tb_inventory_period.start_at:desc",
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+      // ซ่อนงวดที่ยังไม่เริ่ม (ค่าที่เลือกไว้ผ่านเสมอ)
+      filter: (p) => new Date(p.tb_inventory_period.start_at) <= today,
+    });
 
   return (
     <LookupCombobox
@@ -61,10 +64,13 @@ export function LookupPhysicalCountPeriod({
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}
-      items={periods}
+      items={items}
+      selectedItems={selectedItems}
       getId={(p) => p.id}
       getLabel={formatPeriodLabel}
-      getSearchValue={(p) => formatPeriodLabel(p)}
+      getSearchValue={(p) =>
+        `${p.tb_inventory_period.period} ${formatPeriodLabel(p)}`
+      }
       placeholder={
         placeholder ?? tl("select", { entity: tfl("physicalCountPeriod") })
       }
@@ -72,6 +78,9 @@ export function LookupPhysicalCountPeriod({
       disabled={disabled}
       className={className}
       isLoading={isLoading}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
       error={error}
     />
   );
