@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useEquipmentCategory } from "@/hooks/use-equipment-category";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { EquipmentCategory } from "@/types/equipment-category";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupEquipmentCategoryProps {
@@ -50,25 +54,23 @@ export function LookupEquipmentCategory({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const {
     items: categories,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination({
+  } = useLookupPagination<EquipmentCategory>({
     useListHook: useEquipmentCategory,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (v: { id: string; is_active: boolean }) => {
-      if (!v.is_active) return false;
-      if (excludeIds?.has(v.id)) return false;
-      return true;
-    },
+    serverFilter: ACTIVE_ONLY_FILTER,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
+    filter: excludeIds ? (c) => !excludeIds.has(c.id) : undefined,
   });
 
   return (
@@ -80,6 +82,7 @@ export function LookupEquipmentCategory({
         if (open) setHasOpened(true);
       }}
       items={categories}
+      selectedItems={selectedItems}
       getId={(c) => c.id}
       getLabel={(c) => c.name}
       defaultLabel={defaultLabel}

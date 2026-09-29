@@ -3,7 +3,10 @@ import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "@/hooks/use-location";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +34,7 @@ interface LookupLocationProps {
  * Lookup Popover สำหรับเลือก Location (สถานที่เก็บสินค้า)
  *
  * ดึงข้อมูลผ่าน `useLocation` hook พร้อม server-side search และ infinite scroll (perpage 30)
- * filter `is_active = true` รองรับ `excludeIds` กัน duplicate และ `locationTypes` filter
+ * กรอง `is_active` และ `locationTypes` ที่ server รองรับ `excludeIds` กัน duplicate
  * ตามประเภท (inventory/direct/consignment) พร้อม badge แสดงประเภทใน item มี `onItemChange`
  * ส่ง object `Location` เต็ม
  *
@@ -64,13 +67,23 @@ export function LookupLocation({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
+  // location_type|enum: ต้องอยู่ท้ายสุด — ค่า enum คั่นด้วย `,` เหมือนตัวคั่นเงื่อนไข
+  const serverFilter = [
+    ACTIVE_ONLY_FILTER,
+    locationTypes?.length
+      ? `location_type|enum:${locationTypes.join(",")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(",");
 
   const {
     items: locations,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -78,15 +91,10 @@ export function LookupLocation({
   } = useLookupPagination<Location>({
     useListHook: useLocation,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (l: Location) => {
-      if (!l.is_active) return false;
-      if (excludedSet && excludedSet.has(l.id)) return false;
-      if (locationTypes && !locationTypes.includes(l.location_type))
-        return false;
-      return true;
-    },
+    serverFilter,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
+    filter: excludedSet ? (l) => !excludedSet.has(l.id) : undefined,
   });
 
   return (
@@ -100,6 +108,7 @@ export function LookupLocation({
         if (open) setHasOpened(true);
       }}
       items={locations}
+      selectedItems={selectedItems}
       getId={(l) => l.id}
       getLabel={(l) => `${l.code} — ${l.name}`}
       size={size}

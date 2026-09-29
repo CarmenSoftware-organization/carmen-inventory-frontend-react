@@ -4,7 +4,11 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UnitDialog } from "@/components/share/unit-dialog";
 import { useUnit } from "@/hooks/use-unit";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { Unit } from "@/types/unit";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupUnitProps {
@@ -55,26 +59,24 @@ export function LookupUnit({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
   const {
     items: units,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination({
+  } = useLookupPagination<Unit>({
     useListHook: useUnit,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (u: { id: string; is_active: boolean }) => {
-      if (!u.is_active) return false;
-      if (excludedSet && excludedSet.has(u.id)) return false;
-      return true;
-    },
+    serverFilter: ACTIVE_ONLY_FILTER,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
+    filter: excludedSet ? (u) => !excludedSet.has(u.id) : undefined,
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -88,6 +90,7 @@ export function LookupUnit({
           if (open) setHasOpened(true);
         }}
         items={units}
+        selectedItems={selectedItems}
         getId={(u) => u.id}
         getLabel={(u) => u.name}
         defaultLabel={defaultLabel}
