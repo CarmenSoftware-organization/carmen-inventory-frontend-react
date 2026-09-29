@@ -5,6 +5,7 @@ import { profileQueryKey } from "@/hooks/use-profile";
 import { tokenStore } from "@/lib/auth/token-store";
 import { refreshTokenStorage } from "@/lib/auth/refresh-token-storage";
 import { resolveNextPath } from "@/lib/auth/resolve-next-path";
+import { SILENT_SSO_TRIED_KEY } from "@/lib/auth/silent-sso-guard";
 
 /**
  * ปลายทางที่ gateway redirect กลับมาหลัง Google sign-in สำเร็จ (`GET /api/auth/google/callback`
@@ -34,7 +35,7 @@ export function Component() {
     // เคลียร์ guard ของ silent SSO check (require-auth.tsx) — login สำเร็จแล้ว รอบหน้าที่ token
     // หายไปอีก (เช่น หลัง logout) ควรลอง silent check ใหม่ได้อีกครั้ง ไม่ใช่ข้ามไปตลอด tab session
     try {
-      sessionStorage.removeItem("carmen.silentSsoTried");
+      sessionStorage.removeItem(SILENT_SSO_TRIED_KEY);
     } catch {
       // ignore — storage unavailable, nothing to clear
     }

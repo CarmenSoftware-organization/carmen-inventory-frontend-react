@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "use-intl";
 import { logout } from "@/lib/auth/auth-api";
 import { getRuntimeConfig } from "@/lib/runtime-config";
+import { SILENT_SSO_TRIED_KEY } from "@/lib/auth/silent-sso-guard";
 
 /**
  * Hook สำหรับ logout ผู้ใช้ เคลียร์ session/cache และ redirect กลับหน้า login
@@ -27,6 +28,17 @@ export function useLogout() {
 
   const redirectToEndSession = () => {
     queryClient.clear();
+    // Pre-mark require-auth.tsx's silent-check guard: we're deterministically ending the only
+    // session there is right now, so the silent check on the /login this redirect chain lands
+    // on (App → Keycloak → /login) would otherwise fire once more, guaranteed to find nothing,
+    // costing a round trip and a visible flash for no benefit. Same key, same origin as
+    // require-auth.tsx/login-form.tsx's own reads — set before navigating so it's already
+    // there once /login's own effect runs.
+    try {
+      sessionStorage.setItem(SILENT_SSO_TRIED_KEY, "1");
+    } catch {
+      // ignore — worst case is just the one extra round trip this was meant to skip
+    }
     window.location.href = `${getRuntimeConfig().BACKEND_URL}/api/auth/end-session?app=web&locale=${locale}`;
   };
 

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { tokenStore } from "@/lib/auth/token-store";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
+import { SILENT_SSO_TRIED_KEY } from "@/lib/auth/silent-sso-guard";
 
 const App = () => (
   <MemoryRouter initialEntries={["/secure"]}>
@@ -51,7 +52,7 @@ describe("RequireAuth", () => {
     expect(url).toContain("https://api.test/api/auth/authorize");
     expect(url).toContain("silent=true");
     expect(url).toContain(encodeURIComponent("/secure"));
-    expect(sessionStorage.getItem("carmen.silentSsoTried")).toBe("1");
+    expect(sessionStorage.getItem(SILENT_SSO_TRIED_KEY)).toBe("1");
     // Nothing rendered yet — the redirect above is a real navigation away from this page.
     expect(screen.queryByText("login page")).not.toBeInTheDocument();
     expect(screen.queryByText("secure content")).not.toBeInTheDocument();
@@ -60,7 +61,7 @@ describe("RequireAuth", () => {
   });
 
   it("without a token, falls back to /login once the silent check was already tried this tab session", () => {
-    sessionStorage.setItem("carmen.silentSsoTried", "1");
+    sessionStorage.setItem(SILENT_SSO_TRIED_KEY, "1");
     render(<App />);
     expect(screen.getByText("login page")).toBeInTheDocument();
   });

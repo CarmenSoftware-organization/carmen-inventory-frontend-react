@@ -1,17 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "use-intl";
 import { Link, useLocation, useSearchParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { profileQueryKey } from "@/hooks/use-profile";
 import { getRuntimeConfig } from "@/lib/runtime-config";
 import { tokenStore } from "@/lib/auth/token-store";
+import {
+  SILENT_SSO_TRIED_KEY,
+  hasTriedSilentSso,
+} from "@/lib/auth/silent-sso-guard";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import { AuthFormAlert } from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-
-/** Shared with require-auth.tsx's identical constant — same tab-session guard either path sets. */
-const SILENT_SSO_TRIED_KEY = "carmen.silentSsoTried";
 
 export default function LoginForm() {
   const [searchParams] = useSearchParams();
@@ -38,6 +39,15 @@ export default function LoginForm() {
   // ตัดขาดจาก React Router state ทั้งหมด
   const next = searchParams.get("next");
   const t = useTranslations("auth");
+  // Guards the effect below against React.StrictMode's dev-only double-invoke — without it,
+  // a *reload* of this page (isUserReload() inside hasTriedSilentSso() forces it to ignore the
+  // sessionStorage guard on every invocation, unlike the ordinary case where the 2nd
+  // invocation self-heals by seeing the 1st invocation's own sessionStorage write) fires this
+  // real top-level navigation twice back-to-back. A ref (not sessionStorage) is the guard here
+  // because it must reset to `false` per real mount, whereas sessionStorage deliberately
+  // persists across mounts within a tab — same pattern as carmen-platform's
+  // `silentCheckStartedRef` (AuthContext.tsx).
+  const silentCheckStartedRef = useRef(false);
 
   useEffect(() => {
     queryClient.removeQueries({ queryKey: profileQueryKey });
@@ -46,17 +56,14 @@ export default function LoginForm() {
   // ลอง silent SSO check ก่อนหนึ่งครั้งต่อ tab session แม้กำลังอยู่หน้า /login เอง (ไม่ใช่แค่
   // protected route ที่ require-auth.tsx เช็ค) — ถ้า Keycloak มี session ที่ยัง live อยู่แล้ว (เช่น
   // login ผ่าน Platform มา) การมาเปิดหน้า /login ตรงๆ (เช่นจาก bookmark) ก็ควรได้เข้าเลย ไม่ต้องกด
-  // [Sign in] ซ้ำอีกที ไม่ต้องกัน StrictMode double-invoke แบบ require-auth.tsx — ถ้าเคยลองแล้ว
-  // (`alreadyTried`) โค้ดด้านล่างจะ return เฉยๆ ไม่มี branch อื่นที่ทับ navigation กัน
+  // [Sign in] ซ้ำอีกที — ถ้าเคยลองแล้ว (`hasTriedSilentSso()`) โค้ดด้านล่างจะ return เฉยๆ ไม่มี
+  // branch อื่นที่ทับ navigation กัน ใช้ฟังก์ชันเดียวกับ require-auth.tsx (ไม่ทำสำเนา) เพื่อให้กฎ
+  // "reload จริงได้ลองใหม่เสมอ" ของมันมีผลที่นี่ด้วยเหมือนกัน
   useEffect(() => {
+    if (silentCheckStartedRef.current) return; // see the ref's own comment above
     if (tokenStore.get()) return;
-    let alreadyTried = false;
-    try {
-      alreadyTried = sessionStorage.getItem(SILENT_SSO_TRIED_KEY) === "1";
-    } catch {
-      // storage unavailable — fall through and just attempt the check
-    }
-    if (alreadyTried) return;
+    if (hasTriedSilentSso()) return;
+    silentCheckStartedRef.current = true;
     try {
       sessionStorage.setItem(SILENT_SSO_TRIED_KEY, "1");
     } catch {
