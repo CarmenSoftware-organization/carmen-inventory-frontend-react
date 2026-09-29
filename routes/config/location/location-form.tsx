@@ -31,8 +31,10 @@ import {
   useDeleteLocation,
   useUpdateLocation,
 } from "@/hooks/use-location";
-import { useAllUsers } from "@/hooks/use-all-users";
-import { useAllProducts } from "@/hooks/use-all-products";
+import { useUser, useUserAll } from "@/hooks/use-user";
+import { useProductAll } from "@/hooks/use-product";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import { CACHE_NORMAL } from "@/lib/cache-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import {
@@ -75,55 +77,6 @@ export function LocationForm({ location }: LocationFormProps) {
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
 
-  const { data: allUsers = [], isLoading: isLoadingUsers } = useAllUsers();
-  const { data: allProducts = [], isLoading: isLoadingProducts } =
-    useAllProducts();
-
-  const userSource: TransferItem[] = allUsers.map((user) => ({
-    key: user.user_id,
-    title: `${user.firstname} ${user.lastname}`,
-  }));
-
-  const enrichedUsers = (() => {
-    if (!location) return [];
-    const emailMap = new Map(allUsers.map((u) => [u.user_id, u.email]));
-    const seen = new Set<string>();
-    return location.user_location
-      .filter((u) => {
-        if (seen.has(u.id)) return false;
-        seen.add(u.id);
-        return true;
-      })
-      .map((u) => ({
-        ...u,
-        email: emailMap.get(u.id) ?? "",
-      }));
-  })();
-
-  const enrichedProducts = (() => {
-    if (!location) return [];
-    const seen = new Set<string>();
-    const productMap = new Map(
-      allProducts.map((p) => [
-        p.id,
-        {
-          local_name: p.local_name,
-          inventory_unit: p.inventory_unit ?? null,
-        },
-      ]),
-    );
-    return location.product_location
-      .filter((p) => {
-        if (seen.has(p.id)) return false;
-        seen.add(p.id);
-        return true;
-      })
-      .map((p) => ({
-        ...p,
-        ...productMap.get(p.id),
-      }));
-  })();
-
   const initialUserKeys = location?.user_location.map((u) => u.id) ?? [];
   const initialProductIds = new Set(
     location?.product_location.map((p) => p.id) ?? [],
@@ -149,6 +102,53 @@ export function LocationForm({ location }: LocationFormProps) {
     },
   });
   const { form, isView, isAdd, isEdit, isDisabled } = f;
+
+  // ทะเบียนทั้งก้อนใช้แค่ Transfer / ต้นไม้ตอนแก้ไขหรือเพิ่ม — หน้าดูใช้ข้อมูลใน payload
+  // ของ location และดึงอีเมลเฉพาะผู้ใช้ของ location นี้ตาม id
+  const { data: allUsers = [], isLoading: isLoadingUsers } = useUserAll(
+    undefined,
+    { ...CACHE_NORMAL, enabled: !isView },
+  );
+  const { data: allProducts = [], isLoading: isLoadingProducts } =
+    useProductAll(undefined, { enabled: !isView });
+  const { items: viewUsers } = useEntitiesByIds({
+    useListHook: useUser,
+    ids: location?.user_location.map((u) => u.id) ?? [],
+    idFilterKey: "user_id",
+    enabled: isView,
+  });
+
+  const userSource: TransferItem[] = allUsers.map((user) => ({
+    key: user.user_id,
+    title: `${user.firstname} ${user.lastname}`,
+  }));
+
+  const enrichedUsers = (() => {
+    if (!location) return [];
+    const emailMap = new Map(viewUsers.map((u) => [u.user_id, u.email]));
+    const seen = new Set<string>();
+    return location.user_location
+      .filter((u) => {
+        if (seen.has(u.id)) return false;
+        seen.add(u.id);
+        return true;
+      })
+      .map((u) => ({
+        ...u,
+        email: emailMap.get(u.id) ?? "",
+      }));
+  })();
+
+  // local_name / inventory_unit มากับ product_location แล้ว (backend) — ไม่ต้อง join ทะเบียนสินค้า
+  const enrichedProducts = (() => {
+    if (!location) return [];
+    const seen = new Set<string>();
+    return location.product_location.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  })();
 
   const handleUsersChange = (
     nextTargetKeys: string[],
