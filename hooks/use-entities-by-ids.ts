@@ -14,6 +14,8 @@ export type LookupListHook<T> = (
 ) => {
   data: PaginatedResponse<T> | undefined;
   isLoading: boolean;
+  error?: Error | null;
+  refetch?: () => unknown;
 };
 
 interface UseEntitiesByIdsOptions<T> {

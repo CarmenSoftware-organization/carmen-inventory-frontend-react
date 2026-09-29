@@ -7,6 +7,7 @@ import {
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { createConfigApi } from "@/lib/config-crud";
+import { fetchAllPages } from "@/lib/fetch-all-pages";
 import { CACHE_STATIC, type CacheProfile } from "@/lib/cache-config";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type { ApiErrorMeta } from "@/lib/api-error-handler";
@@ -30,7 +31,7 @@ interface ConfigCrudOptions {
  * ทุก hook อ่าน buCode ผ่าน `useBuCode()` และ guard ด้วย enabled อัตโนมัติ
  *
  * @param options - ตัวเลือก queryKey, endpoint, label และ updateMethod
- * @returns object ของ hook useList/useById/useCreate/useUpdate/useDelete
+ * @returns object ของ hook useList/useListAll/useById/useCreate/useUpdate/useDelete
  * @example
  * ```ts
  * const crud = createConfigCrud<Currency, CreateCurrencyDto>({
@@ -57,6 +58,10 @@ export function createConfigCrud<T, TCreate>({
       "queryKey" | "queryFn"
     >,
   ) => UseQueryResult<PaginatedResponse<T>>;
+  useListAll: (
+    params?: Omit<ParamsDto, "page" | "perpage">,
+    options?: Omit<UseQueryOptions<T[]>, "queryKey" | "queryFn">,
+  ) => UseQueryResult<T[]>;
   useById: (id: string | undefined) => UseQueryResult<T>;
   useCreate: () => UseMutationResult<unknown, Error, TCreate>;
   useUpdate: () => UseMutationResult<
@@ -95,6 +100,35 @@ export function createConfigCrud<T, TCreate>({
     return useQuery<PaginatedResponse<T>>({
       queryKey: [queryKey, buCode, params],
       queryFn: () => api.getList(buCode!, params),
+      ...cacheProfile,
+      ...options,
+      enabled: (options?.enabled ?? true) && !!buCode,
+    });
+  }
+
+  /**
+   * Hook ดึงทุกแถวของ entity (วนหน้าละ `MAX_PERPAGE` ผ่าน `fetchAllPages`) แทน `perpage=-1`
+   *
+   * ใช้กับทะเบียนที่ต้องได้ครบจริง (จัดกลุ่ม / ติ๊กทั้งกลุ่ม / พิมพ์) เท่านั้น
+   * queryKey ขึ้นต้นด้วย `queryKey` เดียวกับ `useList` — mutation ของ crud นี้ invalidate ไปด้วย
+   *
+   * @example
+   * ```ts
+   * const { data: permissions = [] } = usePermissionAll();
+   * ```
+   */
+  function useListAll(
+    params?: Omit<ParamsDto, "page" | "perpage">,
+    options?: Omit<UseQueryOptions<T[]>, "queryKey" | "queryFn">,
+  ) {
+    const buCode = useBuCode();
+
+    return useQuery<T[]>({
+      queryKey: [queryKey, buCode, "all", params],
+      queryFn: () =>
+        fetchAllPages((page, perpage) =>
+          api.getList(buCode!, { ...params, page, perpage }),
+        ),
       ...cacheProfile,
       ...options,
       enabled: (options?.enabled ?? true) && !!buCode,
@@ -153,5 +187,5 @@ export function createConfigCrud<T, TCreate>({
     });
   }
 
-  return { useList, useById, useCreate, useUpdate, useDelete };
+  return { useList, useListAll, useById, useCreate, useUpdate, useDelete };
 }

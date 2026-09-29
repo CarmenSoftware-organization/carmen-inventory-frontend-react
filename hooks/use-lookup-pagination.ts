@@ -56,7 +56,7 @@ export function useLookupPagination<T>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, serverFilter, sort, ...resetDeps]);
 
-  const { data, isLoading } = useListHook(
+  const { data, isLoading, error, refetch } = useListHook(
     {
       search: search || undefined,
       perpage,
@@ -131,5 +131,12 @@ export function useLookupPagination<T>({
     isLoadingMore: isLoading && page > 1,
     hasMore,
     loadMore,
+    /** จำนวนแถวที่ตรงเงื่อนไขทั้งหมดบน server (ไม่ใช่แค่ที่โหลดมาแล้ว) */
+    total: Number(data?.paginate?.total ?? allItems.length),
+    error: error ?? null,
+    /** ยิงหน้าปัจจุบันซ้ำ — ใช้กับปุ่มลองใหม่ของ ErrorState */
+    refetch: () => {
+      void refetch?.();
+    },
   };
 }
