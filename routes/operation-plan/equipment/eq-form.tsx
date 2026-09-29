@@ -171,6 +171,11 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
           imageFile={imageFile}
           imageRemoved={imageRemoved}
           onImageChange={handleImageChange}
+          savedCategory={
+            equipment
+              ? { id: equipment.category_id, name: equipment.category_name }
+              : undefined
+          }
         />
         <EqQuantitySection form={form} isDisabled={isDisabled} />
         <EqInstructionsSection form={form} isDisabled={isDisabled} />
