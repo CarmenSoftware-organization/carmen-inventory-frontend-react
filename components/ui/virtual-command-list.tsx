@@ -10,6 +10,11 @@ interface VirtualCommandListProps<T> {
   readonly onLoadMore?: () => void;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;
+  /**
+   * วัดความสูงแถวจริงแทนการเชื่อ `estimateSize` — เปิดเมื่อแถวสูงไม่เท่ากัน
+   * (เช่นการ์ดที่มี/ไม่มีบรรทัดคำอธิบาย) ไม่งั้นแถวจะซ้อนหรือเว้นช่อง
+   */
+  readonly measureRows?: boolean;
 }
 
 /**
@@ -44,6 +49,7 @@ export function VirtualCommandList<T>({
   onLoadMore,
   hasMore,
   isLoadingMore,
+  measureRows = false,
 }: VirtualCommandListProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +104,8 @@ export function VirtualCommandList<T>({
         {virtualizer.getVirtualItems().map((virtualRow) => (
           <div
             key={virtualRow.key}
+            data-index={virtualRow.index}
+            ref={measureRows ? virtualizer.measureElement : undefined}
             className="absolute top-0 left-0 w-full"
             style={{ transform: `translateY(${virtualRow.start}px)` }}
           >
