@@ -29,36 +29,29 @@ export default function LoginForm() {
   const passwordReset =
     (location.state as { passwordReset?: boolean } | null)?.passwordReset ===
     true;
-  // ตั้งโดย gateway (GET /api/auth/google/callback) ตอน redirect กลับมาหลัง sign-in ล้มเหลว — ชื่อ
-  // endpoint/sentinel ("google_auth_failed") เป็นของเดิมตั้งแต่ก่อนมีปุ่ม [Sign in] เดียว (ตอนนั้นมี
-  // ปุ่ม Google แยก) ตอนนี้ callback นี้ใช้ร่วมกันทั้ง password และ Google (เลือกที่หน้า Keycloak เอง)
-  // ข้อความที่โชว์จึงใช้คำกลางๆ ไม่เจาะจง Google
-  const signInFailed = searchParams.get("error") === "google_auth_failed";
-  // เก็บ next ที่ตั้งใจจะไปหลัง login ต่อผ่าน backend (จะได้กลับมาเป็น #next=... ใน
-  // google-callback.route.tsx) — ไม่งั้น deep-link (เช่นลิงก์คำเชิญ) หายไปเพราะ full-page redirect
-  // ตัดขาดจาก React Router state ทั้งหมด
+  // Set by the gateway callback (`?error=auth_failed`) when sign-in fails; the message is generic
+  // because the callback serves every sign-in method.
+  // ตั้งโดย callback ของ gateway (`?error=auth_failed`) เมื่อ sign-in ล้มเหลว ข้อความเป็นคำกลางๆ
+  // เพราะ callback รองรับทุกวิธี sign-in
+  const signInFailed = searchParams.get("error") === "auth_failed";
+  // Passed through the backend (back as `#next=...` in auth-callback.route.tsx) because a full-page
+  // redirect drops all React Router state, which would lose a deep link such as an invitation.
+  // ส่งต่อผ่าน backend (กลับมาเป็น `#next=...`) เพราะ full-page redirect ทิ้ง React Router state ทำให้ deep link (เช่นลิงก์คำเชิญ) หาย
   const next = searchParams.get("next");
   const t = useTranslations("auth");
-  // Guards the effect below against React.StrictMode's dev-only double-invoke — without it,
-  // a *reload* of this page (isUserReload() inside hasTriedSilentSso() forces it to ignore the
-  // sessionStorage guard on every invocation, unlike the ordinary case where the 2nd
-  // invocation self-heals by seeing the 1st invocation's own sessionStorage write) fires this
-  // real top-level navigation twice back-to-back. A ref (not sessionStorage) is the guard here
-  // because it must reset to `false` per real mount, whereas sessionStorage deliberately
-  // persists across mounts within a tab — same pattern as carmen-platform's
-  // `silentCheckStartedRef` (AuthContext.tsx).
+  // StrictMode's dev double-invoke would fire the redirect twice on a reload (where hasTriedSilentSso() ignores
+  // its storage guard on every run). A ref, not sessionStorage: it must reset on every real mount.
   const silentCheckStartedRef = useRef(false);
 
   useEffect(() => {
     queryClient.removeQueries({ queryKey: profileQueryKey });
   }, [queryClient]);
 
-  // ลอง silent SSO check ก่อนหนึ่งครั้งต่อ tab session แม้กำลังอยู่หน้า /login เอง (ไม่ใช่แค่
-  // protected route ที่ require-auth.tsx เช็ค) — ถ้า Keycloak มี session ที่ยัง live อยู่แล้ว (เช่น
-  // login ผ่าน Platform มา) การมาเปิดหน้า /login ตรงๆ (เช่นจาก bookmark) ก็ควรได้เข้าเลย ไม่ต้องกด
-  // [Sign in] ซ้ำอีกที — ถ้าเคยลองแล้ว (`hasTriedSilentSso()`) โค้ดด้านล่างจะ return เฉยๆ ไม่มี
-  // branch อื่นที่ทับ navigation กัน ใช้ฟังก์ชันเดียวกับ require-auth.tsx (ไม่ทำสำเนา) เพื่อให้กฎ
-  // "reload จริงได้ลองใหม่เสมอ" ของมันมีผลที่นี่ด้วยเหมือนกัน
+  // One silent SSO check per tab session on /login itself too (not only on protected routes): opening /login
+  // directly (e.g. a bookmark) with a live Keycloak session should sign in without another click. Shares
+  // `hasTriedSilentSso()` with require-auth.tsx so the "reload always retries" rule applies here too.
+  // ลอง silent SSO check หนึ่งครั้งต่อ tab session ที่ /login เองด้วย (ไม่ใช่แค่ protected route): เปิด /login ตรงๆ
+  // (เช่นจาก bookmark) ขณะมี session Keycloak ที่ live อยู่ก็เข้าได้เลย ใช้ `hasTriedSilentSso()` ร่วมกับ require-auth.tsx
   useEffect(() => {
     if (silentCheckStartedRef.current) return; // see the ref's own comment above
     if (tokenStore.get()) return;
@@ -101,9 +94,7 @@ export default function LoginForm() {
           <AuthFormAlert>{t("errors.signInFailed")}</AuthFormAlert>
         )}
 
-        {/* Real page navigation, not fetch — Keycloak's own hosted login page (password form
-            plus any configured Identity Provider buttons) lives on a different origin, which
-            a JSON call can never reach. */}
+        {/* A real page navigation, not fetch: Keycloak's hosted login page is on another origin. */}
         <Button
           type="button"
           className="group mt-0.5 h-10 w-full"

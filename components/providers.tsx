@@ -49,11 +49,9 @@ const getQueryClient = () => {
 };
 
 /**
- * Mirrors the user's light/dark/system choice into a parent-domain cookie so the Keycloak login
- * page (another origin, cannot see localStorage) can match it — see `lib/theme-cookie.ts`.
- * Tracks `theme` (the selection), not `resolvedTheme`: "system" must clear the cookie so the
- * login page keeps following the OS, same as the app does.
- * ส่งค่า theme ที่ผู้ใช้เลือกไปเป็น cookie ระดับ parent domain ให้หน้า login ของ Keycloak อ่านได้
+ * Mirrors the light/dark/system choice into a cookie for the Keycloak login page (see `lib/theme-cookie.ts`).
+ * Tracks `theme`, not `resolvedTheme`: "system" must clear the cookie so the login page keeps following the OS.
+ * ส่งค่า theme ที่ผู้ใช้เลือกเป็น cookie ให้หน้า login ของ Keycloak; ตาม `theme` ไม่ใช่ `resolvedTheme` เพื่อให้ "system" ล้าง cookie
  */
 function ThemeCookieSync() {
   const { theme } = useTheme();

@@ -8,14 +8,13 @@ import {
 } from "@/lib/auth/silent-sso-guard";
 
 /**
- * Route guard ระดับ auth — token ใน store หาย (เช่น refresh ล้มเหลวกลางคัน
- * จาก http-client) → redirect ไป /login ทันทีผ่าน useSyncExternalStore
- * (การเช็ค permission รายหน้าเป็นหน้าที่ของ RouteGuard เดิม)
- *
- * ก่อน redirect ไป /login ตรงๆ ลอง silent SSO check ก่อนหนึ่งครั้งต่อ tab session — ถ้า Keycloak
- * มี session ที่ยัง live อยู่แล้ว (เช่น login ผ่านอีกแอปมา) จะได้ token กลับมาโดยไม่ต้องกดอะไรเลย
- * แล้วกลับมาที่ path เดิม (`next`); ถ้าไม่มี session Keycloak ตอบเงียบๆ (`login_required`) แล้ว
- * gateway ก็ส่งกลับมาที่ /login ตามปกติ ไม่มี error banner
+ * Auth route guard: redirects to /login as soon as the token store empties (e.g. a refresh failing mid-session).
+ * Per-page permission checks stay with RouteGuard. Before redirecting it tries one silent SSO check per tab
+ * session: a live Keycloak session (e.g. from the other app) signs the user in with no click and returns to
+ * `next`; otherwise Keycloak answers `login_required` and the gateway sends the user to /login, no error banner.
+ * Route guard ระดับ auth: token ใน store หาย (เช่น refresh ล้มเหลวกลางคัน) → redirect ไป /login ทันที
+ * (เช็ค permission รายหน้าเป็นของ RouteGuard) ก่อน redirect ลอง silent SSO check หนึ่งครั้งต่อ tab session:
+ * มี session Keycloak ที่ live อยู่ (เช่นจากอีกแอป) ก็ login ให้เงียบๆ แล้วกลับ `next` ไม่มีก็ gateway ส่งไป /login
  */
 export function RequireAuth({
   children,
@@ -24,17 +23,11 @@ export function RequireAuth({
 }) {
   const token = useSyncExternalStore(tokenStore.subscribe, tokenStore.get);
   const location = useLocation();
-  // Pure read during render (React Compiler forbids mutating anything outside the component
-  // during render, which is why the sessionStorage.setItem + window.location.href assignment
-  // below live in the effect instead) — worst case if storage is unavailable is one extra
-  // redirect round-trip, never a loop (see the constant's comment).
+  // Pure read during render (React Compiler forbids side effects here, so the storage write and redirect live
+  // in the effect). Without storage the worst case is one extra redirect, never a loop.
   const shouldTrySilentCheck = !token && !hasTriedSilentSso();
-  // Guards the effect below against React.StrictMode's dev-only double-invoke (mount → unmount
-  // → remount without a new render in between) — `shouldTrySilentCheck` is a frozen value
-  // captured by both invocations' closures, so without this ref both would fire the same real
-  // top-level navigation twice back-to-back. A ref (not sessionStorage) because it must reset
-  // to `false` per real mount, whereas sessionStorage deliberately persists across mounts
-  // within a tab — same pattern as carmen-platform's `silentCheckStartedRef` (AuthContext.tsx).
+  // StrictMode's dev double-invoke would fire the same navigation twice. A ref, not sessionStorage: it must
+  // reset on every real mount (same as Platform's `silentCheckStartedRef`).
   const silentCheckStartedRef = useRef(false);
 
   useEffect(() => {

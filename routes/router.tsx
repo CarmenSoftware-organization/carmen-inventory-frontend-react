@@ -18,11 +18,11 @@ export const router = createBrowserRouter([
     ErrorBoundary: RootErrorBoundary,
     children: [
       { path: "/login", lazy: () => import("./login/login.route") },
-      // ปลายทางที่ gateway redirect กลับมาหลัง Google sign-in สำเร็จ — token มากับ URL fragment
+      // ปลายทางที่ gateway redirect กลับมาหลัง sign-in สำเร็จ — token มากับ URL fragment
       // (ไม่ใช่ query string) ดู lib/auth/auth-api.ts ที่ login() ปกติเก็บ token แบบเดียวกัน
       {
-        path: "/login/google-callback",
-        lazy: () => import("./login/google-callback.route"),
+        path: "/login/callback",
+        lazy: () => import("./login/auth-callback.route"),
       },
       { path: "/register", lazy: () => import("./register/register.route") },
       {
