@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { BU_SWITCH_CHANNEL } from "@/constant/query-keys";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
+import type { UserProfile } from "@/types/profile";
 
 export const SWITCH_BU_MUTATION_KEY = ["switch-bu"] as const;
 
@@ -55,7 +56,7 @@ export function useBuSwitchSync() {
 /**
  * Hook สลับ business unit ปัจจุบัน — POST `/api/business-units/default`
  *
- * ไม่ทำ optimistic: ถ้าเปลี่ยน `is_default` ใน cache ก่อน server ตอบ หน้าที่เปิดอยู่
+ * ไม่ทำ optimistic (ตั้ง `is_default` ใน cache หลัง server ตอบเท่านั้น): ถ้าตั้งก่อน หน้าที่เปิดอยู่
  * จะยิง query ของ BU ใหม่ทันที แล้วโดน `removeAllBuData` ลบทิ้งตอนสำเร็จอยู่ดี
  * เมื่อสำเร็จจะล้าง cache อื่น แล้ว **รอ** profile ใหม่ก่อน `mutateAsync` resolve
  * (หลังบรรทัด await `useProfile().buCode` เป็นของ BU ใหม่แล้ว) และแจ้ง tab อื่น
@@ -76,7 +77,19 @@ export function useSwitchBu() {
 
       return res.json();
     },
-    onSuccess: async () => {
+    onSuccess: async (_data, buId) => {
+      // ตั้ง BU ใหม่ใน cache ก่อนล้าง — ถ้ารอ refetch อย่างเดียว หน้าที่เปิดอยู่
+      // re-render ระหว่างรอแล้วสร้าง query ที่เพิ่งถูกลบกลับมาด้วย buCode เก่า
+      // (เห็นเป็น dashboard-widgets?bu_code=<เก่า> ตามด้วย <ใหม่>)
+      queryClient.setQueryData<UserProfile>(profileQueryKey, (prev) =>
+        prev && {
+          ...prev,
+          business_unit: prev.business_unit.map((bu) => ({
+            ...bu,
+            is_default: bu.id === buId,
+          })),
+        },
+      );
       removeAllBuData(queryClient);
       getChannel()?.postMessage("switched");
       await queryClient.refetchQueries({ queryKey: profileQueryKey });
