@@ -8,7 +8,7 @@ import type {
 import { httpJournalVoucherRepository } from "./journal-voucher-http-repository";
 import type { JournalVoucherCommand } from "./journal-voucher-repository";
 
-// Connects to dev.blueledgers.com GL JV endpoints with seamless mock fallback
+// Real GL JV API; mock records are handled only for explicit mock IDs.
 const repository = httpJournalVoucherRepository;
 
 export const JOURNAL_VOUCHER_QUERY_KEYS = {
@@ -36,7 +36,7 @@ export function useJournalVoucher(id?: string) {
   return useQuery({
     queryKey: JOURNAL_VOUCHER_QUERY_KEYS.detail(context.buCode, id),
     queryFn: () => context.repository.get(context.buCode, id!),
-    enabled: Boolean(id && id !== "new"),
+    enabled: Boolean(id && id !== "new" && id !== "undefined"),
   });
 }
 

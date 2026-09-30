@@ -8,15 +8,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ApDetailGrid } from "./ap-detail-grid";
-import { ApStatusBadge, Money } from "./ap-ui";
+import { ApDetailGrid } from "../shared/ap-detail-grid";
+import { ApStatusBadge, Money } from "../shared/ap-ui";
 import {
   addDecimal,
   compareDecimal,
   divideDecimal,
   multiplyDecimal,
   subtractDecimal,
-} from "./ap-decimal";
+} from "../shared/ap-decimal";
 
 export function PaymentTaxAllocation({
   form,

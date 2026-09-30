@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Layers, Plus, ListTree } from "lucide-react";
@@ -31,28 +32,80 @@ import {
 } from "@/components/ui/field";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { WarningDialog } from "@/components/ui/warning-dialog";
-import {
-  type DimensionMaster,
-  type DimensionValueMaster,
-  useAccountingMasterMock,
-} from "../accounting-master-mock";
+import { ErrorState } from "@/components/ui/error-state";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { DimensionMaster, DimensionValueMaster } from "@/types/accounting-master";
 
 export default function DimensionPage() {
-  const store = useAccountingMasterMock();
+  const buCode = useBuCode();
+  const queryClient = useQueryClient();
+  const dimensionQuery = useQuery({
+    queryKey: ["accounting-master", "dimensions", buCode],
+    enabled: !!buCode,
+    queryFn: async (): Promise<DimensionMaster[]> => {
+      const res = await httpClient.get(API_ENDPOINTS.GL_DIMENSIONS(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Unable to load dimensions");
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.data ?? []);
+    },
+  });
+  const valueQuery = useQuery({
+    queryKey: ["accounting-master", "dimension-values", buCode],
+    enabled: !!buCode,
+    queryFn: async (): Promise<DimensionValueMaster[]> => {
+      const res = await httpClient.get(API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Unable to load dimension values");
+      const json = await res.json();
+      const items = Array.isArray(json) ? json : (json.data ?? []);
+      return items.map((item: DimensionValueMaster & { gl_dimension_id: string }) => ({
+        ...item,
+        dimension_id: item.gl_dimension_id,
+      }));
+    },
+  });
+  const dimensions = useMemo(
+    () => (dimensionQuery.data ?? []).map((dimension) => ({
+      ...dimension,
+      values: (valueQuery.data ?? []).filter(
+        (value) => value.dimension_id === dimension.id,
+      ),
+    })),
+    [dimensionQuery.data, valueQuery.data],
+  );
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<DimensionMaster | null | undefined>();
-  const [viewingValues, setViewingValues] = useState<DimensionMaster | null>(null);
+  const [viewingValuesId, setViewingValuesId] = useState<string | null>(null);
+  const viewingValues = dimensions.find((dimension) => dimension.id === viewingValuesId) ?? null;
   const [deleting, setDeleting] = useState<DimensionMaster | null>(null);
   const [warning, setWarning] = useState("");
 
+  const mutateValue = async (request: () => Promise<Response>, success: string) => {
+    try {
+      if (!buCode) throw new Error("Select a business unit first");
+      const res = await request();
+      if (!res.ok) throw await ApiError.from(res, "Unable to save dimension value");
+      await queryClient.invalidateQueries({
+        queryKey: ["accounting-master", "dimension-values", buCode],
+      });
+      toast.success(success);
+      return true;
+    } catch (error) {
+      setWarning(error instanceof Error ? error.message : "Unable to save dimension value");
+      return false;
+    }
+  };
+
   const rows = useMemo(
     () =>
-      store.dimensions.filter((item) =>
+      dimensions.filter((item) =>
         `${item.code} ${item.name} ${item.name_local ?? ""}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [search, store.dimensions],
+    [search, dimensions],
   );
 
   const columns = useMemo<ColumnDef<DimensionMaster>[]>(
@@ -107,7 +160,7 @@ export default function DimensionPage() {
             size="sm"
             variant="outline"
             className="h-7 text-xs"
-            onClick={() => setViewingValues(row.original)}
+            onClick={() => setViewingValuesId(row.original.id)}
           >
             <ListTree className="size-3.5 mr-1" />
             {(row.original.values ?? []).length} values
@@ -194,14 +247,38 @@ export default function DimensionPage() {
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>
+      {(dimensionQuery.isError || valueQuery.isError) && (
+        <ErrorState
+          error={dimensionQuery.error ?? valueQuery.error}
+          message="Unable to load dimensions"
+          onRetry={() => {
+            void dimensionQuery.refetch();
+            void valueQuery.refetch();
+          }}
+        />
+      )}
       <DimensionDialog
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
         onOpenChange={(open) => !open && setEditing(undefined)}
-        onSave={(value) => {
+        onSave={async (value) => {
           try {
-            store.saveDimension(value, editing?.id);
+            if (!buCode) throw new Error("Select a business unit first");
+            const endpoint = API_ENDPOINTS.GL_DIMENSIONS(buCode);
+            const res = editing
+              ? await httpClient.put(`${endpoint}/${editing.id}`, {
+                  name: value.name,
+                  name_local: value.name_local,
+                  sequence: value.sequence,
+                  is_active: value.is_active,
+                  doc_version: editing.doc_version,
+                })
+              : await httpClient.post(endpoint, value);
+            if (!res.ok) throw await ApiError.from(res, "Unable to save dimension");
+            await queryClient.invalidateQueries({
+              queryKey: ["accounting-master", "dimensions", buCode],
+            });
             toast.success(
               editing ? "Dimension updated" : "Dimension created",
             );
@@ -217,59 +294,50 @@ export default function DimensionPage() {
         <DimensionValuesDialog
           open={!!viewingValues}
           dimension={viewingValues}
-          onOpenChange={(open) => !open && setViewingValues(null)}
-          onAddValue={(val) => {
+          onOpenChange={(open) => !open && setViewingValuesId(null)}
+          onAddValue={async (val) => {
             const currentVals = viewingValues.values ?? [];
             if (currentVals.some((v) => v.code.toUpperCase() === val.code.toUpperCase())) {
               toast.error(`Value ${val.code} already exists.`);
-              return;
+              return false;
             }
-            const updatedDimension: DimensionMaster = {
-              ...viewingValues,
-              values: [
-                ...currentVals,
-                {
-                  ...val,
-                  id: crypto.randomUUID(),
-                  dimension_id: viewingValues.id,
-                  doc_version: 0,
-                },
-              ],
-            };
-            store.saveDimension(updatedDimension, viewingValues.id);
-            setViewingValues(updatedDimension);
-            toast.success("Dimension value added");
+            return mutateValue(
+              () => httpClient.post(API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!), {
+                gl_dimension_id: viewingValues.id,
+                ...val,
+              }),
+              "Dimension value added",
+            );
           }}
           onUpdateValue={(val) => {
-            const currentVals = viewingValues.values ?? [];
-            const updatedDimension: DimensionMaster = {
-              ...viewingValues,
-              values: currentVals.map((v) => (v.id === val.id ? val : v)),
-            };
-            store.saveDimension(updatedDimension, viewingValues.id);
-            setViewingValues(updatedDimension);
-            toast.success("Dimension value updated");
+            return mutateValue(
+              () => httpClient.put(`${API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!)}/${val.id}`, {
+                name: val.name,
+                name_local: val.name_local,
+                is_active: val.is_active,
+                doc_version: val.doc_version,
+              }),
+              "Dimension value updated",
+            );
           }}
           onToggleStatus={(id) => {
-            const currentVals = viewingValues.values ?? [];
-            const updatedDimension: DimensionMaster = {
-              ...viewingValues,
-              values: currentVals.map((v) =>
-                v.id === id ? { ...v, is_active: !v.is_active } : v,
-              ),
-            };
-            store.saveDimension(updatedDimension, viewingValues.id);
-            setViewingValues(updatedDimension);
-            toast.success("Status toggled");
+            const value = viewingValues.values?.find((item) => item.id === id);
+            if (!value) return Promise.resolve(false);
+            return mutateValue(
+              () => httpClient.put(`${API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!)}/${id}`, {
+                name: value.name,
+                name_local: value.name_local,
+                is_active: !value.is_active,
+                doc_version: value.doc_version,
+              }),
+              "Status toggled",
+            );
           }}
           onDeleteValue={(id) => {
-            const updatedDimension: DimensionMaster = {
-              ...viewingValues,
-              values: (viewingValues.values ?? []).filter((v) => v.id !== id),
-            };
-            store.saveDimension(updatedDimension, viewingValues.id);
-            setViewingValues(updatedDimension);
-            toast.success("Dimension value removed");
+            return mutateValue(
+              () => httpClient.delete(`${API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!)}/${id}`),
+              "Dimension value removed",
+            );
           }}
         />
       )}
@@ -280,10 +348,17 @@ export default function DimensionPage() {
         description={
           deleting ? `Delete ${deleting.code} — ${deleting.name}?` : undefined
         }
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) return;
           try {
-            store.deleteDimension(deleting);
+            if (!buCode) throw new Error("Select a business unit first");
+            const res = await httpClient.delete(
+              `${API_ENDPOINTS.GL_DIMENSIONS(buCode)}/${deleting.id}`,
+            );
+            if (!res.ok) throw await ApiError.from(res, "Unable to delete dimension");
+            await queryClient.invalidateQueries({
+              queryKey: ["accounting-master", "dimensions", buCode],
+            });
             toast.success("Dimension deleted");
             setDeleting(null);
           } catch (error) {
@@ -427,10 +502,10 @@ function DimensionValuesDialog({
   open: boolean;
   dimension: DimensionMaster;
   onOpenChange: (open: boolean) => void;
-  onAddValue: (val: Omit<DimensionValueMaster, "id" | "dimension_id" | "doc_version">) => void;
-  onUpdateValue: (val: DimensionValueMaster) => void;
-  onToggleStatus: (id: string) => void;
-  onDeleteValue: (id: string) => void;
+  onAddValue: (val: Omit<DimensionValueMaster, "id" | "dimension_id" | "doc_version">) => Promise<boolean>;
+  onUpdateValue: (val: DimensionValueMaster) => Promise<boolean>;
+  onToggleStatus: (id: string) => Promise<boolean>;
+  onDeleteValue: (id: string) => Promise<boolean>;
 }) {
   const [valCode, setValCode] = useState("");
   const [valName, setValName] = useState("");
@@ -452,18 +527,18 @@ function DimensionValuesDialog({
     setEditingId(null);
   };
 
-  const saveEdit = (original: DimensionValueMaster) => {
+  const saveEdit = async (original: DimensionValueMaster) => {
     if (!editCode.trim() || !editName.trim()) {
       toast.error("Code and Name (EN) are required");
       return;
     }
-    onUpdateValue({
+    const saved = await onUpdateValue({
       ...original,
       code: editCode.trim().toUpperCase(),
       name: editName.trim(),
       name_local: editNameLocal.trim() || null,
     });
-    setEditingId(null);
+    if (saved) setEditingId(null);
   };
 
   return (
@@ -511,16 +586,18 @@ function DimensionValuesDialog({
               size="sm"
               className="h-8"
               disabled={!valCode.trim() || !valName.trim()}
-              onClick={() => {
-                onAddValue({
+              onClick={async () => {
+                const saved = await onAddValue({
                   code: valCode.trim().toUpperCase(),
                   name: valName.trim(),
                   name_local: valNameLocal.trim() || null,
                   is_active: true,
                 });
-                setValCode("");
-                setValName("");
-                setValNameLocal("");
+                if (saved) {
+                  setValCode("");
+                  setValName("");
+                  setValNameLocal("");
+                }
               }}
             >
               <Plus className="size-3.5 mr-1" /> Add Value
@@ -556,6 +633,7 @@ function DimensionValuesDialog({
                             <td className="p-2">
                               <FieldInput
                                 value={editCode}
+                                disabled
                                 className="h-7 text-xs font-mono font-medium"
                                 onChange={(e) => setEditCode(e.target.value.toUpperCase())}
                               />
@@ -578,7 +656,7 @@ function DimensionValuesDialog({
                             <td className="p-2">
                               <button
                                 type="button"
-                                onClick={() => onToggleStatus(v.id)}
+                                onClick={() => void onToggleStatus(v.id)}
                                 title="Click to toggle status"
                                 className="inline-flex cursor-pointer transition-opacity hover:opacity-80"
                               >
@@ -592,7 +670,7 @@ function DimensionValuesDialog({
                                 <Button
                                   size="sm"
                                   className="h-6 px-2 text-xs"
-                                  onClick={() => saveEdit(v)}
+                                  onClick={() => void saveEdit(v)}
                                 >
                                   Save
                                 </Button>
@@ -615,7 +693,7 @@ function DimensionValuesDialog({
                             <td className="p-2">
                               <button
                                 type="button"
-                                onClick={() => onToggleStatus(v.id)}
+                                onClick={() => void onToggleStatus(v.id)}
                                 title="Click to toggle status"
                                 className="inline-flex cursor-pointer transition-opacity hover:opacity-80"
                               >
@@ -638,7 +716,7 @@ function DimensionValuesDialog({
                                   size="sm"
                                   variant="ghost"
                                   className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-                                  onClick={() => onDeleteValue(v.id)}
+                                  onClick={() => void onDeleteValue(v.id)}
                                 >
                                   Delete
                                 </Button>

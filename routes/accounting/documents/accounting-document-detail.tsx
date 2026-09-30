@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import {
+  AlertTriangle,
   Ban,
   Boxes,
   ChevronDown,
@@ -64,7 +65,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { useChartOfAccount } from "@/hooks/use-chart-of-account";
-import { DEFAULT_CHART_OF_ACCOUNTS } from "@/components/lookup/lookup-chart-of-account";
+import { useDepartment } from "@/hooks/use-department";
+import { useCostCenter } from "@/hooks/use-cost-center";
 import { useGlPeriods } from "@/hooks/use-accounting-master";
 import { CellAction } from "@/components/ui/cell-action";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
@@ -105,13 +107,6 @@ import {
   journalVoucherCapabilities,
   sourceLinksForJournal,
 } from "../journal-voucher/journal-voucher-source";
-
-const DEPARTMENTS = [
-  { id: "100", label: "100 - Admin" },
-  { id: "200", label: "200 - Rooms" },
-  { id: "300", label: "300 - Food & Beverage" },
-  { id: "400", label: "400 - Engineering" },
-];
 
 const TAX_CODES = [
   { id: "VAT7", label: "VAT 7%" },
@@ -166,7 +161,7 @@ const FORM_ID = "accounting-document-form";
 const INITIAL_LINES: JournalLine[] = [
   {
     id: "line-1",
-    department: "100",
+    department: "",
     account: "51001",
     comment: "Office building electricity",
     debit: 10000,
@@ -179,7 +174,7 @@ const INITIAL_LINES: JournalLine[] = [
   },
   {
     id: "line-2",
-    department: "100",
+    department: "",
     account: "21100",
     comment: "Utilities payable accrual",
     debit: 0,
@@ -193,9 +188,23 @@ const INITIAL_LINES: JournalLine[] = [
 ];
 
 const optionLabel = (
-  options: ReadonlyArray<{ id: string; label: string }>,
+  options: ReadonlyArray<{ id: string; label: string; code?: string }>,
   value: string,
-) => options.find((option) => option.id === value)?.label ?? value;
+) => {
+  const match = options.find(
+    (option) =>
+      option.id === value || ("code" in option && option.code === value),
+  );
+  if (match) return match.label;
+  if (
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  ) {
+    return "—";
+  }
+  return value;
+};
 
 export default function AccountingDocumentDetail() {
   "use no memo";
@@ -215,7 +224,10 @@ export default function AccountingDocumentDetail() {
     config.kind === "arReceipt" ||
     config.kind === "assetRegister" ||
     config.kind === "assetDisposal";
-  const journalQuery = useJournalVoucher(isJournalVoucher ? id : undefined);
+  const isValidId = Boolean(id && id !== "new" && id !== "undefined");
+  const journalQuery = useJournalVoucher(
+    isJournalVoucher && isValidId ? id : undefined,
+  );
   const createJournal = useCreateJournalVoucher();
   const updateJournal = useUpdateJournalVoucher();
   const submitJournal = useJournalVoucherAction("submit");
@@ -239,20 +251,39 @@ export default function AccountingDocumentDetail() {
   const documents = useMemo(() => documentsFor(config), [config]);
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
-  const { data: coaData } = useChartOfAccount({ perpage: 200 });
+  const { data: coaData } = useChartOfAccount({ perpage: 100 });
   const accounts = useMemo(() => {
-    const list =
-      coaData?.data && coaData.data.length > 0
-        ? coaData.data
-        : DEFAULT_CHART_OF_ACCOUNTS;
+    const list = coaData?.data ?? [];
     return list
       .filter((a) => a.is_active)
       .map((a) => ({
-        id: a.code,
+        id: a.id || a.code,
+        code: a.code,
         label: `${a.code} - ${a.description_1}`,
         category: a.category,
       }));
   }, [coaData?.data]);
+
+  const { data: deptData } = useDepartment({ perpage: 100 });
+  const { data: costCenterData } = useCostCenter({ perpage: 100 });
+  const departments = useMemo(() => {
+    const ccList = (costCenterData?.data ?? []).filter((c) => c.is_active !== false);
+    if (isJournalVoucher) {
+      return ccList.map((c) => ({
+        id: c.id,
+        code: c.code,
+        label: `${c.code} - ${c.name}`,
+      }));
+    }
+    const list = deptData?.data ?? [];
+    return list
+      .filter((d) => d.is_active !== false)
+      .map((d) => ({
+        id: d.id,
+        code: d.code,
+        label: `${d.code} - ${d.name}`,
+      }));
+  }, [costCenterData?.data, deptData?.data, isJournalVoucher]);
   const number = isNew
     ? t("autoNumber")
     : (journal?.display_no ?? document.number);
@@ -284,18 +315,77 @@ export default function AccountingDocumentDetail() {
   });
   const [fastEntryMode, setFastEntryMode] = useState(false);
   const [lines, setLines] = useState<JournalLine[]>(INITIAL_LINES);
+
+  const [syncedCoaFirstId, setSyncedCoaFirstId] = useState<string | null>(null);
+  const firstAvailableCoaId = coaData?.data?.[0]?.id ?? null;
+  if (isNew && firstAvailableCoaId && syncedCoaFirstId !== firstAvailableCoaId) {
+    setSyncedCoaFirstId(firstAvailableCoaId);
+    const activeCoas = coaData!.data.filter((a) => a.is_active);
+    const first = activeCoas[0] ?? coaData!.data[0];
+    const second = activeCoas[1] ?? coaData!.data[1] ?? first;
+    setLines((prev) => {
+      const isPlaceholder =
+        prev.length >= 2 &&
+        (prev[0].account === "51001" ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            prev[0].account,
+          ));
+      if (isPlaceholder) {
+        return [
+          {
+            ...prev[0],
+            account: first.id,
+            accountLabel: `${first.code} - ${first.description_1}`,
+          },
+          {
+            ...prev[1],
+            account: second.id,
+            accountLabel: `${second.code} - ${second.description_1}`,
+          },
+          ...prev.slice(2),
+        ];
+      }
+      return prev;
+    });
+  }
+
+  useEffect(() => {
+    if (departments.length === 0) return;
+    setLines((prev) => {
+      let changed = false;
+      const updated = prev.map((l) => {
+        if (
+          l.department &&
+          (!l.departmentLabel ||
+            l.departmentLabel === "—" ||
+            l.departmentLabel === l.department)
+        ) {
+          const found = departments.find(
+            (d) => d.id === l.department || d.code === l.department,
+          );
+          if (found && found.label !== l.departmentLabel) {
+            changed = true;
+            return { ...l, departmentLabel: found.label };
+          }
+        }
+        return l;
+      });
+      return changed ? updated : prev;
+    });
+  }, [departments, journal]);
+
   const [selectedLineIds, setSelectedLineIds] = useState<string[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
 
-  const { data: glPeriods = [] } = useGlPeriods();
+  const glPeriodsQuery = useGlPeriods();
   const currentPeriod = useMemo(() => {
     const docDate = values.date;
-    return glPeriods.find(
+    return glPeriodsQuery.data?.find(
       (p) => docDate >= p.start_date && docDate <= p.end_date,
     );
-  }, [glPeriods, values.date]);
+  }, [glPeriodsQuery.data, values.date]);
 
   const isPeriodLocked =
     currentPeriod?.status === "closed" || currentPeriod?.status === "locked";
@@ -324,27 +414,37 @@ export default function AccountingDocumentDetail() {
       reverseDate: journal.reverse_date?.slice(0, 10) ?? "",
     });
     setLines(
-      journal.lines.map((line) => ({
-        id: line.id,
-        department: line.department_id ?? "",
-        departmentLabel: line.department_code
-          ? `${line.department_code} - ${line.department_name ?? ""}`
-          : "—",
-        account: line.account_id,
-        accountLabel: line.account_code
-          ? `${line.account_code} - ${line.account_name ?? ""}`
-          : line.account_id,
-        comment: line.comment ?? "",
-        debit: Number(line.debit),
-        credit: Number(line.credit),
-        taxCode: "",
-        whtCode: "NONE",
-        budgetControlled: false,
-        budget: "",
-        dimension: "",
-        currency: line.currency_id,
-        exchangeRate: Number(line.exchange_rate),
-      })),
+      journal.lines.map((line) => {
+        const deptId = line.department_id ?? "";
+        const matchedDept = departments.find(
+          (d) => d.id === deptId || d.code === deptId,
+        );
+        const resolvedDeptLabel = matchedDept
+          ? matchedDept.label
+          : line.department_code
+            ? `${line.department_code} - ${line.department_name ?? ""}`
+            : undefined;
+
+        return {
+          id: line.id,
+          department: deptId,
+          departmentLabel: resolvedDeptLabel,
+          account: line.account_id,
+          accountLabel: line.account_code
+            ? `${line.account_code} - ${line.account_name ?? ""}`
+            : line.account_id,
+          comment: line.comment ?? "",
+          debit: Number(line.debit),
+          credit: Number(line.credit),
+          taxCode: "",
+          whtCode: "NONE",
+          budgetControlled: false,
+          budget: "",
+          dimension: "",
+          currency: line.currency_id,
+          exchangeRate: Number(line.exchange_rate),
+        };
+      }),
     );
     setSelectedLineIds([]);
     setMode("view");
@@ -372,11 +472,13 @@ export default function AccountingDocumentDetail() {
   };
 
   const addLine = useCallback(() => {
+    const defaultDept = isJournalVoucher ? undefined : departments[0];
     setLines((current) => [
       ...current,
       {
         id: crypto.randomUUID(),
-        department: "",
+        department: defaultDept?.id ?? "",
+        departmentLabel: defaultDept?.label,
         account: "",
         comment: "",
         debit: 0,
@@ -388,7 +490,7 @@ export default function AccountingDocumentDetail() {
         dimension: "",
       },
     ]);
-  }, []);
+  }, [departments, isJournalVoucher]);
 
   const autoBalanceEntry = useCallback(() => {
     const curDebit = lines.reduce((sum, line) => sum + line.debit, 0);
@@ -415,7 +517,7 @@ export default function AccountingDocumentDetail() {
         ...current,
         {
           id: crypto.randomUUID(),
-          department: current[current.length - 1]?.department ?? "100",
+          department: current[current.length - 1]?.department ?? "",
           account: "",
           comment: "Balancing line",
           debit: diff < 0 ? Number(Math.abs(diff).toFixed(2)) : 0,
@@ -485,6 +587,10 @@ export default function AccountingDocumentDetail() {
   };
 
   const handleSave = async (intent: "draft" | "submit") => {
+    if (isJournalVoucher && (glPeriodsQuery.isPending || glPeriodsQuery.isError)) {
+      toast.error("ยังตรวจสอบงวดบัญชีจาก API ไม่ได้ กรุณาลองใหม่อีกครั้ง");
+      return;
+    }
     if (isPeriodLocked) {
       toast.error(
         `ไม่สามารถบันทึกได้ เนื่องจากงวดบัญชี ${currentPeriod?.fiscal_year ?? ""}-P${currentPeriod?.period_number ?? ""} ถูกปิดแล้ว (${currentPeriod?.status})`,
@@ -498,6 +604,54 @@ export default function AccountingDocumentDetail() {
       return;
     }
     if (isJournalVoucher) {
+      if (
+        !isNew &&
+        journal &&
+        (lines.length !== journal.lines.length ||
+          lines.some((line, index) => {
+            const saved = journal.lines[index];
+            return (
+              !saved ||
+              line.id !== saved.id ||
+              line.account !== saved.account_id ||
+              line.department !== (saved.department_id ?? "") ||
+              line.comment !== (saved.comment ?? "") ||
+              (line.currency ?? "THB") !== saved.currency_id ||
+              Number(line.exchangeRate ?? 1) !== Number(saved.exchange_rate) ||
+              Number(line.debit) !== Number(saved.debit) ||
+              Number(line.credit) !== Number(saved.credit)
+            );
+          }))
+      ) {
+        toast.error("API ยังไม่รองรับการแก้ไขบรรทัด JV หลังสร้าง กรุณาสร้าง JV ใหม่");
+        return;
+      }
+      if (coaData?.data && coaData.data.length === 0) {
+        toast.error(
+          "ไม่สามารถบันทึกได้ เนื่องจากยังไม่มีผังบัญชี (Chart of Accounts) ในหน่วยธุรกิจนี้ กรุณาไปตั้งค่าผังบัญชีก่อนครับ",
+        );
+        return;
+      }
+
+      if (lines.length < 2) {
+        toast.error("เอกสาร Journal Voucher ต้องมีรายการอย่างน้อย 2 บรรทัด");
+        return;
+      }
+
+      const hasEmptyAccount = lines.some((l) => !l.account);
+      if (hasEmptyAccount) {
+        toast.error("กรุณาระบุผังบัญชี (Chart of Accounts) ให้ครบทุกบรรทัด");
+        return;
+      }
+
+      const sumDebit = lines.reduce((acc, l) => acc + (Number(l.debit) || 0), 0);
+      const sumCredit = lines.reduce((acc, l) => acc + (Number(l.credit) || 0), 0);
+      if (Math.abs(sumDebit - sumCredit) >= 0.005) {
+        toast.error(
+          `ยอดเดบิต (${sumDebit.toFixed(2)}) และเครดิต (${sumCredit.toFixed(2)}) ต้องเท่ากัน (Base balanced)`,
+        );
+        return;
+      }
       const input: JournalVoucherInput = {
         journal_type: journal?.journal_type ?? "general",
         prefix: values.prefix || journal?.prefix || "JV",
@@ -544,14 +698,18 @@ export default function AccountingDocumentDetail() {
                 doc_version: journal!.doc_version,
               })
             ).data;
+        const targetId = saved?.id ?? (isNew ? undefined : journal?.id);
+        if (!targetId || targetId === "undefined") {
+          throw new Error("Invalid voucher ID received from server");
+        }
         if (intent === "submit")
           await submitJournal.mutateAsync({
-            id: saved.id,
+            id: targetId,
             doc_version: saved.doc_version,
           });
         setMode("view");
         toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
-        navigate(`${config.path}/${saved.id}`, { replace: true });
+        navigate(`${config.path}/${targetId}`, { replace: true });
       } catch (error) {
         toast.error(
           error instanceof Error
@@ -1070,6 +1228,31 @@ export default function AccountingDocumentDetail() {
           void handleSave(intent === "draft" ? "draft" : "submit");
         }}
       >
+        {isJournalVoucher &&
+          !isView &&
+          coaData?.data &&
+          coaData.data.length === 0 && (
+            <div className="flex flex-col gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>
+                  ยังไม่พบผังบัญชี (Chart of Accounts) ในหน่วยธุรกิจนี้ —
+                  การบันทึก Journal Voucher ต้องใช้ผังบัญชีอย่างน้อย 2 บัญชี
+                </span>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="shrink-0 gap-1 bg-white hover:bg-amber-100 dark:bg-amber-900/40"
+                onClick={() => navigate("/config/chart-of-accounts")}
+              >
+                <Plus className="size-3.5" />
+                ไปสร้างผังบัญชี
+              </Button>
+            </div>
+          )}
+
         <Card
           className={
             usesVoucherDetailPattern
@@ -1501,7 +1684,7 @@ export default function AccountingDocumentDetail() {
                       </div>
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {t("department")}
+                      {isJournalVoucher ? t("costCenter") : t("department")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
                       {t("chartOfAccount")}
@@ -1552,19 +1735,24 @@ export default function AccountingDocumentDetail() {
                           </td>
                           <td className="h-12 px-3">
                             {isView ? (
-                              (line.departmentLabel ??
-                              optionLabel(DEPARTMENTS, line.department))
+                              (line.departmentLabel && line.departmentLabel !== "—" && line.departmentLabel !== line.department
+                                ? line.departmentLabel
+                                : (line.department ? optionLabel(departments, line.department) : (isJournalVoucher ? t("costCenterUnassigned") : "—")))
                             ) : (
                               <LookupCombobox
                                 value={line.department}
-                                onValueChange={(department) =>
-                                  updateLine(line.id, { department })
-                                }
-                                items={DEPARTMENTS}
+                                onValueChange={(department) => {
+                                  const match = departments.find((d) => d.id === department);
+                                  updateLine(line.id, {
+                                    department,
+                                    departmentLabel: match ? match.label : undefined,
+                                  });
+                                }}
+                                items={departments}
                                 getId={(option) => option.id}
                                 getLabel={(option) => option.label}
-                                placeholder={t("selectDepartment")}
-                                searchPlaceholder={t("searchDepartment")}
+                                placeholder={isJournalVoucher ? t("selectCostCenter") : t("selectDepartment")}
+                                searchPlaceholder={isJournalVoucher ? t("searchCostCenter") : t("searchDepartment")}
                                 className="min-w-44"
                               />
                             )}
@@ -1967,22 +2155,30 @@ export default function AccountingDocumentDetail() {
           {selectedLine && (
             <div className="grid gap-5 px-4 pb-6">
               <Field>
-                <FieldLabel>{t("department")}</FieldLabel>
+                <FieldLabel>{isJournalVoucher ? t("costCenter") : t("department")}</FieldLabel>
                 {isView ? (
                   <FieldPlainText>
-                    {optionLabel(DEPARTMENTS, selectedLine.department)}
+                    {selectedLine.departmentLabel && selectedLine.departmentLabel !== "—" && selectedLine.departmentLabel !== selectedLine.department
+                      ? selectedLine.departmentLabel
+                      : (selectedLine.department
+                        ? optionLabel(departments, selectedLine.department)
+                        : (isJournalVoucher ? t("costCenterUnassigned") : "—"))}
                   </FieldPlainText>
                 ) : (
                   <LookupCombobox
                     value={selectedLine.department}
-                    onValueChange={(department) =>
-                      updateLine(selectedLine.id, { department })
-                    }
-                    items={DEPARTMENTS}
+                    onValueChange={(department) => {
+                      const match = departments.find((d) => d.id === department);
+                      updateLine(selectedLine.id, {
+                        department,
+                        departmentLabel: match ? match.label : undefined,
+                      });
+                    }}
+                    items={departments}
                     getId={(option) => option.id}
                     getLabel={(option) => option.label}
-                    placeholder={t("selectDepartment")}
-                    searchPlaceholder={t("searchDepartment")}
+                    placeholder={isJournalVoucher ? t("selectCostCenter") : t("selectDepartment")}
+                    searchPlaceholder={isJournalVoucher ? t("searchCostCenter") : t("searchDepartment")}
                     className="w-full"
                   />
                 )}

@@ -1,49 +1,51 @@
 # Accounting API integration checklist
 
-อัปเดตล่าสุดเมื่อ **2026-09-29** กับ [dev OpenAPI](https://dev.blueledgers.com:4001/swagger), BU `CARMEN-AVG` และ `CARMEN-FIFO`; สถานะ `API` หมายถึงหน้าปัจจุบันเรียก backend จริง; `API + Fallback` หมายถึงต่อ backend จริงแล้วแต่มี mock fallback รองรับเมื่อติดสิทธิ์ license 403 หรือยังไม่มีข้อมูล; `Mock` หมายถึงยังใช้ข้อมูลหรือ state จำลองในฝั่ง Frontend
+ตรวจเมื่อ **2026-09-30** จาก [dev Swagger](https://dev.blueledgers.com:4001/swagger) (API Gateway `3.0.2-build.20260928.3b26a29ac`) เทียบกับ hook, repository และ route ที่หน้า Accounting ใช้จริง
+
+**นิยามสถานะ:** `API` = หน้าจอเรียก backend จริง; `API + mock` = เรียก backend แต่แสดงข้อมูลจำลองเมื่อว่างหรือผิดพลาด; `Mock · API พร้อม` = หน้าจอยังใช้ mock แม้ Swagger มี endpoint; `Mock · ยังไม่มี API` = ยังไม่พบ endpoint ที่ตรงกับเอกสารนั้น; `Frontend` = พฤติกรรมใน browser ที่ไม่ต้องมี endpoint แยก
 
 > **หมายเหตุเรื่อง URL Prefix `/api/proxy/`:**  
 > ในโค้ด Frontend จะเห็น path เช่น `/api/proxy/api/{bu_code}/...` — ตัวนี้เป็นเพียง **Internal Rewrite Prefix** ที่ `lib/http-client.ts` ดักจับแล้วตัดคำว่า `/api/proxy` ออกอัตโนมัติ เพื่อส่งตรงไปยัง Backend URL (`https://dev.blueledgers.com:4001/api/...`) ดังนั้นบน Backend จริงจะไม่มี path `/api/proxy/`
 >
-> ดูรายละเอียด Checklist ฝั่ง Business Flow ได้ที่ [Business Flow Checklist](business-flow-checklist.md)
+> ตารางนี้แยก **การมี endpoint ใน Swagger** ออกจาก **การใช้งานจริงในหน้า UI**; endpoint ที่ยังไม่ต่อ UI ยังไม่ถือว่าทดสอบ business flow ผ่าน ดู [Business Flow Checklist](business-flow-checklist.md) สำหรับความคืบหน้าเชิง workflow
 
-| ส่วนของ UI | สถานะปัจจุบัน | API จริงบน Swagger (`dev.blueledgers.com:4001`) | รายละเอียดการเชื่อมต่อและการทำงาน |
+| หน้าจอ / งาน | สถานะ frontend | API ที่พบใน Swagger | ตรวจจาก code / ข้อจำกัด |
 | :--- | :--- | :--- | :--- |
-| **Config → Chart of Accounts** | **API** | `GET/POST/PATCH/DELETE /api/config/{bu_code}/chart-of-accounts` | เรียก API จริงผ่าน `createConfigCrud` (`useChartOfAccount`) รองรับทั้งระบบ |
-| **Config → Bank Accounts** | **API + Fallback** | `GET/POST /api/config/{bu_code}/bank-accounts` | `useBankAccounts` ต่อ API จริงแล้ว หากไม่มีข้อมูลหรือ error จะ fallback หา seed data |
-| **Config → GL Periods & Lock** | **API + Fallback** | `GET/POST /api/config/{bu_code}/gl-periods`<br/>`POST .../close`, `POST .../reopen` | `useGlPeriods` ต่อ API จริงแล้ว นำสถานะ `closed`/`locked` มาบล็อกการบันทึกเอกสารและปุ่ม Action อัตโนมัติ |
-| **Config → Titles (คำนำหน้า)** | **API + Fallback** | `GET /api/config/{bu_code}/titles` | `useTitles` ต่อ API จริงแล้ว สำหรับเลือกระบุชื่อลูกค้าใน AR และคู่ค้าใน AP |
-| **GL → Journal Voucher (JV)** | **API + Fallback** | `GET/POST/PUT /api/{bu_code}/gl-jv`<br/>`POST /api/{bu_code}/gl-jv/{id}/submit`<br/>`POST /api/{bu_code}/gl-jv/{id}/approve`<br/>`POST /api/{bu_code}/gl-jv/{id}/reject` | สลับมาใช้ `httpJournalVoucherRepository` เรียก API จริงตาม Swagger ครบทั้ง CRUD และ Workflow โดยมี Mock Fallback ป้องกันกรณีติด License 403 |
-| **GL → Posting & Reversal** | **API + Fallback** | `POST /api/{bu_code}/gl-posting/{id}/post`<br/>`POST /api/{bu_code}/gl-posting/{id}/void`<br/>`POST /api/{bu_code}/gl-posting/{id}/reverse` | สลับมาต่อ HTTP endpoint จริงของ backend แล้ว |
-| **GL → Fast Entry & Auto-Balance** | **Frontend Ready** | — | ตารางกรอกบัญชีความเร็วสูง + คีย์ลัด `Alt+B` คำนวณยอดดุลอัตโนมัติ |
-| **AP → 3-Way Matching** | **Mock (UI Ready)** | ใช้ข้อมูลประกอบจาก:<br/>`/api/{bu_code}/purchase-orders/{id}`<br/>`/api/{bu_code}/good-received-notes/{id}` | ใน Swagger ยังไม่มี `/api/{bu_code}/ap-invoices` จึงจำลอง logic ตรวจสอบ Qty/Price tolerance, หน้าต่าง 3-Way Match Verification Modal, และปุ่ม Acknowledge Override ไว้ฝั่ง FE |
-| **AP → Advance Deposit Offset** | **Mock (UI Ready)** | รอ backend เปิด endpoint เงินมัดจำ APDP | จำลองการเลือกใบมัดจำ (APDP) มาหักลดยอดจ่ายสุทธิ (Net Outflow) และบันทึกลง Cr 1150 ใน Journal Preview |
-| **AP → Payment Methods & WHT** | **Mock (UI Ready)** | ธนาคารต่อ API จริง; WHT form/rate ใช้ Mock | รองรับ Multi-bank allocation, ภ.ง.ด. 3/53 และอัตราภาษี 1%, 2%, 3%, 5% |
-| **AR → 5 Document Types** | **Mock (UI Ready)** | ไม่พบ `/ar-*` API ใน OpenAPI นี้ | รองรับครบทั้ง 5 ประเภท (`ARIV`, `ARCN`, `ARDN`, `ARDP`, `ARRC`), ช่องเลือก Original Invoice Ref สำหรับลดหนี้, และ Auto Tax Invoice Sequence |
-| **GL Templates / Recurring** | **Mock; Backend Available** | `/api/{bu_code}/gl-jv-templates`<br/>`POST .../generate-all-due` | Backend มี CRUD และตัวสร้างอัตโนมัติ รอผูกหน้า template |
-| **Financial Reports** | **Mock; Backend Available** | `/api/{bu_code}/gl-reports/trial-balance` | มี Trial Balance ใน backend จริง |
+| Config → Chart of Accounts | **API** | `GET/POST /api/config/{bu_code}/chart-of-accounts`; `GET/PUT/PATCH/DELETE .../{id}` | หน้า COA ใช้ `createConfigCrud`; เคยทดสอบ CRUD กับ `CARMEN-FIFO` |
+| JV list, detail, create | **API** | `GET/POST /api/{bu_code}/gl-jv`; `GET/PATCH/DELETE .../{id}` | `useJournalVoucher` ใช้ HTTP repository จริง ไม่มี fallback สำหรับรายการจริง; `CARMEN-AVG` สร้าง JV `20260900004` พร้อม Cost Center แล้วอ่านกลับได้ |
+| JV แก้ไขหลังสร้าง | **API เฉพาะ header** | `PATCH /api/{bu_code}/gl-jv/{id}` | API dev ไม่บันทึกการแก้บรรทัด/Cost Center ผ่าน PATCH; frontend แจ้งข้อจำกัดแทน success. `DELETE` มีใน Swagger แต่ frontend ยังไม่ใช้ |
+| JV workflow / Posting | **API ที่ผูกแล้ว** | `POST .../gl-jv/{id}/{submit,approve,reject}`; `POST .../gl-posting/{id}/{post,void,reverse}` | Action ของ JV จริงส่ง HTTP; ยังไม่ได้ smoke test ทุกสถานะ. Mock repository ใช้เฉพาะ id ที่ขึ้นต้น `mock-` |
+| JV Cost Center lookup | **API** | `GET /api/config/{bu_code}/cost-centers` | ฟอร์ม JV ใช้ Cost Center จริงและส่ง id ในบรรทัด ไม่ใช้ Department แทน; `CARMEN-AVG` มี test center `JV-TEST` |
+| JV Fast Entry / Auto Balance | **Frontend** | ใช้ JV API ตอนบันทึก | ตารางและคีย์ลัดคำนวณใน browser; ไม่มี endpoint เฉพาะ |
+| Config → Bank Accounts | **API** | `GET/POST /api/config/{bu_code}/bank-accounts`; `GET/PUT/DELETE .../{id}` | หน้า Config ต่อ CRUD จริงและส่ง `doc_version` ตอนแก้ไข; ยังไม่ได้ smoke test runtime |
+| Bank Account lookup ใน AP Payment | **API** | `GET /api/config/{bu_code}/bank-accounts` | `useBankAccounts` อ่าน API จริง; API error/ข้อมูลว่างไม่เติม seed แล้ว |
+| Config → GL Periods | **API** | `GET /api/config/{bu_code}/gl-periods`; `POST .../years`; `POST .../{id}/{close,reopen}` | หน้า Config สร้างปี/ปิด/เปิดงวดด้วย API; ไม่มี Lock action เพราะไม่พบ endpoint; ยังไม่ได้ smoke test runtime |
+| Period Lock ในฟอร์ม JV | **API** | `GET /api/config/{bu_code}/gl-periods` | ฟอร์ม JV ใช้งวดจริง; หากอ่าน API ล้มเหลวจะไม่ให้ Save แทนการสมมติว่างวดเปิด |
+| Config → JV Prefix, GL Dimensions, Account Groups | **API** | `/api/config/{bu_code}/gl-jv-prefixes`, `/gl-dimensions`, `/gl-dimension-values`, `/gl-account-groups` | หน้า Config ต่อ CRUD จริง; COA ใช้ Account Groups และ Dimensions จาก API; ยังไม่ได้ smoke test runtime |
+| Config → Titles | **Mock · ยังไม่มี API** | ไม่พบ `/api/config/{bu_code}/titles` | หน้า Title ใช้ `useAccountingMasterMock`; `useTitles` ใน AR เรียก path นี้แต่ fallback เป็น seed เมื่อ 404/error |
+| Config → WHT Forms / Service Types / Payment Types | **Mock · ยังไม่มี API master ที่ตรง** | มี `POST /api/{bu_code}/ap-payment/wht-preview` เฉพาะคำนวณ preview | หน้า Config และ lookup ใช้ค่าจำลอง; WHT preview ยังไม่ถูกเรียกจาก UI |
+| AP Invoice list, detail, create, workflow | **Mock · API ยังไม่ครบตามฟอร์ม** | `GET/POST /api/{bu_code}/ap-invoice`; `GET/PUT/DELETE .../{id}`; `POST .../{submit,approve,review,reject,void}` | ทุก hook ใน `use-accounts-payable.ts` ยังใช้ mock ตามที่โอมเลือก; Swagger GET detail มีข้อมูลสรุป แต่ไม่มี invoice lines ที่ฟอร์มต้องใช้ |
+| AP 3-Way Matching | **Mock · API บางส่วนพร้อม** | `GET /api/{bu_code}/ap-invoice/grn-candidates`; `POST .../from-grn` | Modal/tolerance ใน frontend ยังจำลอง; endpoint สำหรับ GRN candidate และสร้างจาก GRN มีแล้ว แต่ยังไม่ผูก UI |
+| AP Payment list, detail, workflow | **Mock · API ยังไม่ครบตามฟอร์ม** | `GET/POST /api/{bu_code}/ap-payment`; `GET/PUT/DELETE .../{id}`; `POST .../{submit,approve,review,reject,void}` | ยังใช้ AP mock repository ตามที่โอมเลือก; Swagger GET detail ไม่มี payment allocations ที่ฟอร์มต้องใช้ |
+| AP Outstanding / WHT Preview | **Mock · API พร้อม** | `GET /api/{bu_code}/ap-payment/outstanding-documents`; `POST .../wht-preview` | API มีแล้วแต่หน้า AP Payment ยังใช้ข้อมูล/สูตรจำลอง; Advance Deposit Offset และ Multi-bank ต้องเทียบสัญญา API ก่อนเชื่อม |
+| AR Invoice / Receipt | **Mock · ยังไม่มี API** | ไม่พบ `/api/{bu_code}/ar-*` | AR Invoice ใช้ `AR_INVOICES` จาก model; Receipt ใช้ `documentsFor()` จำลอง |
+| JV Templates / Recurring | **Mock · API พร้อมบางส่วน** | `GET/POST /api/{bu_code}/gl-jv-templates`; `GET/PATCH/DELETE .../{id}`; `POST .../generate-all-due`, `POST .../{id}/generate` | หน้า Template/Recurring ใช้ `documentsFor()`; ต้องตรวจ recurring workflow ว่าตรงกับ template API หรือไม่ |
+| Allocation Voucher / Asset Register / Disposal | **Mock · ยังไม่พบ API ที่ตรง** | — | หน้า list/detail ใช้ `documentsFor()` และ local UI state |
+| Financial Reports | **Mock · API พร้อมบางส่วน** | `GET /api/{bu_code}/gl-reports/trial-balance` | หน้า Report ยังใช้ `documentsFor()`; Trial Balance API ยังไม่ผูก |
+| Accounting Dashboards / Cash Forecast | **Mock** | มี Trial Balance; ไม่พบ endpoint ที่ให้ snapshot ตรง UI | `getAccountingDashboardSnapshot()` และ cash forecast ใช้ mock data |
 
 ---
 
-## สรุปสถานะการเชื่อมต่อ ณ วันที่ 2026-09-29
+## งานเชื่อมต่อ API ที่ทำได้ต่อ
 
-1. **ส่วนที่ต่อ API Backend จริงแล้ว:**
-   - ผังบัญชี (`chart-of-accounts`)
-   - สมุดบัญชีเงินฝากธนาคาร (`bank-accounts`)
-   - งวดบัญชีประจำปี (`gl-periods`) สำหรับระบบ Period Lock Guard
-   - สมุดรายวันทั่วไป (`gl-jv`) และระบบ Posting (`gl-posting`) สลับมาใช้ `httpJournalVoucherRepository` แล้ว พร้อม Fallback
-2. **ส่วนที่ยังไม่มี API บน Backend (คง Mockup ฝั่ง Frontend ไว้):**
-   - **AP Invoices & Payments**: ระบบ 3-Way Matching และ Advance Deposit Offset
-   - **AR Documents**: เอกสารลูกหนี้ 5 ประเภท และระบบ Tax Sequence
-   - **WHT Master**: แบบฟอร์ม ภ.ง.ด. 3, 53 และประเภทเงินได้บริการ
-3. **เรื่อง License Feature Key:**
-   - หากยิง `/api/{bu_code}/gl-jv` แล้วได้ `403 This feature is not included in your subscription` ให้แอดมิน assign license feature `accounting.gl` ให้กับ BU นั้นบนระบบ Carmen Platform โดย Frontend มีตัวดักจับ fallback ไปแสดงข้อมูลจำลองเพื่อไม่ให้หน้าจอขัดข้อง
+1. **AP Invoice + AP Payment:** รอ backend ส่ง invoice lines / payment allocations ใน GET detail ก่อนย้ายฟอร์มจาก mock ตามข้อตกลงกับโอม
+2. **Config masters:** endpoint ผูกกับ UI แล้ว; ต้อง smoke test CRUD กับ BU ที่มี license/permission ก่อนถือว่าใช้งานจริงผ่าน
+3. **GL Templates และ Trial Balance:** มี API แต่หน้า UI ยัง mock; ต่อเมื่อ mapping ของหน้าจอตรง API
 
 ---
 
-## ประวัติผลการทดสอบ: CARMEN-FIFO
+## ผลตรวจที่ยืนยันด้วยข้อมูลจริง
 
-- `GET /api/config/CARMEN-FIFO/chart-of-accounts` $\rightarrow$ `200` (CRUD Smoke Test ผ่านสมบูรณ์)
-- `GET /api/CARMEN-FIFO/gl-jv` $\rightarrow$ `403` (ติด Subscription Feature ในบาง BU)
-- `GET /api/config/CARMEN-FIFO/bank-accounts` $\rightarrow$ `200`
-- `GET /api/config/CARMEN-FIFO/gl-periods` $\rightarrow$ `403` (รอ assign license บน dev env)
+- `CARMEN-FIFO` เคยทดสอบ Chart of Accounts CRUD ผ่าน; ณ การทดสอบครั้งนั้น `GET /api/CARMEN-FIFO/gl-jv` ได้ 403 จาก license และ `GET /api/config/CARMEN-FIFO/gl-periods` ได้ 403. **ไม่ได้ทดสอบซ้ำในการอัปเดตเอกสารครั้งนี้**
+- `CARMEN-AVG` สร้าง JV `20260900004` พร้อม Cost Center แล้ว `GET` อ่านกลับได้หลัง reload; `PATCH` ของ JV ใบเดิมไม่บันทึกการแก้บรรทัด
+- รายการ endpoint อื่นในตารางยืนยันจาก Swagger และ code path เท่านั้น ยังไม่ถือว่า runtime CRUD/workflow ของแต่ละ BU ผ่าน

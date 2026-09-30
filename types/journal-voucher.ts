@@ -74,6 +74,7 @@ export interface JournalVoucherInput {
   scheduled_post_at: string | null;
   auto_reverse: boolean;
   reverse_date: string | null;
+  is_adjustment?: boolean;
   lines: JournalVoucherLineInput[];
 }
 

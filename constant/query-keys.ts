@@ -20,6 +20,7 @@ export const QUERY_KEYS = {
   CREDIT_NOTE_COMMENTS: "credit-note-comments",
   CREDIT_NOTE_STOCK_MOVEMENTS: "credit-note-stock-movements",
   CHART_OF_ACCOUNTS: "chart-of-accounts",
+  COST_CENTERS: "cost-centers",
   CREDIT_TERMS: "credit-terms",
   CUISINES: "cuisines",
   CURRENCIES: "currencies",

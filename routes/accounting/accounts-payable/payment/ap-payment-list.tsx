@@ -26,11 +26,11 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { multiplyDecimal } from "./ap-decimal";
+import { multiplyDecimal } from "../shared/ap-decimal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ApPayment } from "@/types/accounts-payable";
-import { ApStatusBadge, Money } from "./ap-ui";
-import { useApPayments } from "./use-accounts-payable";
+import { ApStatusBadge, Money } from "../shared/ap-ui";
+import { useApPayments } from "../shared/use-accounts-payable";
 
 export default function ApPaymentList() {
   const navigate = useNavigate();

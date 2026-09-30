@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ApPaymentInput } from "@/types/accounts-payable";
-import { addDecimal, divideDecimal } from "./ap-decimal";
+import { addDecimal, divideDecimal } from "../shared/ap-decimal";
 import { paymentSummary } from "./ap-payment-totals";
 
 const form: ApPaymentInput = {

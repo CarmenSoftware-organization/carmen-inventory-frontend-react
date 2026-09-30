@@ -148,6 +148,10 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/cost-centers`,
   GL_DIMENSIONS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/gl-dimensions`,
+  GL_DIMENSION_VALUES: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/gl-dimension-values`,
+  GL_ACCOUNT_GROUPS: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/gl-account-groups`,
   GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>

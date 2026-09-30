@@ -1,6 +1,5 @@
-import JournalVoucherForm from "./journal-voucher-form";
+import AccountingDocumentDetail from "../documents/accounting-document-detail";
 
-/** Journal Voucher detail uses its repository-backed source and capability policy. */
 export function Component() {
-  return <JournalVoucherForm />;
+  return <AccountingDocumentDetail />;
 }

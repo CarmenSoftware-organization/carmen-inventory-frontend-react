@@ -5,7 +5,7 @@ import {
   divideDecimal,
   multiplyDecimal,
   subtractDecimal,
-} from "./ap-decimal";
+} from "../shared/ap-decimal";
 
 export function paymentSummary(form: ApPaymentInput) {
   const applied = addDecimal(

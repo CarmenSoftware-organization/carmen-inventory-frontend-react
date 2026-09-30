@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Landmark, Plus } from "lucide-react";
@@ -31,27 +32,73 @@ import {
 } from "@/components/ui/field";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { WarningDialog } from "@/components/ui/warning-dialog";
-import {
-  type BankAccountMaster,
-  useAccountingMasterMock,
-} from "../accounting-master-mock";
+import { ErrorState } from "@/components/ui/error-state";
+import { useBankAccounts } from "@/hooks/use-accounting-master";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { useChartOfAccount } from "@/hooks/use-chart-of-account";
+import { useCurrency } from "@/hooks/use-currency";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { BankAccountMaster } from "@/types/accounting-master";
 import { LookupChartOfAccount } from "@/components/lookup/lookup-chart-of-account";
 
 export default function BankAccountPage() {
-  const store = useAccountingMasterMock();
+  const buCode = useBuCode();
+  const queryClient = useQueryClient();
+  const bankQuery = useBankAccounts();
+  const { data: currencyData } = useCurrency({ perpage: 100 });
+  const { data: accountData } = useChartOfAccount({ perpage: 100 });
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<BankAccountMaster | null | undefined>();
   const [deleting, setDeleting] = useState<BankAccountMaster | null>(null);
   const [warning, setWarning] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const saveBankAccount = async (
+    value: Omit<BankAccountMaster, "id" | "doc_version">,
+  ) => {
+    if (!buCode) throw new Error("Select a business unit first");
+    const code = value.code?.trim();
+    const currencyId = currencyData?.data.find(
+      (currency) => currency.code === value.currency_code,
+    )?.id;
+    const accountId = accountData?.data.find(
+      (account) =>
+        account.id === value.gl_account_id ||
+        account.code === value.gl_account_id,
+    )?.id;
+    if (!code || !currencyId || !accountId) {
+      throw new Error("Code, valid currency and GL account are required");
+    }
+    const payload = {
+      name: value.account_name.trim(),
+      bank_name: value.bank_name.trim(),
+      bank_branch: value.branch_name || null,
+      account_no: value.account_number.trim(),
+      currency_id: currencyId,
+      chart_of_accounts_id: accountId,
+      is_active: value.is_active,
+      ...(editing ? { doc_version: editing.doc_version } : { code }),
+    };
+    const endpoint = API_ENDPOINTS.GL_BANK_ACCOUNTS(buCode);
+    const res = editing
+      ? await httpClient.put(`${endpoint}/${editing.id}`, payload)
+      : await httpClient.post(endpoint, payload);
+    if (!res.ok) throw await ApiError.from(res, "Unable to save bank account");
+    await queryClient.invalidateQueries({
+      queryKey: ["accounting-master", "bank-accounts", buCode],
+    });
+  };
 
   const rows = useMemo(
     () =>
-      store.bankAccounts.filter((item) =>
+      (bankQuery.data ?? []).filter((item) =>
         `${item.bank_name} ${item.account_number} ${item.account_name} ${item.branch_name ?? ""}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [search, store.bankAccounts],
+    [search, bankQuery.data],
   );
 
   const columns = useMemo<ColumnDef<BankAccountMaster>[]>(
@@ -180,6 +227,13 @@ export default function BankAccountPage() {
         tableLayout={{ width: "auto", headerSticky: true }}
         tableClassNames={{ bodyRow: "h-10" }}
       >
+        {bankQuery.isError && (
+          <ErrorState
+            error={bankQuery.error}
+            message="Unable to load bank accounts"
+            onRetry={() => void bankQuery.refetch()}
+          />
+        )}
         <DataGridContainer scroll className="max-h-[calc(100vh-14rem)]">
           <DataGridTable />
         </DataGridContainer>
@@ -188,10 +242,16 @@ export default function BankAccountPage() {
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
+        saving={saving}
+        glAccountCode={
+          accountData?.data.find((account) => account.id === editing?.gl_account_id)
+            ?.code ?? editing?.gl_account_id ?? ""
+        }
         onOpenChange={(open) => !open && setEditing(undefined)}
-        onSave={(value) => {
+        onSave={async (value) => {
+          setSaving(true);
           try {
-            store.saveBankAccount(value, editing?.id);
+            await saveBankAccount(value);
             toast.success(
               editing ? "Bank account updated" : "Bank account created",
             );
@@ -200,6 +260,8 @@ export default function BankAccountPage() {
             setWarning(
               error instanceof Error ? error.message : "Unable to save bank account",
             );
+          } finally {
+            setSaving(false);
           }
         }}
       />
@@ -210,10 +272,17 @@ export default function BankAccountPage() {
         description={
           deleting ? `Delete ${deleting.bank_name} (${deleting.account_number})?` : undefined
         }
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) return;
           try {
-            store.deleteBankAccount(deleting);
+            if (!buCode) throw new Error("Select a business unit first");
+            const res = await httpClient.delete(
+              `${API_ENDPOINTS.GL_BANK_ACCOUNTS(buCode)}/${deleting.id}`,
+            );
+            if (!res.ok) throw await ApiError.from(res, "Unable to delete bank account");
+            await queryClient.invalidateQueries({
+              queryKey: ["accounting-master", "bank-accounts", buCode],
+            });
             toast.success("Bank account deleted");
             setDeleting(null);
           } catch (error) {
@@ -237,21 +306,27 @@ export default function BankAccountPage() {
 function BankAccountDialog({
   open,
   item,
+  saving,
+  glAccountCode,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
   item: BankAccountMaster | null;
+  saving: boolean;
+  glAccountCode: string;
   onOpenChange: (open: boolean) => void;
   onSave: (
     value: Omit<BankAccountMaster, "id" | "doc_version">,
   ) => void;
 }) {
+  const [code, setCode] = useState(item?.code ?? "");
   const [bankName, setBankName] = useState(item?.bank_name ?? "");
   const [accountNumber, setAccountNumber] = useState(item?.account_number ?? "");
   const [accountName, setAccountName] = useState(item?.account_name ?? "");
   const [branchName, setBranchName] = useState(item?.branch_name ?? "");
-  const [glAccountId, setGlAccountId] = useState(item?.gl_account_id ?? "");
+  const [selectedGlAccountId, setGlAccountId] = useState<string | null>(null);
+  const glAccountId = selectedGlAccountId ?? glAccountCode;
   const [currencyCode, setCurrencyCode] = useState(item?.currency_code ?? "THB");
   const [active, setActive] = useState(item?.is_active ?? true);
 
@@ -267,6 +342,15 @@ function BankAccountDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="bank-code" required>Code</FieldLabel>
+            <FieldInput
+              id="bank-code"
+              value={code}
+              disabled={!!item}
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+            />
+          </Field>
           <Field className="sm:col-span-2">
             <FieldLabel htmlFor="bank-name" required>
               Bank Name
@@ -347,9 +431,10 @@ function BankAccountDialog({
             Cancel
           </Button>
           <Button
-            disabled={!bankName.trim() || !accountNumber.trim() || !accountName.trim()}
+            disabled={saving || !code.trim() || !bankName.trim() || !accountNumber.trim() || !accountName.trim() || !glAccountId || !currencyCode}
             onClick={() =>
               onSave({
+                code,
                 bank_name: bankName,
                 account_number: accountNumber,
                 account_name: accountName,

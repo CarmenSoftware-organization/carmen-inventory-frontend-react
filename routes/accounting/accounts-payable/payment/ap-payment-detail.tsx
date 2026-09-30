@@ -65,16 +65,16 @@ import {
   multiplyDecimal,
   percentOf,
   subtractDecimal,
-} from "./ap-decimal";
+} from "../shared/ap-decimal";
 import { PaymentSections } from "./ap-payment-sections";
 import { paymentSummary } from "./ap-payment-totals";
-import { ApStatusBadge, Money } from "./ap-ui";
+import { ApStatusBadge, Money } from "../shared/ap-ui";
 import {
   useApInvoices,
   useApPayment,
   useApPaymentAction,
   useSaveApPayment,
-} from "./use-accounts-payable";
+} from "../shared/use-accounts-payable";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const Field = ({

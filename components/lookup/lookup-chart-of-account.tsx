@@ -327,7 +327,7 @@ export function LookupChartOfAccount({
   const tl = useTranslations("lookup");
   const [hasOpened, setHasOpened] = useState(false);
   const { data, isLoading } = useChartOfAccount(
-    { perpage: 200 },
+    { perpage: 100 },
     { enabled: hasOpened || !!value },
   );
 

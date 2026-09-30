@@ -1,7 +1,7 @@
 # Accounting Business Flow Checklist (Drive FRD vs Implementation)
 
 เอกสารนี้เปรียบเทียบ Business Flow ตามเอกสารสเปกใน [Google Drive Folder](https://drive.google.com/drive/folders/1nSKSvjF37mh8EPJTOA3AionmgnsyuczU) กับสถานะการพัฒนาปัจจุบันในระบบ Carmen Frontend และ Backend APIs  
-สถานะข้อมูล: **2026-09-29**
+สถานะข้อมูล: **2026-09-30** (ตรวจสถานะ API เพิ่มเติมใน [API integration checklist](api-integration-checklist.md))
 
 ---
 
@@ -10,10 +10,10 @@
 | โมดูล (Module) | เอกสารอ้างอิงหลัก (Drive FRD) | Frontend UI / Logic | Backend API (`4001`) | สรุปสถานะ |
 | :--- | :--- | :---: | :---: | :--- |
 | **GL — Journal Voucher** | GL JV FRD V2.14 & Fast-entry HTML | **พร้อม 90%** | **พร้อม 75%** | ทำ Fast Entry, Period Lock Guard, และต่อ API จริงเรียบร้อยแล้ว ขาด Template UI |
-| **AP — Invoices** | AP Invoice FRD v4.5.06 | **พร้อม 85%** | **รอพัฒนา (15%)** | 3-Way Matching Modal & Logic เสร็จแล้ว ขาดตัวเลือกเอกสาร APDN/APCN/APDP แยกประเภท |
-| **AP — Payments** | AP Payment FRD v2.16 | **พร้อม 80%** | **รอพัฒนา (10%)** | Advance Deposit Offset เสร็จแล้ว ขาด Multi-Bank Allocation และ WHT สูงสุด 3 รายการ |
+| **AP — Invoices** | AP Invoice FRD v4.5.06 | **พร้อม 85%** | **มี CRUD/workflow API; UI ยัง mock** | 3-Way Matching Modal & Logic เสร็จแล้ว ขาดตัวเลือกเอกสาร APDN/APCN/APDP แยกประเภท และยังไม่ต่อ `/ap-invoice` |
+| **AP — Payments** | AP Payment FRD v2.16 | **พร้อม 80%** | **มี CRUD/workflow API; UI ยัง mock** | Advance Deposit Offset เสร็จแล้ว ขาด Multi-Bank Allocation และ WHT สูงสุด 3 รายการ; ยังไม่ต่อ `/ap-payment` |
 | **AR — Invoices & Receipts** | AR Invoice FRD v1.07 | **พร้อม 85%** | **รอพัฒนา (0%)** | รองรับ 5 Doc Types, Reference Link, Tax Sequence แล้ว ขาด Settlement Matching UI |
-| **Master Data & Config** | Master Data Specs (10 รายการ) | **พร้อม 40%** | **พร้อม 30%** | COA, Bank, Title, GL Period มีแล้ว ขาด WHT, JV Prefix, Asset Category, Account Groups |
+| **Master Data & Config** | Master Data Specs (10 รายการ) | **พร้อม 40%** | **API ผูกกับหน้าหลักแล้ว; ยังไม่ smoke test CRUD** | COA, Bank, GL Period, JV Prefix, Dimension และ Account Groups ต่อ API แล้ว; Title/WHT ยัง mock เพราะไม่พบ master API ที่ตรง |
 | **Reports & Dashboards** | Dashboard & Trial Balance Specs | **พร้อม 60%** | **พร้อม 25%** | มี Trial Balance API และ Cash Forecast Mock รอผูก API ก้อนสรุป KPI |
 
 ---
@@ -25,12 +25,12 @@
 
 - [x] **JV Document Lifecycle & Status**: Draft $\rightarrow$ Submitted $\rightarrow$ Approved $\rightarrow$ Posted $\rightarrow$ Void / Reversed
 - [x] **Fast-Entry Mode (ตารางคีย์บอร์ดความเร็วสูง)**: สลับโหมด Fast Entry, ปุ่ม Auto Balance (`Alt+B`), คีย์ลัดนำทางในตาราง
-- [x] **Period Lock Guard**: ตรวจสอบงวดบัญชีจาก `GET /api/config/{bu_code}/gl-periods` บล็อกการบันทึก/Submit หากงวดสถานะเป็น `closed` หรือ `locked`
-- [x] **Real API Integration**: เชื่อมต่อ `httpJournalVoucherRepository` กับ backend endpoint `/api/{bu_code}/gl-jv` และ `/api/{bu_code}/gl-posting/` พร้อม Fallback
+- [x] **Period Lock Guard**: ฟอร์ม JV อ่าน `GET /api/config/{bu_code}/gl-periods` และบล็อกงวด `closed`/`locked`; API error จะไม่ให้ Save และไม่มีงวด seed แล้ว
+- [x] **Real API Integration**: เชื่อมต่อ `httpJournalVoucherRepository` กับ backend endpoint `/api/{bu_code}/gl-jv` และ `/api/{bu_code}/gl-posting/` สำหรับ JV จริง; ไม่ fallback เป็นข้อมูลจำลองเมื่อ API error
 - [x] **Auto-Reverse Entry**: รองรับการระบุ `reverse_date` ในงวดถัดไป และปุ่ม Reverse Document
 - [ ] **JV Templates & Recurring (สิ่งที่ยังขาด)**:
   - Backend มี endpoint `/api/{bu_code}/gl-jv-templates` และ `POST .../generate-all-due` แล้ว
-  - Frontend ยังขาดหน้าจัดการ Template CRUD และหน้าต่างสั่งรัน Recurring JV ประจำงวด
+  - Frontend มีหน้า Template/Recurring แบบ mock; ยังไม่เชื่อม CRUD และการ generate จริง
 - [ ] **Account-to-Dimension Mapping Validation (สิ่งที่ยังขาด)**:
   - การล็อกหรือบังคับกรอก Cost Center และ Dimension Sub-codes ตามนโยบายของผังบัญชีแต่ละตัว (COA Control)
 - [ ] **Financial Reports Integration (สิ่งที่ยังขาด)**:
@@ -49,7 +49,7 @@
   - Modal ให้เลือกดึงใบมัดจำ APDP มาหักลบออกจากยอดจ่าย
   - คำนวณหักลดยอดจ่ายสุทธิ (Net Outflow) อัตโนมัติ
   - ลงรายการบัญชีเครดิต Cr 1150 (เงินจ่ายล่วงหน้า) ใน Journal Preview
-- [x] **Bank Account Integration**: เชื่อมโยงบัญชีธนาคารสำหรับจ่ายเงินจาก API จริง `/api/config/{bu_code}/bank-accounts`
+- [x] **Bank Account Lookup**: ช่องเลือกธนาคารใน AP Payment เรียก `/api/config/{bu_code}/bank-accounts` โดยไม่เติม seed เมื่อ API error/ว่าง
 - [ ] **AP Document Types แยกประเภท (สิ่งที่ยังขาด/ต้องเพิ่ม)**:
   - ปัจจุบันหน้า AP Invoice รองรับ APIV (ใบกำกับสินค้ามาตรฐาน) เป็นหลัก
   - ต้องเพิ่มตัวเลือกสำหรับ **APDN** (ใบลดหนี้/เดบิตโน้ต), **APCN** (ใบเพิ่มหนี้/เครดิตโน้ต), และ **APDP** (ใบสำคัญจ่ายเงินมัดจำ) พร้อมช่องอ้างอิง Original Invoice
@@ -61,8 +61,8 @@
   - ปัจจุบันมีให้กรอกได้ 1 รายการ WHT
 - [ ] **Real-time Duplicate Vendor Invoice Warning (สิ่งที่ต้องเพิ่ม)**:
   - แจ้งเตือนทันทีบนฟอร์มขณะพิมพ์ เมื่อพบ Vendor Code + Invoice No. ซ้ำในระบบ
-- [ ] **Backend AP APIs (สิ่งที่ขาดฝั่ง Backend)**:
-  - Backend ยังไม่มี `/api/{bu_code}/ap-invoices` และ `/api/{bu_code}/ap-payments` ใน Swagger (ปัจจุบันใช้ Frontend Mock Repository)
+- [ ] **Frontend AP API Integration**:
+  - Swagger มี `/api/{bu_code}/ap-invoice` และ `/api/{bu_code}/ap-payment` รวม CRUD/workflow แต่ GET detail ยังไม่มี invoice lines / payment allocations จึงคงฟอร์ม AP แบบ mock ตามที่โอมเลือก
 
 ---
 
@@ -89,15 +89,12 @@
 *อ้างอิง: Master Data FRDs (10 รายการ)*
 
 - [x] **Chart of Accounts (COA)**: ใช้งาน API จริง `/api/config/{bu_code}/chart-of-accounts` สมบูรณ์
-- [x] **Bank Accounts**: ใช้งาน API จริง `/api/config/{bu_code}/bank-accounts` พร้อม fallback
-- [x] **GL Periods & Lock**: ใช้งาน API จริง `/api/config/{bu_code}/gl-periods` พร้อมระบบ Lock Guard
-- [x] **Titles (คำนำหน้าชื่อ)**: ใช้งาน API จริง `/api/config/{bu_code}/titles`
-- [ ] **Account Code Grouping (L1-L4 Tree) (สิ่งที่ยังขาด)**:
-  - โครงสร้างหมวดหมู่ผังบัญชี 4 ระดับ (ยังไม่มีหน้า UI Config)
-- [ ] **Dimensions & Sub-codes (สิ่งที่ยังขาด)**:
-  - การกำหนดมิติทางบัญชีและรหัสย่อย (เช่น Project, Event, Branch)
-- [ ] **JV Prefix Management (สิ่งที่ยังขาด)**:
-  - หน้ากำหนดคำนำหน้าสมุดรายวัน (เช่น GJ, PV, RV, AP)
+- [x] **Bank Accounts**: หน้า Config และ lookup ใช้ API จริง; ยังไม่ได้ smoke test CRUD runtime
+- [x] **GL Periods & Lock**: หน้า Config และฟอร์ม JV ใช้ API จริง; ยังไม่ได้ smoke test runtime
+- [ ] **Titles (คำนำหน้าชื่อ)**: หน้า Config mock; ไม่พบ `/api/config/{bu_code}/titles` ใน Swagger รุ่นนี้
+- [x] **Account Code Grouping (L1-L4 Tree)**: หน้า Config และ COA ใช้ `/api/config/{bu_code}/gl-account-groups`; ยังไม่ได้ smoke test CRUD runtime
+- [x] **Dimensions & Sub-codes**: หน้า Config และ COA ใช้ `/api/config/{bu_code}/gl-dimensions` และ `/gl-dimension-values`; ยังไม่ได้ smoke test CRUD runtime
+- [x] **JV Prefix Management**: หน้า Config ใช้ `/api/config/{bu_code}/gl-jv-prefixes`; ยังไม่ได้ smoke test CRUD runtime
 - [ ] **Payment Types Master (สิ่งที่ยังขาด)**:
   - หน้ากำหนดประเภทการชำระเงิน (Transfer, Cheque, Credit Card, Cash) และเงื่อนไขบัญชี
 - [ ] **WHT Service Types & Forms Master (สิ่งที่ยังขาด)**:
@@ -116,6 +113,6 @@
 4. **GL Recurring / Template UI**: สร้างหน้าเชื่อมต่อกับ `/api/{bu_code}/gl-jv-templates` ที่มีบน backend อยู่แล้ว
 
 ### ระยะกลาง (Backend Collaboration Required):
-1. แจ้งทีม Backend เปิด Controller สำหรับ **AP Invoices & Payments** ตาม spec FRD v4.5.06 และ v2.16
+1. ให้ backend เพิ่ม invoice lines / payment allocations ใน AP GET detail แล้วจึงเชื่อมฟอร์ม **AP Invoices & Payments** และทดสอบ workflow จริง
 2. เปิด Controller สำหรับ **AR 5 Document Types & Settlement** ตาม spec FRD v1.07
-3. เพิ่ม Master Data Endpoints สำหรับ WHT, Dimensions, และ JV Prefixes
+3. เพิ่ม Master Data Endpoints สำหรับ WHT และ smoke test Config masters ที่เพิ่งเชื่อม API

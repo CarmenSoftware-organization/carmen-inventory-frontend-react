@@ -45,9 +45,9 @@ import {
   multiplyDecimal,
   percentOf,
   subtractDecimal,
-} from "./ap-decimal";
-import { ApDetailGrid } from "./ap-detail-grid";
-import { ApStatusBadge, Money } from "./ap-ui";
+} from "../shared/ap-decimal";
+import { ApDetailGrid } from "../shared/ap-detail-grid";
+import { ApStatusBadge, Money } from "../shared/ap-ui";
 import { paymentSummary } from "./ap-payment-totals";
 import { PaymentTaxAllocation } from "./ap-payment-tax-allocation";
 import {

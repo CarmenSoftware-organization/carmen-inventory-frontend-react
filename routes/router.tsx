@@ -866,22 +866,22 @@ export const router = createBrowserRouter([
               {
                 path: "accounts-payable/invoice",
                 lazy: () =>
-                  import("./accounting/accounts-payable/ap-invoice-list.route"),
+                  import("./accounting/accounts-payable/invoice/ap-invoice-list.route"),
               },
               {
                 path: "accounts-payable/invoice/:id",
                 lazy: () =>
-                  import("./accounting/accounts-payable/ap-invoice-detail.route"),
+                  import("./accounting/accounts-payable/invoice/ap-invoice-detail.route"),
               },
               {
                 path: "accounts-payable/payment",
                 lazy: () =>
-                  import("./accounting/accounts-payable/ap-payment-list.route"),
+                  import("./accounting/accounts-payable/payment/ap-payment-list.route"),
               },
               {
                 path: "accounts-payable/payment/:id",
                 lazy: () =>
-                  import("./accounting/accounts-payable/ap-payment-detail.route"),
+                  import("./accounting/accounts-payable/payment/ap-payment-detail.route"),
               },
               {
                 path: "accounts-payable/payment-approvals",

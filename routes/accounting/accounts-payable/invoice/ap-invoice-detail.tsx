@@ -58,14 +58,14 @@ import {
   multiplyDecimal,
   percentOf,
   subtractDecimal,
-} from "./ap-decimal";
-import { ApStatusBadge, LabelValue, Money } from "./ap-ui";
+} from "../shared/ap-decimal";
+import { ApStatusBadge, LabelValue, Money } from "../shared/ap-ui";
 import { InvoiceLines } from "./ap-invoice-lines";
 import {
   useApInvoice,
   useApInvoiceAction,
   useSaveApInvoice,
-} from "./use-accounts-payable";
+} from "../shared/use-accounts-payable";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const emptyLine = (): ApInvoiceLine => ({

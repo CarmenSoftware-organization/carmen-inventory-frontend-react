@@ -1,4 +1,5 @@
 import { Controller } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { BookText, Layers } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusSwitch } from "@/components/ui/status-switch";
@@ -21,7 +22,12 @@ import {
   type AccountCategory,
   type ChartOfAccount,
 } from "@/types/chart-of-accounts";
-import { useAccountingMasterMock } from "../accounting-master-mock";
+import { useGlAccountGroups } from "../shared/use-gl-account-groups";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { DimensionMaster } from "@/types/accounting-master";
 import { createCoaSchema, type CoaFormValues } from "./coa-form-schema";
 
 interface CoaDialogProps {
@@ -52,7 +58,19 @@ export function CoaDialog({
 }: CoaDialogProps) {
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
-  const store = useAccountingMasterMock();
+  const groupQuery = useGlAccountGroups();
+  const accountGroups = groupQuery.data ?? [];
+  const buCode = useBuCode();
+  const dimensionQuery = useQuery({
+    queryKey: ["accounting-master", "dimensions", buCode],
+    enabled: !!buCode,
+    queryFn: async (): Promise<DimensionMaster[]> => {
+      const res = await httpClient.get(API_ENDPOINTS.GL_DIMENSIONS(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Unable to load dimensions");
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.data ?? []);
+    },
+  });
 
   return (
     <ConfigEntityDialog<ChartOfAccount, CoaFormValues, CoaPayload>
@@ -111,7 +129,7 @@ export function CoaDialog({
     >
       {({ form, disabled }) => {
         const watchedCategory = form.watch("category");
-        const availableGroups = store.accountGroups.filter(
+        const availableGroups = accountGroups.filter(
           (g) => g.is_active && g.category === watchedCategory,
         );
         return (
@@ -210,7 +228,7 @@ export function CoaDialog({
                       field.onChange(val);
                       const currentGroupId = form.getValues("account_group_id");
                       if (currentGroupId) {
-                        const grp = store.accountGroups.find(
+                        const grp = accountGroups.find(
                           (g) => g.id === currentGroupId,
                         );
                         if (grp && grp.category !== val) {
@@ -236,6 +254,7 @@ export function CoaDialog({
 
             <Field>
               <FieldLabel>Account Group</FieldLabel>
+              {groupQuery.isError && <p className="text-xs text-destructive">Unable to load account groups.</p>}
               <Controller
                 control={form.control}
                 name="account_group_id"
@@ -305,7 +324,10 @@ export function CoaDialog({
               name="allowed_dimensions"
               render={({ field }) => {
                 const selected = new Set(field.value ?? []);
-                const activeDims = store.dimensions.filter((d) => d.is_active);
+                const activeDims = (dimensionQuery.data ?? []).filter((d) => d.is_active);
+                if (dimensionQuery.isError) {
+                  return <div className="text-xs text-destructive">Unable to load dimensions.</div>;
+                }
                 if (activeDims.length === 0) {
                   return (
                     <div className="text-xs text-muted-foreground">
@@ -335,7 +357,7 @@ export function CoaDialog({
                           }`}
                         >
                           <span>{dim.code}</span>
-                          <span className="opacity-70 text-[10px]">({dim.name})</span>
+                          <span className="opacity-70 text-micro-legal">({dim.name})</span>
                         </button>
                       );
                     })}

@@ -31,8 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ApInvoice } from "@/types/accounts-payable";
-import { ApStatusBadge, Money } from "./ap-ui";
-import { useApInvoices } from "./use-accounts-payable";
+import { ApStatusBadge, Money } from "../shared/ap-ui";
+import { useApInvoices } from "../shared/use-accounts-payable";
 
 const lifecycleOptions = [
   "draft",

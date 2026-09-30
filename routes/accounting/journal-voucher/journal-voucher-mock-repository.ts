@@ -1,5 +1,5 @@
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
-import { addDecimal, compareDecimal } from "../accounts-payable/ap-decimal";
+import { addDecimal, compareDecimal } from "../accounts-payable/shared/ap-decimal";
 import type {
   JournalVoucher,
   JournalVoucherAction,

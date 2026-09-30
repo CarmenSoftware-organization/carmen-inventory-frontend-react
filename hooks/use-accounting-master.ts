@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { httpClient } from "@/lib/http-client";
+import { ApiError } from "@/lib/api-error";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { useBuCode } from "@/hooks/use-bu-code";
 import type {
@@ -10,42 +11,6 @@ import type {
   TitleMaster,
   GlPeriodMaster,
 } from "@/types/accounting-master";
-
-export const DEFAULT_BANK_ACCOUNTS: BankAccountMaster[] = [
-  {
-    id: "bank-kbank-01",
-    bank_name: "Kasikorn Bank (KBANK)",
-    account_number: "712-2-98421-0",
-    account_name: "Carmen Hotel Co., Ltd.",
-    branch_name: "Silom Complex",
-    gl_account_id: "1112-01",
-    currency_code: "THB",
-    is_active: true,
-    doc_version: 0,
-  },
-  {
-    id: "bank-scb-01",
-    bank_name: "Siam Commercial Bank (SCB)",
-    account_number: "045-3-11982-4",
-    account_name: "Carmen Hotel Co., Ltd.",
-    branch_name: "Thonglor",
-    gl_account_id: "1112-02",
-    currency_code: "THB",
-    is_active: true,
-    doc_version: 0,
-  },
-  {
-    id: "bank-bbl-01",
-    bank_name: "Bangkok Bank (BBL)",
-    account_number: "101-7-89234-1",
-    account_name: "Carmen Hotel Co., Ltd.",
-    branch_name: "Sathorn",
-    gl_account_id: "1112-03",
-    currency_code: "THB",
-    is_active: true,
-    doc_version: 0,
-  },
-];
 
 export const DEFAULT_PAYMENT_TYPES: PaymentTypeMaster[] = [
   {
@@ -196,18 +161,25 @@ export function useBankAccounts() {
   return useQuery({
     queryKey: ["accounting-master", "bank-accounts", buCode],
     queryFn: async (): Promise<BankAccountMaster[]> => {
-      if (!buCode) return DEFAULT_BANK_ACCOUNTS;
-      try {
-        const res = await httpClient.get(API_ENDPOINTS.GL_BANK_ACCOUNTS(buCode));
-        if (!res.ok) return DEFAULT_BANK_ACCOUNTS;
-        const json = await res.json();
-        const items = Array.isArray(json) ? json : (json?.data ?? []);
-        return items.length > 0 ? items : DEFAULT_BANK_ACCOUNTS;
-      } catch {
-        return DEFAULT_BANK_ACCOUNTS;
-      }
+      const res = await httpClient.get(API_ENDPOINTS.GL_BANK_ACCOUNTS(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Failed to load bank accounts");
+      const json = await res.json();
+      const items = Array.isArray(json) ? json : (json?.data ?? []);
+      return items.map((item: Record<string, unknown>) => ({
+        id: String(item.id),
+        code: String(item.code ?? ""),
+        bank_name: String(item.bank_name ?? ""),
+        account_number: String(item.account_no ?? ""),
+        account_name: String(item.name ?? ""),
+        branch_name: (item.bank_branch as string | null) ?? null,
+        gl_account_id: (item.chart_of_accounts_id as string | null) ?? null,
+        currency_code: String(item.currency_code ?? ""),
+        currency_id: String(item.currency_id ?? ""),
+        is_active: Boolean(item.is_active),
+        doc_version: Number(item.doc_version ?? 0),
+      }));
     },
-    initialData: DEFAULT_BANK_ACCOUNTS,
+    enabled: !!buCode,
   });
 }
 
@@ -261,70 +233,25 @@ export function useTitles() {
   });
 }
 
-export const DEFAULT_GL_PERIODS: GlPeriodMaster[] = [
-  {
-    id: "per-2026-01",
-    fiscal_year: 2026,
-    period_number: 1,
-    start_date: "2026-01-01",
-    end_date: "2026-01-31",
-    status: "closed",
-    doc_version: 0,
-  },
-  {
-    id: "per-2026-02",
-    fiscal_year: 2026,
-    period_number: 2,
-    start_date: "2026-02-01",
-    end_date: "2026-02-28",
-    status: "closed",
-    doc_version: 0,
-  },
-  {
-    id: "per-2026-03",
-    fiscal_year: 2026,
-    period_number: 3,
-    start_date: "2026-03-01",
-    end_date: "2026-03-31",
-    status: "open",
-    doc_version: 0,
-  },
-  {
-    id: "per-2026-04",
-    fiscal_year: 2026,
-    period_number: 4,
-    start_date: "2026-04-01",
-    end_date: "2026-04-30",
-    status: "open",
-    doc_version: 0,
-  },
-  {
-    id: "per-2026-09",
-    fiscal_year: 2026,
-    period_number: 9,
-    start_date: "2026-09-01",
-    end_date: "2026-09-30",
-    status: "open",
-    doc_version: 0,
-  },
-];
-
 export function useGlPeriods() {
   const buCode = useBuCode();
   return useQuery({
     queryKey: ["accounting-master", "gl-periods", buCode],
     queryFn: async (): Promise<GlPeriodMaster[]> => {
-      if (!buCode) return DEFAULT_GL_PERIODS;
-      try {
-        const res = await httpClient.get(API_ENDPOINTS.GL_PERIODS(buCode));
-        if (!res.ok) return DEFAULT_GL_PERIODS;
-        const json = await res.json();
-        const items = Array.isArray(json) ? json : (json?.data ?? []);
-        return items.length > 0 ? items : DEFAULT_GL_PERIODS;
-      } catch {
-        return DEFAULT_GL_PERIODS;
-      }
+      const res = await httpClient.get(API_ENDPOINTS.GL_PERIODS(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Failed to load GL periods");
+      const json = await res.json();
+      const items = Array.isArray(json) ? json : (json?.data ?? []);
+      return items.map((item: Record<string, unknown>) => ({
+        id: String(item.id),
+        fiscal_year: Number(item.fiscal_year),
+        period_number: Number(item.period_no),
+        start_date: String(item.start_at).slice(0, 10),
+        end_date: String(item.end_at).slice(0, 10),
+        status: item.status as GlPeriodMaster["status"],
+        doc_version: Number(item.doc_version ?? 0),
+      }));
     },
-    initialData: DEFAULT_GL_PERIODS,
+    enabled: !!buCode,
   });
 }

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useAccountingMasterMock } from "../accounting-master-mock";
+import { useGlAccountGroups } from "../shared/use-gl-account-groups";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
@@ -35,10 +35,10 @@ export function useCoaTable({
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
-  const store = useAccountingMasterMock();
+  const groupQuery = useGlAccountGroups();
   const groupMap = useMemo(
-    () => new Map(store.accountGroups.map((g) => [g.id, g])),
-    [store.accountGroups],
+    () => new Map((groupQuery.data ?? []).map((g) => [g.id, g])),
+    [groupQuery.data],
   );
 
   const columns: ColumnDef<ChartOfAccount>[] = [

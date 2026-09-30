@@ -60,12 +60,14 @@ export interface DimensionMaster {
 
 export interface BankAccountMaster {
   id: string;
+  code?: string;
   bank_name: string;
   account_number: string;
   account_name: string;
   branch_name?: string | null;
   gl_account_id?: string | null;
   currency_code: string;
+  currency_id?: string;
   is_active: boolean;
   doc_version: number;
 }

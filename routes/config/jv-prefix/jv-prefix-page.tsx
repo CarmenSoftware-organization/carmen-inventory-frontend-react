@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Bookmark, Plus } from "lucide-react";
@@ -32,13 +33,26 @@ import {
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Switch } from "@/components/ui/switch";
 import { WarningDialog } from "@/components/ui/warning-dialog";
-import {
-  type JvPrefixMaster,
-  useAccountingMasterMock,
-} from "../accounting-master-mock";
+import { ErrorState } from "@/components/ui/error-state";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { JvPrefixMaster } from "@/types/accounting-master";
 
 export default function JvPrefixPage() {
-  const store = useAccountingMasterMock();
+  const buCode = useBuCode();
+  const queryClient = useQueryClient();
+  const prefixQuery = useQuery({
+    queryKey: ["accounting-master", "jv-prefixes", buCode],
+    enabled: !!buCode,
+    queryFn: async (): Promise<JvPrefixMaster[]> => {
+      const res = await httpClient.get(API_ENDPOINTS.GL_JV_PREFIXES(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Unable to load JV prefixes");
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.data ?? []);
+    },
+  });
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<JvPrefixMaster | null | undefined>();
   const [deleting, setDeleting] = useState<JvPrefixMaster | null>(null);
@@ -46,12 +60,12 @@ export default function JvPrefixPage() {
 
   const rows = useMemo(
     () =>
-      store.jvPrefixes.filter((item) =>
+      (prefixQuery.data ?? []).filter((item) =>
         `${item.code} ${item.description} ${item.description_local ?? ""}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [search, store.jvPrefixes],
+    [search, prefixQuery.data],
   );
 
   const columns = useMemo<ColumnDef<JvPrefixMaster>[]>(
@@ -190,14 +204,35 @@ export default function JvPrefixPage() {
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>
+      {prefixQuery.isError && (
+        <ErrorState
+          error={prefixQuery.error}
+          message="Unable to load JV prefixes"
+          onRetry={() => void prefixQuery.refetch()}
+        />
+      )}
       <JvPrefixDialog
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
         onOpenChange={(open) => !open && setEditing(undefined)}
-        onSave={(value) => {
+        onSave={async (value) => {
           try {
-            store.saveJvPrefix(value, editing?.id);
+            if (!buCode) throw new Error("Select a business unit first");
+            const endpoint = API_ENDPOINTS.GL_JV_PREFIXES(buCode);
+            const res = editing
+              ? await httpClient.put(`${endpoint}/${editing.id}`, {
+                  description: value.description,
+                  description_local: value.description_local,
+                  is_default: value.is_default,
+                  is_active: value.is_active,
+                  doc_version: editing.doc_version,
+                })
+              : await httpClient.post(endpoint, value);
+            if (!res.ok) throw await ApiError.from(res, "Unable to save JV prefix");
+            await queryClient.invalidateQueries({
+              queryKey: ["accounting-master", "jv-prefixes", buCode],
+            });
             toast.success(
               editing ? "JV Prefix updated" : "JV Prefix created",
             );
@@ -216,10 +251,17 @@ export default function JvPrefixPage() {
         description={
           deleting ? `Delete ${deleting.code} — ${deleting.description}?` : undefined
         }
-        onConfirm={() => {
+        onConfirm={async () => {
           if (!deleting) return;
           try {
-            store.deleteJvPrefix(deleting);
+            if (!buCode) throw new Error("Select a business unit first");
+            const res = await httpClient.delete(
+              `${API_ENDPOINTS.GL_JV_PREFIXES(buCode)}/${deleting.id}`,
+            );
+            if (!res.ok) throw await ApiError.from(res, "Unable to delete JV prefix");
+            await queryClient.invalidateQueries({
+              queryKey: ["accounting-master", "jv-prefixes", buCode],
+            });
             toast.success("JV prefix deleted");
             setDeleting(null);
           } catch (error) {

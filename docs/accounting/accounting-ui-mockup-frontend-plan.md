@@ -20,7 +20,7 @@
 | ----------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Master list             | `routes/config/chart-of-accounts/coa-component.tsx` and `components/templates/config-list-template.tsx`    |
 | Small master add/edit   | `components/templates/config-entity-dialog.tsx`                                                            |
-| Document list           | `routes/accounting/accounts-payable/ap-invoice-list.tsx`                                                   |
+| Document list           | `routes/accounting/accounts-payable/invoice/ap-invoice-list.tsx`                                                   |
 | Document detail         | existing procurement detail pages using `DocFormHeader`, `FormToolbar`, item grids, and `SummaryFooterBar` |
 | AP prototype content    | `routes/accounting/accounts-payable/`                                                                      |
 | GL/JV prototype content | `routes/accounting/journal-voucher/`                                                                       |

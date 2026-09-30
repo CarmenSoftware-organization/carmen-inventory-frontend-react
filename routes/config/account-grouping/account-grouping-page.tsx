@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { AlertCircle, FolderTree, Plus } from "lucide-react";
@@ -34,13 +35,15 @@ import { SelectContent, SelectItem } from "@/components/ui/select";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WarningDialog } from "@/components/ui/warning-dialog";
+import { ErrorState } from "@/components/ui/error-state";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { AccountGroupMaster } from "@/types/accounting-master";
+import { glAccountGroupsKey, useGlAccountGroups } from "../shared/use-gl-account-groups";
 import type { AccountCategory } from "@/types/chart-of-accounts";
 import { ACCOUNT_CATEGORIES } from "@/types/chart-of-accounts";
-import {
-  type AccountGroupMaster,
-  getDescendantGroupIds,
-  useAccountingMasterMock,
-} from "../accounting-master-mock";
 
 const CATEGORY_LABELS: Record<AccountCategory, string> = {
   asset: "Asset (สินทรัพย์)",
@@ -83,8 +86,26 @@ function buildHierarchyOrder(groups: AccountGroupMaster[]): AccountGroupMaster[]
   return result;
 }
 
+function getDescendantGroupIds(groups: AccountGroupMaster[], rootId: string) {
+  const descendants = new Set<string>();
+  const queue = [rootId];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const group of groups) {
+      if (group.parent_id === current && !descendants.has(group.id)) {
+        descendants.add(group.id);
+        queue.push(group.id);
+      }
+    }
+  }
+  return descendants;
+}
+
 export default function AccountGroupingPage() {
-  const store = useAccountingMasterMock();
+  const buCode = useBuCode();
+  const queryClient = useQueryClient();
+  const groupQuery = useGlAccountGroups();
+  const groups = useMemo(() => groupQuery.data ?? [], [groupQuery.data]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
@@ -92,18 +113,55 @@ export default function AccountGroupingPage() {
   const [editing, setEditing] = useState<AccountGroupMaster | null | undefined>();
   const [deleting, setDeleting] = useState<AccountGroupMaster | null>(null);
   const [warning, setWarning] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const saveGroup = async (value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">) => {
+    if (!buCode || saving) return;
+    setSaving(true);
+    try {
+      const url = API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode);
+      const { level: _level, category, ...fields } = value;
+      const res = editing
+        ? await httpClient.put(`${url}/${editing.id}`, { ...fields, doc_version: editing.doc_version })
+        : await httpClient.post(url, { ...fields, category });
+      if (!res.ok) throw await ApiError.from(res, "Unable to save account group");
+      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      toast.success(editing ? "Account group updated" : "Account group created");
+      setEditing(undefined);
+    } catch (error) {
+      setWarning(error instanceof Error ? error.message : "Unable to save account group");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteGroup = async () => {
+    if (!buCode || !deleting || saving) return;
+    setSaving(true);
+    try {
+      const res = await httpClient.delete(`${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${deleting.id}`);
+      if (!res.ok) throw await ApiError.from(res, "Unable to delete account group");
+      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      toast.success("Account group deleted");
+      setDeleting(null);
+    } catch (error) {
+      setWarning(error instanceof Error ? error.message : "Unable to delete account group");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const item of store.accountGroups) {
+    for (const item of groups) {
       counts[item.category] = (counts[item.category] ?? 0) + 1;
     }
     return counts;
-  }, [store.accountGroups]);
+  }, [groups]);
 
   const orderedGroups = useMemo(
-    () => buildHierarchyOrder(store.accountGroups),
-    [store.accountGroups],
+    () => buildHierarchyOrder(groups),
+    [groups],
   );
 
   const rows = useMemo(() => {
@@ -134,12 +192,12 @@ export default function AccountGroupingPage() {
   const names = useMemo(
     () =>
       new Map(
-        store.accountGroups.map((item) => [
+        groups.map((item) => [
           item.id,
           `${item.code} — ${item.name}`,
         ]),
       ),
-    [store.accountGroups],
+    [groups],
   );
 
   const columns = useMemo<ColumnDef<AccountGroupMaster>[]>(
@@ -338,6 +396,7 @@ export default function AccountGroupingPage() {
       }
     >
       <div className="space-y-3">
+        {groupQuery.isError && <ErrorState error={groupQuery.error} onRetry={() => groupQuery.refetch()} />}
         <Tabs
           value={selectedCategory}
           onValueChange={setSelectedCategory}
@@ -345,7 +404,7 @@ export default function AccountGroupingPage() {
         >
           <TabsList variant="line" className="border-b w-full justify-start overflow-x-auto">
             <TabsTrigger value="all">
-              All ({store.accountGroups.length})
+              All ({groups.length})
             </TabsTrigger>
             {ACCOUNT_CATEGORIES.map((cat) => (
               <TabsTrigger key={cat} value={cat}>
@@ -382,23 +441,10 @@ export default function AccountGroupingPage() {
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        groups={store.accountGroups}
+        groups={groups}
+        saving={saving}
         onOpenChange={(open) => !open && setEditing(undefined)}
-        onSave={(value) => {
-          try {
-            store.saveAccountGroup(value, editing?.id);
-            toast.success(
-              editing ? "Account group updated" : "Account group created",
-            );
-            setEditing(undefined);
-          } catch (error) {
-            setWarning(
-              error instanceof Error
-                ? error.message
-                : "Unable to save account group",
-            );
-          }
-        }}
+        onSave={saveGroup}
       />
       <DeleteDialog
         open={!!deleting}
@@ -407,21 +453,8 @@ export default function AccountGroupingPage() {
         description={
           deleting ? `Delete ${deleting.code} — ${deleting.name}?` : undefined
         }
-        onConfirm={() => {
-          if (!deleting) return;
-          try {
-            store.deleteAccountGroup(deleting);
-            toast.success("Account group deleted");
-            setDeleting(null);
-          } catch (error) {
-            setDeleting(null);
-            setWarning(
-              error instanceof Error
-                ? error.message
-                : "Unable to delete account group",
-            );
-          }
-        }}
+        isPending={saving}
+        onConfirm={deleteGroup}
       />
       <WarningDialog
         open={!!warning}
@@ -437,12 +470,14 @@ function GroupDialog({
   open,
   item,
   groups,
+  saving,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
   item: AccountGroupMaster | null;
   groups: AccountGroupMaster[];
+  saving: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (
     value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">,
@@ -542,7 +577,7 @@ function GroupDialog({
             <FieldLabel required>Category</FieldLabel>
             <FieldSelect
               value={category}
-              disabled={!!item && item.account_count > 0}
+              disabled={!!item}
               onValueChange={(val) => handleCategoryChange(val as AccountCategory)}
             >
               <SelectContent>
@@ -645,6 +680,7 @@ function GroupDialog({
           </Button>
           <Button
             disabled={
+              saving ||
               !code.trim() ||
               !name.trim() ||
               (level > 1 && (!parentId || parentId === "root"))
