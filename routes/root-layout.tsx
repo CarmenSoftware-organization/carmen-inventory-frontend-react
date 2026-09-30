@@ -15,8 +15,11 @@ import { ProfileGate } from "@/components/share/profile-gate";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarShell } from "@/components/sidebar/sidebar-shell";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { useBuSwitchSync } from "@/hooks/use-switch-bu";
 
 export default function RootLayout() {
+  // สลับ BU จาก tab อื่น → ล้าง cache ที่นี่ที่เดียว
+  useBuSwitchSync();
   return (
     <SidebarShell>
       <AnalyticsBridge />

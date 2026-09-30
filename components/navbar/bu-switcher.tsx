@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Building2, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { profileQueryKey, useProfile } from "@/hooks/use-profile";
+import { useProfile } from "@/hooks/use-profile";
 import { useSwitchBu } from "@/hooks/use-switch-bu";
 
 function BuAvatar({
@@ -62,7 +61,6 @@ function BuAvatar({
 }
 
 export default function BuSwitcher() {
-  const queryClient = useQueryClient();
   const tt = useTranslations("toast");
   const tErr = useTranslations("errors");
   const navigate = useNavigate();
@@ -150,10 +148,8 @@ export default function BuSwitcher() {
                 if (isActive) return;
                 setIsSwitching(true);
                 try {
+                  // resolve หลัง profile ใหม่มาถึงแล้ว (ดู useSwitchBu)
                   await switchBuMutation.mutateAsync(bu.id);
-                  await queryClient.refetchQueries({
-                    queryKey: [...profileQueryKey],
-                  });
                   toast.success(tt("buSwitched", { name: bu.name }));
                   // ข้อมูลของ BU เดิมถูกล้างไปแล้ว หน้าที่ยืนอยู่อาจอ้างถึง id ที่ไม่มีใน BU ใหม่
                   navigate("/dashboard");
