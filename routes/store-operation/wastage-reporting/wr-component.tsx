@@ -14,8 +14,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import DisplayTemplate from "@/components/display-template";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import { formatCurrency } from "@/lib/currency-utils";
 import { WASTAGE_STATUS_OPTIONS } from "@/constant/wastage-reporting";
 import { useWastageReportTable } from "./use-wr-table";
@@ -78,21 +77,17 @@ export default function WrComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title={t("title")}
       description={t("desc")}
       toolbar={
         <ListToolbar
-          variant="bare"
           search={search}
           onSearch={setSearch}
           lf={lf}
           fields={wrFilterFields}
           onSaveViewClick={() => setSaveViewDialogOpen(true)}
         />
-      }
-      filterBar={
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
     >
       <div className="space-y-3">
@@ -146,6 +141,6 @@ export default function WrComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }

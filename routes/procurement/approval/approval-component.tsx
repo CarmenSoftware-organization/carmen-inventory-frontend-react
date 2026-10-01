@@ -12,11 +12,10 @@ import { useApprovalPending, useApprovalPendingSummary } from "./use-approval";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { ErrorState } from "@/components/ui/error-state";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import type { ApprovalPendingSummary } from "@/types/approval";
 import ApprovalQueueList from "./approve-queue-list";
 import { cn } from "@/lib/utils";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -99,12 +98,11 @@ export default function ApprovalComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title={t("title")}
       description={t("desc")}
       toolbar={
         <ListToolbar
-          variant="bare"
           search={search}
           // ค้นหาและ filter ประเภทเอกสารทำที่ SQL ทั้งคู่ จึงใช้ร่วมกันได้ตรง ๆ
           // เดิมต้องล้าง filter ทิ้งตอนค้น เพราะทั้งสองทำฝั่ง client บนข้อมูลหน้าแรก
@@ -113,9 +111,6 @@ export default function ApprovalComponent() {
           fields={APPROVAL_FILTER_FIELDS}
           onSaveViewClick={() => setSaveViewDialogOpen(true)}
         />
-      }
-      filterBar={
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
     >
       {/* Summary Stats */}
@@ -180,6 +175,6 @@ export default function ApprovalComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }

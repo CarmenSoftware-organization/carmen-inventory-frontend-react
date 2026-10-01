@@ -46,9 +46,7 @@ const ALLOWED: Record<string, number> = {
   "routes/accounting/dashboard/accounting-dashboard-page.tsx": 1,
 
   // ── PR 2: procurement · store-operation · vendor-management
-  "routes/procurement/approval/approval-component.tsx": 1,
   "routes/store-operation/stock-replenishment/stock-repl-component.tsx": 1,
-  "routes/store-operation/wastage-reporting/wr-component.tsx": 1,
 
   // ── PR 3: system-admin · report · config · operation-plan
   // (email-profile / email-template / interface เขียน <h1> สดจึงไม่มีลายเซ็นให้จับ —
