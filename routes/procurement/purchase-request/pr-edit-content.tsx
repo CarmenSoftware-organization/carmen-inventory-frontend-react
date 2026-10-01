@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { usePurchaseRequestById } from "./use-purchase-request";
 import { PurchaseRequestForm } from "./pr-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 
 export function PrEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseRequest");
@@ -13,7 +13,7 @@ export function PrEditContent({ id }: { id: string }) {
     refetch,
   } = usePurchaseRequestById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <DocPageSkeleton />;
   if (error || !purchaseRequest)
     return (
       <ErrorState
@@ -24,5 +24,10 @@ export function PrEditContent({ id }: { id: string }) {
       />
     );
 
-  return <PurchaseRequestForm key={purchaseRequest.id} purchaseRequest={purchaseRequest} />;
+  return (
+    <PurchaseRequestForm
+      key={purchaseRequest.id}
+      purchaseRequest={purchaseRequest}
+    />
+  );
 }

@@ -196,3 +196,13 @@ describe("FormToolbar — permission gate only for keys that exist in the catalo
     expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
   });
 });
+
+describe("FormToolbar — ribbon", () => {
+  it("renders the ribbon under the header row, outside the action buttons", () => {
+    setCan();
+    renderToolbar({ mode: "view", ribbon: <div data-testid="ribbon">R</div> });
+    const ribbon = screen.getByTestId("ribbon");
+    const row = screen.getByRole("heading", { level: 1 }).closest(".relative")!;
+    expect(row.contains(ribbon)).toBe(false);
+  });
+});

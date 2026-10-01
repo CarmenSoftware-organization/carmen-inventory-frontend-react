@@ -51,6 +51,8 @@ interface FormToolbarProps {
   readonly flush?: boolean;
   /** เปิดปุ่ม Activity — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id) */
   readonly activity?: { id: string; label?: string };
+  /** แถวช่องข้อมูลใต้หัว ส่งต่อ `DocFormHeader.ribbon` (PR — ช่อง workflow/description) */
+  readonly ribbon?: ReactNode;
 }
 
 /**
@@ -84,6 +86,7 @@ export function FormToolbar({
   permissionPrefix,
   flush = true,
   activity,
+  ribbon,
 }: FormToolbarProps) {
   const tc = useTranslations("common");
   const tf = useTranslations("form");
@@ -245,6 +248,7 @@ export function FormToolbar({
       badges={badges}
       leading={leading}
       actions={actions}
+      ribbon={ribbon}
       flush={flush}
     />
   );
