@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import EmptyComponent from "@/components/empty-component";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   Card,
@@ -65,8 +66,7 @@ export default function PeReview() {
   const tc = useTranslations("common");
   const { data, isLoading, isFetching, refetch } = usePeriodEndReview();
   const closeMutation = useClosePeriodEnd();
-  const { open: openPhysicalCount, pendingLocationId } =
-    useOpenPhysicalCount();
+  const { open: openPhysicalCount, pendingLocationId } = useOpenPhysicalCount();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [docsKey, setDocsKey] = useState<ReviewTransactionKey | null>(null);
 
@@ -113,273 +113,278 @@ export default function PeReview() {
   };
 
   return (
-    <div className="animate-fade-in-up space-y-5 p-3 md:p-4">
-      <DocFormHeader
-        leading={
-          <span
-            aria-hidden="true"
-            className="inline-flex size-9 items-center justify-center rounded-xl"
-            style={{
-              background:
-                "color-mix(in oklch, var(--primary), transparent 88%)",
-              color: "var(--primary)",
-            }}
-          >
-            <CalendarRange className="size-5" />
-          </span>
-        }
-        title={t("review")}
-        subtitle={t("reviewDesc")}
-        backLabel={tc("goBack")}
-        onBack={() => navigate("/inventory-management/period-end")}
-        actions={
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              aria-label={tc("refresh")}
+    <FormPageShell
+      width="wide"
+      header={
+        <DocFormHeader
+          leading={
+            <span
+              aria-hidden="true"
+              className="inline-flex size-9 items-center justify-center rounded-xl"
+              style={{
+                background:
+                  "color-mix(in oklch, var(--primary), transparent 88%)",
+                color: "var(--primary)",
+              }}
             >
-              <RefreshCw
-                className={isFetching ? "animate-spin" : undefined}
-                aria-hidden="true"
-              />
-              <span className="hidden sm:inline">{tc("refresh")}</span>
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setConfirmOpen(true)}
-              disabled={!canClose || closeMutation.isPending}
-              title={!canClose ? t("notReadyToClose") : undefined}
-            >
-              <Lock aria-hidden="true" />
-              {t("closePeriod")}
-            </Button>
-          </>
-        }
-        flush
-      />
-
-      {isLoading && (
-        <div className="space-y-3">
-          <Skeleton className="h-24 w-full rounded-xl" />
-          <Skeleton className="h-40 w-full rounded-xl" />
-          <Skeleton className="h-48 w-full rounded-xl" />
-        </div>
-      )}
-
-      {!isLoading && data && (
-        <>
-          <Card
-            className="border-l-4"
-            style={{ borderLeftColor: "var(--primary)" }}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <CalendarRange
-                  className="text-muted-foreground/70 size-4"
+              <CalendarRange className="size-5" />
+            </span>
+          }
+          title={t("review")}
+          subtitle={t("reviewDesc")}
+          backLabel={tc("goBack")}
+          onBack={() => navigate("/inventory-management/period-end")}
+          actions={
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                aria-label={tc("refresh")}
+              >
+                <RefreshCw
+                  className={isFetching ? "animate-spin" : undefined}
                   aria-hidden="true"
                 />
-                {formatLocalizedDate(data.start_date, locale)} –{" "}
-                {formatLocalizedDate(data.end_date, locale)}
-              </CardTitle>
-              <CardAction>
-                <StatusIconLabel
-                  status={data.status}
-                  label={t(`status.${data.status}`)}
-                />
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                <SummaryStat
-                  label={t("transactionsTotal")}
-                  value={txTotal}
-                  hint={`${txDone}/${TRANSACTION_KEYS.length}`}
-                  tone={
-                    txDone === TRANSACTION_KEYS.length ? "success" : "warning"
-                  }
-                />
-                <SummaryStat
-                  label={t("locationsAll")}
-                  value={locations.length}
-                  hint={t("locationsCompleted", {
-                    completed: locationsDone,
-                    total: locations.length,
-                  })}
-                  tone={
-                    locations.length > 0 && locationsDone === locations.length
-                      ? "success"
-                      : "warning"
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <section className="space-y-3">
-            <header className="flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="bg-primary/10 text-primary inline-flex size-7 items-center justify-center rounded-lg"
+                <span className="hidden sm:inline">{tc("refresh")}</span>
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmOpen(true)}
+                disabled={!canClose || closeMutation.isPending}
+                title={!canClose ? t("notReadyToClose") : undefined}
               >
-                <Sparkles className="size-3.5" />
-              </span>
-              <h2 className="text-sm font-semibold">{t("transactions")}</h2>
-            </header>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-              {transactionEntries.map(({ key, stat, isDone }, index) => {
-                const moduleConfig = MODULE_CONFIG[key];
-                const Icon = moduleConfig.icon;
-                return (
-                  <Card
-                    key={key}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={t("openDocumentsLabel", {
-                      module: t(`modules.${key}`),
-                    })}
-                    onClick={() => setDocsKey(key)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setDocsKey(key);
-                      }
-                    }}
-                    className="animate-fade-in-up group focus-visible:ring-ring hover:border-primary/40 cursor-pointer transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                    style={{ animationDelay: `${index * 60}ms` }}
-                  >
-                    <CardContent className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span
-                          aria-hidden="true"
-                          className="inline-flex size-8 items-center justify-center rounded-lg"
-                          style={{
-                            background: `color-mix(in oklch, ${moduleConfig.color}, transparent 86%)`,
-                            color: moduleConfig.color,
-                          }}
-                        >
-                          <Icon className="size-4" />
-                        </span>
-                        {isDone && (
-                          <CheckCircle2
-                            className="text-success-ink size-4"
-                            aria-hidden="true"
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-micro font-semibold tracking-wide uppercase">
-                          {t(`modules.${key}`)}
-                        </p>
-                        <p className="text-foreground mt-0.5 text-2xl font-semibold tabular-nums">
-                          {stat.count}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={isDone ? "success-light" : "warning-light"}
-                        size="xs"
-                      >
-                        {isDone ? t("complete") : t("incomplete")}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
+                <Lock aria-hidden="true" />
+                {t("closePeriod")}
+              </Button>
+            </>
+          }
+          flush
+        />
+      }
+    >
+      <div className="animate-fade-in-up space-y-5">
+        {isLoading && (
+          <div className="space-y-3">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
+        )}
 
-          <section className="space-y-3">
-            <header className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+        {!isLoading && data && (
+          <>
+            <Card
+              className="border-l-4"
+              style={{ borderLeftColor: "var(--primary)" }}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <CalendarRange
+                    className="text-muted-foreground/70 size-4"
+                    aria-hidden="true"
+                  />
+                  {formatLocalizedDate(data.start_date, locale)} –{" "}
+                  {formatLocalizedDate(data.end_date, locale)}
+                </CardTitle>
+                <CardAction>
+                  <StatusIconLabel
+                    status={data.status}
+                    label={t(`status.${data.status}`)}
+                  />
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  <SummaryStat
+                    label={t("transactionsTotal")}
+                    value={txTotal}
+                    hint={`${txDone}/${TRANSACTION_KEYS.length}`}
+                    tone={
+                      txDone === TRANSACTION_KEYS.length ? "success" : "warning"
+                    }
+                  />
+                  <SummaryStat
+                    label={t("locationsAll")}
+                    value={locations.length}
+                    hint={t("locationsCompleted", {
+                      completed: locationsDone,
+                      total: locations.length,
+                    })}
+                    tone={
+                      locations.length > 0 && locationsDone === locations.length
+                        ? "success"
+                        : "warning"
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <section className="space-y-3">
+              <header className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
                   className="bg-primary/10 text-primary inline-flex size-7 items-center justify-center rounded-lg"
                 >
-                  <MapPin className="size-3.5" />
+                  <Sparkles className="size-3.5" />
                 </span>
-                <h2 className="text-sm font-semibold">{t("physicalCount")}</h2>
-              </div>
-              {locations.length > 0 && (
-                <Badge
-                  variant={
-                    locationsDone === locations.length
-                      ? "success-light"
-                      : "warning-light"
-                  }
-                  size="xs"
-                >
-                  {t("locationsCompleted", {
-                    completed: locationsDone,
-                    total: locations.length,
-                  })}
-                </Badge>
-              )}
-            </header>
-            {locations.length === 0 ? (
-              <Card>
-                <CardContent>
-                  <EmptyComponent
-                    icon={ClipboardList}
-                    title={t("noPhysicalCount")}
-                  />
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                <Progress
-                  value={locationsPercent}
-                  variant="auto"
-                  className="h-1.5"
-                />
-                <div className="space-y-2">
-                  {locations.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="animate-fade-in-up"
-                      style={{ animationDelay: `${index * 40}ms` }}
+                <h2 className="text-sm font-semibold">{t("transactions")}</h2>
+              </header>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                {transactionEntries.map(({ key, stat, isDone }, index) => {
+                  const moduleConfig = MODULE_CONFIG[key];
+                  const Icon = moduleConfig.icon;
+                  return (
+                    <Card
+                      key={key}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={t("openDocumentsLabel", {
+                        module: t(`modules.${key}`),
+                      })}
+                      onClick={() => setDocsKey(key)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setDocsKey(key);
+                        }
+                      }}
+                      className="animate-fade-in-up group focus-visible:ring-ring hover:border-primary/40 cursor-pointer transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      style={{ animationDelay: `${index * 60}ms` }}
                     >
-                      <PcLocationCard
-                        item={item}
-                        index={index}
-                        onAction={handleLocationAction}
-                        disabled={!isCounting}
-                        disabledReason={t("notCountingYet")}
-                        pending={pendingLocationId === item.id}
-                      />
-                    </div>
-                  ))}
-                </div>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span
+                            aria-hidden="true"
+                            className="inline-flex size-8 items-center justify-center rounded-lg"
+                            style={{
+                              background: `color-mix(in oklch, ${moduleConfig.color}, transparent 86%)`,
+                              color: moduleConfig.color,
+                            }}
+                          >
+                            <Icon className="size-4" />
+                          </span>
+                          {isDone && (
+                            <CheckCircle2
+                              className="text-success-ink size-4"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-micro font-semibold tracking-wide uppercase">
+                            {t(`modules.${key}`)}
+                          </p>
+                          <p className="text-foreground mt-0.5 text-2xl font-semibold tabular-nums">
+                            {stat.count}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={isDone ? "success-light" : "warning-light"}
+                          size="xs"
+                        >
+                          {isDone ? t("complete") : t("incomplete")}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
-            )}
-          </section>
-        </>
-      )}
+            </section>
 
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title={t("closeConfirmTitle")}
-        description={t("closeConfirmDesc")}
-        onConfirm={handleClose}
-        isPending={closeMutation.isPending}
-        confirmText={t("closePeriod")}
-        variant="destructive"
-      />
+            <section className="space-y-3">
+              <header className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="bg-primary/10 text-primary inline-flex size-7 items-center justify-center rounded-lg"
+                  >
+                    <MapPin className="size-3.5" />
+                  </span>
+                  <h2 className="text-sm font-semibold">
+                    {t("physicalCount")}
+                  </h2>
+                </div>
+                {locations.length > 0 && (
+                  <Badge
+                    variant={
+                      locationsDone === locations.length
+                        ? "success-light"
+                        : "warning-light"
+                    }
+                    size="xs"
+                  >
+                    {t("locationsCompleted", {
+                      completed: locationsDone,
+                      total: locations.length,
+                    })}
+                  </Badge>
+                )}
+              </header>
+              {locations.length === 0 ? (
+                <Card>
+                  <CardContent>
+                    <EmptyComponent
+                      icon={ClipboardList}
+                      title={t("noPhysicalCount")}
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  <Progress
+                    value={locationsPercent}
+                    variant="auto"
+                    className="h-1.5"
+                  />
+                  <div className="space-y-2">
+                    {locations.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="animate-fade-in-up"
+                        style={{ animationDelay: `${index * 40}ms` }}
+                      >
+                        <PcLocationCard
+                          item={item}
+                          index={index}
+                          onAction={handleLocationAction}
+                          disabled={!isCounting}
+                          disabledReason={t("notCountingYet")}
+                          pending={pendingLocationId === item.id}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        )}
 
-      <PeDocumentsDialog
-        open={docsKey !== null}
-        onOpenChange={(o) => !o && setDocsKey(null)}
-        moduleKey={docsKey}
-        stat={docsKey && data ? data.details.transaction[docsKey] : null}
-        icon={docsKey ? MODULE_CONFIG[docsKey].icon : ClipboardList}
-        color={
-          docsKey ? MODULE_CONFIG[docsKey].color : "var(--primary)"
-        }
-      />
-    </div>
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title={t("closeConfirmTitle")}
+          description={t("closeConfirmDesc")}
+          onConfirm={handleClose}
+          isPending={closeMutation.isPending}
+          confirmText={t("closePeriod")}
+          variant="destructive"
+        />
+
+        <PeDocumentsDialog
+          open={docsKey !== null}
+          onOpenChange={(o) => !o && setDocsKey(null)}
+          moduleKey={docsKey}
+          stat={docsKey && data ? data.details.transaction[docsKey] : null}
+          icon={docsKey ? MODULE_CONFIG[docsKey].icon : ClipboardList}
+          color={docsKey ? MODULE_CONFIG[docsKey].color : "var(--primary)"}
+        />
+      </div>
+    </FormPageShell>
   );
 }
 
