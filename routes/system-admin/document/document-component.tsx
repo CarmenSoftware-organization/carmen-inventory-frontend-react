@@ -264,7 +264,6 @@ export default function DocumentComponent() {
               // ตามว่าช่องแถบสรุปมีของ (summarySlotVisible: กำลังโหลดหรือมีข้อมูลแล้ว) และมี
               // active filter หรือไม่ ใช้ summarySlotVisible ไม่ใช่ hasSummary เพราะถ้ารอข้อมูล
               // จริงก่อนค่อยเผื่อพื้นที่ ตารางจะกระตุกตอน skeleton สลับเป็นแถบจริง
-              // แถบสรุป (summary slot) สูง 4rem กินพื้นที่เหนือตาราง — บวกจากสูตรกลาง
               summarySlotVisible
                 ? lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-17rem-3rem)]"

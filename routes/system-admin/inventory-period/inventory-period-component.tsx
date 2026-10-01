@@ -214,7 +214,8 @@ export default function InventoryPeriodComponent() {
             <Plus aria-hidden="true" />
             {t("add")}
           </Button>
-
+          {/* งานรอง (เติมรอบ/ส่งออก/พิมพ์) อยู่ในเมนูเดียวกันทุกขนาดจอ — หน้า config
+              ที่เปิดเดือนละครั้งไม่ควรมีปุ่มน้ำหนักเท่ากันสี่ปุ่มแย่งสายตา */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
