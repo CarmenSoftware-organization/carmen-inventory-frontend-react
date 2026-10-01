@@ -4613,8 +4613,6 @@
     "loading": "Loading…",
     "runReport": "Run Report",
     "noFiltersConfigured": "No filters configured for this report.",
-    "listView": "List view",
-    "gridView": "Grid view",
     "openFilters": "Open filters"
   },
   "reportSchedule": {

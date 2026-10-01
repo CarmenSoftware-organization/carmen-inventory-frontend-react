@@ -4603,8 +4603,6 @@
     "loading": "กำลังโหลด…",
     "runReport": "เรียกดูรายงาน",
     "noFiltersConfigured": "รายงานนี้ไม่มีตัวกรอง",
-    "listView": "มุมมองรายการ",
-    "gridView": "มุมมองตาราง",
     "openFilters": "เปิดตัวกรอง"
   },
   "reportSchedule": {
