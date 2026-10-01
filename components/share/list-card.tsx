@@ -70,6 +70,8 @@ interface ListCardProps {
    * ไม่ต้องห่อ guard เอง (ไม่มีสิทธิ์ = ไม่ถูกเรียก เด้ง dialog แทน)
    */
   readonly onDelete?: () => void;
+  /** เหตุผลที่การ์ดนี้ลบไม่ได้ (ปุ่มลบปิด + title) — กติกาเดียวกับ `DataGridRowActions` */
+  readonly deleteDisabledTitle?: string;
   readonly actions?: ReactNode;
   readonly children: ReactNode;
 }
@@ -258,6 +260,7 @@ export function ListCard({
   badge,
   onOpen,
   onDelete,
+  deleteDisabledTitle,
   actions,
   children,
 }: ListCardProps) {
@@ -279,6 +282,7 @@ export function ListCard({
   };
 
   const hasFooter = !!actions || !!onDelete;
+  const deleteDisabled = writeDisabled || !!deleteDisabledTitle;
 
   return (
     <Card
@@ -328,11 +332,15 @@ export function ListCard({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                disabled={writeDisabled}
-                title={writeDisabled ? writeDisabledTitle : tc("delete")}
+                disabled={deleteDisabled}
+                title={
+                  writeDisabled
+                    ? writeDisabledTitle
+                    : (deleteDisabledTitle ?? tc("delete"))
+                }
                 aria-label={tc("delete")}
                 aria-disabled={
-                  !writeDisabled && deleteDenied ? true : undefined
+                  !deleteDisabled && deleteDenied ? true : undefined
                 }
                 className={cn(
                   "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
