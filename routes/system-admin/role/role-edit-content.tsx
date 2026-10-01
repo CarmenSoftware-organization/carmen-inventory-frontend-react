@@ -2,13 +2,13 @@ import { useTranslations } from "use-intl";
 import { useRoleById } from "../shared/use-role";
 import { RoleForm } from "./role-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function RoleEditContent({ id }: { id: string }) {
   const tErr = useTranslations("systemAdmin.role");
   const { data: role, isLoading, error, refetch } = useRoleById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !role)
     return (
       <ErrorState
