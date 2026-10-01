@@ -36,13 +36,18 @@ import { Loader2 } from "lucide-react";
 import type { InventoryPeriod } from "@/types/inventory-period";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import InventoryPeriodCard from "./inventory-period-card";
-import { INVENTORY_PERIOD_STATUS_OPTIONS, INVENTORY_PERIOD_STATUS_CONFIG } from "@/constant/inventory-period";
+import {
+  INVENTORY_PERIOD_STATUS_OPTIONS,
+  INVENTORY_PERIOD_STATUS_CONFIG,
+} from "@/constant/inventory-period";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const InventoryPeriodDialog = lazy(() =>
-  import("./inventory-period-dialog").then((mod) => ({ default: mod.InventoryPeriodDialog })),
+  import("./inventory-period-dialog").then((mod) => ({
+    default: mod.InventoryPeriodDialog,
+  })),
 );
 import { cn } from "@/lib/utils";
 import { useInventoryPeriodTable } from "./use-inventory-period-table";
@@ -52,7 +57,8 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useProfile } from "@/hooks/use-profile";
 import { InventoryPeriodTimeline } from "./inventory-period-timeline";
@@ -70,7 +76,8 @@ export default function InventoryPeriodComponent() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const { currentPeriod } = useProfile();
   const today = todayDateInput();
-  const [editInventoryPeriod, setEditInventoryPeriod] = useState<InventoryPeriod | null>(null);
+  const [editInventoryPeriod, setEditInventoryPeriod] =
+    useState<InventoryPeriod | null>(null);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const t = useTranslations("systemAdmin.inventoryPeriod");
   const tc = useTranslations("common");
@@ -109,9 +116,12 @@ export default function InventoryPeriodComponent() {
   const combinedParams = { ...params, filter: lf.filterParam };
 
   const useInfiniteScroll = !!isMobile;
-  const { data, isLoading, error, refetch } = useInventoryPeriod(combinedParams, {
-    enabled: !useInfiniteScroll,
-  });
+  const { data, isLoading, error, refetch } = useInventoryPeriod(
+    combinedParams,
+    {
+      enabled: !useInfiniteScroll,
+    },
+  );
 
   const grid = useGridPagination<InventoryPeriod>({
     useListHook: useInventoryPeriod,
@@ -139,7 +149,8 @@ export default function InventoryPeriodComponent() {
           { header: t("endAt"), value: (r) => r.end_at ?? "", width: 14 },
           {
             header: t("status"),
-            value: (r) => INVENTORY_PERIOD_STATUS_CONFIG[r.status]?.label ?? r.status,
+            value: (r) =>
+              INVENTORY_PERIOD_STATUS_CONFIG[r.status]?.label ?? r.status,
             width: 12,
           },
         ],
@@ -186,152 +197,143 @@ export default function InventoryPeriodComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              className="flex-1 sm:flex-none"
-              onClick={() => {
-                setEditInventoryPeriod(null);
-                setDialogOpen(true);
-              }}
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            {/* งานรอง (เติมรอบ/ส่งออก/พิมพ์) อยู่ในเมนูเดียวกันทุกขนาดจอ — หน้า config
-                ที่เปิดเดือนละครั้งไม่ควรมีปุ่มน้ำหนักเท่ากันสี่ปุ่มแย่งสายตา */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="size-11 shrink-0 sm:size-8"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-60">
-                <DropdownMenuItem
-                  disabled={generateNext.isPending || toCreate === 0}
-                  onSelect={() => setGenerateOpen(true)}
-                >
-                  <CalendarPlus aria-hidden="true" />
-                  <span className="flex flex-col">
-                    {t("generateNext")}
-                    {toCreate === 0 && (
-                      <span className="text-muted-foreground text-xs">
-                        {t("generateNothing")}
-                      </span>
-                    )}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {allPeriods.length > 0 && (
-          <InventoryPeriodTimeline
-            periods={allPeriods}
-            currentPeriodId={currentPeriod?.id}
-            currentFiscalYear={currentPeriod?.fiscal_year}
-            today={today}
-            onSelect={openEdit}
-          />
-        )}
-
-        <ListToolbar
-          variant="row"
-          search={search}
-          onSearch={setSearch}
-          lf={lf}
-          fields={inventoryPeriodFilterFields}
-          onSaveViewClick={() => setSaveViewDialogOpen(true)}
-        />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isMobile ? (
-          grid.isLoading ? (
-            <CardSkeletonGrid />
-          ) : grid.error ? (
-            <ErrorState
-              message={grid.error.message}
-              onRetry={() => grid.refetch?.()}
-            />
-          ) : periods.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-3">
-                {periods.map((p) => (
-                  <InventoryPeriodCard
-                    key={p.id}
-                    item={p}
-                    onEdit={openEdit}
-                    isCurrent={p.id === currentPeriod?.id}
-                    today={today}
-                  />
-                ))}
-              </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <EmptyComponent />
-          )
-        ) : (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <Button
+            size="sm"
+            className="flex-1 sm:flex-none"
+            onClick={() => {
+              setEditInventoryPeriod(null);
+              setDialogOpen(true);
+            }}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            <Plus aria-hidden="true" />
+            {t("add")}
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="size-11 shrink-0 sm:size-8"
+                aria-label={tc("aria.moreActions")}
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-60">
+              <DropdownMenuItem
+                disabled={generateNext.isPending || toCreate === 0}
+                onSelect={() => setGenerateOpen(true)}
+              >
+                <CalendarPlus aria-hidden="true" />
+                <span className="flex flex-col">
+                  {t("generateNext")}
+                  {toCreate === 0 && (
+                    <span className="text-muted-foreground text-xs">
+                      {t("generateNothing")}
+                    </span>
+                  )}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {isExporting ? tc("exporting") : tc("export")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => globalThis.print()}>
+                <Printer aria-hidden="true" />
+                {tc("print")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      }
+      toolbar={
+        <>
+          {allPeriods.length > 0 && (
+            <InventoryPeriodTimeline
+              periods={allPeriods}
+              currentPeriodId={currentPeriod?.id}
+              currentFiscalYear={currentPeriod?.fiscal_year}
+              today={today}
+              onSelect={openEdit}
+            />
+          )}
+
+          <ListToolbar
+            variant="row"
+            search={search}
+            onSearch={setSearch}
+            lf={lf}
+            fields={inventoryPeriodFilterFields}
+            onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          />
+        </>
+      }
+    >
+      {isMobile ? (
+        grid.isLoading ? (
+          <CardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        ) : periods.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-3">
+              {periods.map((p) => (
+                <InventoryPeriodCard
+                  key={p.id}
+                  item={p}
+                  onEdit={openEdit}
+                  isCurrent={p.id === currentPeriod?.id}
+                  today={today}
+                />
+              ))}
+            </div>
+            {grid.hasMore && (
+              <div ref={grid.sentinelRef} className="flex justify-center py-4">
+                {grid.isLoadingMore && (
+                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyComponent />
+        )
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <Suspense fallback={null}>
         <InventoryPeriodDialog
@@ -368,6 +370,6 @@ export default function InventoryPeriodComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }
