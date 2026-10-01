@@ -47,7 +47,6 @@ const ALLOWED: Record<string, number> = {
 
   // ── PR 2: procurement · store-operation · vendor-management
   "routes/procurement/approval/approval-component.tsx": 1,
-  "routes/store-operation/store-requisition/sr-component.tsx": 4,
   "routes/store-operation/stock-replenishment/stock-repl-component.tsx": 1,
   "routes/store-operation/wastage-reporting/wr-component.tsx": 1,
   "routes/vendor-management/request-price-list/rfp-component.tsx": 4,
