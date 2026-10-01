@@ -52,9 +52,6 @@ const ALLOWED: Record<string, number> = {
   //  ตามใน spec §4 ไม่ใช่ที่นี่)
 
   // ── PR 4: accounting · inventory-management · product-management
-  "routes/inventory-management/physical-count/pc-component.tsx": 1,
-  "routes/inventory-management/spot-check/sc-component.tsx": 1,
-  "routes/inventory-management/transaction/transaction-component.tsx": 1,
 };
 
 function countSignatures(src: string): number {
