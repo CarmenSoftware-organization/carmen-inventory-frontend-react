@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { useListReturn } from "@/hooks/use-list-return";
-import { History, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { WarningDialog } from "@/components/ui/warning-dialog";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { useDeleteWorkflow } from "./use-wf-mutations";
 import { useWorkflowEditAvailability } from "./use-wf-availability";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface WfHeaderProps {
   readonly workflow: Workflow;
@@ -37,9 +34,7 @@ export function WfHeader({
   const [showDelete, setShowDelete] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
   const t = useTranslations("systemAdmin.workflow");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
-  const tf = useTranslations("form");
   const tw = useTranslations("systemAdmin.workflow.documents");
   const tt = useTranslations("toast");
 
@@ -57,11 +52,7 @@ export function WfHeader({
           {tw("draft")}: {docCounts.draft}
         </span>
         <span
-          className={
-            docCounts.in_progress > 0
-              ? "text-warning-ink"
-              : ""
-          }
+          className={docCounts.in_progress > 0 ? "text-warning-ink" : ""}
           title={
             docCounts.in_progress > 0 ? tw("inProgressBlocksEdit") : undefined
           }
@@ -92,20 +83,6 @@ export function WfHeader({
       <span className="line-clamp-2">{workflow.description}</span>
     ) : undefined;
 
-  // ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทั้งสองโหมด
-  const activityButton = (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={() => openActivity(workflow.id, workflow.name)}
-      className="text-sm"
-    >
-      <History className="size-3" />
-      {tActivity("title")}
-    </Button>
-  );
-
   // เข้าโหมดแก้ได้เสมอแล้ว: เอกสารที่เดินอยู่ล็อกแค่รายการ stage กับเส้นทางระหว่าง stage ส่วนชื่อ
   // ผู้อนุมัติ และรายการสินค้าบันทึกได้ตลอด การปิดทั้งปุ่มจึงกันคนออกจากงานที่ทำได้จริง — ตัวที่ยังปิด
   // อยู่คือส่วน stage ข้างในฟอร์ม ซึ่งปิดตรงจุดที่มันถูกล็อกจริง
@@ -121,59 +98,22 @@ export function WfHeader({
     setShowDelete(true);
   };
 
-  const actions = isEditing ? (
-    <>
-      {activityButton}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={onCancel}
-        disabled={isPending}
-        className="text-sm"
-      >
-        {tc("cancel")}
-      </Button>
-      <Button
-        type="submit"
-        size="sm"
-        form={formId}
-        disabled={isPending}
-        className="text-sm"
-      >
-        {isPending ? tf("saving") : t("saveChanges")}
-      </Button>
-    </>
-  ) : (
-    <>
-      {activityButton}
-      <Button size="sm" onClick={onEdit} className="text-sm">
-        <Pencil className="size-3" />
-        {tc("edit")}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleDelete}
-        disabled={deleteWorkflow.isPending}
-        className="text-sm"
-      >
-        <Trash2 className="size-3" />
-        {tc("delete")}
-      </Button>
-    </>
-  );
-
   return (
     <>
-      <DocFormHeader
+      <FormToolbar
+        mode={isEditing ? "edit" : "view"}
+        formId={formId}
+        isPending={isPending}
         title={isEditing ? t("editWorkflow") : workflow.name}
         subtitle={subtitle}
-        backLabel={tc("goBack")}
-        onBack={() => toList()}
         badges={badges}
-        actions={actions}
-        flush
+        submitLabel={t("saveChanges")}
+        onBack={() => toList()}
+        onCancel={onCancel}
+        onEdit={onEdit}
+        onDelete={handleDelete}
+        deleteIsPending={deleteWorkflow.isPending}
+        activity={{ id: workflow.id, label: workflow.name }}
       />
 
       <WarningDialog

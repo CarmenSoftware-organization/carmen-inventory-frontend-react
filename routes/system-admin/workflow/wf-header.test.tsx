@@ -26,6 +26,20 @@ vi.mock("@/components/share/activity-sheet-host", () => ({
   openActivity: vi.fn(),
 }));
 
+// WfHeader วาดปุ่มผ่าน FormToolbar ซึ่งเช็ค license/permission ด้วย useCan —
+// เทสต์นี้สนใจตรรกะล็อกตามเอกสารค้าง ไม่ใช่สิทธิ์ ให้ผ่านหมด
+vi.mock("@/hooks/use-can", () => ({
+  useCan: () => ({
+    can: () => true,
+    canAny: () => true,
+    canAll: () => true,
+    guard: (_p: unknown, fn: () => void) => fn,
+    isAdmin: true,
+    permissions: [],
+    canWrite: true,
+  }),
+}));
+
 const { WfHeader } = await import("./wf-header");
 
 const workflow = {
