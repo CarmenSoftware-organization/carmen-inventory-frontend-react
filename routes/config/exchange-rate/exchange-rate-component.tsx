@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   ArrowRight,
   Columns3,
-  LayoutGrid,
-  LayoutList,
   Loader2,
   Minus,
   Plus,
@@ -56,7 +54,10 @@ import { formatExchangeRate } from "@/lib/currency-utils";
 import { ExchangeRateDialog } from "./exchange-rate-dialog";
 import { useExchangeRateTable } from "./use-exchange-rate-table";
 import ExchangeRateCard from "./exchange-rate-card";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { cn } from "@/lib/utils";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 
 export default function ExchangeRateComponent() {
   const { defaultCurrencyCode, defaultCurrencyDecimalPlaces, dateFormat } =
@@ -105,7 +106,8 @@ export default function ExchangeRateComponent() {
     : (historyData?.paginate?.total ?? 0);
 
   // --- Currencies (internal) ---
-  const { data: currencyData, isLoading: isLoadingCurrencies } = useCurrencyAll();
+  const { data: currencyData, isLoading: isLoadingCurrencies } =
+    useCurrencyAll();
 
   const { data: externalRates, isRefetching } =
     useExternalExchangeRates(baseCurrency);
@@ -173,51 +175,45 @@ export default function ExchangeRateComponent() {
   }
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      {/* Sticky top section on mobile */}
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc", { base: baseCurrency })}
-            count={totalRecords}
-          />
-          <div className="flex w-full gap-2 *:flex-1 sm:w-auto sm:*:flex-initial">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setEditItem(null);
-                setDialogMode("create");
-                setDialogOpen(true);
-              }}
-            >
-              <Plus aria-hidden="true" />
-              {t("addManual")}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setBulkConfirmOpen(true)}
-              disabled={
-                isLoadingCurrencies ||
-                isRefetching ||
-                bulkMutation.isPending ||
-                currencyWithDiff.length === 0
+    <ListPageShell
+      title={t("title")}
+      description={t("desc", { base: baseCurrency })}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full gap-2 *:flex-1 sm:w-auto sm:*:flex-initial">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setEditItem(null);
+              setDialogMode("create");
+              setDialogOpen(true);
+            }}
+          >
+            <Plus aria-hidden="true" />
+            {t("addManual")}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setBulkConfirmOpen(true)}
+            disabled={
+              isLoadingCurrencies ||
+              isRefetching ||
+              bulkMutation.isPending ||
+              currencyWithDiff.length === 0
+            }
+          >
+            <RefreshCw
+              className={
+                isRefetching || bulkMutation.isPending ? "animate-spin" : ""
               }
-            >
-              <RefreshCw
-                className={
-                  isRefetching || bulkMutation.isPending ? "animate-spin" : ""
-                }
-                aria-hidden="true"
-              />
-              {bulkMutation.isPending ? t("updating") : t("update")}
-            </Button>
-          </div>
+              aria-hidden="true"
+            />
+            {bulkMutation.isPending ? t("updating") : t("update")}
+          </Button>
         </div>
-
-        {/* Toolbar */}
+      }
+      toolbar={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
             <div className="flex-1 sm:flex-initial">
@@ -241,78 +237,63 @@ export default function ExchangeRateComponent() {
               />
             )}
             {!isMobile && (
-              <div className="flex items-center rounded-md border">
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "list" ? "secondary" : "ghost"}
-                  onClick={() => setDisplayMode("list")}
-                  aria-label={tc("aria.listView")}
-                >
-                  <LayoutList className="size-4" />
-                </Button>
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "grid" ? "secondary" : "ghost"}
-                  onClick={() => setDisplayMode("grid")}
-                  aria-label={tc("aria.gridView")}
-                >
-                  <LayoutGrid className="size-4" />
-                </Button>
-              </div>
+              <DisplayModeToggle
+                value={displayMode}
+                onChange={setDisplayMode}
+              />
             )}
           </div>
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="mt-3 space-y-3">
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && items.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
-                <ExchangeRateCard
-                  key={item.id}
-                  item={item}
-                  baseCurrency={baseCurrency}
-                  onEdit={(rate) => {
-                    setEditItem(rate);
-                    setDialogMode("edit");
-                    setDialogOpen(true);
-                  }}
-                  onDelete={(rate) => setDeleteItem(rate)}
-                />
-              ))}
+      }
+    >
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && items.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <ExchangeRateCard
+                key={item.id}
+                item={item}
+                baseCurrency={baseCurrency}
+                onEdit={(rate) => {
+                  setEditItem(rate);
+                  setDialogMode("edit");
+                  setDialogOpen(true);
+                }}
+                onDelete={(rate) => setDeleteItem(rate)}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
             </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && items.length === 0 && (
-          <EmptyComponent />
-        )}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoadingHistory}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
+          )}
+        </>
+      )}
+      {isGridMode && !grid.isLoading && items.length === 0 && (
+        <EmptyComponent />
+      )}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoadingHistory}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn("flex flex-col", listGridMaxH(false))}
           >
-            <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination sizes={[5, 10, 25, 50, 100]} />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination sizes={[5, 10, 25, 50, 100]} />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       {dialogMode === "create" ? (
         <ExchangeRateDialog
@@ -480,6 +461,6 @@ export default function ExchangeRateComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </ListPageShell>
   );
 }
