@@ -12,13 +12,11 @@ const ROOT = join(import.meta.dirname, "../../..");
  * - ลายเซ็น sticky แบบเต็มของ ConfigListTemplate ที่ถูกก๊อป 29 หน้า
  *   (จงใจเป็น string เต็ม: `routes/profile/user-profile-setting.tsx` มี
  *   `sticky top-0 z-20` ของตัวเองคนละเรื่อง ไม่ใช่หน้า list)
- * - `<DisplayTemplate` — คอมโพเนนต์ที่กำลังถูกถอด
  * - `<LayoutList` / `<LayoutGrid` — ปุ่มคู่ต้องผ่าน DisplayModeToggle
  */
 const SIGNATURES = [
   /<DocumentListHeader\b/g,
   /sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0/g,
-  /<DisplayTemplate\b/g,
   /<Layout(?:List|Grid)\b/g,
 ];
 
@@ -44,25 +42,6 @@ const sources = tsxFiles("routes").map((file) => ({
 const ALLOWED: Record<string, number> = {
   // ── ถาวร — หัว dashboard ยืม DocumentListHeader ไม่ใช่หน้า list (งาน landing คนละ spec)
   "routes/accounting/dashboard/accounting-dashboard-page.tsx": 1,
-
-  // ── PR 2: procurement · store-operation · vendor-management
-
-  // ── PR 3: system-admin · report · config · operation-plan
-  // (email-profile / email-template / interface เขียน <h1> สดจึงไม่มีลายเซ็นให้จับ —
-  //  ตามใน spec §4 ไม่ใช่ที่นี่)
-
-  // ── PR 4: accounting · inventory-management · product-management
-  "routes/accounting/accounts-payable/ap-invoice-list.tsx": 4,
-  "routes/accounting/accounts-payable/ap-payment-list.tsx": 3,
-  "routes/accounting/accounts-receivable/ar-invoice-list.route.tsx": 1,
-  "routes/accounting/documents/accounting-document-list.tsx": 4,
-  "routes/accounting/journal-voucher/journal-voucher-list.tsx": 3,
-  "routes/inventory-management/inventory-adjustment/ia-component.tsx": 2,
-  "routes/inventory-management/physical-count/pc-component.tsx": 1,
-  "routes/inventory-management/spot-check/sc-component.tsx": 1,
-  "routes/inventory-management/transaction/transaction-component.tsx": 1,
-  "routes/product-management/product/pd-component.tsx": 2,
-  "routes/product-management/category/category-component.tsx": 2,
 };
 
 function countSignatures(src: string): number {
@@ -85,11 +64,10 @@ describe("list pages go through ListPageShell", () => {
     const probe = [
       `<DocumentListHeader title="x" description="y" />`,
       `<div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">`,
-      `<DisplayTemplate title="x">`,
       `<LayoutList className="size-4" />`,
       `<LayoutGrid className="size-4" />`,
     ].join("\n");
-    expect(countSignatures(probe)).toBe(5);
+    expect(countSignatures(probe)).toBe(4);
   });
 
   it("matches the sticky block as the shell actually writes it", () => {

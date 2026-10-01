@@ -30,7 +30,7 @@ interface ListToolbarProps {
    * บรรทัดใหม่ ใช้กับหน้าที่มีปุ่มฝั่งขวาเยอะ · `"row"` บีบทุกอย่างไว้แถวเดียว
    * ช่องค้นยืดตามที่เหลือ ใช้กับหน้าที่ไม่มีปุ่มฝั่งขวา
    */
-  readonly variant?: "wrap" | "row" | "bare";
+  readonly variant?: "wrap" | "row";
 }
 
 /**
@@ -74,30 +74,6 @@ export function ListToolbar({
   const tc = useTranslations("common");
   const showRight = !!table;
   const isRow = variant === "row";
-  const isBare = variant === "bare";
-
-  const inner = (
-    <>
-      <SearchInput defaultValue={search} onSearch={onSearch} />
-      {beforeViewSelector}
-      <ViewSelector
-        view={lf.view}
-        snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-      />
-      <ListFilter
-        fields={fields}
-        values={lf.values}
-        setValue={lf.setValue}
-        onClearAll={lf.clearAll}
-        onSaveClick={onSaveViewClick}
-        activeCount={lf.activeFilters.length}
-      />
-    </>
-  );
-
-  // DisplayTemplate มี slot toolbar/filterBar แยกกัน — หน้าที่ใช้ variant นี้
-  // ส่ง ActiveFilterBar เข้า filterBar เอง ตรงนี้จึงต้องไม่ห่อ div และไม่ต่อท้าย
-  if (isBare) return inner;
 
   return (
     <>

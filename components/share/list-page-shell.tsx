@@ -66,7 +66,7 @@ export function ListPageShell({
         </div>
       )}
       {/* Sticky top section on mobile */}
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
+      <div className="bg-background sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div
           data-testid="list-page-header"
           className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"

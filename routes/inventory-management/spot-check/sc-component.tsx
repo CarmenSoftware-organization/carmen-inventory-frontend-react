@@ -27,9 +27,8 @@ import type {
   SpotCheckLocationLatest,
   SpotCheckStatus,
 } from "@/types/spot-check";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import {
-  InvListShell,
   InvSearchBar,
   InvStatusSectionsList,
   KpiTile,
@@ -39,7 +38,7 @@ import {
 } from "../shared/inv-shared";
 import { ScHistoryCard } from "./sc-history-card";
 import { ScLocationCard } from "./sc-location-card";
-import { Reveal } from "@/components/share/reveal";
+import { AnimationStyles, Reveal } from "@/components/share/reveal";
 
 type StatusKey = "resume" | "not_started";
 type ViewMode = "locations" | "history";
@@ -194,22 +193,15 @@ export default function ScComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <InvListShell>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={locations.length}
+      actions={<ViewToggle view={view} setView={setView} t={t} />}
+    >
+      <AnimationStyles />
       <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
-          <Reveal>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <DocumentListHeader
-                  title={t("title")}
-                  description={t("desc")}
-                  count={locations.length}
-                />
-              </div>
-              <ViewToggle view={view} setView={setView} t={t} />
-            </div>
-          </Reveal>
-
           {isLocationsView && (
             <Reveal delay={80}>
               <div className="mt-4 grid grid-cols-3 gap-2">
@@ -337,7 +329,7 @@ export default function ScComponent() {
           )}
         </>
       )}
-    </InvListShell>
+    </ListPageShell>
   );
 }
 

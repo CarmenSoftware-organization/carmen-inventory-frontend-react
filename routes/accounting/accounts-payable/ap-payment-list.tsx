@@ -1,17 +1,14 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import {
-  Columns3,
-  LayoutGrid,
-  LayoutList,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { Columns3, RefreshCw } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
@@ -201,21 +198,17 @@ export default function ApPaymentList() {
       />
     );
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title="Payment Voucher Directory"
-            description="Supplier payment workflow and execution"
-          />
-          <Button
-            size="sm"
-            onClick={() => navigate("/accounting/accounts-payable/payment/new")}
-          >
-            <Plus className="size-4" />
-            New Payment
-          </Button>
-        </div>
+    <ListPageShell
+      title="Payment Voucher Directory"
+      description="Supplier payment workflow and execution"
+      actions={
+        <DocumentListActions
+          onAdd={() => navigate("/accounting/accounts-payable/payment/new")}
+          addLabel="New Payment"
+          hideExportPrint
+        />
+      }
+      toolbar={
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-1 flex-wrap gap-3">
             <div className="min-w-52 flex-1 sm:flex-initial">
@@ -230,12 +223,9 @@ export default function ApPaymentList() {
               onChange={(value) => setFilter("lifecycle", value)}
               placeholder="Workflow"
               defaultLabel="All workflow"
-              options={[
-                "draft",
-                "submitted",
-                "posted",
-                "voided",
-              ].map((value) => ({ value, label: value.replaceAll("_", " ") }))}
+              options={["draft", "submitted", "posted", "voided"].map(
+                (value) => ({ value, label: value.replaceAll("_", " ") }),
+              )}
               className="w-40"
             />
             <StatusFilter
@@ -276,24 +266,7 @@ export default function ApPaymentList() {
                 }
               />
             )}
-            <div className="flex rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={mode === "list" ? "secondary" : "ghost"}
-                aria-label="List view"
-                onClick={() => setMode("list")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={mode === "grid" ? "secondary" : "ghost"}
-                aria-label="Grid view"
-                onClick={() => setMode("grid")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
+            <DisplayModeToggle value={mode} onChange={setMode} />
             <Button
               size="icon-sm"
               variant="ghost"
@@ -304,53 +277,52 @@ export default function ApPaymentList() {
             </Button>
           </div>
         </div>
-      </div>
-      <div className="mt-3">
-        {query.isLoading ? (
-          <Skeleton className="h-80 rounded-lg" />
-        ) : !(isMobile || mode === "grid") ? (
-          <DataGrid
-            table={table}
-            recordCount={rows.length}
-            tableLayout={{ headerSticky: true, width: "auto" }}
-            tableClassNames={{ bodyRow: "h-10" }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer className="max-h-[calc(100vh-13rem)]">
-              <DataGridTable />
-            </DataGridContainer>
-          </DataGrid>
-        ) : rows.length === 0 ? (
-          <EmptyComponent />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map((payment) => (
-              <ListCard
-                key={payment.id}
-                title={payment.pv_no}
-                badge={<ApStatusBadge value={payment.lifecycle} />}
-                onOpen={() =>
-                  navigate(`/accounting/accounts-payable/payment/${payment.id}`)
-                }
-              >
-                <ListCardRow label="Vendor">{payment.vendor_name}</ListCardRow>
-                <ListCardRow label="Method">
-                  {payment.payment_method.replaceAll("_", " ")}
-                </ListCardRow>
-                <ListCardRow label="Net pay">
-                  <Money
-                    value={payment.net_pay}
-                    currency={payment.currency_code}
-                  />
-                </ListCardRow>
-                <ListCardRow label="Execution">
-                  <ApStatusBadge value={payment.execution_status} />
-                </ListCardRow>
-              </ListCard>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      }
+    >
+      {query.isLoading ? (
+        <Skeleton className="h-80 rounded-lg" />
+      ) : !(isMobile || mode === "grid") ? (
+        <DataGrid
+          table={table}
+          recordCount={rows.length}
+          tableLayout={{ headerSticky: true, width: "auto" }}
+          tableClassNames={{ bodyRow: "h-10" }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer className={listGridMaxH(false)}>
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
+      ) : rows.length === 0 ? (
+        <EmptyComponent />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((payment) => (
+            <ListCard
+              key={payment.id}
+              title={payment.pv_no}
+              badge={<ApStatusBadge value={payment.lifecycle} />}
+              onOpen={() =>
+                navigate(`/accounting/accounts-payable/payment/${payment.id}`)
+              }
+            >
+              <ListCardRow label="Vendor">{payment.vendor_name}</ListCardRow>
+              <ListCardRow label="Method">
+                {payment.payment_method.replaceAll("_", " ")}
+              </ListCardRow>
+              <ListCardRow label="Net pay">
+                <Money
+                  value={payment.net_pay}
+                  currency={payment.currency_code}
+                />
+              </ListCardRow>
+              <ListCardRow label="Execution">
+                <ApStatusBadge value={payment.execution_status} />
+              </ListCardRow>
+            </ListCard>
+          ))}
+        </div>
+      )}
+    </ListPageShell>
   );
 }

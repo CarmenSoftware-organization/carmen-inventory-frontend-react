@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnimationStyles, Reveal, useCountUp } from "@/components/share/reveal";
+import { Reveal, useCountUp } from "@/components/share/reveal";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import { cn } from "@/lib/utils";
@@ -441,19 +441,6 @@ export function LocationCardShell({
   return (
     <div className="border-border/60 bg-card hover:border-primary/40 relative space-y-3 rounded-xl border p-3 transition-colors">
       {children}
-    </div>
-  );
-}
-
-export function InvListShell({
-  children,
-}: {
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <div className="relative isolate -mx-3 -my-3">
-      <AnimationStyles />
-      <div className="relative px-4 pt-4 pb-8 lg:p-4">{children}</div>
     </div>
   );
 }
