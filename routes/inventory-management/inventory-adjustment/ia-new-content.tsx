@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
-import { Loader2 } from "lucide-react";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 import { InventoryAdjustmentForm } from "./ia-form";
 import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
@@ -20,13 +20,7 @@ function NewInventoryAdjustmentInner() {
 
 export function IaNewContent() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="text-muted-foreground size-6 animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<FormPageSkeleton />}>
       <NewInventoryAdjustmentInner />
     </Suspense>
   );
