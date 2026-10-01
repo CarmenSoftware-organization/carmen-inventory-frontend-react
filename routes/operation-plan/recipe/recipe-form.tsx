@@ -23,6 +23,7 @@ import {
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useRecipeCostCalc } from "./use-recipe-cost-calc";
 import { useRecipeGallery } from "./use-recipe-gallery";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { RecipeToolbar } from "./recipe-toolbar";
 import { RecipeHeroFields } from "./recipe-hero-fields";
 import { RecipeGeneralFields } from "./recipe-general-fields";
@@ -128,18 +129,20 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <RecipeToolbar
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        isDeleting={deleteRecipe.isPending}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={recipe ? () => setShowDelete(true) : undefined}
-      />
-
+    <FormPageShell
+      header={
+        <RecipeToolbar
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          isDeleting={deleteRecipe.isPending}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={recipe ? () => setShowDelete(true) : undefined}
+        />
+      }
+    >
       {/* flatten หน้าเดียว: hero บนสุด แล้วแต่ละ section เป็น 2-col แบบ company
           profile (title/desc ซ้าย · เนื้อหาขวา) stack ต่อกันด้วยเส้นคั่น */}
       <form
@@ -196,7 +199,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         onCancel={f.navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }
 

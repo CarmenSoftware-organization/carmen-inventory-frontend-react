@@ -45,21 +45,7 @@ const sources = tsxFiles("routes").map((file) => ({
 const ALLOWED: Record<string, number> = {
   // ── ถาวร
   "routes/legal/legal-page.tsx": 1, // ArrowLeft ลิงก์กลับแอป ไม่ใช่ฟอร์ม
-  "routes/inventory-management/period-end/pe-review.tsx": 1, // DFH ตรง — ไม่ใช่ฟอร์ม (PR 2 ย้ายเข้า shell แต่ยังเรียก DFH)
-  // ── PR 2 (wrapper โมดูล + ฟอร์มของมัน)
-  "routes/inventory-management/inventory-adjustment/ia-form-hero.tsx": 1,
-  "routes/inventory-management/inventory-adjustment/ia-form.tsx": 1,
-  "routes/operation-plan/category/recipe-category-form.tsx": 1,
-  "routes/operation-plan/category/recipe-category-toolbar.tsx": 1,
-  "routes/operation-plan/cuisine/cuisine-form.tsx": 1,
-  "routes/operation-plan/cuisine/cuisine-toolbar.tsx": 1,
-  "routes/operation-plan/recipe/recipe-form.tsx": 1,
-  "routes/operation-plan/recipe/recipe-toolbar.tsx": 1,
-  "routes/operation-plan/equipment/eq-form.tsx": 1,
-  "routes/operation-plan/equipment/eq-toolbar.tsx": 1,
-  "routes/product-management/product/pd-form-toolbar.tsx": 1,
-  "routes/system-admin/role/role-form-hero.tsx": 1,
-  "routes/system-admin/workflow/wf-header.tsx": 1,
+  "routes/inventory-management/period-end/pe-review.tsx": 1, // DFH ตรงใน FormPageShell — ไม่ใช่ฟอร์ม ไม่มีชุด Edit/Save
   // ── PR 3 (h1 เขียนเอง + หน้าพิเศษ)
   "routes/system-admin/notification-template/noti-tmpl-form.tsx": 2,
   "routes/system-admin/user/user-assigned-form.tsx": 1,

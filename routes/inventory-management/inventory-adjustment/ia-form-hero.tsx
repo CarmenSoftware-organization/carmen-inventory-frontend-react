@@ -1,8 +1,8 @@
 import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
@@ -15,7 +15,6 @@ import type {
 } from "@/types/inventory-adjustment";
 import type { FormMode } from "@/types/form";
 import type { AdjFormValues } from "./ia-form-schema";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface IaFormHeroProps {
   readonly adjustmentType: InventoryAdjustmentType;
@@ -49,7 +48,6 @@ export function IaFormHero({
   onDelete,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
-  const tActivity = useTranslations("activity");
   const isView = mode === "view";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
   const docNo = inventoryAdjustment?.si_no ?? inventoryAdjustment?.so_no ?? "";
@@ -82,83 +80,47 @@ export function IaFormHero({
       </div>
     ) : undefined;
 
-  const actions = (
-    <>
-      {isView && !isReadOnly ? (
-        <Button size="sm" variant="outline" onClick={onEdit}>
-          <Pencil />
-          {tc("edit")}
-        </Button>
-      ) : !isView ? (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            <X />
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            form={formId}
-            disabled={isPending}
-            onClick={saveAsDraft}
-          >
-            <Save />
-            {tc("save")}
-          </Button>
-        </>
-      ) : null}
-      {canDelete && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
-          disabled={isPending || deleteIsPending}
-        >
-          <Trash2 />
-          {tc("delete")}
-        </Button>
-      )}
-      {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-      {inventoryAdjustment && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openActivity(inventoryAdjustment.id, docNo || undefined)
-          }
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
+  // Save ตั้ง doc_status=draft ตอนคลิกก่อน submit จึงเป็น submitSlot (ไม่ผ่าน gate
+  // license/permission ของ FormToolbar — Edit ยัง gate; โหมด add ตกที่ backend)
+  const submitSlot = (
+    <Button
+      type="submit"
+      size="sm"
+      form={formId}
+      disabled={isPending}
+      onClick={saveAsDraft}
+    >
+      <Save />
+      {tc("save")}
+    </Button>
+  );
+
+  return (
+    <FormToolbar
+      mode={mode}
+      formId={formId}
+      isPending={isPending}
+      title={docNo || typeLabel}
+      leading={leading}
+      badges={badges}
+      submitSlot={submitSlot}
+      onBack={onBack}
+      onCancel={onCancel}
+      onEdit={isReadOnly ? undefined : onEdit}
+      onDelete={canDelete ? onDelete : undefined}
+      deleteIsPending={deleteIsPending}
+      activity={
+        inventoryAdjustment
+          ? { id: inventoryAdjustment.id, label: docNo || undefined }
+          : undefined
+      }
+    >
       {canPrint && (
         <PrintDocumentButton
           documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
           documentId={inventoryAdjustment!.id}
         />
       )}
-    </>
-  );
-
-  // ไม่มีกล่อง card ครอบ header แล้ว — วางบนพื้นหน้าตรง ๆ เหมือน price-list /
-  // company-profile (flush ให้ title align กับ field ใน SettingSection ข้างล่าง)
-  return (
-    <DocFormHeader
-      leading={leading}
-      title={docNo || typeLabel}
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-      flush
-    />
+    </FormToolbar>
   );
 }
