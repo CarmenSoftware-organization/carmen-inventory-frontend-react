@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Columns3, LayoutGrid, LayoutList } from "lucide-react";
+import { Columns3 } from "lucide-react";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -150,24 +151,10 @@ export function ListToolbar({
               }
             />
             {displayMode && onDisplayModeChange && (
-              <div className="flex items-center rounded-md border">
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "list" ? "secondary" : "ghost"}
-                  onClick={() => onDisplayModeChange("list")}
-                  aria-label={tc("aria.listView")}
-                >
-                  <LayoutList className="size-4" />
-                </Button>
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "grid" ? "secondary" : "ghost"}
-                  onClick={() => onDisplayModeChange("grid")}
-                  aria-label={tc("aria.gridView")}
-                >
-                  <LayoutGrid className="size-4" />
-                </Button>
-              </div>
+              <DisplayModeToggle
+                value={displayMode}
+                onChange={onDisplayModeChange}
+              />
             )}
           </div>
         )}
