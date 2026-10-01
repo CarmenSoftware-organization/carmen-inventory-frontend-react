@@ -46,19 +46,12 @@ const ALLOWED: Record<string, number> = {
   "routes/accounting/dashboard/accounting-dashboard-page.tsx": 1,
 
   // ── PR 2: procurement · store-operation · vendor-management
-  "routes/procurement/credit-note/cn-component.tsx": 2,
-  "routes/procurement/goods-receive-note/grn-component.tsx": 2,
-  "routes/procurement/purchase-order/po-component.tsx": 2,
-  "routes/procurement/purchase-request/pr-component.tsx": 2,
   "routes/procurement/purchase-request-template/prt-component.tsx": 2,
   "routes/procurement/approval/approval-component.tsx": 1,
   "routes/store-operation/store-requisition/sr-component.tsx": 4,
   "routes/store-operation/stock-replenishment/stock-repl-component.tsx": 1,
   "routes/store-operation/wastage-reporting/wr-component.tsx": 1,
-  "routes/vendor-management/price-list-template/plt-component.tsx": 2,
-  "routes/vendor-management/price-list/pl-component.tsx": 2,
   "routes/vendor-management/request-price-list/rfp-component.tsx": 4,
-  "routes/vendor-management/vendor/vendor-component.tsx": 2,
 
   // ── PR 3: system-admin · report · config · operation-plan
   // (email-profile / email-template / interface เขียน <h1> สดจึงไม่มีลายเซ็นให้จับ —

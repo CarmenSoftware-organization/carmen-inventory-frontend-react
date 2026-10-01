@@ -39,7 +39,8 @@ import { useProfile } from "@/hooks/use-profile";
 import { useCan } from "@/hooks/use-can";
 import { canDeletePr } from "./pr-ownership";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -235,23 +236,20 @@ export default function PurchaseRequestComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={handleAdd}
-            addLabel={t("add")}
-            addDisabled={!canCreatePr}
-          />
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={handleAdd}
+          addLabel={t("add")}
+          addDisabled={!canCreatePr}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -271,103 +269,99 @@ export default function PurchaseRequestComponent() {
             />
           }
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {hasSelection && viewMode === "my-pending" && (
-          <div className="flex items-center justify-end gap-2">
-            <span className="text-muted-foreground text-xs">
-              {selectedItems.length} {t("selected")}
-            </span>
-            {selectedGroup === "draft" ? (
+      }
+    >
+      {hasSelection && viewMode === "my-pending" && (
+        <div className="flex items-center justify-end gap-2">
+          <span className="text-muted-foreground text-xs">
+            {selectedItems.length} {t("selected")}
+          </span>
+          {selectedGroup === "draft" ? (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={requestBatchDelete}
+            >
+              <Trash2 aria-hidden="true" />
+              {tc("delete")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="success"
+                onClick={() => setBatchApproveOpen(true)}
+              >
+                <CheckCircle2 aria-hidden="true" />
+                {tc("approve")}
+              </Button>
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={requestBatchDelete}
+                onClick={() => setBatchRejectOpen(true)}
               >
-                <Trash2 aria-hidden="true" />
-                {tc("delete")}
+                <XCircle aria-hidden="true" />
+                {tc("reject")}
               </Button>
-            ) : (
-              <>
-                <Button
-                  size="sm"
-                  variant="success"
-                  onClick={() => setBatchApproveOpen(true)}
-                >
-                  <CheckCircle2 aria-hidden="true" />
-                  {tc("approve")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => setBatchRejectOpen(true)}
-                >
-                  <XCircle aria-hidden="true" />
-                  {tc("reject")}
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
+      )}
 
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{
-              checkbox: true,
-              headerSticky: true,
-              // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
-              // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
-              // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
-              columnsResizable: true,
-            }}
-            emptyMessage={<EmptyComponent />}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{
+            checkbox: true,
+            headerSticky: true,
+            // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
+            // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
+            // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
+            columnsResizable: true,
+          }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
-        {isGridMode && (
-          <>
-            <PrCardList
-              items={items}
-              isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(item) =>
-                navigate(
-                  `/procurement/purchase-request/${item.id}`,
-                  listReturnState(),
-                )
-              }
-              onApprove={setApproveTarget}
-              onReject={setRejectTarget}
-              onDelete={requestDelete}
-              isMyPending={viewMode === "my-pending"}
-            />
-            {useInfiniteScroll && grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {isGridMode && (
+        <>
+          <PrCardList
+            items={items}
+            isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
+            onEdit={(item) =>
+              navigate(
+                `/procurement/purchase-request/${item.id}`,
+                listReturnState(),
+              )
+            }
+            onApprove={setApproveTarget}
+            onReject={setRejectTarget}
+            onDelete={requestDelete}
+            isMyPending={viewMode === "my-pending"}
+          />
+          {useInfiniteScroll && grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       <PrListDialogs
         deleteTarget={deleteTarget}
@@ -438,6 +432,6 @@ export default function PurchaseRequestComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }
