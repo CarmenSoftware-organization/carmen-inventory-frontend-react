@@ -27,8 +27,13 @@ import { getProductStatusLabel } from "@/constant/product-status";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { defineEntitySource } from "@/components/filter/entity-filter-source";
-import type { CategoryDto, ItemGroupDto, SubCategoryDto } from "@/types/category";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import type {
+  CategoryDto,
+  ItemGroupDto,
+  SubCategoryDto,
+} from "@/types/category";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useProductTable } from "./use-product-table";
@@ -207,24 +212,19 @@ export default function ProductComponent() {
   };
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={handleAddItem}
-            addLabel={t("add")}
-          />
-        </div>
-
-        {/* Toolbar */}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={handleAddItem}
+          addLabel={t("add")}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -235,79 +235,69 @@ export default function ProductComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Content */}
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && grid.error && (
-          <ErrorState
-            message={grid.error.message}
-            onRetry={() => grid.refetch?.()}
-          />
-        )}
-        {isGridMode &&
-          !grid.isLoading &&
-          !grid.error &&
-          products.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {products.map((item) => (
-                  <ProductCard
-                    key={item.id}
-                    item={item}
-                    onEdit={(p) =>
-                      navigate(
-                        `/product-management/product/${p.id}`,
-                        listReturnState(),
-                      )
-                    }
-                    onDelete={setDeleteTarget}
-                  />
-                ))}
-              </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
+      }
+    >
+      {/* Content */}
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && grid.error && (
+        <ErrorState
+          message={grid.error.message}
+          onRetry={() => grid.refetch?.()}
+        />
+      )}
+      {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((item) => (
+              <ProductCard
+                key={item.id}
+                item={item}
+                onEdit={(p) =>
+                  navigate(
+                    `/product-management/product/${p.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            </>
+            </div>
           )}
-        {isGridMode &&
-          !grid.isLoading &&
-          !grid.error &&
-          products.length === 0 && <EmptyComponent />}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            tableLayout={{ headerSticky: true }}
-            isLoading={isLoading}
-            emptyMessage={<EmptyComponent />}
+        </>
+      )}
+      {isGridMode &&
+        !grid.isLoading &&
+        !grid.error &&
+        products.length === 0 && <EmptyComponent />}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          tableLayout={{ headerSticky: true }}
+          isLoading={isLoading}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <div className="flex-1 overflow-auto">
-                <div className="min-w-300">
-                  <DataGridTable />
-                </div>
+            <div className="flex-1 overflow-auto">
+              <div className="min-w-300">
+                <DataGridTable />
               </div>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -335,6 +325,6 @@ export default function ProductComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

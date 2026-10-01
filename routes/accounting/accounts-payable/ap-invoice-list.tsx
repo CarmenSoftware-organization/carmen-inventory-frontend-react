@@ -1,18 +1,13 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import {
-  Columns3,
-  CreditCard,
-  LayoutGrid,
-  LayoutList,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { Columns3, CreditCard, Plus, RefreshCw } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -235,37 +230,33 @@ export default function ApInvoiceList() {
       />
     );
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title="AP Invoice Directory"
-            description="Supplier invoices, matching and open liabilities"
-          />
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={eligible.length === 0}
-              onClick={() =>
-                navigate(
-                  `/accounting/accounts-payable/payment/new?invoice_ids=${eligible.map((item) => item.id).join(",")}`,
-                )
-              }
-            >
-              <CreditCard className="size-4" /> Pay Selected
-              {eligible.length ? ` (${eligible.length})` : ""}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate("/accounting/accounts-payable/invoice/new")
-              }
-            >
-              <Plus className="size-4" /> New Invoice
-            </Button>
-          </div>
+    <ListPageShell
+      title="AP Invoice Directory"
+      description="Supplier invoices, matching and open liabilities"
+      actions={
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={eligible.length === 0}
+            onClick={() =>
+              navigate(
+                `/accounting/accounts-payable/payment/new?invoice_ids=${eligible.map((item) => item.id).join(",")}`,
+              )
+            }
+          >
+            <CreditCard className="size-4" /> Pay Selected
+            {eligible.length ? ` (${eligible.length})` : ""}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate("/accounting/accounts-payable/invoice/new")}
+          >
+            <Plus className="size-4" /> New Invoice
+          </Button>
         </div>
+      }
+      toolbar={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto">
             <div className="min-w-52 flex-1 sm:flex-initial">
@@ -330,24 +321,7 @@ export default function ApInvoiceList() {
                 }
               />
             )}
-            <div className="flex rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label="List view"
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label="Grid view"
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
+            <DisplayModeToggle value={displayMode} onChange={setDisplayMode} />
             <Button
               size="icon-sm"
               variant="ghost"
@@ -358,7 +332,8 @@ export default function ApInvoiceList() {
             </Button>
           </div>
         </div>
-      </div>
+      }
+    >
       <div className="mt-3">
         {query.isLoading ? (
           <Skeleton className="h-80 rounded-lg" />
@@ -370,7 +345,7 @@ export default function ApInvoiceList() {
             tableClassNames={{ bodyRow: "h-10" }}
             emptyMessage={<EmptyComponent />}
           >
-            <DataGridContainer className="max-h-[calc(100vh-13rem)]">
+            <DataGridContainer className={listGridMaxH(false)}>
               <DataGridTable />
             </DataGridContainer>
           </DataGrid>
@@ -403,6 +378,6 @@ export default function ApInvoiceList() {
           </div>
         )}
       </div>
-    </div>
+    </ListPageShell>
   );
 }

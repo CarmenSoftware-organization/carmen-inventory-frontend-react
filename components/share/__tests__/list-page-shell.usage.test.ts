@@ -52,17 +52,12 @@ const ALLOWED: Record<string, number> = {
   //  ตามใน spec §4 ไม่ใช่ที่นี่)
 
   // ── PR 4: accounting · inventory-management · product-management
-  "routes/accounting/accounts-payable/ap-invoice-list.tsx": 4,
   "routes/accounting/accounts-payable/ap-payment-list.tsx": 3,
   "routes/accounting/accounts-receivable/ar-invoice-list.route.tsx": 1,
-  "routes/accounting/documents/accounting-document-list.tsx": 4,
   "routes/accounting/journal-voucher/journal-voucher-list.tsx": 3,
-  "routes/inventory-management/inventory-adjustment/ia-component.tsx": 2,
   "routes/inventory-management/physical-count/pc-component.tsx": 1,
   "routes/inventory-management/spot-check/sc-component.tsx": 1,
   "routes/inventory-management/transaction/transaction-component.tsx": 1,
-  "routes/product-management/product/pd-component.tsx": 2,
-  "routes/product-management/category/category-component.tsx": 2,
 };
 
 function countSignatures(src: string): number {
