@@ -2,13 +2,13 @@ import { useTranslations } from "use-intl";
 import { useLocationById } from "@/hooks/use-location";
 import { LocationForm } from "./location-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function LocationEditContent({ id }: { id: string }) {
   const tErr = useTranslations("config.location");
   const { data: location, isLoading, error, refetch } = useLocationById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !location)
     return (
       <ErrorState

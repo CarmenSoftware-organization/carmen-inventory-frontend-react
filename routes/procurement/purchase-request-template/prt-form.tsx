@@ -9,6 +9,7 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { FormToolbar } from "@/components/share/form-toolbar";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
 import { useCreatePrt, useUpdatePrt, useDeletePrt } from "./use-prt";
@@ -163,45 +164,45 @@ export function PrtForm({ template }: PrtFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <FormToolbar
-        entity={template?.name || t("entity")}
-        badges={
-          template && <StatusBadge active={template.is_active} size="xs" />
-        }
-        mode={mode}
-        formId="prt-form"
-        isPending={isPending}
-        onBack={handleBack}
-        onEdit={() => setMode("edit")}
-        onCancel={handleCancel}
-        onDelete={template ? () => setShowDelete(true) : undefined}
-        deleteIsPending={deletePrt.isPending}
-        activity={template && { id: template.id, label: template.name }}
-      />
-
-      <div className="mt-6">
-        <form
-          id="prt-form"
-          onSubmit={form.handleSubmit(onSubmit, () =>
-            scrollToFirstInvalidField(),
-          )}
-        >
-          <PrtGeneralFields
-            form={form}
-            readOnly={isView}
-            disabled={isPending}
-            workflowName={template?.workflow?.name ?? undefined}
-            isAdd={isAdd}
-          />
-          <PrtItemFields
-            form={form}
-            readOnly={isView}
-            disabled={isPending}
-            defaultBu={defaultBu}
-          />
-        </form>
-      </div>
+    <FormPageShell
+      header={
+        <FormToolbar
+          entity={template?.name || t("entity")}
+          badges={
+            template && <StatusBadge active={template.is_active} size="xs" />
+          }
+          mode={mode}
+          formId="prt-form"
+          isPending={isPending}
+          onBack={handleBack}
+          onEdit={() => setMode("edit")}
+          onCancel={handleCancel}
+          onDelete={template ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deletePrt.isPending}
+          activity={template && { id: template.id, label: template.name }}
+        />
+      }
+    >
+      <form
+        id="prt-form"
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
+      >
+        <PrtGeneralFields
+          form={form}
+          readOnly={isView}
+          disabled={isPending}
+          workflowName={template?.workflow?.name ?? undefined}
+          isAdd={isAdd}
+        />
+        <PrtItemFields
+          form={form}
+          readOnly={isView}
+          disabled={isPending}
+          defaultBu={defaultBu}
+        />
+      </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 
@@ -234,6 +235,6 @@ export function PrtForm({ template }: PrtFormProps) {
           }}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }
