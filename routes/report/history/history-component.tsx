@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { LayoutGrid, LayoutList, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -20,11 +19,13 @@ import { useHistoryTable } from "./use-history-table";
 import { useReportHistory } from "./use-report-history";
 import type { ReportHistory } from "@/types/report-history";
 import HistoryCard from "./history-card";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { cn } from "@/lib/utils";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 
 export default function HistoryComponent() {
   const t = useTranslations("reportHistory");
-  const tc = useTranslations("common");
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const isMobile = useIsMobile();
   const { params, search, setSearch, tableConfig } = useDataGridState();
@@ -63,40 +64,23 @@ export default function HistoryComponent() {
   });
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <DocumentListHeader
-        title={t("title")}
-        description={t("desc")}
-        count={totalRecords}
-      />
-
-      {/* Toolbar — search + display toggle */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="w-full flex-1 sm:w-auto sm:flex-initial">
-          <SearchInput defaultValue={search} onSearch={setSearch} />
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="w-full flex-1 sm:w-auto sm:flex-initial">
+            <SearchInput defaultValue={search} onSearch={setSearch} />
+          </div>
+          <DisplayModeToggle
+            value={displayMode}
+            onChange={setDisplayMode}
+            className="hidden sm:flex"
+          />
         </div>
-        <div className="hidden items-center rounded-md border sm:flex">
-          <Button
-            size="icon-sm"
-            variant={displayMode === "list" ? "secondary" : "ghost"}
-            onClick={() => setDisplayMode("list")}
-            aria-label={tc("aria.listView")}
-          >
-            <LayoutList className="size-4" />
-          </Button>
-          <Button
-            size="icon-sm"
-            variant={displayMode === "grid" ? "secondary" : "ghost"}
-            onClick={() => setDisplayMode("grid")}
-            aria-label={tc("aria.gridView")}
-          >
-            <LayoutGrid className="size-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Content */}
+      }
+    >
       {isGridMode ? (
         <GridContent
           items={items}
@@ -114,7 +98,9 @@ export default function HistoryComponent() {
           tableLayout={{ headerSticky: true }}
           emptyMessage={<EmptyComponent />}
         >
-          <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
+          <DataGridContainer
+            className={cn("flex flex-col", listGridMaxH(false))}
+          >
             <DataGridScrollArea>
               <DataGridTable />
             </DataGridScrollArea>
@@ -122,7 +108,7 @@ export default function HistoryComponent() {
           </DataGridContainer>
         </DataGrid>
       )}
-    </div>
+    </ListPageShell>
   );
 }
 

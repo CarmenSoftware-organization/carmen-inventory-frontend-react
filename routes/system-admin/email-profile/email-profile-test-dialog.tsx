@@ -46,7 +46,7 @@ export function EmailProfileTestDialog({
   const t = useTranslations("systemAdmin.emailProfile");
   const tc = useTranslations("common");
 
-  // ตัวเรียก mount ใหม่ทุกครั้งที่เปิด (ดู `email-profile.route.tsx`) ค่าตั้งต้นจึงมาจาก
+  // ตัวเรียก mount ใหม่ทุกครั้งที่เปิด (ดู `email-profile-component.tsx`) ค่าตั้งต้นจึงมาจาก
   // initializer ตรง ๆ ไม่ต้องมี effect คอย sync — setState ใน effect ทำให้ render ซ้อนโดยเปล่าประโยชน์
   const [to, setTo] = useState(profile.from_email);
   const [error, setError] = useState<string | null>(null);

@@ -1,5 +1,4 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Download, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import {
   useRecipeEquipmentCategory,
   useDeleteRecipeEquipmentCategory,
@@ -19,8 +17,10 @@ import type { RecipeEquipmentCategory } from "@/types/recipe-equipment-category"
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import DisplayTemplate from "@/components/display-template";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
+import { cn } from "@/lib/utils";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DocumentListActions } from "@/components/share/document-list-actions";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { useRecipeEquipmentCategoryTable } from "./use-recipe-equipment-category-table";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ListToolbar } from "@/components/list-filter/list-toolbar";
@@ -45,7 +45,6 @@ export default function RecipeEquipmentCategoryComponent() {
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const t = useTranslations("operationPlan.recipeEquipmentCategory");
-  const tc = useTranslations("common");
   const tt = useTranslations("toast");
 
   // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
@@ -90,12 +89,11 @@ export default function RecipeEquipmentCategoryComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title={t("title")}
       description={t("desc")}
       toolbar={
         <ListToolbar
-          variant="bare"
           search={search}
           onSearch={setSearch}
           lf={lf}
@@ -103,30 +101,15 @@ export default function RecipeEquipmentCategoryComponent() {
           onSaveViewClick={() => setSaveViewDialogOpen(true)}
         />
       }
-      filterBar={
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
-      }
       actions={
-        <>
-          <Button size="sm" variant="outline" disabled title={tc("comingSoon")}>
-            <Download aria-hidden="true" />
-            {tc("export")}
-          </Button>
-          <Button size="sm" variant="outline" disabled title={tc("comingSoon")}>
-            <Printer aria-hidden="true" />
-            {tc("print")}
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditCategory(null);
-              setDialogOpen(true);
-            }}
-          >
-            <Plus aria-hidden="true" />
-            {t("add")}
-          </Button>
-        </>
+        <DocumentListActions
+          onAdd={() => {
+            setEditCategory(null);
+            setDialogOpen(true);
+          }}
+          addLabel={t("add")}
+          hideExportPrint
+        />
       }
     >
       <DataGrid
@@ -136,7 +119,12 @@ export default function RecipeEquipmentCategoryComponent() {
         tableLayout={{ headerSticky: true }}
         emptyMessage={<EmptyComponent />}
       >
-        <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
+        <DataGridContainer
+          className={cn(
+            "flex flex-col",
+            listGridMaxH(lf.activeFilters.length > 0),
+          )}
+        >
           <DataGridScrollArea>
             <DataGridTable />
           </DataGridScrollArea>
@@ -178,6 +166,6 @@ export default function RecipeEquipmentCategoryComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
