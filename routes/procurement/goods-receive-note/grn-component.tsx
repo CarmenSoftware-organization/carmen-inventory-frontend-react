@@ -25,7 +25,8 @@ import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { cn } from "@/lib/utils";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import { GrnInvoiceFilter } from "./grn-invoice-filter";
@@ -264,22 +265,19 @@ export default function GrnComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={() => setShowCreateDialog(true)}
-            addLabel={t("add")}
-          />
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={() => setShowCreateDialog(true)}
+          addLabel={t("add")}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -290,93 +288,87 @@ export default function GrnComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-11rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-
-        {isGridMode && useInfiniteScroll && (
-          <>
-            <GrnCardList
-              items={goodsReceiveNotes}
-              isLoading={grid.isLoading}
-              onEdit={(grn) =>
-                navigate(
-                  `/procurement/goods-receive-note/${grn.id}`,
-                  listReturnState(),
-                )
-              }
-              onDelete={setDeleteTarget}
-            />
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
+      }
+    >
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
             )}
-          </>
-        )}
-
-        {isGridMode && !useInfiniteScroll && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
           >
-            <DataGridContainer
-              // โหมดการ์ด: กล่องนอกไม่ใช่การ์ด เป็นแค่ตัวคุมพื้นที่เลื่อนกับแถบ
-              // แบ่งหน้า — ทา `bg-card` ทับการ์ดที่เป็น `bg-card` อยู่แล้วเมื่อไร
-              // ก็กลายเป็นการ์ดซ้อนการ์ดที่แยกกันไม่ออก
-              border={false}
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-11rem-3rem)]",
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
+
+      {isGridMode && useInfiniteScroll && (
+        <>
+          <GrnCardList
+            items={goodsReceiveNotes}
+            isLoading={grid.isLoading}
+            onEdit={(grn) =>
+              navigate(
+                `/procurement/goods-receive-note/${grn.id}`,
+                listReturnState(),
+              )
+            }
+            onDelete={setDeleteTarget}
+          />
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            >
-              <div className="flex-1 overflow-auto">
-                <GrnCardList
-                  items={goodsReceiveNotes}
-                  isLoading={isLoading}
-                  onEdit={(grn) =>
-                    navigate(
-                      `/procurement/goods-receive-note/${grn.id}`,
-                      listReturnState(),
-                    )
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              </div>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {isGridMode && !useInfiniteScroll && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+        >
+          <DataGridContainer
+            // โหมดการ์ด: กล่องนอกไม่ใช่การ์ด เป็นแค่ตัวคุมพื้นที่เลื่อนกับแถบ
+            // แบ่งหน้า — ทา `bg-card` ทับการ์ดที่เป็น `bg-card` อยู่แล้วเมื่อไร
+            // ก็กลายเป็นการ์ดซ้อนการ์ดที่แยกกันไม่ออก
+            border={false}
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <div className="flex-1 overflow-auto">
+              <GrnCardList
+                items={goodsReceiveNotes}
+                isLoading={isLoading}
+                onEdit={(grn) =>
+                  navigate(
+                    `/procurement/goods-receive-note/${grn.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            </div>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <GrnCreateDialog
         open={showCreateDialog}
@@ -410,6 +402,6 @@ export default function GrnComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }
