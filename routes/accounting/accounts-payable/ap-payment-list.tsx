@@ -223,12 +223,9 @@ export default function ApPaymentList() {
               onChange={(value) => setFilter("lifecycle", value)}
               placeholder="Workflow"
               defaultLabel="All workflow"
-              options={[
-                "draft",
-                "submitted",
-                "posted",
-                "voided",
-              ].map((value) => ({ value, label: value.replaceAll("_", " ") }))}
+              options={["draft", "submitted", "posted", "voided"].map(
+                (value) => ({ value, label: value.replaceAll("_", " ") }),
+              )}
               className="w-40"
             />
             <StatusFilter
@@ -282,52 +279,50 @@ export default function ApPaymentList() {
         </div>
       }
     >
-      </div>
-      <div className="mt-3">
-        {query.isLoading ? (
-          <Skeleton className="h-80 rounded-lg" />
-        ) : !(isMobile || mode === "grid") ? (
-          <DataGrid
-            table={table}
-            recordCount={rows.length}
-            tableLayout={{ headerSticky: true, width: "auto" }}
-            tableClassNames={{ bodyRow: "h-10" }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer className={listGridMaxH(false)}>
-              <DataGridTable />
-            </DataGridContainer>
-          </DataGrid>
-        ) : rows.length === 0 ? (
-          <EmptyComponent />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {rows.map((payment) => (
-              <ListCard
-                key={payment.id}
-                title={payment.pv_no}
-                badge={<ApStatusBadge value={payment.lifecycle} />}
-                onOpen={() =>
-                  navigate(`/accounting/accounts-payable/payment/${payment.id}`)
-                }
-              >
-                <ListCardRow label="Vendor">{payment.vendor_name}</ListCardRow>
-                <ListCardRow label="Method">
-                  {payment.payment_method.replaceAll("_", " ")}
-                </ListCardRow>
-                <ListCardRow label="Net pay">
-                  <Money
-                    value={payment.net_pay}
-                    currency={payment.currency_code}
-                  />
-                </ListCardRow>
-                <ListCardRow label="Execution">
-                  <ApStatusBadge value={payment.execution_status} />
-                </ListCardRow>
-              </ListCard>
-            ))}
-          </div>
-        )}
+      {query.isLoading ? (
+        <Skeleton className="h-80 rounded-lg" />
+      ) : !(isMobile || mode === "grid") ? (
+        <DataGrid
+          table={table}
+          recordCount={rows.length}
+          tableLayout={{ headerSticky: true, width: "auto" }}
+          tableClassNames={{ bodyRow: "h-10" }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer className={listGridMaxH(false)}>
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
+      ) : rows.length === 0 ? (
+        <EmptyComponent />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((payment) => (
+            <ListCard
+              key={payment.id}
+              title={payment.pv_no}
+              badge={<ApStatusBadge value={payment.lifecycle} />}
+              onOpen={() =>
+                navigate(`/accounting/accounts-payable/payment/${payment.id}`)
+              }
+            >
+              <ListCardRow label="Vendor">{payment.vendor_name}</ListCardRow>
+              <ListCardRow label="Method">
+                {payment.payment_method.replaceAll("_", " ")}
+              </ListCardRow>
+              <ListCardRow label="Net pay">
+                <Money
+                  value={payment.net_pay}
+                  currency={payment.currency_code}
+                />
+              </ListCardRow>
+              <ListCardRow label="Execution">
+                <ApStatusBadge value={payment.execution_status} />
+              </ListCardRow>
+            </ListCard>
+          ))}
+        </div>
+      )}
     </ListPageShell>
   );
 }
