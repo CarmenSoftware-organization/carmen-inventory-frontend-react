@@ -3,8 +3,12 @@ import {
   buildSrDefaultValues,
   buildSrDuplicateValues,
   srStockVisible,
+  srPostedCostByDetail,
 } from "./sr-form-helpers";
-import type { StoreRequisition } from "@/types/store-requisition";
+import type {
+  SrStockMovementItem,
+  StoreRequisition,
+} from "@/types/store-requisition";
 
 const sr = {
   id: "5f0b1b3e-2f0a-4a34-9b0a-3d2a1c4e5f60",
@@ -126,5 +130,40 @@ describe("srStockVisible", () => {
     ]) {
       expect(srStockVisible(status)).toBe(false);
     }
+  });
+});
+
+describe("srPostedCostByDetail", () => {
+  const row = (over: Partial<SrStockMovementItem>): SrStockMovementItem =>
+    ({
+      id: "m",
+      inventory_transaction_id: "t",
+      store_requisition_detail_id: "d1",
+      qty_in: 0,
+      qty_out: 0,
+      cost_per_unit: 0,
+      total_cost: 0,
+      ...over,
+    }) as SrStockMovementItem;
+
+  // ใบที่จ่ายแล้ว: ต้นทุนของบรรทัด = รายการขาออกที่คลังต้นทาง ไม่นับฝั่งขาเข้าที่ปลายทางซ้ำ
+  it("sums the out rows of each line and ignores the matching in rows", () => {
+    const posted = srPostedCostByDetail([
+      row({ store_requisition_detail_id: "d1", qty_out: 10, total_cost: 500 }),
+      row({ store_requisition_detail_id: "d1", qty_out: 5, total_cost: 300 }),
+      row({ store_requisition_detail_id: "d1", qty_in: 15, total_cost: 800 }),
+      row({ store_requisition_detail_id: "d2", qty_out: 3, total_cost: 100 }),
+    ]);
+
+    expect(posted.get("d1")).toEqual({ total_cost: 800, cost_per_unit: 53.33 });
+    expect(posted.get("d2")).toEqual({ total_cost: 100, cost_per_unit: 33.33 });
+  });
+
+  it("leaves out a line that has no posted out row", () => {
+    const posted = srPostedCostByDetail([
+      row({ store_requisition_detail_id: "d1", qty_in: 4, total_cost: 40 }),
+    ]);
+
+    expect(posted.has("d1")).toBe(false);
   });
 });

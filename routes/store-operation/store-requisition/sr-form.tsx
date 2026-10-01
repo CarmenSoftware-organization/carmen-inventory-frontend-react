@@ -217,6 +217,8 @@ export function StoreRequisitionForm({
     toLocationId: toLocationId ?? "",
     workflowId: workflowId ?? "",
     role: storeRequisition ? storeRequisition.role : STAGE_ROLE.CREATE,
+    srId: storeRequisition?.id,
+    docStatus: storeRequisition?.doc_status,
   };
 
   return (
@@ -267,12 +269,8 @@ export function StoreRequisitionForm({
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList variant="line">
-            <TabsTrigger value="items">
-              {t("tabItems")}
-            </TabsTrigger>
-            <TabsTrigger value="stock">
-              {t("tabStock")}
-            </TabsTrigger>
+            <TabsTrigger value="items">{t("tabItems")}</TabsTrigger>
+            <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="space-y-4">
