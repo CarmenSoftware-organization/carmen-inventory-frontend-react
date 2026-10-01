@@ -48,9 +48,7 @@ const ALLOWED: Record<string, number> = {
   "routes/inventory-management/period-end/pe-review.tsx": 1, // DFH ตรงใน FormPageShell — ไม่ใช่ฟอร์ม ไม่มีชุด Edit/Save
   // ลิงก์มีป้าย "← Purchase Orders" บนหน้าสำเร็จ ไม่ใช่ปุ่ม back แบบไอคอน — BackButton จะทำป้ายหาย
   "routes/procurement/purchase-order/from-pr/step-result.tsx": 1,
-  // ── ระลอกเอกสาร (procurement / accounting) — spec §8
-  "routes/procurement/purchase-request/pr-header.tsx": 1,
-  "routes/procurement/purchase-request/pr-form-dialogs.tsx": 1,
+  // ── ชั่วคราว — accounting รอ spec accounting i18n (documents spec §0/§8)
   "routes/accounting/accounts-payable/ap-invoice-detail.tsx": 1,
   "routes/accounting/accounts-payable/ap-payment-detail.tsx": 1,
   "routes/accounting/accounts-receivable/ar-invoice-detail.tsx": 1,
