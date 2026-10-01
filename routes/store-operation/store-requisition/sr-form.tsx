@@ -3,6 +3,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { draftSaveHandler } from "@/lib/form-helpers";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/hooks/use-profile";
@@ -220,31 +221,52 @@ export function StoreRequisitionForm({
   };
 
   return (
-    <div className="flex min-h-full flex-col">
-      <SrHeader
-        storeRequisition={storeRequisition}
-        srType={derivedSrType}
-        mode={mode}
-        isPending={actions.isPending}
-        hasDepartment={!!departmentId}
-        isDeletePending={actions.deleteIsPending}
-        srDate={srDate}
-        dateFormat={dateFormat}
-        requesterName={reqName}
-        departmentName={departmentName}
-        departmentCode={departmentCode}
-        isLoading={!profile}
-        onBack={actions.handleBack}
-        onEdit={() => setMode("edit")}
-        onCancel={actions.handleCancel}
-        onDelete={() => actions.setShowDelete(true)}
-        onComment={() => actions.setShowComment(true)}
-      />
-
+    <FormPageShell
+      width="wide"
+      header={
+        <SrHeader
+          storeRequisition={storeRequisition}
+          srType={derivedSrType}
+          mode={mode}
+          isPending={actions.isPending}
+          hasDepartment={!!departmentId}
+          isDeletePending={actions.deleteIsPending}
+          srDate={srDate}
+          dateFormat={dateFormat}
+          requesterName={reqName}
+          departmentName={departmentName}
+          departmentCode={departmentCode}
+          isLoading={!profile}
+          onBack={actions.handleBack}
+          onEdit={() => setMode("edit")}
+          onCancel={actions.handleCancel}
+          onDelete={() => actions.setShowDelete(true)}
+          onComment={() => actions.setShowComment(true)}
+        />
+      }
+      footer={
+        <SrFooter
+          canSubmit={!!canSubmit}
+          isPending={actions.isPending}
+          role={storeRequisition?.role}
+          action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
+          grandTotal={srGrandTotal(items)}
+          hasItems={items.length > 0}
+          activeTab={tab === "stock" ? "stock" : "items"}
+          srId={storeRequisition?.id}
+          docStatus={storeRequisition?.doc_status}
+          onSubmit={actions.openSubmitDialog}
+          onApprove={() => actions.setActionDialog("approve")}
+          onIssue={() => actions.setActionDialog("issue")}
+          onReject={() => actions.setActionDialog("reject")}
+          onSendBack={() => actions.setActionDialog("review")}
+        />
+      }
+    >
       <form
         id="store-requisition-form"
         onSubmit={draftSaveHandler(form, actions.onSubmit)}
-        className="space-y-4 px-4"
+        className="space-y-4"
       >
         <SrRequestDetails
           form={form}
@@ -267,12 +289,8 @@ export function StoreRequisitionForm({
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList variant="line">
-            <TabsTrigger value="items">
-              {t("tabItems")}
-            </TabsTrigger>
-            <TabsTrigger value="stock">
-              {t("tabStock")}
-            </TabsTrigger>
+            <TabsTrigger value="items">{t("tabItems")}</TabsTrigger>
+            <TabsTrigger value="stock">{t("tabStock")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="space-y-4">
@@ -294,29 +312,12 @@ export function StoreRequisitionForm({
         </Tabs>
       </form>
 
-      <SrFooter
-        canSubmit={!!canSubmit}
-        isPending={actions.isPending}
-        role={storeRequisition?.role}
-        action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
-        grandTotal={srGrandTotal(items)}
-        hasItems={items.length > 0}
-        activeTab={tab === "stock" ? "stock" : "items"}
-        srId={storeRequisition?.id}
-        docStatus={storeRequisition?.doc_status}
-        onSubmit={actions.openSubmitDialog}
-        onApprove={() => actions.setActionDialog("approve")}
-        onIssue={() => actions.setActionDialog("issue")}
-        onReject={() => actions.setActionDialog("reject")}
-        onSendBack={() => actions.setActionDialog("review")}
-      />
-
       <SrFormDialogs
         storeRequisition={storeRequisition}
         form={form}
         items={items}
         actions={actions}
       />
-    </div>
+    </FormPageShell>
   );
 }

@@ -2,15 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
-import {
-  Building2,
-  CalendarDays,
-  Pencil,
-  Save,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { Building2, CalendarDays, Save, User } from "lucide-react";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
@@ -30,10 +22,10 @@ import { WorkflowStepButton } from "@/components/share/workflow-step-button";
 import { cn } from "@/lib/utils";
 import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
 import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { formatDate } from "@/lib/date-utils";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { getModeLabels, type FormMode } from "@/types/form";
+import type { FormMode } from "@/types/form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type {
   StoreRequisition,
@@ -152,74 +144,6 @@ export function SrHeader({
     </div>
   );
 
-  const actions = (
-    <>
-      {isView ? (
-        canEdit && (
-          <Button type="button" size="sm" variant="outline" onClick={onEdit}>
-            <Pencil aria-hidden="true" />
-            {tc("edit")}
-          </Button>
-        )
-      ) : (
-        <>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            <X aria-hidden="true" />
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="submit"
-            form="store-requisition-form"
-            size="sm"
-            disabled={isPending || !hasDepartment}
-            title={hasDepartment ? undefined : t("noDepartment")}
-          >
-            <Save aria-hidden="true" />
-            {isPending ? getModeLabels(mode, t("entity")).pending : tc("save")}
-          </Button>
-          {storeRequisition && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onDelete}
-              disabled={isPending || isDeletePending}
-            >
-              <Trash2 aria-hidden="true" />
-              {tc("delete")}
-            </Button>
-          )}
-        </>
-      )}
-      {/* Duplicate/Print เฉพาะ view (ตอน edit ค่าบนจออาจยังไม่ save) */}
-      {storeRequisition && (
-        <DocActionsMenu
-          onDuplicate={isView ? handleDuplicate : undefined}
-          onComment={onComment}
-          commentCount={comments?.length}
-          activity={{ id: storeRequisition.id, label: storeRequisition.sr_no }}
-          print={
-            isView && storeRequisition.id
-              ? {
-                  documentType: "SR",
-                  documentId: storeRequisition.id,
-                  filters: storeRequisition.sr_no
-                    ? { DocumentNo: storeRequisition.sr_no }
-                    : undefined,
-                }
-              : undefined
-          }
-        />
-      )}
-    </>
-  );
-
   const workflowHistorySheet = hasHistory ? (
     <Sheet open={showHistory} onOpenChange={setShowHistory}>
       {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
@@ -313,7 +237,10 @@ export function SrHeader({
 
   return (
     <>
-      <DocFormHeader
+      <FormToolbar
+        mode={mode}
+        formId="store-requisition-form"
+        isPending={isPending}
         title={storeRequisition?.sr_no ?? t("title")}
         subtitle={
           <span className="flex flex-col gap-1">
@@ -321,11 +248,52 @@ export function SrHeader({
             {workflowStep}
           </span>
         }
-        backLabel={tc("goBack")}
-        onBack={onBack}
         badges={badges}
-        actions={actions}
-      />
+        onBack={onBack}
+        onCancel={onCancel}
+        // แก้ได้เฉพาะ stage role ที่กรอกใบได้ (create / approve / issue)
+        onEdit={canEdit ? onEdit : undefined}
+        // ลบได้เฉพาะตอนแก้ — หน้าดูเป็นที่ทำงาน workflow
+        onDelete={!isView && storeRequisition ? onDelete : undefined}
+        deleteIsPending={isDeletePending}
+        // เดิมป้าย Save ทุกโหมด — ไม่ให้โหมด add กลายเป็น "Create"
+        submitLabel={tc("save")}
+        // ไม่มีแผนก = บันทึกไม่ได้ ปิดปุ่มพร้อมเหตุผล — มีแผนกแล้วใช้ปุ่มมาตรฐาน
+        // (ผ่านด่าน license ของ toolbar)
+        submitSlot={
+          hasDepartment ? undefined : (
+            <Button type="button" size="sm" disabled title={t("noDepartment")}>
+              <Save aria-hidden="true" />
+              {tc("save")}
+            </Button>
+          )
+        }
+      >
+        {/* Duplicate/Print เฉพาะ view (ตอน edit ค่าบนจออาจยังไม่ save) ·
+            comment / activity ยุบอยู่ในเมนู ⋯ — ไม่ส่ง activity ให้ toolbar ซ้ำ */}
+        {storeRequisition && (
+          <DocActionsMenu
+            onDuplicate={isView ? handleDuplicate : undefined}
+            onComment={onComment}
+            commentCount={comments?.length}
+            activity={{
+              id: storeRequisition.id,
+              label: storeRequisition.sr_no,
+            }}
+            print={
+              isView && storeRequisition.id
+                ? {
+                    documentType: "SR",
+                    documentId: storeRequisition.id,
+                    filters: storeRequisition.sr_no
+                      ? { DocumentNo: storeRequisition.sr_no }
+                      : undefined,
+                  }
+                : undefined
+            }
+          />
+        )}
+      </FormToolbar>
       {workflowHistorySheet}
     </>
   );

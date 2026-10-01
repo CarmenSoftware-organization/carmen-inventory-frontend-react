@@ -49,10 +49,8 @@ const ALLOWED: Record<string, number> = {
   // ลิงก์มีป้าย "← Purchase Orders" บนหน้าสำเร็จ ไม่ใช่ปุ่ม back แบบไอคอน — BackButton จะทำป้ายหาย
   "routes/procurement/purchase-order/from-pr/step-result.tsx": 1,
   // ── ระลอกเอกสาร (procurement / accounting) — spec §8
-  "routes/procurement/purchase-order/po-header.tsx": 1,
   "routes/procurement/purchase-request/pr-header.tsx": 1,
   "routes/procurement/purchase-request/pr-form-dialogs.tsx": 1,
-  "routes/store-operation/store-requisition/sr-header.tsx": 1,
   "routes/accounting/accounts-payable/ap-invoice-detail.tsx": 1,
   "routes/accounting/accounts-payable/ap-payment-detail.tsx": 1,
   "routes/accounting/accounts-receivable/ar-invoice-detail.tsx": 1,
