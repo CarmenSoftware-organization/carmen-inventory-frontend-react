@@ -255,7 +255,7 @@ export function LocationForm({ location }: LocationFormProps) {
           onCancel={f.handleCancel}
           onDelete={location ? () => setShowDelete(true) : undefined}
           deleteIsPending={deleteLocation.isPending}
-          statusBadge={codeBadge}
+          badges={codeBadge}
           permissionPrefix="configuration.location"
           activity={location && { id: location.id, label: location.name }}
         />

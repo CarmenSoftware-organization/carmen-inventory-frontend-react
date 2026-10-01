@@ -166,7 +166,7 @@ export function PrtForm({ template }: PrtFormProps) {
     <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <FormToolbar
         entity={template?.name || t("entity")}
-        statusBadge={
+        badges={
           template && <StatusBadge active={template.is_active} size="xs" />
         }
         mode={mode}

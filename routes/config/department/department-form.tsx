@@ -246,7 +246,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           onEdit={f.handleEdit}
           onDelete={department ? () => setShowDelete(true) : undefined}
           deleteIsPending={deleteDepartment.isPending}
-          statusBadge={codeBadge}
+          badges={codeBadge}
           editTitle={department?.name}
           permissionPrefix="configuration.department"
           activity={department && { id: department.id, label: department.name }}
