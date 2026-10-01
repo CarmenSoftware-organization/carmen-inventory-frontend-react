@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
-import {
-  Columns3,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-  RefreshCw,
-} from "lucide-react";
+import { Columns3, Loader2 } from "lucide-react";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { toast } from "sonner";
@@ -26,7 +20,9 @@ import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useListFilters } from "@/hooks/use-list-filters";
 import SearchInput from "@/components/search-input";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
@@ -326,145 +322,110 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div
-      ref={pullRefresh.containerRef}
-      className="pb-[max(1rem,env(safe-area-inset-bottom))]"
-    >
-      {isMobile && (pullRefresh.distance > 0 || pullRefresh.isRefreshing) && (
-        <div
-          className="text-muted-foreground flex items-center justify-center overflow-hidden transition-all"
-          style={{
-            height: pullRefresh.isRefreshing ? 48 : pullRefresh.distance,
-          }}
-          aria-hidden={!pullRefresh.isRefreshing}
-        >
-          <RefreshCw
-            className={cn("size-4", pullRefresh.isRefreshing && "animate-spin")}
-            style={{
-              transform: pullRefresh.isRefreshing
-                ? undefined
-                : `rotate(${pullRefresh.progress * 360}deg)`,
-            }}
-          />
-        </div>
-      )}
-      {/* Sticky top section on mobile */}
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader title={t("title")} description={t("desc")} />
-          <DocumentListActions
-            onAdd={handleAddClick}
-            addDisabled={addBlocked}
-            addLabel={t("add")}
-            onExport={handleExport}
-            isExporting={isExporting}
-            showExport={!!exportColumns}
-            hideExportPrint={hideExportPrint}
-            extraActions={extraActions}
-          />
-        </div>
-
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={filterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            {!isGridMode && (
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
-            )}
-            {renderCard && (
-              <div className="flex items-center rounded-md border">
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "list" ? "secondary" : "ghost"}
-                  onClick={() => setDisplayMode("list")}
-                  aria-label={tc("aria.listView")}
-                >
-                  <LayoutList className="size-4" />
-                </Button>
-                <Button
-                  size="icon-sm"
-                  variant={displayMode === "grid" ? "secondary" : "ghost"}
-                  onClick={() => setDisplayMode("grid")}
-                  aria-label={tc("aria.gridView")}
-                >
-                  <LayoutGrid className="size-4" />
-                </Button>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      pullRefresh={pullRefresh}
+      actions={
+        <DocumentListActions
+          onAdd={handleAddClick}
+          addDisabled={addBlocked}
+          addLabel={t("add")}
+          onExport={handleExport}
+          isExporting={isExporting}
+          showExport={!!exportColumns}
+          hideExportPrint={hideExportPrint}
+          extraActions={extraActions}
+        />
+      }
+      toolbar={
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+              <div className="flex-1 sm:flex-initial">
+                <SearchInput defaultValue={search} onSearch={setSearch} />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Active filter badges — driven by registry field values, not statusOptions */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
-      </div>
-
-      {/* Content */}
-      <div className="mt-3 space-y-3">
-        {isGridMode ? (
-          renderGridContent({
-            isLoading,
-            entities,
-            renderCard,
-            handleEdit,
-            handleDelete: setDeleteTarget,
-            useInfiniteScroll,
-            grid,
-          })
-        ) : (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+              <span className="bg-border hidden h-4 w-px sm:block" />
+              {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
+                  (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+              <ViewSelector
+                view={lf.view}
+                snapshot={{
+                  filters: lf.values,
+                  sort: lf.sortParam || undefined,
+                }}
+              />
+              <ListFilter
+                fields={filterFields}
+                values={lf.values}
+                setValue={lf.setValue}
+                onClearAll={lf.clearAll}
+                onSaveClick={() => setSaveDialogOpen(true)}
+                activeCount={lf.activeFilters.length}
+              />
+            </div>
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <DataGridSortMenu table={table} />
+              {!isGridMode && (
+                <DataGridColumnVisibility
+                  table={table}
+                  trigger={
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      aria-label={tc("aria.toggleColumns")}
+                    >
+                      <Columns3 className="size-4" />
+                    </Button>
+                  }
+                />
               )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+              {renderCard && (
+                <DisplayModeToggle
+                  value={displayMode}
+                  onChange={setDisplayMode}
+                />
+              )}
+            </div>
+          </div>
+          {/* Active filter badges — driven by registry field values, not statusOptions */}
+          <ActiveFilterBar
+            filters={lf.activeFilters}
+            onClearAll={lf.clearAll}
+          />
+        </>
+      }
+    >
+      {isGridMode ? (
+        renderGridContent({
+          isLoading,
+          entities,
+          renderCard,
+          handleEdit,
+          handleDelete: setDeleteTarget,
+          useInfiniteScroll,
+          grid,
+        })
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       {renderDialog?.({
         open: dialogOpen,
@@ -490,6 +451,6 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }
