@@ -19,6 +19,7 @@ import {
   mapToPayload,
   type RecipeCategoryFormValues,
 } from "./recipe-category-form-schema";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { RecipeCategoryToolbar } from "./recipe-category-toolbar";
 import { RecipeCategoryGeneralFields } from "./recipe-category-general-fields";
 import { RecipeCategoryCostFields } from "./recipe-category-cost-fields";
@@ -92,19 +93,21 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const excludeIds = category ? new Set([category.id]) : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <RecipeCategoryToolbar
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        isDeleting={deleteCategory.isPending}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={category ? () => setShowDelete(true) : undefined}
-        activityId={category?.id}
-      />
-
+    <FormPageShell
+      header={
+        <RecipeCategoryToolbar
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          isDeleting={deleteCategory.isPending}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={category ? () => setShowDelete(true) : undefined}
+          activityId={category?.id}
+        />
+      }
+    >
       <form
         id="recipe-category-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -145,6 +148,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         onCancel={f.navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }

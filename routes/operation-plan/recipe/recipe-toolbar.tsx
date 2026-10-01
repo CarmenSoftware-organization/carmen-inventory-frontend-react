@@ -1,9 +1,7 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import {
   Select,
   SelectContent,
@@ -43,26 +41,13 @@ export function RecipeToolbar({
   onCancel,
   onDelete,
 }: RecipeToolbarProps) {
-  const tc = useTranslations("common");
-  const tform = useTranslations("form");
   const ts = useTranslations("status");
   const tr = useTranslations("operationPlan.recipe");
   const code = useWatch({ control: form.control, name: "code" });
   const name = useWatch({ control: form.control, name: "name" });
   const status = useWatch({ control: form.control, name: "status" });
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
-
-  const title = isAdd ? tr("add") : name || tr("untitledRecipe");
-
-  const submitLabel = isPending
-    ? isAdd
-      ? tform("creating")
-      : tform("saving")
-    : isAdd
-      ? tc("create")
-      : tc("save");
 
   const badges = (
     <>
@@ -90,9 +75,7 @@ export function RecipeToolbar({
         >
           {ts(
             (status?.toLowerCase() ?? "draft") as
-              | "draft"
-              | "published"
-              | "archived",
+              "draft" | "published" | "archived",
           )}
         </StatusDotBadge>
       ) : (
@@ -124,50 +107,18 @@ export function RecipeToolbar({
     </>
   );
 
-  const actions = isView ? (
-    <Button size="sm" onClick={onEdit}>
-      <Pencil />
-      {tc("edit")}
-    </Button>
-  ) : (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={onCancel}
-        disabled={isPending}
-      >
-        <X />
-        {tc("cancel")}
-      </Button>
-      <Button type="submit" size="sm" form="recipe-form" disabled={isPending}>
-        <Save />
-        {submitLabel}
-      </Button>
-      {isEdit && onDelete && (
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onDelete}
-          disabled={isDeleting || isPending}
-        >
-          <Trash2 />
-          {tc("delete")}
-        </Button>
-      )}
-    </>
-  );
-
   return (
-    <DocFormHeader
-      title={title}
-      backLabel={tc("goBack")}
-      onBack={onBack}
+    <FormToolbar
+      mode={mode}
+      formId="recipe-form"
+      isPending={isPending}
+      title={isAdd ? tr("add") : name || tr("untitledRecipe")}
       badges={badges}
-      actions={actions}
-      flush
+      onBack={onBack}
+      onCancel={onCancel}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      deleteIsPending={isDeleting}
     />
   );
 }

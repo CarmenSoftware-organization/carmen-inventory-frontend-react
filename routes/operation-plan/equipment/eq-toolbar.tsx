@@ -1,10 +1,8 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { cn } from "@/lib/utils";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import type { FormMode } from "@/types/form";
 import type { EquipmentFormValues } from "./eq-form-schema";
 
@@ -29,106 +27,58 @@ export function EqToolbar({
   onCancel,
   onDelete,
 }: EqToolbarProps) {
-  const tc = useTranslations("common");
-  const tform = useTranslations("form");
-  const ts = useTranslations("status");
   const tr = useTranslations("operationPlan.equipment");
+  const ts = useTranslations("status");
   const code = useWatch({ control: form.control, name: "code" });
   const name = useWatch({ control: form.control, name: "name" });
   const isActive = useWatch({ control: form.control, name: "is_active" });
-  const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
-  const title = isAdd ? tr("add") : name || tr("untitledEquipment");
-
-  const submitLabel = isPending
-    ? isAdd
-      ? tform("creating")
-      : tform("saving")
-    : isAdd
-      ? tc("create")
-      : tc("save");
-
-  const badges = (
-    <>
-      <span
-        className={cn(
-          "text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase",
-          code
-            ? "bg-foreground text-background"
-            : "text-muted-foreground border border-dashed",
-        )}
-      >
-        {code && (
-          <span
-            className="bg-background/70 size-1 rounded-full"
-            aria-hidden="true"
-          />
-        )}
-        {code || tr("noCode")}
-      </span>
-      {!isAdd && (
-        <StatusDotBadge
-          tone={isActive ? "success" : "neutral"}
-          size="xs"
-          className="tracking-wider uppercase"
-        >
-          {isActive ? ts("active") : ts("inactive")}
-        </StatusDotBadge>
+  const codePill = (
+    <span
+      className={cn(
+        "text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase",
+        code
+          ? "bg-foreground text-background"
+          : "text-muted-foreground border border-dashed",
       )}
-    </>
+    >
+      {code && (
+        <span
+          className="bg-background/70 size-1 rounded-full"
+          aria-hidden="true"
+        />
+      )}
+      {code || tr("noCode")}
+    </span>
   );
-
-  const actions = isView ? (
-    <Button size="sm" onClick={onEdit}>
-      <Pencil />
-      {tc("edit")}
-    </Button>
-  ) : (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={onCancel}
-        disabled={isPending}
-      >
-        <X />
-        {tc("cancel")}
-      </Button>
-      <Button
-        type="submit"
-        size="sm"
-        form="equipment-form"
-        disabled={isPending}
-      >
-        <Save />
-        {submitLabel}
-      </Button>
-      {isEdit && onDelete && (
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onDelete}
-          disabled={isDeleting || isPending}
-        >
-          <Trash2 />
-          {tc("delete")}
-        </Button>
-      )}
-    </>
+  const statusDot = !isAdd && (
+    <StatusDotBadge
+      tone={isActive ? "success" : "neutral"}
+      size="xs"
+      className="tracking-wider uppercase"
+    >
+      {isActive ? ts("active") : ts("inactive")}
+    </StatusDotBadge>
   );
 
   return (
-    <DocFormHeader
-      title={title}
-      backLabel={tc("goBack")}
+    <FormToolbar
+      mode={mode}
+      formId="equipment-form"
+      isPending={isPending}
+      title={isAdd ? tr("add") : name || tr("untitledEquipment")}
+      badges={
+        <>
+          {codePill}
+          {statusDot}
+        </>
+      }
       onBack={onBack}
-      badges={badges}
-      actions={actions}
-      flush
+      onCancel={onCancel}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      deleteIsPending={isDeleting}
     />
   );
 }

@@ -26,6 +26,20 @@ vi.mock("@/hooks/use-cuisine", () => ({
   useDeleteCuisine: () => deleteMut,
 }));
 
+// FormToolbar ปิดปุ่ม Edit เมื่อไม่มีสิทธิ์ — เทสต์นี้สนใจเส้นทางหลัง save
+// ไม่ใช่ permission ให้ผ่านหมดไปเลย
+vi.mock("@/hooks/use-can", () => ({
+  useCan: () => ({
+    can: () => true,
+    canAny: () => true,
+    canAll: () => true,
+    guard: (_p: unknown, fn: () => void) => fn,
+    isAdmin: true,
+    permissions: [],
+    canWrite: true,
+  }),
+}));
+
 const { CuisineForm } = await import("./cuisine-form");
 
 const CUISINE: Cuisine = {
