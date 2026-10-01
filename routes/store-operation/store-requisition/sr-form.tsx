@@ -188,12 +188,17 @@ export function StoreRequisitionForm({
   ]);
 
   // ปุ่ม Submit ค้างไว้ตั้งแต่ใบใหม่ — กดแล้วระบบ save ให้ก่อนค่อยส่ง (เหมือน PR)
+  // แต่ต้องเป็นคนที่ backend ให้ role = create เท่านั้น (เจ้าของใบ/คนที่ถูก send back
+  // กลับมา) — คนอื่นที่เปิดดูได้ role เป็น view_only ซึ่งเดิมหลุดมาเห็นปุ่มทั้งที่
+  // ปุ่ม Edit ซ่อนไปแล้ว กดแล้วก็โดน backend ปัด; ใบใหม่ยังไม่มี role ถือเป็น create
+  const role = storeRequisition?.role ?? STAGE_ROLE.CREATE;
   const canSubmit =
-    isAdd ||
-    mode === "edit" ||
-    (isView &&
-      (storeRequisition?.doc_status === "draft" ||
-        storeRequisition?.doc_status === "in_progress"));
+    role === STAGE_ROLE.CREATE &&
+    (isAdd ||
+      mode === "edit" ||
+      (isView &&
+        (storeRequisition?.doc_status === "draft" ||
+          storeRequisition?.doc_status === "in_progress")));
 
   let derivedSrType: StoreRequisitionType | undefined;
   if (toLocInfo.location_type === INVENTORY_TYPE.DIRECT) {
