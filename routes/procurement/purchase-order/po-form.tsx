@@ -22,6 +22,7 @@ import {
   scrollToFirstInvalidField,
   draftSaveHandler,
 } from "@/lib/form-helpers";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
@@ -221,30 +222,55 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   );
 
   return (
-    <div className="flex min-h-full flex-col space-y-4">
-      <PoHeader
-        purchaseOrder={purchaseOrder}
-        mode={mode}
-        canEdit={canEdit}
-        canClose={canClose}
-        terminalStatus={terminalStatus}
-        isPending={isPending}
-        deletePoIsPending={deletePo.isPending}
-        departmentName={departmentName}
-        buyerName={purchaseOrder?.buyer_name || buyerName}
-        onBack={handleBack}
-        onCancel={handleCancel}
-        onEnterEdit={() => setMode("edit")}
-        onShowClose={() => dialogs.setShowClose(true)}
-        onShowComment={() => dialogs.setShowComment(true)}
-        onShowDelete={() => dialogs.setShowDelete(true)}
-        hasHistory={hasHistory}
-        onShowHistory={() => dialogs.setShowHistory(true)}
-      />
+    <FormPageShell
+      width="wide"
+      header={
+        <PoHeader
+          purchaseOrder={purchaseOrder}
+          mode={mode}
+          canEdit={canEdit}
+          canClose={canClose}
+          terminalStatus={terminalStatus}
+          isPending={isPending}
+          deletePoIsPending={deletePo.isPending}
+          departmentName={departmentName}
+          buyerName={purchaseOrder?.buyer_name || buyerName}
+          onBack={handleBack}
+          onCancel={handleCancel}
+          onEnterEdit={() => setMode("edit")}
+          onShowClose={() => dialogs.setShowClose(true)}
+          onShowComment={() => dialogs.setShowComment(true)}
+          onShowDelete={() => dialogs.setShowDelete(true)}
+          hasHistory={hasHistory}
+          onShowHistory={() => dialogs.setShowHistory(true)}
+        />
+      }
+      footer={
+        <PoFooterAction
+          control={form.control}
+          currencyCode={form.getValues("currency_code")}
+          isPending={isPending}
+          isEditMode={isEditMode}
+          role={role}
+          poStatus={purchaseOrder?.po_status}
+          previousStages={previousStages}
+          stagesLoading={stagesLoading}
+          // ใบใหม่ที่ยังไม่เคยเซฟก็กดส่งได้ — handleSubmitPo สร้างใบให้ก่อนแล้วค่อยส่ง
+          // (ทรงเดียวกับ PR) ของเดิมส่ง undefined ทำให้ปุ่มหายจนกว่าจะกด Save ก่อน
+          onSubmit={handleSubmitPo}
+          onValidateSubmit={validateSubmitPo}
+          onApprove={purchaseOrder ? handleApprovePo : undefined}
+          onReject={
+            purchaseOrder ? () => dialogs.setShowReject(true) : undefined
+          }
+          onReview={purchaseOrder ? handleReviewConfirm : undefined}
+        />
+      }
+    >
       <form
         id="po-form"
         onSubmit={draftSaveHandler(form, onSubmit)}
-        className="flex flex-1 flex-col gap-4 px-4"
+        className="flex flex-col gap-4"
       >
         <PoGeneralFields
           form={form}
@@ -278,24 +304,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           onClose={purchaseOrder ? handleClosePo : undefined}
         />
       </form>
-
-      <PoFooterAction
-        control={form.control}
-        currencyCode={form.getValues("currency_code")}
-        isPending={isPending}
-        isEditMode={isEditMode}
-        role={role}
-        poStatus={purchaseOrder?.po_status}
-        previousStages={previousStages}
-        stagesLoading={stagesLoading}
-        // ใบใหม่ที่ยังไม่เคยเซฟก็กดส่งได้ — handleSubmitPo สร้างใบให้ก่อนแล้วค่อยส่ง
-        // (ทรงเดียวกับ PR) ของเดิมส่ง undefined ทำให้ปุ่มหายจนกว่าจะกด Save ก่อน
-        onSubmit={handleSubmitPo}
-        onValidateSubmit={validateSubmitPo}
-        onApprove={purchaseOrder ? handleApprovePo : undefined}
-        onReject={purchaseOrder ? () => dialogs.setShowReject(true) : undefined}
-        onReview={purchaseOrder ? handleReviewConfirm : undefined}
-      />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />
       <DiscardDialog {...navDiscardDialogProps} variant="warning" />
@@ -371,6 +379,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           />
         </>
       )}
-    </div>
+    </FormPageShell>
   );
 }

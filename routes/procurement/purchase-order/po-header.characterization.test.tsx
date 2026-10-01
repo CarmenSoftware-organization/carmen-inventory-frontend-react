@@ -129,12 +129,12 @@ describe("PoHeader — characterization", () => {
     expect(h.onShowDelete).toHaveBeenCalledTimes(1);
   });
 
-  it("[view, approved + canClose] Close · Edit · Delete · Send · More", async () => {
+  it("[view, approved + canClose] Edit · Delete · Close · Send · More", async () => {
     const h = renderHeader("view", APPROVED, { canClose: true });
     expect(headerButtons()).toEqual([
-      en.common.close,
       en.common.edit,
       en.common.delete,
+      en.common.close,
       SEND,
       en.common.more,
     ]);
@@ -186,5 +186,16 @@ describe("PoHeader — characterization", () => {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
     expect(h.onEnterEdit).toHaveBeenCalledTimes(1);
     expect(dispatchPermissionDenied).not.toHaveBeenCalled();
+  });
+
+  it("[view, license หมดอายุ] Edit/Delete ถูกปิดพร้อมเหตุผล — Close ไม่ถูกปิด", () => {
+    can.canWrite = false;
+    renderHeader("view", APPROVED, { canClose: true });
+    for (const name of [en.common.edit, en.common.delete]) {
+      const b = screen.getByRole("button", { name });
+      expect(b).toBeDisabled();
+      expect(b).toHaveAttribute("title", en.license.writeDisabledTitle);
+    }
+    expect(screen.getByRole("button", { name: en.common.close })).toBeEnabled();
   });
 });
