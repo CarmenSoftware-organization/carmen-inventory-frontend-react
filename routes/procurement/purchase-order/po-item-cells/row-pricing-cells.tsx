@@ -15,6 +15,7 @@ import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { PoFormValues } from "../po-form-schema";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 type ItemPricingField =
   | "sub_total_price"
@@ -23,11 +24,7 @@ type ItemPricingField =
   | "tax_amount"
   | "total_price";
 
-
-function useItemLine(
-  form: UseFormReturn<PoFormValues>,
-  itemIndex: number,
-) {
+function useItemLine(form: UseFormReturn<PoFormValues>, itemIndex: number) {
   "use no memo";
   const control = form.control;
   const base = `items.${itemIndex}` as const;
@@ -59,7 +56,6 @@ function useItemLine(
   });
 }
 
-
 export function ItemAmountCell({
   form,
   itemIndex,
@@ -84,7 +80,6 @@ export function ItemAmountCell({
     </span>
   );
 }
-
 
 export function ItemPriceText({
   form,
@@ -196,7 +191,6 @@ export function ItemDiscountCell({
   );
 }
 
-
 export function ItemTaxCell({
   form,
   itemIndex,
@@ -290,7 +284,7 @@ export function ItemQtyInput({
         decimals={decimals}
         placeholder="0"
         defaultValue={value}
-        {...form.register(name)}
+        {...form.register(name, { setValueAs: coerceNumberInput })}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
           form.setValue(name, Number.isNaN(n) ? 0 : n, {
