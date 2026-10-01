@@ -52,9 +52,6 @@ const ALLOWED: Record<string, number> = {
   //  ตามใน spec §4 ไม่ใช่ที่นี่)
 
   // ── PR 4: accounting · inventory-management · product-management
-  "routes/accounting/accounts-payable/ap-payment-list.tsx": 3,
-  "routes/accounting/accounts-receivable/ar-invoice-list.route.tsx": 1,
-  "routes/accounting/journal-voucher/journal-voucher-list.tsx": 3,
   "routes/inventory-management/physical-count/pc-component.tsx": 1,
   "routes/inventory-management/spot-check/sc-component.tsx": 1,
   "routes/inventory-management/transaction/transaction-component.tsx": 1,

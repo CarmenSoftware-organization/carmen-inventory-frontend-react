@@ -1,15 +1,12 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import {
-  Plus,
-  RefreshCw,
-  Columns3,
-  LayoutGrid,
-  LayoutList,
-} from "lucide-react";
+import { RefreshCw, Columns3 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import {
   DataGrid,
   DataGridContainer,
@@ -153,85 +150,66 @@ export default function JournalVoucherList() {
     getCoreRowModel: getCoreRowModel(),
   });
   return (
-    <div className="space-y-3 pb-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <DocumentListHeader
-          title="Journal Voucher"
-          description="General Ledger entries, workflow and posting history"
+    <ListPageShell
+      title="Journal Voucher"
+      description="General Ledger entries, workflow and posting history"
+      actions={
+        <DocumentListActions
+          onAdd={() => navigate("/accounting/journal-voucher/new")}
+          addLabel="New JV"
+          hideExportPrint
         />
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={() => navigate("/accounting/journal-voucher/new")}
-          >
-            <Plus className="size-4" /> New JV
-          </Button>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-          <SearchInput
-            defaultValue={search}
-            onSearch={setSearch}
-            onInputChange={setSearch}
-          />
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <StatusFilter
-            value={status}
-            onChange={setStatus}
-            placeholder="Status"
-            defaultLabel="All statuses"
-            options={statuses.map((item) => ({
-              value: item,
-              label: item.replaceAll("_", " "),
-            }))}
-            className="w-36 text-xs"
-          />
-        </div>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <DataGridSortMenu table={table} />
-          {displayMode === "list" && (
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label="Toggle columns"
-                >
-                  <Columns3 className="size-4" />
-                </Button>
-              }
+      }
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+            <SearchInput
+              defaultValue={search}
+              onSearch={setSearch}
+              onInputChange={setSearch}
             />
-          )}
-          <div className="flex items-center rounded-md border">
+            <span className="bg-border hidden h-4 w-px sm:block" />
+            <StatusFilter
+              value={status}
+              onChange={setStatus}
+              placeholder="Status"
+              defaultLabel="All statuses"
+              options={statuses.map((item) => ({
+                value: item,
+                label: item.replaceAll("_", " "),
+              }))}
+              className="w-36 text-xs"
+            />
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
+            {displayMode === "list" && (
+              <DataGridColumnVisibility
+                table={table}
+                trigger={
+                  <Button
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label="Toggle columns"
+                  >
+                    <Columns3 className="size-4" />
+                  </Button>
+                }
+              />
+            )}
+            <DisplayModeToggle value={displayMode} onChange={setDisplayMode} />
             <Button
+              variant="ghost"
               size="icon-sm"
-              variant={displayMode === "list" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("list")}
-              aria-label="List view"
+              onClick={() => query.refetch()}
+              aria-label="Refresh"
             >
-              <LayoutList className="size-4" />
-            </Button>
-            <Button
-              size="icon-sm"
-              variant={displayMode === "grid" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("grid")}
-              aria-label="Grid view"
-            >
-              <LayoutGrid className="size-4" />
+              <RefreshCw className="size-4" />
             </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => query.refetch()}
-            aria-label="Refresh"
-          >
-            <RefreshCw className="size-4" />
-          </Button>
         </div>
-      </div>
+      }
+    >
       {displayMode === "list" ? (
         <DataGrid
           table={table}
@@ -239,7 +217,7 @@ export default function JournalVoucherList() {
           tableLayout={{ headerSticky: true, width: "auto" }}
           tableClassNames={{ bodyRow: "h-10" }}
         >
-          <DataGridContainer className="max-h-[calc(100vh-12rem)]">
+          <DataGridContainer className={listGridMaxH(false)}>
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>
@@ -266,6 +244,6 @@ export default function JournalVoucherList() {
           ))}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }
