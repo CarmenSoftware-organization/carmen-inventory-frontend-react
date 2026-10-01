@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Plus } from "lucide-react";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import {
   DataGrid,
@@ -8,7 +7,6 @@ import {
   DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { toast } from "sonner";
@@ -21,7 +19,10 @@ import {
 import type { ReportSchedule } from "@/types/report-schedule";
 import { CreateScheduleDialog } from "./create-schedule-dialog";
 import { useScheduleTableColumns } from "./use-schedule-table";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { cn } from "@/lib/utils";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 
 export default function ScheduleComponent() {
   const t = useTranslations("reportSchedule");
@@ -58,34 +59,31 @@ export default function ScheduleComponent() {
   });
 
   return (
-    <>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={schedules.length}
-          />
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-1 size-4" aria-hidden="true" />
-            {t("createSchedule")}
-          </Button>
-        </div>
-
-        <DataGrid
-          table={table}
-          recordCount={schedules.length}
-          isLoading={isLoading}
-          tableLayout={{ headerSticky: true }}
-          emptyMessage={<EmptyComponent />}
-        >
-          <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
-            <DataGridScrollArea>
-              <DataGridTable />
-            </DataGridScrollArea>
-          </DataGridContainer>
-        </DataGrid>
-      </div>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={schedules.length}
+      actions={
+        <DocumentListActions
+          onAdd={() => setCreateOpen(true)}
+          addLabel={t("createSchedule")}
+          hideExportPrint
+        />
+      }
+    >
+      <DataGrid
+        table={table}
+        recordCount={schedules.length}
+        isLoading={isLoading}
+        tableLayout={{ headerSticky: true }}
+        emptyMessage={<EmptyComponent />}
+      >
+        <DataGridContainer className={cn("flex flex-col", listGridMaxH(false))}>
+          <DataGridScrollArea>
+            <DataGridTable />
+          </DataGridScrollArea>
+        </DataGridContainer>
+      </DataGrid>
 
       <CreateScheduleDialog
         open={createOpen}
@@ -102,6 +100,6 @@ export default function ScheduleComponent() {
         title={t("deleteConfirm")}
         description={pendingDelete?.name}
       />
-    </>
+    </ListPageShell>
   );
 }
