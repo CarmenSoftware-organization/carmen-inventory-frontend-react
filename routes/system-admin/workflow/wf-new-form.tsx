@@ -47,9 +47,7 @@ export default function WorkflowNewForm({
   const createWorkflow = useCreateWorkflow();
   const isPending = createWorkflow.isPending;
   const t = useTranslations("systemAdmin.workflow");
-  const tc = useTranslations("common");
   const tt = useTranslations("toast");
-  const tf = useTranslations("form");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
 
