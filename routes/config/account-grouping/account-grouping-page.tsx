@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { FolderTree, Plus } from "lucide-react";
+import { FolderTree } from "lucide-react";
 import { toast } from "sonner";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
@@ -159,20 +160,26 @@ export default function AccountGroupingPage() {
   });
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title="Account Code Grouping"
       description="Four-level hierarchy used to classify Chart of Accounts"
       toolbar={
-        <SearchInput
-          defaultValue={search}
-          onSearch={setSearch}
-          onInputChange={setSearch}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-auto sm:flex-initial">
+            <SearchInput
+              defaultValue={search}
+              onSearch={setSearch}
+              onInputChange={setSearch}
+            />
+          </div>
+        </div>
       }
       actions={
-        <Button size="sm" onClick={() => setEditing(null)}>
-          <Plus className="size-4" /> Add Group
-        </Button>
+        <DocumentListActions
+          onAdd={() => setEditing(null)}
+          addLabel="Add Group"
+          hideExportPrint
+        />
       }
     >
       <div className="bg-muted/30 flex items-center gap-2 rounded-md px-3 py-2 text-xs">
@@ -189,6 +196,7 @@ export default function AccountGroupingPage() {
         tableLayout={{ width: "auto", headerSticky: true }}
         tableClassNames={{ bodyRow: "h-10" }}
       >
+        {/* สูตรเฉพาะ: ตารางนี้ไม่มี pagination bar (scroll ล้วน) จึงไม่ใช้ listGridMaxH */}
         <DataGridContainer scroll className="max-h-[calc(100vh-14rem)]">
           <DataGridTable />
         </DataGridContainer>
@@ -244,7 +252,7 @@ export default function AccountGroupingPage() {
         description={warning}
         onConfirm={() => setWarning("")}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
 

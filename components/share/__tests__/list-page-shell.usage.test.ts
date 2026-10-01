@@ -50,10 +50,6 @@ const ALLOWED: Record<string, number> = {
   // ── PR 3: system-admin · report · config · operation-plan
   // (email-profile / email-template / interface เขียน <h1> สดจึงไม่มีลายเซ็นให้จับ —
   //  ตามใน spec §4 ไม่ใช่ที่นี่)
-  "routes/config/account-grouping/account-grouping-page.tsx": 1,
-  "routes/config/chart-of-account-mapping/coam-component.tsx": 1,
-  "routes/config/title-master/title-master-page.tsx": 1,
-  "routes/operation-plan/recipe-equipment-category/recipe-equipment-category-component.tsx": 1,
 
   // ── PR 4: accounting · inventory-management · product-management
   "routes/accounting/accounts-payable/ap-invoice-list.tsx": 4,
