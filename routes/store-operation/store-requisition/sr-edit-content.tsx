@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { useStoreRequisitionById } from "./use-sr";
 import { StoreRequisitionForm } from "./sr-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 
 export function SrEditContent({ id }: { id: string }) {
   const t = useTranslations("storeOperation.storeRequisition");
@@ -13,7 +13,7 @@ export function SrEditContent({ id }: { id: string }) {
     refetch,
   } = useStoreRequisitionById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <DocPageSkeleton />;
   if (error || !storeRequisition)
     return (
       <ErrorState

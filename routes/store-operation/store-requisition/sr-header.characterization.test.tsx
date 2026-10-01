@@ -193,4 +193,14 @@ describe("SrHeader — characterization", () => {
       within(sheet).getAllByText(tSr.tabWorkflowHistory).length,
     ).toBeGreaterThan(0);
   });
+
+  it("[edit, license หมดอายุ] Save/Delete ถูกปิดพร้อมเหตุผล license", () => {
+    can.canWrite = false;
+    renderHeader("edit", DRAFT);
+    for (const name of [en.common.save, en.common.delete]) {
+      const b = screen.getByRole("button", { name });
+      expect(b).toBeDisabled();
+      expect(b).toHaveAttribute("title", en.license.writeDisabledTitle);
+    }
+  });
 });
