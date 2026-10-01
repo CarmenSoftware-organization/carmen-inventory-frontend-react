@@ -26,6 +26,7 @@ import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
 import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { GrnHeader } from "./grn-header";
 import { GrnSummaryFooter } from "./grn-summary-footer";
 import { GrnFormHeader } from "./grn-form-header";
@@ -184,41 +185,54 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   }, []);
 
   return (
-    <div className="flex min-h-full flex-col space-y-4">
-      <GrnHeader
-        goodsReceiveNote={goodsReceiveNote}
-        mode={mode}
-        isPending={actions.isPending}
-        isCommitted={isCommitted}
-        isVoid={isVoid}
-        deleteIsPending={actions.deleteGrn.isPending}
-        receivedByName={receivedByName}
-        departmentName={departmentName}
-        onBack={actions.handleBack}
-        onEnterEdit={() => setMode("edit")}
-        onCancel={actions.handleCancel}
-        onShowComment={() => actions.setShowComment(true)}
-        onShowDelete={() => actions.setShowDelete(true)}
-        onSaveDraft={() => actions.handleSubmitWithStatus("draft")}
-        // ใบ committed ต้องส่งสถานะเดิม — ส่ง "saved" จะทำให้ doc_status นับเป็นค่าที่เปลี่ยน
-        // แล้วหลังบ้านปฏิเสธด้วย GRN_COMMITTED_HEADER_ONLY
-        onSave={() =>
-          actions.handleSubmitWithStatus(isCommitted ? "committed" : "saved")
-        }
-      />
-
+    <FormPageShell
+      width="wide"
+      header={
+        <GrnHeader
+          goodsReceiveNote={goodsReceiveNote}
+          mode={mode}
+          isPending={actions.isPending}
+          isCommitted={isCommitted}
+          isVoid={isVoid}
+          deleteIsPending={actions.deleteGrn.isPending}
+          receivedByName={receivedByName}
+          departmentName={departmentName}
+          onBack={actions.handleBack}
+          onEnterEdit={() => setMode("edit")}
+          onCancel={actions.handleCancel}
+          onShowComment={() => actions.setShowComment(true)}
+          onShowDelete={() => actions.setShowDelete(true)}
+          onSaveDraft={() => actions.handleSubmitWithStatus("draft")}
+          // ใบ committed ต้องส่งสถานะเดิม — ส่ง "saved" จะทำให้ doc_status นับเป็นค่าที่เปลี่ยน
+          // แล้วหลังบ้านปฏิเสธด้วย GRN_COMMITTED_HEADER_ONLY
+          onSave={() =>
+            actions.handleSubmitWithStatus(isCommitted ? "committed" : "saved")
+          }
+        />
+      }
+      footer={
+        <GrnSummaryFooter
+          form={form}
+          isActionPending={actions.isActionPending}
+          hasRecord={!!goodsReceiveNote}
+          isView={mode === "view"}
+          isCommitted={isCommitted}
+          isVoid={isVoid}
+          onCommit={() => actions.setShowCommit(true)}
+          onVoid={() => actions.setShowVoid(true)}
+        />
+      }
+    >
       <form
         id="grn-form"
         onSubmit={draftSaveHandler(form, actions.onSubmit)}
-        className="space-y-3 px-4"
+        className="space-y-3"
       >
         <GrnFormHeader
           form={form}
           disabled={isDisabled || isView}
           fromWizard={fromWizard}
-          lockIdentity={
-            goodsReceiveNote?.doc_status === "saved" || isCommitted
-          }
+          lockIdentity={goodsReceiveNote?.doc_status === "saved" || isCommitted}
           lockCommercial={isCommitted}
         />
 
@@ -261,17 +275,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         </Tabs>
       </form>
 
-      <GrnSummaryFooter
-        form={form}
-        isActionPending={actions.isActionPending}
-        hasRecord={!!goodsReceiveNote}
-        isView={mode === "view"}
-        isCommitted={isCommitted}
-        isVoid={isVoid}
-        onCommit={() => actions.setShowCommit(true)}
-        onVoid={() => actions.setShowVoid(true)}
-      />
-
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
       <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />
 
@@ -298,6 +301,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           setShowComment={actions.setShowComment}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

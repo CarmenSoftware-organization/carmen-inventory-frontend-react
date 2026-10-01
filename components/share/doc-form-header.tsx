@@ -101,7 +101,7 @@ export function DocFormHeader({
         )}
 
         {/* ── Document info ribbon ── */}
-        {/* ribbon เป็น grid ที่ align คอลัมน์กับ form body (PO/PR/GRN/CN/SR); ml-4
+        {/* ribbon เป็น grid ที่ align คอลัมน์กับ form body (ใช้แค่ PR — ช่อง workflow/description); ml-4
             ของตัว ribbon เอง cancel -ml-4 นี้ ให้ content ตัวแรกเสมอกับ title */}
         {ribbon && (
           <div className="flex items-center gap-2 pt-4">
