@@ -121,6 +121,6 @@ N/A — ไม่มีการเลือกรายการ ผลลั�
 | Doc ID | Title | Relationship |
 |--------|-------|-------------|
 | CB-PAGE-002 | Chart of Accounts | Opens this modal via **Import from Carmen GL** |
-| CB-MODAL-001 | Add / Edit Chart of Account | ทางแก้รหัสบัญชีทีละรายการ |
+| CB-PAGE-002A | Chart of Account Editor | ทางแก้รหัสบัญชีทีละรายการ |
 | — | Interfaces config (`/system-admin/interface/accounting/carmen_gl`) | ที่ตั้ง `sync_policy` และ token ของ Carmen GL (ยังไม่มีเอกสาร UI) |
 | — | Parent flow | N/A — master data CRUD ไม่มี workflow |

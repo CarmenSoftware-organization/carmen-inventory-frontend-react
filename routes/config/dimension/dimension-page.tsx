@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Layers, Plus, ListTree } from "lucide-react";
+import { Plus, ListTree } from "lucide-react";
 import { toast } from "sonner";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
@@ -31,6 +31,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { StatusSwitch } from "@/components/ui/status-switch";
+import { StatusFilter } from "@/components/ui/status-filter";
 import { WarningDialog } from "@/components/ui/warning-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -76,6 +77,7 @@ export default function DimensionPage() {
     [dimensionQuery.data, valueQuery.data],
   );
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
   const [editing, setEditing] = useState<DimensionMaster | null | undefined>();
   const [viewingValuesId, setViewingValuesId] = useState<string | null>(null);
   const viewingValues = dimensions.find((dimension) => dimension.id === viewingValuesId) ?? null;
@@ -100,12 +102,15 @@ export default function DimensionPage() {
 
   const rows = useMemo(
     () =>
-      dimensions.filter((item) =>
-        `${item.code} ${item.name} ${item.name_local ?? ""}`
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      ),
-    [search, dimensions],
+      dimensions
+        .filter((item) =>
+          `${item.code} ${item.name} ${item.name_local ?? ""}`
+            .toLowerCase()
+            .includes(search.toLowerCase()),
+        )
+        .filter((item) => !status || item.is_active === (status === "active"))
+        .sort((a, b) => a.sequence - b.sequence || a.code.localeCompare(b.code)),
+    [search, status, dimensions],
   );
 
   const columns = useMemo<ColumnDef<DimensionMaster>[]>(
@@ -214,14 +219,25 @@ export default function DimensionPage() {
 
   return (
     <DisplayTemplate
-      title="Accounting Dimensions"
-      description="Analytical dimensions and segment values for GL entries and reporting"
+      title="Dimensions"
+      description="Manage GL dimensions and values used by Journal Vouchers"
       toolbar={
-        <SearchInput
-          defaultValue={search}
-          onSearch={setSearch}
-          onInputChange={setSearch}
-        />
+        <>
+          <SearchInput
+            defaultValue={search}
+            onSearch={setSearch}
+            onInputChange={setSearch}
+          />
+          <StatusFilter
+            value={status}
+            onChange={setStatus}
+            defaultLabel="All statuses"
+            options={[
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ]}
+          />
+        </>
       }
       actions={
         <Button size="sm" onClick={() => setEditing(null)}>
@@ -229,16 +245,10 @@ export default function DimensionPage() {
         </Button>
       }
     >
-      <div className="bg-muted/30 flex items-center gap-2 rounded-md px-3 py-2 text-xs">
-        <Layers className="text-primary size-4" />
-        <span className="font-medium">Multi-dimensional accounting:</span>
-        <span className="text-muted-foreground">
-          Each dimension allows sub-codes (e.g. Market Segments, Channels) for tag-based GL allocation and budgeting.
-        </span>
-      </div>
       <DataGrid
         table={table}
         recordCount={rows.length}
+        isLoading={dimensionQuery.isLoading || valueQuery.isLoading}
         emptyMessage={<EmptyComponent />}
         tableLayout={{ width: "auto", headerSticky: true }}
         tableClassNames={{ bodyRow: "h-10" }}
@@ -511,6 +521,7 @@ function DimensionValuesDialog({
   const [valName, setValName] = useState("");
   const [valNameLocal, setValNameLocal] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingValue, setDeletingValue] = useState<DimensionValueMaster | null>(null);
   const [editCode, setEditCode] = useState("");
   const [editName, setEditName] = useState("");
   const [editNameLocal, setEditNameLocal] = useState("");
@@ -716,7 +727,7 @@ function DimensionValuesDialog({
                                   size="sm"
                                   variant="ghost"
                                   className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-                                  onClick={() => void onDeleteValue(v.id)}
+                                  onClick={() => setDeletingValue(v)}
                                 >
                                   Delete
                                 </Button>
@@ -736,6 +747,15 @@ function DimensionValuesDialog({
           <Button onClick={() => onOpenChange(false)}>Close</Button>
         </DialogFooter>
       </DialogContent>
+      <DeleteDialog
+        open={!!deletingValue}
+        onOpenChange={(open) => !open && setDeletingValue(null)}
+        title="Delete dimension value?"
+        description={deletingValue ? `Delete ${deletingValue.code} — ${deletingValue.name}?` : undefined}
+        onConfirm={async () => {
+          if (deletingValue && await onDeleteValue(deletingValue.id)) setDeletingValue(null);
+        }}
+      />
     </Dialog>
   );
 }

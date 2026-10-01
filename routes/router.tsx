@@ -96,6 +96,14 @@ export const router = createBrowserRouter([
                   import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
+                path: "chart-of-accounts/new",
+                lazy: () => import("./config/chart-of-accounts/coa-new.route"),
+              },
+              {
+                path: "chart-of-accounts/:id",
+                lazy: () => import("./config/chart-of-accounts/coa-edit.route"),
+              },
+              {
                 path: "account-grouping",
                 lazy: () =>
                   import("./config/account-grouping/account-grouping.route"),

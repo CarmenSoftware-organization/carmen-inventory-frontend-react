@@ -60,6 +60,7 @@ export function useCoaTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("accountName")} />
       ),
+      cell: ({ row }) => <CellAction onClick={() => onEdit(row.original)}>{row.original.description_1}</CellAction>,
       size: 140,
       meta: { headerTitle: t("accountName"), skeleton: columnSkeletons.text },
     },

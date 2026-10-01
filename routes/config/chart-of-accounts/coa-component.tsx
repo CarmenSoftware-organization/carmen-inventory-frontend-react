@@ -3,7 +3,6 @@ import { useChartOfAccount, useDeleteChartOfAccount } from "./use-coa";
 import type { ChartOfAccount } from "@/types/chart-of-accounts";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
-import { CoaDialog } from "./coa-dialog";
 import { useCoaTable } from "./use-coa-table";
 import { COA_FILTER_FIELDS } from "./coa-filter-fields";
 import CoaCard from "./coa-card";
@@ -22,6 +21,8 @@ export default function CoaComponent() {
       useDelete={useDeleteChartOfAccount}
       useTable={useCoaTable}
       pageKey={LIST_PAGE_KEYS.CHART_OF_ACCOUNT}
+      addPath="/config/chart-of-accounts/new"
+      getEditPath={(account) => `/config/chart-of-accounts/${account.id}`}
       filterFields={COA_FILTER_FIELDS}
       extraActions={<CoaImportCarmenGlButton />}
       // ยังไม่ส่ง defaultSort — backend เพิ่งเปิด endpoint ยังไม่รู้ว่ารับ sort
@@ -51,14 +52,6 @@ export default function CoaComponent() {
           width: 10,
         },
       ]}
-      renderDialog={({ open, onOpenChange, entity, readOnly }) => (
-        <CoaDialog
-          open={open}
-          onOpenChange={onOpenChange}
-          chartOfAccount={entity}
-          readOnly={readOnly}
-        />
-      )}
       renderCard={({ item, onEdit, onDelete }) => (
         <CoaCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}

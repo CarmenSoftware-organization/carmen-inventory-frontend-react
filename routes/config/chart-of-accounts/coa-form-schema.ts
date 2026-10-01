@@ -4,7 +4,14 @@ import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
   ACCOUNT_CATEGORIES,
+  type AccountCategory,
 } from "@/types/chart-of-accounts";
+
+export function natureFor(category: AccountCategory): ACCOUNT_NATURE {
+  return category === "liability" || category === "equity" || category === "revenue"
+    ? ACCOUNT_NATURE.CREDIT
+    : ACCOUNT_NATURE.DEBIT;
+}
 
 export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
@@ -23,7 +30,7 @@ export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
     category: z.enum(ACCOUNT_CATEGORIES, {
       error: tv("required", { field: tf("category") }),
     }),
-    account_group_id: z.string().nullable().optional(),
+    account_group_id: z.string().min(1, "Account Code Grouping Path is required before saving!"),
     allowed_dimensions: z.array(z.string()).optional(),
     dimension_required: z.boolean().optional(),
     is_active: z.boolean(),

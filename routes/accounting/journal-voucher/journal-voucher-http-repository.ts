@@ -184,6 +184,12 @@ async function buildLineRequests(
       if (line.comment || fallbackDescription) {
         lineObj.description = line.comment || fallbackDescription;
       }
+      if (line.dimension.length > 0) {
+        lineObj.dimensions = line.dimension.map((item) => ({
+          gl_dimension_id: item.dimension_id,
+          gl_dimension_value_id: item.dimension_value_id,
+        }));
+      }
 
       return lineObj;
     }),
@@ -312,6 +318,10 @@ export const httpJournalVoucherRepository: JournalVoucherRepository = {
       credit?: number | string;
       base_debit?: number | string;
       base_credit?: number | string;
+      tb_gl_jv_detail_dimension?: Array<{
+        gl_dimension_id: string;
+        gl_dimension_value_id: string;
+      }>;
     }
 
     const rawLines: RawLine[] = Array.isArray(raw.tb_gl_jv_detail)
@@ -350,7 +360,10 @@ export const httpJournalVoucherRepository: JournalVoucherRepository = {
           credit: String(l.credit ?? 0),
           base_debit: String(l.base_debit ?? l.debit ?? 0),
           base_credit: String(l.base_credit ?? l.credit ?? 0),
-          dimension: [],
+          dimension: (l.tb_gl_jv_detail_dimension ?? []).map((item) => ({
+            dimension_id: item.gl_dimension_id,
+            dimension_value_id: item.gl_dimension_value_id,
+          })),
         };
       },
     );

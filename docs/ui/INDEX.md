@@ -20,6 +20,7 @@
 |----|-------|--------|-------|--------|------|
 | CB-PAGE-001 | Configuration Overview (Config Dashboard) | 8 Configuration | `/config` | Draft | [CB-PAGE-001-config-dashboard.md](pages/CB-PAGE-001-config-dashboard.md) |
 | CB-PAGE-002 | Chart of Accounts | 8 Configuration | `/config/chart-of-accounts` | Draft | [CB-PAGE-002-chart-of-accounts.md](pages/CB-PAGE-002-chart-of-accounts.md) |
+| CB-PAGE-002A | Chart of Account Editor | 8 Configuration | `/config/chart-of-accounts/new`, `/:id` | Draft | [CB-PAGE-002A-chart-of-account-editor.md](pages/CB-PAGE-002A-chart-of-account-editor.md) |
 | CB-PAGE-003 | Chart of Account Mapping | 8 Configuration | `/config/chart-of-account-mapping` | Draft | [CB-PAGE-003-chart-of-account-mapping.md](pages/CB-PAGE-003-chart-of-account-mapping.md) |
 | CB-PAGE-004 | Unit of Measurement (List) | 8 Configuration | `/config/unit` | Draft | [CB-PAGE-004-unit.md](pages/CB-PAGE-004-unit.md) |
 | CB-PAGE-005 | Currency (List) | 8 Configuration | `/config/currency` | Draft | [CB-PAGE-005-currency.md](pages/CB-PAGE-005-currency.md) |
@@ -41,7 +42,7 @@
 
 | ID | Title | Parent Page(s) | Status | File |
 |----|-------|----------------|--------|------|
-| CB-MODAL-001 | Add / Edit Chart of Account | CB-PAGE-002 | Draft | [CB-MODAL-001-coa-dialog.md](modals/CB-MODAL-001-coa-dialog.md) |
+| CB-MODAL-001 | Add / Edit Chart of Account (superseded) | CB-PAGE-002 | Historical | [CB-MODAL-001-coa-dialog.md](modals/CB-MODAL-001-coa-dialog.md) |
 | CB-MODAL-002 | Import from Carmen GL (Confirm) | CB-PAGE-002 | Draft | [CB-MODAL-002-import-carmen-gl.md](modals/CB-MODAL-002-import-carmen-gl.md) |
 | CB-MODAL-003 | Unit Dialog (Add / Edit Unit) | CB-PAGE-004 | Draft | [CB-MODAL-003-unit-dialog.md](modals/CB-MODAL-003-unit-dialog.md) |
 | CB-MODAL-004 | Currency Dialog (Add / Edit Currency) | CB-PAGE-005 | Draft | [CB-MODAL-004-currency-dialog.md](modals/CB-MODAL-004-currency-dialog.md) |

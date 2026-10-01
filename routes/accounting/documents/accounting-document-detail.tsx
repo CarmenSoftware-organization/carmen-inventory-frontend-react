@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useTranslations } from "use-intl";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { FormMode } from "@/types/form";
 import { Badge } from "@/components/ui/badge";
@@ -65,9 +66,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { useChartOfAccount } from "@/hooks/use-chart-of-account";
+import { useCurrency } from "@/hooks/use-currency";
 import { useDepartment } from "@/hooks/use-department";
 import { useCostCenter } from "@/hooks/use-cost-center";
 import { useGlPeriods } from "@/hooks/use-accounting-master";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
+import type { DimensionMaster, DimensionValueMaster } from "@/types/accounting-master";
+import { multiplyDecimal } from "../accounts-payable/shared/ap-decimal";
 import { CellAction } from "@/components/ui/cell-action";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import {
@@ -101,7 +109,7 @@ import {
   useJournalVoucherAction,
   useUpdateJournalVoucher,
 } from "../journal-voucher/use-journal-voucher";
-import type { JournalVoucherInput } from "@/types/journal-voucher";
+import type { JournalLineDimensionInput, JournalVoucherInput } from "@/types/journal-voucher";
 import {
   isSourceGenerated,
   journalVoucherCapabilities,
@@ -147,6 +155,7 @@ interface JournalLine {
   budgetControlled: boolean;
   budget: string;
   dimension: string;
+  dimensions?: JournalLineDimensionInput[];
   departmentLabel?: string;
   accountLabel?: string;
   currency?: string;
@@ -187,6 +196,23 @@ const INITIAL_LINES: JournalLine[] = [
   },
 ];
 
+const EMPTY_JV_LINE: JournalLine = {
+  id: "line-1",
+  department: "",
+  account: "",
+  comment: "",
+  debit: 0,
+  credit: 0,
+  taxCode: "",
+  whtCode: "NONE",
+  budgetControlled: false,
+  budget: "",
+  dimension: "",
+  dimensions: [],
+  currency: "THB",
+  exchangeRate: 1,
+};
+
 const optionLabel = (
   options: ReadonlyArray<{ id: string; label: string; code?: string }>,
   value: string,
@@ -215,6 +241,31 @@ export default function AccountingDocumentDetail() {
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
   const isJournalVoucher = config.kind === "journalVoucher";
+  const buCode = useBuCode();
+  const dimensionQuery = useQuery({
+    queryKey: ["accounting-master", "dimensions", buCode],
+    enabled: isJournalVoucher && !!buCode,
+    queryFn: async (): Promise<DimensionMaster[]> => {
+      const res = await httpClient.get(`${API_ENDPOINTS.GL_DIMENSIONS(buCode!)}?perpage=100`);
+      if (!res.ok) throw await ApiError.from(res, "Unable to load dimensions");
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.data ?? []);
+    },
+  });
+  const dimensionValuesQuery = useQuery({
+    queryKey: ["accounting-master", "dimension-values", buCode],
+    enabled: isJournalVoucher && !!buCode,
+    queryFn: async (): Promise<DimensionValueMaster[]> => {
+      const res = await httpClient.get(`${API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!)}?perpage=100`);
+      if (!res.ok) throw await ApiError.from(res, "Unable to load dimension values");
+      const json = await res.json();
+      const values = Array.isArray(json) ? json : (json.data ?? []);
+      return values.map((value: DimensionValueMaster & { gl_dimension_id: string }) => ({
+        ...value,
+        dimension_id: value.gl_dimension_id,
+      }));
+    },
+  });
   const usesVoucherDetailPattern =
     isJournalVoucher ||
     config.kind === "templateVoucher" ||
@@ -252,6 +303,9 @@ export default function AccountingDocumentDetail() {
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
   const { data: coaData } = useChartOfAccount({ perpage: 100 });
+  const accountById = useMemo(() => new Map(
+    (coaData?.data ?? []).flatMap((account) => [[account.id, account], [account.code, account]] as const),
+  ), [coaData?.data]);
   const accounts = useMemo(() => {
     const list = coaData?.data ?? [];
     return list
@@ -266,6 +320,11 @@ export default function AccountingDocumentDetail() {
 
   const { data: deptData } = useDepartment({ perpage: 100 });
   const { data: costCenterData } = useCostCenter({ perpage: 100 });
+  const { data: currencyData } = useCurrency({ perpage: 100 }, { enabled: isJournalVoucher });
+  const currencyIdFor = (value?: string) =>
+    currencyData?.data.find((currency) => currency.id === value || currency.code === value)?.id ?? value ?? "";
+  const currencyCodeFor = (value?: string) =>
+    currencyData?.data.find((currency) => currency.id === value || currency.code === value)?.code ?? value ?? "THB";
   const departments = useMemo(() => {
     const ccList = (costCenterData?.data ?? []).filter((c) => c.is_active !== false);
     if (isJournalVoucher) {
@@ -314,11 +373,13 @@ export default function AccountingDocumentDetail() {
     reverseDate: "",
   });
   const [fastEntryMode, setFastEntryMode] = useState(false);
-  const [lines, setLines] = useState<JournalLine[]>(INITIAL_LINES);
+  const [lines, setLines] = useState<JournalLine[]>(() =>
+    isNew && isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES,
+  );
 
   const [syncedCoaFirstId, setSyncedCoaFirstId] = useState<string | null>(null);
   const firstAvailableCoaId = coaData?.data?.[0]?.id ?? null;
-  if (isNew && firstAvailableCoaId && syncedCoaFirstId !== firstAvailableCoaId) {
+  if (isNew && !isJournalVoucher && firstAvailableCoaId && syncedCoaFirstId !== firstAvailableCoaId) {
     setSyncedCoaFirstId(firstAvailableCoaId);
     const activeCoas = coaData!.data.filter((a) => a.is_active);
     const first = activeCoas[0] ?? coaData!.data[0];
@@ -441,6 +502,7 @@ export default function AccountingDocumentDetail() {
           budgetControlled: false,
           budget: "",
           dimension: "",
+          dimensions: line.dimension,
           currency: line.currency_id,
           exchangeRate: Number(line.exchange_rate),
         };
@@ -467,7 +529,7 @@ export default function AccountingDocumentDetail() {
       autoReverse: false,
       reverseDate: "",
     });
-    setLines(INITIAL_LINES);
+    setLines(isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
     setSelectedLineIds([]);
   };
 
@@ -488,15 +550,22 @@ export default function AccountingDocumentDetail() {
         budgetControlled: false,
         budget: "",
         dimension: "",
+        dimensions: [],
+        currency: "THB",
+        exchangeRate: 1,
       },
     ]);
   }, [departments, isJournalVoucher]);
 
   const autoBalanceEntry = useCallback(() => {
-    const curDebit = lines.reduce((sum, line) => sum + line.debit, 0);
-    const curCredit = lines.reduce((sum, line) => sum + line.credit, 0);
+    const curDebit = lines.reduce((sum, line) => sum + (isJournalVoucher
+      ? Number(multiplyDecimal(String(line.debit), String(line.exchangeRate ?? 1)))
+      : line.debit), 0);
+    const curCredit = lines.reduce((sum, line) => sum + (isJournalVoucher
+      ? Number(multiplyDecimal(String(line.credit), String(line.exchangeRate ?? 1)))
+      : line.credit), 0);
     const diff = curDebit - curCredit;
-    if (Math.abs(diff) < 0.005) {
+    if (Math.abs(diff) < (isJournalVoucher ? 0.01 : 0.005)) {
       toast.info("ยอดเดบิตและเครดิตสมดุลแล้ว (Already balanced)");
       return;
     }
@@ -507,6 +576,7 @@ export default function AccountingDocumentDetail() {
           idx === current.length - 1
             ? {
                 ...line,
+                ...(isJournalVoucher ? { currency: "THB", exchangeRate: 1 } : {}),
                 debit: diff < 0 ? Number(Math.abs(diff).toFixed(2)) : 0,
                 credit: diff > 0 ? Number(diff.toFixed(2)) : 0,
               }
@@ -527,11 +597,12 @@ export default function AccountingDocumentDetail() {
           budgetControlled: false,
           budget: "",
           dimension: "",
+          ...(isJournalVoucher ? { dimensions: [], currency: "THB", exchangeRate: 1 } : {}),
         },
       ];
     });
     toast.success("คำนวณและปรับยอดให้สมดุลแล้ว (Auto balanced)");
-  }, [lines]);
+  }, [lines, isJournalVoucher]);
 
   useEffect(() => {
     if (isView) return;
@@ -551,7 +622,14 @@ export default function AccountingDocumentDetail() {
   const updateLine = (lineId: string, patch: Partial<JournalLine>) => {
     setLines((current) =>
       current.map((line) =>
-        line.id === lineId ? { ...line, ...patch } : line,
+        line.id === lineId
+          ? {
+              ...line,
+              ...patch,
+              ...(isJournalVoucher && patch.debit && patch.debit > 0 ? { credit: 0 } : {}),
+              ...(isJournalVoucher && patch.credit && patch.credit > 0 ? { debit: 0 } : {}),
+            }
+          : line,
       ),
     );
   };
@@ -616,10 +694,11 @@ export default function AccountingDocumentDetail() {
               line.account !== saved.account_id ||
               line.department !== (saved.department_id ?? "") ||
               line.comment !== (saved.comment ?? "") ||
-              (line.currency ?? "THB") !== saved.currency_id ||
+              currencyIdFor(line.currency ?? "THB") !== saved.currency_id ||
               Number(line.exchangeRate ?? 1) !== Number(saved.exchange_rate) ||
               Number(line.debit) !== Number(saved.debit) ||
-              Number(line.credit) !== Number(saved.credit)
+              Number(line.credit) !== Number(saved.credit) ||
+              JSON.stringify(line.dimensions ?? []) !== JSON.stringify(saved.dimension ?? [])
             );
           }))
       ) {
@@ -628,7 +707,7 @@ export default function AccountingDocumentDetail() {
       }
       if (coaData?.data && coaData.data.length === 0) {
         toast.error(
-          "ไม่สามารถบันทึกได้ เนื่องจากยังไม่มีผังบัญชี (Chart of Accounts) ในหน่วยธุรกิจนี้ กรุณาไปตั้งค่าผังบัญชีก่อนครับ",
+          "ไม่สามารถบันทึกได้ เนื่องจากยังไม่มีผังบัญชี (Chart of Accounts) ในหน่วยธุรกิจนี้ กรุณาไปตั้งค่าผังบัญชีก่อนค่ะ",
         );
         return;
       }
@@ -644,11 +723,24 @@ export default function AccountingDocumentDetail() {
         return;
       }
 
-      const sumDebit = lines.reduce((acc, l) => acc + (Number(l.debit) || 0), 0);
-      const sumCredit = lines.reduce((acc, l) => acc + (Number(l.credit) || 0), 0);
-      if (Math.abs(sumDebit - sumCredit) >= 0.005) {
+      if (lines.some((line) => !Number.isFinite(line.exchangeRate) || (line.exchangeRate ?? 1) <= 0)) {
+        toast.error("กรุณาระบุ Rate มากกว่า 0 ให้ครบทุกบรรทัด");
+        return;
+      }
+      if (intent === "submit" && (dimensionQuery.isError || dimensionValuesQuery.isError)) {
+        toast.error("ยังโหลด Dimension master ไม่สำเร็จ กรุณาลองใหม่ก่อน Submit");
+        return;
+      }
+      if (intent === "submit" && lines.some((line) =>
+        accountById.get(line.account)?.dimension_required &&
+        !line.dimensions?.length,
+      )) {
+        toast.error("กรุณาระบุ Dimension ที่บังคับก่อน Submit");
+        return;
+      }
+      if (intent === "submit" && !isBalanced) {
         toast.error(
-          `ยอดเดบิต (${sumDebit.toFixed(2)}) และเครดิต (${sumCredit.toFixed(2)}) ต้องเท่ากัน (Base balanced)`,
+          `ยอด Base Debit (${totalBaseDebit.toFixed(2)}) และ Base Credit (${totalBaseCredit.toFixed(2)}) ต้องสมดุลก่อน Submit`,
         );
         return;
       }
@@ -671,20 +763,15 @@ export default function AccountingDocumentDetail() {
           account_id: line.account,
           department_id: line.department || null,
           comment: line.comment || null,
-          currency_id: line.currency ?? "THB",
+          currency_id: currencyIdFor(line.currency ?? "THB"),
           exchange_rate: String(line.exchangeRate ?? 1),
           rate_date: null,
           rate_type: null,
           rate_source: null,
           debit: line.debit.toFixed(2),
           credit: line.credit.toFixed(2),
-          dimension: line.dimension
-            ? [
-                {
-                  dimension_id: line.dimension,
-                  dimension_value_id: line.dimension,
-                },
-              ]
+          dimension: isJournalVoucher ? (line.dimensions ?? []) : line.dimension
+            ? [{ dimension_id: line.dimension, dimension_value_id: line.dimension }]
             : [],
         })),
       };
@@ -753,7 +840,7 @@ export default function AccountingDocumentDetail() {
 
   const handleNew = () => {
     setValues((current) => ({ ...current, description: "", party: "" }));
-    setLines(INITIAL_LINES);
+    setLines(isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
     setSelectedLineIds([]);
     setDocumentStatus("Draft");
     setMode("add");
@@ -795,8 +882,19 @@ export default function AccountingDocumentDetail() {
 
   const totalDebit = lines.reduce((sum, line) => sum + line.debit, 0);
   const totalCredit = lines.reduce((sum, line) => sum + line.credit, 0);
-  const variance = Math.abs(totalDebit - totalCredit);
-  const isBalanced = lines.length > 0 && variance < 0.005;
+  const baseAmount = (amount: number, rate: number) =>
+    Number(multiplyDecimal(String(amount), String(rate), 2));
+  const totalBaseDebit = lines.reduce(
+    (sum, line) => sum + baseAmount(line.debit, line.exchangeRate ?? 1), 0,
+  );
+  const totalBaseCredit = lines.reduce(
+    (sum, line) => sum + baseAmount(line.credit, line.exchangeRate ?? 1), 0,
+  );
+  const variance = Math.abs(
+    (isJournalVoucher ? totalBaseDebit : totalDebit) -
+      (isJournalVoucher ? totalBaseCredit : totalCredit),
+  );
+  const isBalanced = lines.length > 0 && variance < (isJournalVoucher ? 0.01 : 0.005);
   const summaryMetrics = [
     { label: t("totalTransDebit"), value: totalDebit, color: "text-primary" },
     {
@@ -804,10 +902,10 @@ export default function AccountingDocumentDetail() {
       value: totalCredit,
       color: "text-success-foreground",
     },
-    { label: t("totalBaseDebit"), value: totalDebit, color: "text-primary" },
+    { label: t("totalBaseDebit"), value: totalBaseDebit, color: "text-primary" },
     {
       label: t("totalBaseCredit"),
-      value: totalCredit,
+      value: totalBaseCredit,
       color: "text-success-foreground",
     },
     {
@@ -1684,16 +1782,16 @@ export default function AccountingDocumentDetail() {
                       </div>
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {isJournalVoucher ? t("costCenter") : t("department")}
+                      {isJournalVoucher ? t("accountCode") : t("department")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {t("chartOfAccount")}
+                      {isJournalVoucher ? t("costCenter") : t("chartOfAccount")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
                       {t("comment")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {t("currency")}
+                      {isJournalVoucher ? "Cur." : t("currency")}
                     </th>
                     <th className="h-10 px-3 text-right font-medium">
                       {t("rate")}
@@ -1712,6 +1810,11 @@ export default function AccountingDocumentDetail() {
                 <tbody>
                   {lines.map((line, lineIndex) => {
                     const isSelected = selectedLineIds.includes(line.id);
+                    const lineAccount = accountById.get(line.account);
+                    const visibleDimensions = (dimensionQuery.data ?? []).filter(
+                      (dimension) => dimension.is_active &&
+                        (!lineAccount?.allowed_dimensions?.length || lineAccount.allowed_dimensions.includes(dimension.id)),
+                    );
                     return (
                       <Fragment key={line.id}>
                         <tr className={isSelected ? "bg-muted/30" : undefined}>
@@ -1734,39 +1837,66 @@ export default function AccountingDocumentDetail() {
                             </div>
                           </td>
                           <td className="h-12 px-3">
-                            {isView ? (
+                            {isJournalVoucher ? (
+                              isView ? (line.accountLabel ?? optionLabel(accounts, line.account)) : (
+                                <LookupCombobox
+                                  value={line.account}
+                                  onValueChange={(account) => updateLine(line.id, { account, department: "", departmentLabel: undefined, dimensions: [] })}
+                                  items={accounts}
+                                  getId={(option) => option.id}
+                                  getLabel={(option) => option.label}
+                                  placeholder={t("selectAccount")}
+                                  searchPlaceholder={t("searchAccount")}
+                                  className="min-w-52"
+                                />
+                              )
+                            ) : isView ? (
                               (line.departmentLabel && line.departmentLabel !== "—" && line.departmentLabel !== line.department
                                 ? line.departmentLabel
-                                : (line.department ? optionLabel(departments, line.department) : (isJournalVoucher ? t("costCenterUnassigned") : "—")))
+                                : (line.department ? optionLabel(departments, line.department) : "—"))
                             ) : (
                               <LookupCombobox
                                 value={line.department}
                                 onValueChange={(department) => {
                                   const match = departments.find((d) => d.id === department);
-                                  updateLine(line.id, {
-                                    department,
-                                    departmentLabel: match ? match.label : undefined,
-                                  });
+                                  updateLine(line.id, { department, departmentLabel: match?.label });
                                 }}
                                 items={departments}
                                 getId={(option) => option.id}
                                 getLabel={(option) => option.label}
-                                placeholder={isJournalVoucher ? t("selectCostCenter") : t("selectDepartment")}
-                                searchPlaceholder={isJournalVoucher ? t("searchCostCenter") : t("searchDepartment")}
+                                placeholder={t("selectDepartment")}
+                                searchPlaceholder={t("searchDepartment")}
                                 className="min-w-44"
                               />
                             )}
                           </td>
                           <td className="h-12 px-3 font-medium">
-                            {isView ? (
-                              (line.accountLabel ??
-                              optionLabel(accounts, line.account))
+                            {isJournalVoucher ? (
+                              isView ? (
+                                line.departmentLabel && line.departmentLabel !== "—" && line.departmentLabel !== line.department
+                                  ? line.departmentLabel
+                                  : line.department ? optionLabel(departments, line.department) : t("costCenterUnassigned")
+                              ) : (
+                                <LookupCombobox
+                                  value={line.department}
+                                  onValueChange={(department) => {
+                                    const match = departments.find((d) => d.id === department);
+                                    updateLine(line.id, { department, departmentLabel: match?.label });
+                                  }}
+                                  items={departments}
+                                  getId={(option) => option.id}
+                                  getLabel={(option) => option.label}
+                                  placeholder={t("selectCostCenter")}
+                                  searchPlaceholder={t("searchCostCenter")}
+                                  className="min-w-44"
+                                />
+                              )
+                            ) : isView ? (
+                              (line.accountLabel ?? optionLabel(accounts, line.account))
                             ) : (
                               <LookupCombobox
                                 value={line.account}
-                                onValueChange={(account) =>
-                                  updateLine(line.id, { account })
-                                }
+                                onValueChange={(account) => updateLine(line.id, { account })}
                                 items={accounts}
                                 getId={(option) => option.id}
                                 getLabel={(option) => option.label}
@@ -1793,10 +1923,26 @@ export default function AccountingDocumentDetail() {
                             )}
                           </td>
                           <td className="h-12 px-3">
-                            {line.currency ?? "THB"}
+                            {isJournalVoucher && !isView ? (
+                              <LookupCurrency
+                                value={currencyIdFor(line.currency ?? "THB")}
+                                onValueChange={(currency) => updateLine(line.id, { currency })}
+                                size="sm"
+                              />
+                            ) : currencyCodeFor(line.currency)}
                           </td>
                           <td className="h-12 px-3 text-right tabular-nums">
-                            {line.exchangeRate ?? 1}
+                            {isJournalVoucher && !isView ? (
+                              <Input
+                                type="number"
+                                min={0.00001}
+                                step={0.00001}
+                                size="sm"
+                                value={line.exchangeRate ?? 1}
+                                onChange={(event) => updateLine(line.id, { exchangeRate: Number(event.target.value) })}
+                                className="min-w-24 text-right tabular-nums"
+                              />
+                            ) : (line.exchangeRate ?? 1)}
                           </td>
                           <td className="h-12 px-3 text-right tabular-nums">
                             {isView ? (
@@ -1962,18 +2108,44 @@ export default function AccountingDocumentDetail() {
                           </td>
                           <td colSpan={4} className="px-3 py-0.5">
                             <div className="flex flex-wrap items-center gap-1">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="xs"
-                                onClick={() =>
-                                  openLineDetail(line.id, "dimension")
-                                }
-                              >
-                                {t("dimension")}:{" "}
-                                {optionLabel(DIMENSIONS, line.dimension) || "-"}
-                              </Button>
-                              <Button
+                              {isJournalVoucher && (dimensionQuery.isError || dimensionValuesQuery.isError) && (
+                                <span className="text-destructive text-xs">Unable to load dimensions</span>
+                              )}
+                              {isJournalVoucher ? visibleDimensions.map((dimension) => {
+                                const selectedValue = line.dimensions?.find((item) => item.dimension_id === dimension.id)?.dimension_value_id;
+                                const values = (dimensionValuesQuery.data ?? []).filter(
+                                  (value) => value.dimension_id === dimension.id && value.is_active,
+                                );
+                                return (
+                                  <div key={dimension.id} className="flex items-center gap-1 text-xs">
+                                    <span className="text-muted-foreground">{dimension.code}</span>
+                                    {isView ? (
+                                      <span>{values.find((value) => value.id === selectedValue)?.code ?? "—"}</span>
+                                    ) : (
+                                      <FieldSelect
+                                        value={selectedValue ?? "none"}
+                                        onValueChange={(valueId) => updateLine(line.id, {
+                                          dimensions: [
+                                            ...(line.dimensions ?? []).filter((item) => item.dimension_id !== dimension.id),
+                                            ...(valueId === "none" ? [] : [{ dimension_id: dimension.id, dimension_value_id: valueId }]),
+                                          ],
+                                        })}
+                                        className="h-7 text-xs"
+                                      >
+                                        <SelectContent>
+                                          <SelectItem value="none">—</SelectItem>
+                                          {values.map((value) => (
+                                            <SelectItem key={value.id} value={value.id}>{value.code} — {value.name}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </FieldSelect>
+                                    )}
+                                  </div>
+                                );
+                              }) : <Button type="button" variant="outline" size="xs" onClick={() => openLineDetail(line.id, "dimension")}>
+                                {t("dimension")}: {optionLabel(DIMENSIONS, line.dimension) || "-"}
+                              </Button>}
+                              {!isJournalVoucher && <Button
                                 type="button"
                                 variant="outline"
                                 size="xs"
@@ -1981,8 +2153,8 @@ export default function AccountingDocumentDetail() {
                               >
                                 {t("taxCode")}:{" "}
                                 {optionLabel(TAX_CODES, line.taxCode) || "-"}
-                              </Button>
-                              <Button
+                              </Button>}
+                              {!isJournalVoucher && <Button
                                 type="button"
                                 variant="outline"
                                 size="xs"
@@ -1992,7 +2164,7 @@ export default function AccountingDocumentDetail() {
                               >
                                 {t("budget")}:{" "}
                                 {optionLabel(BUDGETS, line.budget) || "-"}
-                              </Button>
+                              </Button>}
                             </div>
                           </td>
                           <td className="px-3 py-0.5" />
@@ -2001,7 +2173,7 @@ export default function AccountingDocumentDetail() {
                               {t("baseDebit")}
                             </span>
                             <span className="text-primary font-semibold">
-                              {line.debit.toLocaleString(undefined, {
+                              {(isJournalVoucher ? baseAmount(line.debit, line.exchangeRate ?? 1) : line.debit).toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                               })}
                             </span>
@@ -2011,7 +2183,7 @@ export default function AccountingDocumentDetail() {
                               {t("baseCredit")}
                             </span>
                             <span className="text-success-foreground font-semibold">
-                              {line.credit.toLocaleString(undefined, {
+                              {(isJournalVoucher ? baseAmount(line.credit, line.exchangeRate ?? 1) : line.credit).toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                               })}
                             </span>

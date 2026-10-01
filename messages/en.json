@@ -311,6 +311,7 @@
       "department": "Department",
       "costCenter": "Cost Center",
       "costCenterUnassigned": "Not assigned",
+      "accountCode": "Account Code",
       "chartOfAccount": "Chart of Account",
       "comment": "Comment",
       "currency": "Currency",
@@ -1466,6 +1467,8 @@
       "deleteConfirm": "Are you sure you want to delete account \"{name}\"? This action cannot be undone.",
       "codePlaceholder": "e.g. 1010000",
       "accountName": "Account name",
+      "descriptionEnglish": "Description (English)",
+      "descriptionThai": "Description (Thai)",
       "accountNamePlaceholder": "e.g. Inventory - Food",
       "selectNature": "Select normal balance",
       "nature": {

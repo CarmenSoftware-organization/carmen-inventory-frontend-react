@@ -312,6 +312,7 @@
       "costCenter": "ศูนย์ต้นทุน",
       "costCenterUnassigned": "ไม่ได้กำหนด",
       "accountCode": "รหัสบัญชี",
+      "chartOfAccount": "ผังบัญชี",
       "comment": "หมายเหตุ",
       "currency": "สกุลเงิน",
       "debit": "เดบิต",
@@ -1466,6 +1467,8 @@
       "deleteConfirm": "ยืนยันลบบัญชี \"{name}\" ไหม ลบแล้วเอากลับไม่ได้",
       "codePlaceholder": "เช่น 1010000",
       "accountName": "ชื่อบัญชี",
+      "descriptionEnglish": "ชื่อบัญชี (อังกฤษ)",
+      "descriptionThai": "ชื่อบัญชี (ไทย)",
       "accountNamePlaceholder": "เช่น สินค้าคงคลัง - อาหาร",
       "selectNature": "เลือกด้านบัญชี",
       "nature": {

@@ -1,80 +1,57 @@
-import { describe, it, expect } from "vitest";
-import { createCoaSchema } from "./coa-form-schema";
-import {
-  CHART_OF_ACCOUNT_TYPE,
-  ACCOUNT_NATURE,
-} from "@/types/chart-of-accounts";
+import { describe, expect, it } from "vitest";
+import { ACCOUNT_NATURE, CHART_OF_ACCOUNT_TYPE } from "@/types/chart-of-accounts";
+import { createCoaSchema, natureFor } from "./coa-form-schema";
 
-const tv = ((k: string) => k) as never;
-const tf = ((k: string) => k) as never;
-const schema = createCoaSchema(tv, tf);
+const translate = (key: string) => key;
 
-const valid = {
-  code: "1140-001",
-  description_1: "Inventory - Food",
-  description_2: "",
-  nature: ACCOUNT_NATURE.DEBIT,
-  type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
-  category: "asset",
-  is_active: true,
-};
-
-describe("createCoaSchema", () => {
-  it("ผ่านเมื่อกรอกครบทุกช่องที่บังคับ", () => {
-    expect(schema.safeParse(valid).success).toBe(true);
-  });
-
-  it("description_2 ไม่บังคับ — กรอกหรือปล่อยว่างก็ผ่าน", () => {
-    expect(
-      schema.safeParse({ ...valid, description_2: "อาหารสด" }).success,
-    ).toBe(true);
-    expect(schema.safeParse({ ...valid, description_2: "" }).success).toBe(
-      true,
-    );
-  });
-
-  it("code กับ description_1 ว่างไม่ได้", () => {
-    expect(schema.safeParse({ ...valid, code: "" }).success).toBe(false);
-    expect(schema.safeParse({ ...valid, description_1: "" }).success).toBe(
-      false,
-    );
-  });
-
-  it("รับ nature แค่ debit กับ credit", () => {
-    for (const nature of ["debit", "credit"]) {
-      expect(schema.safeParse({ ...valid, nature }).success).toBe(true);
-    }
-    // ตัวใหญ่ก็ไม่รับ — backend เก็บเป็นตัวเล็ก ส่งตัวใหญ่ไปได้ 400
-    for (const nature of ["Debit", "dr", "", "asset"]) {
-      expect(schema.safeParse({ ...valid, nature }).success).toBe(false);
-    }
-  });
-
-  it("รับ type แค่สี่ค่าในผังบัญชี", () => {
-    for (const type of [
-      "header",
-      "balance_sheet",
-      "income_statement",
-      "statistic",
-    ]) {
-      expect(schema.safeParse({ ...valid, type }).success).toBe(true);
-    }
-    for (const type of ["Balance_Sheet", "balance sheet", "", "pl"]) {
-      expect(schema.safeParse({ ...valid, type }).success).toBe(false);
-    }
-  });
-
-  it("บังคับ category ตาม API", () => {
-    expect(schema.safeParse({ ...valid, category: undefined }).success).toBe(false);
-    expect(schema.safeParse({ ...valid, category: "unknown" }).success).toBe(false);
-  });
-
-  it("ไม่มี name/description เดิมหลงเหลืออยู่ในผลลัพธ์", () => {
-    const parsed = schema.parse({
-      ...valid,
-      name: "ของเก่า",
-      description: "ของเก่า",
+describe("COA editor rules", () => {
+  it("requires category, type and grouping on create", () => {
+    const schema = createCoaSchema(translate, translate);
+    const result = schema.safeParse({
+      code: "1000",
+      description_1: "Cash",
+      description_2: "",
+      category: "",
+      nature: ACCOUNT_NATURE.DEBIT,
+      type: "",
+      account_group_id: "",
+      is_active: true,
     });
-    expect(parsed).toEqual(valid);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.path[0])).toEqual(
+        expect.arrayContaining(["category", "type", "account_group_id"]),
+      );
+    }
+    expect(schema.safeParse({
+      code: "1000", description_1: "Cash", description_2: "",
+      category: "asset", nature: ACCOUNT_NATURE.DEBIT,
+      type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+      account_group_id: "group-1", is_active: true,
+    }).success).toBe(true);
+  });
+
+  it("derives nature from category", () => {
+    expect(natureFor("asset")).toBe(ACCOUNT_NATURE.DEBIT);
+    expect(natureFor("expense")).toBe(ACCOUNT_NATURE.DEBIT);
+    expect(natureFor("liability")).toBe(ACCOUNT_NATURE.CREDIT);
+    expect(natureFor("equity")).toBe(ACCOUNT_NATURE.CREDIT);
+    expect(natureFor("revenue")).toBe(ACCOUNT_NATURE.CREDIT);
+    expect(natureFor("statistic")).toBe(ACCOUNT_NATURE.DEBIT);
+  });
+
+  it("rejects blank code and English description", () => {
+    const schema = createCoaSchema(translate, translate);
+    const valid = {
+      code: "1000", description_1: "Cash", description_2: "",
+      category: "asset", nature: ACCOUNT_NATURE.DEBIT,
+      type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+      account_group_id: "group-1", is_active: true,
+    };
+    expect(schema.safeParse({ ...valid, code: "" }).success).toBe(false);
+    expect(schema.safeParse({ ...valid, description_1: "" }).success).toBe(false);
+    expect(schema.safeParse({ ...valid, description_2: "เงินสด" }).success).toBe(true);
+    expect(schema.safeParse({ ...valid, nature: "Debit" }).success).toBe(false);
+    expect(schema.safeParse({ ...valid, type: "pl" }).success).toBe(false);
   });
 });

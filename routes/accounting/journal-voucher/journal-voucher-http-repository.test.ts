@@ -23,6 +23,33 @@ describe("httpJournalVoucherRepository", () => {
     vi.clearAllMocks();
   });
 
+  it("reads saved line dimensions from the detail API", async () => {
+    vi.mocked(httpClient.get).mockImplementation(async (url: string) =>
+      mockResponse(url.includes("cost-centers")
+        ? { data: [] }
+        : { data: {
+            id: "44444444-4444-4444-4444-444444444444",
+            tb_gl_jv_detail: [{
+              id: "line-1",
+              tb_gl_jv_detail_dimension: [{
+                gl_dimension_id: "66666666-6666-6666-6666-666666666666",
+                gl_dimension_value_id: "77777777-7777-7777-7777-777777777777",
+              }],
+            }],
+          } }),
+    );
+
+    const voucher = await httpJournalVoucherRepository.get(
+      "CARMEN-AVG",
+      "44444444-4444-4444-4444-444444444444",
+    );
+
+    expect(voucher?.lines[0].dimension).toEqual([{
+      dimension_id: "66666666-6666-6666-6666-666666666666",
+      dimension_value_id: "77777777-7777-7777-7777-777777777777",
+    }]);
+  });
+
   describe("create", () => {
     it("constructs payload matching Swagger GlJvCreateRequestDto specification", async () => {
       vi.mocked(httpClient.get).mockImplementation(async (url: string) => {
@@ -88,7 +115,10 @@ describe("httpJournalVoucherRepository", () => {
             rate_source: null,
             debit: "1500.00",
             credit: "0.00",
-            dimension: [],
+            dimension: [{
+              dimension_id: "66666666-6666-6666-6666-666666666666",
+              dimension_value_id: "77777777-7777-7777-7777-777777777777",
+            }],
           },
           {
             account_id: "33333333-3333-3333-3333-333333333333",
@@ -128,6 +158,10 @@ describe("httpJournalVoucherRepository", () => {
               credit: 0,
               exchange_rate: 1,
               description: "Electricity line",
+              dimensions: [{
+                gl_dimension_id: "66666666-6666-6666-6666-666666666666",
+                gl_dimension_value_id: "77777777-7777-7777-7777-777777777777",
+              }],
             },
             {
               sequence_no: 2,

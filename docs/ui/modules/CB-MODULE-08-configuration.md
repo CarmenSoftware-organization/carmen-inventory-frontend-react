@@ -83,7 +83,7 @@
 
 ### 8.3 Document Creation
 
-**Doc reference:** dialog CB-MODAL-001, 003–013 และฟอร์ม CB-PAGE-015, CB-PAGE-017
+**Doc reference:** COA full-screen form CB-PAGE-002A, dialog 003–013 และฟอร์ม CB-PAGE-015, CB-PAGE-017 (CB-MODAL-001 เป็นประวัติ UI เก่า)
 
 **Creation methods:**
 
@@ -188,7 +188,7 @@ N/A
 
 | Modal ID | Modal Name | Trigger | Parent Page |
 |----------|-----------|---------|------------|
-| CB-MODAL-001 | Add / Edit Chart of Account | Add Account / คลิก Code | CB-PAGE-002 |
+| CB-MODAL-001 | Add / Edit Chart of Account (retired) | ใช้ CB-PAGE-002A แทน | CB-PAGE-002 |
 | CB-MODAL-002 | Import from Carmen GL (Confirm) | Import from Carmen GL | CB-PAGE-002 |
 | CB-MODAL-003 | Unit Dialog | Add Unit / คลิกแถว | CB-PAGE-004 |
 | CB-MODAL-004 | Currency Dialog | Add Currency / คลิกแถว | CB-PAGE-005 |
@@ -213,6 +213,7 @@ N/A
 |---------|-----------|-------|---------|
 | CB-PAGE-001 | Configuration Overview | `/config` | Dashboard ภาพรวม master data |
 | CB-PAGE-002 | Chart of Accounts | `/config/chart-of-accounts` | ผังบัญชี + import จาก Carmen GL |
+| CB-PAGE-002A | Chart of Account Editor | `/config/chart-of-accounts/new`, `/:id` | สร้าง / ดู / แก้ไขบัญชีแบบเต็มหน้า |
 | CB-PAGE-003 | Chart of Account Mapping | `/config/chart-of-account-mapping` | ⚠️ ข้อมูล mock ทั้งหน้า ยังไม่ต่อ API |
 | CB-PAGE-004 | Unit | `/config/unit` | หน่วยนับ + จำนวนทศนิยม |
 | CB-PAGE-005 | Currency | `/config/currency` | สกุลเงิน + อัตราเทียบสกุลหลัก |
