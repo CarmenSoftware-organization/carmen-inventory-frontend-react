@@ -270,7 +270,7 @@ skeleton: `user-edit-content` → `FormPageSkeleton` (noti-template / interface 
 | ไฟล์ | เดิม | ใหม่ |
 |---|---|---|
 | `routes/procurement/goods-receive-note/from-po/from-po-content.tsx:121` | ghost + ArrowLeft | `BackButton` |
-| `routes/procurement/purchase-order/from-pr/from-pr-content.tsx:157` และ `step-result.tsx:162` | ghost + ArrowLeft | `BackButton` |
+| `routes/procurement/purchase-order/from-pr/from-pr-content.tsx:157` | ghost + ArrowLeft | `BackButton` (`step-result.tsx:162` คงไว้ — ดู §5) |
 | `routes/procurement/purchase-order/from-price-list/from-price-list-content.tsx:275` | ghost + ArrowLeft | `BackButton` |
 | `routes/procurement/purchase-request/from-template/from-template-content.tsx:70` และ `qty-step.tsx:188` | ghost + ArrowLeft | `BackButton` |
 | `routes/inventory-management/spot-check/sc-form.tsx:162` | ghost `size="sm"` + ChevronLeft | `BackButton` |
@@ -298,9 +298,11 @@ const SIGNATURES = [
 `ALLOWED` หลัง PR 3:
 
 - ถาวร: `routes/legal/legal-page.tsx` (ArrowLeft ลิงก์กลับแอป ไม่ใช่ฟอร์ม) ·
-  `routes/inventory-management/period-end/pe-review.tsx` (DFH ตรง — ไม่ใช่ฟอร์ม)
+  `routes/inventory-management/period-end/pe-review.tsx` (DFH ตรง — ไม่ใช่ฟอร์ม) ·
+  `routes/procurement/purchase-order/from-pr/step-result.tsx` (ลิงก์มีป้าย "← Purchase Orders" บนหน้าสำเร็จ —
+  เบี่ยงจาก §4 ที่ให้แทนด้วย BackButton เพราะจะทำป้ายหาย; ตัดสินตอน PR 3)
 - ชั่วคราว (ระลอกเอกสาร): procurement 5 wrapper + `pr-form-dialogs.tsx` · accounting 4 ไฟล์ · pc/sc review
-  (`navigate(-1)`) · wizard 4 + qty-step + step-result (ArrowLeft) · orphan `config-email-component.tsx`
+  (`navigate(-1)`) · · orphan `config-email-component.tsx`
   (profile 2 หน้าและ entry 2 หน้าไม่ match signature ใดเลย จึงไม่อยู่ใน allowlist)
 
 `ChevronLeft` ไม่อยู่ใน signature เพราะใช้ถูกต้องเป็นลูกศรเลื่อนใน gallery/lightbox/timeline 4 ไฟล์

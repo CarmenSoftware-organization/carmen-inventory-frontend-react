@@ -46,21 +46,8 @@ const ALLOWED: Record<string, number> = {
   // ── ถาวร
   "routes/legal/legal-page.tsx": 1, // ArrowLeft ลิงก์กลับแอป ไม่ใช่ฟอร์ม
   "routes/inventory-management/period-end/pe-review.tsx": 1, // DFH ตรงใน FormPageShell — ไม่ใช่ฟอร์ม ไม่มีชุด Edit/Save
-  // ── PR 3 (h1 เขียนเอง + หน้าพิเศษ)
-  "routes/system-admin/notification-template/noti-tmpl-form.tsx": 2,
-  "routes/system-admin/user/user-assigned-form.tsx": 1,
-  "routes/system-admin/company-profile/company-profile-component.tsx": 1,
-  "routes/system-admin/default-setting/default-setting-component.tsx": 1,
-  "routes/system-admin/interface/interface-page-layout.tsx": 1,
-  "routes/system-admin/interface/interface-detail.route.tsx": 1,
-  "routes/inventory-management/physical-count/pc-review-component.tsx": 1,
-  "routes/inventory-management/spot-check/sc-review-component.tsx": 1,
-  "routes/procurement/goods-receive-note/from-po/from-po-content.tsx": 1,
-  "routes/procurement/purchase-order/from-pr/from-pr-content.tsx": 1,
+  // ลิงก์มีป้าย "← Purchase Orders" บนหน้าสำเร็จ ไม่ใช่ปุ่ม back แบบไอคอน — BackButton จะทำป้ายหาย
   "routes/procurement/purchase-order/from-pr/step-result.tsx": 1,
-  "routes/procurement/purchase-order/from-price-list/from-price-list-content.tsx": 1,
-  "routes/procurement/purchase-request/from-template/from-template-content.tsx": 1,
-  "routes/procurement/purchase-request/from-template/qty-step.tsx": 1,
   // ── ระลอกเอกสาร (procurement / accounting) — spec §8
   "routes/procurement/credit-note/cn-header.tsx": 1,
   "routes/procurement/goods-receive-note/grn-header.tsx": 1,
