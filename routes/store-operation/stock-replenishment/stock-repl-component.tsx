@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { ErrorState } from "@/components/ui/error-state";
 import { WarningDialog } from "@/components/ui/warning-dialog";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import SearchInput from "@/components/search-input";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { cn } from "@/lib/utils";
@@ -170,15 +170,21 @@ export default function StockReplComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title={t("title")}
       description={t("desc")}
-      toolbar={<SearchInput defaultValue={search} onSearch={setSearch} />}
       actions={
         <Button size="sm" variant="outline" onClick={() => refetch()}>
           <RefreshCcw />
           {tc("refresh")}
         </Button>
+      }
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-auto sm:flex-initial">
+            <SearchInput defaultValue={search} onSearch={setSearch} />
+          </div>
+        </div>
       }
     >
       {isLoading && (
@@ -298,6 +304,6 @@ export default function StockReplComponent() {
         confirmLabel={tc("goBack")}
         onConfirm={() => setLocationWarningOpen(false)}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
