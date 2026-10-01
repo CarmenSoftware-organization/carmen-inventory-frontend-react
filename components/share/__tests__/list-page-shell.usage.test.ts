@@ -46,7 +46,6 @@ const ALLOWED: Record<string, number> = {
   "routes/accounting/dashboard/accounting-dashboard-page.tsx": 1,
 
   // ── PR 2: procurement · store-operation · vendor-management
-  "routes/procurement/purchase-request-template/prt-component.tsx": 2,
   "routes/procurement/approval/approval-component.tsx": 1,
   "routes/store-operation/store-requisition/sr-component.tsx": 4,
   "routes/store-operation/stock-replenishment/stock-repl-component.tsx": 1,
