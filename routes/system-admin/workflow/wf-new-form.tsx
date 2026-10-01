@@ -3,10 +3,10 @@ import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
-import { Info, Plus } from "lucide-react";
+import { Info } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Button } from "@/components/ui/button";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { Input } from "@/components/ui/input";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +33,6 @@ import {
   EMPTY_FORM,
   type WorkflowFormValues,
 } from "./wf-form-schema";
-import { Spinner } from "@/components/ui/spinner";
 
 interface WorkflowNewFormProps {
   /** ชนิดใบที่มาจากหน้ารายการ — ล็อกไว้ให้แก้ไม่ได้ เพราะหน้าที่กดมาเป็นของชนิดนั้น */
@@ -91,42 +90,19 @@ export default function WorkflowNewForm({
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6">
-        <DocFormHeader
-          flush
-          title={tf("addTitle", { entity: t("entity") })}
-          backLabel={tc("goBack")}
+    <FormPageShell
+      header={
+        <FormToolbar
+          entity={t("entity")}
+          mode="add"
+          formId="new-workflow-form"
+          isPending={isPending}
+          submitLabel={t("createWorkflow")}
           onBack={handleLeave}
-          actions={
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleLeave}
-                disabled={isPending}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form="new-workflow-form"
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <Spinner className="spinner size-3.5" />
-                ) : (
-                  <Plus className="size-3.5" />
-                )}
-                {isPending ? tf("creating") : t("createWorkflow")}
-              </Button>
-            </>
-          }
+          onCancel={handleLeave}
         />
-      </div>
-
+      }
+    >
       <form
         id="new-workflow-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -245,6 +221,6 @@ export default function WorkflowNewForm({
         onCancel={navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }
