@@ -626,7 +626,15 @@
       "tooManyAttempts": "Too many login attempts. Try again in {seconds}s.",
       "tooManyAttemptsFallback": "Too many login attempts. Please try again later.",
       "registerConflict": "This email or username is already in use",
-      "networkUnavailable": "Could not reach the server. Check your connection and try again."
+      "networkUnavailable": "Could not reach the server. Check your connection and try again.",
+      "googleFailed": "Google sign-in failed. Please try again.",
+      "googleNoAccount": "No account exists for this Google email address.",
+      "googleAccountConflict": "This email address conflicts with another account. Please contact your administrator.",
+      "googleTooManyAttempts": "Too many sign-in attempts. Please wait a moment and try again."
+    },
+    "google": {
+      "or": "or",
+      "continue": "Continue with Google"
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",

@@ -12,6 +12,7 @@ import {
 } from "@/lib/invitation-api";
 import { AuthFormAlert } from "@/components/auth/floating-field";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import SignupProfileForm from "../register/signup-profile-form";
 import type { SignupProfileValues } from "../register/signup-schema";
@@ -287,6 +288,9 @@ export function Component() {
               </Link>
             </Button>
           )}
+          {/* Google signs the invitee in (creating the account if the address is new) and brings them back here,
+              signed in: they then press Accept themselves, and the backend checks the address matches. */}
+          <GoogleSignInButton next={`/invitations/${encodeURIComponent(token)}`} />
         </div>
       )}
     </AuthSplitShell>

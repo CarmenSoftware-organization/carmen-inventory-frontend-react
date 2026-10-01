@@ -11,6 +11,7 @@ import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
 import { login } from "@/lib/auth/auth-api";
 import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import {
   AuthFormAlert,
   FloatingField,
@@ -128,6 +129,20 @@ export default function LoginForm() {
       ? t("resetPassword.successBanner")
       : null;
 
+  // `?error=` is a CODE set by the gateway / callback page after a Google sign-in; only these map to text, so
+  // nothing from the URL is ever rendered as-is. An unknown code falls back to the generic message.
+  const errorCode = searchParams.get("error");
+  const googleError =
+    errorCode === null
+      ? null
+      : errorCode === "google_no_account"
+        ? t("errors.googleNoAccount")
+        : errorCode === "google_account_conflict"
+          ? t("errors.googleAccountConflict")
+          : errorCode === "google_too_many_attempts"
+            ? t("errors.googleTooManyAttempts")
+            : t("errors.googleFailed");
+
   const onSubmit = (values: LoginFormValues) => {
     loginMutation.reset();
     loginMutation.mutate(values, {
@@ -187,6 +202,10 @@ export default function LoginForm() {
             </Link>
           </div>
 
+          {!loginMutation.isError && googleError && (
+            <AuthFormAlert>{googleError}</AuthFormAlert>
+          )}
+
           {loginMutation.isError && (
             <AuthFormAlert>
               {loginMutation.error instanceof RateLimitError &&
@@ -215,6 +234,8 @@ export default function LoginForm() {
           </Button>
         </FieldGroup>
       </form>
+
+      <GoogleSignInButton next={searchParams.get("next") ?? undefined} />
 
       <p className="text-muted-foreground mt-4 text-center text-xs">
         {t("noAccount")}{" "}
