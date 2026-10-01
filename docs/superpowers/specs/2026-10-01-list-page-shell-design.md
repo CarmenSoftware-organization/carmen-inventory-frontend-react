@@ -99,7 +99,9 @@ div.pb-[max(1rem,env(safe-area-inset-bottom))]  (ref = pullRefresh.containerRef 
 aria-label `common.aria.listView` / `common.aria.gridView`) · `ListToolbar` เปลี่ยนมาเรียกตัวนี้ ·
 9 หน้าที่วาดเองย้ายมาเรียก
 
-### 2.3 ค่าคงที่ความสูงตาราง — export จาก `list-page-shell.tsx`
+### 2.3 ค่าคงที่ความสูงตาราง — `components/share/list-grid-max-h.ts`
+
+(แยกไฟล์จาก shell เพราะ ESLint `react-refresh/only-export-components` เตือนเมื่อไฟล์คอมโพเนนต์ export ค่าอื่น)
 
 ```ts
 export const LIST_GRID_MAX_H = {

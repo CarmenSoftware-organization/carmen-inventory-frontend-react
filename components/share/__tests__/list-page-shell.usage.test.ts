@@ -127,4 +127,15 @@ describe("list pages go through ListPageShell", () => {
     ].join("\n");
     expect(countSignatures(probe)).toBe(5);
   });
+
+  it("matches the sticky block as the shell actually writes it", () => {
+    // probe ข้างบนป้อน string ที่ก๊อปจาก regex เอง จึงพิสูจน์ไม่ได้ว่า regex ยังตรง
+    // กับของจริง — ถ้าใครแก้ class ใน list-page-shell.tsx แล้วหน้าใหม่ก๊อปชุดใหม่ไป
+    // regex ตัวนี้จะไม่ match อะไรอีกเลยโดยไม่มีใครรู้
+    const shell = readFileSync(
+      join(ROOT, "components/share/list-page-shell.tsx"),
+      "utf-8",
+    );
+    expect(shell).toMatch(SIGNATURES[1]);
+  });
 });
