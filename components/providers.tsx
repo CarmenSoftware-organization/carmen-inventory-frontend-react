@@ -3,14 +3,12 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { ThemeProvider, useTheme } from "next-themes";
+import { ThemeProvider } from "next-themes";
 import { ApiErrorToaster } from "@/components/api-error-toaster";
 import { PermissionDeniedDialog } from "@/components/permission-denied-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiError } from "@/lib/api-error";
 import { reportApiError, skipsGlobalErrorToast } from "@/lib/api-error-handler";
-import { syncThemeCookie } from "@/lib/theme-cookie";
 
 export const makeQueryClient = () =>
   new QueryClient({
@@ -48,21 +46,6 @@ const getQueryClient = () => {
   return browserQueryClient;
 };
 
-/**
- * Mirrors the light/dark/system choice into a cookie for the Keycloak login page (see `lib/theme-cookie.ts`).
- * Tracks `theme`, not `resolvedTheme`: "system" must clear the cookie so the login page keeps following the OS.
- * ส่งค่า theme ที่ผู้ใช้เลือกเป็น cookie ให้หน้า login ของ Keycloak; ตาม `theme` ไม่ใช่ `resolvedTheme` เพื่อให้ "system" ล้าง cookie
- */
-function ThemeCookieSync() {
-  const { theme } = useTheme();
-  useEffect(() => {
-    if (theme === "light" || theme === "dark" || theme === "system") {
-      syncThemeCookie(theme);
-    }
-  }, [theme]);
-  return null;
-}
-
 export default function Providers({
   children,
 }: {
@@ -73,7 +56,6 @@ export default function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <ThemeCookieSync />
         <TooltipProvider>
           {children}
           <ApiErrorToaster />

@@ -1,24 +1,43 @@
-import { useEffect, useRef } from "react";
-import { useTranslations, useLocale } from "use-intl";
-import { Link, useLocation, useSearchParams } from "react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "use-intl";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
+import { ArrowRight } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
-import { getRuntimeConfig } from "@/lib/runtime-config";
-import { tokenStore } from "@/lib/auth/token-store";
-import {
-  SILENT_SSO_TRIED_KEY,
-  hasTriedSilentSso,
-} from "@/lib/auth/silent-sso-guard";
+import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
+import { login } from "@/lib/auth/auth-api";
+import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
-import { AuthFormAlert } from "@/components/auth/floating-field";
+import {
+  AuthFormAlert,
+  FloatingField,
+  FloatingFieldPassword,
+} from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 
+const PASSWORD_MIN = 6;
+
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
+
+class RateLimitError extends Error {
+  constructor(public readonly retryAfter: number) {
+    super("");
+    this.name = "RateLimitError";
+  }
+}
+
 export default function LoginForm() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const locale = useLocale();
   // ตั้งโดย /register/verify หลังสร้างบัญชีสำเร็จ — เป็น router state ไม่ใช่ query string
   // จึงหายไปเองเมื่อรีเฟรช ซึ่งถูกแล้ว เพราะข้อความนี้ควรเห็นครั้งเดียว
   const justRegistered =
@@ -29,44 +48,77 @@ export default function LoginForm() {
   const passwordReset =
     (location.state as { passwordReset?: boolean } | null)?.passwordReset ===
     true;
-  // Set by the gateway callback (`?error=auth_failed`) when sign-in fails; the message is generic
-  // because the callback serves every sign-in method.
-  // ตั้งโดย callback ของ gateway (`?error=auth_failed`) เมื่อ sign-in ล้มเหลว ข้อความเป็นคำกลางๆ
-  // เพราะ callback รองรับทุกวิธี sign-in
-  const signInFailed = searchParams.get("error") === "auth_failed";
-  // Passed through the backend (back as `#next=...` in auth-callback.route.tsx) because a full-page
-  // redirect drops all React Router state, which would lose a deep link such as an invitation.
-  // ส่งต่อผ่าน backend (กลับมาเป็น `#next=...`) เพราะ full-page redirect ทิ้ง React Router state ทำให้ deep link (เช่นลิงก์คำเชิญ) หาย
-  const next = searchParams.get("next");
   const t = useTranslations("auth");
-  // StrictMode's dev double-invoke would fire the redirect twice on a reload (where hasTriedSilentSso() ignores
-  // its storage guard on every run). A ref, not sessionStorage: it must reset on every real mount.
-  const silentCheckStartedRef = useRef(false);
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
+
+  const loginSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("validation.emailRequired"))
+      .pipe(z.email(t("validation.emailInvalid"))),
+    password: z
+      .string()
+      .min(1, t("validation.passwordRequired"))
+      .min(
+        PASSWORD_MIN,
+        t("validation.passwordMinChars", { min: PASSWORD_MIN }),
+      ),
+  });
+
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema) as Resolver<LoginFormValues>,
+    defaultValues: { email: "", password: "" },
+    mode: "onTouched",
+  });
 
   useEffect(() => {
     queryClient.removeQueries({ queryKey: profileQueryKey });
   }, [queryClient]);
 
-  // One silent SSO check per tab session on /login itself too (not only on protected routes): opening /login
-  // directly (e.g. a bookmark) with a live Keycloak session should sign in without another click. Shares
-  // `hasTriedSilentSso()` with require-auth.tsx so the "reload always retries" rule applies here too.
-  // ลอง silent SSO check หนึ่งครั้งต่อ tab session ที่ /login เองด้วย (ไม่ใช่แค่ protected route): เปิด /login ตรงๆ
-  // (เช่นจาก bookmark) ขณะมี session Keycloak ที่ live อยู่ก็เข้าได้เลย ใช้ `hasTriedSilentSso()` ร่วมกับ require-auth.tsx
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: LoginFormValues) => {
+      try {
+        return await login(credentials.email, credentials.password);
+      } catch (err) {
+        if (err instanceof ApiError && err.code === ERROR_CODES.UNAUTHORIZED) {
+          throw new Error(t("errors.invalidCredentials"));
+        }
+        if (err instanceof ApiError && err.code === ERROR_CODES.RATE_LIMITED) {
+          const seconds = (err.details as { retryAfter?: number } | undefined)
+            ?.retryAfter;
+          if (seconds && seconds > 0) {
+            throw new RateLimitError(seconds);
+          }
+          throw new Error(t("errors.tooManyAttemptsFallback"));
+        }
+        // ส่งไม่ถึงเซิร์ฟเวอร์ — message ของ error พวกนี้เป็นอังกฤษที่ dev เขียนไว้ ไม่ได้แปล
+        if (isTransportError(err)) {
+          throw new Error(t("errors.networkUnavailable"));
+        }
+        throw err;
+      }
+    },
+    // Profile is no longer returned by login(); it loads via ProfileGate /
+    // use-profile after redirect, so we no longer seed the profile cache here.
+    onSuccess: () => {
+      navigate(resolveNextPath(searchParams.get("next")));
+    },
+  });
+
+  const { reset: resetMutation } = loginMutation;
+
   useEffect(() => {
-    if (silentCheckStartedRef.current) return; // see the ref's own comment above
-    if (tokenStore.get()) return;
-    if (hasTriedSilentSso()) return;
-    silentCheckStartedRef.current = true;
-    try {
-      sessionStorage.setItem(SILENT_SSO_TRIED_KEY, "1");
-    } catch {
-      // ignore
-    }
-    const params = new URLSearchParams({ app: "web", locale, silent: "true" });
-    if (next) params.set("next", next);
-    window.location.href = `${getRuntimeConfig().BACKEND_URL}/api/auth/authorize?${params.toString()}`;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (retryAfter === null || retryAfter <= 0) return;
+    const id = setTimeout(() => {
+      if (retryAfter <= 1) {
+        setRetryAfter(null);
+        resetMutation();
+      } else {
+        setRetryAfter(retryAfter - 1);
+      }
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [retryAfter, resetMutation]);
 
   // แถบยืนยันเหนือฟอร์ม — มาจากเส้นทางที่พาผู้ใช้มาที่นี่ ไม่ใช่จากสถานะของฟอร์มเอง
   // ทั้งสองกรณีเกิดพร้อมกันไม่ได้ (คนละ navigate) จึงเลือกอันเดียวพอ
@@ -76,48 +128,93 @@ export default function LoginForm() {
       ? t("resetPassword.successBanner")
       : null;
 
+  const onSubmit = (values: LoginFormValues) => {
+    loginMutation.reset();
+    loginMutation.mutate(values, {
+      onError: (err) => {
+        form.setValue("password", "");
+        if (err instanceof RateLimitError) {
+          setRetryAfter(err.retryAfter);
+        }
+      },
+    });
+  };
+
   return (
     <AuthSplitShell title={t("welcomeBack")} subtitle={t("subtitle")}>
-      <FieldGroup className="mt-4 gap-3">
-        {notice && (
-          <div
-            className="border-positive-ink/40 bg-positive-ink/5 rounded-xl border px-3 py-2"
-            style={{ animation: "fade-up-soft 0.3s ease-out both" }}
-            role="status"
-            aria-live="polite"
-          >
-            <p className="text-positive-ink text-xs font-semibold">{notice}</p>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4" noValidate>
+        <FieldGroup className="gap-3">
+          {notice && !loginMutation.isError && (
+            <div
+              className="border-positive-ink/40 bg-positive-ink/5 rounded-xl border px-3 py-2"
+              style={{ animation: "fade-up-soft 0.3s ease-out both" }}
+              role="status"
+              aria-live="polite"
+            >
+              <p className="text-positive-ink text-xs font-semibold">
+                {notice}
+              </p>
+            </div>
+          )}
+
+          <FloatingField
+            id="email"
+            label={t("emailLabel")}
+            type="email"
+            autoComplete="email"
+            register={form.register("email")}
+            error={form.formState.errors.email?.message}
+          />
+
+          <FloatingFieldPassword
+            id="password"
+            label={t("passwordLabel")}
+            showLabel={t("showPassword")}
+            hideLabel={t("hidePassword")}
+            dataId="log-in-password"
+            register={form.register("password")}
+            error={form.formState.errors.password?.message}
+          />
+
+          {/* อยู่ติดช่องรหัสผ่านโดยตั้งใจ — คนที่กดหาลิงก์นี้คือคนที่เพิ่งพิมพ์รหัสผิด สายตายังอยู่
+              ตรงช่องนั้น ไม่ได้อยู่ท้ายหน้า */}
+          <div className="-mt-1.5 flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-muted-foreground hover:text-primary py-1 text-xs underline-offset-4 transition-colors hover:underline"
+            >
+              {t("forgotPasswordLink")}
+            </Link>
           </div>
-        )}
 
-        {signInFailed && (
-          <AuthFormAlert>{t("errors.signInFailed")}</AuthFormAlert>
-        )}
+          {loginMutation.isError && (
+            <AuthFormAlert>
+              {loginMutation.error instanceof RateLimitError &&
+              retryAfter !== null
+                ? t("errors.tooManyAttempts", { seconds: retryAfter })
+                : loginMutation.error.message}
+            </AuthFormAlert>
+          )}
 
-        {/* A real page navigation, not fetch: Keycloak's hosted login page is on another origin. */}
-        <Button
-          type="button"
-          className="group mt-0.5 h-10 w-full"
-          onClick={() => {
-            const params = new URLSearchParams({ app: "web", locale });
-            if (next) params.set("next", next);
-            window.location.href = `${getRuntimeConfig().BACKEND_URL}/api/auth/authorize?${params.toString()}`;
-          }}
-        >
-          {t("signIn")}
-        </Button>
-
-        {/* อยู่ติดปุ่ม Sign in โดยตั้งใจ — คนที่กดหาลิงก์นี้คือคนที่จำรหัสผ่านไม่ได้ */}
-        <div className="-mt-1.5 flex justify-end">
-          <Link
-            to="/forgot-password"
-            className="text-muted-foreground hover:text-primary py-1 text-xs underline-offset-4 transition-colors hover:underline"
+          <Button
+            type="submit"
+            className="group mt-0.5 h-10 w-full"
+            disabled={loginMutation.isPending || retryAfter !== null}
           >
-            {t("forgotPasswordLink")}
-          </Link>
-        </div>
-
-      </FieldGroup>
+            {loginMutation.isPending ? (
+              <>
+                <span className="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2" />
+                {t("signingIn")}
+              </>
+            ) : (
+              <>
+                {t("signIn")}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </>
+            )}
+          </Button>
+        </FieldGroup>
+      </form>
 
       <p className="text-muted-foreground mt-4 text-center text-xs">
         {t("noAccount")}{" "}
