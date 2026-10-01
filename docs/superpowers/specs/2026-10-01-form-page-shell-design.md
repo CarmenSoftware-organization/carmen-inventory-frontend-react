@@ -1,4 +1,4 @@
-# FormPageShell — โครงหน้า form เดียวกันทั้งแอป (ระลอก 1: ฟอร์ม entity)
+# FormPageShell — โครงหน้า form เดียวกันทั้งแอป (ระลอก 1: ฟอร์ม entity 39 หน้า)
 
 ต่อจาก `2026-10-01-list-page-shell-design.md` §8 — งานถัดไปคือหน้า form
 
@@ -22,7 +22,7 @@ Edit เป็น outline หรือ primary แล้วแต่หน้า
 อยู่หน้าสุด / หลัง Delete / ท้ายสุด / ใน ⋯ / ไม่มี · `pd-form-toolbar.tsx` default-export ชื่อ `FormToolbar`
 ชนกับของกลาง
 
-**ขอบเขตที่เลือก:** ฟอร์ม entity ~41 หน้าก่อน (ใช้ SettingSection/card + ชุดปุ่ม Edit/Cancel/Save/Delete)
+**ขอบเขตที่เลือก:** ฟอร์ม entity 39 หน้าก่อน (38 ฟอร์ม + pe-review) (ใช้ SettingSection/card + ชุดปุ่ม Edit/Cancel/Save/Delete)
 เอกสาร procurement (PO/PR/GRN/CN/SR 10), accounting (5 ไฟล์ 11 URL), entry/review (4), wizard (4),
 profile (2) เป็นระลอกถัดไป
 
@@ -206,7 +206,7 @@ fields={["half","half","full"]}` — แทน `FormSkeleton` ใน edit-conten
 secondary) · Activity อยู่หลัง Delete ทุกหน้า (เดิม op-plan/product/wf/noti วางหน้าสุด, vendor วางท้ายสุด
 หลัง Delete อยู่แล้ว)
 
-## 4. การย้าย (41 หน้า + หน้าพิเศษ)
+## 4. การย้าย (39 หน้า + หน้าพิเศษ)
 
 ทุกหน้า: wrapper เดิม → `<FormPageShell header={…} width? footer?>` · header = `FormToolbar` (ตรงหรือผ่าน
 wrapper §3) · ลบ `<div className="mb-6">` / `mt-6` / `space-y-*` ที่เคยคั่น header กับ body
@@ -261,6 +261,8 @@ characterization tests ที่ต้องปรับตามพฤติก
 | company-profile | `routes/system-admin/company-profile/company-profile-component.tsx` | ไม่มี `onBack` · `title`=ชื่อหน้า `subtitle`=description · `mode`=editing?"edit":"view" · body ห่อ `<form id>` ให้ Save เป็น submit · `permissionPrefix="system_admin.business_unit"` |
 | default-setting | `routes/system-admin/default-setting/default-setting-component.tsx` | เหมือน company-profile |
 | interface detail | `routes/system-admin/interface/interface-page-layout.tsx` | เหมือน company แต่ไม่ส่ง `permissionPrefix` · `writeDisabledReason` เมื่อ `isExpired` · `<form>` เดิมใส่ `id` |
+
+skeleton: `user-edit-content` → `FormPageSkeleton` (noti-template / interface มี skeleton ของตัวเองที่เป็น SettingSectionSkeleton อยู่แล้ว คงไว้)
 
 หน้าพิเศษ — ปุ่มย้อนกลับเท่านั้น:
 
