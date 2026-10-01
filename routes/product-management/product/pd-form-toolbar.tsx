@@ -2,14 +2,13 @@ import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import { Save } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
-interface FormToolbarProps {
+interface PdFormToolbarProps {
   readonly product?: ProductDetail;
   readonly form: ProductFormInstance;
   readonly mode: FormMode;
@@ -29,7 +28,7 @@ interface FormToolbarProps {
   readonly onDelete: () => void;
 }
 
-function FormToolbar({
+function PdFormToolbarInner({
   product,
   form,
   mode,
@@ -40,13 +39,11 @@ function FormToolbar({
   onEdit,
   onCancel,
   onDelete,
-}: FormToolbarProps) {
+}: PdFormToolbarProps) {
   const tc = useTranslations("common");
-  const tActivity = useTranslations("activity");
   const tf = useTranslations("form");
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
-  const isView = mode === "view";
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
@@ -138,74 +135,33 @@ function FormToolbar({
     </span>
   ) : undefined;
 
-  const actions = (
-    <>
-      {/* ปุ่มประวัติอยู่ซ้ายสุด — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-      {product && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(product.id, product.code)}
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isEdit && product && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
-          disabled={isPending || deleteIsPending}
-        >
-          <Trash2 aria-hidden="true" />
-          {tc("delete")}
-        </Button>
-      )}
-      {isView ? (
-        <Button size="sm" onClick={onEdit}>
-          <Pencil aria-hidden="true" />
-          {tc("edit")}
-        </Button>
-      ) : (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            <X className="size-4" aria-hidden="true" />
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            form="product-form"
-            disabled={saveDisabled}
-          >
-            <Save className="size-4" aria-hidden="true" />
-            {getButtonLabel()}
-          </Button>
-        </>
-      )}
-    </>
+  // Save ต้อง disabled จน dirty (หรือมีรูปรอ) จึงเป็น submitSlot — ปุ่มนี้ไม่ผ่าน
+  // gate license/permission ของ FormToolbar (Edit ยัง gate อยู่ คนที่ไม่มีสิทธิ์
+  // เข้าโหมดแก้ไม่ได้ตั้งแต่แรก; โหมด add ตกที่ 403 ของ backend)
+  const submitSlot = (
+    <Button type="submit" size="sm" form="product-form" disabled={saveDisabled}>
+      <Save className="size-4" aria-hidden="true" />
+      {getButtonLabel()}
+    </Button>
   );
 
   return (
-    <DocFormHeader
-      title={displayName}
+    <FormToolbar
+      mode={mode}
+      formId="product-form"
+      isPending={isPending}
+      title={displayName ?? ""}
       subtitle={subtitle}
-      backLabel={tc("goBack")}
-      onBack={onBack}
       badges={badges}
-      actions={actions}
-      flush
+      submitSlot={submitSlot}
+      onBack={onBack}
+      onCancel={onCancel}
+      onEdit={onEdit}
+      onDelete={product ? onDelete : undefined}
+      deleteIsPending={deleteIsPending}
+      activity={product ? { id: product.id, label: product.code } : undefined}
     />
   );
 }
 
-export default memo(FormToolbar);
+export const PdFormToolbar = memo(PdFormToolbarInner);
