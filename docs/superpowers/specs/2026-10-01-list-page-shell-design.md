@@ -194,8 +194,10 @@ test ให้เหลือว่าง
 3. มี `<DisplayTemplate`
 4. มี `<LayoutList` หรือ `<LayoutGrid` (ต้องผ่าน `DisplayModeToggle`)
 
-allowlist เป็น array ในไฟล์เทสต์ · PR 1 ใส่ครบทุกไฟล์ที่ยังไม่ย้าย (50 + accounting-dashboard-page)
-· PR 2–4 ตัดออกตามที่ย้าย · จบงานเหลือ `accounting-dashboard-page.tsx` ตัวเดียวพร้อม comment
+allowlist เป็น map ไฟล์→จำนวนลายเซ็นในไฟล์เทสต์ · PR 1 ใส่ครบทุกไฟล์ที่ยังมีลายเซ็น (47 +
+accounting-dashboard-page = 48; email-profile / email-template / interface เขียน `<h1>` สดจึงไม่มี
+ลายเซ็นให้ grep — ติดตามผ่าน §4 ไม่ใช่ guard) · PR 2–4 ตัดออกตามที่ย้าย · จบงานเหลือ
+`accounting-dashboard-page.tsx` ตัวเดียวพร้อม comment
 
 ## 6. การตรวจ
 
