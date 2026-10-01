@@ -5,7 +5,8 @@ import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
 import { BackButton } from "@/components/share/back-button";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -15,18 +16,13 @@ interface DocFormHeaderProps {
    */
   readonly titleMuted?: boolean;
   readonly subtitle?: ReactNode;
-  readonly backLabel: string;
-  readonly onBack: () => void;
+  /** ไม่ส่ง = ใช้ `common.goBack` ของ BackButton */
+  readonly backLabel?: string;
+  /** ไม่ส่ง = ไม่มีปุ่มย้อนกลับ (หน้า settings ที่เป็น leaf ของเมนู ไม่มี list ให้กลับ) */
+  readonly onBack?: () => void;
   readonly badges?: ReactNode;
   readonly actions?: ReactNode;
   readonly ribbon?: ReactNode;
-  readonly workflowStep?: ReactNode;
-  /**
-   * วาง workflowStep เป็นแถวแยกใต้ ribbon แทนคอลัมน์ขวาข้าง ribbon — ใช้เมื่อ
-   * ribbon เป็น grid ที่ต้อง align คอลัมน์กับ form body (เช่น PO): workflowStep
-   * ข้างขวาจะหักความกว้าง ribbon ทำให้คอลัมน์ drift
-   */
-  readonly workflowStepBelow?: boolean;
   readonly leading?: ReactNode;
   readonly flush?: boolean;
 }
@@ -40,8 +36,6 @@ export function DocFormHeader({
   badges,
   actions,
   ribbon,
-  workflowStep,
-  workflowStepBelow = false,
   leading,
   flush = false,
 }: DocFormHeaderProps) {
@@ -67,11 +61,13 @@ export function DocFormHeader({
           โหมด — อยู่บรรทัดเดียวกับ title โดยไม่ push ให้ title เยื้อง */}
       <div className={cn("relative", !flush && "px-4")}>
         <div className="relative flex flex-wrap items-center gap-2">
-          <BackButton
-            onClick={onBack}
-            label={backLabel}
-            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2"
-          />
+          {onBack && (
+            <BackButton
+              onClick={onBack}
+              label={backLabel}
+              className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.25rem)] -translate-y-1/2"
+            />
+          )}
           {leading}
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1
@@ -106,31 +102,14 @@ export function DocFormHeader({
 
         {/* ── Document info ribbon ── */}
         {/* ribbon เป็น grid ที่ align คอลัมน์กับ form body (PO/PR/GRN/CN/SR); ml-4
-            ของตัว ribbon เอง cancel -ml-4 นี้ ให้ content ตัวแรกเสมอกับ title.
-            workflowStepBelow → workflowStep แยกแถวล่างเพื่อไม่หักความกว้าง ribbon */}
-        {ribbon &&
-          (workflowStepBelow ? (
-            // ribbon เต็มความกว้าง (columns align กับ form body) + workflowStep
-            // absolute มุมขวาบน อยู่ line เดียวกับ ribbon โดยไม่หักความกว้าง ribbon
-            // (ribbon ชิดซ้าย cols fixed → มีที่ว่างขวาให้ step ไม่ทับ cells).
-            // min-h เผื่อความสูง workflowStep (absolute ไม่กินที่) กัน content ถัดไป
-            // (เช่น item table ตอนไม่มี general fields คั่น) ถูก step ทับ
-            <div className={cn("relative pt-4", workflowStep && "min-h-26")}>
-              <div className="-ml-4 flex w-full min-w-0 items-center">
-                {ribbon}
-              </div>
-              {workflowStep && (
-                <div className="absolute top-4 right-0">{workflowStep}</div>
-              )}
+            ของตัว ribbon เอง cancel -ml-4 นี้ ให้ content ตัวแรกเสมอกับ title */}
+        {ribbon && (
+          <div className="flex items-center gap-2 pt-4">
+            <div className="-ml-4 flex min-w-0 flex-1 items-center gap-2">
+              {ribbon}
             </div>
-          ) : (
-            <div className="flex items-center justify-between gap-2 pt-4">
-              <div className="-ml-4 flex min-w-0 flex-1 items-center gap-2">
-                {ribbon}
-              </div>
-              {workflowStep}
-            </div>
-          ))}
+          </div>
+        )}
       </div>
     </div>
   );
