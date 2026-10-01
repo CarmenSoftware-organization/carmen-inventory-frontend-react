@@ -203,3 +203,28 @@ export function buildPermissionKey(
 ): Permission {
   return `${prefix}.${action}` as Permission;
 }
+
+function collectPermissionKeys(node: unknown, out: Set<string>): void {
+  if (typeof node === "string") {
+    out.add(node);
+    return;
+  }
+  if (node && typeof node === "object")
+    for (const value of Object.values(node)) collectPermissionKeys(value, out);
+}
+
+const permissionKeys = new Set<string>();
+collectPermissionKeys(PERMISSIONS, permissionKeys);
+
+/** ทุก key ที่ประกาศใน `PERMISSIONS` — ใช้กันการ gate ด้วย key ผีที่ประกอบจาก prefix */
+export const PERMISSION_KEYS: ReadonlySet<string> = permissionKeys;
+
+/**
+ * key ที่ประกอบแบบ dynamic (`buildPermissionKey`) อยู่ใน catalog จริงไหม — prefix ของ
+ * leaf ที่ใช้ permission ระดับโมดูล (`operation_plan.view` → `operation_plan.update`)
+ * ประกอบได้ key ที่ไม่มีทั้งในไฟล์นี้และใน tb_permission; gate ด้วย key แบบนั้น =
+ * non-admin โดน denied ทุกคนโดย admin ไม่เห็น (bypass)
+ */
+export function isKnownPermission(key: string): key is Permission {
+  return PERMISSION_KEYS.has(key);
+}
