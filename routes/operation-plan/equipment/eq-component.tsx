@@ -1,13 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
-import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -18,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import { useEquipment, useDeleteEquipment } from "./use-eq";
 import { useEquipmentCategory } from "@/hooks/use-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -32,7 +25,9 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { defineEntitySource } from "@/components/filter/entity-filter-source";
 import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
 import type { EquipmentCategory } from "@/types/equipment-category";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentTable } from "./use-eq-table";
 import EqCard from "./eq-card";
@@ -50,7 +45,6 @@ const EQUIPMENT_CATEGORY_ENTITY = defineEntitySource<EquipmentCategory>({
 
 export default function EquipmentComponent() {
   const t = useTranslations("operationPlan.equipment");
-  const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
@@ -142,69 +136,20 @@ export default function EquipmentComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled
-              title={tc("comingSoon")}
-              className="hidden sm:inline-flex"
-            >
-              <Download aria-hidden="true" />
-              {tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled
-              title={tc("comingSoon")}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate("/operation-plan/equipment/new", listReturnState())
-              }
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>
-                  <Download aria-hidden="true" />
-                  {tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onAdd={() =>
+            navigate("/operation-plan/equipment/new", listReturnState())
+          }
+          addLabel={t("add")}
+          hideExportPrint
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -215,69 +160,65 @@ export default function EquipmentComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && equipments.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {equipments.map((item) => (
-                <EqCard
-                  key={item.id}
-                  item={item}
-                  categoryName={
-                    item.category_id
-                      ? categories.get(item.category_id)
-                      : undefined
-                  }
-                  onEdit={(eq) =>
-                    navigate(
-                      `/operation-plan/equipment/${eq.id}`,
-                      listReturnState(),
-                    )
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && equipments.length === 0 && (
-          <EmptyComponent />
-        )}
-
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+      }
+    >
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && equipments.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {equipments.map((item) => (
+              <EqCard
+                key={item.id}
+                item={item}
+                categoryName={
+                  item.category_id
+                    ? categories.get(item.category_id)
+                    : undefined
+                }
+                onEdit={(eq) =>
+                  navigate(
+                    `/operation-plan/equipment/${eq.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
+      {isGridMode && !grid.isLoading && equipments.length === 0 && (
+        <EmptyComponent />
+      )}
+
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -305,6 +246,6 @@ export default function EquipmentComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

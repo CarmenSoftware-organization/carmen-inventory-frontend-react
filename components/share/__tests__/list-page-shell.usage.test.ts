@@ -63,11 +63,6 @@ const ALLOWED: Record<string, number> = {
   "routes/config/account-grouping/account-grouping-page.tsx": 1,
   "routes/config/chart-of-account-mapping/coam-component.tsx": 1,
   "routes/config/title-master/title-master-page.tsx": 1,
-  "routes/operation-plan/category/recipe-category-component.tsx": 2,
-  "routes/operation-plan/cuisine/cuisine-component.tsx": 2,
-  "routes/operation-plan/equipment-category/equipment-category-component.tsx": 2,
-  "routes/operation-plan/equipment/eq-component.tsx": 2,
-  "routes/operation-plan/recipe/recipe-component.tsx": 2,
   "routes/operation-plan/recipe-equipment-category/recipe-equipment-category-component.tsx": 1,
 
   // ── PR 4: accounting · inventory-management · product-management
