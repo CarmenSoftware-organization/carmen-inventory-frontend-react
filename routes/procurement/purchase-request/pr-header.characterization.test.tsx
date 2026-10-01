@@ -48,7 +48,6 @@ vi.mock("@/hooks/use-workflow", async (orig) => ({
 }));
 
 const { PrHeader } = await import("./pr-header");
-const { PrFormActions } = await import("./pr-form-actions");
 
 const tPr = en.procurement.purchaseRequest;
 const base = {
@@ -88,7 +87,15 @@ function renderHeader(mode: FormMode, pr?: PurchaseRequest, opts: Opts = {}) {
   renderForm(
     <PrHeader
       purchaseRequest={pr}
+      mode={mode}
+      role={role}
+      isPending={false}
+      isDeletePending={false}
       onBack={h.onBack}
+      onEdit={h.onEdit}
+      onCancel={h.onCancel}
+      onDelete={h.onDelete}
+      onComment={h.onComment}
       reqName="Alice"
       departmentName="Kitchen"
       prDateDisplay="01/10/2026"
@@ -98,22 +105,6 @@ function renderHeader(mode: FormMode, pr?: PurchaseRequest, opts: Opts = {}) {
       descriptionField={opts.descriptionField}
       hasHistory={opts.hasHistory}
       onShowHistory={h.onShowHistory}
-      actions={
-        <PrFormActions
-          mode={mode}
-          role={role}
-          prStatus={pr?.pr_status}
-          prId={pr?.id}
-          prNo={pr?.pr_no}
-          isPending={false}
-          isDeletePending={false}
-          hasRecord={!!pr}
-          onEdit={h.onEdit}
-          onCancel={h.onCancel}
-          onDelete={h.onDelete}
-          onComment={h.onComment}
-        />
-      }
     />,
   );
   return h;
@@ -240,5 +231,15 @@ describe("PrHeader — characterization", () => {
     await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
     expect(h.onEdit).toHaveBeenCalledTimes(1);
     expect(dispatchPermissionDenied).not.toHaveBeenCalled();
+  });
+
+  it("[view, license หมดอายุ] Edit/Delete ถูกปิดพร้อมเหตุผล license", () => {
+    can.canWrite = false;
+    renderHeader("view", DRAFT);
+    for (const name of [en.common.edit, en.common.delete]) {
+      const b = screen.getByRole("button", { name });
+      expect(b).toBeDisabled();
+      expect(b).toHaveAttribute("title", en.license.writeDisabledTitle);
+    }
   });
 });

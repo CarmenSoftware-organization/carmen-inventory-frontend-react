@@ -5,7 +5,7 @@ import { PurchaseRequestForm } from "./pr-form";
 import { usePurchaseRequestById } from "./use-purchase-request";
 import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
 import { WORKFLOW_TYPE } from "@/types/workflows";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 
 const PrNewInner = () => {
@@ -14,8 +14,7 @@ const PrNewInner = () => {
   // ขอจริงกับจำนวนที่กรอกมาให้แล้ว ส่ง id ผ่าน URL จะได้จำนวนของเทมเพลตกลับมาแทน
   // (refresh แล้ว state หาย = ได้ฟอร์มเปล่า ซึ่งตรงกับความจริงว่าไม่มีอะไรค้างอยู่)
   const template = useLocation().state?.template as
-    | PurchaseRequestTemplate
-    | undefined;
+    PurchaseRequestTemplate | undefined;
   // ?duplicate_id= — สร้างสำเนาจากใบเดิม (ปุ่ม Duplicate ในหน้า detail/เมนูแถว)
   const duplicateId = searchParams.get("duplicate_id");
 
@@ -27,7 +26,7 @@ const PrNewInner = () => {
   // ฟอร์มจะ mount เปล่า ๆ แล้ว defaultValues ถูกแช่ไปตลอด (useForm อ่านครั้งเดียว)
   // ดึงใบเดิมพลาด → ตกไปฟอร์มเปล่าแทนที่จะค้าง skeleton
   if (duplicateId && !duplicateFrom && !duplicateError) {
-    return <FormSkeleton />;
+    return <DocPageSkeleton />;
   }
 
   return (
@@ -43,7 +42,7 @@ export function PrNewContent() {
       workflowType={WORKFLOW_TYPE.PR}
       description={t("noCreatableWorkflow")}
     >
-      <Suspense fallback={<FormSkeleton />}>
+      <Suspense fallback={<DocPageSkeleton />}>
         <PrNewInner />
       </Suspense>
     </CreateWorkflowGate>
