@@ -161,8 +161,9 @@ interface FormToolbarProps {
   `writeDisabledReason` ใช้ทางเดียวกัน (มาก่อน permission)
 - **permission (กติกาใหม่):** `prefix = permissionPrefix ?? usePermissionPrefix()` แล้ว gate
   **ต่อ action** ก็ต่อเมื่อ `isKnownPermission(\`${prefix}.${action}\`)` — key ต้องอยู่ใน `PERMISSIONS`
-  จริง · `permissionPrefix` ที่ส่งมาเองก็ผ่านกติกาเดียวกัน (กันพิมพ์ผิด) · key ที่ไม่รู้จัก = ไม่ gate
-  (พฤติกรรมเดิมของหน้าที่ไม่เคยเช็ค)
+  จริง · `permissionPrefix` ที่ส่งมาเองก็ผ่านกติกาเดียวกัน · key ที่ไม่รู้จัก = ไม่ gate
+  (พฤติกรรมเดิมของหน้าที่ไม่เคยเช็ค) — prefix ที่พิมพ์ผิดจึง "ไม่ gate เงียบ ๆ" แทน "deny ทุก non-admin"
+  guard test (§5) สแกน literal `permissionPrefix="…"` ใต้ `routes/` ว่ามี `.update`/`.create` ใน catalog
 - เพิ่มใน `constant/permissions.ts`: `PERMISSION_KEYS: ReadonlySet<string>` (flatten leaf ของ
   `PERMISSIONS` ตอนโหลดโมดูล) และ `isKnownPermission(key: string): boolean`
 - ผลข้างเคียงที่ตั้งใจ: หน้าที่ย้ายมาแล้ว key ตรง catalog จะ gate permission เพิ่ม — role, user, workflow,
@@ -183,7 +184,7 @@ default export `FormToolbar` → named export `PdFormToolbar` · `pd-form.tsx` i
 export function FormPageSkeleton({ width }: { readonly width?: "default" | "wide" })
 ```
 
-= `FormPageShell` + header skeleton (วงกลม back `size-7` · แท่ง title `h-6 w-48` · แท่งปุ่ม `h-8 w-20`) +
+= `FormPageShell` + header skeleton (แท่ง title `h-6 w-48` · badge `h-5 w-16` · แท่งปุ่ม `h-8 w-20` — ไม่มีวงกลม back เพราะปุ่มจริงเป็น absolute ห้อยซ้าย ไม่กินที่ใน flow) +
 `SettingSectionSkeleton first fields={["half","half","half","half"]}` + `SettingSectionSkeleton
 fields={["half","half","full"]}` — แทน `FormSkeleton` ใน edit-content 17 ไฟล์ + `ia-new-content` (spinner)
 ของขอบเขตนี้ · `FormSkeleton` เดิมเหลือให้ procurement (po/pr/grn/sr) และ sc-by-location จนระลอกหน้า
@@ -298,8 +299,9 @@ const SIGNATURES = [
 
 - ถาวร: `routes/legal/legal-page.tsx` (ArrowLeft ลิงก์กลับแอป ไม่ใช่ฟอร์ม) ·
   `routes/inventory-management/period-end/pe-review.tsx` (DFH ตรง — ไม่ใช่ฟอร์ม)
-- ชั่วคราว (ระลอกเอกสาร): procurement 5 wrapper + `pr-form-dialogs.tsx` · accounting 4 ไฟล์ · entry/review ·
-  wizard 4 (padding safe-area ของ wizard เขียนเอง) · profile 2
+- ชั่วคราว (ระลอกเอกสาร): procurement 5 wrapper + `pr-form-dialogs.tsx` · accounting 4 ไฟล์ · pc/sc review
+  (`navigate(-1)`) · wizard 4 + qty-step + step-result (ArrowLeft) · orphan `config-email-component.tsx`
+  (profile 2 หน้าและ entry 2 หน้าไม่ match signature ใดเลย จึงไม่อยู่ใน allowlist)
 
 `ChevronLeft` ไม่อยู่ใน signature เพราะใช้ถูกต้องเป็นลูกศรเลื่อนใน gallery/lightbox/timeline 4 ไฟล์
 หลังย้าย noti-template กับ sc-form แล้ว ไม่เหลือที่ใช้เป็นปุ่มย้อนกลับ

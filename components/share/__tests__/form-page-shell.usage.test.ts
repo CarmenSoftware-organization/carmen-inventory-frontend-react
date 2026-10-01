@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it, expect } from "vitest";
+import { PERMISSION_KEYS } from "@/constant/permissions";
 
 const ROOT = join(import.meta.dirname, "../../..");
 
@@ -113,6 +114,23 @@ describe("form pages go through FormPageShell / FormToolbar / BackButton", () =>
       `<DocFormHeader title="x" backLabel="y" onBack={fn} />`,
     ].join("\n");
     expect(countSignatures(probe)).toBe(4);
+  });
+
+  it("every permissionPrefix literal in routes/ names keys that exist in the catalog", () => {
+    // FormToolbar gate เฉพาะ key ที่อยู่ใน PERMISSIONS — prefix ที่พิมพ์ผิดจึงไม่ทำให้
+    // non-admin โดน denied อีก แต่กลายเป็น "ไม่ gate เงียบ ๆ" แทน เทสต์นี้คือตัวดัก
+    const bad: string[] = [];
+    for (const { file, src } of sources) {
+      for (const m of src.matchAll(/permissionPrefix="([^"]+)"/g)) {
+        const prefix = m[1];
+        if (
+          !PERMISSION_KEYS.has(`${prefix}.update`) &&
+          !PERMISSION_KEYS.has(`${prefix}.create`)
+        )
+          bad.push(`${file}: ${prefix}`);
+      }
+    }
+    expect(bad).toEqual([]);
   });
 
   it("matches the padding as the shell actually writes it", () => {
