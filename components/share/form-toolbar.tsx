@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,41 +7,60 @@ import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { buildPermissionKey } from "@/constant/permissions";
+import {
+  buildPermissionKey,
+  isKnownPermission,
+  type Permission,
+  type PermissionAction,
+} from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 
 interface FormToolbarProps {
-  readonly entity: string;
+  /** ชื่อ entity สำหรับ title ที่ derive ตามโหมด ("Add X" / "Edit X" / X) — ไม่ต้องส่งถ้าส่ง `title` */
+  readonly entity?: string;
   readonly mode: FormMode;
   readonly formId: string;
   readonly isPending: boolean;
-  readonly onBack: () => void;
+  /** ไม่ส่ง = ไม่มีปุ่มย้อนกลับ (หน้า settings) */
+  readonly onBack?: () => void;
   readonly onCancel: () => void;
   readonly onEdit?: () => void;
   readonly onDelete?: () => void;
   readonly deleteIsPending?: boolean;
-  readonly subtitle?: string;
-  readonly statusBadge?: React.ReactNode;
-  readonly submitSlot?: React.ReactNode;
-  readonly children?: React.ReactNode;
+  /** ทับ title ที่ derive จาก entity ทุกโหมด (เลขที่เอกสาร / ชื่อสดจาก useWatch / placeholder) */
+  readonly title?: string;
+  readonly titleMuted?: boolean;
+  readonly subtitle?: ReactNode;
+  readonly badges?: ReactNode;
+  readonly leading?: ReactNode;
+  /** label ของปุ่ม Save ตอน idle — ตอน pending ยังใช้ form.creating/saving */
+  readonly submitLabel?: string;
+  /** แทนปุ่ม Save ทั้งปุ่ม (product: disabled จน dirty · IA: ตั้ง doc_status ตอนคลิก) */
+  readonly submitSlot?: ReactNode;
+  /** ปิด Edit/Save/Delete พร้อม title อธิบาย — ทางเดียวกับ license (interface หมดอายุ) */
+  readonly writeDisabledReason?: string;
+  /** ปุ่มเพิ่มของหน้า (Print, Send email) ต่อท้าย Activity */
+  readonly children?: ReactNode;
   readonly editTitle?: string;
   readonly permissionPrefix?: string;
   /**
-   * ส่งต่อ `DocFormHeader.flush` — default true เพราะ consumer ของ FormToolbar
-   * ทั้งหมด form body flush กับ container ของตัวเอง (centered card `p-4` /
-   * full-width) ไม่มี px-4 เหมือน PR/PO จึงต้องให้ header flush ด้วยเพื่อ align
+   * ส่งต่อ `DocFormHeader.flush` — default true: ใน FormPageShell ไม่มี px-4 ของตัวเอง
+   * shell ให้ gutter แล้ว header ต้อง flush เพื่อให้ title ตรงกับ body
    */
   readonly flush?: boolean;
-  /**
-   * เปิดปุ่ม Activity ในแถบปุ่ม — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id)
-   *
-   * อยู่ที่ toolbar กลาง ไม่ให้แต่ละหน้ายัดปุ่มนี้เอง ทุกหน้าที่ใช้ toolbar นี้จะได้
-   * ตำแหน่งเดียวกันเสมอ
-   */
+  /** เปิดปุ่ม Activity — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id) */
   readonly activity?: { id: string; label?: string };
 }
 
+/**
+ * ชุดปุ่มมาตรฐานของหัวฟอร์มทุกหน้า (spec 2026-10-01-form-page-shell-design.md §2.3):
+ * Edit (primary) | Cancel · Save (primary) ; Delete (outline, view+edit) ; Activity ; children
+ *
+ * ที่เดียวที่เช็ค license `canWrite` และ permission — permission gate เฉพาะ key ที่อยู่ใน
+ * `PERMISSIONS` จริง (leaf ที่ใช้ permission ระดับโมดูลประกอบได้ key ผี เช่น
+ * `operation_plan.update` ซึ่งต้องไม่ gate)
+ */
 export function FormToolbar({
   entity,
   mode,
@@ -51,9 +71,14 @@ export function FormToolbar({
   onEdit,
   onDelete,
   deleteIsPending = false,
+  title,
+  titleMuted,
   subtitle,
-  statusBadge,
+  badges,
+  leading,
+  submitLabel,
   submitSlot,
+  writeDisabledReason,
   children,
   editTitle,
   permissionPrefix,
@@ -69,36 +94,40 @@ export function FormToolbar({
   const prefix = permissionPrefix ?? autoPrefix;
   const isView = mode === "view";
   const isAdd = mode === "add";
-  // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่มเขียนจริง (native disabled + title อธิบาย)
-  // ต่างจาก saveDenied/editDenied/deleteDenied (permission) ที่ยังคลิกได้แล้ว
-  // เด้ง dialog — license มาก่อนเสมอเพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
-  const writeDisabledTitle = !canWrite ? tl("writeDisabledTitle") : undefined;
 
-  const title =
-    mode === "add"
-      ? tf("addTitle", { entity })
+  // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่มเขียนจริง (native disabled + title อธิบาย) ต่างจาก
+  // permission ที่ยังคลิกได้แล้วเด้ง dialog — license มาก่อนเสมอเพราะแก้คนละวิธี
+  // (ต่ออายุ ไม่ใช่ขอสิทธิ์) · writeDisabledReason ของหน้าใช้ทางเดียวกัน
+  const disabledReason = !canWrite
+    ? tl("writeDisabledTitle")
+    : writeDisabledReason;
+  const writeDisabled = disabledReason !== undefined;
+
+  const resolvedTitle =
+    title ??
+    (mode === "add"
+      ? tf("addTitle", { entity: entity ?? "" })
       : mode === "edit"
-        ? (editTitle ?? tf("editTitle", { entity }))
-        : entity;
-  const submit = mode === "add" ? tc("create") : tc("save");
-  const pending = mode === "add" ? tf("creating") : tf("saving");
+        ? (editTitle ?? tf("editTitle", { entity: entity ?? "" }))
+        : (entity ?? ""));
+  const submit = submitLabel ?? (isAdd ? tc("create") : tc("save"));
+  const pending = isAdd ? tf("creating") : tf("saving");
 
-  const savePermission = prefix
-    ? buildPermissionKey(prefix, mode === "add" ? "create" : "update")
-    : undefined;
-  const updatePermission = prefix
-    ? buildPermissionKey(prefix, "update")
-    : undefined;
-  const deletePermission = prefix
-    ? buildPermissionKey(prefix, "delete")
-    : undefined;
+  // key ต่อ action — undefined เมื่อไม่มี prefix หรือ key ไม่อยู่ใน catalog (= ไม่ gate)
+  const keyFor = (action: PermissionAction): Permission | undefined => {
+    if (!prefix) return undefined;
+    const key = buildPermissionKey(prefix, action);
+    return isKnownPermission(key) ? key : undefined;
+  };
+  const savePermission = keyFor(isAdd ? "create" : "update");
+  const updatePermission = keyFor("update");
+  const deletePermission = keyFor("delete");
+  const denied = (key: Permission | undefined) =>
+    !!key && !isAdmin && !can(key);
+  const saveDenied = denied(savePermission);
+  const editDenied = denied(updatePermission);
+  const deleteDenied = denied(deletePermission);
 
-  const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
-  const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
-
-  // ประกอบปุ่ม action ตาม mode แล้วส่งเข้า DocFormHeader.actions — layout (back
-  // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
   const actions = (
     <>
       {/* key + type="button" กัน React reuse DOM node ข้ามโหมด — ถ้าปุ่ม Edit
@@ -109,18 +138,17 @@ export function FormToolbar({
           key="edit"
           type="button"
           size="sm"
-          variant="outline"
           onClick={
-            !canWrite
+            writeDisabled
               ? undefined
               : editDenied
                 ? () => dispatchPermissionDenied(updatePermission)
                 : onEdit
           }
-          disabled={!canWrite}
-          title={writeDisabledTitle}
-          aria-disabled={canWrite && editDenied ? true : undefined}
-          className={cn(canWrite && editDenied && "opacity-50")}
+          disabled={writeDisabled}
+          title={disabledReason}
+          aria-disabled={!writeDisabled && editDenied ? true : undefined}
+          className={cn(!writeDisabled && editDenied && "opacity-50")}
         >
           <Pencil />
           {tc("edit")}
@@ -138,13 +166,8 @@ export function FormToolbar({
             {tc("cancel")}
           </Button>
           {submitSlot ??
-            (!canWrite ? (
-              <Button
-                type="button"
-                size="sm"
-                disabled
-                title={writeDisabledTitle}
-              >
+            (writeDisabled ? (
+              <Button type="button" size="sm" disabled title={disabledReason}>
                 <Save />
                 {submit}
               </Button>
@@ -178,18 +201,18 @@ export function FormToolbar({
           variant="outline"
           size="sm"
           onClick={
-            !canWrite
+            writeDisabled
               ? undefined
               : deleteDenied
                 ? () => dispatchPermissionDenied(deletePermission)
                 : onDelete
           }
           disabled={
-            !canWrite || (!deleteDenied && (isPending || deleteIsPending))
+            writeDisabled || (!deleteDenied && (isPending || deleteIsPending))
           }
-          title={writeDisabledTitle}
-          aria-disabled={canWrite && deleteDenied ? true : undefined}
-          className={cn(canWrite && deleteDenied && "opacity-50")}
+          title={disabledReason}
+          aria-disabled={!writeDisabled && deleteDenied ? true : undefined}
+          className={cn(!writeDisabled && deleteDenied && "opacity-50")}
         >
           <Trash2 />
           {tc("delete")}
@@ -214,11 +237,13 @@ export function FormToolbar({
 
   return (
     <DocFormHeader
-      title={title}
+      title={resolvedTitle}
+      titleMuted={titleMuted}
       subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
-      badges={statusBadge}
+      badges={badges}
+      leading={leading}
       actions={actions}
       flush={flush}
     />

@@ -16,6 +16,7 @@ import {
   FieldPlainText,
 } from "@/components/ui/field";
 import { FormToolbar } from "@/components/share/form-toolbar";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -232,193 +233,194 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     ) : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <FormPageShell
+      header={
+        <Reveal>
+          <FormToolbar
+            entity={department?.name || t("entity")}
+            mode={f.mode}
+            formId={FORM_ID}
+            isPending={isPending}
+            onBack={f.handleBack}
+            onCancel={f.handleCancel}
+            onEdit={f.handleEdit}
+            onDelete={department ? () => setShowDelete(true) : undefined}
+            deleteIsPending={deleteDepartment.isPending}
+            badges={codeBadge}
+            editTitle={department?.name}
+            permissionPrefix="configuration.department"
+            activity={
+              department && { id: department.id, label: department.name }
+            }
+          />
+        </Reveal>
+      }
+    >
       <AnimationStyles />
-      {/* ── Toolbar ─────────── */}
-      <Reveal>
-        <FormToolbar
-          entity={department?.name || t("entity")}
-          mode={f.mode}
-          formId={FORM_ID}
-          isPending={isPending}
-          onBack={f.handleBack}
-          onCancel={f.handleCancel}
-          onEdit={f.handleEdit}
-          onDelete={department ? () => setShowDelete(true) : undefined}
-          deleteIsPending={deleteDepartment.isPending}
-          statusBadge={codeBadge}
-          editTitle={department?.name}
-          permissionPrefix="configuration.department"
-          activity={department && { id: department.id, label: department.name }}
-        />
+      {/* ── General Info ─────────── */}
+      <Reveal delay={80}>
+        <form
+          id={FORM_ID}
+          onSubmit={form.handleSubmit(onSubmit, () =>
+            scrollToFirstInvalidField(),
+          )}
+        >
+          <SettingSection
+            first
+            title={tfl("general")}
+            description={t("generalDesc")}
+          >
+            <Field>
+              <FieldLabel htmlFor="department-code" required>
+                {tfl("code")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{department?.code}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="department-code"
+                  placeholder={t("codePlaceholder")}
+                  disabled={isDisabled}
+                  error={form.formState.errors.code?.message}
+                  maxLength={10}
+                  {...form.register("code")}
+                />
+              )}
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="department-name" required>
+                {tfl("name")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{department?.name}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="department-name"
+                  placeholder={t("namePlaceholder")}
+                  disabled={isDisabled}
+                  error={form.formState.errors.name?.message}
+                  maxLength={100}
+                  {...form.register("name")}
+                />
+              )}
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="department-account-code">
+                {tfl("accountCode")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{department?.account_code}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="department-account-code"
+                  placeholder={tfl("optional")}
+                  disabled={isDisabled}
+                  maxLength={30}
+                  {...form.register("account_code")}
+                />
+              )}
+            </Field>
+
+            <Field className="sm:col-span-2">
+              <FieldLabel htmlFor="department-description">
+                {tfl("description")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText className="whitespace-pre-wrap">
+                  {department?.description}
+                </FieldPlainText>
+              ) : (
+                <Textarea
+                  id="department-description"
+                  placeholder={tfl("optional")}
+                  rows={2}
+                  disabled={isDisabled}
+                  maxLength={256}
+                  className="resize-none"
+                  {...form.register("description")}
+                />
+              )}
+            </Field>
+
+            <div className="sm:col-span-2">
+              <Controller
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <StatusSwitch
+                    id="department-is-active"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isDisabled}
+                  />
+                )}
+              />
+            </div>
+          </SettingSection>
+        </form>
       </Reveal>
 
-      <div className="mt-6">
-        {/* ── General Info ─────────── */}
-        <Reveal delay={80}>
-          <form
-            id={FORM_ID}
-            onSubmit={form.handleSubmit(onSubmit, () =>
-              scrollToFirstInvalidField(),
-            )}
-          >
-            <SettingSection
-              first
-              title={tfl("general")}
-              description={t("generalDesc")}
-            >
-              <Field>
-                <FieldLabel htmlFor="department-code" required>
-                  {tfl("code")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText>{department?.code}</FieldPlainText>
-                ) : (
-                  <FieldInput
-                    id="department-code"
-                    placeholder={t("codePlaceholder")}
-                    disabled={isDisabled}
-                    error={form.formState.errors.code?.message}
-                    maxLength={10}
-                    {...form.register("code")}
-                  />
-                )}
-              </Field>
+      {/* ── Members ─────────── */}
+      <Reveal delay={160}>
+        <SettingSection
+          wide
+          frameless
+          title={t("members")}
+          description={t("membersDesc")}
+          count={
+            isView
+              ? (department?.department_users.length ?? 0)
+              : deptUserTargetKeys.length
+          }
+        >
+          {isView ? (
+            <UserTable users={enrichedDeptUsers} />
+          ) : (
+            <Suspense fallback={null}>
+              <Transfer
+                dataSource={departmentUserSource}
+                targetKeys={deptUserTargetKeys}
+                onChange={handleDeptUsersChange}
+                disabled={isDisabled}
+                loading={isLoadingUsers}
+                titles={[t("availableUsers"), t("members")]}
+              />
+            </Suspense>
+          )}
+        </SettingSection>
+      </Reveal>
 
-              <Field>
-                <FieldLabel htmlFor="department-name" required>
-                  {tfl("name")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText>{department?.name}</FieldPlainText>
-                ) : (
-                  <FieldInput
-                    id="department-name"
-                    placeholder={t("namePlaceholder")}
-                    disabled={isDisabled}
-                    error={form.formState.errors.name?.message}
-                    maxLength={100}
-                    {...form.register("name")}
-                  />
-                )}
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="department-account-code">
-                  {tfl("accountCode")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText>{department?.account_code}</FieldPlainText>
-                ) : (
-                  <FieldInput
-                    id="department-account-code"
-                    placeholder={tfl("optional")}
-                    disabled={isDisabled}
-                    maxLength={30}
-                    {...form.register("account_code")}
-                  />
-                )}
-              </Field>
-
-              <Field className="sm:col-span-2">
-                <FieldLabel htmlFor="department-description">
-                  {tfl("description")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText className="whitespace-pre-wrap">
-                    {department?.description}
-                  </FieldPlainText>
-                ) : (
-                  <Textarea
-                    id="department-description"
-                    placeholder={tfl("optional")}
-                    rows={2}
-                    disabled={isDisabled}
-                    maxLength={256}
-                    className="resize-none"
-                    {...form.register("description")}
-                  />
-                )}
-              </Field>
-
-              <div className="sm:col-span-2">
-                <Controller
-                  control={form.control}
-                  name="is_active"
-                  render={({ field }) => (
-                    <StatusSwitch
-                      id="department-is-active"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isDisabled}
-                    />
-                  )}
-                />
-              </div>
-            </SettingSection>
-          </form>
-        </Reveal>
-
-        {/* ── Members ─────────── */}
-        <Reveal delay={160}>
-          <SettingSection
-            wide
-            frameless
-            title={t("members")}
-            description={t("membersDesc")}
-            count={
-              isView
-                ? (department?.department_users.length ?? 0)
-                : deptUserTargetKeys.length
-            }
-          >
-            {isView ? (
-              <UserTable users={enrichedDeptUsers} />
-            ) : (
-              <Suspense fallback={null}>
-                <Transfer
-                  dataSource={departmentUserSource}
-                  targetKeys={deptUserTargetKeys}
-                  onChange={handleDeptUsersChange}
-                  disabled={isDisabled}
-                  loading={isLoadingUsers}
-                  titles={[t("availableUsers"), t("members")]}
-                />
-              </Suspense>
-            )}
-          </SettingSection>
-        </Reveal>
-
-        {/* ── HOD ─────────── */}
-        <Reveal delay={220}>
-          <SettingSection
-            wide
-            frameless
-            title={t("hod")}
-            description={t("hodDesc")}
-            count={
-              isView
-                ? (department?.hod_users.length ?? 0)
-                : hodUserTargetKeys.length
-            }
-          >
-            {isView ? (
-              <UserTable users={enrichedHodUsers} />
-            ) : (
-              <Suspense fallback={null}>
-                <Transfer
-                  dataSource={hodUserSource}
-                  targetKeys={hodUserTargetKeys}
-                  onChange={handleHodUsersChange}
-                  disabled={isDisabled}
-                  loading={isLoadingUsers}
-                  titles={[t("availableUsers"), t("hod")]}
-                />
-              </Suspense>
-            )}
-          </SettingSection>
-        </Reveal>
-      </div>
+      {/* ── HOD ─────────── */}
+      <Reveal delay={220}>
+        <SettingSection
+          wide
+          frameless
+          title={t("hod")}
+          description={t("hodDesc")}
+          count={
+            isView
+              ? (department?.hod_users.length ?? 0)
+              : hodUserTargetKeys.length
+          }
+        >
+          {isView ? (
+            <UserTable users={enrichedHodUsers} />
+          ) : (
+            <Suspense fallback={null}>
+              <Transfer
+                dataSource={hodUserSource}
+                targetKeys={hodUserTargetKeys}
+                onChange={handleHodUsersChange}
+                disabled={isDisabled}
+                loading={isLoadingUsers}
+                titles={[t("availableUsers"), t("hod")]}
+              />
+            </Suspense>
+          )}
+        </SettingSection>
+      </Reveal>
 
       <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
@@ -451,6 +453,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           }}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

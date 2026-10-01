@@ -5,14 +5,12 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
-import { getSubmitLabel } from "@/lib/form-utils";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -32,7 +30,6 @@ import {
 } from "./pl-form-schema";
 import { PLGeneralCard } from "./pl-general-card";
 import { PlItemFields } from "./pl-item-fields";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "pl-form";
 
@@ -45,12 +42,9 @@ const LIST_PATH = "/vendor-management/price-list";
 export function PriceListForm({ priceList }: PriceListFormProps) {
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.priceList");
-  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const tc = useTranslations("common");
-  const tform = useTranslations("form");
   const ts = useTranslations("status");
 
   const createPriceList = useCreatePriceList();
@@ -163,17 +157,23 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const tsStatus = ts as (
     key: "draft" | "submitted" | "active" | "inactive",
   ) => string;
-  const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="mx-auto w-full p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6">
-        <DocFormHeader
-          flush
+    <FormPageShell
+      width="wide"
+      header={
+        <FormToolbar
+          mode={f.mode}
+          formId={FORM_ID}
+          isPending={isPending}
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
-          backLabel={tc("goBack")}
           onBack={f.handleBack}
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
+          onDelete={priceList ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deletePriceList.isPending}
+          activity={priceList && { id: priceList.id, label: priceList.no }}
           badges={
             <>
               {plNo && (
@@ -190,65 +190,9 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
               />
             </>
           }
-          actions={
-            <>
-              {isView ? (
-                <Button size="sm" variant="outline" onClick={f.handleEdit}>
-                  <Pencil />
-                  {tc("edit")}
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={f.handleCancel}
-                    disabled={isPending}
-                  >
-                    <X />
-                    {tc("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    form={FORM_ID}
-                    disabled={isPending}
-                  >
-                    <Save />
-                    {submitLabel}
-                  </Button>
-                </>
-              )}
-              {priceList && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deletePriceList.isPending || isPending}
-                >
-                  <Trash2 />
-                  {tc("delete")}
-                </Button>
-              )}
-              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-              {priceList && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => openActivity(priceList.id, priceList.no)}
-                >
-                  <History />
-                  {tActivity("title")}
-                </Button>
-              )}
-            </>
-          }
         />
-      </div>
-
+      }
+    >
       <form
         id={FORM_ID}
         onSubmit={form.handleSubmit(handleSubmit, () =>
@@ -298,7 +242,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           onConfirm={handleConfirmDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }
 

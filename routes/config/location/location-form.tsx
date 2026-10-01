@@ -17,6 +17,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { FormToolbar } from "@/components/share/form-toolbar";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { ProductTable } from "@/components/ui/product-table";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -237,269 +238,260 @@ export function LocationForm({ location }: LocationFormProps) {
     ) : undefined;
 
   return (
-    <div
+    <FormPageShell
       ref={containerRef}
       tabIndex={-1}
-      className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] outline-none"
+      header={
+        <Reveal>
+          <FormToolbar
+            entity={location && f.mode !== "add" ? location.name : t("entity")}
+            mode={f.mode}
+            formId={FORM_ID}
+            isPending={isPending}
+            onBack={f.handleBack}
+            onEdit={f.handleEdit}
+            onCancel={f.handleCancel}
+            onDelete={location ? () => setShowDelete(true) : undefined}
+            deleteIsPending={deleteLocation.isPending}
+            badges={codeBadge}
+            permissionPrefix="configuration.location"
+            activity={location && { id: location.id, label: location.name }}
+          />
+        </Reveal>
+      }
     >
       <AnimationStyles />
-      {/* ── Toolbar ─────────── */}
-      <Reveal>
-        <FormToolbar
-          entity={location && f.mode !== "add" ? location.name : t("entity")}
-          mode={f.mode}
-          formId={FORM_ID}
-          isPending={isPending}
-          onBack={f.handleBack}
-          onEdit={f.handleEdit}
-          onCancel={f.handleCancel}
-          onDelete={location ? () => setShowDelete(true) : undefined}
-          deleteIsPending={deleteLocation.isPending}
-          statusBadge={codeBadge}
-          permissionPrefix="configuration.location"
-          activity={location && { id: location.id, label: location.name }}
-        />
-      </Reveal>
-
-      <div className="mt-6">
-        {/* ── General Info ─────────── */}
-        <Reveal delay={80}>
-          <form
-            id={FORM_ID}
-            onSubmit={(e) =>
-              form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())(e)
-            }
+      {/* ── General Info ─────────── */}
+      <Reveal delay={80}>
+        <form
+          id={FORM_ID}
+          onSubmit={(e) =>
+            form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())(e)
+          }
+        >
+          <SettingSection
+            first
+            title={tfl("general")}
+            description={t("generalDesc")}
           >
-            <SettingSection
-              first
-              title={tfl("general")}
-              description={t("generalDesc")}
-            >
-              <Field>
-                <FieldLabel htmlFor="location-code" required>
-                  {tfl("code")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText>{location?.code}</FieldPlainText>
-                ) : (
-                  <FieldInput
-                    id="location-code"
-                    placeholder={t("codePlaceholder")}
-                    disabled={isDisabled}
-                    error={form.formState.errors.code?.message}
-                    maxLength={10}
-                    {...form.register("code")}
-                  />
-                )}
-              </Field>
+            <Field>
+              <FieldLabel htmlFor="location-code" required>
+                {tfl("code")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{location?.code}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="location-code"
+                  placeholder={t("codePlaceholder")}
+                  disabled={isDisabled}
+                  error={form.formState.errors.code?.message}
+                  maxLength={10}
+                  {...form.register("code")}
+                />
+              )}
+            </Field>
 
-              <Field>
-                <FieldLabel htmlFor="location-name" required>
-                  {tfl("name")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText>{location?.name}</FieldPlainText>
-                ) : (
-                  <FieldInput
-                    id="location-name"
-                    placeholder={t("namePlaceholder")}
-                    disabled={isDisabled}
-                    error={form.formState.errors.name?.message}
-                    maxLength={100}
-                    {...form.register("name")}
-                  />
-                )}
-              </Field>
+            <Field>
+              <FieldLabel htmlFor="location-name" required>
+                {tfl("name")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{location?.name}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="location-name"
+                  placeholder={t("namePlaceholder")}
+                  disabled={isDisabled}
+                  error={form.formState.errors.name?.message}
+                  maxLength={100}
+                  {...form.register("name")}
+                />
+              )}
+            </Field>
 
-              <Field>
-                <FieldLabel required>{tfl("locationType")}</FieldLabel>
-                {isView ? (
-                  <FieldPlainText>
-                    {location?.location_type ? (
-                      <LocationTypeLabel type={location.location_type} />
-                    ) : (
-                      ""
-                    )}
-                  </FieldPlainText>
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name="location_type"
-                    render={({ field }) => (
-                      <FieldSelect
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isDisabled}
-                        error={form.formState.errors.location_type?.message}
-                        placeholder={tfl("selectLocationType")}
-                      >
-                        <SelectContent>
-                          {INVENTORY_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {t(INVENTORY_TYPE_LABEL_KEY[opt.value])}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </FieldSelect>
-                    )}
-                  />
-                )}
-              </Field>
-
-              <Field>
-                <FieldLabel required>{tfl("physicalCount")}</FieldLabel>
-                {isView ? (
-                  <FieldPlainText>
-                    {location?.physical_count_type
-                      ? t(
-                          PHYSICAL_COUNT_LABEL_KEY[
-                            location.physical_count_type
-                          ],
-                        )
-                      : ""}
-                  </FieldPlainText>
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name="physical_count_type"
-                    render={({ field }) => (
-                      <FieldSelect
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isDisabled}
-                        error={
-                          form.formState.errors.physical_count_type?.message
-                        }
-                        placeholder={tfl("selectPhysicalCountType")}
-                      >
-                        <SelectContent>
-                          {PHYSICAL_COUNT_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {t(PHYSICAL_COUNT_LABEL_KEY[opt.value])}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </FieldSelect>
-                    )}
-                  />
-                )}
-              </Field>
-
-              <Field className="sm:col-span-2">
-                <FieldLabel required>{tfl("deliveryPoint")}</FieldLabel>
-                {isView ? (
-                  <FieldPlainText>
-                    {location?.delivery_point?.name}
-                  </FieldPlainText>
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name="delivery_point_id"
-                    render={({ field }) => (
-                      <LookupDeliveryPoint
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        onItemChange={(item) =>
-                          form.setValue("delivery_point_name", item.name)
-                        }
-                        defaultLabel={location?.delivery_point?.name}
-                        disabled={isDisabled}
-                        error={form.formState.errors.delivery_point_id?.message}
-                      />
-                    )}
-                  />
-                )}
-              </Field>
-
-              <Field className="sm:col-span-2">
-                <FieldLabel htmlFor="location-description">
-                  {tfl("description")}
-                </FieldLabel>
-                {isView ? (
-                  <FieldPlainText className="whitespace-pre-wrap">
-                    {location?.description}
-                  </FieldPlainText>
-                ) : (
-                  <Textarea
-                    id="location-description"
-                    placeholder={tfl("optional")}
-                    rows={2}
-                    disabled={isDisabled}
-                    maxLength={256}
-                    className="resize-none"
-                    {...form.register("description")}
-                  />
-                )}
-              </Field>
-
-              <div className="sm:col-span-2">
+            <Field>
+              <FieldLabel required>{tfl("locationType")}</FieldLabel>
+              {isView ? (
+                <FieldPlainText>
+                  {location?.location_type ? (
+                    <LocationTypeLabel type={location.location_type} />
+                  ) : (
+                    ""
+                  )}
+                </FieldPlainText>
+              ) : (
                 <Controller
                   control={form.control}
-                  name="is_active"
+                  name="location_type"
                   render={({ field }) => (
-                    <StatusSwitch
-                      id="location-is-active"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+                    <FieldSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
                       disabled={isDisabled}
-                      description={t("activeDescription")}
+                      error={form.formState.errors.location_type?.message}
+                      placeholder={tfl("selectLocationType")}
+                    >
+                      <SelectContent>
+                        {INVENTORY_TYPE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {t(INVENTORY_TYPE_LABEL_KEY[opt.value])}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </FieldSelect>
+                  )}
+                />
+              )}
+            </Field>
+
+            <Field>
+              <FieldLabel required>{tfl("physicalCount")}</FieldLabel>
+              {isView ? (
+                <FieldPlainText>
+                  {location?.physical_count_type
+                    ? t(PHYSICAL_COUNT_LABEL_KEY[location.physical_count_type])
+                    : ""}
+                </FieldPlainText>
+              ) : (
+                <Controller
+                  control={form.control}
+                  name="physical_count_type"
+                  render={({ field }) => (
+                    <FieldSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isDisabled}
+                      error={form.formState.errors.physical_count_type?.message}
+                      placeholder={tfl("selectPhysicalCountType")}
+                    >
+                      <SelectContent>
+                        {PHYSICAL_COUNT_TYPE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {t(PHYSICAL_COUNT_LABEL_KEY[opt.value])}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </FieldSelect>
+                  )}
+                />
+              )}
+            </Field>
+
+            <Field className="sm:col-span-2">
+              <FieldLabel required>{tfl("deliveryPoint")}</FieldLabel>
+              {isView ? (
+                <FieldPlainText>
+                  {location?.delivery_point?.name}
+                </FieldPlainText>
+              ) : (
+                <Controller
+                  control={form.control}
+                  name="delivery_point_id"
+                  render={({ field }) => (
+                    <LookupDeliveryPoint
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onItemChange={(item) =>
+                        form.setValue("delivery_point_name", item.name)
+                      }
+                      defaultLabel={location?.delivery_point?.name}
+                      disabled={isDisabled}
+                      error={form.formState.errors.delivery_point_id?.message}
                     />
                   )}
                 />
-              </div>
-            </SettingSection>
-          </form>
-        </Reveal>
+              )}
+            </Field>
 
-        {/* ── Users ─────────── */}
-        <Reveal delay={160}>
-          <SettingSection
-            wide
-            frameless
-            title={t("locationUsers")}
-            description={t("usersDesc")}
-            count={isView ? enrichedUsers.length : userTargetKeys.length}
-          >
-            {isView ? (
-              <UserTable users={enrichedUsers} />
-            ) : (
-              <Suspense fallback={null}>
-                <Transfer
-                  dataSource={userSource}
-                  targetKeys={userTargetKeys}
-                  onChange={handleUsersChange}
+            <Field className="sm:col-span-2">
+              <FieldLabel htmlFor="location-description">
+                {tfl("description")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText className="whitespace-pre-wrap">
+                  {location?.description}
+                </FieldPlainText>
+              ) : (
+                <Textarea
+                  id="location-description"
+                  placeholder={tfl("optional")}
+                  rows={2}
                   disabled={isDisabled}
-                  loading={isLoadingUsers}
-                  titles={[t("availableUsers"), t("locationUsers")]}
+                  maxLength={256}
+                  className="resize-none"
+                  {...form.register("description")}
                 />
-              </Suspense>
-            )}
-          </SettingSection>
-        </Reveal>
+              )}
+            </Field>
 
-        {/* ── Products ─────────── */}
-        <Reveal delay={220}>
-          <SettingSection
-            wide
-            frameless
-            title={t("products")}
-            description={t("productsDesc")}
-            count={isView ? enrichedProducts.length : selectedProductIds.size}
-          >
-            {isView ? (
-              <ProductTable products={enrichedProducts} />
-            ) : (
-              <TreeProductLookup
-                products={allProducts}
-                selectedProductIds={selectedProductIds}
-                onSelectionChange={handleProductSelectionChange}
-                disabled={isDisabled}
-                loading={isLoadingProducts}
+            <div className="sm:col-span-2">
+              <Controller
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <StatusSwitch
+                    id="location-is-active"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isDisabled}
+                    description={t("activeDescription")}
+                  />
+                )}
               />
-            )}
+            </div>
           </SettingSection>
-        </Reveal>
-      </div>
+        </form>
+      </Reveal>
+
+      {/* ── Users ─────────── */}
+      <Reveal delay={160}>
+        <SettingSection
+          wide
+          frameless
+          title={t("locationUsers")}
+          description={t("usersDesc")}
+          count={isView ? enrichedUsers.length : userTargetKeys.length}
+        >
+          {isView ? (
+            <UserTable users={enrichedUsers} />
+          ) : (
+            <Suspense fallback={null}>
+              <Transfer
+                dataSource={userSource}
+                targetKeys={userTargetKeys}
+                onChange={handleUsersChange}
+                disabled={isDisabled}
+                loading={isLoadingUsers}
+                titles={[t("availableUsers"), t("locationUsers")]}
+              />
+            </Suspense>
+          )}
+        </SettingSection>
+      </Reveal>
+
+      {/* ── Products ─────────── */}
+      <Reveal delay={220}>
+        <SettingSection
+          wide
+          frameless
+          title={t("products")}
+          description={t("productsDesc")}
+          count={isView ? enrichedProducts.length : selectedProductIds.size}
+        >
+          {isView ? (
+            <ProductTable products={enrichedProducts} />
+          ) : (
+            <TreeProductLookup
+              products={allProducts}
+              selectedProductIds={selectedProductIds}
+              onSelectionChange={handleProductSelectionChange}
+              disabled={isDisabled}
+              loading={isLoadingProducts}
+            />
+          )}
+        </SettingSection>
+      </Reveal>
 
       <DiscardDialog {...f.discard.dialogProps} variant="warning" />
 
@@ -532,6 +524,6 @@ export function LocationForm({ location }: LocationFormProps) {
           }}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

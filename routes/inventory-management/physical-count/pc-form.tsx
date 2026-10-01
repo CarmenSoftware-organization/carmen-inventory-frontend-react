@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/share/form-toolbar";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import {
   useCreatePhysicalCount,
@@ -86,32 +87,31 @@ export function PcForm({ physicalCount }: PcFormProps) {
   };
 
   return (
-    // px-4 ให้ทั้ง header+form มี gutter ซ้าย — FormToolbar flush (title ตรง form
-    // body) และปุ่ม back hang ออกซ้ายพอดีในกรอบ ไม่โดน main-content ตัด (pc เป็น
-    // full-width ต่างจาก config forms ที่อยู่ใน centered card ปุ่มลอยนอกได้)
-    <div className="space-y-4 px-4">
-      <FormToolbar
-        entity={t("entity")}
-        mode={f.mode}
-        formId="pc-form"
-        isPending={isPending}
-        onBack={f.handleBack}
-        onCancel={f.handleCancel}
-        onEdit={f.handleEdit}
-        onDelete={physicalCount ? () => setShowDelete(true) : undefined}
-        deleteIsPending={deletePc.isPending}
-        // ไม่ส่ง label เพราะ pc-edit-content cast `PhysicalCountData`
-        // เป็น `PhysicalCount` — ฟิลด์ชื่อที่ type ประกาศไว้ไม่มีอยู่จริงตอนรัน
-        activity={physicalCount && { id: physicalCount.id }}
-      >
-        {f.mode === "view" && physicalCount?.id && (
-          <PrintDocumentButton
-            documentType="PC"
-            documentId={physicalCount.id}
-          />
-        )}
-      </FormToolbar>
-
+    <FormPageShell
+      header={
+        <FormToolbar
+          entity={t("entity")}
+          mode={f.mode}
+          formId="pc-form"
+          isPending={isPending}
+          onBack={f.handleBack}
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
+          onDelete={physicalCount ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deletePc.isPending}
+          // ไม่ส่ง label เพราะ pc-edit-content cast `PhysicalCountData`
+          // เป็น `PhysicalCount` — ฟิลด์ชื่อที่ type ประกาศไว้ไม่มีอยู่จริงตอนรัน
+          activity={physicalCount && { id: physicalCount.id }}
+        >
+          {f.mode === "view" && physicalCount?.id && (
+            <PrintDocumentButton
+              documentType="PC"
+              documentId={physicalCount.id}
+            />
+          )}
+        </FormToolbar>
+      }
+    >
       <form
         id="pc-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -153,6 +153,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
           }}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

@@ -349,7 +349,9 @@ export function RfpSendEmailDialog({
                 {isError ? t("loadError") : t("noProfiles")}
               </p>
               <Button asChild size="sm" variant="outline">
-                <Link to="/system-admin/email-profile">{t("goToSettings")}</Link>
+                <Link to="/system-admin/email-profile">
+                  {t("goToSettings")}
+                </Link>
               </Button>
             </div>
           )}
@@ -374,7 +376,9 @@ export function RfpSendEmailDialog({
 
               {rfpTemplates.length > 0 && (
                 <Field>
-                  <FieldLabel htmlFor="rse-template">{t("template")}</FieldLabel>
+                  <FieldLabel htmlFor="rse-template">
+                    {t("template")}
+                  </FieldLabel>
                   <Select
                     value={selectedTemplate?.id ?? ""}
                     onValueChange={handleTemplateChange}
