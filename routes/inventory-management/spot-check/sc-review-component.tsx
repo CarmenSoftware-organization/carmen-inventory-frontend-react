@@ -51,7 +51,7 @@ export function ScReviewComponent({
 
   const handleBack = () => {
     if (onBack) onBack();
-    else navigate(-1);
+    else navigate("/inventory-management/spot-check");
   };
 
   const handleSubmit = () => {

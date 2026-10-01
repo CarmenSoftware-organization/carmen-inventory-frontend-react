@@ -55,7 +55,7 @@ export function PcReviewComponent({
       getActualQty={(d) => d.actual_qty ?? null}
       getVariance={(d) => d.diff_qty}
       getUnitName={(d) => d.inventory_unit_name}
-      onBack={() => navigate(-1)}
+      onBack={() => navigate("/inventory-management/physical-count")}
       onSubmit={handleSubmit}
       isSubmitting={submitPhysicalCount.isPending}
       submitLabel={t("submitPhysicalCount")}
