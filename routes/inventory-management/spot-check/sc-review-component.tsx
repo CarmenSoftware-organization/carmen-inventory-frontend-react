@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { summarizeVariance } from "../shared/variance-summary";
@@ -31,7 +30,6 @@ export function ScReviewComponent({
   onBack,
 }: ScReviewComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const navigate = useNavigate();
   const { toList } = useListReturn("/inventory-management/spot-check");
   const submitSc = useSubmitSpotCheck(review.id);
 
@@ -51,7 +49,7 @@ export function ScReviewComponent({
 
   const handleBack = () => {
     if (onBack) onBack();
-    else navigate(-1);
+    else toList();
   };
 
   const handleSubmit = () => {

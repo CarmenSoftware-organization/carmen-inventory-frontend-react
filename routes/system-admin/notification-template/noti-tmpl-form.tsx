@@ -3,9 +3,7 @@ import { Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { ChevronLeft, History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldError,
@@ -37,7 +35,9 @@ import {
 } from "./noti-tmpl-form-schema";
 import { NotiTmplPreview } from "./noti-tmpl-preview";
 import { VariableChips } from "./noti-tmpl-variable-chips";
-import { openActivity } from "@/components/share/activity-sheet-host";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
+import { FormPageHeaderSkeleton } from "@/components/loader/form-page-skeleton";
 
 const LIST_PATH = "/system-admin/notification-template";
 const FORM_ID = "notification-template-form";
@@ -50,9 +50,6 @@ export function NotificationTemplateForm({
   template,
 }: NotificationTemplateFormProps) {
   const t = useTranslations("systemAdmin.notificationTemplate");
-  const tActivity = useTranslations("activity");
-  const tc = useTranslations("common");
-  const tf = useTranslations("form");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
@@ -71,14 +68,13 @@ export function NotificationTemplateForm({
     listPath: LIST_PATH,
     isPending,
   });
-  const { form, isView, isAdd, isEdit, isDisabled } = f;
+  const { form, isAdd, isEdit, isDisabled } = f;
   const errors = form.formState.errors;
 
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedActive = useWatch({ control: form.control, name: "is_active" });
   const watchedBody = useWatch({ control: form.control, name: "body" });
   const title = isAdd ? t("add") : watchedName || t("untitled");
-
 
   const onSubmit = (values: NotificationTemplateFormValues) => {
     const payload = mapToPayload(values);
@@ -115,93 +111,34 @@ export function NotificationTemplateForm({
     });
   };
 
-  const pendingLabel = isAdd ? tf("creating") : tf("saving");
-  const actionLabel = isAdd ? tc("create") : tc("save");
-  const submitLabel = isPending ? pendingLabel : actionLabel;
-
   return (
-    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="w-fit"
-            type="button"
-            aria-label={tc("goBack")}
-            onClick={f.handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1 className="max-w-[20rem] truncate text-lg font-semibold tracking-tight">
-            {title}
-          </h1>
-          {!isAdd && (
-            <Badge
-              variant={watchedActive ? "success-light" : "warning-light"}
-              size="xs"
-              className="tracking-wider uppercase"
-            >
-              {watchedActive ? ts("active") : ts("inactive")}
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-          {template && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => openActivity(template.id, template.name)}
-            >
-              <History />
-              {tActivity("title")}
-            </Button>
-          )}
-          {isView ? (
-            <Button size="sm" onClick={f.handleEdit}>
-              <Pencil />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={f.handleCancel}
-                disabled={isPending}
+    <FormPageShell
+      header={
+        <FormToolbar
+          mode={f.mode}
+          formId={FORM_ID}
+          isPending={isPending}
+          title={title}
+          badges={
+            !isAdd && (
+              <Badge
+                variant={watchedActive ? "success-light" : "warning-light"}
+                size="xs"
+                className="tracking-wider uppercase"
               >
-                <X />
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={isPending}
-              >
-                <Save />
-                {submitLabel}
-              </Button>
-              {isEdit && template && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deleteMut.isPending || isPending}
-                >
-                  <Trash2 />
-                  {tc("delete")}
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
+                {watchedActive ? ts("active") : ts("inactive")}
+              </Badge>
+            )
+          }
+          onBack={f.handleBack}
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
+          onDelete={template ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deleteMut.isPending}
+          activity={template && { id: template.id, label: template.name }}
+        />
+      }
+    >
       <form
         id={FORM_ID}
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -325,21 +262,13 @@ export function NotificationTemplateForm({
           onConfirm={handleDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }
 
 export function NotificationTemplateFormSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Skeleton className="size-8 rounded-md" />
-          <Skeleton className="h-6 w-56" />
-          <Skeleton className="h-4 w-14 rounded-full" />
-        </div>
-        <Skeleton className="h-8 w-20" />
-      </div>
+    <FormPageShell header={<FormPageHeaderSkeleton />}>
       {/* General: name · description(textarea) · status */}
       <SettingSectionSkeleton first fields={["full", "tall", "full"]} />
       {/* Message content: ครึ่งซ้ายช่องกรอก ครึ่งขวาพรีวิว */}
@@ -353,6 +282,6 @@ export function NotificationTemplateFormSkeleton() {
           <Skeleton className="h-40 w-full" />
         </div>
       </div>
-    </div>
+    </FormPageShell>
   );
 }

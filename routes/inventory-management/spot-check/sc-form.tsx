@@ -4,16 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
+import { BackButton } from "@/components/share/back-button";
 import { toast } from "sonner";
-import {
-  Boxes,
-  ChevronLeft,
-  ClipboardCheck,
-  MapPin,
-  Save,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { Boxes, ClipboardCheck, MapPin, Save, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -159,16 +152,7 @@ export function ScForm({
             {/* Toolbar */}
             <div className="mb-3 flex flex-wrap items-center justify-between">
               <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="w-fit hover:bg-transparent dark:hover:bg-transparent"
-                  aria-label={tc("goBack")}
-                  onClick={handleBack}
-                >
-                  <ChevronLeft />
-                </Button>
+                <BackButton onClick={handleBack} />
                 <span className="bg-primary/10 text-primary text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase">
                   <ClipboardCheck className="size-2.5" />
                   {t("entity")}

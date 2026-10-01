@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { Button } from "@/components/ui/button";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { ErrorState } from "@/components/ui/error-state";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -47,6 +47,8 @@ import {
   timezoneExample,
   numberExample,
 } from "./company-profile-examples";
+
+const FORM_ID = "company-profile-form";
 
 /**
  * i18n key (relative to `companyProfile.fields`) ของแต่ละค่า `calculation_method`
@@ -148,57 +150,20 @@ export default function CompanyProfileComponent() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            {tm("companyProfile")}
-          </h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
-            {t("pageDescription")}
-          </p>
-        </div>
-        {!isError && !isBusy && data && (
-          <div className="flex shrink-0 items-center gap-2">
-            {editing ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={update.isPending}
-                >
-                  <X className="size-3.5" aria-hidden="true" />
-                  {t("cancel")}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={onSubmit}
-                  disabled={update.isPending}
-                >
-                  {update.isPending ? (
-                    <Loader2
-                      className="size-3.5 animate-spin"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <Save className="size-3.5" aria-hidden="true" />
-                  )}
-                  {t("save")}
-                </Button>
-              </>
-            ) : (
-              <Button type="button" size="sm" onClick={handleEdit}>
-                <Pencil className="size-3.5" aria-hidden="true" />
-                {t("edit")}
-              </Button>
-            )}
-          </div>
-        )}
-      </header>
-
+    <FormPageShell
+      header={
+        <FormToolbar
+          mode={editing ? "edit" : "view"}
+          formId={FORM_ID}
+          isPending={update.isPending}
+          title={tm("companyProfile")}
+          subtitle={t("pageDescription")}
+          permissionPrefix="system_admin.business_unit"
+          onCancel={handleCancel}
+          onEdit={!isError && !isBusy && data ? handleEdit : undefined}
+        />
+      }
+    >
       {isError && (
         <ErrorState message={t("loadError")} onRetry={() => refetch()} />
       )}
@@ -235,7 +200,7 @@ export default function CompanyProfileComponent() {
       )}
 
       {!isError && !isBusy && data && (
-        <form onSubmit={onSubmit}>
+        <form id={FORM_ID} onSubmit={onSubmit}>
           {/* General */}
           <SettingSection
             first
@@ -708,7 +673,7 @@ export default function CompanyProfileComponent() {
         onCancel={navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }
 

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
+import { BackButton } from "@/components/share/back-button";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, ClipboardCheck } from "lucide-react";
+import { ArrowRight, Check, ClipboardCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -118,15 +119,7 @@ export function FromPoContent() {
   return (
     <div className="flex flex-col gap-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-start gap-3">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleCancel}
-          aria-label={tc("goBack")}
-          className="mt-0.5"
-        >
-          <ArrowLeft />
-        </Button>
+        <BackButton onClick={handleCancel} className="mt-0.5" />
         <div className="min-w-0 flex-1 space-y-0.5">
           <h1 className="text-foreground text-lg font-semibold tracking-tight">
             {t("fromPo")}

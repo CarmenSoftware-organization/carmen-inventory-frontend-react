@@ -2,7 +2,8 @@ import { FormPageShell } from "@/components/share/form-page-shell";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function HeaderSkeleton() {
+/** แถบหัวของ FormPageSkeleton — export ให้หน้าที่มี skeleton body เฉพาะตัวใช้หัวเดียวกัน */
+export function FormPageHeaderSkeleton() {
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
@@ -25,7 +26,7 @@ export function FormPageSkeleton({
   readonly width?: "default" | "wide";
 }) {
   return (
-    <FormPageShell header={<HeaderSkeleton />} width={width}>
+    <FormPageShell header={<FormPageHeaderSkeleton />} width={width}>
       <SettingSectionSkeleton first fields={["half", "half", "half", "half"]} />
       <SettingSectionSkeleton fields={["half", "half", "full"]} />
     </FormPageShell>
