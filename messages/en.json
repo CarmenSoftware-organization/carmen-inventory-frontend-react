@@ -2555,11 +2555,6 @@
         "removeItemTitle": "Remove Product",
         "removeItemConfirm": "Are you sure you want to remove this product?"
       },
-      "statusDescription": {
-        "draft": "Draft price lists are not visible to procurement agents or available for automated ordering.",
-        "active": "This price list is active and will be used for purchasing from this vendor.",
-        "inactive": "Inactive price lists are archived and will not be used for new orders."
-      },
       "notFound": "Price list not found"
     },
     "priceListTemplate": {
@@ -3606,7 +3601,6 @@
       "desc": "Requests to move stock from a store to a department — what was asked for, what was issued.",
       "add": "New Store Requisition",
       "noCreatableWorkflow": "None of the approval flows let you start a store requisition.",
-      "nItems": "{count} items",
       "edit": "Edit Store Requisition",
       "deleteTitle": "Delete Store Requisition",
       "deleteConfirm": "Are you sure you want to delete \"{srNo}\"? This action cannot be undone.",
