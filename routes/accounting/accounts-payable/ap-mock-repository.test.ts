@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearApMockStorage,
   createApMockRepository,
@@ -8,8 +8,16 @@ const BU_A = "AP-TEST-A";
 const BU_B = "AP-TEST-B";
 
 beforeEach(() => {
+  // submit/approve ปฏิเสธใบที่ paid_date ไม่อยู่เดือนปัจจุบัน และ seed ผูกกับ ก.ย. 2026
+  // ตรึงนาฬิกาไว้ ไม่งั้นเทสต์แดงเองทุกครั้งที่ขึ้นเดือนใหม่
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-09-15T00:00:00Z"));
   clearApMockStorage(BU_A);
   clearApMockStorage(BU_B);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("AP mock repository", () => {
