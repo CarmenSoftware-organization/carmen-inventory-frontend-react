@@ -63,6 +63,7 @@ export function PoHeader({
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const tf = useTranslations("form");
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
   const [showSendEmail, setShowSendEmail] = useState(false);
 
@@ -178,6 +179,7 @@ export function PoHeader({
         deleteIsPending={deletePoIsPending}
         // เดิมป้าย Save ทุกโหมด — ไม่ให้โหมด add กลายเป็น "Create"
         submitLabel={tc("save")}
+        pendingLabel={tf("saving")}
       >
         {/* Close/Send email ต่อท้าย Delete (เดิม Close อยู่หน้าสุด — spec §3 ยอมรับ)
             comment / activity / print ยุบอยู่ในเมนู ⋯ — ไม่ส่ง activity ให้ toolbar ซ้ำ */}

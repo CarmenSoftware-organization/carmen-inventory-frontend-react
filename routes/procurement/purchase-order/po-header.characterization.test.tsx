@@ -62,6 +62,7 @@ function renderHeader(
     canEdit?: boolean;
     canClose?: boolean;
     terminalStatus?: boolean;
+    isPending?: boolean;
   } = {},
 ) {
   const handlers = {
@@ -79,7 +80,7 @@ function renderHeader(
       canEdit={flags.canEdit ?? true}
       canClose={flags.canClose ?? false}
       terminalStatus={flags.terminalStatus ?? false}
-      isPending={false}
+      isPending={flags.isPending ?? false}
       deletePoIsPending={false}
       departmentName="Kitchen"
       buyerName="Bob"
@@ -177,6 +178,12 @@ describe("PoHeader — characterization", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       en.procurement.purchaseOrder.entity,
     );
+  });
+
+  it("[add, กำลังบันทึก] ปุ่ม Save ขึ้น Saving… ตามป้าย ไม่ใช่ Creating…", () => {
+    renderHeader("add", undefined, { isPending: true });
+    expect(screen.getByRole("button", { name: en.form.saving })).toBeDisabled();
+    expect(screen.queryByText(en.form.creating)).not.toBeInTheDocument();
   });
 
   it("[view, ไม่มีสิทธิ์] Edit ยังกดได้ — key ของ PO ไม่อยู่ใน catalog จึงไม่ gate", async () => {

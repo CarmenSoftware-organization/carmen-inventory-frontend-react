@@ -75,6 +75,7 @@ export function SrHeader({
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
+  const tf = useTranslations("form");
   const { data: comments } = useStoreRequisitionComments(storeRequisition?.id);
 
   const isView = mode === "view";
@@ -258,6 +259,7 @@ export function SrHeader({
         deleteIsPending={isDeletePending}
         // เดิมป้าย Save ทุกโหมด — ไม่ให้โหมด add กลายเป็น "Create"
         submitLabel={tc("save")}
+        pendingLabel={tf("saving")}
         // ไม่มีแผนก = บันทึกไม่ได้ ปิดปุ่มพร้อมเหตุผล — มีแผนกแล้วใช้ปุ่มมาตรฐาน
         // (ผ่านด่าน license ของ toolbar)
         submitSlot={
