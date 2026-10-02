@@ -1,0 +1,31 @@
+# vercel --prod อัปโหลดทั้งโฟลเดอร์ในเครื่อง (ไม่ใช่แค่ไฟล์ใน git) — ก่อนมีไฟล์นี้
+# scratch ของ agent / session log / graph ติดขึ้นไปทุกครั้ง (เปิดดูได้จากหน้า Source
+# ของ deployment) และ `tsc --noEmit` ใน build ก็ไล่ตรวจ .ts ที่หลงอยู่ในนั้นด้วย
+#
+# denylist ไม่ใช่ allowlist — ลืมใส่ของที่ build ต้องใช้ = deploy พัง
+# ห้ามใส่: public/ (build อ่าน public/config.prod.json ที่ gitignored จากที่อัปโหลดไป),
+#          vendor/ (package.json ติดตั้ง xlsx จาก tgz ในนี้),
+#          scripts/ · changelog.json (แอป/tsc ใช้)
+# node_modules / .git / .vercel / .env*.local ถูก Vercel ตัดเองอยู่แล้ว
+
+# agent / editor scratch
+.remember/
+.superpowers/
+.claude/
+.agents/
+.codex/
+.impeccable/
+.zed/
+.vscode/
+.mcp.json
+agent-os/
+graft/
+
+# ไม่ใช่ส่วนของ build
+docs/
+.github/
+.cloudbuild/
+dist/
+test-results/
+playwright-report/
+*.tsbuildinfo
