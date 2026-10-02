@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "@/hooks/use-location";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Location } from "@/types/location";
 import { useWorkflowById } from "@/hooks/use-workflow";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -92,16 +94,13 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
   const items = (values.items ?? []) as FromPriceListSelectedItem[];
 
   const { data: workflow } = useWorkflowById(values.workflow_id ?? "");
-  const { data: locationsRes, isLoading: locLoading } = useLocation({
-    perpage: -1,
-  });
-
-  const locationMap = (() => {
-    const m = new Map<string, string>();
-    const list = Array.isArray(locationsRes) ? [] : (locationsRes?.data ?? []);
-    for (const loc of list) m.set(loc.id, loc.name);
-    return m;
-  })();
+  // ชื่อคลังเฉพาะที่ item ในใบนี้เลือก (ดึงตาม id)
+  const { items: locations, isLoading: locLoading } =
+    useEntitiesByIds<Location>({
+      useListHook: useLocation,
+      ids: items.map((i) => i.location_id ?? ""),
+    });
+  const locationMap = new Map(locations.map((l) => [l.id, l.name]));
 
   const totals = (() => {
     let subTotal = 0;
@@ -283,7 +282,8 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                     const lineTotal = round2(qty * item.price);
                     const locationId = item.location_id ?? "";
                     const locationName = locationId
-                      ? (locationMap.get(locationId) ?? locationId)
+                      ? (locationMap.get(locationId) ??
+                        (item.location_name || "—"))
                       : "—";
                     return (
                       <tr key={item.pricelist_detail_id || `item-${index}`}>

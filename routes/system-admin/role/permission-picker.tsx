@@ -7,7 +7,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { usePermission } from "./use-permission";
+import { usePermissionAll } from "./use-permission";
 import {
   ACTION_TKEY,
   CATEGORY_META,
@@ -63,8 +63,8 @@ export function PermissionPicker({
   const t = useTranslations("systemAdmin.role");
   const tc = useTranslations("common");
   const tRes = useTranslations("systemAdmin.role.resources");
-  const { data: permData, isLoading } = usePermission({ perpage: -1 });
-  const permissions = (permData?.data ?? []) as PermissionRecord[];
+  const { data: permData, isLoading } = usePermissionAll();
+  const permissions = (permData ?? []) as PermissionRecord[];
 
   const getCategoryMeta = (cat: string) =>
     CATEGORY_META[cat] ?? DEFAULT_CATEGORY_META;

@@ -10,6 +10,7 @@ import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { PrFormValues } from "../pr-form-schema";
 import { useIsRowLocked, WatchedProductUnit, QtyUnitPlain } from "./helpers";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 export const ApprovedCell = memo(function ApprovedCell({
   control,
@@ -69,7 +70,9 @@ export const ApprovedCell = memo(function ApprovedCell({
         decimals={decimals}
         placeholder={tfl("qty")}
         defaultValue={qty ?? undefined}
-        {...form.register(`items.${index}.approved_qty`)}
+        {...form.register(`items.${index}.approved_qty`, {
+          setValueAs: coerceNumberInput,
+        })}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
           form.setValue(

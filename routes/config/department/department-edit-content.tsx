@@ -2,13 +2,13 @@ import { useTranslations } from "use-intl";
 import { useDepartmentById } from "@/hooks/use-department";
 import { DepartmentForm } from "./department-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function DepartmentEditContent({ id }: { id: string }) {
   const tErr = useTranslations("config.department");
   const { data: department, isLoading, error, refetch } = useDepartmentById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !department)
     return (
       <ErrorState

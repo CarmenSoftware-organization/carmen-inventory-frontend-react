@@ -8,7 +8,7 @@ import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { SettingSection } from "@/components/ui/setting-section";
 import { TreeProductLookup } from "@/components/share/tree-product-lookup";
-import { useAllProducts } from "@/hooks/use-all-products";
+import { useProductAll } from "@/hooks/use-product";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import { PLT_DETAIL_EMPTY, type PltFormValues } from "./plt-form-schema";
@@ -43,8 +43,11 @@ export function PltItemFields({
     remove: removeDetail,
   } = useFieldArray({ control: form.control, name: "details" });
 
-  const { data: allProducts = [], isLoading: productsLoading } =
-    useAllProducts();
+  // ต้นไม้ใช้เฉพาะตอนแก้ไข/เพิ่ม — หน้าดูใช้ PltItemGroupedView จากข้อมูลของ template
+  const { data: allProducts = [], isLoading: productsLoading } = useProductAll(
+    undefined,
+    { enabled: !isView },
+  );
   const watchedDetails = useWatch({ control: form.control, name: "details" });
   const selectedProductIds = new Set(
     (watchedDetails ?? []).map((d) => d.product_id).filter(Boolean),

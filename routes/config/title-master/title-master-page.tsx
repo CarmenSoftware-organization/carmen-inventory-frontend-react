@@ -6,7 +6,7 @@ import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import {
   ListCard,
   ListCardActiveRow,
@@ -138,11 +138,11 @@ export default function TitleMasterPage() {
   };
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title="Title Master"
       description="Honorifics used by customer, guest and accounting profiles"
       toolbar={
-        <>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="min-w-52 flex-1 sm:flex-initial">
             <SearchInput
               defaultValue={search}
@@ -161,10 +161,10 @@ export default function TitleMasterPage() {
             ]}
             className="w-36"
           />
-        </>
+        </div>
       }
       actions={
-        <>
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Button
             variant="outline"
             size="icon-sm"
@@ -176,7 +176,7 @@ export default function TitleMasterPage() {
           <Button size="sm" onClick={() => setEditing(null)}>
             <Plus className="size-4" /> Add Title
           </Button>
-        </>
+        </div>
       }
     >
       {isMobile ? (
@@ -205,6 +205,7 @@ export default function TitleMasterPage() {
         >
           <DataGridContainer
             scroll
+            // สูตรเฉพาะ: ตารางนี้ไม่มี pagination bar (scroll ล้วน) จึงไม่ใช้ listGridMaxH
             className="max-h-[calc(100vh-13rem)]"
           >
             <DataGridTable />
@@ -246,7 +247,7 @@ export default function TitleMasterPage() {
         description={warning}
         onConfirm={() => setWarning("")}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/share/back-button";
+import { Loader2 } from "lucide-react";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import { usePurchaseRequestTemplates } from "../use-purchase-request";
@@ -21,7 +21,6 @@ const PR_LIST_PATH = "/procurement/purchase-request";
  */
 export function FromTemplateContent() {
   const t = useTranslations("procurement.purchaseRequest");
-  const tc = useTranslations("common");
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selected, setSelected] = useState<PurchaseRequestTemplate | null>(
@@ -67,15 +66,7 @@ export function FromTemplateContent() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-start gap-2">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => navigate(PR_LIST_PATH)}
-          aria-label={tc("goBack")}
-          className="mt-0.5"
-        >
-          <ArrowLeft />
-        </Button>
+        <BackButton onClick={() => navigate(PR_LIST_PATH)} className="mt-0.5" />
         <div className="min-w-0 flex-1 space-y-0.5">
           <h1 className="text-foreground text-lg font-semibold tracking-tight">
             {t("selectTemplate")}

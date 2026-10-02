@@ -1,10 +1,16 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Plus, RefreshCw, Columns3, LayoutGrid, LayoutList } from "lucide-react";
+import { RefreshCw, Columns3 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { DocumentListHeader } from "@/components/share/document-list-header";
-import { DataGrid, DataGridContainer } from "@/components/ui/data-grid/data-grid";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
@@ -15,170 +21,229 @@ import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/search-input";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { useJournalVouchers } from "./use-journal-voucher";
-import type { JournalVoucher, JournalVoucherStatus } from "@/types/journal-voucher";
+import type {
+  JournalVoucher,
+  JournalVoucherStatus,
+} from "@/types/journal-voucher";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 
-const statuses: JournalVoucherStatus[] = ["draft", "submitted", "posting", "scheduled", "posted", "post_failed", "voided", "reversed"];
-const statusClass: Record<string, string> = { draft: "bg-muted text-muted-foreground", submitted: "bg-amber-100 text-amber-900", posted: "bg-emerald-100 text-emerald-900", post_failed: "bg-red-100 text-red-900", reversed: "bg-slate-200 text-slate-700" };
+const statuses: JournalVoucherStatus[] = [
+  "draft",
+  "submitted",
+  "posting",
+  "scheduled",
+  "posted",
+  "post_failed",
+  "voided",
+  "reversed",
+];
+const statusClass: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  submitted: "bg-amber-100 text-amber-900",
+  posted: "bg-emerald-100 text-emerald-900",
+  post_failed: "bg-red-100 text-red-900",
+  reversed: "bg-slate-200 text-slate-700",
+};
 
 export default function JournalVoucherList() {
-  const navigate = useNavigate(); const [search, setSearch] = useState(""); const [status, setStatus] = useState(""); const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const query = useJournalVouchers({ perpage: 25, search, filter: status ? `status:${status}` : undefined }); const rows = query.data?.data ?? [];
-  const columns = useMemo<ColumnDef<JournalVoucher>[]>(() => [
-    {
-      accessorKey: "display_no",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Number" />,
-      cell: ({ row }) => {
-        const item = row.original;
-        const numberDisplay =
-          item.display_no ||
-          (item.prefix && item.jv_no
-            ? (item.jv_no.startsWith(item.prefix) ? item.jv_no : `${item.prefix}-${item.jv_no}`)
-            : item.jv_no) ||
-          item.draft_reference ||
-          (item.id ? `Draft (${item.id.slice(0, 8)})` : "—");
-        return (
-          <CellAction onClick={() => navigate(`/accounting/journal-voucher/${item.id}`)}>
-            {numberDisplay}
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
+  const query = useJournalVouchers({
+    perpage: 25,
+    search,
+    filter: status ? `status:${status}` : undefined,
+  });
+  const rows = query.data?.data ?? [];
+  const columns = useMemo<ColumnDef<JournalVoucher>[]>(
+    () => [
+      {
+        accessorKey: "display_no",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Number" />
+        ),
+        cell: ({ row }) => (
+          <CellAction
+            onClick={() =>
+              navigate(`/accounting/journal-voucher/${row.original.id}`)
+            }
+          >
+            {row.original.display_no}
           </CellAction>
-        );
+        ),
+        enableHiding: false,
+        meta: { headerTitle: "Number" },
       },
-      enableHiding: false,
-      meta: { headerTitle: "Number" },
-    },
-    {
-      accessorKey: "jv_date",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Date" />,
-      cell: ({ row }) => <span className="tabular-nums">{row.original.jv_date ? row.original.jv_date.slice(0, 10) : "—"}</span>,
-      meta: { headerTitle: "Date" },
-    },
-    {
-      accessorKey: "description",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Description" />,
-      cell: ({ row }) => <span className="block max-w-80 truncate" title={row.original.description ?? ""}>{row.original.description ?? "—"}</span>,
-      meta: { headerTitle: "Description" },
-    },
-    {
-      accessorKey: "source_type",
-      header: "Source",
-      cell: ({ row }) => row.original.source_type ?? "Manual",
-      meta: { headerTitle: "Source" },
-    },
-    {
-      accessorKey: "jv_status",
-      header: "Status",
-      cell: ({ row }) => <Badge size="xs" className={statusClass[row.original.jv_status] ?? "bg-muted"}>{row.original.jv_status.replaceAll("_", " ")}</Badge>,
-      meta: { headerTitle: "Status" },
-    },
-    {
-      accessorKey: "total_debit",
-      header: "Debit",
-      cell: ({ row }) => <span className="block text-right tabular-nums">{row.original.total_debit}</span>,
-      meta: { headerTitle: "Debit", cellClassName: "text-right" },
-    },
-    {
-      accessorKey: "total_credit",
-      header: "Credit",
-      cell: ({ row }) => <span className="block text-right tabular-nums">{row.original.total_credit}</span>,
-      meta: { headerTitle: "Credit", cellClassName: "text-right" },
-    },
-  ], [navigate]);
-  const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() });
+      {
+        accessorKey: "jv_date",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Date" />
+        ),
+        cell: ({ row }) => (
+          <span className="tabular-nums">
+            {row.original.jv_date.slice(0, 10)}
+          </span>
+        ),
+        meta: { headerTitle: "Date" },
+      },
+      {
+        accessorKey: "description",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Description" />
+        ),
+        cell: ({ row }) => (
+          <span
+            className="block max-w-80 truncate"
+            title={row.original.description}
+          >
+            {row.original.description}
+          </span>
+        ),
+        meta: { headerTitle: "Description" },
+      },
+      {
+        accessorKey: "source_type",
+        header: "Source",
+        cell: ({ row }) => row.original.source_type ?? "Manual",
+        meta: { headerTitle: "Source" },
+      },
+      {
+        accessorKey: "jv_status",
+        header: "Status",
+        cell: ({ row }) => (
+          <Badge
+            size="xs"
+            className={statusClass[row.original.jv_status] ?? "bg-muted"}
+          >
+            {row.original.jv_status.replaceAll("_", " ")}
+          </Badge>
+        ),
+        meta: { headerTitle: "Status" },
+      },
+      {
+        accessorKey: "total_debit",
+        header: "Debit",
+        cell: ({ row }) => (
+          <span className="block text-right tabular-nums">
+            {row.original.total_debit}
+          </span>
+        ),
+        meta: { headerTitle: "Debit", cellClassName: "text-right" },
+      },
+      {
+        accessorKey: "total_credit",
+        header: "Credit",
+        cell: ({ row }) => (
+          <span className="block text-right tabular-nums">
+            {row.original.total_credit}
+          </span>
+        ),
+        meta: { headerTitle: "Credit", cellClassName: "text-right" },
+      },
+    ],
+    [navigate],
+  );
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
   return (
-    <div className="space-y-3 pb-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <DocumentListHeader title="Journal Voucher" description="General Ledger entries, workflow and posting history" />
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => navigate("/accounting/journal-voucher/new")}>
-            <Plus className="size-4" /> New JV
-          </Button>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-          <SearchInput defaultValue={search} onSearch={setSearch} onInputChange={setSearch} />
-          <span className="bg-border hidden h-4 w-px sm:block" />
-          <StatusFilter
-            value={status}
-            onChange={setStatus}
-            placeholder="Status"
-            defaultLabel="All statuses"
-            options={statuses.map((item) => ({ value: item, label: item.replaceAll("_", " ") }))}
-            className="w-36 text-xs"
-          />
-        </div>
-        <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <DataGridSortMenu table={table} />
-          {displayMode === "list" && (
-            <DataGridColumnVisibility
-              table={table}
-              trigger={
-                <Button size="icon-sm" variant="outline" aria-label="Toggle columns">
-                  <Columns3 className="size-4" />
-                </Button>
-              }
+    <ListPageShell
+      title="Journal Voucher"
+      description="General Ledger entries, workflow and posting history"
+      actions={
+        <DocumentListActions
+          onAdd={() => navigate("/accounting/journal-voucher/new")}
+          addLabel="New JV"
+          hideExportPrint
+        />
+      }
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+            <SearchInput
+              defaultValue={search}
+              onSearch={setSearch}
+              onInputChange={setSearch}
             />
-          )}
-          <div className="flex items-center rounded-md border">
+            <span className="bg-border hidden h-4 w-px sm:block" />
+            <StatusFilter
+              value={status}
+              onChange={setStatus}
+              placeholder="Status"
+              defaultLabel="All statuses"
+              options={statuses.map((item) => ({
+                value: item,
+                label: item.replaceAll("_", " "),
+              }))}
+              className="w-36 text-xs"
+            />
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
+            {displayMode === "list" && (
+              <DataGridColumnVisibility
+                table={table}
+                trigger={
+                  <Button
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label="Toggle columns"
+                  >
+                    <Columns3 className="size-4" />
+                  </Button>
+                }
+              />
+            )}
+            <DisplayModeToggle value={displayMode} onChange={setDisplayMode} />
             <Button
+              variant="ghost"
               size="icon-sm"
-              variant={displayMode === "list" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("list")}
-              aria-label="List view"
+              onClick={() => query.refetch()}
+              aria-label="Refresh"
             >
-              <LayoutList className="size-4" />
-            </Button>
-            <Button
-              size="icon-sm"
-              variant={displayMode === "grid" ? "secondary" : "ghost"}
-              onClick={() => setDisplayMode("grid")}
-              aria-label="Grid view"
-            >
-              <LayoutGrid className="size-4" />
+              <RefreshCw className="size-4" />
             </Button>
           </div>
-          <Button variant="ghost" size="icon-sm" onClick={() => query.refetch()} aria-label="Refresh">
-            <RefreshCw className="size-4" />
-          </Button>
         </div>
-      </div>
+      }
+    >
       {displayMode === "list" ? (
         <DataGrid
           table={table}
           recordCount={rows.length}
-          isLoading={query.isLoading}
           tableLayout={{ headerSticky: true, width: "auto" }}
           tableClassNames={{ bodyRow: "h-10" }}
         >
-          <DataGridContainer className="max-h-[calc(100vh-12rem)]">
+          <DataGridContainer className={listGridMaxH(false)}>
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => {
-            const title =
-              row.display_no ||
-              (row.prefix && row.jv_no
-                ? (row.jv_no.startsWith(row.prefix) ? row.jv_no : `${row.prefix}-${row.jv_no}`)
-                : row.jv_no) ||
-              row.draft_reference ||
-              (row.id ? `Draft (${row.id.slice(0, 8)})` : "—");
-            return (
-              <ListCard
-                key={row.id}
-                title={title}
-                badge={<Badge size="xs" className={statusClass[row.jv_status] ?? "bg-muted"}>{row.jv_status}</Badge>}
-                onOpen={() => navigate(`/accounting/journal-voucher/${row.id}`)}
-              >
-                <ListCardRow label="Date">{row.jv_date ? row.jv_date.slice(0, 10) : "—"}</ListCardRow>
-                <ListCardRow label="Description">{row.description ?? "—"}</ListCardRow>
-                <ListCardRow label="Total">{row.total_debit ?? "0"}</ListCardRow>
-              </ListCard>
-            );
-          })}
+          {rows.map((row) => (
+            <ListCard
+              key={row.id}
+              title={row.display_no}
+              badge={
+                <Badge
+                  size="xs"
+                  className={statusClass[row.jv_status] ?? "bg-muted"}
+                >
+                  {row.jv_status}
+                </Badge>
+              }
+              onOpen={() => navigate(`/accounting/journal-voucher/${row.id}`)}
+            >
+              <ListCardRow label="Date">{row.jv_date.slice(0, 10)}</ListCardRow>
+              <ListCardRow label="Description">{row.description}</ListCardRow>
+              <ListCardRow label="Total">{row.total_debit}</ListCardRow>
+            </ListCard>
+          ))}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }

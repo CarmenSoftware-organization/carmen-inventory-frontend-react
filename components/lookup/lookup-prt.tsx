@@ -33,11 +33,12 @@ export function LookupPrt({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const {
     items: templates,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -45,9 +46,10 @@ export function LookupPrt({
   } = useLookupPagination<PriceListTemplate>({
     useListHook: usePriceListTemplate,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (t: PriceListTemplate) => t.status === "active",
+    // ห้ามส่ง is_active — endpoint นี้ตอบ 500 ใช้ status แทน
+    serverFilter: "status|string:active",
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
   });
 
   return (
@@ -59,6 +61,7 @@ export function LookupPrt({
         if (open) setHasOpened(true);
       }}
       items={templates}
+      selectedItems={selectedItems}
       getId={(t) => t.id}
       getLabel={(t) => t.name}
       defaultLabel={defaultLabel}

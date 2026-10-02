@@ -2,13 +2,13 @@ import { useTranslations } from "use-intl";
 import { useEquipmentById } from "./use-eq";
 import { EquipmentForm } from "./eq-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function EqEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.equipment");
   const { data: equipment, isLoading, error, refetch } = useEquipmentById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !equipment)
     return (
       <ErrorState

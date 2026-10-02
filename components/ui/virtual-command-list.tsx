@@ -1,4 +1,4 @@
-import { useCallback, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface VirtualCommandListProps<T> {
@@ -10,6 +10,11 @@ interface VirtualCommandListProps<T> {
   readonly onLoadMore?: () => void;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;
+  /**
+   * วัดความสูงแถวจริงแทนการเชื่อ `estimateSize` — เปิดเมื่อแถวสูงไม่เท่ากัน
+   * (เช่นการ์ดที่มี/ไม่มีบรรทัดคำอธิบาย) ไม่งั้นแถวจะซ้อนหรือเว้นช่อง
+   */
+  readonly measureRows?: boolean;
 }
 
 /**
@@ -44,6 +49,7 @@ export function VirtualCommandList<T>({
   onLoadMore,
   hasMore,
   isLoadingMore,
+  measureRows = false,
 }: VirtualCommandListProps<T>) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +68,18 @@ export function VirtualCommandList<T>({
       onLoadMore();
     }
   }, [onLoadMore, hasMore, isLoadingMore]);
+
+  // onScroll ยิงได้เฉพาะเมื่อมีแถบเลื่อน — ถ้ารายการว่าง (ไม่มี scroll element) หรือสั้นจนไม่พอให้เลื่อน
+  // (เช่น กรองฝั่ง client เหลือไม่กี่แถว ทั้งที่ยังมีหน้าถัดไป) จะไม่มีทางโหลดต่อ จึงโหลดหน้าถัดไปเอง
+  // ไล่ทีละหน้าจนกว่าจะเต็มกล่องหรือหมดหน้า · เรียกซ้ำได้ปลอดภัยเพราะ loadMore ของ
+  // useLookupPagination เช็ค hasMore && !isLoading และ effect นี้รันใหม่เฉพาะเมื่อ deps เปลี่ยน
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoadingMore) return;
+    const el = parentRef.current;
+    if (items.length === 0 || (el && el.scrollHeight - el.clientHeight < 50)) {
+      onLoadMore();
+    }
+  }, [items.length, hasMore, isLoadingMore, onLoadMore]);
 
   if (items.length === 0) {
     return (
@@ -86,6 +104,8 @@ export function VirtualCommandList<T>({
         {virtualizer.getVirtualItems().map((virtualRow) => (
           <div
             key={virtualRow.key}
+            data-index={virtualRow.index}
+            ref={measureRows ? virtualizer.measureElement : undefined}
             className="absolute top-0 left-0 w-full"
             style={{ transform: `translateY(${virtualRow.start}px)` }}
           >

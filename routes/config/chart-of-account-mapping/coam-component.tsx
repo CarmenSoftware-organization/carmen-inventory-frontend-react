@@ -8,7 +8,7 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import EmptyComponent from "@/components/empty-component";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
@@ -89,13 +89,19 @@ export default function CoamComponent() {
   );
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title={t("title")}
       description={t("desc")}
-      toolbar={<SearchInput defaultValue={search} onSearch={setSearch} />}
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-auto sm:flex-initial">
+            <SearchInput defaultValue={search} onSearch={setSearch} />
+          </div>
+        </div>
+      }
       actions={
         // ยังไม่ผูก handler — วาง UI ไว้ก่อนตามที่ตกลง กดแล้วยังไม่มีอะไรเกิดขึ้น
-        <>
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Button type="button" size="sm" variant="outline">
             <Upload />
             {t("import")}
@@ -116,7 +122,7 @@ export default function CoamComponent() {
             <Pencil />
             {tc("edit")}
           </Button>
-        </>
+        </div>
       }
     >
       <Tabs value={tab} onValueChange={(v) => setTab(v as "AP" | "GL")}>

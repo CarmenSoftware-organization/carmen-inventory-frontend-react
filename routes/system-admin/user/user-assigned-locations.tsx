@@ -30,7 +30,7 @@ import SearchInput from "@/components/search-input";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { INVENTORY_TYPE, INVENTORY_TYPE_LABEL_KEY } from "@/constant/location";
-import { useLocation } from "@/hooks/use-location";
+import { useLocationAll } from "@/hooks/use-location";
 import type { UserLocation } from "@/types/user";
 import { AssignSection, EmptyState } from "./user-assigned-ui";
 import type { UserAssignedFormValues } from "./user-assigned-form-schema";
@@ -98,14 +98,13 @@ export function LocationsSection({
   const [typeFilter, setTypeFilter] = useState<INVENTORY_TYPE | "all">("all");
 
   // ทะเบียนคลังทั้ง BU ยิงตอนกด Edit เท่านั้น — คนเปิดดูเฉย ๆ ไม่ต้องเสีย
-  const { data: allLocationsData, isLoading } = useLocation(
-    { perpage: -1 },
-    { enabled: !isDisabled },
-  );
+  const { data: allLocationsData, isLoading } = useLocationAll(undefined, {
+    enabled: !isDisabled,
+  });
 
   const rows = useMemo<LocationRow[]>(() => {
     if (isDisabled) return userLocations.map(fromAssigned);
-    return (allLocationsData?.data ?? []).map((l) => ({
+    return (allLocationsData ?? []).map((l) => ({
       id: l.id,
       code: l.code,
       name: l.name,

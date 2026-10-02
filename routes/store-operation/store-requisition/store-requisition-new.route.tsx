@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import { StoreRequisitionForm } from "./sr-form";
 import { useStoreRequisitionById } from "./use-sr";
 import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 
 export function Component() {
@@ -23,7 +23,7 @@ export function Component() {
           (รอ buCode) isLoading เป็น false ฟอร์มจะ mount เปล่าแล้ว defaultValues
           โดนแช่ (บทเรียนจาก PR) ดึงพลาด → ตกไปฟอร์มเปล่าแทนค้าง skeleton */}
       {duplicateId && !duplicateFrom && !duplicateError ? (
-        <FormSkeleton />
+        <DocPageSkeleton />
       ) : (
         <StoreRequisitionForm duplicateFrom={duplicateFrom} />
       )}

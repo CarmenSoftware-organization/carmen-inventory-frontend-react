@@ -10,7 +10,6 @@ import {
   useCreateRecipeCategory,
   useUpdateRecipeCategory,
   useDeleteRecipeCategory,
-  useRecipeCategory,
 } from "@/hooks/use-recipe-category";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RecipeCategory } from "@/types/recipe-category";
@@ -20,6 +19,7 @@ import {
   mapToPayload,
   type RecipeCategoryFormValues,
 } from "./recipe-category-form-schema";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { RecipeCategoryToolbar } from "./recipe-category-toolbar";
 import { RecipeCategoryGeneralFields } from "./recipe-category-general-fields";
 import { RecipeCategoryCostFields } from "./recipe-category-cost-fields";
@@ -34,11 +34,6 @@ const LIST_PATH = "/operation-plan/category";
 export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tt = useTranslations("toast");
-
-  const { data: allCategoryData } = useRecipeCategory({ perpage: -1 });
-  const categoryMap = new Map(
-    (allCategoryData?.data ?? []).map((c) => [c.id, c]),
-  );
 
   const createCategory = useCreateRecipeCategory();
   const updateCategory = useUpdateRecipeCategory();
@@ -57,13 +52,8 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   });
   const { form, isEdit, isDisabled } = f;
 
-  const handleParentChange = (parentId: string) => {
-    if (!parentId) {
-      form.setValue("level", 1);
-    } else {
-      const parent = categoryMap.get(parentId);
-      form.setValue("level", parent ? parent.level + 1 : 1);
-    }
+  const handleParentChange = (parent?: RecipeCategory) => {
+    form.setValue("level", parent ? parent.level + 1 : 1);
   };
 
   const onSubmit = (values: RecipeCategoryFormValues) => {
@@ -103,19 +93,21 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const excludeIds = category ? new Set([category.id]) : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <RecipeCategoryToolbar
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        isDeleting={deleteCategory.isPending}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={category ? () => setShowDelete(true) : undefined}
-        activityId={category?.id}
-      />
-
+    <FormPageShell
+      header={
+        <RecipeCategoryToolbar
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          isDeleting={deleteCategory.isPending}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={category ? () => setShowDelete(true) : undefined}
+          activityId={category?.id}
+        />
+      }
+    >
       <form
         id="recipe-category-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -127,7 +119,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
           isDisabled={isDisabled}
           excludeIds={excludeIds}
           onParentChange={handleParentChange}
-          getCategoryName={(id) => categoryMap.get(id)?.name}
         />
         <RecipeCategoryCostFields form={form} isDisabled={isDisabled} />
         <RecipeCategoryMarginFields form={form} isDisabled={isDisabled} />
@@ -157,6 +148,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         onCancel={f.navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }

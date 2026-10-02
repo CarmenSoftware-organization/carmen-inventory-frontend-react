@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   ChangePasswordDto,
@@ -6,38 +5,13 @@ import type {
   UserProfile,
 } from "@/types/profile";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import { BU_SWITCH_CHANNEL, QUERY_KEYS } from "@/constant/query-keys";
+import { QUERY_KEYS } from "@/constant/query-keys";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
 
 export const profileQueryKey = [QUERY_KEYS.PROFILE] as const;
 
 export function useProfile() {
-  const queryClient = useQueryClient();
-
-  // Listen for BU switch from other tabs
-  useEffect(() => {
-    let channel: BroadcastChannel;
-    try {
-      channel = new BroadcastChannel(BU_SWITCH_CHANNEL);
-      channel.onmessage = () => {
-        queryClient.removeQueries({
-          predicate: (query) => query.queryKey[0] !== profileQueryKey[0],
-        });
-        queryClient.invalidateQueries({ queryKey: profileQueryKey });
-      };
-    } catch {
-      // BroadcastChannel not supported
-    }
-    return () => {
-      try {
-        channel?.close();
-      } catch {
-        // already closed
-      }
-    };
-  }, [queryClient]);
-
   const query = useQuery<UserProfile>({
     queryKey: profileQueryKey,
     queryFn: async () => {

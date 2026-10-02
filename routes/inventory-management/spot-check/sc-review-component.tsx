@@ -1,10 +1,11 @@
-import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { summarizeVariance } from "../shared/variance-summary";
 import { toast } from "sonner";
 import { useSubmitSpotCheck } from "./use-sc";
 import { useUnit } from "@/hooks/use-unit";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Unit } from "@/types/unit";
 import type {
   SpotCheckReviewData,
   SpotCheckReviewItem,
@@ -29,15 +30,15 @@ export function ScReviewComponent({
   onBack,
 }: ScReviewComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const navigate = useNavigate();
   const { toList } = useListReturn("/inventory-management/spot-check");
   const submitSc = useSubmitSpotCheck(review.id);
 
-  const { data: unitsData } = useUnit({ perpage: -1 });
-  const unitNameById = new Map<string, string>();
-  for (const u of unitsData?.data ?? []) {
-    unitNameById.set(u.id, u.name);
-  }
+  // ชื่อหน่วยเฉพาะที่แถว review อ้างถึง (ดึงตาม id)
+  const { items: units } = useEntitiesByIds<Unit>({
+    useListHook: useUnit,
+    ids: review.items.map((it) => it.inventory_unit_id),
+  });
+  const unitNameById = new Map(units.map((u) => [u.id, u.name]));
 
   // matches/variances ใช้ตัวเลขจาก API ตามเดิม (backend นับจากชุดเต็ม ไม่ใช่แค่
   // แถวที่ส่งมาแสดง) ส่วนเกิน/ขาดแยกจากแถวที่มีอยู่ตรงนี้
@@ -48,7 +49,7 @@ export function ScReviewComponent({
 
   const handleBack = () => {
     if (onBack) onBack();
-    else navigate(-1);
+    else toList();
   };
 
   const handleSubmit = () => {

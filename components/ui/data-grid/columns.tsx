@@ -99,6 +99,8 @@ export function actionColumn<T>(
     deletePermission?: Permission;
     writeDisabled?: boolean;
     writeDisabledTitle?: string;
+    /** คืนเหตุผลเมื่อแถวนี้ลบไม่ได้ (ปุ่มลบปิด + title) · คืน undefined = ลบได้ */
+    deleteDisabledTitle?: (item: T) => string | undefined;
     activity?: ActionColumnActivity<T>;
   },
 ): ColumnDef<T> {
@@ -114,6 +116,7 @@ export function actionColumn<T>(
           deletePermission={options?.deletePermission}
           writeDisabled={options?.writeDisabled}
           writeDisabledTitle={options?.writeDisabledTitle}
+          deleteDisabledTitle={options?.deleteDisabledTitle?.(row.original)}
           activity={
             activityId
               ? {

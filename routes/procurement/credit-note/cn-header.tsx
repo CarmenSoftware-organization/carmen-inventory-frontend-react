@@ -1,18 +1,12 @@
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, User, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useCreditNoteComments } from "./use-credit-note";
-import { useCan } from "@/hooks/use-can";
-import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
-import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { buildPermissionKey } from "@/constant/permissions";
-import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -42,27 +36,10 @@ export function CnHeader({
   onShowComment,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
-  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useCreditNoteComments(creditNote?.id);
 
-  const { can, isAdmin } = useCan();
-  const prefix = usePermissionPrefix();
   const isView = mode === "view";
-  const isAdd = mode === "add";
-
-  const savePermission = prefix
-    ? buildPermissionKey(prefix, isAdd ? "create" : "update")
-    : undefined;
-  const updatePermission = prefix
-    ? buildPermissionKey(prefix, "update")
-    : undefined;
-  const deletePermission = prefix
-    ? buildPermissionKey(prefix, "delete")
-    : undefined;
-  const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
-  const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
   const statusCfg = creditNote ? CN_STATUS_CONFIG[creditNote.doc_status] : null;
 
@@ -87,78 +64,37 @@ export function CnHeader({
     </div>
   );
 
-  const actions = (
-    <>
-      {/* View — edit (ส่งใบย้ายไป footer ขวาล่าง = CnFooterAction) */}
-      {isView && !isLocked && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={
-            editDenied
-              ? () => dispatchPermissionDenied(updatePermission)
-              : onEnterEdit
-          }
-          aria-disabled={editDenied || undefined}
-          className={cn(editDenied && "opacity-50")}
-        >
-          <Pencil aria-hidden="true" />
-          {tc("edit")}
-        </Button>
+  // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
+  // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
+  // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
+  const subtitle = createdByName ? (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      {createdByName && (
+        <span className="flex items-center gap-1">
+          <User className="size-3 shrink-0" aria-hidden="true" />
+          {createdByName}
+        </span>
       )}
+    </span>
+  ) : undefined;
 
-      {/* Edit / add — cancel + save + delete */}
-      {!isView && (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            <X aria-hidden="true" />
-            {tc("cancel")}
-          </Button>
-          {saveDenied ? (
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => dispatchPermissionDenied(savePermission)}
-              aria-disabled
-              className="opacity-50"
-            >
-              <Save aria-hidden="true" />
-              {isAdd ? tc("create") : tc("save")}
-            </Button>
-          ) : (
-            <Button type="submit" form="cn-form" size="sm" disabled={isPending}>
-              <Save aria-hidden="true" />
-              {isAdd ? tc("create") : tc("save")}
-            </Button>
-          )}
-          {creditNote && !isLocked && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={
-                deleteDenied
-                  ? () => dispatchPermissionDenied(deletePermission)
-                  : onShowDelete
-              }
-              disabled={!deleteDenied && (isPending || deleteIsPending)}
-              aria-disabled={deleteDenied || undefined}
-              className={cn(deleteDenied && "opacity-50")}
-            >
-              <Trash2 aria-hidden="true" />
-              {tc("delete")}
-            </Button>
-          )}
-        </>
-      )}
-
-      {/* Always (มี record) — comment / activity / print ยุบอยู่ในเมนู ⋯ */}
+  return (
+    <FormToolbar
+      mode={mode}
+      formId="cn-form"
+      isPending={isPending}
+      title={creditNote?.cn_no ?? t("entity")}
+      subtitle={subtitle}
+      badges={badges}
+      onBack={onBack}
+      onCancel={onCancel}
+      // ส่งใบย้ายไป footer ขวาล่าง (CnFooterAction) — หัวมีแค่ Edit
+      onEdit={isLocked ? undefined : onEnterEdit}
+      // ลบได้เฉพาะตอนแก้ใบที่ยังไม่ล็อก — หน้าดูเป็นที่ทำงาน workflow
+      onDelete={!isView && creditNote && !isLocked ? onShowDelete : undefined}
+      deleteIsPending={deleteIsPending}
+    >
+      {/* comment / activity / print ยุบอยู่ในเมนู ⋯ — ไม่ส่ง activity ให้ toolbar ซ้ำ */}
       {creditNote && (
         <DocActionsMenu
           onComment={onShowComment}
@@ -177,31 +113,6 @@ export function CnHeader({
           }
         />
       )}
-    </>
-  );
-
-  // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
-  // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
-  // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
-  const subtitle = createdByName ? (
-    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-      {createdByName && (
-        <span className="flex items-center gap-1">
-          <User className="size-3 shrink-0" aria-hidden="true" />
-          {createdByName}
-        </span>
-      )}
-    </span>
-  ) : undefined;
-
-  return (
-    <DocFormHeader
-      title={creditNote?.cn_no ?? t("entity")}
-      subtitle={subtitle}
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-    />
+    </FormToolbar>
   );
 }

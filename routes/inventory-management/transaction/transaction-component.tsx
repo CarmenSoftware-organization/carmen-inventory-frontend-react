@@ -20,7 +20,7 @@ import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
 import EmptyComponent from "@/components/empty-component";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { useTransactionTable } from "./use-transaction-table";
 import { TransactionSummary } from "./transaction-summary";
@@ -322,81 +322,74 @@ export default function TransactionComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="relative isolate -mx-3 -my-3">
-      <AnimationStyles />
-      <div className="relative px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))] lg:p-4">
-        {/* ── Page header ─────────── */}
-        <Reveal>
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-        </Reveal>
-
-        {/* ── Search + filters ─────────── */}
-        <Reveal delay={60}>
-          <div className="mt-4 flex w-full flex-wrap items-center gap-2">
-            <div className="min-w-0 flex-1 [&>div]:w-full">
-              <SearchInput
-                defaultValue={search}
-                onSearch={setSearch}
-                containerClassName="w-full"
-                inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      toolbar={
+        <>
+          <Reveal delay={60}>
+            <div className="flex w-full flex-wrap items-center gap-2">
+              <div className="min-w-0 flex-1 [&>div]:w-full">
+                <SearchInput
+                  defaultValue={search}
+                  onSearch={setSearch}
+                  containerClassName="w-full"
+                  inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
+                />
+              </div>
+              <ViewSelector
+                view={lf.view}
+                snapshot={{
+                  filters: lf.values,
+                  sort: lf.sortParam || undefined,
+                }}
+              />
+              <ListFilter
+                fields={transactionFilterFields}
+                values={lf.values}
+                setValue={lf.setValue}
+                onClearAll={lf.clearAll}
+                onSaveClick={() => setSaveViewDialogOpen(true)}
+                activeCount={lf.activeFilters.length}
               />
             </div>
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={transactionFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-        </Reveal>
-
-        {/* ── Active filter bar ─────────── */}
-        {lf.activeFilters.length > 0 && (
-          <Reveal delay={120}>
-            <div className="mt-3">
+          </Reveal>
+          {lf.activeFilters.length > 0 && (
+            <Reveal delay={120}>
               <ActiveFilterBar
                 filters={lf.activeFilters}
                 onClearAll={lf.clearAll}
               />
-            </div>
-          </Reveal>
-        )}
+            </Reveal>
+          )}
+        </>
+      }
+    >
+      <AnimationStyles />
 
-        {/* ── Summary stats ─────────── */}
-        <Reveal delay={180}>
-          <div className="mt-4">
-            <TransactionSummary data={data?.summary ?? EMPTY_SUMMARY} />
-          </div>
-        </Reveal>
+      {/* ── Summary stats ─────────── */}
+      <Reveal delay={180}>
+        <TransactionSummary data={data?.summary ?? EMPTY_SUMMARY} />
+      </Reveal>
 
-        {/* ── Data grid (glass card) ─────────── */}
-        <Reveal delay={240}>
-          <div className="border-border/60 bg-card mt-4 overflow-hidden rounded-xl border">
-            <DataGrid
-              table={table}
-              recordCount={totalRecords}
-              isLoading={isLoading}
-              tableLayout={{ headerSticky: true }}
-              emptyMessage={<EmptyComponent />}
-            >
-              <DataGridContainer>
-                <DataGridTable />
-                <DataGridPagination />
-              </DataGridContainer>
-            </DataGrid>
-          </div>
-        </Reveal>
-      </div>
+      {/* ── Data grid (glass card) ─────────── */}
+      <Reveal delay={240}>
+        <div className="border-border/60 bg-card overflow-hidden rounded-xl border">
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+            emptyMessage={<EmptyComponent />}
+          >
+            <DataGridContainer>
+              <DataGridTable />
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
+        </div>
+      </Reveal>
 
       <SaveViewDialog
         open={saveViewDialogOpen}
@@ -405,6 +398,6 @@ export default function TransactionComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

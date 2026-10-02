@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -11,7 +10,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import { useRole, useDeleteRole } from "../shared/use-role";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
@@ -25,7 +23,10 @@ import EmptyComponent from "@/components/empty-component";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import RoleCard from "./role-card";
 import { useRoleTable } from "./use-role-table";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { cn } from "@/lib/utils";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 
 export default function RoleComponent() {
   const navigate = useNavigate();
@@ -64,88 +65,76 @@ export default function RoleComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate("/system-admin/role/new", listReturnState())
-              }
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-          </div>
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onAdd={() => navigate("/system-admin/role/new", listReturnState())}
+          addLabel={t("add")}
+          hideExportPrint
+        />
+      }
+      toolbar={
         <div className="flex w-full items-center gap-2">
           <div className="flex-1">
             <SearchInput defaultValue={search} onSearch={setSearch} />
           </div>
         </div>
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isMobile ? (
-          grid.isLoading ? (
-            <CardSkeletonGrid />
-          ) : grid.error ? (
-            <ErrorState
-              message={grid.error.message}
-              onRetry={() => grid.refetch?.()}
-            />
-          ) : items.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-3">
-                {items.map((item) => (
-                  <RoleCard
-                    key={item.id}
-                    item={item}
-                    onEdit={(r) =>
-                      navigate(`/system-admin/role/${r.id}`, listReturnState())
-                    }
-                    onDelete={setDeleteTarget}
-                  />
-                ))}
+      }
+    >
+      {isMobile ? (
+        grid.isLoading ? (
+          <CardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        ) : items.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-3">
+              {items.map((item) => (
+                <RoleCard
+                  key={item.id}
+                  item={item}
+                  onEdit={(r) =>
+                    navigate(`/system-admin/role/${r.id}`, listReturnState())
+                  }
+                  onDelete={setDeleteTarget}
+                />
+              ))}
+            </div>
+            {grid.hasMore && (
+              <div ref={grid.sentinelRef} className="flex justify-center py-4">
+                {grid.isLoadingMore && (
+                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                )}
               </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <EmptyComponent />
-          )
+            )}
+          </>
         ) : (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
+          <EmptyComponent />
+        )
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn("flex flex-col", listGridMaxH(false))}
           >
-            <DataGridContainer className="flex max-h-[calc(100vh-10rem-3rem)] flex-col">
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -165,6 +154,6 @@ export default function RoleComponent() {
           });
         }}
       />
-    </div>
+    </ListPageShell>
   );
 }

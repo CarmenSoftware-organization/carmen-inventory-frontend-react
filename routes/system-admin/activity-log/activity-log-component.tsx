@@ -23,7 +23,9 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActivityCardSkeletonGrid } from "@/components/loader/activity-card-skeleton";
-import { useAllUsers } from "@/hooks/use-all-users";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useUser } from "@/hooks/use-user";
+import type { User } from "@/types/workflows";
 import { getUserFullName } from "@/components/lookup/lookup-user";
 import { cn } from "@/lib/utils";
 import { useActivityLogTable } from "./use-activity-log-table";
@@ -37,7 +39,8 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 
 type DisplayMode = "list" | "grid";
 
@@ -87,6 +90,18 @@ const ENTITY_TYPE_OPTIONS = [
   { label: "Auth", value: "auth" },
 ];
 
+// actor_id ส่งเป็น query param แยก (`actor_id=a,b`) ไม่ใช่ clause ของ filter —
+// ค่า URL จึงเป็น id เปล่า (bareIds) · users ห้ามส่ง is_active (ได้ 0 แถว)
+const ACTOR_ENTITY = defineEntitySource<User>({
+  fieldKey: "actor_id",
+  useListHook: useUser,
+  getId: (u) => u.user_id,
+  getLabel: getUserFullName,
+  idFilterKey: "user_id",
+  serverFilter: null,
+  bareIds: true,
+});
+
 export default function ActivityLogComponent() {
   const isMobile = useIsMobile();
   const [displayMode, setDisplayMode] = useState<DisplayMode>("list");
@@ -95,24 +110,14 @@ export default function ActivityLogComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "-created_at",
   });
-  const { data: allUsers = [] } = useAllUsers();
   const t = useTranslations("systemAdmin.activityLog");
   const tc = useTranslations("common");
   const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const { exportActivityLog, isExporting } = useExportActivityLog();
 
-  const userOptions = useMemo(
-    () =>
-      allUsers.map((u) => ({
-        label: getUserFullName(u),
-        value: u.user_id,
-      })),
-    [allUsers],
-  );
-
-  // action/entity_type/actor_id เป็น literal string/ชื่อผู้ใช้จริง (ไม่ใช่ i18n
-  // key) จึงต้องใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน
+  // action/entity_type เป็น literal string (ไม่ใช่ i18n key) จึงห่อ custom ·
+  // actor_id เป็น control "entity" แบบ bareIds — เหมือน
   // pattern ของ PO_TYPE/CN_TYPE ใน Task 19 ทั้ง 3 field ไม่ผ่าน
   // filter|type:value clause แบบหน้าอื่น — backend รับเป็น query param แยก
   // (action=, entity_type=, actor_id=) ตรง ๆ จึงอ่านค่าดิบจาก lf.values แทน
@@ -156,22 +161,12 @@ export default function ActivityLogComponent() {
       {
         key: "actor_id",
         section: "listView.sectionPeople",
-        control: "custom",
+        control: "entity",
+        entity: ACTOR_ENTITY,
         labelKey: "systemAdmin.activityLog.user",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={t("user")}
-            options={userOptions}
-            searchable
-            searchPlaceholder={t("searchUser")}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [t, userOptions],
+    [t],
   );
 
   const lf = useListFilters({
@@ -258,69 +253,64 @@ export default function ActivityLogComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-auto h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="hidden sm:inline-flex"
+          >
+            {isExporting ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Download aria-hidden="true" />
+            )}
+            {isExporting ? tc("exporting") : tc("export")}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => globalThis.print()}
+            className="hidden sm:inline-flex"
+          >
+            <Printer aria-hidden="true" />
+            {tc("print")}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="ml-auto h-11 w-11 shrink-0 sm:hidden"
+                aria-label={tc("aria.moreActions")}
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {isExporting ? tc("exporting") : tc("export")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => globalThis.print()}>
+                <Printer aria-hidden="true" />
+                {tc("print")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
-        {/* Toolbar */}
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -331,70 +321,63 @@ export default function ActivityLogComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Content */}
-        {!isMobile && displayMode === "list" && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-            onRowClick={setSelectedLog}
+      }
+    >
+      {/* Content */}
+      {!isMobile && displayMode === "list" && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+          onRowClick={setSelectedLog}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
-        {useInfiniteScroll &&
-          (grid.isLoading ? (
-            <ActivityCardSkeletonGrid />
-          ) : grid.error ? (
-            <ErrorState
-              message={grid.error.message}
-              onRetry={() => grid.refetch?.()}
-            />
-          ) : logs.length === 0 ? (
-            <EmptyComponent />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {logs.map((log, i) => (
-                  <ActivityLogCard
-                    key={log.id}
-                    log={log}
-                    index={i}
-                    onClick={() => setSelectedLog(log)}
-                  />
-                ))}
+      {useInfiniteScroll &&
+        (grid.isLoading ? (
+          <ActivityCardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        ) : logs.length === 0 ? (
+          <EmptyComponent />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {logs.map((log, i) => (
+                <ActivityLogCard
+                  key={log.id}
+                  log={log}
+                  index={i}
+                  onClick={() => setSelectedLog(log)}
+                />
+              ))}
+            </div>
+            {grid.hasMore && (
+              <div ref={grid.sentinelRef} className="flex justify-center py-4">
+                {grid.isLoadingMore && (
+                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                )}
               </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
-              )}
-            </>
-          ))}
-      </div>
+            )}
+          </>
+        ))}
 
       {/* Detail Sheet */}
       <ActivityLogDetailSheet
@@ -412,6 +395,6 @@ export default function ActivityLogComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

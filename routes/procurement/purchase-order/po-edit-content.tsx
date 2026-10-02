@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { usePurchaseOrderById } from "../shared/use-purchase-order";
 import PoForm from "./po-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 
 export function PoEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.purchaseOrder");
@@ -13,7 +13,7 @@ export function PoEditContent({ id }: { id: string }) {
     refetch,
   } = usePurchaseOrderById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <DocPageSkeleton />;
   if (error || !purchaseOrder)
     return (
       <ErrorState

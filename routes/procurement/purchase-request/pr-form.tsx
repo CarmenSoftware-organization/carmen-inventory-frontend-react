@@ -3,7 +3,11 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useTranslations } from "use-intl";
-import { scrollToFirstInvalidField, draftSaveHandler } from "@/lib/form-helpers";
+import {
+  scrollToFirstInvalidField,
+  draftSaveHandler,
+} from "@/lib/form-helpers";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import {
   PR_STATUS,
   type PurchaseRequest,
@@ -13,7 +17,6 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
 import { PrDescriptionField, PrWorkflowField } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
-import { PrFormActions } from "./pr-form-actions";
 import { PrFooterAction } from "./workflow/pr-footer-action";
 import { PrFormDialogs } from "./pr-form-dialogs";
 import { usePrFormActions } from "./use-pr-form-actions";
@@ -54,7 +57,6 @@ export function PurchaseRequestForm({
     userId,
   } = useProfile();
   const { isAdmin } = useCan();
-
 
   const [mode, setMode] = useState<FormMode>(purchaseRequest ? "view" : "add");
   const isView = mode === "view";
@@ -245,61 +247,78 @@ export function PurchaseRequestForm({
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col space-y-4">
-      <PrHeader
-        purchaseRequest={purchaseRequest}
-        onBack={actions.handleBack}
-        reqName={reqName}
-        departmentName={departmentName ?? ""}
-        prDateDisplay={prDateDisplay}
-        description={descriptionReadOnly ? watchedDescription : undefined}
-        workflowName={
-          purchaseRequest?.workflow?.name ?? template?.workflow?.name ?? undefined
-        }
-        workflowField={
-          workflowEditable ? (
-            <PrWorkflowField
-              form={form}
-              disabled={actions.isPending}
-              isAdd={isAdd}
-            />
-          ) : undefined
-        }
-        descriptionField={
-          descriptionReadOnly ? undefined : (
-            <PrDescriptionField
-              form={form}
-              disabled={actions.isPending}
-              className="lg:col-span-2"
-            />
-          )
-        }
-        hasHistory={hasHistory}
-        onShowHistory={() => actions.setShowHistory(true)}
-        actions={
-          <PrFormActions
-            mode={mode}
-            role={role}
-            prStatus={purchaseRequest?.pr_status}
-            prId={purchaseRequest?.id}
-            prNo={purchaseRequest?.pr_no}
-            isPending={actions.isPending}
-            isDeletePending={actions.deletePr.isPending}
-            hasRecord={!!purchaseRequest}
-            onEdit={() => setMode("edit")}
-            onCancel={actions.handleCancel}
-            onDelete={handleDeleteClick}
-            onComment={() => actions.setShowComment(true)}
-          />
-        }
-      />
+    <FormPageShell
+      width="wide"
+      header={
+        <PrHeader
+          purchaseRequest={purchaseRequest}
+          mode={mode}
+          role={role}
+          isPending={actions.isPending}
+          isDeletePending={actions.deletePr.isPending}
+          onBack={actions.handleBack}
+          onEdit={() => setMode("edit")}
+          onCancel={actions.handleCancel}
+          onDelete={handleDeleteClick}
+          onComment={() => actions.setShowComment(true)}
+          reqName={reqName}
+          departmentName={departmentName ?? ""}
+          prDateDisplay={prDateDisplay}
+          description={descriptionReadOnly ? watchedDescription : undefined}
+          workflowName={
+            purchaseRequest?.workflow?.name ??
+            template?.workflow?.name ??
+            undefined
+          }
+          workflowField={
+            workflowEditable ? (
+              <PrWorkflowField
+                form={form}
+                disabled={actions.isPending}
+                isAdd={isAdd}
+              />
+            ) : undefined
+          }
+          descriptionField={
+            descriptionReadOnly ? undefined : (
+              <PrDescriptionField
+                form={form}
+                disabled={actions.isPending}
+                className="lg:col-span-2"
+              />
+            )
+          }
+          hasHistory={hasHistory}
+          onShowHistory={() => actions.setShowHistory(true)}
+        />
+      }
+      footer={
+        <PrFooterAction
+          role={role}
+          prStatus={purchaseRequest?.pr_status}
+          isPending={actions.isPending}
+          hasRecord={!!purchaseRequest}
+          control={form.control}
+          currencyCode={defaultBu?.config?.default_currency?.code ?? ""}
+          previousStages={previousStages}
+          stagesLoading={stagesLoading}
+          onSubmitPr={actions.handleSubmitPr}
+          onValidateSubmit={actions.validateSubmitPr}
+          onApprove={actions.handleApprove}
+          onReject={actions.handleReject}
+          onReview={actions.handleReview}
+          onPurchaseApprove={actions.handlePurchaseApprove}
+          onValidatePurchase={validatePurchase}
+        />
+      }
+    >
       <form
         id="purchase-request-form"
         onSubmit={(e) => {
           actions.fillKnownItemDefaults();
           draftSaveHandler(form, actions.onSubmit)(e);
         }}
-        className="space-y-4 px-4"
+        className="space-y-4"
       >
         <hr className="border-border" />
 
@@ -339,24 +358,6 @@ export function PurchaseRequestForm({
         isPending={actions.isPending}
         onActionConfirm={actions.handleActionConfirm}
       />
-
-      <PrFooterAction
-        role={role}
-        prStatus={purchaseRequest?.pr_status}
-        isPending={actions.isPending}
-        hasRecord={!!purchaseRequest}
-        control={form.control}
-        currencyCode={defaultBu?.config?.default_currency?.code ?? ""}
-        previousStages={previousStages}
-        stagesLoading={stagesLoading}
-        onSubmitPr={actions.handleSubmitPr}
-        onValidateSubmit={actions.validateSubmitPr}
-        onApprove={actions.handleApprove}
-        onReject={actions.handleReject}
-        onReview={actions.handleReview}
-        onPurchaseApprove={actions.handlePurchaseApprove}
-        onValidatePurchase={validatePurchase}
-      />
-    </div>
+    </FormPageShell>
   );
 }

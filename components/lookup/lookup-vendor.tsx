@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { WarehouseIcon } from "lucide-react";
 import { useVendor } from "@/hooks/use-vendor";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
 import type { Vendor } from "@/types/vendor";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -37,11 +40,12 @@ export function LookupVendor({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const {
     items: vendors,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -49,13 +53,10 @@ export function LookupVendor({
   } = useLookupPagination<Vendor>({
     useListHook: useVendor,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (v: Vendor) => {
-      if (!v.is_active) return false;
-      if (excludeIds?.has(v.id)) return false;
-      return true;
-    },
+    serverFilter: ACTIVE_ONLY_FILTER,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
+    filter: excludeIds ? (v) => !excludeIds.has(v.id) : undefined,
   });
 
   return (
@@ -70,6 +71,7 @@ export function LookupVendor({
         if (open) setHasOpened(true);
       }}
       items={vendors}
+      selectedItems={selectedItems}
       getId={(v) => v.id}
       getLabel={(v) => v.name}
       getSearchValue={(v) => `${v.code} ${v.name}`}

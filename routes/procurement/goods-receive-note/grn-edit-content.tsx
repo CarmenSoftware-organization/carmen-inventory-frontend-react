@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import { GrnForm } from "./grn-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 
 export function GrnEditContent({ id }: { id: string }) {
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -13,7 +13,7 @@ export function GrnEditContent({ id }: { id: string }) {
     refetch,
   } = useGoodsReceiveNoteById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <DocPageSkeleton />;
   if (error || !goodsReceiveNote)
     return (
       <ErrorState

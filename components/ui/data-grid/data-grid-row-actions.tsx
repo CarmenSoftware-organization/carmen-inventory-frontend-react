@@ -31,6 +31,13 @@ interface DataGridRowActionsProps {
   readonly writeDisabled?: boolean;
   readonly writeDisabledTitle?: string;
   /**
+   * เหตุผลที่แถวนี้ลบไม่ได้ (เช่น เอกสารพ้นขั้นร่างแล้ว) — ส่งมาแล้วปุ่มลบปิดจริง
+   * พร้อม `title` อธิบาย ไม่ส่ง = ลบได้ตามปกติ · อยู่หลัง `writeDisabled`
+   * (license) แต่มาก่อน `deleteDenied` (permission) เพราะต่อให้มีสิทธิ์ backend
+   * ก็ตีกลับ 422 อยู่ดี ไม่ควรให้กดแล้วค่อยรู้
+   */
+  readonly deleteDisabledTitle?: string;
+  /**
    * เปิดเมนู Activity ของแถวนี้ — ไม่ส่ง = ไม่มีเมนู
    *
    * เปิดเฉพาะตารางที่ backend บันทึกกิจกรรมให้จริง (ดู activity-registry.ts ฝั่ง
@@ -70,6 +77,7 @@ export function DataGridRowActions({
   deletePermission,
   writeDisabled,
   writeDisabledTitle,
+  deleteDisabledTitle,
   activity,
 }: DataGridRowActionsProps) {
   const tc = useTranslations("common");
@@ -80,7 +88,8 @@ export function DataGridRowActions({
     : editDenied
       ? () => dispatchPermissionDenied(editPermission)
       : onEdit;
-  const handleDelete = writeDisabled
+  const deleteDisabled = writeDisabled || !!deleteDisabledTitle;
+  const handleDelete = deleteDisabled
     ? undefined
     : deleteDenied
       ? () => dispatchPermissionDenied(deletePermission)
@@ -129,10 +138,10 @@ export function DataGridRowActions({
             <DropdownMenuItem
               onClick={handleDelete}
               variant={"destructive"}
-              disabled={writeDisabled}
-              title={writeDisabled ? writeDisabledTitle : undefined}
-              aria-disabled={!writeDisabled && deleteDenied ? true : undefined}
-              className={cn((writeDisabled || deleteDenied) && "opacity-50")}
+              disabled={deleteDisabled}
+              title={writeDisabled ? writeDisabledTitle : deleteDisabledTitle}
+              aria-disabled={!deleteDisabled && deleteDenied ? true : undefined}
+              className={cn((deleteDisabled || deleteDenied) && "opacity-50")}
             >
               <Trash2 className="text-destructive" />
               {tc("delete")}

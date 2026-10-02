@@ -3,13 +3,13 @@ import { useTranslations } from "use-intl";
 import { useProductById } from "@/hooks/use-product";
 import { ProductForm } from "./pd-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 const PdEditInner = ({ id }: { id: string }) => {
   const t = useTranslations("productManagement.product");
   const { data: product, isLoading, error, refetch } = useProductById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton width="wide" />;
   if (error || !product)
     return (
       <ErrorState
@@ -25,7 +25,7 @@ const PdEditInner = ({ id }: { id: string }) => {
 
 export function PdEditContent({ id }: { id: string }) {
   return (
-    <Suspense fallback={<FormSkeleton />}>
+    <Suspense fallback={<FormPageSkeleton width="wide" />}>
       <PdEditInner id={id} />
     </Suspense>
   );

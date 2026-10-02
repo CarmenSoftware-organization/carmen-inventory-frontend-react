@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Columns3, FileDown, LayoutGrid, LayoutList, Plus } from "lucide-react";
+import { Columns3, FileDown, Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import SearchInput from "@/components/search-input";
@@ -18,7 +18,9 @@ import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-co
 import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { STATUS_DOT_CHIP, createStatusConfig } from "@/constant/status-config";
@@ -175,26 +177,23 @@ export default function AccountingDocumentList() {
     navigate(`${config.path}/${document.id}`);
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t(`${config.kind}.title`)}
-            description={t(`${config.kind}.description`)}
-            count={documents.length}
-          />
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <FileDown className="size-4" aria-hidden="true" />
-              {t("export")}
-            </Button>
-            <Button size="sm" onClick={() => navigate(`${config.path}/new`)}>
-              <Plus className="size-4" aria-hidden="true" />
-              {t("new")}
-            </Button>
-          </div>
+    <ListPageShell
+      title={t(`${config.kind}.title`)}
+      description={t(`${config.kind}.description`)}
+      count={documents.length}
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <FileDown className="size-4" aria-hidden="true" />
+            {t("export")}
+          </Button>
+          <Button size="sm" onClick={() => navigate(`${config.path}/new`)}>
+            <Plus className="size-4" aria-hidden="true" />
+            {t("new")}
+          </Button>
         </div>
-
+      }
+      toolbar={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
             <div className="flex-1 sm:flex-initial">
@@ -234,28 +233,11 @@ export default function AccountingDocumentList() {
                 }
               />
             )}
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
+            <DisplayModeToggle value={displayMode} onChange={setDisplayMode} />
           </div>
         </div>
-      </div>
-
+      }
+    >
       <div className="mt-3">
         {!isGridMode && (
           <DataGrid
@@ -265,7 +247,7 @@ export default function AccountingDocumentList() {
             tableClassNames={{ bodyRow: "h-10" }}
             emptyMessage={<EmptyComponent />}
           >
-            <DataGridContainer className="max-h-[calc(100vh-10rem-3rem)]">
+            <DataGridContainer className={listGridMaxH(false)}>
               <DataGridTable />
             </DataGridContainer>
           </DataGrid>
@@ -315,6 +297,6 @@ export default function AccountingDocumentList() {
           </>
         )}
       </div>
-    </div>
+    </ListPageShell>
   );
 }

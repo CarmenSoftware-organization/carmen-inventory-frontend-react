@@ -25,8 +25,10 @@ vi.mock("@/hooks/use-department", () => ({
   useUpdateDepartment: () => updateMut,
   useDeleteDepartment: () => deleteMut,
 }));
-vi.mock("@/hooks/use-all-users", () => ({
-  useAllUsers: () => ({ data: [], isLoading: false }),
+vi.mock("@/hooks/use-user", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/use-user")>()),
+  useUser: () => ({ data: undefined, isLoading: false }),
+  useUserAll: () => ({ data: [], isLoading: false }),
 }));
 // FormToolbar ปิดปุ่ม Edit เมื่อไม่มีสิทธิ์ — เทสต์นี้สนใจเส้นทางหลัง save
 // ไม่ใช่ permission ให้ผ่านหมดไปเลย

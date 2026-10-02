@@ -2,13 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
-import { Download, Loader2, MoreHorizontal, Plus, Printer } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -18,7 +12,10 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Cuisine } from "@/types/cuisine";
+import type { RecipeCategory } from "@/types/recipe-category";
 import { useRecipe, useDeleteRecipe } from "./use-recipe";
 import { useCuisine } from "@/hooks/use-cuisine";
 import { useRecipeCategory } from "@/hooks/use-recipe-category";
@@ -33,7 +30,9 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useRecipeTable } from "./use-recipe-table";
 import RecipeCard from "./recipe-card";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -42,9 +41,19 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
+const CUISINE_ENTITY = defineEntitySource<Cuisine>({
+  fieldKey: "cuisine_id",
+  useListHook: useCuisine,
+  getLabel: (c) => c.name,
+});
+const RECIPE_CATEGORY_ENTITY = defineEntitySource<RecipeCategory>({
+  fieldKey: "category_id",
+  useListHook: useRecipeCategory,
+  getLabel: (c) => c.name,
+});
+
 export default function RecipeComponent() {
   const t = useTranslations("operationPlan.recipe");
-  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
@@ -57,26 +66,6 @@ export default function RecipeComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
-
-  const { data: cuisineData } = useCuisine({ perpage: -1 });
-  const { data: categoryData } = useRecipeCategory({ perpage: -1 });
-
-  const cuisineFilterOptions = useMemo(
-    () =>
-      (cuisineData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `cuisine_id|string:${c.id}` })),
-    [cuisineData],
-  );
-
-  const categoryFilterOptions = useMemo(
-    () =>
-      (categoryData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` })),
-    [categoryData],
-  );
-
   const difficultyFilterOptions = useMemo(
     () =>
       RECIPE_DIFFICULTY_OPTIONS.map((o) => ({
@@ -94,10 +83,8 @@ export default function RecipeComponent() {
     [ts],
   );
 
-  // cuisine/category/difficulty เป็นชื่อ/label literal จริง (ไม่ใช่ i18n key)
-  // จึงต้องใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern
-  // ของ PO_TYPE/CN_TYPE ใน Task 19 filter (status) ก็ literal เช่นกันเพราะมา
-  // จาก ts() ที่ resolve เป็น string ธรรมดาแล้วก่อนถึง options
+  // difficulty/status เป็น label literal จึงห่อ custom · cuisine/category เป็น
+  // control "entity" (ค้นที่ server, chip ขึ้นชื่อ)
   const recipeFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -129,42 +116,20 @@ export default function RecipeComponent() {
       },
       {
         key: "cuisine",
-        control: "custom",
+        control: "entity",
+        entity: CUISINE_ENTITY,
         labelKey: "field.cuisine",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("cuisine")}
-            options={cuisineFilterOptions}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "category",
-        control: "custom",
+        control: "entity",
+        entity: RECIPE_CATEGORY_ENTITY,
         labelKey: "field.category",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("category")}
-            options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [
-      STATUS_OPTIONS,
-      cuisineFilterOptions,
-      categoryFilterOptions,
-      difficultyFilterOptions,
-      tfl,
-    ],
+    [STATUS_OPTIONS, difficultyFilterOptions, tfl],
   );
 
   const lf = useListFilters({
@@ -189,10 +154,20 @@ export default function RecipeComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
+  // ชื่อ cuisine/หมวดของแถวในหน้านี้เท่านั้น (ดึงตาม id) — ไม่ลากทะเบียนทั้ง BU
+  const { items: cuisines } = useEntitiesByIds<Cuisine>({
+    useListHook: useCuisine,
+    ids: recipes.map((r) => r.cuisine_id),
+  });
+  const { items: recipeCategories } = useEntitiesByIds<RecipeCategory>({
+    useListHook: useRecipeCategory,
+    ids: recipes.map((r) => r.category_id),
+  });
+
   const table = useRecipeTable({
     recipes,
-    cuisines: cuisineData?.data ?? [],
-    categories: categoryData?.data ?? [],
+    cuisines,
+    categories: recipeCategories,
     totalRecords,
     params,
     tableConfig,
@@ -204,69 +179,20 @@ export default function RecipeComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled
-              title={tc("comingSoon")}
-              className="hidden sm:inline-flex"
-            >
-              <Download aria-hidden="true" />
-              {tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled
-              title={tc("comingSoon")}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate("/operation-plan/recipe/new", listReturnState())
-              }
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>
-                  <Download aria-hidden="true" />
-                  {tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onAdd={() =>
+            navigate("/operation-plan/recipe/new", listReturnState())
+          }
+          addLabel={t("add")}
+          hideExportPrint
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -277,65 +203,58 @@ export default function RecipeComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && recipes.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {recipes.map((item) => (
-                <RecipeCard
-                  key={item.id}
-                  item={item}
-                  cuisines={cuisineData?.data ?? []}
-                  categories={categoryData?.data ?? []}
-                  onEdit={(r) =>
-                    navigate(
-                      `/operation-plan/recipe/${r.id}`,
-                      listReturnState(),
-                    )
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && recipes.length === 0 && (
-          <EmptyComponent />
-        )}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+      }
+    >
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && recipes.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {recipes.map((item) => (
+              <RecipeCard
+                key={item.id}
+                item={item}
+                cuisines={cuisines}
+                categories={recipeCategories}
+                onEdit={(r) =>
+                  navigate(`/operation-plan/recipe/${r.id}`, listReturnState())
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
+      {isGridMode && !grid.isLoading && recipes.length === 0 && (
+        <EmptyComponent />
+      )}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -363,6 +282,6 @@ export default function RecipeComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

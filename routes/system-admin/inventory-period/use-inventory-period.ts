@@ -24,6 +24,7 @@ const crud = createConfigCrud<InventoryPeriod, CreateInventoryPeriodDto>({
 });
 
 export const useInventoryPeriod = crud.useList;
+export const useInventoryPeriodAll = crud.useListAll;
 
 export const useInventoryPeriodById = crud.useById;
 

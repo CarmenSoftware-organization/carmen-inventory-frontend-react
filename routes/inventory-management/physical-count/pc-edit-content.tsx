@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { usePhysicalCountById } from "../shared/use-physical-count";
 import { PcForm } from "./pc-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 import type { PhysicalCount } from "@/types/physical-count";
 
 export function PcEditContent({ id }: Readonly<{ id: string }>) {
@@ -14,7 +14,7 @@ export function PcEditContent({ id }: Readonly<{ id: string }>) {
     refetch,
   } = usePhysicalCountById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !physicalCount)
     return (
       <ErrorState

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import EmptyComponent from "@/components/empty-component";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
 
 export default function DashboardDatasetComponent() {
   const t = useTranslations("systemAdmin.dashboardDataset");
@@ -37,27 +37,26 @@ export default function DashboardDatasetComponent() {
   })();
 
   return (
-    <div className="space-y-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <DocumentListHeader
-        title={t("title")}
-        description={t("desc")}
-        count={total}
-      />
-
-      <div className="relative max-w-sm">
-        <Search
-          className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
-          aria-hidden
-        />
-        <Input
-          className="h-8 pl-8 text-sm"
-          placeholder={t("searchPlaceholder")}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label={t("searchPlaceholder")}
-        />
-      </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={total}
+      toolbar={
+        <div className="relative max-w-sm">
+          <Search
+            className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
+            aria-hidden
+          />
+          <Input
+            className="h-8 pl-8 text-sm"
+            placeholder={t("searchPlaceholder")}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label={t("searchPlaceholder")}
+          />
+        </div>
+      }
+    >
       {isLoading && (
         <div
           className="text-muted-foreground flex items-center gap-2 py-8 text-sm"
@@ -103,7 +102,7 @@ export default function DashboardDatasetComponent() {
           ))}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }
 

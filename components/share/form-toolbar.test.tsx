@@ -169,3 +169,40 @@ describe("FormToolbar — canWrite true, permission granted: buttons run their r
     expect(dispatchPermissionDenied).not.toHaveBeenCalled();
   });
 });
+
+describe("FormToolbar — permission gate only for keys that exist in the catalog", () => {
+  it("unknown prefix (module-level leaf) never gates: Save is a real submit even when can() is false", async () => {
+    setCan({ canWrite: true, can: () => false });
+    renderToolbar({ mode: "edit", permissionPrefix: "operation_plan" });
+    const save = screen.getByRole("button", { name: /save/i });
+    expect(save).toHaveAttribute("type", "submit");
+    expect(save).not.toHaveAttribute("aria-disabled");
+    await userEvent.click(save);
+    expect(dispatchPermissionDenied).not.toHaveBeenCalled();
+  });
+
+  it("writeDisabledReason disables Edit/Save/Delete with that title, like the license path", () => {
+    setCan({ canWrite: true, can: () => true });
+    renderToolbar({
+      mode: "edit",
+      onDelete: () => {},
+      writeDisabledReason: "expired",
+    });
+    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save/i })).toHaveAttribute(
+      "title",
+      "expired",
+    );
+    expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
+  });
+});
+
+describe("FormToolbar — ribbon", () => {
+  it("renders the ribbon under the header row, outside the action buttons", () => {
+    setCan();
+    renderToolbar({ mode: "view", ribbon: <div data-testid="ribbon">R</div> });
+    const ribbon = screen.getByTestId("ribbon");
+    const row = screen.getByRole("heading", { level: 1 }).closest(".relative")!;
+    expect(row.contains(ribbon)).toBe(false);
+  });
+});

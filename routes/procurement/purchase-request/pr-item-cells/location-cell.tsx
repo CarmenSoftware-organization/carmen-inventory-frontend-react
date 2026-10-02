@@ -17,6 +17,8 @@ import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { fieldFocusRef } from "@/lib/field-focus";
 import { useUserLocation } from "@/hooks/use-user-location";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Location } from "@/types/location";
 import { inventoryTypeLabelKey } from "@/constant/location";
 import type { PrFormValues } from "../pr-form-schema";
 import { LOCATION_TYPE_VARIANT, useIsRowLocked } from "./helpers";
@@ -48,15 +50,16 @@ export const LocationCell = memo(function LocationCell({
     useWatch({ control, name: `items.${index}.delivery_point_name` }) ?? "";
   const isRowLocked = useIsRowLocked(control, index);
 
-  // Resolve location_type from cached user locations when API doesn't provide it
-  const { data: locationsData } = useUserLocation({ perpage: -1 });
-
-  const locationType = (() => {
-    if (storedType) return storedType;
-    if (!locationId || !locationsData?.data) return "";
-    const found = locationsData.data.find((l) => l.id === locationId);
-    return found?.location_type ?? "";
-  })();
+  // location_type ของคลังเมื่อ API ไม่ส่งมา — ดึงเฉพาะคลังของแถวนี้ (แถวที่ id ซ้ำ
+  // ใช้ cache ร่วมกัน) และไม่ยิงเลยเมื่อแถวมี type อยู่แล้ว
+  const { items: locationItems } = useEntitiesByIds<Location>({
+    useListHook: useUserLocation,
+    ids: locationId ? [locationId] : [],
+    enabled: !storedType,
+  });
+  const locationType =
+    storedType ||
+    (locationItems.find((l) => l.id === locationId)?.location_type ?? "");
 
   const hasLocation = !!(locationCode || locationName);
 

@@ -36,7 +36,9 @@ import { useRunningCodeTable } from "./use-running-code-table";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { cn } from "@/lib/utils";
 
 export default function RunningCodeComponent() {
   const [deleteTarget, setDeleteTarget] = useState<RunningCode | null>(null);
@@ -109,164 +111,158 @@ export default function RunningCodeComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                initRunningCode.mutate(undefined, {
-                  onSuccess: () => toast.success(t("initSuccess")),
-                })
-              }
-              disabled={initRunningCode.isPending}
-              className="hidden sm:inline-flex"
-            >
-              <Play aria-hidden="true" />
-              {initRunningCode.isPending ? t("initializing") : t("init")}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditRunningCode(null);
-                setDialogOpen(true);
-              }}
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  disabled={initRunningCode.isPending}
-                  onSelect={() =>
-                    initRunningCode.mutate(undefined, {
-                      onSuccess: () => toast.success(t("initSuccess")),
-                    })
-                  }
-                >
-                  <Play aria-hidden="true" />
-                  {initRunningCode.isPending ? t("initializing") : t("init")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="hidden sm:inline-flex"
+          >
+            {isExporting ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Download aria-hidden="true" />
+            )}
+            {isExporting ? tc("exporting") : tc("export")}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => globalThis.print()}
+            className="hidden sm:inline-flex"
+          >
+            <Printer aria-hidden="true" />
+            {tc("print")}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              initRunningCode.mutate(undefined, {
+                onSuccess: () => toast.success(t("initSuccess")),
+              })
+            }
+            disabled={initRunningCode.isPending}
+            className="hidden sm:inline-flex"
+          >
+            <Play aria-hidden="true" />
+            {initRunningCode.isPending ? t("initializing") : t("init")}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditRunningCode(null);
+              setDialogOpen(true);
+            }}
+          >
+            <Plus aria-hidden="true" />
+            {t("add")}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-11 w-11 shrink-0 sm:hidden"
+                aria-label={tc("aria.moreActions")}
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={initRunningCode.isPending}
+                onSelect={() =>
+                  initRunningCode.mutate(undefined, {
+                    onSuccess: () => toast.success(t("initSuccess")),
+                  })
+                }
+              >
+                <Play aria-hidden="true" />
+                {initRunningCode.isPending ? t("initializing") : t("init")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {isExporting ? tc("exporting") : tc("export")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => globalThis.print()}>
+                <Printer aria-hidden="true" />
+                {tc("print")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
+      }
+      toolbar={
         <div className="flex w-full items-center gap-2">
           <div className="flex-1">
             <SearchInput defaultValue={search} onSearch={setSearch} />
           </div>
         </div>
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isMobile ? (
-          grid.isLoading ? (
-            <CardSkeletonGrid />
-          ) : grid.error ? (
-            <ErrorState
-              message={grid.error.message}
-              onRetry={() => grid.refetch?.()}
-            />
-          ) : runningCodes.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-3">
-                {runningCodes.map((rc) => (
-                  <RunningCodeCard
-                    key={rc.id}
-                    item={rc}
-                    onEdit={(item) => {
-                      setEditRunningCode(item);
-                      setDialogOpen(true);
-                    }}
-                    onDelete={setDeleteTarget}
-                  />
-                ))}
+      }
+    >
+      {isMobile ? (
+        grid.isLoading ? (
+          <CardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        ) : runningCodes.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-3">
+              {runningCodes.map((rc) => (
+                <RunningCodeCard
+                  key={rc.id}
+                  item={rc}
+                  onEdit={(item) => {
+                    setEditRunningCode(item);
+                    setDialogOpen(true);
+                  }}
+                  onDelete={setDeleteTarget}
+                />
+              ))}
+            </div>
+            {grid.hasMore && (
+              <div ref={grid.sentinelRef} className="flex justify-center py-4">
+                {grid.isLoadingMore && (
+                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                )}
               </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <EmptyComponent />
-          )
+            )}
+          </>
         ) : (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
+          <EmptyComponent />
+        )
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn("flex flex-col", listGridMaxH(false))}
           >
-            <DataGridContainer className="flex max-h-[calc(100vh-10rem-3rem)] flex-col">
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <RunningCodeDialog
         open={dialogOpen}
@@ -292,6 +288,6 @@ export default function RunningCodeComponent() {
           });
         }}
       />
-    </div>
+    </ListPageShell>
   );
 }

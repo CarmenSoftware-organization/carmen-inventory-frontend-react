@@ -7,7 +7,8 @@ import { AlertCircle, FolderTree, Plus } from "lucide-react";
 import { toast } from "sonner";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import DisplayTemplate from "@/components/display-template";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
@@ -43,7 +44,10 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
 import type { AccountGroupMaster } from "@/types/accounting-master";
-import { glAccountGroupsKey, useGlAccountGroups } from "../shared/use-gl-account-groups";
+import {
+  glAccountGroupsKey,
+  useGlAccountGroups,
+} from "../shared/use-gl-account-groups";
 import type { AccountCategory } from "@/types/chart-of-accounts";
 import { ACCOUNT_CATEGORIES } from "@/types/chart-of-accounts";
 
@@ -56,7 +60,9 @@ const CATEGORY_LABELS: Record<AccountCategory, string> = {
   statistic: "Statistic (สถิติ)",
 };
 
-function buildHierarchyOrder(groups: AccountGroupMaster[]): AccountGroupMaster[] {
+function buildHierarchyOrder(
+  groups: AccountGroupMaster[],
+): AccountGroupMaster[] {
   const result: AccountGroupMaster[] = [];
   const byParent = new Map<string | null, AccountGroupMaster[]>();
   for (const g of groups) {
@@ -68,7 +74,8 @@ function buildHierarchyOrder(groups: AccountGroupMaster[]): AccountGroupMaster[]
   for (const list of byParent.values()) {
     list.sort(
       (a, b) =>
-        (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.code.localeCompare(b.code),
+        (a.sort_order ?? 0) - (b.sort_order ?? 0) ||
+        a.code.localeCompare(b.code),
     );
   }
   function traverse(parentId: string | null) {
@@ -113,26 +120,40 @@ export default function AccountGroupingPage() {
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [detailOnly, setDetailOnly] = useState(false);
-  const [editing, setEditing] = useState<AccountGroupMaster | null | undefined>();
+  const [editing, setEditing] = useState<
+    AccountGroupMaster | null | undefined
+  >();
   const [deleting, setDeleting] = useState<AccountGroupMaster | null>(null);
   const [warning, setWarning] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const saveGroup = async (value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">) => {
+  const saveGroup = async (
+    value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">,
+  ) => {
     if (!buCode || saving) return;
     setSaving(true);
     try {
       const url = API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode);
       const { level: _level, category, ...fields } = value;
       const res = editing
-        ? await httpClient.put(`${url}/${editing.id}`, { ...fields, doc_version: editing.doc_version })
+        ? await httpClient.put(`${url}/${editing.id}`, {
+            ...fields,
+            doc_version: editing.doc_version,
+          })
         : await httpClient.post(url, { ...fields, category });
-      if (!res.ok) throw await ApiError.from(res, "Unable to save account group");
-      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
-      toast.success(editing ? "Account group updated" : "Account group created");
+      if (!res.ok)
+        throw await ApiError.from(res, "Unable to save account group");
+      await queryClient.invalidateQueries({
+        queryKey: glAccountGroupsKey(buCode),
+      });
+      toast.success(
+        editing ? "Account group updated" : "Account group created",
+      );
       setEditing(undefined);
     } catch (error) {
-      setWarning(error instanceof Error ? error.message : "Unable to save account group");
+      setWarning(
+        error instanceof Error ? error.message : "Unable to save account group",
+      );
     } finally {
       setSaving(false);
     }
@@ -142,13 +163,22 @@ export default function AccountGroupingPage() {
     if (!buCode || !deleting || saving) return;
     setSaving(true);
     try {
-      const res = await httpClient.delete(`${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${deleting.id}`);
-      if (!res.ok) throw await ApiError.from(res, "Unable to delete account group");
-      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      const res = await httpClient.delete(
+        `${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${deleting.id}`,
+      );
+      if (!res.ok)
+        throw await ApiError.from(res, "Unable to delete account group");
+      await queryClient.invalidateQueries({
+        queryKey: glAccountGroupsKey(buCode),
+      });
       toast.success("Account group deleted");
       setDeleting(null);
     } catch (error) {
-      setWarning(error instanceof Error ? error.message : "Unable to delete account group");
+      setWarning(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete account group",
+      );
     } finally {
       setSaving(false);
     }
@@ -162,10 +192,7 @@ export default function AccountGroupingPage() {
     return counts;
   }, [groups]);
 
-  const orderedGroups = useMemo(
-    () => buildHierarchyOrder(groups),
-    [groups],
-  );
+  const orderedGroups = useMemo(() => buildHierarchyOrder(groups), [groups]);
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -194,12 +221,7 @@ export default function AccountGroupingPage() {
 
   const names = useMemo(
     () =>
-      new Map(
-        groups.map((item) => [
-          item.id,
-          `${item.code} — ${item.name}`,
-        ]),
-      ),
+      new Map(groups.map((item) => [item.id, `${item.code} — ${item.name}`])),
     [groups],
   );
 
@@ -211,7 +233,12 @@ export default function AccountGroupingPage() {
           <DataGridColumnHeader column={column} title="Group Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
+          <CellAction
+            onClick={() => {
+              setDetailOnly(true);
+              setEditing(row.original);
+            }}
+          >
             <span className="font-mono font-medium">{row.original.code}</span>
           </CellAction>
         ),
@@ -223,13 +250,18 @@ export default function AccountGroupingPage() {
           <DataGridColumnHeader column={column} title="Group Name (EN)" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
+          <CellAction
+            onClick={() => {
+              setDetailOnly(true);
+              setEditing(row.original);
+            }}
+          >
             <span
               className="inline-flex items-center gap-1.5"
               style={{ paddingLeft: `${(row.original.level - 1) * 20}px` }}
             >
               {row.original.level > 1 && (
-                <span className="text-muted-foreground/60 select-none font-mono text-xs">
+                <span className="text-muted-foreground/60 font-mono text-xs select-none">
                   └─
                 </span>
               )}
@@ -253,7 +285,12 @@ export default function AccountGroupingPage() {
         accessorKey: "category",
         header: "Category",
         cell: ({ row }) => (
-          <Badge data-standard-chip="" variant="outline" size="sm" className="uppercase font-mono">
+          <Badge
+            data-standard-chip=""
+            variant="outline"
+            size="sm"
+            className="font-mono uppercase"
+          >
             {row.original.category}
           </Badge>
         ),
@@ -265,13 +302,14 @@ export default function AccountGroupingPage() {
         cell: ({ row }) => {
           const l = row.original.level;
           const variant =
-            l === 1
-              ? "default"
-              : l === 2
-                ? "secondary"
-                : "outline";
+            l === 1 ? "default" : l === 2 ? "secondary" : "outline";
           return (
-            <Badge data-standard-chip="" variant={variant} size="sm" className="font-mono">
+            <Badge
+              data-standard-chip=""
+              variant={variant}
+              size="sm"
+              className="font-mono"
+            >
               L{l}
             </Badge>
           );
@@ -287,14 +325,16 @@ export default function AccountGroupingPage() {
               {names.get(row.original.parent_id) ?? row.original.parent_id}
             </span>
           ) : (
-            <span className="text-muted-foreground/50 text-xs italic">Root</span>
+            <span className="text-muted-foreground/50 text-xs italic">
+              Root
+            </span>
           ),
       },
       {
         accessorKey: "account_count",
         header: "Accounts",
         cell: ({ row }) => (
-          <span className="tabular-nums font-mono text-xs">
+          <span className="font-mono text-xs tabular-nums">
             {row.original.account_count}
           </span>
         ),
@@ -304,9 +344,7 @@ export default function AccountGroupingPage() {
       {
         accessorKey: "is_active",
         header: "Status",
-        cell: ({ row }) => (
-          <StatusBadge active={row.original.is_active} />
-        ),
+        cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
         size: 90,
       },
       {
@@ -316,7 +354,10 @@ export default function AccountGroupingPage() {
           <DataGridRowActions
             activity={{ id: row.original.id }}
 
-            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onEdit={() => {
+              setDetailOnly(false);
+              setEditing(row.original);
+            }}
             onDelete={() => setDeleting(row.original)}
           />
         ),
@@ -334,65 +375,45 @@ export default function AccountGroupingPage() {
   });
 
   return (
-    <DisplayTemplate
+    <ListPageShell
       title="Account Code Grouping"
       description="Four-level hierarchy used to classify Chart of Accounts"
       toolbar={
         <div className="flex flex-wrap items-center gap-2">
-          <div className="w-56">
+          <div className="w-full sm:w-auto sm:flex-initial">
             <SearchInput
               defaultValue={search}
               onSearch={setSearch}
               onInputChange={setSearch}
             />
           </div>
-          <div className="w-32">
-            <FieldSelect
-              value={selectedLevel}
-              onValueChange={setSelectedLevel}
-              className="h-8 text-xs"
-            >
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="1">Level 1 (Root)</SelectItem>
-                <SelectItem value="2">Level 2</SelectItem>
-                <SelectItem value="3">Level 3</SelectItem>
-                <SelectItem value="4">Level 4</SelectItem>
-              </SelectContent>
-            </FieldSelect>
-          </div>
-          <div className="w-32">
-            <FieldSelect
-              value={selectedStatus}
-              onValueChange={setSelectedStatus}
-              className="h-8 text-xs"
-            >
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </FieldSelect>
-          </div>
         </div>
       }
       actions={
-        <Button size="sm" onClick={() => setEditing(null)}>
-          <Plus className="size-4" /> Add Group
-        </Button>
+        <DocumentListActions
+          onAdd={() => setEditing(null)}
+          addLabel="Add Group"
+          hideExportPrint
+        />
       }
     >
       <div className="space-y-3">
-        {groupQuery.isError && <ErrorState error={groupQuery.error} onRetry={() => groupQuery.refetch()} />}
+        {groupQuery.isError && (
+          <ErrorState
+            error={groupQuery.error}
+            onRetry={() => groupQuery.refetch()}
+          />
+        )}
         <Tabs
           value={selectedCategory}
           onValueChange={setSelectedCategory}
           className="w-full"
         >
-          <TabsList variant="line" className="border-b w-full justify-start overflow-x-auto">
-            <TabsTrigger value="all">
-              All ({groups.length})
-            </TabsTrigger>
+          <TabsList
+            variant="line"
+            className="w-full justify-start overflow-x-auto border-b"
+          >
+            <TabsTrigger value="all">All ({groups.length})</TabsTrigger>
             {ACCOUNT_CATEGORIES.map((cat) => (
               <TabsTrigger key={cat} value={cat}>
                 {cat.charAt(0).toUpperCase() + cat.slice(1)} (
@@ -406,8 +427,8 @@ export default function AccountGroupingPage() {
           <FolderTree className="text-primary size-4 shrink-0" />
           <span className="font-medium">Hierarchy Tree:</span>
           <span className="text-muted-foreground">
-            L1–L4 structure classified by account category. Indentation indicates
-            parent-child relationship.
+            L1–L4 structure classified by account category. Indentation
+            indicates parent-child relationship.
           </span>
         </div>
 
@@ -431,7 +452,12 @@ export default function AccountGroupingPage() {
         item={editing ?? null}
         groups={groups}
         saving={saving}
-        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditing(undefined);
+            setDetailOnly(false);
+          }
+        }}
         onSave={saveGroup}
       />
       <DeleteDialog
@@ -450,7 +476,7 @@ export default function AccountGroupingPage() {
         description={warning}
         onConfirm={() => setWarning("")}
       />
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
 
@@ -543,13 +569,21 @@ function GroupDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {readOnly ? "Account Group Detail" : item ? "Edit Account Group" : "Add Account Group"}
+            {readOnly
+              ? "Account Group Detail"
+              : item
+                ? "Edit Account Group"
+                : "Add Account Group"}
           </DialogTitle>
           <DialogDescription>
-            Selecting a parent creates the hierarchy path used by Chart of Accounts.
+            Selecting a parent creates the hierarchy path used by Chart of
+            Accounts.
           </DialogDescription>
         </DialogHeader>
-        <fieldset disabled={readOnly} className="grid gap-4 py-2 sm:grid-cols-2">
+        <fieldset
+          disabled={readOnly}
+          className="grid gap-4 py-2 sm:grid-cols-2"
+        >
           <Field>
             <FieldLabel htmlFor="group-code" required>
               Group Code
@@ -568,7 +602,9 @@ function GroupDialog({
             <FieldSelect
               value={category}
               disabled={!!item}
-              onValueChange={(val) => handleCategoryChange(val as AccountCategory)}
+              onValueChange={(val) =>
+                handleCategoryChange(val as AccountCategory)
+              }
             >
               <SelectContent>
                 {ACCOUNT_CATEGORIES.map((cat) => (
@@ -592,9 +628,7 @@ function GroupDialog({
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="group-name-local">
-              Group Name (TH)
-            </FieldLabel>
+            <FieldLabel htmlFor="group-name-local">Group Name (TH)</FieldLabel>
             <FieldInput
               id="group-name-local"
               value={nameLocal}
@@ -607,7 +641,11 @@ function GroupDialog({
             <FieldLabel required>Level</FieldLabel>
             <FieldSelect
               value={String(level)}
-              disabled={!!item && (item.account_count > 0 || groups.some((g) => g.parent_id === item.id))}
+              disabled={
+                !!item &&
+                (item.account_count > 0 ||
+                  groups.some((g) => g.parent_id === item.id))
+              }
               onValueChange={(value) => {
                 handleLevelChange(Number(value) as AccountGroupMaster["level"]);
               }}
@@ -641,9 +679,11 @@ function GroupDialog({
               </SelectContent>
             </FieldSelect>
             {level > 1 && parentOptions.length === 0 && (
-              <div className="flex items-center gap-1 text-amber-600 text-xs mt-1">
+              <div className="mt-1 flex items-center gap-1 text-xs text-amber-600">
                 <AlertCircle className="size-3 shrink-0" />
-                <span>No active L{level - 1} group in {category}</span>
+                <span>
+                  No active L{level - 1} group in {category}
+                </span>
               </div>
             )}
           </Field>
@@ -653,7 +693,9 @@ function GroupDialog({
               id="group-sort-order"
               type="number"
               value={sortOrder}
-              onChange={(event) => setSortOrder(Number(event.target.value) || 0)}
+              onChange={(event) =>
+                setSortOrder(Number(event.target.value) || 0)
+              }
             />
           </Field>
           <div className="sm:col-span-2">
@@ -668,28 +710,30 @@ function GroupDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {readOnly ? "Close" : "Cancel"}
           </Button>
-          {!readOnly && <Button
-            disabled={
-              saving ||
-              !code.trim() ||
-              !name.trim() ||
-              (level > 1 && (!parentId || parentId === "root"))
-            }
-            onClick={() =>
-              onSave({
-                code,
-                name,
-                name_local: nameLocal || null,
-                level,
-                parent_id: level === 1 ? null : parentId,
-                category,
-                sort_order: sortOrder,
-                is_active: active,
-              })
-            }
-          >
-            {item ? "Save" : "Create"}
-          </Button>}
+          {!readOnly && (
+            <Button
+              disabled={
+                saving ||
+                !code.trim() ||
+                !name.trim() ||
+                (level > 1 && (!parentId || parentId === "root"))
+              }
+              onClick={() =>
+                onSave({
+                  code,
+                  name,
+                  name_local: nameLocal || null,
+                  level,
+                  parent_id: level === 1 ? null : parentId,
+                  category,
+                  sort_order: sortOrder,
+                  is_active: active,
+                })
+              }
+            >
+              {item ? "Save" : "Create"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

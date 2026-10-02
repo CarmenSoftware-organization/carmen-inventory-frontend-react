@@ -33,7 +33,8 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { cn } from "@/lib/utils";
 import { ViewModeToggle } from "@/components/share/view-mode-toggle";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
 import { DocumentListActions } from "@/components/share/document-list-actions";
@@ -48,6 +49,10 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import {
+  VENDOR_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
 const CreatePODialog = lazy(() =>
@@ -213,17 +218,17 @@ export default function PoComponent() {
       {
         // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
         key: "buyer",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity("created_by_id"),
         labelKey: "field.buyer",
-        fieldKey: "created_by_id",
         section: "listView.sectionPeople",
       },
       {
-        // ทะเบียน vendor ใหญ่หลักร้อย KB (T02: 858 แถว ≈ 435 KB) — control "vendor"
-        // ยิงเองตอนเปิด popover ส่วนชื่อบน chip มาจาก useListFilters ที่ยิงเฉพาะ
-        // เมื่อมีค่ากรองค้างจริง หน้านี้จึงไม่จ่ายค่านั้นตอน mount
+        // ทะเบียน vendor ใหญ่หลักร้อย KB — control "entity" ยิงรายการเองตอนเปิด
+        // popover ทีละหน้า ส่วนชื่อบน chip ดึงเฉพาะ id ที่เลือก (EntityChipValue)
         key: "vendor",
-        control: "vendor",
+        control: "entity",
+        entity: VENDOR_ENTITY,
         labelKey: "field.vendor",
         section: "listView.sectionPeople",
       },
@@ -280,7 +285,11 @@ export default function PoComponent() {
         viewMode,
         columns: [
           { header: tfl("poNo"), value: (r) => r.po_no, width: 18 },
-          { header: tfl("vendor"), value: (r) => r.vendor?.name ?? "", width: 26 },
+          {
+            header: tfl("vendor"),
+            value: (r) => r.vendor?.name ?? "",
+            width: 26,
+          },
           { header: tfl("poType"), value: (r) => r.po_type, width: 12 },
           { header: tfl("orderDate"), value: (r) => r.order_date, width: 12 },
           {
@@ -334,23 +343,20 @@ export default function PoComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={handleAdd}
-            addLabel={t("add")}
-            addDisabled={!canCreatePo}
-          />
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={handleAdd}
+          addLabel={t("add")}
+          addDisabled={!canCreatePo}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -370,62 +376,58 @@ export default function PoComponent() {
             />
           }
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{
-              headerSticky: true,
-              // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
-              // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
-              // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
-              columnsResizable: true,
-            }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-
-        {isGridMode && (
-          <>
-            <PoCardList
-              items={purchaseOrders}
-              isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(po) =>
-                navigate(
-                  `/procurement/purchase-order/${po.id}`,
-                  listReturnState(),
-                )
-              }
-              onDelete={setDeleteTarget}
-            />
-            {useInfiniteScroll && grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
+      }
+    >
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{
+            headerSticky: true,
+            // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
+            // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
+            // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
+            columnsResizable: true,
+          }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
             )}
-          </>
-        )}
-      </div>
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
+
+      {isGridMode && (
+        <>
+          <PoCardList
+            items={purchaseOrders}
+            isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
+            onEdit={(po) =>
+              navigate(
+                `/procurement/purchase-order/${po.id}`,
+                listReturnState(),
+              )
+            }
+            onDelete={setDeleteTarget}
+          />
+          {useInfiniteScroll && grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       <Suspense fallback={null}>
         <CreatePODialog open={createOpen} onOpenChange={setCreateOpen} />
@@ -457,6 +459,6 @@ export default function PoComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

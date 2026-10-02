@@ -6,22 +6,24 @@ import {
   FieldLabel,
   FieldError,
   FieldDatePicker,
-  FieldSelect,
   FieldPlainText,
 } from "@/components/ui/field";
-import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
+import { useAdjustmentType } from "@/hooks/use-adjustment-type";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { formatDate } from "@/lib/date-utils";
+import type { ADJUSTMENT_TYPE, AdjustmentType } from "@/types/adjustment-type";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
+import { LookupAdjustmentType } from "./lookup-adjustment-type";
 
 interface DocumentInfoProps {
   readonly form: ReturnType<typeof useForm<AdjFormValues>>;
   readonly isView: boolean;
   readonly isDisabled: boolean;
-  readonly adjTypes: ReadonlyArray<{ id: string; name: string }>;
+  readonly adjustmentKind: ADJUSTMENT_TYPE;
   readonly inventoryAdjustment?: InventoryAdjustment;
   readonly currentPeriodStart?: string;
   readonly currentPeriodEnd?: string;
@@ -35,7 +37,7 @@ export function DocumentInfo({
   form,
   isView,
   isDisabled,
-  adjTypes,
+  adjustmentKind,
   inventoryAdjustment,
   currentPeriodStart,
   currentPeriodEnd,
@@ -83,7 +85,6 @@ export function DocumentInfo({
         {isView ? (
           <PlainReasonValue
             control={form.control}
-            adjTypes={adjTypes}
             fallback={
               // ก้อนของ endpoint รายละเอียดมีแค่ id+code (ไม่มี name) ต่างจาก list
               inventoryAdjustment?.adjustment_type?.name ??
@@ -96,22 +97,14 @@ export function DocumentInfo({
             control={form.control}
             name="adjustment_type_id"
             render={({ field }) => (
-              <FieldSelect
+              <LookupAdjustmentType
                 value={field.value ?? ""}
                 onValueChange={field.onChange}
+                kind={adjustmentKind}
                 disabled={isDisabled}
-                placeholder={tfl("selectAdjustmentType")}
-                className="text-xs"
+                className="w-full text-xs"
                 error={form.formState.errors.adjustment_type_id?.message}
-              >
-                <SelectContent>
-                  {adjTypes.map((at) => (
-                    <SelectItem key={at.id} value={at.id}>
-                      {at.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </FieldSelect>
+              />
             )}
           />
         )}
@@ -194,15 +187,18 @@ function PlainDateValue({
 
 function PlainReasonValue({
   control,
-  adjTypes,
   fallback,
 }: {
   readonly control: Control<AdjFormValues>;
-  readonly adjTypes: ReadonlyArray<{ id: string; name: string }>;
   readonly fallback?: string;
 }) {
   const adjustmentTypeId = useWatch({ control, name: "adjustment_type_id" });
-  const name = adjTypes.find((at) => at.id === adjustmentTypeId)?.name;
+  // endpoint รายละเอียดมีแค่ id+code ของเหตุผล — ดึงชื่อตาม id (fallback ระหว่างโหลด)
+  const { items } = useEntitiesByIds<AdjustmentType>({
+    useListHook: useAdjustmentType,
+    ids: adjustmentTypeId ? [adjustmentTypeId] : [],
+  });
+  const name = items.find((at) => at.id === adjustmentTypeId)?.name;
   return <FieldPlainText>{name ?? fallback}</FieldPlainText>;
 }
 

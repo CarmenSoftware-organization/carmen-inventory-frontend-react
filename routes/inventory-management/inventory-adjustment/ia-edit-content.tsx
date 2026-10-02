@@ -5,7 +5,7 @@ import { useInventoryAdjustmentById } from "./use-inventory-adjustment";
 import { InventoryAdjustmentForm } from "./ia-form";
 import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 const IaEditInner = ({ id }: { id: string }) => {
   const [searchParams] = useSearchParams();
@@ -34,7 +34,7 @@ const EditWithType = ({
     refetch,
   } = useInventoryAdjustmentById(id, type);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !inventoryAdjustment)
     return (
       <ErrorState
@@ -54,7 +54,7 @@ const EditWithType = ({
 };
 
 /**
- * หน้าดู/แก้ไข Inventory Adjustment ตาม id — ห่อไว้ใน Suspense พร้อม `FormSkeleton`
+ * หน้าดู/แก้ไข Inventory Adjustment ตาม id — ห่อไว้ใน Suspense พร้อม `FormPageSkeleton`
  * ชนิดใบ (stock-in / stock-out) อ่านจาก query `?type=` ไม่ใช่จาก path
  *
  * @param props.id - รหัสใบปรับปรุงที่ route อ่านมาจาก URL segment (`useParams`)
@@ -62,7 +62,7 @@ const EditWithType = ({
  */
 export function IaEditContent({ id }: { id: string }) {
   return (
-    <Suspense fallback={<FormSkeleton />}>
+    <Suspense fallback={<FormPageSkeleton />}>
       <IaEditInner id={id} />
     </Suspense>
   );

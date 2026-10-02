@@ -95,6 +95,8 @@ export function useProductsByLocation(
           perpage: params?.perpage ?? 30,
           page: params?.page,
           search: params?.search,
+          // เฉพาะเส้น workflow ที่รับ `product_id|string:` — เส้นธรรมดาเมิน filter
+          filter: useWorkflow ? params?.filter : undefined,
         },
       );
       const res = await httpClient.get(url);

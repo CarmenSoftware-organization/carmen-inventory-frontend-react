@@ -14,6 +14,7 @@ const crud = createConfigCrud<Permission, CreatePermissionDto>({
 });
 
 export const usePermission = crud.useList;
+export const usePermissionAll = crud.useListAll;
 
 export const usePermissionById = crud.useById;
 

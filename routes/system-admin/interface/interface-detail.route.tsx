@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { CalendarX } from "lucide-react";
 import { ErrorState } from "@/components/ui/error-state";
-import { SettingSectionSkeleton } from "@/components/ui/setting-section";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 import { useInterfaceEntitlement } from "@/hooks/use-interface-entitlement";
 import { findCategory, findBrand } from "./interface-registry";
 
@@ -52,16 +52,7 @@ export function Component() {
           <span className="text-muted-foreground">{t("expiredNotice")}</span>
         </div>
       )}
-      <Suspense
-        fallback={
-          <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-            <SettingSectionSkeleton
-              first
-              fields={["half", "half", "half", "half"]}
-            />
-          </div>
-        }
-      >
+      <Suspense fallback={<FormPageSkeleton />}>
         <Form />
       </Suspense>
     </>

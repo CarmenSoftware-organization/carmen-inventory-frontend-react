@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import {
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { ChevronDown, Columns3, Plus } from "lucide-react";
 import { useNavigate } from "react-router";
 import EmptyComponent from "@/components/empty-component";
@@ -10,7 +14,10 @@ import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
-import { DataGrid, DataGridContainer } from "@/components/ui/data-grid/data-grid";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
@@ -40,7 +47,10 @@ const statusTone: Record<ArInvoice["status"], DotTone> = {
   Void: "neutral",
 };
 
-const docTypeTone: Record<ArDocumentType, "default" | "secondary" | "destructive" | "outline"> = {
+const docTypeTone: Record<
+  ArDocumentType,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   ARIV: "default",
   ARCN: "destructive",
   ARDN: "secondary",
@@ -49,7 +59,11 @@ const docTypeTone: Record<ArDocumentType, "default" | "secondary" | "destructive
 };
 
 function InvoiceStatus({ status }: { status: ArInvoice["status"] }) {
-  return <StatusDotBadge tone={statusTone[status]} size="xs">{status}</StatusDotBadge>;
+  return (
+    <StatusDotBadge tone={statusTone[status]} size="xs">
+      {status}
+    </StatusDotBadge>
+  );
 }
 
 export function Component() {
@@ -61,75 +75,118 @@ export function Component() {
   const rows = useMemo(() => {
     const term = search.toLowerCase();
     return AR_INVOICES.filter((invoice) => {
-      const matchesSearch = `${invoice.docNo} ${invoice.customerName} ${invoice.customerCode} ${invoice.sourceDoc} ${invoice.docType ?? ""}`
-        .toLowerCase()
-        .includes(term);
-      const matchesType = docTypeFilter === "ALL" || invoice.docType === docTypeFilter;
+      const matchesSearch =
+        `${invoice.docNo} ${invoice.customerName} ${invoice.customerCode} ${invoice.sourceDoc} ${invoice.docType ?? ""}`
+          .toLowerCase()
+          .includes(term);
+      const matchesType =
+        docTypeFilter === "ALL" || invoice.docType === docTypeFilter;
       return matchesSearch && matchesType;
     });
   }, [search, docTypeFilter]);
-  const columns = useMemo<ColumnDef<ArInvoice>[]>(() => [
-    {
-      accessorKey: "docType",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Type" />,
-      cell: ({ row }) => (
-        <Badge variant={docTypeTone[row.original.docType ?? "ARIV"]} size="xs">
-          {row.original.docType ?? "ARIV"}
-        </Badge>
-      ),
-      meta: { headerTitle: "Type" },
-    },
-    {
-      accessorKey: "docNo",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Doc No." />,
-      cell: ({ row }) => (
-        <CellAction onClick={() => navigate(`${AR_INVOICE_PATH}/${row.original.id}`)}>
-          {row.original.docNo}
-        </CellAction>
-      ),
-      enableHiding: false,
-      meta: { headerTitle: "Doc No." },
-    },
-    {
-      accessorKey: "inputDate",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Input Date" />,
-      meta: { headerTitle: "Input Date", cellClassName: "tabular-nums" },
-    },
-    {
-      accessorKey: "customerName",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Customer (AR)" />,
-      cell: ({ row }) => (
-        <div>
-          <span className="block max-w-56 truncate" title={row.original.customerName}>
-            {row.original.customerName}
+  const columns = useMemo<ColumnDef<ArInvoice>[]>(
+    () => [
+      {
+        accessorKey: "docType",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Type" />
+        ),
+        cell: ({ row }) => (
+          <Badge
+            variant={docTypeTone[row.original.docType ?? "ARIV"]}
+            size="xs"
+          >
+            {row.original.docType ?? "ARIV"}
+          </Badge>
+        ),
+        meta: { headerTitle: "Type" },
+      },
+      {
+        accessorKey: "docNo",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Doc No." />
+        ),
+        cell: ({ row }) => (
+          <CellAction
+            onClick={() => navigate(`${AR_INVOICE_PATH}/${row.original.id}`)}
+          >
+            {row.original.docNo}
+          </CellAction>
+        ),
+        enableHiding: false,
+        meta: { headerTitle: "Doc No." },
+      },
+      {
+        accessorKey: "inputDate",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Input Date" />
+        ),
+        meta: { headerTitle: "Input Date", cellClassName: "tabular-nums" },
+      },
+      {
+        accessorKey: "customerName",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title="Customer (AR)" />
+        ),
+        cell: ({ row }) => (
+          <div>
+            <span
+              className="block max-w-56 truncate"
+              title={row.original.customerName}
+            >
+              {row.original.customerName}
+            </span>
+            <span className="text-muted-foreground text-xs">
+              {row.original.customerCode}
+            </span>
+          </div>
+        ),
+        meta: { headerTitle: "Customer (AR)" },
+      },
+      {
+        accessorKey: "source",
+        header: "Source",
+        meta: { headerTitle: "Source" },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => <InvoiceStatus status={row.original.status} />,
+        meta: { headerTitle: "Status" },
+      },
+      {
+        id: "total",
+        header: "Grand Total",
+        accessorFn: (invoice) => invoiceTotals(invoice).total,
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums">
+            {money(row.getValue<number>("total"))} {row.original.currency}
           </span>
-          <span className="text-muted-foreground text-xs">{row.original.customerCode}</span>
-        </div>
-      ),
-      meta: { headerTitle: "Customer (AR)" },
-    },
-    { accessorKey: "source", header: "Source", meta: { headerTitle: "Source" } },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => <InvoiceStatus status={row.original.status} />,
-      meta: { headerTitle: "Status" },
-    },
-    {
-      id: "total",
-      header: "Grand Total",
-      accessorFn: (invoice) => invoiceTotals(invoice).total,
-      cell: ({ row }) => <span className="whitespace-nowrap tabular-nums">{money(row.getValue<number>("total"))} {row.original.currency}</span>,
-      meta: { headerTitle: "Grand Total", headerClassName: "text-right", cellClassName: "text-right" },
-    },
-    {
-      id: "unpaid",
-      header: "Unpaid",
-      accessorFn: (invoice) => invoiceTotals(invoice).unpaid,
-      cell: ({ row }) => <span className="whitespace-nowrap tabular-nums">{money(row.getValue<number>("unpaid"))} {row.original.currency}</span>,
-      meta: { headerTitle: "Unpaid", headerClassName: "text-right", cellClassName: "text-right" },
-    },
-  ], [navigate]);
+        ),
+        meta: {
+          headerTitle: "Grand Total",
+          headerClassName: "text-right",
+          cellClassName: "text-right",
+        },
+      },
+      {
+        id: "unpaid",
+        header: "Unpaid",
+        accessorFn: (invoice) => invoiceTotals(invoice).unpaid,
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums">
+            {money(row.getValue<number>("unpaid"))} {row.original.currency}
+          </span>
+        ),
+        meta: {
+          headerTitle: "Unpaid",
+          headerClassName: "text-right",
+          cellClassName: "text-right",
+        },
+      },
+    ],
+    [navigate],
+  );
   const table = useReactTable({
     data: rows,
     columns,
@@ -150,7 +207,8 @@ export function Component() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="sm">
-              <Plus className="size-4" /> New Document <ChevronDown className="size-3.5 ml-1" />
+              <Plus className="size-4" /> New Document{" "}
+              <ChevronDown className="ml-1 size-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -177,28 +235,42 @@ export function Component() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <div className="min-w-48 sm:w-60">
-            <SearchInput defaultValue={search} onSearch={setSearch} onInputChange={setSearch} />
+            <SearchInput
+              defaultValue={search}
+              onSearch={setSearch}
+              onInputChange={setSearch}
+            />
           </div>
           <div className="flex items-center gap-1 overflow-x-auto text-xs">
-            {(["ALL", "ARIV", "ARCN", "ARDN", "ARDP", "ARRC"] as const).map((t) => (
-              <Button
-                key={t}
-                type="button"
-                variant={docTypeFilter === t ? "default" : "outline"}
-                size="sm"
-                className="h-8 px-2.5 text-xs"
-                onClick={() => setDocTypeFilter(t)}
-              >
-                {t === "ALL" ? "All Types" : t}
-              </Button>
-            ))}
+            {(["ALL", "ARIV", "ARCN", "ARDN", "ARDP", "ARRC"] as const).map(
+              (t) => (
+                <Button
+                  key={t}
+                  type="button"
+                  variant={docTypeFilter === t ? "default" : "outline"}
+                  size="sm"
+                  className="h-8 px-2.5 text-xs"
+                  onClick={() => setDocTypeFilter(t)}
+                >
+                  {t === "ALL" ? "All Types" : t}
+                </Button>
+              ),
+            )}
           </div>
         </div>
         <div className="hidden items-center gap-2 sm:flex">
           <DataGridSortMenu table={table} />
           <DataGridColumnVisibility
             table={table}
-            trigger={<Button size="icon-sm" variant="outline" aria-label="Toggle columns"><Columns3 className="size-4" /></Button>}
+            trigger={
+              <Button
+                size="icon-sm"
+                variant="outline"
+                aria-label="Toggle columns"
+              >
+                <Columns3 className="size-4" />
+              </Button>
+            }
           />
         </div>
       </div>
@@ -214,15 +286,25 @@ export function Component() {
                   badge={<InvoiceStatus status={invoice.status} />}
                   onOpen={() => navigate(`${AR_INVOICE_PATH}/${invoice.id}`)}
                 >
-                  <ListCardRow label="Customer">{invoice.customerName}</ListCardRow>
-                  <ListCardRow label="Input Date">{invoice.inputDate}</ListCardRow>
-                  <ListCardRow label="Grand Total">{money(totals.total)} {invoice.currency}</ListCardRow>
-                  <ListCardRow label="Unpaid">{money(totals.unpaid)} {invoice.currency}</ListCardRow>
+                  <ListCardRow label="Customer">
+                    {invoice.customerName}
+                  </ListCardRow>
+                  <ListCardRow label="Input Date">
+                    {invoice.inputDate}
+                  </ListCardRow>
+                  <ListCardRow label="Grand Total">
+                    {money(totals.total)} {invoice.currency}
+                  </ListCardRow>
+                  <ListCardRow label="Unpaid">
+                    {money(totals.unpaid)} {invoice.currency}
+                  </ListCardRow>
                 </ListCard>
               );
             })}
           </div>
-        ) : <EmptyComponent />
+        ) : (
+          <EmptyComponent />
+        )
       ) : (
         <DataGrid
           table={table}

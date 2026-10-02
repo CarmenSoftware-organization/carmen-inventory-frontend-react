@@ -201,6 +201,10 @@ export function useStoreRequisitionTable({
     ...dataColumns,
     actionColumn<StoreRequisition>(onDelete, {
       ...deleteGate,
+      // backend ลบให้เฉพาะ draft (SR_ONLY_DRAFT_DELETABLE) — ปิดปุ่มตั้งแต่ต้น
+      // ดีกว่าให้กดยืนยันแล้วค่อยเด้ง error
+      deleteDisabledTitle: (r) =>
+        r.doc_status === "draft" ? undefined : tc("deleteOnlyDraft"),
       activity: { id: (r) => r.id, label: (r) => r.sr_no },
     }),
   ];
