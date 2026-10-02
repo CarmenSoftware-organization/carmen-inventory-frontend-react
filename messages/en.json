@@ -2771,6 +2771,7 @@
       "tabNotStarted": "Not Started",
       "tabComplete": "Complete",
       "progress": "Progress",
+      "nItems": "{count} items",
       "count": "Count",
       "notCount": "Not count",
       "started": "Started {date}",
