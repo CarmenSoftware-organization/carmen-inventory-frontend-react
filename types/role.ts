@@ -6,6 +6,12 @@ interface RolePermission {
   action: string;
   resource: string;
   description: string;
+  /**
+   * Get By ID คืน catalog ทั้งหมด (ทุก permission) แล้วบอกด้วยฟิลด์นี้ว่า role ถือตัวไหน
+   * — อย่าเอาทุกแถวไปเป็นสิทธิ์ของ role ใช้ `grantedPermissionIds()` เสมอ
+   * (backend รุ่นก่อน 2026-09-07 คืนเฉพาะตัวที่ถือและไม่มีฟิลด์นี้)
+   */
+  is_granted?: boolean;
 }
 
 /**
