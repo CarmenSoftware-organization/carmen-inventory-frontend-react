@@ -344,7 +344,7 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "product_management.master_eco_label", // config:product-master-eco-labels
         icon: Leaf,
         separatorBefore: true,
-        permission: PERMISSIONS.product_management.view,
+        permission: PERMISSIONS.product_management.master_eco_label.view,
       },
     ],
   },
@@ -371,14 +371,14 @@ export const moduleList: ModuleDto[] = [
         path: "/vendor-management/price-list-template",
         licenseFeature: "vendor_management.price_list_template", // app:pricelist-templates
         icon: FileSpreadsheet,
-        permission: PERMISSIONS.vendor_management.view,
+        permission: PERMISSIONS.vendor_management.price_list_template.view,
       },
       {
         name: "requestPriceList",
         path: "/vendor-management/request-price-list",
         licenseFeature: "vendor_management.request_price_list", // app:request-for-pricings
         icon: FileSpreadsheet,
-        permission: PERMISSIONS.vendor_management.view,
+        permission: PERMISSIONS.vendor_management.request_price_list.view,
       },
       {
         // licenseFeature ชี้ vendor_management มาตั้งแต่แรก — ย้ายมาอยู่ใต้เมนูนี้
@@ -390,7 +390,8 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "vendor_management.vendor_master_certificate", // config:vendor-master-certificates
         icon: Award,
         separatorBefore: true,
-        permission: PERMISSIONS.vendor_management.view,
+        permission:
+          PERMISSIONS.vendor_management.vendor_master_certificate.view,
       },
     ],
   },
@@ -433,14 +434,14 @@ export const moduleList: ModuleDto[] = [
         path: "/inventory-management/inventory-adjustment",
         licenseFeature: "inventory_management.inventory_adjustment", // app:inventory-adjustments
         icon: ArrowUpDown,
-        permission: PERMISSIONS.inventory_management.view,
+        permission: PERMISSIONS.inventory_management.inventory_adjustment.view,
       },
       {
         name: "transaction",
         path: "/inventory-management/transaction",
         licenseFeature: "inventory_management.transaction", // app:inventory-transactions
         icon: Receipt,
-        permission: PERMISSIONS.inventory_management.view,
+        permission: PERMISSIONS.inventory_management.transaction.view,
       },
       {
         name: "physicalCount",
@@ -473,35 +474,35 @@ export const moduleList: ModuleDto[] = [
         path: "/operation-plan/recipe",
         licenseFeature: "operation_plan.recipe", // config:recipes
         icon: BookOpen,
-        permission: PERMISSIONS.operation_plan.view,
+        permission: PERMISSIONS.operation_plan.recipe.view,
       },
       {
         name: "operationCategory",
         path: "/operation-plan/category",
         licenseFeature: "operation_plan.category", // config:recipe-categories
         icon: Layers,
-        permission: PERMISSIONS.operation_plan.view,
+        permission: PERMISSIONS.operation_plan.category.view,
       },
       {
         name: "operationCuisine",
         path: "/operation-plan/cuisine",
         licenseFeature: "operation_plan.cuisine", // config:recipe-cuisines
         icon: UtensilsCrossed,
-        permission: PERMISSIONS.operation_plan.view,
+        permission: PERMISSIONS.operation_plan.cuisine.view,
       },
       {
         name: "operationEquipment",
         path: "/operation-plan/equipment",
         licenseFeature: "operation_plan.equipment", // config:recipe-equipment
         icon: Wrench,
-        permission: PERMISSIONS.operation_plan.view,
+        permission: PERMISSIONS.operation_plan.equipment.view,
       },
       {
         name: "operationEquipmentCategory",
         path: "/operation-plan/equipment-category",
         licenseFeature: "operation_plan.equipment_category", // config:recipe-equipment-categories
         icon: FolderTree,
-        permission: PERMISSIONS.operation_plan.view,
+        permission: PERMISSIONS.operation_plan.equipment_category.view,
       },
     ],
   },

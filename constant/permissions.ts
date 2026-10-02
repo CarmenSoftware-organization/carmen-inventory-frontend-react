@@ -48,15 +48,23 @@ export const PERMISSIONS = {
     notification_template: crud("configuration.notification_template"),
     tax_profile: crud("configuration.tax_profile"),
   },
+  // ไม่มีคีย์ระดับ module (`product_management.view` / `vendor_management.view` /
+  // `operation_plan.view`) ใน tb_permission — เคยประกาศไว้แล้วเอาไปคุมเมนู ผลคือหน้าเหล่านั้น
+  // เปิดไม่ได้สำหรับทุกคนที่ไม่ใช่ admin (ดู module-list.permission.test.ts)
   product_management: {
-    view: "product_management.view",
     product: crud("product_management.product"),
     category: crud("product_management.category"),
+    /** หน้า /product-management/eco ใช้ endpoint product-master-eco-labels */
+    master_eco_label: crud("product_management.master_eco_label"),
   },
   vendor_management: {
-    view: "vendor_management.view",
     vendor: crud("vendor_management.vendor"),
     price_list: crud("vendor_management.price_list"),
+    price_list_template: crud("vendor_management.price_list_template"),
+    request_price_list: crud("vendor_management.request_price_list"),
+    vendor_master_certificate: crud(
+      "vendor_management.vendor_master_certificate",
+    ),
   },
   procurement: {
     view: "procurement.view",
@@ -78,6 +86,11 @@ export const PERMISSIONS = {
   },
   inventory_management: {
     view: "inventory_management.view",
+    inventory_adjustment: crud("inventory_management.inventory_adjustment"),
+    transaction: {
+      view: "inventory_management.transaction.view",
+      create: "inventory_management.transaction.create",
+    },
     stock_in: crud("inventory_management.stock_in"),
     stock_out: crud("inventory_management.stock_out"),
     // SR ของจริงอยู่ใน namespace `store_operations` ด้านล่าง — สำเนาที่เคยอยู่ตรงนี้
@@ -172,7 +185,11 @@ export const PERMISSIONS = {
     history: viewOnly("report.history"),
   },
   operation_plan: {
-    view: "operation_plan.view",
+    recipe: crud("operation_plan.recipe"),
+    category: crud("operation_plan.category"),
+    cuisine: crud("operation_plan.cuisine"),
+    equipment: crud("operation_plan.equipment"),
+    equipment_category: crud("operation_plan.equipment_category"),
   },
 } as const;
 

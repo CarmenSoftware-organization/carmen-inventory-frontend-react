@@ -1,0 +1,40 @@
+import { describe, it, expect } from "vitest";
+import { moduleList, type ModuleDto } from "./module-list";
+
+/**
+ * เทสต์กันการกลับมาของบั๊ก "เมนูคุมด้วย permission ระดับ module"
+ *
+ * role จริงได้ permission ระดับ resource (`inventory_management.stock_in.create`,
+ * `operation_plan.recipe.view` …) ส่วน endpoint ของแต่ละหน้าที่ backend บังคับก็เป็นระดับ
+ * resource (`permission.route-map.ts`: `app:inventory-adjustments` →
+ * `inventory_management.inventory_adjustment`) — แต่ 11 leaf เคยถูกคุมด้วยคีย์ระดับ module:
+ *
+ * - `product_management.view` / `vendor_management.view` / `operation_plan.view` **ไม่มีอยู่ใน
+ *   tb_permission เลย** หน้าเหล่านั้นจึงเปิดไม่ได้สำหรับทุกคนที่ไม่ใช่ admin
+ * - `inventory_management.view` มีอยู่ แต่ role ที่ได้สิทธิ์ทำใบปรับยอดครบ (stock_in/out +
+ *   inventory_adjustment) ไม่ได้คีย์นี้ — เปิด Inventory Adjustment / Transaction แล้วเจอ
+ *   Permission Denied (เจอจาก e2e ที่ login เป็นบัญชี fc ของ CARMEN-AVG เมื่อ 2026-10-02)
+ *
+ * admin ข้ามด่าน permission ทั้งหมด (`RouteGuard` เช็ค `isAdmin` ก่อน) บั๊กนี้จึงมองไม่เห็นเลย
+ * ถ้าทดสอบด้วย admin
+ */
+
+function leaves(mods: ModuleDto[] = moduleList): ModuleDto[] {
+  return mods.flatMap((m) =>
+    m.subModules && m.subModules.length > 0 ? leaves(m.subModules) : [m],
+  );
+}
+
+describe("moduleList → permission ของ leaf", () => {
+  it("ทุก leaf ที่ระบุ permission ต้องเป็นคีย์ระดับ resource (`namespace.resource.action`)", () => {
+    const moduleLevel = leaves()
+      .filter((leaf) => leaf.permission !== undefined)
+      .map((leaf) => ({
+        path: leaf.path,
+        permission: leaf.permission as string,
+      }))
+      .filter((x) => x.permission.split(".").length < 3);
+
+    expect(moduleLevel).toEqual([]);
+  });
+});
