@@ -13,10 +13,17 @@ export const EMPTY_FORM: RoleFormValues = {
   permissions: [],
 };
 
+/** id ของ permission ที่ role ถือจริง — `permissions` ของ detail คือ catalog ทั้งหมด */
+export function grantedPermissionIds(role: RoleDetail): string[] {
+  return role.permissions
+    .filter((p) => p.is_granted !== false)
+    .map((p) => p.permission_id);
+}
+
 export function getDefaultValues(role?: RoleDetail): RoleFormValues {
   if (!role) return EMPTY_FORM;
   return {
     application_role_name: role.application_role_name,
-    permissions: role.permissions.map((p) => p.permission_id),
+    permissions: grantedPermissionIds(role),
   };
 }

@@ -25,6 +25,7 @@ import { useRolePrint } from "./use-role-print";
 import {
   roleSchema,
   getDefaultValues,
+  grantedPermissionIds,
   type RoleFormValues,
 } from "./role-form-schema";
 
@@ -44,9 +45,7 @@ export function RoleForm({ role }: RoleFormProps) {
 
   const isPending = createRole.isPending || updateRole.isPending;
 
-  const originalPermissionIds = new Set(
-    role?.permissions.map((p) => p.permission_id) ?? [],
-  );
+  const originalPermissionIds = new Set(role ? grantedPermissionIds(role) : []);
 
   const defaultValues = getDefaultValues(role);
 
