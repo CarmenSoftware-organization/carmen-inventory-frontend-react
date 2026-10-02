@@ -65,6 +65,7 @@ export function PrHeader({
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const tf = useTranslations("form");
   const navigate = useNavigate();
   const { returnState } = useListReturn("/procurement/purchase-request");
   const prId = purchaseRequest?.id;
@@ -242,6 +243,7 @@ export function PrHeader({
       deleteIsPending={isDeletePending}
       // เดิมป้าย Save ทุกโหมด — ไม่ให้โหมด add กลายเป็น "Create"
       submitLabel={tc("save")}
+      pendingLabel={tf("saving")}
     >
       {/* comment / activity / duplicate / print ยุบอยู่ในเมนู ⋯ — ไม่ส่ง activity
           ให้ toolbar ซ้ำ · Duplicate/Print เฉพาะ view (ตอน edit ค่าบนจออาจยังไม่ save) */}

@@ -79,7 +79,7 @@ const WITH_HISTORY = {
 function renderHeader(
   mode: FormMode,
   sr?: StoreRequisition,
-  opts: { hasDepartment?: boolean } = {},
+  opts: { hasDepartment?: boolean; isPending?: boolean } = {},
 ) {
   const handlers = {
     onBack: vi.fn(),
@@ -92,7 +92,7 @@ function renderHeader(
     <SrHeader
       storeRequisition={sr}
       mode={mode}
-      isPending={false}
+      isPending={opts.isPending ?? false}
       hasDepartment={opts.hasDepartment ?? true}
       isDeletePending={false}
       dateFormat="dd/MM/yyyy"
@@ -172,6 +172,12 @@ describe("SrHeader — characterization", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       tSr.title,
     );
+  });
+
+  it("[add, กำลังบันทึก] ปุ่ม Save ขึ้น Saving… ตามป้าย ไม่ใช่ Creating…", () => {
+    renderHeader("add", undefined, { isPending: true });
+    expect(screen.getByRole("button", { name: en.form.saving })).toBeDisabled();
+    expect(screen.queryByText(en.form.creating)).not.toBeInTheDocument();
   });
 
   it("[view, ไม่มีสิทธิ์] Edit ยังกดได้ — key ของ SR ไม่อยู่ใน catalog จึงไม่ gate", async () => {

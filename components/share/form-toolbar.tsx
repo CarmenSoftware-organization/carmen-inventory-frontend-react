@@ -34,8 +34,13 @@ interface FormToolbarProps {
   readonly subtitle?: ReactNode;
   readonly badges?: ReactNode;
   readonly leading?: ReactNode;
-  /** label ของปุ่ม Save ตอน idle — ตอน pending ยังใช้ form.creating/saving */
+  /** label ของปุ่ม Save ตอน idle */
   readonly submitLabel?: string;
+  /**
+   * label ตอน pending — ไม่ส่ง = form.creating/saving ตามโหมด
+   * ส่งคู่กับ submitLabel เมื่อป้าย idle ไม่ตรงกับโหมด (เอกสารที่ add แต่ปุ่มเขียน "Save")
+   */
+  readonly pendingLabel?: string;
   /** แทนปุ่ม Save ทั้งปุ่ม (product: disabled จน dirty · IA: ตั้ง doc_status ตอนคลิก) */
   readonly submitSlot?: ReactNode;
   /** ปิด Edit/Save/Delete พร้อม title อธิบาย — ทางเดียวกับ license (interface หมดอายุ) */
@@ -79,6 +84,7 @@ export function FormToolbar({
   badges,
   leading,
   submitLabel,
+  pendingLabel,
   submitSlot,
   writeDisabledReason,
   children,
@@ -114,7 +120,7 @@ export function FormToolbar({
         ? (editTitle ?? tf("editTitle", { entity: entity ?? "" }))
         : (entity ?? ""));
   const submit = submitLabel ?? (isAdd ? tc("create") : tc("save"));
-  const pending = isAdd ? tf("creating") : tf("saving");
+  const pending = pendingLabel ?? (isAdd ? tf("creating") : tf("saving"));
 
   // key ต่อ action — undefined เมื่อไม่มี prefix หรือ key ไม่อยู่ใน catalog (= ไม่ gate)
   const keyFor = (action: PermissionAction): Permission | undefined => {

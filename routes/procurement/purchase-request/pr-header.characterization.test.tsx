@@ -72,6 +72,7 @@ interface Opts {
   workflowField?: ReactNode;
   description?: string;
   descriptionField?: ReactNode;
+  isPending?: boolean;
 }
 
 function renderHeader(mode: FormMode, pr?: PurchaseRequest, opts: Opts = {}) {
@@ -89,7 +90,7 @@ function renderHeader(mode: FormMode, pr?: PurchaseRequest, opts: Opts = {}) {
       purchaseRequest={pr}
       mode={mode}
       role={role}
-      isPending={false}
+      isPending={opts.isPending ?? false}
       isDeletePending={false}
       onBack={h.onBack}
       onEdit={h.onEdit}
@@ -190,6 +191,12 @@ describe("PrHeader — characterization", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       tPr.title,
     );
+  });
+
+  it("[add, กำลังบันทึก] ปุ่ม Save ขึ้น Saving… ตามป้าย ไม่ใช่ Creating…", () => {
+    renderHeader("add", undefined, { isPending: true });
+    expect(screen.getByRole("button", { name: en.form.saving })).toBeDisabled();
+    expect(screen.queryByText(en.form.creating)).not.toBeInTheDocument();
   });
 
   it("ribbon: โหมดอ่านโชว์ workflow + description เป็นช่อง disabled ใต้แถวหัว", () => {
