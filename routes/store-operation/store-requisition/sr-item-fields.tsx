@@ -16,6 +16,9 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
 import { SR_ITEM, SR_ITEM_STAGE } from "./sr-form-schema";
 import { SrItemCostSync } from "./sr-item-cost-sync";
+import { SrItemPostedCostSync } from "./sr-item-posted-cost-sync";
+import { srStockVisible } from "./sr-form-helpers";
+import { useSrStockMovements } from "./use-sr";
 import { useSrItemTable } from "./use-sr-item-table";
 import { SrSelectDialog } from "./sr-select-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
@@ -29,6 +32,9 @@ interface SrItemFieldsProps {
   readonly toLocationId: string;
   readonly workflowId: string;
   readonly role?: string;
+  /** id ของใบ — ใบที่จ่ายแล้วใช้ดึงต้นทุนที่ลงบัญชีจริง */
+  readonly srId?: string;
+  readonly docStatus?: string;
 }
 
 export function SrItemFields({
@@ -39,8 +45,14 @@ export function SrItemFields({
   toLocationId,
   workflowId,
   role,
+  srId,
+  docStatus,
 }: SrItemFieldsProps) {
   "use no memo";
+  // ใบที่จ่ายแล้วโชว์ต้นทุนที่ลงบัญชีจริงจาก stock movement ของใบ ไม่ใช่ราคาประมาณที่คิดจาก
+  // ล็อตที่เหลือ ณ วันนี้ — เกณฑ์เดียวกับแท็บ Stock Movement (srStockVisible) และใช้ query ตัวเดียวกัน
+  const isPosted = srStockVisible(docStatus);
+  const { data: movement } = useSrStockMovements(srId, { enabled: isPosted });
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -223,16 +235,21 @@ export function SrItemFields({
         )}
       </div>
 
-      {/* ดึงต้นทุนรายแถวจาก backend แล้วเขียนกลับเข้าฟอร์ม — หนึ่งตัวต่อแถว ติดตั้ง
-          ที่นี่ไม่ใช่ในเซลล์ เพื่อให้คอลัมน์ยอดเงินกับยอดรวมท้ายใบอ่านค่าเดียวกัน */}
-      {itemFields.map((item, i) => (
-        <SrItemCostSync
-          key={item.id}
-          form={form}
-          index={i}
-          fromLocationId={fromLocationId}
-        />
-      ))}
+      {/* ดึงต้นทุนรายแถวจาก backend แล้วเขียนกลับเข้าฟอร์ม — ติดตั้งที่นี่ไม่ใช่ในเซลล์
+          เพื่อให้คอลัมน์ยอดเงินกับยอดรวมท้ายใบอ่านค่าเดียวกัน · ใบที่จ่ายแล้วใช้ต้นทุนที่ลงบัญชี
+          ใบที่ยังไม่จ่ายใช้ราคาประมาณ (หนึ่งตัวต่อแถว) */}
+      {isPosted ? (
+        <SrItemPostedCostSync form={form} movement={movement} />
+      ) : (
+        itemFields.map((item, i) => (
+          <SrItemCostSync
+            key={item.id}
+            form={form}
+            index={i}
+            fromLocationId={fromLocationId}
+          />
+        ))
+      )}
 
       <DataGrid
         table={table}
