@@ -570,7 +570,8 @@
    ตามไปด้วย และเพราะกฎนี้อยู่นอก @layer มันชนะ utility ของ Tailwind ทุกตัว การไป
    แก้ prop `size` ที่คอมโพเนนต์จึงไม่มีผลอะไรเลยในตาราง (มีผลแต่ใน card view)
    โดยไม่มีอะไรฟ้อง — ชิปสถานะจึงขอออกจากกฎนี้ แล้วไปคุมขนาดที่คอมโพเนนต์ตัวเอง */
-[data-slot="data-grid-table"] [data-slot="badge"]:not([data-status-chip]) {
+/* Accounting config chips opt into the component size rather than the micro-grid floor. */
+[data-slot="data-grid-table"] [data-slot="badge"]:not([data-status-chip]):not([data-standard-chip]) {
   font-size: var(--text-micro-floor);
   line-height: 1;
   height: 0.875rem;

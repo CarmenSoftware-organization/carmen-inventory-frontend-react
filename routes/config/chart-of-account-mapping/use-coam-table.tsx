@@ -8,7 +8,9 @@ import {
   columnSkeletons,
   customActionColumn,
 } from "@/components/ui/data-grid/columns";
-import { Button } from "@/components/ui/button";
+import { CellAction } from "@/components/ui/cell-action";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import type { AccountMappingRow, CodeName } from "@/types/chart-of-account-mapping";
@@ -22,10 +24,11 @@ const codeNameCell = (value: CodeName) =>
 
 interface UseCoamTableOptions {
   data: AccountMappingRow[];
+  onView: (row: AccountMappingRow) => void;
 }
 
 /**
- * ตารางผังการผูกบัญชี — อ่านอย่างเดียว ไม่มีปุ่มแก้/ลบรายแถว
+ * ตารางผังการผูกบัญชี — View รายแถว; Edit ปิดไว้จนพร้อมใช้งาน
  *
  * ใช้ `useReactTable` ตรง ๆ ไม่ผ่าน `useConfigTable` เพราะตัวนั้นผูกกับ row action
  * และ permission ของ config CRUD ซึ่งหน้านี้ยังไม่มี
@@ -33,7 +36,7 @@ interface UseCoamTableOptions {
  * @param options - data ของตาราง
  * @returns TanStack table instance
  */
-export function useCoamTable({ data }: UseCoamTableOptions) {
+export function useCoamTable({ data, onView }: UseCoamTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
@@ -56,7 +59,7 @@ export function useCoamTable({ data }: UseCoamTableOptions) {
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("location")} />
       ),
-      cell: ({ row }) => codeNameCell(row.original.store_location),
+      cell: ({ row }) => <CellAction onClick={() => onView(row.original)}>{codeNameCell(row.original.store_location)}</CellAction>,
       size: 160,
       meta: { headerTitle: tfl("location"), skeleton: columnSkeletons.text },
     },
@@ -153,16 +156,10 @@ export function useCoamTable({ data }: UseCoamTableOptions) {
       size: 160,
       meta: { headerTitle: t("lastScannedAt"), skeleton: columnSkeletons.text },
     },
-    // ยังไม่ผูก handler — วาง UI ไว้ก่อนตามที่ตกลง
-    customActionColumn<AccountMappingRow>(() => (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        aria-label={tc("edit")}
-      >
-        <Pencil className="size-3.5" />
-      </Button>
+    customActionColumn<AccountMappingRow>(({ row }) => (
+      <DataGridRowActions activity={{ id: row.original.id, disabled: true, disabledTitle: "Activity is unavailable for mock data" }}>
+        <DropdownMenuItem disabled><Pencil className="size-3" />{tc("edit")}</DropdownMenuItem>
+      </DataGridRowActions>
     )),
   ];
 

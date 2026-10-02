@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -11,8 +12,8 @@ import {
   ListCardActiveRow,
   ListCardRow,
 } from "@/components/share/list-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -44,6 +45,7 @@ export default function TitleMasterPage() {
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<TitleMaster | null | undefined>();
   const [deleting, setDeleting] = useState<TitleMaster | null>(null);
   const [warning, setWarning] = useState("");
@@ -68,7 +70,7 @@ export default function TitleMasterPage() {
           <DataGridColumnHeader column={column} title="Title Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.code}
           </CellAction>
         ),
@@ -79,7 +81,7 @@ export default function TitleMasterPage() {
           <DataGridColumnHeader column={column} title="Description" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.description}
           </CellAction>
         ),
@@ -96,34 +98,19 @@ export default function TitleMasterPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            size="xs"
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id, disabled: true, disabledTitle: "Activity is unavailable for mock data" }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -198,7 +185,7 @@ export default function TitleMasterPage() {
             <ListCard
               key={item.id}
               title={item.code}
-              onOpen={() => setEditing(item)}
+              onOpen={() => { setDetailOnly(true); setEditing(item); }}
               onDelete={() => setDeleting(item)}
             >
               <ListCardRow label="Description">{item.description}</ListCardRow>
@@ -225,10 +212,11 @@ export default function TitleMasterPage() {
         </DataGrid>
       )}
       <TitleDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={(values) => {
           try {
             store.saveTitle(values, editing?.id);
@@ -264,11 +252,13 @@ export default function TitleMasterPage() {
 
 function TitleDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: TitleMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (value: {
@@ -284,12 +274,12 @@ function TitleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{item ? "Edit Title" : "Add Title"}</DialogTitle>
+          <DialogTitle>{readOnly ? "Title Detail" : item ? "Edit Title" : "Add Title"}</DialogTitle>
           <DialogDescription>
             Code is locked after the title is created.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2">
           <Field>
             <FieldLabel htmlFor="title-code" required>
               Title Code
@@ -318,17 +308,17 @@ function TitleDialog({
             checked={active}
             onCheckedChange={setActive}
           />
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !description.trim()}
             onClick={() => onSave({ code, description, is_active: active })}
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

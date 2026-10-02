@@ -24,13 +24,14 @@
 *อ้างอิง: GL JV FRD V2.14*
 
 - [x] **JV Document Lifecycle & Status**: Draft $\rightarrow$ Submitted $\rightarrow$ Approved $\rightarrow$ Posted $\rightarrow$ Void / Reversed
-- [x] **Fast-Entry Mode (ตารางคีย์บอร์ดความเร็วสูง)**: สลับโหมด Fast Entry, ปุ่ม Auto Balance (`Alt+B`), คีย์ลัดนำทางในตาราง
+- [x] **Fast Entry (ตารางคีย์บอร์ดความเร็วสูง)**: ตาราง JV เป็น Fast Entry อยู่แล้ว; ปุ่ม Auto Balance (`Alt+B`) แสดงเมื่อมีรายการ transaction และใช้คีย์ลัดเพิ่มแถว (`Alt+A`)
 - [x] **Period Lock Guard**: ฟอร์ม JV อ่าน `GET /api/config/{bu_code}/gl-periods` และบล็อกงวด `closed`/`locked`; API error จะไม่ให้ Save และไม่มีงวด seed แล้ว
 - [x] **Real API Integration**: เชื่อมต่อ `httpJournalVoucherRepository` กับ backend endpoint `/api/{bu_code}/gl-jv` และ `/api/{bu_code}/gl-posting/` สำหรับ JV จริง; ไม่ fallback เป็นข้อมูลจำลองเมื่อ API error
 - [x] **Auto-Reverse Entry**: รองรับการระบุ `reverse_date` ในงวดถัดไป และปุ่ม Reverse Document
 - [ ] **JV Templates & Recurring (สิ่งที่ยังขาด)**:
   - Backend มี endpoint `/api/{bu_code}/gl-jv-templates` และ `POST .../generate-all-due` แล้ว
   - Frontend มีหน้า Template/Recurring แบบ mock; ยังไม่เชื่อม CRUD และการ generate จริง
+  - UI detail ของ Template, Recurring และ Allocation ใช้ตาราง Account Code → Cost Center, All Dimensions dialog, Auto Balance และ rows/balance footer แบบ JV แล้ว (2026-10-02); Edit → Cancel คืนข้อมูลก่อนแก้ไข
 - [ ] **Account-to-Dimension Mapping Validation (สิ่งที่ยังขาด)**:
   - การล็อกหรือบังคับกรอก Cost Center และ Dimension Sub-codes ตามนโยบายของผังบัญชีแต่ละตัว (COA Control)
 - [ ] **Financial Reports Integration (สิ่งที่ยังขาด)**:

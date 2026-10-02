@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -8,6 +9,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -39,6 +41,7 @@ import { LookupChartOfAccount } from "@/components/lookup/lookup-chart-of-accoun
 export default function AssetCategoryPage() {
   const store = useAccountingMasterMock();
   const [search, setSearch] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<AssetCategoryMaster | null | undefined>();
   const [deleting, setDeleting] = useState<AssetCategoryMaster | null>(null);
 
@@ -60,7 +63,7 @@ export default function AssetCategoryPage() {
           <DataGridColumnHeader column={column} title="Category Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-semibold">{row.original.code}</span>
           </CellAction>
         ),
@@ -71,7 +74,7 @@ export default function AssetCategoryPage() {
           <DataGridColumnHeader column={column} title="Description" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.description}
           </CellAction>
         ),
@@ -80,7 +83,7 @@ export default function AssetCategoryPage() {
         accessorKey: "useful_life_years",
         header: "Useful Life",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs">
+          <Badge data-standard-chip="" variant="outline" size="sm">
             {row.original.useful_life_years} years
           </Badge>
         ),
@@ -110,34 +113,19 @@ export default function AssetCategoryPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id, disabled: true, disabledTitle: "Activity is unavailable for mock data" }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -187,10 +175,11 @@ export default function AssetCategoryPage() {
         </DataGridContainer>
       </DataGrid>
       <AssetCategoryDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={(value) => {
           store.saveAssetCategory(value, editing?.id);
           toast.success(
@@ -219,11 +208,13 @@ export default function AssetCategoryPage() {
 
 function AssetCategoryDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: AssetCategoryMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (value: Omit<AssetCategoryMaster, "id" | "doc_version">) => void;
@@ -240,12 +231,12 @@ function AssetCategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{item ? "Edit Asset Category" : "Add Asset Category"}</DialogTitle>
+          <DialogTitle>{readOnly ? "Asset Category Detail" : item ? "Edit Asset Category" : "Add Asset Category"}</DialogTitle>
           <DialogDescription>
             Configuration for asset classification, lifespan, and three-leg GL posting.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2 sm:grid-cols-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="ast-code" required>Category Code</FieldLabel>
             <FieldInput
@@ -311,12 +302,12 @@ function AssetCategoryDialog({
               onCheckedChange={setActive}
             />
           </div>
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !description.trim()}
             onClick={() =>
               onSave({
@@ -331,7 +322,7 @@ function AssetCategoryDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,11 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router";
+import { listReturnState } from "@/hooks/use-list-return";
+import { useCan } from "@/hooks/use-can";
+import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
+import { buildPermissionKey } from "@/constant/permissions";
+import { useDeleteGate } from "@/hooks/use-delete-gate";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useGlAccountGroups } from "../shared/use-gl-account-groups";
 import { useTranslations } from "use-intl";
@@ -7,6 +14,7 @@ import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import {
   auditColumns,
+  customActionColumn,
   columnSkeletons,
   statusColumn,
 } from "@/components/ui/data-grid/columns";
@@ -35,6 +43,11 @@ export function useCoaTable({
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
+  const navigate = useNavigate();
+  const deleteGate = useDeleteGate();
+  const { can, isAdmin } = useCan();
+  const prefix = usePermissionPrefix();
+  const editPermission = prefix ? buildPermissionKey(prefix, "update") : undefined;
   const groupQuery = useGlAccountGroups();
   const groupMap = useMemo(
     () => new Map((groupQuery.data ?? []).map((g) => [g.id, g])),
@@ -117,6 +130,17 @@ export function useCoaTable({
     },
     statusColumn<ChartOfAccount>(),
     ...auditColumns<ChartOfAccount>(tfl, dateTimeFormat),
+    customActionColumn<ChartOfAccount>(({ row }) => (
+      <DataGridRowActions
+        activity={{ id: row.original.id, label: row.original.code }}
+
+        onEdit={() => navigate(`/config/chart-of-accounts/${row.original.id}?mode=edit`, listReturnState())}
+        onDelete={() => onDelete(row.original)}
+        {...deleteGate}
+        editPermission={editPermission}
+        editDenied={!!editPermission && !isAdmin && !can(editPermission)}
+      />
+    )),
   ];
 
   return useConfigTable<ChartOfAccount>({
@@ -125,12 +149,10 @@ export function useCoaTable({
     totalRecords,
     params,
     tableConfig,
-    onDelete,
     hideStatus: true,
     initialState: {
       columnVisibility: { created_at: false, updated_at: false },
     },
-    // ยังไม่เปิด activity — โมดูลนี้ไม่มีในทะเบียนของ activity-registry ฝั่ง backend
-    // เปิดไปจะได้เมนูที่กดแล้วว่างเปล่า (ดู CLAUDE.md หัวข้อ Activity sheet)
+
   });
 }

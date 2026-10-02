@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import DisplayTemplate from "@/components/display-template";
 import EmptyComponent from "@/components/empty-component";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import SearchInput from "@/components/search-input";
 import type { AccountMappingRow } from "@/types/chart-of-account-mapping";
 import { COAM_MOCK_ROWS } from "./coam-mock";
@@ -37,9 +39,9 @@ const matches = (row: AccountMappingRow, term: string) => {
   return haystack.includes(term);
 };
 
-function AmTable({ rows }: { readonly rows: AccountMappingRow[] }) {
+function AmTable({ rows, onView }: { readonly rows: AccountMappingRow[]; readonly onView: (row: AccountMappingRow) => void }) {
   "use no memo";
-  const table = useCoamTable({ data: rows });
+  const table = useCoamTable({ data: rows, onView });
 
   return (
     <DataGrid
@@ -64,6 +66,8 @@ export default function CoamComponent() {
   "use no memo";
   const t = useTranslations("config.chartOfAccountMapping");
   const tc = useTranslations("common");
+  const tfl = useTranslations("field");
+  const [detail, setDetail] = useState<AccountMappingRow | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"AP" | "GL">("AP");
 
@@ -132,12 +136,24 @@ export default function CoamComponent() {
         </TabsList>
 
         <TabsContent value="AP">
-          <AmTable rows={apRows} />
+          <AmTable rows={apRows} onView={setDetail} />
         </TabsContent>
         <TabsContent value="GL">
-          <AmTable rows={glRows} />
+          <AmTable rows={glRows} onView={setDetail} />
         </TabsContent>
       </Tabs>
+      <Dialog open={!!detail} onOpenChange={(open) => !open && setDetail(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{t("title")} — {tc("view")}</DialogTitle><DialogDescription>{t("desc")}</DialogDescription></DialogHeader>
+          {detail && <div className="grid gap-4 sm:grid-cols-2">
+            {(["store_location", "category", "sub_category", "item_group", "department", "account_code"] as const).map((key, index) => (
+              <Field key={key}><FieldLabel>{tfl(["location", "category", "subCategory", "itemGroup", "department", "accountCode"][index])}</FieldLabel><FieldPlainText>{[detail[key].code, detail[key].name].filter(Boolean).join(" — ") || "—"}</FieldPlainText></Field>
+            ))}
+            <Field><FieldLabel>{t("mapped")}</FieldLabel><FieldPlainText>{detail.is_mapped ? t("mapped") : t("notMapped")}</FieldPlainText></Field>
+          </div>}
+          <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>{tc("close")}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DisplayTemplate>
   );
 }

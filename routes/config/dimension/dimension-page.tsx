@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -9,6 +10,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -78,6 +80,7 @@ export default function DimensionPage() {
   );
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<DimensionMaster | null | undefined>();
   const [viewingValuesId, setViewingValuesId] = useState<string | null>(null);
   const viewingValues = dimensions.find((dimension) => dimension.id === viewingValuesId) ?? null;
@@ -121,7 +124,7 @@ export default function DimensionPage() {
           <DataGridColumnHeader column={column} title="Dimension Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-semibold">{row.original.code}</span>
           </CellAction>
         ),
@@ -132,7 +135,7 @@ export default function DimensionPage() {
           <DataGridColumnHeader column={column} title="Dimension Name (EN)" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.name}
           </CellAction>
         ),
@@ -152,7 +155,7 @@ export default function DimensionPage() {
         accessorKey: "sequence",
         header: "Sequence",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs">
+          <Badge data-standard-chip="" variant="outline" size="sm">
             Seq {row.original.sequence}
           </Badge>
         ),
@@ -176,34 +179,19 @@ export default function DimensionPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -268,10 +256,11 @@ export default function DimensionPage() {
         />
       )}
       <DimensionDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={async (value) => {
           try {
             if (!buCode) throw new Error("Select a business unit first");
@@ -391,11 +380,13 @@ export default function DimensionPage() {
 
 function DimensionDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: DimensionMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (
@@ -413,13 +404,13 @@ function DimensionDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {item ? "Edit Dimension" : "Add Dimension"}
+            {readOnly ? "Dimension Detail" : item ? "Edit Dimension" : "Add Dimension"}
           </DialogTitle>
           <DialogDescription>
             Defines a category of analytical tags (e.g., market segment, project).
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2">
           <Field>
             <FieldLabel htmlFor="dim-code" required>
               Dimension Code (lowercase/underscore)
@@ -475,12 +466,12 @@ function DimensionDialog({
             checked={active}
             onCheckedChange={setActive}
           />
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !name.trim()}
             onClick={() =>
               onSave({
@@ -493,7 +484,7 @@ function DimensionDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -671,9 +662,7 @@ function DimensionValuesDialog({
                                 title="Click to toggle status"
                                 className="inline-flex cursor-pointer transition-opacity hover:opacity-80"
                               >
-                                <Badge variant={v.is_active ? "success-light" : "invert-light"} size="xs">
-                                  {v.is_active ? "Active" : "Inactive"}
-                                </Badge>
+                                <StatusBadge active={v.is_active} />
                               </button>
                             </td>
                             <td className="p-2 text-right">
@@ -708,30 +697,11 @@ function DimensionValuesDialog({
                                 title="Click to toggle status"
                                 className="inline-flex cursor-pointer transition-opacity hover:opacity-80"
                               >
-                                <Badge variant={v.is_active ? "success-light" : "invert-light"} size="xs">
-                                  {v.is_active ? "Active" : "Inactive"}
-                                </Badge>
+                                <StatusBadge active={v.is_active} />
                               </button>
                             </td>
                             <td className="p-2 text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={() => startEdit(v)}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-                                  onClick={() => setDeletingValue(v)}
-                                >
-                                  Delete
-                                </Button>
-                              </div>
+                              <DataGridRowActions activity={{ id: v.id, label: v.code }} onEdit={() => startEdit(v)} onDelete={() => setDeletingValue(v)} />
                             </td>
                           </>
                         )}

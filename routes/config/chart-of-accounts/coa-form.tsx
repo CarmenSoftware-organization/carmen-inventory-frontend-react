@@ -6,12 +6,14 @@ import { Link, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { Field, FieldInput, FieldLabel, FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
+import { Switch } from "@/components/ui/switch";
 import { FormToolbar } from "@/components/share/form-toolbar";
 import { useEntityForm } from "@/hooks/use-entity-form";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -34,7 +36,7 @@ import { useCreateChartOfAccount, useDeleteChartOfAccount, useUpdateChartOfAccou
 const LIST_PATH = "/config/chart-of-accounts";
 const FORM_ID = "coa-form";
 
-export function CoaForm({ account }: { account?: ChartOfAccount }) {
+export function CoaForm({ account, initialEdit = false }: { account?: ChartOfAccount; initialEdit?: boolean }) {
   const navigate = useNavigate();
   const t = useTranslations("config.chartOfAccounts");
   const tfl = useTranslations("field");
@@ -88,6 +90,11 @@ export function CoaForm({ account }: { account?: ChartOfAccount }) {
     isPending: create.isPending || update.isPending,
   });
   const { form } = f;
+  const [editStarted, setEditStarted] = useState(false);
+  if (account && initialEdit && !editStarted) {
+    setEditStarted(true);
+    f.setMode("edit");
+  }
   const category = form.watch("category");
   const groups = (groupQuery.data ?? []).filter(
     (g) => g.category === category && (g.is_active || g.id === account?.account_group_id),
@@ -188,15 +195,38 @@ export function CoaForm({ account }: { account?: ChartOfAccount }) {
             )} />
           </Field>
         </SettingSection>
-        <SettingSection title="Accounting Dimensions" description="Allowed dimensions for journal entry" wide>
-          <Controller control={form.control} name="dimension_required" render={({ field }) => <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={field.value ?? false} onChange={(event) => field.onChange(event.target.checked)} disabled={f.isDisabled} />Require dimension on journal entry</label>} />
-          {dimensionQuery.isError && <p className="text-xs text-destructive">Unable to load dimensions.</p>}
-          <Controller control={form.control} name="allowed_dimensions" render={({ field }) => (
-            <div className="flex flex-wrap gap-2">
-              {dimensions.length === 0 && <p className="text-sm text-muted-foreground">No active dimensions defined.</p>}
-              {dimensions.map((dim) => <label key={dim.id} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm"><input type="checkbox" checked={(field.value ?? []).includes(dim.id)} disabled={f.isDisabled} onChange={(event) => field.onChange(event.target.checked ? [...(field.value ?? []), dim.id] : (field.value ?? []).filter((id) => id !== dim.id))} />{dim.code} — {dim.name}</label>)}
+        <SettingSection title="Accounting Dimensions" description="Control which dimensions can be used on journal entries" plain>
+          <Controller control={form.control} name="dimension_required" render={({ field }) => (
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium">Require dimension</p>
+                <p className="text-xs text-muted-foreground">Journal entries must include a dimension for this account.</p>
+              </div>
+              <Switch checked={field.value ?? false} onCheckedChange={field.onChange} disabled={f.isDisabled} aria-label="Require dimension" />
             </div>
           )} />
+          <div className="mt-5 border-t pt-5">
+            <p className="text-sm font-medium">Allowed dimensions</p>
+            <p className="mt-1 text-xs text-muted-foreground">Leave all unchecked to allow any active dimension.</p>
+            {dimensionQuery.isError && <p className="mt-3 text-xs text-destructive">Unable to load dimensions.</p>}
+            <Controller control={form.control} name="allowed_dimensions" render={({ field }) => (
+              <div className="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                {dimensions.length === 0 && !dimensionQuery.isError && <p className="text-sm text-muted-foreground">No active dimensions defined.</p>}
+                {dimensions.map((dim) => (
+                  <label key={dim.id} className="flex cursor-pointer items-center gap-3 text-sm">
+                    <Checkbox
+                      checked={(field.value ?? []).includes(dim.id)}
+                      disabled={f.isDisabled}
+                      onCheckedChange={(checked) => field.onChange(checked
+                        ? [...(field.value ?? []), dim.id]
+                        : (field.value ?? []).filter((id) => id !== dim.id))}
+                    />
+                    <span><span className="font-medium">{dim.code}</span><span className="text-muted-foreground"> — {dim.name}</span></span>
+                  </label>
+                ))}
+              </div>
+            )} />
+          </div>
         </SettingSection>
       </form>
       <DiscardDialog {...f.discard.dialogProps} variant="warning" />

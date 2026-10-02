@@ -50,3 +50,11 @@
 - `CARMEN-FIFO` เคยทดสอบ Chart of Accounts CRUD ผ่าน; ณ การทดสอบครั้งนั้น `GET /api/CARMEN-FIFO/gl-jv` ได้ 403 จาก license และ `GET /api/config/CARMEN-FIFO/gl-periods` ได้ 403. **ไม่ได้ทดสอบซ้ำในการอัปเดตเอกสารครั้งนี้**
 - `CARMEN-AVG` สร้าง JV `20260900004` พร้อม Cost Center แล้ว `GET` อ่านกลับได้หลัง reload; `PATCH` ของ JV ใบเดิมไม่บันทึกการแก้บรรทัด
 - รายการ endpoint อื่นในตารางยืนยันจาก Swagger และ code path เท่านั้น ยังไม่ถือว่า runtime CRUD/workflow ของแต่ละ BU ผ่าน
+
+## Accounting Config — Activity (2026-10-02)
+
+- API: COA, Account Code Grouping, JV Prefix, Dimension/Sub-values, Bank Account, GL Period ใช้ Activity sheet กลาง → `GET /api/{bu_code}/activity-logs/record/{entityId}` และ endpoint detail เดิม
+- Mock: Title Master, Payment Type, WHT Form, WHT Service Type, Asset Category, Account Mapping แสดง Activity แบบ disabled เพราะข้อมูลยังเป็น mock
+- Backend source มี Prisma CRUD audit เพิ่มเติมจาก Activity registry; การไม่มีรายการใน registry อย่างเดียวไม่ได้แปลว่าไม่มี CRUD audit
+- การเชื่อม API ไม่รับประกันว่าทุก record เก่ามีประวัติ; แสดง empty/error state จาก Activity sheet จริง ไม่มี fallback mock
+- Runtime verification: COA record `101` ใน CARMEN-AVG แสดง Created และรายละเอียด field จาก API จริง; Payment Type แสดง Activity disabled สำหรับ mock (2026-10-02)

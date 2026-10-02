@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -9,6 +10,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -50,6 +52,7 @@ export default function BankAccountPage() {
   const { data: currencyData } = useCurrency({ perpage: 100 });
   const { data: accountData } = useChartOfAccount({ perpage: 100 });
   const [search, setSearch] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<BankAccountMaster | null | undefined>();
   const [deleting, setDeleting] = useState<BankAccountMaster | null>(null);
   const [warning, setWarning] = useState("");
@@ -109,7 +112,7 @@ export default function BankAccountPage() {
           <DataGridColumnHeader column={column} title="Bank Name" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-semibold">{row.original.bank_name}</span>
           </CellAction>
         ),
@@ -146,7 +149,7 @@ export default function BankAccountPage() {
         accessorKey: "currency_code",
         header: "Currency",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs">
+          <Badge data-standard-chip="" variant="outline" size="sm">
             {row.original.currency_code}
           </Badge>
         ),
@@ -155,34 +158,19 @@ export default function BankAccountPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -239,6 +227,7 @@ export default function BankAccountPage() {
         </DataGridContainer>
       </DataGrid>
       <BankAccountDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
@@ -247,7 +236,7 @@ export default function BankAccountPage() {
           accountData?.data.find((account) => account.id === editing?.gl_account_id)
             ?.code ?? editing?.gl_account_id ?? ""
         }
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={async (value) => {
           setSaving(true);
           try {
@@ -305,6 +294,7 @@ export default function BankAccountPage() {
 
 function BankAccountDialog({
   open,
+  readOnly = false,
   item,
   saving,
   glAccountCode,
@@ -312,6 +302,7 @@ function BankAccountDialog({
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: BankAccountMaster | null;
   saving: boolean;
   glAccountCode: string;
@@ -335,13 +326,13 @@ function BankAccountDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {item ? "Edit Bank Account" : "Add Bank Account"}
+            {readOnly ? "Bank Account Detail" : item ? "Edit Bank Account" : "Add Bank Account"}
           </DialogTitle>
           <DialogDescription>
             Account details for financial operations and GL control mapping.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2 sm:grid-cols-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="bank-code" required>Code</FieldLabel>
             <FieldInput
@@ -425,12 +416,12 @@ function BankAccountDialog({
               onCheckedChange={setActive}
             />
           </div>
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={saving || !code.trim() || !bankName.trim() || !accountNumber.trim() || !accountName.trim() || !glAccountId || !currencyCode}
             onClick={() =>
               onSave({
@@ -446,7 +437,7 @@ function BankAccountDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

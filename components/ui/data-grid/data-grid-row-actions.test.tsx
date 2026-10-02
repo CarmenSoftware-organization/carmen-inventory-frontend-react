@@ -95,3 +95,10 @@ describe("DataGridRowActions — writeDisabled false, no denial: real callback r
     expect(dispatchPermissionDenied).not.toHaveBeenCalled();
   });
 });
+
+it("disables Activity for mock records", async () => {
+ render(<DataGridRowActions activity={{ id: "mock", disabled: true, disabledTitle: "Mock data" }} />);
+ await openMenu();
+ expect(screen.getByRole("menuitem", { name: "title" })).toHaveAttribute("data-disabled");
+ expect(screen.getByRole("menuitem", { name: "title" })).toHaveAttribute("title", "Mock data");
+});

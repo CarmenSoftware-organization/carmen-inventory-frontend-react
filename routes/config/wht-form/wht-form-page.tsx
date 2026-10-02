@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -8,6 +9,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -49,6 +51,7 @@ const FORM_TYPES = [
 export default function WhtFormPage() {
   const store = useAccountingMasterMock();
   const [search, setSearch] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<WhtFormMaster | null | undefined>();
   const [deleting, setDeleting] = useState<WhtFormMaster | null>(null);
 
@@ -70,7 +73,7 @@ export default function WhtFormPage() {
           <DataGridColumnHeader column={column} title="Form Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-semibold">{row.original.code}</span>
           </CellAction>
         ),
@@ -81,7 +84,7 @@ export default function WhtFormPage() {
           <DataGridColumnHeader column={column} title="Form Description" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.description}
           </CellAction>
         ),
@@ -90,7 +93,7 @@ export default function WhtFormPage() {
         accessorKey: "form_type",
         header: "Form Type",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs" className="uppercase font-mono">
+          <Badge data-standard-chip="" variant="outline" size="sm" className="uppercase font-mono">
             {row.original.form_type}
           </Badge>
         ),
@@ -106,34 +109,19 @@ export default function WhtFormPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id, disabled: true, disabledTitle: "Activity is unavailable for mock data" }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -183,10 +171,11 @@ export default function WhtFormPage() {
         </DataGridContainer>
       </DataGrid>
       <WhtFormDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={(value) => {
           store.saveWhtForm(value, editing?.id);
           toast.success(
@@ -215,11 +204,13 @@ export default function WhtFormPage() {
 
 function WhtFormDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: WhtFormMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (value: Omit<WhtFormMaster, "id" | "doc_version">) => void;
@@ -234,12 +225,12 @@ function WhtFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{item ? "Edit WHT Form" : "Add WHT Form"}</DialogTitle>
+          <DialogTitle>{readOnly ? "WHT Form Detail" : item ? "Edit WHT Form" : "Add WHT Form"}</DialogTitle>
           <DialogDescription>
             Configuration for statutory withholding tax filing and liability mapping.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2">
           <Field>
             <FieldLabel htmlFor="form-code" required>Form Code</FieldLabel>
             <FieldInput
@@ -287,12 +278,12 @@ function WhtFormDialog({
             checked={active}
             onCheckedChange={setActive}
           />
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !description.trim()}
             onClick={() =>
               onSave({
@@ -305,7 +296,7 @@ function WhtFormDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

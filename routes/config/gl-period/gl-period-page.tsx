@@ -5,8 +5,11 @@ import { CalendarRange, Plus, Unlock, CheckCircle2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import DisplayTemplate from "@/components/display-template";
-import { Badge } from "@/components/ui/badge";
+import { CellAction } from "@/components/ui/cell-action";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import {
   DataGrid,
   DataGridContainer,
@@ -25,6 +28,7 @@ import {
   Field,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { WarningDialog } from "@/components/ui/warning-dialog";
 import { ErrorState } from "@/components/ui/error-state";
@@ -44,6 +48,7 @@ export default function GlPeriodPage() {
   const [generatingYear, setGeneratingYear] = useState(false);
   const [newYearInput, setNewYearInput] = useState<number>(new Date().getFullYear() + 1);
   const [warning, setWarning] = useState("");
+  const [detail, setDetail] = useState<GlPeriodMaster | null>(null);
 
   const updatePeriod = useCallback(async (id: string, action: "close" | "reopen") => {
     if (!buCode) throw new Error("Select a business unit first");
@@ -79,11 +84,11 @@ export default function GlPeriodPage() {
           <DataGridColumnHeader column={column} title="Period #" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono font-bold">
+          <CellAction onClick={() => setDetail(row.original)} className="font-mono font-bold">
             {row.original.period_number === 13
               ? "Period 13 (Year-end Adj)"
               : `Period ${row.original.period_number}`}
-          </span>
+          </CellAction>
         ),
       },
       {
@@ -116,16 +121,16 @@ export default function GlPeriodPage() {
         header: "Status",
         cell: ({ row }) => {
           const s = row.original.status;
-          const variant =
+          const tone =
             s === "open"
-              ? "success-light"
+              ? "success"
               : s === "closed"
-                ? "warning-light"
-                : "invert-light";
+                ? "warning"
+                : "neutral";
           return (
-            <Badge variant={variant} size="xs" className="uppercase font-mono">
+            <StatusDotBadge tone={tone}>
               {s}
-            </Badge>
+            </StatusDotBadge>
           );
         },
       },
@@ -135,13 +140,10 @@ export default function GlPeriodPage() {
         cell: ({ row }) => {
           const p = row.original;
           return (
-            <div className="flex justify-end gap-1">
+            <DataGridRowActions activity={{ id: p.id, label: `${p.fiscal_year} / Period ${p.period_number}` }}>
               {p.status === "open" && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  onClick={() => {
+                <DropdownMenuItem
+                  onSelect={() => {
                     void updatePeriod(p.id, "close")
                       .then(() => toast.success(`Period ${p.period_number} closed`))
                       .catch((error) =>
@@ -151,15 +153,12 @@ export default function GlPeriodPage() {
                 >
                   <CheckCircle2 className="size-3.5 mr-1" />
                   Close Period
-                </Button>
+                </DropdownMenuItem>
               )}
               {p.status === "closed" && (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs"
-                    onClick={() => {
+                  <DropdownMenuItem
+                    onSelect={() => {
                       void updatePeriod(p.id, "reopen")
                         .then(() => toast.success(`Period ${p.period_number} re-opened`))
                         .catch((error) =>
@@ -169,15 +168,15 @@ export default function GlPeriodPage() {
                   >
                     <Unlock className="size-3.5 mr-1" />
                     Re-open
-                  </Button>
+                  </DropdownMenuItem>
                 </>
               )}
               {p.status === "locked" && (
-                <span className="text-xs text-muted-foreground self-center px-2">
+                <DropdownMenuItem disabled>
                   Locked
-                </span>
+                </DropdownMenuItem>
               )}
-            </div>
+            </DataGridRowActions>
           );
         },
         enableSorting: false,
@@ -250,6 +249,22 @@ export default function GlPeriodPage() {
         </DataGridContainer>
       </DataGrid>
 
+      <Dialog open={!!detail} onOpenChange={(open) => !open && setDetail(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>GL Period Detail</DialogTitle>
+            <DialogDescription>Fiscal period dates and current status.</DialogDescription>
+          </DialogHeader>
+          {detail && <div className="grid gap-4 sm:grid-cols-2">
+            <Field><FieldLabel>Fiscal Year</FieldLabel><FieldPlainText>{detail.fiscal_year}</FieldPlainText></Field>
+            <Field><FieldLabel>Period</FieldLabel><FieldPlainText>{detail.period_number}</FieldPlainText></Field>
+            <Field><FieldLabel>Start Date</FieldLabel><FieldPlainText>{detail.start_date}</FieldPlainText></Field>
+            <Field><FieldLabel>End Date</FieldLabel><FieldPlainText>{detail.end_date}</FieldPlainText></Field>
+            <Field><FieldLabel>Status</FieldLabel><FieldPlainText>{detail.status}</FieldPlainText></Field>
+          </div>}
+          <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={generatingYear} onOpenChange={setGeneratingYear}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

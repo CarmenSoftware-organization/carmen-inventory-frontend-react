@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -9,6 +10,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -54,6 +56,7 @@ export default function JvPrefixPage() {
     },
   });
   const [search, setSearch] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<JvPrefixMaster | null | undefined>();
   const [deleting, setDeleting] = useState<JvPrefixMaster | null>(null);
   const [warning, setWarning] = useState("");
@@ -76,7 +79,7 @@ export default function JvPrefixPage() {
           <DataGridColumnHeader column={column} title="Prefix Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-semibold">{row.original.code}</span>
           </CellAction>
         ),
@@ -87,7 +90,7 @@ export default function JvPrefixPage() {
           <DataGridColumnHeader column={column} title="Description (EN)" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.description}
           </CellAction>
         ),
@@ -108,7 +111,7 @@ export default function JvPrefixPage() {
         header: "Default",
         cell: ({ row }) =>
           row.original.is_default ? (
-            <Badge variant="outline" size="xs" className="border-primary text-primary">
+            <Badge data-standard-chip="" variant="outline" size="sm" className="border-primary text-primary">
               Default
             </Badge>
           ) : null,
@@ -118,7 +121,7 @@ export default function JvPrefixPage() {
         header: "System",
         cell: ({ row }) =>
           row.original.is_system ? (
-            <Badge variant="outline" size="xs">
+            <Badge data-standard-chip="" variant="outline" size="sm">
               System
             </Badge>
           ) : null,
@@ -127,35 +130,19 @@ export default function JvPrefixPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={row.original.is_system}
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={row.original.is_system ? undefined : () => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -212,10 +199,11 @@ export default function JvPrefixPage() {
         />
       )}
       <JvPrefixDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={async (value) => {
           try {
             if (!buCode) throw new Error("Select a business unit first");
@@ -284,11 +272,13 @@ export default function JvPrefixPage() {
 
 function JvPrefixDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: JvPrefixMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (
@@ -308,13 +298,13 @@ function JvPrefixDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {item ? "Edit JV Prefix" : "Add JV Prefix"}
+            {readOnly ? "JV Prefix Detail" : item ? "Edit JV Prefix" : "Add JV Prefix"}
           </DialogTitle>
           <DialogDescription>
             Prefix code used as running number prefix in Journal Vouchers.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2">
           <Field>
             <FieldLabel htmlFor="jv-code" required>
               Prefix Code (2-10 Chars)
@@ -371,12 +361,12 @@ function JvPrefixDialog({
             checked={active}
             onCheckedChange={setActive}
           />
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !description.trim()}
             onClick={() =>
               onSave({
@@ -389,7 +379,7 @@ function JvPrefixDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -20,7 +20,7 @@
 - Toolbar: New, Copy, Template, Void, AI Suggest, Attachments, Log, Save Draft, Submit
 - Header: Prefix, generated JV No., JV Date, Description, Schedule Post, Auto-Reverse, Approval, Source และ Status
 - Journal lines: Department, Account Code, Comment, Currency, Rate, Debit, Credit
-- Line actions: Tax Detail, Check Budget และ All Dimensions
+- Line actions: All Dimensions สำหรับเลือกค่าจาก Dimension Master; Tax/WHT อยู่นอก scope ของ JV ตาม FRD V2.14 และไม่มี Check Budget ใน JV
 - Tax/WHT detail มี vendor, tax ID/branch, invoice no., base amount และ tax amount
 - Budget view แยก Year Budget, Actual Posted, Pending/Draft, Current Transaction และ Remaining
 - Dimensions ใน prototype มี Market, Sales, Project, Event, Location, Channel และ Guest Type

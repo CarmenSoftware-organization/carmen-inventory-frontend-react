@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -9,6 +10,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -110,6 +112,7 @@ export default function AccountGroupingPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<AccountGroupMaster | null | undefined>();
   const [deleting, setDeleting] = useState<AccountGroupMaster | null>(null);
   const [warning, setWarning] = useState("");
@@ -208,7 +211,7 @@ export default function AccountGroupingPage() {
           <DataGridColumnHeader column={column} title="Group Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-medium">{row.original.code}</span>
           </CellAction>
         ),
@@ -220,7 +223,7 @@ export default function AccountGroupingPage() {
           <DataGridColumnHeader column={column} title="Group Name (EN)" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span
               className="inline-flex items-center gap-1.5"
               style={{ paddingLeft: `${(row.original.level - 1) * 20}px` }}
@@ -250,7 +253,7 @@ export default function AccountGroupingPage() {
         accessorKey: "category",
         header: "Category",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs" className="uppercase font-mono">
+          <Badge data-standard-chip="" variant="outline" size="sm" className="uppercase font-mono">
             {row.original.category}
           </Badge>
         ),
@@ -268,7 +271,7 @@ export default function AccountGroupingPage() {
                 ? "secondary"
                 : "outline";
           return (
-            <Badge variant={variant} size="xs" className="font-mono">
+            <Badge data-standard-chip="" variant={variant} size="sm" className="font-mono">
               L{l}
             </Badge>
           );
@@ -302,12 +305,7 @@ export default function AccountGroupingPage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
         size: 90,
       },
@@ -315,26 +313,15 @@ export default function AccountGroupingPage() {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-destructive hover:text-destructive"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
-        size: 130,
+        size: 60,
       },
     ],
     [names],
@@ -438,12 +425,13 @@ export default function AccountGroupingPage() {
       </div>
 
       <GroupDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
         groups={groups}
         saving={saving}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={saveGroup}
       />
       <DeleteDialog
@@ -468,6 +456,7 @@ export default function AccountGroupingPage() {
 
 function GroupDialog({
   open,
+  readOnly = false,
   item,
   groups,
   saving,
@@ -475,6 +464,7 @@ function GroupDialog({
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: AccountGroupMaster | null;
   groups: AccountGroupMaster[];
   saving: boolean;
@@ -553,13 +543,13 @@ function GroupDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {item ? "Edit Account Group" : "Add Account Group"}
+            {readOnly ? "Account Group Detail" : item ? "Edit Account Group" : "Add Account Group"}
           </DialogTitle>
           <DialogDescription>
             Selecting a parent creates the hierarchy path used by Chart of Accounts.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2 sm:grid-cols-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="group-code" required>
               Group Code
@@ -673,12 +663,12 @@ function GroupDialog({
               onCheckedChange={setActive}
             />
           </div>
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={
               saving ||
               !code.trim() ||
@@ -699,7 +689,7 @@ function GroupDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

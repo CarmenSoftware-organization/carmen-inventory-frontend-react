@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -8,6 +9,7 @@ import EmptyComponent from "@/components/empty-component";
 import DisplayTemplate from "@/components/display-template";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { CellAction } from "@/components/ui/cell-action";
 import {
   DataGrid,
@@ -48,6 +50,7 @@ const PAYMENT_METHODS = [
 export default function PaymentTypePage() {
   const store = useAccountingMasterMock();
   const [search, setSearch] = useState("");
+  const [detailOnly, setDetailOnly] = useState(false);
   const [editing, setEditing] = useState<PaymentTypeMaster | null | undefined>();
   const [deleting, setDeleting] = useState<PaymentTypeMaster | null>(null);
 
@@ -69,7 +72,7 @@ export default function PaymentTypePage() {
           <DataGridColumnHeader column={column} title="Payment Type Code" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             <span className="font-mono font-semibold">{row.original.code}</span>
           </CellAction>
         ),
@@ -80,7 +83,7 @@ export default function PaymentTypePage() {
           <DataGridColumnHeader column={column} title="Description (EN)" />
         ),
         cell: ({ row }) => (
-          <CellAction onClick={() => setEditing(row.original)}>
+          <CellAction onClick={() => { setDetailOnly(true); setEditing(row.original); }}>
             {row.original.description}
           </CellAction>
         ),
@@ -100,7 +103,7 @@ export default function PaymentTypePage() {
         accessorKey: "payment_method",
         header: "Method",
         cell: ({ row }) => (
-          <Badge variant="outline" size="xs" className="uppercase font-mono">
+          <Badge data-standard-chip="" variant="outline" size="sm" className="uppercase font-mono">
             {row.original.payment_method}
           </Badge>
         ),
@@ -109,34 +112,19 @@ export default function PaymentTypePage() {
         accessorKey: "is_active",
         header: "Status",
         cell: ({ row }) => (
-          <Badge
-            variant={row.original.is_active ? "success-light" : "invert-light"}
-            size="xs"
-          >
-            {row.original.is_active ? "Active" : "Inactive"}
-          </Badge>
+          <StatusBadge active={row.original.is_active} />
         ),
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(row.original)}
-            >
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setDeleting(row.original)}
-            >
-              Delete
-            </Button>
-          </div>
+          <DataGridRowActions
+            activity={{ id: row.original.id, disabled: true, disabledTitle: "Activity is unavailable for mock data" }}
+
+            onEdit={() => { setDetailOnly(false); setEditing(row.original); }}
+            onDelete={() => setDeleting(row.original)}
+          />
         ),
         enableSorting: false,
       },
@@ -186,10 +174,11 @@ export default function PaymentTypePage() {
         </DataGridContainer>
       </DataGrid>
       <PaymentTypeDialog
+        readOnly={detailOnly}
         key={editing?.id ?? "new"}
         open={editing !== undefined}
         item={editing ?? null}
-        onOpenChange={(open) => !open && setEditing(undefined)}
+        onOpenChange={(open) => { if (!open) { setEditing(undefined); setDetailOnly(false); } }}
         onSave={(value) => {
           store.savePaymentType(value, editing?.id);
           toast.success(
@@ -218,11 +207,13 @@ export default function PaymentTypePage() {
 
 function PaymentTypeDialog({
   open,
+  readOnly = false,
   item,
   onOpenChange,
   onSave,
 }: {
   open: boolean;
+  readOnly?: boolean;
   item: PaymentTypeMaster | null;
   onOpenChange: (open: boolean) => void;
   onSave: (value: Omit<PaymentTypeMaster, "id" | "doc_version">) => void;
@@ -237,12 +228,12 @@ function PaymentTypeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{item ? "Edit Payment Type" : "Add Payment Type"}</DialogTitle>
+          <DialogTitle>{readOnly ? "Payment Type Detail" : item ? "Edit Payment Type" : "Add Payment Type"}</DialogTitle>
           <DialogDescription>
             Defines the payment instrument for financial transactions.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-2">
+        <fieldset disabled={readOnly} className="grid gap-4 py-2">
           <Field>
             <FieldLabel htmlFor="pm-code" required>Payment Type Code</FieldLabel>
             <FieldInput
@@ -291,12 +282,12 @@ function PaymentTypeDialog({
             checked={active}
             onCheckedChange={setActive}
           />
-        </div>
+        </fieldset>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {readOnly ? "Close" : "Cancel"}
           </Button>
-          <Button
+          {!readOnly && <Button
             disabled={!code.trim() || !description.trim()}
             onClick={() =>
               onSave({
@@ -309,7 +300,7 @@ function PaymentTypeDialog({
             }
           >
             {item ? "Save" : "Create"}
-          </Button>
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -241,10 +242,12 @@ export default function AccountingDocumentDetail() {
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
   const isJournalVoucher = config.kind === "journalVoucher";
+  const isGlVoucher = isJournalVoucher || config.kind === "templateVoucher" ||
+    config.kind === "recurringVoucher" || config.kind === "allocationVoucher";
   const buCode = useBuCode();
   const dimensionQuery = useQuery({
     queryKey: ["accounting-master", "dimensions", buCode],
-    enabled: isJournalVoucher && !!buCode,
+    enabled: isGlVoucher && !!buCode,
     queryFn: async (): Promise<DimensionMaster[]> => {
       const res = await httpClient.get(`${API_ENDPOINTS.GL_DIMENSIONS(buCode!)}?perpage=100`);
       if (!res.ok) throw await ApiError.from(res, "Unable to load dimensions");
@@ -254,7 +257,7 @@ export default function AccountingDocumentDetail() {
   });
   const dimensionValuesQuery = useQuery({
     queryKey: ["accounting-master", "dimension-values", buCode],
-    enabled: isJournalVoucher && !!buCode,
+    enabled: isGlVoucher && !!buCode,
     queryFn: async (): Promise<DimensionValueMaster[]> => {
       const res = await httpClient.get(`${API_ENDPOINTS.GL_DIMENSION_VALUES(buCode!)}?perpage=100`);
       if (!res.ok) throw await ApiError.from(res, "Unable to load dimension values");
@@ -267,10 +270,7 @@ export default function AccountingDocumentDetail() {
     },
   });
   const usesVoucherDetailPattern =
-    isJournalVoucher ||
-    config.kind === "templateVoucher" ||
-    config.kind === "recurringVoucher" ||
-    config.kind === "allocationVoucher" ||
+    isGlVoucher ||
     config.kind === "arInvoice" ||
     config.kind === "arReceipt" ||
     config.kind === "assetRegister" ||
@@ -320,14 +320,14 @@ export default function AccountingDocumentDetail() {
 
   const { data: deptData } = useDepartment({ perpage: 100 });
   const { data: costCenterData } = useCostCenter({ perpage: 100 });
-  const { data: currencyData } = useCurrency({ perpage: 100 }, { enabled: isJournalVoucher });
+  const { data: currencyData } = useCurrency({ perpage: 100 }, { enabled: isGlVoucher });
   const currencyIdFor = (value?: string) =>
     currencyData?.data.find((currency) => currency.id === value || currency.code === value)?.id ?? value ?? "";
   const currencyCodeFor = (value?: string) =>
     currencyData?.data.find((currency) => currency.id === value || currency.code === value)?.code ?? value ?? "THB";
   const departments = useMemo(() => {
     const ccList = (costCenterData?.data ?? []).filter((c) => c.is_active !== false);
-    if (isJournalVoucher) {
+    if (isGlVoucher) {
       return ccList.map((c) => ({
         id: c.id,
         code: c.code,
@@ -342,7 +342,7 @@ export default function AccountingDocumentDetail() {
         code: d.code,
         label: `${d.code} - ${d.name}`,
       }));
-  }, [costCenterData?.data, deptData?.data, isJournalVoucher]);
+  }, [costCenterData?.data, deptData?.data, isGlVoucher]);
   const number = isNew
     ? t("autoNumber")
     : (journal?.display_no ?? document.number);
@@ -363,7 +363,7 @@ export default function AccountingDocumentDetail() {
   ]);
   const [commentDraft, setCommentDraft] = useState("");
   const [values, setValues] = useState({
-    prefix: isNew ? "AJ" : (journal?.prefix ?? "JV"),
+    prefix: isJournalVoucher ? (isNew ? "AJ" : (journal?.prefix ?? "JV")) : config.prefix,
     date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
     description: isNew ? "" : document.description,
     party: isNew ? "" : document.party,
@@ -372,10 +372,10 @@ export default function AccountingDocumentDetail() {
     autoReverse: false,
     reverseDate: "",
   });
-  const [fastEntryMode, setFastEntryMode] = useState(false);
   const [lines, setLines] = useState<JournalLine[]>(() =>
-    isNew && isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES,
+    isNew && isGlVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES,
   );
+  const editSnapshotRef = useRef<{ values: typeof values; lines: JournalLine[] } | null>(null);
 
   const [syncedCoaFirstId, setSyncedCoaFirstId] = useState<string | null>(null);
   const firstAvailableCoaId = coaData?.data?.[0]?.id ?? null;
@@ -437,6 +437,7 @@ export default function AccountingDocumentDetail() {
 
   const [selectedLineIds, setSelectedLineIds] = useState<string[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
+  const [dimensionDraft, setDimensionDraft] = useState<JournalLineDimensionInput[]>([]);
   const [lineDetailSection, setLineDetailSection] =
     useState<LineDetailSection>("tax");
 
@@ -518,7 +519,7 @@ export default function AccountingDocumentDetail() {
 
   const resetForm = () => {
     setValues({
-      prefix: isNew ? "AJ" : (journal?.prefix ?? "JV"),
+      prefix: isJournalVoucher ? (isNew ? "AJ" : (journal?.prefix ?? "JV")) : config.prefix,
       date: isNew ? new Date().toISOString().slice(0, 10) : document.date,
       description: isNew ? "" : document.description,
       party: isNew ? "" : document.party,
@@ -529,12 +530,12 @@ export default function AccountingDocumentDetail() {
       autoReverse: false,
       reverseDate: "",
     });
-    setLines(isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
+    setLines(isGlVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
     setSelectedLineIds([]);
   };
 
   const addLine = useCallback(() => {
-    const defaultDept = isJournalVoucher ? undefined : departments[0];
+    const defaultDept = isGlVoucher ? undefined : departments[0];
     setLines((current) => [
       ...current,
       {
@@ -555,17 +556,18 @@ export default function AccountingDocumentDetail() {
         exchangeRate: 1,
       },
     ]);
-  }, [departments, isJournalVoucher]);
+  }, [departments, isGlVoucher]);
 
   const autoBalanceEntry = useCallback(() => {
-    const curDebit = lines.reduce((sum, line) => sum + (isJournalVoucher
+    if (isGlVoucher && !lines.some((line) => line.account && (line.debit > 0 || line.credit > 0))) return;
+    const curDebit = lines.reduce((sum, line) => sum + (isGlVoucher
       ? Number(multiplyDecimal(String(line.debit), String(line.exchangeRate ?? 1)))
       : line.debit), 0);
-    const curCredit = lines.reduce((sum, line) => sum + (isJournalVoucher
+    const curCredit = lines.reduce((sum, line) => sum + (isGlVoucher
       ? Number(multiplyDecimal(String(line.credit), String(line.exchangeRate ?? 1)))
       : line.credit), 0);
     const diff = curDebit - curCredit;
-    if (Math.abs(diff) < (isJournalVoucher ? 0.01 : 0.005)) {
+    if (Math.abs(diff) < (isGlVoucher ? 0.01 : 0.005)) {
       toast.info("ยอดเดบิตและเครดิตสมดุลแล้ว (Already balanced)");
       return;
     }
@@ -576,7 +578,7 @@ export default function AccountingDocumentDetail() {
           idx === current.length - 1
             ? {
                 ...line,
-                ...(isJournalVoucher ? { currency: "THB", exchangeRate: 1 } : {}),
+                ...(isGlVoucher ? { currency: "THB", exchangeRate: 1 } : {}),
                 debit: diff < 0 ? Number(Math.abs(diff).toFixed(2)) : 0,
                 credit: diff > 0 ? Number(diff.toFixed(2)) : 0,
               }
@@ -597,12 +599,12 @@ export default function AccountingDocumentDetail() {
           budgetControlled: false,
           budget: "",
           dimension: "",
-          ...(isJournalVoucher ? { dimensions: [], currency: "THB", exchangeRate: 1 } : {}),
+          ...(isGlVoucher ? { dimensions: [], currency: "THB", exchangeRate: 1 } : {}),
         },
       ];
     });
     toast.success("คำนวณและปรับยอดให้สมดุลแล้ว (Auto balanced)");
-  }, [lines, isJournalVoucher]);
+  }, [lines, isGlVoucher]);
 
   useEffect(() => {
     if (isView) return;
@@ -626,8 +628,8 @@ export default function AccountingDocumentDetail() {
           ? {
               ...line,
               ...patch,
-              ...(isJournalVoucher && patch.debit && patch.debit > 0 ? { credit: 0 } : {}),
-              ...(isJournalVoucher && patch.credit && patch.credit > 0 ? { debit: 0 } : {}),
+              ...(isGlVoucher && patch.debit && patch.debit > 0 ? { credit: 0 } : {}),
+              ...(isGlVoucher && patch.credit && patch.credit > 0 ? { debit: 0 } : {}),
             }
           : line,
       ),
@@ -651,6 +653,9 @@ export default function AccountingDocumentDetail() {
   };
 
   const openLineDetail = (lineId: string, section: LineDetailSection) => {
+    if (isGlVoucher && section === "dimension") {
+      setDimensionDraft(structuredClone(lines.find((line) => line.id === lineId)?.dimensions ?? []));
+    }
     setSelectedLineId(lineId);
     setLineDetailSection(section);
   };
@@ -660,8 +665,22 @@ export default function AccountingDocumentDetail() {
       navigate(config.path);
       return;
     }
-    resetForm();
+    if (isGlVoucher && editSnapshotRef.current) {
+      setValues(editSnapshotRef.current.values);
+      setLines(editSnapshotRef.current.lines);
+      setSelectedLineIds([]);
+      setSelectedLineId(null);
+      editSnapshotRef.current = null;
+    } else {
+      resetForm();
+    }
     setMode("view");
+  };
+
+  const startEdit = () => {
+    editSnapshotRef.current = { values: { ...values }, lines: structuredClone(lines) };
+    editActivatedAtRef.current = performance.now();
+    setMode("edit");
   };
 
   const handleSave = async (intent: "draft" | "submit") => {
@@ -840,7 +859,7 @@ export default function AccountingDocumentDetail() {
 
   const handleNew = () => {
     setValues((current) => ({ ...current, description: "", party: "" }));
-    setLines(isJournalVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
+    setLines(isGlVoucher ? [{ ...EMPTY_JV_LINE }] : INITIAL_LINES);
     setSelectedLineIds([]);
     setDocumentStatus("Draft");
     setMode("add");
@@ -848,6 +867,7 @@ export default function AccountingDocumentDetail() {
   };
 
   const applyTemplate = () => {
+    if (isGlVoucher && isView) startEdit();
     setValues((current) => ({
       ...current,
       description: t("templateDescription"),
@@ -858,6 +878,7 @@ export default function AccountingDocumentDetail() {
   };
 
   const applyAiSuggestion = () => {
+    if (isGlVoucher && isView) startEdit();
     setValues((current) => ({
       ...current,
       description: t("suggestedDescription"),
@@ -891,10 +912,12 @@ export default function AccountingDocumentDetail() {
     (sum, line) => sum + baseAmount(line.credit, line.exchangeRate ?? 1), 0,
   );
   const variance = Math.abs(
-    (isJournalVoucher ? totalBaseDebit : totalDebit) -
-      (isJournalVoucher ? totalBaseCredit : totalCredit),
+    (isGlVoucher ? totalBaseDebit : totalDebit) -
+      (isGlVoucher ? totalBaseCredit : totalCredit),
   );
-  const isBalanced = lines.length > 0 && variance < (isJournalVoucher ? 0.01 : 0.005);
+  const transactionCount = lines.filter((line) => line.account && (line.debit > 0 || line.credit > 0)).length;
+  const isBalanced = (isGlVoucher ? transactionCount > 0 : lines.length > 0) &&
+    variance < (isGlVoucher ? 0.01 : 0.005);
   const summaryMetrics = [
     { label: t("totalTransDebit"), value: totalDebit, color: "text-primary" },
     {
@@ -915,7 +938,7 @@ export default function AccountingDocumentDetail() {
     },
   ];
   const entryTitle =
-    config.kind === "journalVoucher"
+    isGlVoucher
       ? t("journalEntryDetails")
       : t("entryDetails");
   const sourceLabel = isJournalVoucher
@@ -961,10 +984,7 @@ export default function AccountingDocumentDetail() {
                     type="button"
                     size="sm"
                     disabled={documentStatus === "Voided"}
-                    onClick={() => {
-                      editActivatedAtRef.current = performance.now();
-                      setMode("edit");
-                    }}
+                    onClick={startEdit}
                   >
                     <Pencil className="size-4" aria-hidden="true" />
                     {tc("edit")}
@@ -1087,7 +1107,7 @@ export default function AccountingDocumentDetail() {
                     activity={{ id: journal?.id ?? document.id, label: number }}
                   />
                 )}
-                {!isJournalVoucher && (
+                {!isJournalVoucher && (!isGlVoucher || !isNew) && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button type="button" size="sm" variant="outline">
@@ -1247,10 +1267,7 @@ export default function AccountingDocumentDetail() {
                   type="button"
                   size="sm"
                   disabled={documentStatus === "Voided"}
-                  onClick={() => {
-                    editActivatedAtRef.current = performance.now();
-                    setMode("edit");
-                  }}
+                  onClick={startEdit}
                 >
                   <Pencil className="size-4" aria-hidden="true" />
                   {tc("edit")}
@@ -1706,16 +1723,7 @@ export default function AccountingDocumentDetail() {
             </div>
             {!isView && (
               <CardAction className="flex flex-wrap items-center gap-2">
-                <Button
-                  type="button"
-                  variant={fastEntryMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFastEntryMode((v) => !v)}
-                  title="สลับโหมดกรอกด่วน (Fast Entry Mode)"
-                >
-                  ⚡ Fast Entry
-                </Button>
-                {!isBalanced && (
+                {!isBalanced && (!isGlVoucher || transactionCount > 0) && (
                   <Button
                     type="button"
                     variant="secondary"
@@ -1782,16 +1790,16 @@ export default function AccountingDocumentDetail() {
                       </div>
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {isJournalVoucher ? t("accountCode") : t("department")}
+                      {isGlVoucher ? t("accountCode") : t("department")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {isJournalVoucher ? t("costCenter") : t("chartOfAccount")}
+                      {isGlVoucher ? t("costCenter") : t("chartOfAccount")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
                       {t("comment")}
                     </th>
                     <th className="h-10 px-3 text-left font-medium">
-                      {isJournalVoucher ? "Cur." : t("currency")}
+                      {isGlVoucher ? "Cur." : t("currency")}
                     </th>
                     <th className="h-10 px-3 text-right font-medium">
                       {t("rate")}
@@ -1837,7 +1845,7 @@ export default function AccountingDocumentDetail() {
                             </div>
                           </td>
                           <td className="h-12 px-3">
-                            {isJournalVoucher ? (
+                            {isGlVoucher ? (
                               isView ? (line.accountLabel ?? optionLabel(accounts, line.account)) : (
                                 <LookupCombobox
                                   value={line.account}
@@ -1871,7 +1879,7 @@ export default function AccountingDocumentDetail() {
                             )}
                           </td>
                           <td className="h-12 px-3 font-medium">
-                            {isJournalVoucher ? (
+                            {isGlVoucher ? (
                               isView ? (
                                 line.departmentLabel && line.departmentLabel !== "—" && line.departmentLabel !== line.department
                                   ? line.departmentLabel
@@ -1923,7 +1931,7 @@ export default function AccountingDocumentDetail() {
                             )}
                           </td>
                           <td className="h-12 px-3">
-                            {isJournalVoucher && !isView ? (
+                            {isGlVoucher && !isView ? (
                               <LookupCurrency
                                 value={currencyIdFor(line.currency ?? "THB")}
                                 onValueChange={(currency) => updateLine(line.id, { currency })}
@@ -1932,7 +1940,7 @@ export default function AccountingDocumentDetail() {
                             ) : currencyCodeFor(line.currency)}
                           </td>
                           <td className="h-12 px-3 text-right tabular-nums">
-                            {isJournalVoucher && !isView ? (
+                            {isGlVoucher && !isView ? (
                               <Input
                                 type="number"
                                 min={0.00001}
@@ -2006,8 +2014,8 @@ export default function AccountingDocumentDetail() {
                             rowSpan={2}
                             className="w-16 border-l px-1 align-middle"
                           >
-                            <div className="mx-auto grid w-fit grid-cols-2 place-items-center gap-1 p-1">
-                              <Button
+                            <div className="mx-auto flex w-fit flex-wrap items-center justify-center gap-1 p-1">
+                              {!isGlVoucher && <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon-xs"
@@ -2019,8 +2027,8 @@ export default function AccountingDocumentDetail() {
                                   className="size-4"
                                   aria-hidden="true"
                                 />
-                              </Button>
-                              <Button
+                              </Button>}
+                              {!isGlVoucher && <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon-xs"
@@ -2034,12 +2042,11 @@ export default function AccountingDocumentDetail() {
                                   className="size-4"
                                   aria-hidden="true"
                                 />
-                              </Button>
+                              </Button>}
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon-xs"
-                                className={isView ? "col-span-2" : undefined}
                                 aria-label={t("allDimensions")}
                                 title={t("allDimensions")}
                                 onClick={() =>
@@ -2108,44 +2115,29 @@ export default function AccountingDocumentDetail() {
                           </td>
                           <td colSpan={4} className="px-3 py-0.5">
                             <div className="flex flex-wrap items-center gap-1">
-                              {isJournalVoucher && (dimensionQuery.isError || dimensionValuesQuery.isError) && (
+                              {isGlVoucher && (dimensionQuery.isError || dimensionValuesQuery.isError) && (
                                 <span className="text-destructive text-xs">Unable to load dimensions</span>
                               )}
-                              {isJournalVoucher ? visibleDimensions.map((dimension) => {
+                              {isGlVoucher && !line.dimensions?.length && (
+                                <span className="text-muted-foreground text-xs">{t("allDimensions")}: —</span>
+                              )}
+                              {isGlVoucher ? visibleDimensions.filter((dimension) =>
+                                line.dimensions?.some((item) => item.dimension_id === dimension.id),
+                              ).map((dimension) => {
                                 const selectedValue = line.dimensions?.find((item) => item.dimension_id === dimension.id)?.dimension_value_id;
                                 const values = (dimensionValuesQuery.data ?? []).filter(
                                   (value) => value.dimension_id === dimension.id && value.is_active,
                                 );
+                                const selected = values.find((value) => value.id === selectedValue);
                                 return (
-                                  <div key={dimension.id} className="flex items-center gap-1 text-xs">
-                                    <span className="text-muted-foreground">{dimension.code}</span>
-                                    {isView ? (
-                                      <span>{values.find((value) => value.id === selectedValue)?.code ?? "—"}</span>
-                                    ) : (
-                                      <FieldSelect
-                                        value={selectedValue ?? "none"}
-                                        onValueChange={(valueId) => updateLine(line.id, {
-                                          dimensions: [
-                                            ...(line.dimensions ?? []).filter((item) => item.dimension_id !== dimension.id),
-                                            ...(valueId === "none" ? [] : [{ dimension_id: dimension.id, dimension_value_id: valueId }]),
-                                          ],
-                                        })}
-                                        className="h-7 text-xs"
-                                      >
-                                        <SelectContent>
-                                          <SelectItem value="none">—</SelectItem>
-                                          {values.map((value) => (
-                                            <SelectItem key={value.id} value={value.id}>{value.code} — {value.name}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </FieldSelect>
-                                    )}
-                                  </div>
+                                  <span key={dimension.id} className="text-muted-foreground text-xs">
+                                    {dimension.code}: <span className="text-foreground">{selected?.code ?? "—"}</span>
+                                  </span>
                                 );
                               }) : <Button type="button" variant="outline" size="xs" onClick={() => openLineDetail(line.id, "dimension")}>
                                 {t("dimension")}: {optionLabel(DIMENSIONS, line.dimension) || "-"}
                               </Button>}
-                              {!isJournalVoucher && <Button
+                              {!isGlVoucher && <Button
                                 type="button"
                                 variant="outline"
                                 size="xs"
@@ -2154,7 +2146,7 @@ export default function AccountingDocumentDetail() {
                                 {t("taxCode")}:{" "}
                                 {optionLabel(TAX_CODES, line.taxCode) || "-"}
                               </Button>}
-                              {!isJournalVoucher && <Button
+                              {!isGlVoucher && <Button
                                 type="button"
                                 variant="outline"
                                 size="xs"
@@ -2173,7 +2165,7 @@ export default function AccountingDocumentDetail() {
                               {t("baseDebit")}
                             </span>
                             <span className="text-primary font-semibold">
-                              {(isJournalVoucher ? baseAmount(line.debit, line.exchangeRate ?? 1) : line.debit).toLocaleString(undefined, {
+                              {(isGlVoucher ? baseAmount(line.debit, line.exchangeRate ?? 1) : line.debit).toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                               })}
                             </span>
@@ -2183,7 +2175,7 @@ export default function AccountingDocumentDetail() {
                               {t("baseCredit")}
                             </span>
                             <span className="text-success-foreground font-semibold">
-                              {(isJournalVoucher ? baseAmount(line.credit, line.exchangeRate ?? 1) : line.credit).toLocaleString(undefined, {
+                              {(isGlVoucher ? baseAmount(line.credit, line.exchangeRate ?? 1) : line.credit).toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                               })}
                             </span>
@@ -2199,6 +2191,7 @@ export default function AccountingDocumentDetail() {
               <div id="journal-balance-status" aria-live="polite">
                 <SummaryFooterBar
                   hasRecord
+                  className={isGlVoucher ? "[&>div:first-child]:min-w-0 [&>div:first-child]:flex-wrap" : undefined}
                   items={summaryMetrics.map((metric) => ({
                     key: metric.label,
                     label: metric.label,
@@ -2208,6 +2201,12 @@ export default function AccountingDocumentDetail() {
                     valueClassName: metric.color,
                   }))}
                 >
+                  {isGlVoucher && <div className="flex shrink-0 items-center gap-2">
+                    <Badge variant="outline" size="sm">{t("rowCount", { count: transactionCount })}</Badge>
+                    <Badge variant={isBalanced ? "success-light" : "destructive-light"} size="sm">
+                      {isBalanced ? t("balanced") : t("unbalanced")}
+                    </Badge>
+                  </div>}
                   {!isView && (
                     <div className="flex shrink-0 gap-2">
                       <Button
@@ -2306,7 +2305,7 @@ export default function AccountingDocumentDetail() {
         }}
       />
       <Sheet
-        open={!!selectedLine}
+        open={!isGlVoucher && !!selectedLine}
         onOpenChange={(open) => !open && setSelectedLineId(null)}
       >
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
@@ -2321,11 +2320,14 @@ export default function AccountingDocumentDetail() {
                       : "allDimensions",
                 )}
               </SheetTitle>
-              <SheetDescription>{t("lineDetailsDescription")}</SheetDescription>
+              <SheetDescription>{isJournalVoucher && lineDetailSection === "dimension"
+                ? "Select accounting dimensions for this journal line."
+                : t("lineDetailsDescription")}</SheetDescription>
             </div>
           </SheetHeader>
           {selectedLine && (
             <div className="grid gap-5 px-4 pb-6">
+              {!(isJournalVoucher && lineDetailSection === "dimension") && <div className="grid gap-5">
               <Field>
                 <FieldLabel>{isJournalVoucher ? t("costCenter") : t("department")}</FieldLabel>
                 {isView ? (
@@ -2485,6 +2487,8 @@ export default function AccountingDocumentDetail() {
                 </Field>
               </div>
 
+              </div>}
+
               {lineDetailSection === "tax" && (
                 <section className="grid gap-4 border-t pt-5">
                   <h3 className="text-sm font-semibold">{t("taxWhtConfig")}</h3>
@@ -2619,6 +2623,45 @@ export default function AccountingDocumentDetail() {
           )}
         </SheetContent>
       </Sheet>
+
+      <Dialog open={isGlVoucher && !!selectedLine} onOpenChange={(open) => !open && setSelectedLineId(null)}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("allDimensions")}</DialogTitle>
+            <DialogDescription>Select accounting dimensions for this journal line.</DialogDescription>
+          </DialogHeader>
+          {selectedLine && <div className="grid gap-4 sm:grid-cols-2">
+            {(dimensionQuery.data ?? []).filter((dimension) =>
+              dimension.is_active && (!accountById.get(selectedLine.account)?.allowed_dimensions?.length ||
+                accountById.get(selectedLine.account)?.allowed_dimensions?.includes(dimension.id)),
+            ).map((dimension) => {
+              const selectedValue = dimensionDraft.find((item) => item.dimension_id === dimension.id)?.dimension_value_id;
+              const options = (dimensionValuesQuery.data ?? []).filter((value) => value.dimension_id === dimension.id && value.is_active);
+              return <Field key={dimension.id}>
+                <FieldLabel>{dimension.code} — {dimension.name}</FieldLabel>
+                {isView ? <FieldPlainText>{options.find((value) => value.id === selectedValue)?.name ?? "—"}</FieldPlainText> : (
+                  <FieldSelect value={selectedValue ?? "none"} onValueChange={(valueId) => setDimensionDraft((current) => [
+                    ...current.filter((item) => item.dimension_id !== dimension.id),
+                    ...(valueId === "none" ? [] : [{ dimension_id: dimension.id, dimension_value_id: valueId }]),
+                  ])}>
+                    <SelectContent>
+                      <SelectItem value="none">—</SelectItem>
+                      {options.map((value) => <SelectItem key={value.id} value={value.id}>{value.code} — {value.name}</SelectItem>)}
+                    </SelectContent>
+                  </FieldSelect>
+                )}
+              </Field>;
+            })}
+          </div>}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setSelectedLineId(null)}>{tc("cancel")}</Button>
+            {!isView && selectedLine && <Button type="button" onClick={() => {
+              updateLine(selectedLine.id, { dimensions: dimensionDraft });
+              setSelectedLineId(null);
+            }}>Apply</Button>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Sheet
         open={!!utilityPanel}

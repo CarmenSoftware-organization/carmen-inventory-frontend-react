@@ -1,4 +1,5 @@
 import { History, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import type { Permission } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 
 interface DataGridRowActionsProps {
+  readonly children?: ReactNode;
   readonly onEdit?: () => void;
   readonly onDelete?: () => void;
   readonly editDenied?: boolean;
@@ -34,7 +36,7 @@ interface DataGridRowActionsProps {
    * เปิดเฉพาะตารางที่ backend บันทึกกิจกรรมให้จริง (ดู activity-registry.ts ฝั่ง
    * micro-business) เปิดให้ตารางที่ไม่มีในทะเบียนจะได้เมนูที่กดแล้วว่างเปล่า
    */
-  readonly activity?: { id: string; label?: string };
+  readonly activity?: { id: string; label?: string; disabled?: boolean; disabledTitle?: string };
 }
 
 /**
@@ -59,6 +61,7 @@ interface DataGridRowActionsProps {
  * ```
  */
 export function DataGridRowActions({
+  children,
   onEdit,
   onDelete,
   editDenied,
@@ -113,6 +116,8 @@ export function DataGridRowActions({
               className="cursor-pointer"
               // onSelect ไม่ใช่ onClick — Radix ต้องปิดเมนูและคืน focus ให้เสร็จ
               // ก่อน Sheet จะ mount ไม่งั้นสองตัวแย่ง focus กัน
+              disabled={activity.disabled}
+              title={activity.disabled ? activity.disabledTitle : undefined}
               onSelect={() => openActivity(activity.id, activity.label)}
             >
               <History className="size-3" />
@@ -133,6 +138,7 @@ export function DataGridRowActions({
               {tc("delete")}
             </DropdownMenuItem>
           )}
+          {children}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
