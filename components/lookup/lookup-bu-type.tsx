@@ -189,7 +189,7 @@ export function LookupBuType({
         </Tooltip>
       </TooltipProvider>
 
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
         <Command
           filter={(value, search) => {
             if (!search) return 1;

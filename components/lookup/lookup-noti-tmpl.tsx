@@ -73,7 +73,7 @@ export function LookupNotificationTemplate({
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
       error={error}
-      popoverWidth="52rem"
+      popoverWidth="w-[min(92vw,52rem)]"
     />
   );
 }
