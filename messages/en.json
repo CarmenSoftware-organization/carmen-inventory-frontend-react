@@ -6,7 +6,7 @@
     "noImage": "No image",
     "sections": {
       "general": "General",
-      "generalDesc": "Core identity and licensing of this business unit.",
+      "generalDesc": "Core identity of this business unit.",
       "branding": "Branding",
       "brandingDesc": "Logo and avatar shown across the app and documents.",
       "company": "Company",
@@ -32,7 +32,12 @@
       "info": "Info",
       "infoDesc": "Additional information about the business unit.",
       "calculationMethod": "Costing Method",
-      "calculationMethodDesc": "Inventory costing method (e.g. average, FIFO).",
+      "calculationMethodDesc": "Inventory costing method (average, FIFO, or average per location).",
+      "calculationMethodOptions": {
+        "average": "Average",
+        "fifo": "FIFO",
+        "averagePerLocation": "Average per location"
+      },
       "defaultCurrencyId": "Default Currency",
       "defaultCurrencyIdDesc": "The default currency for this unit.",
       "docVersion": "Document Version",
@@ -116,8 +121,6 @@
       "amountFormatDesc": "Language and minimum decimal places for monetary amounts.",
       "quantityFormat": "Quantity Format",
       "quantityFormatDesc": "Language and minimum decimal places for quantities.",
-      "perpageFormat": "Per-Page Format",
-      "perpageFormatDesc": "Language and minimum decimal places for per-page counts.",
       "recipeFormat": "Recipe Format",
       "recipeFormatDesc": "Language and minimum decimal places for recipe quantities.",
       "isActive": "Active",
@@ -214,6 +217,20 @@
         "monthEndMeta": "Accrual setup requires review"
       }
     },
+    "sectionDashboards": {
+      "generalLedger": {
+        "title": "General Ledger Dashboard",
+        "description": "Financial position, posting health, and work requiring attention"
+      },
+      "accountsReceivable": {
+        "title": "Accounts Receivable Dashboard",
+        "description": "Receivables, customer settlements, and posting health"
+      },
+      "asset": {
+        "title": "Asset Dashboard",
+        "description": "Fixed asset values, registration, and disposal activity"
+      }
+    },
     "documents": {
       "journalVoucher": {
         "title": "Journal Voucher Directory",
@@ -259,6 +276,16 @@
         "title": "AR Receipt Directory",
         "description": "Customer receipts and allocations",
         "single": "AR Receipt"
+      },
+      "assetRegister": {
+        "title": "Asset Register",
+        "description": "Registered fixed assets and their current values",
+        "single": "Asset"
+      },
+      "assetDisposal": {
+        "title": "Asset Disposal",
+        "description": "Asset retirement, sale, and write-off records",
+        "single": "Asset Disposal"
       },
       "export": "Export",
       "new": "New",
@@ -363,6 +390,62 @@
       "logCreated": "Voucher created by Accounting",
       "logUpdated": "Journal entries updated",
       "logReviewed": "Submitted to Financial Controller"
+    },
+    "ap": {
+      "dashboardTitle": "Accounts Payable Dashboard",
+      "dashboardDescription": "Outstanding liabilities, due dates, approvals and tax exceptions",
+      "invoiceTitle": "AP Invoice Directory",
+      "paymentTitle": "Payment Voucher Directory",
+      "approvalTitle": "Payment Approval",
+      "empty": "No accounts payable documents found",
+      "loadError": "Unable to load accounts payable data",
+      "stale": "Data may be stale",
+      "actions": {
+        "newInvoice": "New Invoice",
+        "newPayment": "New Payment",
+        "paySelected": "Pay Selected",
+        "saveDraft": "Save Draft",
+        "submit": "Submit",
+        "approve": "Approve",
+        "return": "Return",
+        "reject": "Reject",
+        "void": "Void",
+        "release": "Release",
+        "clarify": "Request Clarification"
+      },
+      "fields": {
+        "documentNo": "Document no.",
+        "vendor": "Vendor",
+        "inputDate": "Input date",
+        "invoiceDate": "Invoice date",
+        "dueDate": "Due date",
+        "currency": "Currency",
+        "exchangeRate": "Exchange rate",
+        "description": "Description",
+        "originalAmount": "Original amount",
+        "openAmount": "Open amount",
+        "appliedAmount": "Applied amount",
+        "wht": "WHT",
+        "netPay": "Net pay",
+        "paymentMethod": "Payment method",
+        "reference": "Reference",
+        "status": "Status"
+      },
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "posted": "Posted",
+        "readyToRelease": "Ready to release",
+        "executed": "Executed",
+        "voided": "Voided",
+        "unpaid": "Unpaid",
+        "partiallyPaid": "Partially paid",
+        "paid": "Paid",
+        "matched": "Matched",
+        "variance": "Variance",
+        "pending": "Pending",
+        "urgent": "Urgent"
+      }
     }
   },
   "dashboardWidget": {
@@ -425,6 +508,7 @@
     "view": "View",
     "hide": "Hide",
     "delete": "Delete",
+    "deleteOnlyDraft": "Only drafts can be deleted",
     "rowActions": "Row actions",
     "more": "More",
     "from": "From",
@@ -786,6 +870,7 @@
     "missingField": "A required field is missing.",
     "invalidForm": "Some fields aren't filled in correctly. Check them and try again.",
     "documentChanged": "Someone else changed this document. Refresh the page and try again.",
+    "conflictsWithData": "This can't be done because it conflicts with data already recorded in the system.",
     "tryAgain": "Try again",
     "goBack": "Go back",
     "contactSupport": "Contact support",
@@ -822,6 +907,7 @@
       "PO_NO_VALID_PR_DETAILS": "None of the picked lines can become a purchase order — they are missing a vendor or a currency.",
       "PO_BATCH_DELETE_BLOCKED": "Nothing was deleted: {blocked} of {total} purchase orders cannot be deleted — they are past draft, or someone else created them.",
       "PO_DELETE_FORBIDDEN": "You can only delete purchase orders you created yourself.",
+      "PO_ONLY_DRAFT_DELETABLE": "This purchase order is past draft, so it can no longer be deleted. Refresh to see its current status.",
       "PR_NOT_FOUND": "This purchase request no longer exists. Someone may have deleted it.",
       "PR_NO_WORKFLOW_ASSIGNED": "This purchase request has no approval route attached. Ask your administrator to set one.",
       "PR_NO_PRINT_MAPPING": "No print form has been set up for purchase requests yet. Ask your administrator to add one.",
@@ -830,6 +916,7 @@
       "PR_REPORT_SERVICE_ERROR": "Printing failed — the report service is having trouble. Please try again.",
       "PR_BATCH_DELETE_BLOCKED": "Nothing was deleted: {blocked} of {total} purchase requests cannot be deleted — they are past draft, or someone else created them.",
       "PR_DELETE_FORBIDDEN": "You can only delete purchase requests you created yourself.",
+      "PR_ONLY_DRAFT_DELETABLE": "This purchase request is past draft, so it can no longer be deleted. Refresh to see its current status.",
       "PR_TEMPLATE_NOT_FOUND": "This purchase request template no longer exists. Someone may have deleted it.",
       "SR_NOT_FOUND": "This requisition no longer exists. Someone may have deleted it.",
       "SR_NO_WORKFLOW_ASSIGNED": "This requisition has no approval route attached. Ask your administrator to set one.",
@@ -837,13 +924,23 @@
       "SR_NO_BUSINESS_UNITS_FOR_USER": "Your account is not attached to any business unit yet. Ask your administrator to add you to one.",
       "SR_BATCH_DELETE_BLOCKED": "Nothing was deleted: {blocked} of {total} requisitions cannot be deleted — they are past draft, or someone else created them.",
       "SR_DELETE_FORBIDDEN": "You can only delete requisitions you created yourself.",
+      "SR_ONLY_DRAFT_DELETABLE": "This requisition is past draft, so it can no longer be deleted. Refresh to see its current status.",
+      "GRN_ONLY_DRAFT_DELETABLE": "This goods receive note is past draft, so it can no longer be deleted. Refresh to see its current status.",
+      "GRN_RECEIPT_ALREADY_CONSUMED": "Stock received on this goods receive note has already been issued, so it can no longer be voided or changed.",
+      "CREDIT_NOTE_ONLY_DRAFT_DELETABLE": "This credit note is past draft, so it can no longer be deleted. Refresh to see its current status.",
       "SR_DATE_PATTERN_REQUIRED": "Today is outside every open accounting period. Choose whether this requisition should be dated inside the open period or today.",
       "SR_NO_OPEN_PERIOD": "No accounting period is open, so this requisition cannot be dated. Ask accounting to open one.",
       "SR_ISSUE_DATE_PATTERN_REQUIRED": "Today is outside every open accounting period. Choose whether this issue should be dated inside the open period or today.",
       "SR_ISSUE_DATE_TODAY_OUTSIDE_PERIOD": "Today is outside every open accounting period, so the issue cannot be dated today. Date it inside the open period instead.",
       "SR_DEPARTMENT_AMBIGUOUS": "You belong to more than one department, so the requisition department cannot be filled in for you. Pick one: {departments}",
       "SR_DEPARTMENT_NOT_FOUND": "You are not in any department yet, so the requisition department cannot be filled in. Ask your administrator to add you to one.",
-      "PRODUCT_ALREADY_EXISTS": "This product is already in the system. Search for it by name or SKU and edit that one instead of creating it again."
+      "PRODUCT_ALREADY_EXISTS": "This product is already in the system. Search for it by name or SKU and edit that one instead of creating it again.",
+      "PERIOD_CLOSED_NOT_EDITABLE": "This inventory period is closed and can't be edited or deleted.",
+      "PERIOD_COUNTING_NOT_EDITABLE": "A stock count is in progress for this inventory period, so it can't be edited or deleted.",
+      "PERIOD_CURRENT_NOT_EDITABLE": "The current inventory period can't be edited or deleted.",
+      "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "An inventory period's status can only be changed on the Period End page.",
+      "COMMON_DOC_VERSION_REQUIRED": "This record is out of date. Refresh the page and try again.",
+      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0."
     }
   },
   "validation": {
@@ -1391,6 +1488,14 @@
         "header": "Header (not postable)",
         "balance_sheet": "Balance sheet",
         "income_statement": "Income statement",
+        "statistic": "Statistic"
+      },
+      "accountCategory": {
+        "asset": "Asset",
+        "liability": "Liability",
+        "equity": "Equity",
+        "revenue": "Revenue",
+        "expense": "Expense",
         "statistic": "Statistic"
       },
       "importCarmenGl": {
@@ -2009,7 +2114,21 @@
       "statusOpen": "Open",
       "statusClosed": "Closed",
       "statusLocked": "Locked",
-      "generateNext": "Generate next 12 inventory periods"
+      "generateNext": "Top up open periods to 12",
+      "dateRange": "Date Range",
+      "current": "Current",
+      "overdue": "Overdue",
+      "overdueCount": "{count, plural, one {# period} other {# periods}} past end date, still open",
+      "allOnTrack": "No open period past its end date",
+      "phaseActive": "In progress",
+      "phaseUpcoming": "Upcoming",
+      "noPeriod": "No period",
+      "fiscalYearLabel": "Fiscal year {year}",
+      "prevYear": "Previous fiscal year",
+      "nextYear": "Next fiscal year",
+      "generateTitle": "Top up open periods to 12?",
+      "generateDesc": "{open} periods are open now. This creates {create} more monthly periods after the latest one, each starting on day 1.",
+      "generateNothing": "12 periods are already open"
     },
     "configEmail": {
       "title": "Email Configuration",
@@ -2814,6 +2933,8 @@
       "viewLocations": "Locations",
       "viewHistory": "History",
       "noHistory": "No spot check history yet",
+      "loadMoreHistory": "Load more",
+      "loadingMoreHistory": "Loading…",
       "tabAll": "All",
       "tabResume": "Resume",
       "tabInProgress": "In Progress",
@@ -3733,7 +3854,6 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
-      "lastPrice": "Last price",
       "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
@@ -4152,7 +4272,8 @@
       "committed": "Goods receive note committed — stock updated",
       "commit": "Commit",
       "deleteProductLine": "Remove this line",
-      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is"
+      "stockNotPosted": "Not posted to stock yet — the In and Total columns stay at zero until it is",
+      "editLockedByAp": "Already on AP invoice {docNos} — can no longer be edited"
     },
     "approval": {
       "entity": "Approval",
@@ -4502,8 +4623,6 @@
     "loading": "Loading…",
     "runReport": "Run Report",
     "noFiltersConfigured": "No filters configured for this report.",
-    "listView": "List view",
-    "gridView": "Grid view",
     "openFilters": "Open filters"
   },
   "reportSchedule": {
@@ -4728,16 +4847,25 @@
     "reportSchedule": "Schedules",
     "reportHistory": "History",
     "accounting": "Accounting",
+    "generalLedger": "General Ledger",
+    "glDashboard": "Dashboard",
     "journalVoucher": "Journal Voucher",
     "templateVoucher": "Template Voucher",
     "recurringVoucher": "Recurring Voucher",
     "allocationVoucher": "Allocation Voucher",
     "accountsPayable": "Accounts Payable",
+    "apDashboard": "Dashboard",
     "apInvoice": "Invoice",
     "apPayment": "Payment",
+    "apPaymentApproval": "Payment Approval",
     "accountsReceivable": "Accounts Receivable",
+    "arDashboard": "Dashboard",
     "arInvoice": "Invoice",
     "arReceipt": "Receipt",
+    "asset": "Asset",
+    "assetDashboard": "Dashboard",
+    "assetRegister": "Register",
+    "assetDisposal": "Disposal",
     "financialReports": "Financial Reports",
     "accountingDesc": "Journal entries, voucher automation, and financial analysis",
     "configDesc": "Master data and system-wide settings",
@@ -4754,6 +4882,8 @@
     "notifications": "Notifications",
     "fromPriceList": "From price list",
     "chartOfAccounts": "Chart of Accounts",
+    "accountGrouping": "Account Code Grouping",
+    "titleMaster": "Title Master",
     "chartOfAccountMapping": "Chart of Account Mapping"
   },
   "commentSheet": {
@@ -5236,5 +5366,11 @@
     "outsideOpenPeriod": "This document is dated outside the open period ({from} – {to}). Pick the date it should carry.",
     "useOpenPeriodDate": "Move it into the open period ({date})",
     "useDocumentDate": "Keep the date on the document ({date})"
+  },
+  "buCurrency": {
+    "missing": "Business unit {bu} has no default currency set — amounts are shown in THB until one is set.",
+    "invalid": "The default currency of business unit {bu} no longer exists — amounts are shown in THB until it is fixed.",
+    "goToSettings": "Set it in Company Profile",
+    "contactAdmin": "Please contact your administrator."
   }
 }

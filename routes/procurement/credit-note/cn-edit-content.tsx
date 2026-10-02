@@ -2,13 +2,13 @@ import { useCreditNoteById } from "./use-credit-note";
 import { useTranslations } from "use-intl";
 import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { DocFormSkeleton } from "@/components/loader/doc-form-skeleton";
+import { DocPageSkeleton } from "@/components/loader/doc-page-skeleton";
 
 export function CnEditContent({ id }: { id: string }) {
   const tErr = useTranslations("procurement.creditNote");
   const { data: creditNote, isLoading, error, refetch } = useCreditNoteById(id);
 
-  if (isLoading) return <DocFormSkeleton />;
+  if (isLoading) return <DocPageSkeleton />;
   if (error || !creditNote)
     return (
       <ErrorState

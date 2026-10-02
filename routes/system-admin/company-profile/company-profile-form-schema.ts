@@ -78,7 +78,6 @@ export function createBusinessSettingSchema(
 
     amount_format: numberFormatSchema,
     quantity_format: numberFormatSchema,
-    perpage_format: numberFormatSchema,
     recipe_format: numberFormatSchema,
 
     config: z.array(configItemSchema),
@@ -173,7 +172,6 @@ export function toFormValues(
 
     amount_format: data.amount_format ?? { ...emptyFormat },
     quantity_format: data.quantity_format ?? { ...emptyFormat },
-    perpage_format: data.perpage_format ?? { ...emptyFormat },
     recipe_format: data.recipe_format ?? { ...emptyFormat },
 
     config: mergeSeededConfig(normalizeConfig(data.config)),
@@ -224,7 +222,6 @@ const NULLABLE_STR_FIELDS = [
 const NUMBER_FORMAT_FIELDS = [
   "amount_format",
   "quantity_format",
-  "perpage_format",
   "recipe_format",
 ] as const;
 

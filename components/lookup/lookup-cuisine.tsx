@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCuisine } from "@/hooks/use-cuisine";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { Cuisine } from "@/types/cuisine";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCuisineProps {
@@ -12,6 +16,11 @@ interface LookupCuisineProps {
   readonly className?: string;
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
+  /**
+   * ป้ายของ `value` ที่รู้อยู่แล้วจากเอกสาร — list โหลดทีละหน้า ค่าที่อยู่หลังหน้าแรก
+   * จะหาชื่อไม่เจอแล้วขึ้น placeholder ทั้งที่มีค่าอยู่
+   */
+  readonly defaultLabel?: string;
 }
 
 export function LookupCuisine({
@@ -22,25 +31,27 @@ export function LookupCuisine({
   className,
   size,
   error,
+  defaultLabel,
 }: LookupCuisineProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
+  // Lazy: ยิงรายการตอนเปิด popover ครั้งแรก — ชื่อของค่าที่เลือกดึงตาม id แยก (selectedIds)
   const [hasOpened, setHasOpened] = useState(false);
 
   const {
     items: cuisines,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination({
+  } = useLookupPagination<Cuisine>({
     useListHook: useCuisine,
     search,
-    perpage: 30,
-    enabled: hasOpened || !!value,
-    filter: (v: { is_active: boolean }) => v.is_active,
+    serverFilter: ACTIVE_ONLY_FILTER,
+    enabled: hasOpened,
+    selectedIds: value ? [value] : [],
   });
 
   return (
@@ -52,8 +63,10 @@ export function LookupCuisine({
         if (open) setHasOpened(true);
       }}
       items={cuisines}
+      selectedItems={selectedItems}
       getId={(c) => c.id}
       getLabel={(c) => c.name}
+      defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("cuisine") })}
       searchPlaceholder={tl("search", { entity: tfl("cuisine") })}
       disabled={disabled}

@@ -237,6 +237,30 @@ describe("byCode messages", () => {
     ).toBe("byCode.PRODUCT_ALREADY_EXISTS");
   });
 
+  // 409 ที่มีรหัสแต่ยังไม่มีข้อความของเรา ต้องไม่ตกไป "มีคนแก้ใบนี้ รีเฟรชแล้วลองใหม่"
+  // — นั่นคือ doc_version ชนกัน ซึ่ง backend ส่งมาโดยไม่มีรหัส (AVG 2605: void GRN
+  // ที่ของถูกเบิกไปแล้วขึ้นข้อความนี้ ผู้ใช้รีเฟรชกี่ทีก็ไม่ผ่าน)
+  it("does not call a catalog 409 with no message a document change", () => {
+    expect(getUserErrorMessage(catalogError("UNIT_ALREADY_EXISTS", 409), tHas)).toBe(
+      "conflictsWithData",
+    );
+  });
+
+  it("still says the document changed on a 409 with no catalog code", () => {
+    const versionConflict = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "dev fallback",
+      409,
+    );
+    expect(getUserErrorMessage(versionConflict, tHas)).toBe("documentChanged");
+  });
+
+  it("says why a consumed receipt cannot be voided", () => {
+    expect(
+      getUserErrorMessage(catalogError("GRN_RECEIPT_ALREADY_CONSUMED", 409), tHas),
+    ).toBe("byCode.GRN_RECEIPT_ALREADY_CONSUMED");
+  });
+
   it("keeps APP_CODE_TO_KEY winning over the code-named key", () => {
     expect(
       getUserErrorMessage(catalogError("SR_DATE_OUTSIDE_OPEN_PERIOD", 422), tHas),

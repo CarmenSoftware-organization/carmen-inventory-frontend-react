@@ -9,13 +9,15 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { LookupRecipeCategory } from "@/components/lookup/lookup-recipe-category";
 import { SettingSection } from "@/components/ui/setting-section";
+import type { RecipeCategory } from "@/types/recipe-category";
 import type { RecipeCategoryFormValues } from "./recipe-category-form-schema";
 
 interface RecipeCategoryGeneralFieldsProps {
   readonly form: UseFormReturn<RecipeCategoryFormValues>;
   readonly isDisabled: boolean;
   readonly excludeIds?: Set<string>;
-  readonly onParentChange: (parentId: string) => void;
+  /** หมวดแม่ที่ผู้ใช้เพิ่งเลือก (undefined = ล้างค่า) — ใช้คำนวณ level */
+  readonly onParentChange: (parent?: RecipeCategory) => void;
 }
 
 export function RecipeCategoryGeneralFields({
@@ -77,8 +79,9 @@ export function RecipeCategoryGeneralFields({
                 value={field.value ?? ""}
                 onValueChange={(id) => {
                   field.onChange(id || null);
-                  onParentChange(id);
+                  if (!id) onParentChange(undefined);
                 }}
+                onItemChange={(parent) => onParentChange(parent)}
                 disabled={isDisabled}
                 placeholder={t("notSet")}
                 excludeIds={excludeIds}

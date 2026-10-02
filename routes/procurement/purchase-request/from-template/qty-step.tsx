@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
+import { BackButton } from "@/components/share/back-button";
 import {
   type ColumnDef,
   type SortingState,
@@ -7,7 +8,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   InputSuffixAddon,
@@ -185,15 +186,7 @@ export function QtyStep({ template, onBack, onContinue }: QtyStepProps) {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-start gap-3">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onBack}
-          aria-label={tc("goBack")}
-          className="mt-0.5"
-        >
-          <ArrowLeft />
-        </Button>
+        <BackButton onClick={onBack} className="mt-0.5" />
         <div className="min-w-0 flex-1 space-y-0.5">
           {/* workflow นำหน้าชื่อเทมเพลต — ใบที่กำลังจะเกิดเดินตาม workflow นี้
               และเปลี่ยนทีหลังไม่ได้ ต้องเห็นก่อนกรอกจำนวน ไม่ใช่ไปรู้ในฟอร์ม */}

@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { useRequestPriceListById } from "./use-rfp";
 import { RequestPriceListForm } from "./rfp-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function RfpEditContent({ id }: { id: string }) {
   const tErr = useTranslations("vendorManagement.requestPriceList");
@@ -13,7 +13,7 @@ export function RfpEditContent({ id }: { id: string }) {
     refetch,
   } = useRequestPriceListById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton width="wide" />;
   if (error || !requestPriceList)
     return (
       <ErrorState

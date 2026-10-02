@@ -37,7 +37,8 @@ import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 
 type FileTypeKey = "pdf" | "xls" | "doc" | "image" | "txt" | "archive" | "code";
 
@@ -180,111 +181,103 @@ export default function DocumentComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full items-center gap-2 *:flex-1 sm:w-auto sm:*:flex-initial">
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.handleUpload,.docx,.xls,.xlsx,.csv,.txt"
+            onChange={handleUpload}
+            className="hidden"
           />
-          <div className="flex w-full items-center gap-2 *:flex-1 sm:w-auto sm:*:flex-initial">
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.handleUpload,.docx,.xls,.xlsx,.csv,.txt"
-              onChange={handleUpload}
-              className="hidden"
-            />
-            <Button
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadDocument.isPending}
-            >
-              <Upload />
-              {uploadDocument.isPending ? t("uploading") : t("upload")}
-            </Button>
-          </div>
-        </div>
-
-        <DocumentSummaryBar
-          summary={summary}
-          isLoading={isSummaryLoading}
-          onViewAll={() => setSummarySheetOpen(true)}
-        />
-
-        <ListToolbar
-          variant="row"
-          search={search}
-          onSearch={setSearch}
-          lf={lf}
-          fields={documentFilterFields}
-          onSaveViewClick={() => setSaveViewDialogOpen(true)}
-        />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isMobile ? (
-          grid.isLoading ? (
-            <CardSkeletonGrid />
-          ) : grid.error ? (
-            <ErrorState
-              message={grid.error.message}
-              onRetry={() => grid.refetch?.()}
-            />
-          ) : documents.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-3">
-                {documents.map((doc, i) => (
-                  <DocumentCard key={doc.fileToken} item={doc} index={i} />
-                ))}
-              </div>
-              {grid.hasMore && selectedTypes.size === 0 && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <EmptyComponent />
-          )
-        ) : (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
+          <Button
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadDocument.isPending}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ (ทั้ง skeleton ตอนโหลดและแถบจริง) — สี่เคส
-                // ตามว่าช่องแถบสรุปมีของ (summarySlotVisible: กำลังโหลดหรือมีข้อมูลแล้ว) และมี
-                // active filter หรือไม่ ใช้ summarySlotVisible ไม่ใช่ hasSummary เพราะถ้ารอข้อมูล
-                // จริงก่อนค่อยเผื่อพื้นที่ ตารางจะกระตุกตอน skeleton สลับเป็นแถบจริง
-                summarySlotVisible
-                  ? lf.activeFilters.length > 0
-                    ? "max-h-[calc(100vh-17rem-3rem)]"
-                    : "max-h-[calc(100vh-14rem-3rem)]"
-                  : lf.activeFilters.length > 0
-                    ? "max-h-[calc(100vh-13rem-3rem)]"
-                    : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            <Upload />
+            {uploadDocument.isPending ? t("uploading") : t("upload")}
+          </Button>
+        </div>
+      }
+      toolbar={
+        <>
+          <DocumentSummaryBar
+            summary={summary}
+            isLoading={isSummaryLoading}
+            onViewAll={() => setSummarySheetOpen(true)}
+          />
+
+          <ListToolbar
+            variant="row"
+            search={search}
+            onSearch={setSearch}
+            lf={lf}
+            fields={documentFilterFields}
+            onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          />
+        </>
+      }
+    >
+      {isMobile ? (
+        grid.isLoading ? (
+          <CardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        ) : documents.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 gap-3">
+              {documents.map((doc, i) => (
+                <DocumentCard key={doc.fileToken} item={doc} index={i} />
+              ))}
+            </div>
+            {grid.hasMore && selectedTypes.size === 0 && (
+              <div ref={grid.sentinelRef} className="flex justify-center py-4">
+                {grid.isLoadingMore && (
+                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyComponent />
+        )
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ (ทั้ง skeleton ตอนโหลดและแถบจริง) — สี่เคส
+              // ตามว่าช่องแถบสรุปมีของ (summarySlotVisible: กำลังโหลดหรือมีข้อมูลแล้ว) และมี
+              // active filter หรือไม่ ใช้ summarySlotVisible ไม่ใช่ hasSummary เพราะถ้ารอข้อมูล
+              // จริงก่อนค่อยเผื่อพื้นที่ ตารางจะกระตุกตอน skeleton สลับเป็นแถบจริง
+              summarySlotVisible
+                ? lf.activeFilters.length > 0
+                  ? "max-h-[calc(100vh-17rem-3rem)]"
+                  : "max-h-[calc(100vh-14rem-3rem)]"
+                : listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -322,6 +315,6 @@ export default function DocumentComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

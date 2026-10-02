@@ -8,12 +8,11 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
-import { useDepartment } from "@/hooks/use-department";
-import { useUser } from "@/hooks/use-user";
-import { useVendor } from "@/hooks/use-vendor";
 import { useListViews, type UseListViewsResult } from "@/hooks/use-list-views";
 import {
+  clauseTokens,
   encodeFilterParam,
+  firstPlusRest,
   viewMatchesCurrent,
 } from "@/lib/list-filter-encode";
 import type { ActiveFilter } from "@/components/ui/active-filter-bar";
@@ -22,21 +21,6 @@ import type { SavedView, ViewScope } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
-
-function clauseTokens(value: string): string[] {
-  return value
-    .split(",")
-    .map((part) =>
-      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
-    )
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
-function firstPlusRest(names: readonly string[]): string | undefined {
-  if (names.length === 0) return undefined;
-  return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
-}
 
 /**
  * ข้อความค่าบน chip ของ ActiveFilterBar — derive จาก field def + ค่า URL:
@@ -218,36 +202,6 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
-  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ/ผู้ขาย — ค่าใน clause เป็น id ล้วน ชื่ออยู่ใน
-  // ทะเบียนกลาง ไม่ใช่ในตัว control
-  //
-  // เงื่อนไขคือ "มี chip ที่ต้องแปลงชื่อจริง ๆ" ไม่ใช่แค่ "หน้านี้มี field ชนิดนั้น" —
-  // เปิดหน้าเปล่าโดยไม่มี filter ค้าง (เกือบทุกครั้งที่เข้าหน้า) จะได้ไม่ลากทะเบียน
-  // ทั้ง BU มาทิ้ง ส่วน dropdown ให้เลือกนั้น FilterDepartment/FilterRequester/FilterVendor
-  // ยิงเองตอนเปิดอยู่แล้ว และพอเลือกเสร็จ chip ก็มาขอทะเบียนชุดเดียวกัน
-  // (query key เดียวกัน react-query จึงใช้ของที่ cache ไว้ ไม่ยิงซ้ำ)
-  const hasDepartmentField = fields.some(
-    (f) => f.control === "department" && !!values[f.key]?.trim(),
-  );
-  const hasRequesterField = fields.some(
-    (f) => f.control === "requester" && !!values[f.key]?.trim(),
-  );
-  const hasVendorField = fields.some(
-    (f) => f.control === "vendor" && !!values[f.key]?.trim(),
-  );
-  const { data: departmentData } = useDepartment(
-    { perpage: -1 },
-    { enabled: hasDepartmentField },
-  );
-  const { data: userData } = useUser(
-    { perpage: -1 },
-    { enabled: hasRequesterField },
-  );
-  const { data: vendorData } = useVendor(
-    { perpage: -1 },
-    { enabled: hasVendorField },
-  );
-
   // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
   // ListFilter ส่งให้ control ใน sheet/เมนู เพื่อให้ field คู่ (linked keys) ทำงานครบ
   const peer: FilterPeerAccess = useMemo(
@@ -274,41 +228,12 @@ export function useListFilters(
                 peer,
               }
             : {}),
+          // ชื่อของ field entity มาจาก EntityChipValue ใน ActiveFilterBar
+          ...(f.control === "entity" ? { entity: f.entity } : {}),
           // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
+          // field entity: ค่านี้เป็น fallback (จำนวน) ระหว่าง chip รอชื่อ
           value: (() => {
-            const raw = values[f.key];
-            // แผนก/ผู้ขอ: id → ชื่อจริงจากทะเบียน (ระหว่างโหลดตก fallback เป็นจำนวน)
-            let named: string | undefined;
-            if (f.control === "department") {
-              const list = departmentData?.data ?? [];
-              named = firstPlusRest(
-                clauseTokens(raw)
-                  .map((id) => list.find((d) => d.id === id)?.name)
-                  .filter((n): n is string => !!n),
-              );
-            } else if (f.control === "vendor") {
-              const list = vendorData?.data ?? [];
-              named = firstPlusRest(
-                clauseTokens(raw)
-                  .map((id) => list.find((v) => v.id === id)?.name)
-                  .filter((n): n is string => !!n),
-              );
-            } else if (f.control === "requester") {
-              const list = userData?.data ?? [];
-              named = firstPlusRest(
-                clauseTokens(raw)
-                  .map((id) => {
-                    const u = list.find((usr) => usr.user_id === id);
-                    return u
-                      ? [u.firstname, u.middlename, u.lastname]
-                          .filter(Boolean)
-                          .join(" ")
-                      : undefined;
-                  })
-                  .filter((n): n is string => !!n),
-              );
-            }
-            const text = named ?? chipValueText(f, raw, t);
+            const text = chipValueText(f, values[f.key], t);
             return text === t(f.labelKey) ? undefined : text;
           })(),
           onRemove: () => {
@@ -326,7 +251,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue, peer, departmentData, userData, vendorData],
+    [fields, values, t, setValue, peer],
   );
 
   const current: SavedView | null = sv

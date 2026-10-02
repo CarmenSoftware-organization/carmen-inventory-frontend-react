@@ -27,6 +27,7 @@ export function useLocationPairProducts(
   locationId2: string | undefined,
   workflowId: string | undefined,
   params?: ParamsDto,
+  options?: { enabled?: boolean },
 ) {
   const buCode = useBuCode();
 
@@ -51,13 +52,20 @@ export function useLocationPairProducts(
           perpage: params?.perpage ?? 30,
           page: params?.page,
           search: params?.search,
+          // รับ `product_id|string:a,b` (ใช้ดึงสินค้าที่เลือกไว้ตาม id)
+          filter: params?.filter,
         },
       );
       const res = await httpClient.get(url);
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
-    enabled: !!buCode && !!locationId1 && !!locationId2 && !!workflowId,
+    enabled:
+      !!buCode &&
+      !!locationId1 &&
+      !!locationId2 &&
+      !!workflowId &&
+      (options?.enabled ?? true),
     // ยิงใหม่เมื่อ "เกณฑ์กรองเปลี่ยน" เท่านั้น — คู่คลังกับ workflow อยู่ใน queryKey
     // อยู่แล้ว เปลี่ยนเมื่อไหร่ก็ไม่มีข้อมูลของ key ใหม่ ยิงทันทีเอง
     //

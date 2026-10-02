@@ -37,7 +37,11 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { useAdjustmentType } from "@/hooks/use-adjustment-type";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type { AdjustmentType } from "@/types/adjustment-type";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -47,6 +51,14 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+
+// ไม่กรอง is_active — หน้า list ต้องกรองใบเก่าที่อ้างประเภทที่ถูกปิดไปแล้วได้
+const ADJUSTMENT_TYPE_ENTITY = defineEntitySource<AdjustmentType>({
+  fieldKey: "adjustment_type_id",
+  useListHook: useAdjustmentType,
+  getLabel: (at) => `${at.code} - ${at.name}`,
+  serverFilter: null,
+});
 
 export default function InventoryAdjustmentComponent() {
   const navigate = useNavigate();
@@ -70,6 +82,10 @@ export default function InventoryAdjustmentComponent() {
   const { exportInventoryAdjustment, isExporting } =
     useExportInventoryAdjustment();
   const { params, search, setSearch, tableConfig } = useDataGridState();
+
+  // ตัวกรองประเภทการปรับปรุง (adjustment type ของ BU เช่น EOP-IN, FN) แยกจากตัวกรอง
+  // Type (SI/SO) ข้างล่าง — control "entity" ค้นที่ server โหลดทีละหน้า
+  // เลือกหลายตัว = `adjustment_type_id|string:a,b` (IN)
 
   // ของเดิมเก็บ type+status ปนกันใน "filter" ตัวเดียว (CSV) — แยกเป็น 2 URL param
   // ("filter" คง status, "adj_type" ใหม่คง type) ตามชื่อที่ตั้งไว้ในหน้า config
@@ -97,6 +113,13 @@ export default function InventoryAdjustmentComponent() {
             className="w-full"
           />
         ),
+      },
+      {
+        key: "adjustment_type",
+        section: "listView.sectionDocument",
+        control: "entity",
+        entity: ADJUSTMENT_TYPE_ENTITY,
+        labelKey: "field.adjustmentType",
       },
       {
         key: "filter",
@@ -253,112 +276,104 @@ export default function InventoryAdjustmentComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            {(() => {
-              const StockInIcon = IA_TYPE_ICON["stock-in"];
-              const StockOutIcon = IA_TYPE_ICON["stock-out"];
-              return (
-                <>
-                  {/* กล่องเป็นกลาง สีอยู่ที่ไอคอนครั้งเดียว — ปุ่มทึบสองสีติดกัน
-                      ในแถบเดียวดังกว่าตัวข้อมูลในตาราง (docs/DESIGN.md: หนึ่ง
-                      สัญญาณต่อหนึ่ง element) ส่วนสีตัวอักษรใช้ `-ink` ที่ผ่าน AA */}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(
-                        `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
-                        listReturnState(),
-                      )
-                    }
-                  >
-                    <StockInIcon
-                      aria-hidden="true"
-                      className="text-success-ink"
-                    />
-                    {t("addStockIn")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(
-                        `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
-                        listReturnState(),
-                      )
-                    }
-                  >
-                    <StockOutIcon
-                      aria-hidden="true"
-                      className="text-destructive"
-                    />
-                    {t("addStockOut")}
-                  </Button>
-                </>
-              );
-            })()}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="hidden sm:inline-flex"
+          >
+            {isExporting ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Download aria-hidden="true" />
+            )}
+            {isExporting ? tc("exporting") : tc("export")}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => globalThis.print()}
+            className="hidden sm:inline-flex"
+          >
+            <Printer aria-hidden="true" />
+            {tc("print")}
+          </Button>
+          {(() => {
+            const StockInIcon = IA_TYPE_ICON["stock-in"];
+            const StockOutIcon = IA_TYPE_ICON["stock-out"];
+            return (
+              <>
                 <Button
-                  size="icon"
+                  size="sm"
                   variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
+                  onClick={() =>
+                    navigate(
+                      `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
+                      listReturnState(),
+                    )
+                  }
                 >
-                  <MoreHorizontal aria-hidden="true" />
+                  <StockInIcon
+                    aria-hidden="true"
+                    className="text-success-ink"
+                  />
+                  {t("addStockIn")}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    navigate(
+                      `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
+                      listReturnState(),
+                    )
+                  }
+                >
+                  <StockOutIcon
+                    aria-hidden="true"
+                    className="text-destructive"
+                  />
+                  {t("addStockOut")}
+                </Button>
+              </>
+            );
+          })()}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-11 w-11 shrink-0 sm:hidden"
+                aria-label={tc("aria.moreActions")}
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
+                {isExporting ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Download aria-hidden="true" />
+                )}
+                {isExporting ? tc("exporting") : tc("export")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => globalThis.print()}>
+                <Printer aria-hidden="true" />
+                {tc("print")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
-        {/* Toolbar */}
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -369,52 +384,48 @@ export default function InventoryAdjustmentComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Content */}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-
-        {isGridMode && (
-          <>
-            <IaCardList
-              items={items}
-              isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={navigateToItem}
-              onDelete={setDeleteTarget}
-            />
-            {useInfiniteScroll && grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
+      }
+    >
+      {/* Content */}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
             )}
-          </>
-        )}
-      </div>
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
+
+      {isGridMode && (
+        <>
+          <IaCardList
+            items={items}
+            isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
+            onEdit={navigateToItem}
+            onDelete={setDeleteTarget}
+          />
+          {useInfiniteScroll && grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -450,6 +461,6 @@ export default function InventoryAdjustmentComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

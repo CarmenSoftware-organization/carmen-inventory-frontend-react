@@ -1,5 +1,5 @@
 // components/form/summary-footer-bar.tsx
-import { Fragment, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface SummaryItemConfig {
@@ -22,13 +22,17 @@ export function SummaryBar({ items, className }: SummaryBarProps) {
     // ยอดรวมแยกตัวเองด้วย "น้ำหนัก" ไม่ใช่ "ขนาด" — ของเดิมรายการย่อยไม่ได้ระบุ
     // ขนาดเลย จึงตกไปกิน body 17px ที่ globals.css ทำให้ตัวประกอบใหญ่กว่ายอดรวม
     // ที่ระบุ text-sm (14px) ไว้ ซึ่งกลับหัวลำดับความสำคัญ
-    <div
-      className={cn("flex items-center gap-4 text-xs tabular-nums", className)}
-    >
-      {items.map((item, i) => (
-        <Fragment key={item.key}>
-          {i > 0 && <span className="text-border">|</span>}
-          <div className="flex items-center gap-1.5">
+    // จอแคบตัดบรรทัดทีละช่อง (ป้ายกับตัวเลขไม่แยกกัน) แทนการดันทั้งแถวล้นจอ
+    // ตัวคั่นเป็น border-l ของแต่ละช่อง ไม่ใช่ตัวอักษร "|" — แถวในเลื่อนซ้าย 17px
+    // (gap 16 + เส้น 1) แล้วกรอบนอก overflow-hidden ตัดเส้นของช่องที่ขึ้นต้นบรรทัดทิ้ง
+    // ตัวคั่นจึงไม่ค้างหัว/ท้ายบรรทัดไม่ว่าจะตัดตรงไหน
+    <div className={cn("overflow-hidden text-xs tabular-nums", className)}>
+      <div className="-ml-[17px] flex flex-wrap items-center gap-x-4 gap-y-1">
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className="border-border flex items-center gap-1.5 border-l pl-4 whitespace-nowrap"
+          >
             {/* label muted + value 500 = คู่ label→value มาตรฐานของ DESIGN.md
                 (ของเดิม label เป็น 600 เท่าค่า ป้ายเลยดังเท่าตัวเลข) */}
             <span className="text-muted-foreground">{item.label}</span>
@@ -46,8 +50,8 @@ export function SummaryBar({ items, className }: SummaryBarProps) {
               </span>
             )}
           </div>
-        </Fragment>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -70,7 +74,7 @@ export function SummaryFooterBar({
   return (
     <div
       className={[
-        "bg-background sticky bottom-0 z-20 mt-auto flex flex-wrap items-center gap-3 border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4",
+        "bg-background sticky bottom-0 z-20 mt-auto flex flex-wrap items-center gap-3 border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:gap-4 lg:flex-nowrap",
         hasRecord ? "justify-between" : "justify-end",
         className,
       ]

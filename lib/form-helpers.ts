@@ -1,5 +1,25 @@
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 
+/**
+ * `setValueAs` สำหรับช่องตัวเลขที่ spread `register()` แล้ว override `onChange` เอง
+ *
+ * `onBlur` ที่ติดมากับ `register()` คือ handler ตัวเดียวกับ `onChange` ภายใน RHF — มัน
+ * อ่านค่าดิบจาก DOM (string `"10"`) เขียนทับ number ที่ `onChange` เพิ่ง `setValue`
+ * ไว้ทันทีที่โฟกัสหลุด ฟอร์มที่ Save ด้วย `draftSaveHandler` (ไม่ผ่าน zod) จึงส่ง
+ * string ไปชน `z.number()` ฝั่ง backend → 400 "expected number, received string"
+ *
+ * ว่าง/ไม่ใช่ตัวเลข → 0 ให้ตรงกับที่ `onChange` ทำ (`valueAsNumber` ของ RHF ให้ NaN
+ * กับช่องว่าง แล้วขอบแดงค้างแม้พิมพ์ 0 กลับ)
+ *
+ * @example
+ * ```tsx
+ * <InputSuffixQty {...form.register(name, { setValueAs: coerceNumberInput })} onChange={…} />
+ * ```
+ */
+export function coerceNumberInput(v: unknown): number {
+  const n = Number(v);
+  return v === "" || Number.isNaN(n) ? 0 : n;
+}
 
 /**
  * Scroll และ focus ไปยัง field แรกที่มี validation error
@@ -253,6 +273,11 @@ export function countInvalidItems(
  * ค่าที่ส่งคือ `form.getValues()` ดิบ ๆ ไม่ผ่าน zod — ทุกช่องตัวเลขในโมดูลพวกนี้
  * `setValue` เป็น `number` ตั้งแต่ `onChange` อยู่แล้ว ไม่ได้พึ่ง `z.coerce`
  * ถ้าเพิ่มช่องใหม่ที่ปล่อยค่าเป็น string ต้อง coerce ที่ตัวช่องเอง
+ *
+ * กับดัก: override แค่ `onChange` ของ `register()` ยังไม่พอ — `onBlur` ที่ spread มา
+ * ด้วยคือ handler ตัวเดียวกันใน RHF มันอ่านค่าดิบจาก DOM (`"10"`) เขียนทับ number
+ * ที่ `onChange` เพิ่ง set ไว้ทันทีที่โฟกัสหลุด แล้ว Save ก็ส่ง string ไป 400 ต้อง
+ * `register(name, { setValueAs: coerceNumberInput })` ให้ตัว register coerce เอง
  *
  * @param form - instance ของ react-hook-form
  * @param save - ตัวบันทึกจริง รับ values ของฟอร์ม

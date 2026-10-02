@@ -8,6 +8,10 @@ import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { usePurchaseRequestWorkflowStages } from "./use-purchase-request";
+import {
+  DEPARTMENT_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
 
 interface PrFilterFieldsArgs {
   viewMode: "my-pending" | "all-document";
@@ -108,13 +112,15 @@ export function usePrFilterFields({
       },
       {
         key: "department",
-        control: "department",
+        control: "entity",
+        entity: DEPARTMENT_ENTITY,
         labelKey: "field.department",
         section: "listView.sectionPeople",
       },
       {
         key: "user_id",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity(),
         labelKey: "common.requester",
         section: "listView.sectionPeople",
       },

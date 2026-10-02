@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
 import { useLocationsByProduct } from "@/hooks/use-locations-by-product";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import type { LookupListParams } from "@/hooks/use-entities-by-ids";
 import type { LocationOption } from "@/types/location";
 import { Badge } from "@/components/ui/badge";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
@@ -55,14 +56,15 @@ export function LookupProductLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) => useLocationsByProduct(productId || undefined, params, workflowId);
+  const useListHook = (
+    params: LookupListParams,
+    options?: { enabled?: boolean },
+  ) =>
+    useLocationsByProduct(productId || undefined, params, workflowId, options);
 
   const {
     items: locations,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -70,11 +72,10 @@ export function LookupProductLocation({
   } = useLookupPagination<LocationOption>({
     useListHook,
     search,
-    perpage: 30,
-    filter: (l: LocationOption) => {
-      if (excludedSet && excludedSet.has(l.id)) return false;
-      return true;
-    },
+    // ดึงตาม id ได้เฉพาะเส้นธรรมดา (user-locations/product/:id) — เส้น workflow
+    // เมิน filter และคืนทั้งชุดอยู่แล้ว จึงพึ่ง items + defaultLabel ของ caller
+    selectedIds: !workflowId && value ? [value] : [],
+    filter: excludedSet ? (l) => !excludedSet.has(l.id) : undefined,
   });
 
   return (
@@ -86,6 +87,7 @@ export function LookupProductLocation({
         if (item) onItemChange?.(item);
       }}
       items={locations}
+      selectedItems={selectedItems}
       getId={(l) => l.id}
       getLabel={(l) => `${l.name} - ${l.code}`}
       serverSideSearch

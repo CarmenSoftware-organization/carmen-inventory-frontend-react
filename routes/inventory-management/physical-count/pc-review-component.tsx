@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
 import { summarizeVariance } from "../shared/variance-summary";
@@ -18,7 +17,6 @@ export function PcReviewComponent({
   physicalCountReview,
 }: PcReviewComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const navigate = useNavigate();
   const { toList } = useListReturn("/inventory-management/physical-count");
   const submitPhysicalCount = useSubmitPhysicalCount(physicalCountReview.id);
 
@@ -55,7 +53,7 @@ export function PcReviewComponent({
       getActualQty={(d) => d.actual_qty ?? null}
       getVariance={(d) => d.diff_qty}
       getUnitName={(d) => d.inventory_unit_name}
-      onBack={() => navigate(-1)}
+      onBack={() => toList()}
       onSubmit={handleSubmit}
       isSubmitting={submitPhysicalCount.isPending}
       submitLabel={t("submitPhysicalCount")}

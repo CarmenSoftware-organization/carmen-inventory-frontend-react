@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Plus, FolderTree } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderTree } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -7,19 +7,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import SearchInput from "@/components/search-input";
 import {
-  useCategory,
+  useCategoryAll,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
 } from "@/hooks/use-category";
 import {
-  useSubCategory,
+  useSubCategoryAll,
   useCreateSubCategory,
   useUpdateSubCategory,
   useDeleteSubCategory,
 } from "@/hooks/use-sub-category";
 import {
-  useItemGroup,
+  useItemGroupAll,
   useCreateItemGroup,
   useUpdateItemGroup,
   useDeleteItemGroup,
@@ -30,7 +30,8 @@ import { useCategoryDialog } from "./use-category-dialog";
 import { CategoryDialog } from "./category-dialog";
 import type { CategoryFormValues } from "./category-form-schema";
 import TreeContent from "./tree-content";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 
 export default function CategoryComponent() {
   const t = useTranslations("productManagement.category");
@@ -48,15 +49,9 @@ export default function CategoryComponent() {
   const [deleteTarget, setDeleteTarget] = useState<CategoryNode | null>(null);
 
   // Data
-  const { data: catData, isLoading: catLoading } = useCategory({
-    perpage: -1,
-  });
-  const { data: subData, isLoading: subLoading } = useSubCategory({
-    perpage: -1,
-  });
-  const { data: igData, isLoading: igLoading } = useItemGroup({
-    perpage: -1,
-  });
+  const { data: catData, isLoading: catLoading } = useCategoryAll();
+  const { data: subData, isLoading: subLoading } = useSubCategoryAll();
+  const { data: igData, isLoading: igLoading } = useItemGroupAll();
   const isLoading = catLoading || subLoading || igLoading;
 
   // Mutations
@@ -86,9 +81,9 @@ export default function CategoryComponent() {
   // Tree
   const { categoryData, expanded, expandAll, collapseAll, toggleExpand } =
     useCategoryTree({
-      categories: catData?.data ?? [],
-      subCategories: subData?.data ?? [],
-      itemGroups: igData?.data ?? [],
+      categories: catData ?? [],
+      subCategories: subData ?? [],
+      itemGroups: igData ?? [],
       isLoading,
     });
 
@@ -124,9 +119,9 @@ export default function CategoryComponent() {
 
   // Stats
   const stats = (() => {
-    const cats = catData?.data?.length ?? 0;
-    const subs = subData?.data?.length ?? 0;
-    const igs = igData?.data?.length ?? 0;
+    const cats = catData?.length ?? 0;
+    const subs = subData?.length ?? 0;
+    const igs = igData?.length ?? 0;
     return { cats, subs, igs, total: cats + subs + igs };
   })();
 
@@ -230,21 +225,17 @@ export default function CategoryComponent() {
   };
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button onClick={() => handleAdd()} size="sm">
-              <Plus className="h-3 w-3" />
-              {t("add")}
-            </Button>
-          </div>
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      actions={
+        <DocumentListActions
+          onAdd={() => handleAdd()}
+          addLabel={t("add")}
+          hideExportPrint
+        />
+      }
+      toolbar={
         <div className="w-full">
           <SearchInput
             defaultValue={search}
@@ -252,57 +243,55 @@ export default function CategoryComponent() {
             onInputChange={setSearch}
           />
         </div>
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Summary bar */}
-        {!isLoading && (
-          <div className="text-muted-foreground flex items-center gap-3 px-1 py-1 text-xs">
-            <span className="text-foreground/70 font-semibold">
-              {t("nItems", { count: stats.total })}
-            </span>
-            <span className="text-border">|</span>
-            <span>{t("nCategories", { count: stats.cats })}</span>
-            <span className="text-border">|</span>
-            <span>{t("nSubcategories", { count: stats.subs })}</span>
-            <span className="text-border">|</span>
-            <span>{t("nItemGroups", { count: stats.igs })}</span>
-          </div>
-        )}
-
-        {/* Tree */}
-        <div className="bg-card rounded-md border">
-          {/* Header row */}
-          <div className="bg-muted/40 text-muted-foreground text-micro-legal flex h-9 items-center justify-between border-b px-2 font-semibold tracking-wider uppercase">
-            <div className="flex items-center">
-              <FolderTree className="mr-1.5 h-3 w-3" />
-              {t("categoryTree")}
-            </div>
-            <div className="flex items-center gap-1">
-              <Button onClick={expandAll} size="xs" variant="ghost">
-                <ChevronDown className="h-3 w-3" />
-                {t("expand")}
-              </Button>
-              <Button onClick={collapseAll} size="xs" variant="ghost">
-                <ChevronUp className="h-3 w-3" />
-                {t("collapse")}
-              </Button>
-            </div>
-          </div>
-
-          <ScrollArea className="h-[calc(100vh-21rem-3rem)] sm:h-[calc(100vh-11rem-3rem)]">
-            <TreeContent
-              isLoading={isLoading}
-              filteredData={filteredData}
-              expanded={search ? searchExpanded : expanded}
-              toggleExpand={toggleExpand}
-              onEdit={handleEdit}
-              onAdd={handleAdd}
-              onDelete={setDeleteTarget}
-              search={search}
-            />
-          </ScrollArea>
+      }
+    >
+      {/* Summary bar */}
+      {!isLoading && (
+        <div className="text-muted-foreground flex items-center gap-3 px-1 py-1 text-xs">
+          <span className="text-foreground/70 font-semibold">
+            {t("nItems", { count: stats.total })}
+          </span>
+          <span className="text-border">|</span>
+          <span>{t("nCategories", { count: stats.cats })}</span>
+          <span className="text-border">|</span>
+          <span>{t("nSubcategories", { count: stats.subs })}</span>
+          <span className="text-border">|</span>
+          <span>{t("nItemGroups", { count: stats.igs })}</span>
         </div>
+      )}
+
+      {/* Tree */}
+      <div className="bg-card rounded-md border">
+        {/* Header row */}
+        <div className="bg-muted/40 text-muted-foreground text-micro-legal flex h-9 items-center justify-between border-b px-2 font-semibold tracking-wider uppercase">
+          <div className="flex items-center">
+            <FolderTree className="mr-1.5 h-3 w-3" />
+            {t("categoryTree")}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button onClick={expandAll} size="xs" variant="ghost">
+              <ChevronDown className="h-3 w-3" />
+              {t("expand")}
+            </Button>
+            <Button onClick={collapseAll} size="xs" variant="ghost">
+              <ChevronUp className="h-3 w-3" />
+              {t("collapse")}
+            </Button>
+          </div>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-21rem-3rem)] sm:h-[calc(100vh-11rem-3rem)]">
+          <TreeContent
+            isLoading={isLoading}
+            filteredData={filteredData}
+            expanded={search ? searchExpanded : expanded}
+            toggleExpand={toggleExpand}
+            onEdit={handleEdit}
+            onAdd={handleAdd}
+            onDelete={setDeleteTarget}
+            search={search}
+          />
+        </ScrollArea>
       </div>
 
       <CategoryDialog
@@ -323,6 +312,6 @@ export default function CategoryComponent() {
         isPending={isDeleting}
         onConfirm={handleConfirmDelete}
       />
-    </div>
+    </ListPageShell>
   );
 }

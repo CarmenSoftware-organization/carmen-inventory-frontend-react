@@ -4,14 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
-import { getSubmitLabel } from "@/lib/form-utils";
 import {
   Field,
   FieldDatePicker,
@@ -21,7 +18,8 @@ import {
 } from "@/components/ui/field";
 import { LookupPrt } from "@/components/lookup/lookup-prt";
 import { Input } from "@/components/ui/input";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -43,7 +41,6 @@ import {
   type RfpFormValues,
 } from "./rfp-form-schema";
 import { RfpVendorFields } from "./rfp-vendor-fields";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "rfp-form";
 
@@ -59,12 +56,9 @@ export function RequestPriceListForm({
   const navigate = useNavigate();
   const { dateFormat } = useProfile();
   const t = useTranslations("vendorManagement.requestPriceList");
-  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const tc = useTranslations("common");
-  const tform = useTranslations("form");
 
   const createRfp = useCreateRequestPriceList();
   const updateRfp = useUpdateRequestPriceList();
@@ -159,91 +153,42 @@ export function RequestPriceListForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode อ่านโดยไม่ retrigger
   }, [vendorIdsKey, requestPriceList?.id]);
 
-  const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
-
   return (
-    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6">
-        <DocFormHeader
-          flush
+    <FormPageShell
+      width="wide"
+      header={
+        <FormToolbar
+          mode={f.mode}
+          formId={FORM_ID}
+          isPending={isPending}
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
-          backLabel={tc("goBack")}
           onBack={f.handleBack}
-          actions={
-            <>
-              {isView ? (
-                <>
-                  <Button size="sm" variant="outline" onClick={f.handleEdit}>
-                    <Pencil />
-                    {tc("edit")}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={f.handleCancel}
-                    disabled={isPending}
-                  >
-                    <X />
-                    {tc("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    form={FORM_ID}
-                    disabled={isPending}
-                  >
-                    <Save />
-                    {submitLabel}
-                  </Button>
-                </>
-              )}
-              {requestPriceList && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deleteRfp.isPending || isPending}
-                >
-                  <Trash2 />
-                  {tc("delete")}
-                </Button>
-              )}
-              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-              {requestPriceList && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    openActivity(requestPriceList.id, requestPriceList.name)
-                  }
-                >
-                  <History />
-                  {tActivity("title")}
-                </Button>
-              )}
-              {isView && requestPriceList?.id && (
-                <PrintDocumentButton
-                  documentType="RFP"
-                  documentId={requestPriceList.id}
-                  filters={
-                    requestPriceList.name
-                      ? { DocumentNo: requestPriceList.name }
-                      : undefined
-                  }
-                />
-              )}
-            </>
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
+          onDelete={requestPriceList ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deleteRfp.isPending}
+          activity={
+            requestPriceList && {
+              id: requestPriceList.id,
+              label: requestPriceList.name,
+            }
           }
-        />
-      </div>
-
+        >
+          {isView && requestPriceList?.id && (
+            <PrintDocumentButton
+              documentType="RFP"
+              documentId={requestPriceList.id}
+              filters={
+                requestPriceList.name
+                  ? { DocumentNo: requestPriceList.name }
+                  : undefined
+              }
+            />
+          )}
+        </FormToolbar>
+      }
+    >
       <form
         id={FORM_ID}
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -294,6 +239,13 @@ export function RequestPriceListForm({
                   <LookupPrt
                     value={field.value ?? ""}
                     onValueChange={(value) => field.onChange(value)}
+                    defaultLabel={
+                      field.value &&
+                      field.value === requestPriceList?.pricelist_template?.id
+                        ? (requestPriceList.pricelist_template.name ??
+                          undefined)
+                        : undefined
+                    }
                     disabled={isDisabled}
                     className="w-full"
                     error={form.formState.errors.pricelist_template_id?.message}
@@ -410,6 +362,6 @@ export function RequestPriceListForm({
           onConfirm={handleConfirmDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

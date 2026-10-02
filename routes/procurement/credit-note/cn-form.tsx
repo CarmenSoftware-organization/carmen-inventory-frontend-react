@@ -24,12 +24,7 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -40,6 +35,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { pickDocVersion, withFreshDetailVersions } from "@/lib/doc-version";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
 import { CnItem } from "./cn-item";
@@ -387,30 +383,44 @@ export function CnForm({ creditNote }: CnFormProps) {
   };
 
   return (
-    <div className="flex min-h-full flex-col space-y-4">
-      <CnHeader
-        creditNote={creditNote}
-        mode={mode}
-        isPending={isPending}
-        deleteIsPending={deleteCn.isPending}
-        isLocked={isLocked}
-        createdByName={createdByName}
-        onBack={handleBack}
-        onEnterEdit={() => setMode("edit")}
-        onCancel={handleCancel}
-        onShowDelete={() => setShowDelete(true)}
-        onShowComment={() => setShowComment(true)}
-      />
-
+    <FormPageShell
+      width="wide"
+      header={
+        <CnHeader
+          creditNote={creditNote}
+          mode={mode}
+          isPending={isPending}
+          deleteIsPending={deleteCn.isPending}
+          isLocked={isLocked}
+          createdByName={createdByName}
+          onBack={handleBack}
+          onEnterEdit={() => setMode("edit")}
+          onCancel={handleCancel}
+          onShowDelete={() => setShowDelete(true)}
+          onShowComment={() => setShowComment(true)}
+        />
+      }
+      footer={
+        <CnFooterAction
+          control={form.control}
+          canSubmit={
+            isAdd || (!isLocked && creditNote?.doc_status === CN_STATUS.DRAFT)
+          }
+          isPending={isPending}
+          onSubmitCn={() => setShowSubmit(true)}
+        />
+      }
+    >
       <form
         id="cn-form"
         onSubmit={draftSaveHandler(form, onSubmit)}
-        className="space-y-3 px-4"
+        className="space-y-3"
       >
         <CnGeneralFields
           form={form}
           disabled={isDisabled || isView}
           vendorName={creditNote?.vendor?.name ?? undefined}
+          savedGrn={creditNote?.grn}
         />
         <hr className="border-border" />
 
@@ -432,15 +442,6 @@ export function CnForm({ creditNote }: CnFormProps) {
           </TabsContent>
         </Tabs>
       </form>
-
-      <CnFooterAction
-        control={form.control}
-        canSubmit={
-          isAdd || (!isLocked && creditNote?.doc_status === CN_STATUS.DRAFT)
-        }
-        isPending={isPending}
-        onSubmitCn={() => setShowSubmit(true)}
-      />
 
       {/* ส่งใบแล้วย้อนไม่ได้ — ถามก่อนหนึ่งครั้ง เหมือน PR/PO/SR */}
       <ConfirmDialog
@@ -494,6 +495,6 @@ export function CnForm({ creditNote }: CnFormProps) {
           </Suspense>
         </>
       )}
-    </div>
+    </FormPageShell>
   );
 }

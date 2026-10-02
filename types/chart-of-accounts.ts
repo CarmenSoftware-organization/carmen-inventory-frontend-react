@@ -1,5 +1,4 @@
 import type { Audit } from "./audit";
-import type { EntityRef } from "./entity-ref";
 
 export enum ACCOUNT_NATURE {
   DEBIT = "debit",
@@ -16,6 +15,25 @@ export enum CHART_OF_ACCOUNT_TYPE {
   INCOME_STATEMENT = "income_statement",
   STATISTIC = "statistic",
 }
+
+export const ACCOUNT_CATEGORIES = [
+  "asset",
+  "liability",
+  "equity",
+  "revenue",
+  "expense",
+  "statistic",
+] as const;
+export type AccountCategory = (typeof ACCOUNT_CATEGORIES)[number];
+
+/** Subledger that owns a control account. Manual JV lines must not use owned accounts. */
+export type CONTROL_ACCOUNT_TYPE =
+  | "accounts_payable"
+  | "accounts_receivable"
+  | "inventory"
+  | "cash"
+  | "tax"
+  | "other";
 
 export const ACCOUNT_NATURES = [
   ACCOUNT_NATURE.DEBIT,
@@ -37,10 +55,11 @@ export interface ChartOfAccount {
   description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
+  category: AccountCategory;
   is_active: boolean;
-  // ยืนยันจาก live list+detail (id เท่านั้น ไม่มี name คู่กันบน wire เลย —
-  // null ใน 100/100 แถวที่ตรวจ) ยังไม่มี call site ในแอปอ่านฟิลด์นี้จริง
-  account_group?: EntityRef | null;
+  control_account_type?: CONTROL_ACCOUNT_TYPE | null;
+  manual_posting_allowed?: boolean;
+  allowed_source_types?: string[];
   audit?: Audit;
 }
 
@@ -51,5 +70,9 @@ export interface CreateChartOfAccountDto {
   description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: CHART_OF_ACCOUNT_TYPE;
+  category: AccountCategory;
   is_active: boolean;
+  control_account_type?: CONTROL_ACCOUNT_TYPE | null;
+  manual_posting_allowed?: boolean;
+  allowed_source_types?: string[];
 }

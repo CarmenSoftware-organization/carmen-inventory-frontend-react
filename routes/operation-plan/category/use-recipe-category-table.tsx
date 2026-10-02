@@ -11,7 +11,6 @@ import { useProfile } from "@/hooks/use-profile";
 
 interface UseRecipeCategoryTableOptions {
   categories: RecipeCategory[];
-  allCategories: RecipeCategory[];
   totalRecords: number;
   params: ParamsDto;
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
@@ -21,7 +20,6 @@ interface UseRecipeCategoryTableOptions {
 
 export function useRecipeCategoryTable({
   categories,
-  allCategories,
   totalRecords,
   params,
   tableConfig,
@@ -65,12 +63,10 @@ export function useRecipeCategoryTable({
         <DataGridColumnHeader column={column} title={t("parent")} />
       ),
       meta: { headerTitle: t("parent") },
-      cell: ({ row }) => {
-        const parentId = row.original.parent?.id;
-        if (!parentId) return <span className="text-muted-foreground">—</span>;
-        const parent = allCategories.find((c) => c.id === parentId);
-        return parent?.name ?? row.original.parent?.name ?? parentId;
-      },
+      cell: ({ row }) =>
+        row.original.parent?.name || (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     // Status ก่อน created/updated (hideStatus:true กัน useConfigTable inject ซ้ำ)
     statusColumn<RecipeCategory>(),

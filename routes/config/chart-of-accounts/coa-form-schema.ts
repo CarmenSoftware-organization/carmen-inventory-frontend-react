@@ -3,6 +3,7 @@ import type { TranslationFn } from "@/lib/i18n-schema";
 import {
   CHART_OF_ACCOUNT_TYPE,
   ACCOUNT_NATURE,
+  ACCOUNT_CATEGORIES,
 } from "@/types/chart-of-accounts";
 
 export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
@@ -18,6 +19,9 @@ export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
     }),
     type: z.enum(CHART_OF_ACCOUNT_TYPE, {
       error: tv("required", { field: tf("type") }),
+    }),
+    category: z.enum(ACCOUNT_CATEGORIES, {
+      error: tv("required", { field: tf("category") }),
     }),
     is_active: z.boolean(),
   });

@@ -18,6 +18,7 @@ const crud = createConfigCrud<ProductDetail, CreateProductDto>({
 });
 
 export const useProduct = crud.useList;
+export const useProductAll = crud.useListAll;
 
 export const useProductById = crud.useById;
 

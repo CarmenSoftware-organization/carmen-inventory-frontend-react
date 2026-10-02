@@ -15,6 +15,7 @@ const valid = {
   description_2: "",
   nature: ACCOUNT_NATURE.DEBIT,
   type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+  category: "asset",
   is_active: true,
 };
 
@@ -61,6 +62,11 @@ describe("createCoaSchema", () => {
     for (const type of ["Balance_Sheet", "balance sheet", "", "pl"]) {
       expect(schema.safeParse({ ...valid, type }).success).toBe(false);
     }
+  });
+
+  it("บังคับ category ตาม API", () => {
+    expect(schema.safeParse({ ...valid, category: undefined }).success).toBe(false);
+    expect(schema.safeParse({ ...valid, category: "unknown" }).success).toBe(false);
   });
 
   it("ไม่มี name/description เดิมหลงเหลืออยู่ในผลลัพธ์", () => {

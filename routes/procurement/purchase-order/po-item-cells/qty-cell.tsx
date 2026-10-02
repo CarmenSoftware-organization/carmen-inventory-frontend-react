@@ -14,6 +14,7 @@ import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { PoFormValues } from "../po-form-schema";
 import { WatchedProductUnit } from "./unit-cell";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 function useOrderUnitDecimals(control: Control<PoFormValues>, index: number) {
   const productId =
@@ -120,7 +121,7 @@ export const QtyUnitCell = function QtyUnitCell({
           decimals={decimals}
           placeholder="0"
           defaultValue={Number(qty)}
-          {...form.register(name)}
+          {...form.register(name, { setValueAs: coerceNumberInput })}
           onChange={(e) => {
             const n = e.target.valueAsNumber;
             form.setValue(name, Number.isNaN(n) ? 0 : n, {
@@ -228,7 +229,7 @@ export const FocQtyCell = function FocQtyCell({
           decimals={decimals}
           placeholder="0"
           defaultValue={Number(qty)}
-          {...form.register(name)}
+          {...form.register(name, { setValueAs: coerceNumberInput })}
           onChange={(e) => {
             const n = e.target.valueAsNumber;
             const next = Number.isNaN(n) ? 0 : n;

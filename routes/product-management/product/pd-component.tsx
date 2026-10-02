@@ -26,8 +26,14 @@ import type { Product, ProductDetail } from "@/types/product";
 import { getProductStatusLabel } from "@/constant/product-status";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type {
+  CategoryDto,
+  ItemGroupDto,
+  SubCategoryDto,
+} from "@/types/category";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useProductTable } from "./use-product-table";
@@ -39,6 +45,22 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+
+const CATEGORY_ENTITY = defineEntitySource<CategoryDto>({
+  fieldKey: "product_category_id",
+  useListHook: useCategory,
+  getLabel: (c) => c.name,
+});
+const SUB_CATEGORY_ENTITY = defineEntitySource<SubCategoryDto>({
+  fieldKey: "product_sub_category_id",
+  useListHook: useSubCategory,
+  getLabel: (c) => c.name,
+});
+const ITEM_GROUP_ENTITY = defineEntitySource<ItemGroupDto>({
+  fieldKey: "product_item_group_id",
+  useListHook: useItemGroup,
+  getLabel: (c) => c.name,
+});
 
 export default function ProductComponent() {
   const t = useTranslations("productManagement.product");
@@ -58,52 +80,8 @@ export default function ProductComponent() {
 
   const isGridMode = isMobile || displayMode === "grid";
 
-  const { data: categoryData } = useCategory({ perpage: -1 });
-  const { data: subCategoryData } = useSubCategory({ perpage: -1 });
-  const { data: itemGroupData } = useItemGroup({ perpage: -1 });
-
-  // ค่า option มาจาก query data (ชื่อจริง ไม่ใช่ i18n key) — memo กันไม่ให้ array
-  // reference เปลี่ยนทุก render จน productFilterFields memo ข้างล่างไม่เคย hit
-  const categoryFilterOptions = useMemo(
-    () =>
-      (categoryData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({
-          label: c.name,
-          value: `product_category_id|string:${c.id}`,
-        })),
-    [categoryData],
-  );
-
-  const subCategoryFilterOptions = useMemo(
-    () =>
-      (subCategoryData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({
-          label: c.name,
-          value: `product_sub_category_id|string:${c.id}`,
-        })),
-    [subCategoryData],
-  );
-
-  const itemGroupFilterOptions = useMemo(
-    () =>
-      (itemGroupData?.data ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => ({
-          label: c.name,
-          value: `product_item_group_id|string:${c.id}`,
-        })),
-    [itemGroupData],
-  );
-
-  // category/sub_category/item_group เป็น 3 filter อิสระต่อกัน (ไม่มี cascade ใน
-  // โค้ดเดิม — เดิม sub_category/item_group ดึงข้อมูล *ทั้งหมด* เสมอ ไม่กรองตาม
-  // category ที่เลือกเลย) จึงไม่มี linkedKeys ระหว่างกัน ผู้ใช้เลือก/ล้างแต่ละ field
-  // ได้อิสระเหมือนเดิมทุกประการ ค่า literal string (ชื่อ category จริง) ทำให้ต้องใช้
-  // control: "custom" ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select"
-  // ทั่วไป (ตัวนั้นเรียก t(option.labelKey) กับทุก option ซึ่งจะ error ถ้า label
-  // ไม่ใช่ i18n key จริง — เหมือน pattern PO_TYPE/CN_TYPE ใน Task 19)
+  // category/sub_category/item_group เป็น 3 filter อิสระต่อกัน (ไม่มี cascade) —
+  // control "entity" ค้นที่ server โหลดทีละหน้าตอนเปิด และ chip ดึงชื่อตาม id เอง
   const productFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -123,48 +101,27 @@ export default function ProductComponent() {
       },
       {
         key: "category",
-        control: "custom",
+        control: "entity",
+        entity: CATEGORY_ENTITY,
         labelKey: "field.category",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "sub_category",
-        control: "custom",
+        control: "entity",
+        entity: SUB_CATEGORY_ENTITY,
         labelKey: "field.subCategory",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={subCategoryFilterOptions}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "item_group",
-        control: "custom",
+        control: "entity",
+        entity: ITEM_GROUP_ENTITY,
         labelKey: "field.itemGroup",
         section: "listView.sectionCategory",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={itemGroupFilterOptions}
-            className="w-full"
-          />
-        ),
       },
     ],
-    [categoryFilterOptions, subCategoryFilterOptions, itemGroupFilterOptions],
+    [],
   );
 
   const lf = useListFilters({
@@ -255,24 +212,19 @@ export default function ProductComponent() {
   };
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={handleAddItem}
-            addLabel={t("add")}
-          />
-        </div>
-
-        {/* Toolbar */}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={handleAddItem}
+          addLabel={t("add")}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -283,79 +235,69 @@ export default function ProductComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Content */}
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && grid.error && (
-          <ErrorState
-            message={grid.error.message}
-            onRetry={() => grid.refetch?.()}
-          />
-        )}
-        {isGridMode &&
-          !grid.isLoading &&
-          !grid.error &&
-          products.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {products.map((item) => (
-                  <ProductCard
-                    key={item.id}
-                    item={item}
-                    onEdit={(p) =>
-                      navigate(
-                        `/product-management/product/${p.id}`,
-                        listReturnState(),
-                      )
-                    }
-                    onDelete={setDeleteTarget}
-                  />
-                ))}
-              </div>
-              {grid.hasMore && (
-                <div
-                  ref={grid.sentinelRef}
-                  className="flex justify-center py-4"
-                >
-                  {grid.isLoadingMore && (
-                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                  )}
-                </div>
+      }
+    >
+      {/* Content */}
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && grid.error && (
+        <ErrorState
+          message={grid.error.message}
+          onRetry={() => grid.refetch?.()}
+        />
+      )}
+      {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((item) => (
+              <ProductCard
+                key={item.id}
+                item={item}
+                onEdit={(p) =>
+                  navigate(
+                    `/product-management/product/${p.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            </>
+            </div>
           )}
-        {isGridMode &&
-          !grid.isLoading &&
-          !grid.error &&
-          products.length === 0 && <EmptyComponent />}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            tableLayout={{ headerSticky: true }}
-            isLoading={isLoading}
-            emptyMessage={<EmptyComponent />}
+        </>
+      )}
+      {isGridMode &&
+        !grid.isLoading &&
+        !grid.error &&
+        products.length === 0 && <EmptyComponent />}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          tableLayout={{ headerSticky: true }}
+          isLoading={isLoading}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <div className="flex-1 overflow-auto">
-                <div className="min-w-300">
-                  <DataGridTable />
-                </div>
+            <div className="flex-1 overflow-auto">
+              <div className="min-w-300">
+                <DataGridTable />
               </div>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -383,6 +325,6 @@ export default function ProductComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

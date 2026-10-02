@@ -1,7 +1,5 @@
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DataGrid,
   DataGridContainer,
@@ -13,7 +11,8 @@ import SearchInput from "@/components/search-input";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useNotificationTemplates } from "@/hooks/use-notification-template";
 import { useNotiTmplTable } from "./use-noti-tmpl-table";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 
 const LIST_PATH = "/system-admin/notification-template";
 
@@ -28,6 +27,7 @@ const APP_CHANNEL_ONLY = "type:app";
 
 export default function NotificationTemplateComponent() {
   const t = useTranslations("systemAdmin.notificationTemplate");
+  const navigate = useNavigate();
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "name:asc",
   });
@@ -50,23 +50,25 @@ export default function NotificationTemplateComponent() {
   }
 
   return (
-    <div className="space-y-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <DocumentListHeader
-          title={t("title")}
-          description={t("desc")}
-          count={totalRecords}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onAdd={() => navigate(`${LIST_PATH}/new`)}
+          addLabel={t("add")}
+          hideExportPrint
         />
-        <Button asChild size="sm">
-          <Link to={`${LIST_PATH}/new`}>
-            <Plus aria-hidden />
-            {t("add")}
-          </Link>
-        </Button>
-      </div>
-
-      <SearchInput defaultValue={search} onSearch={setSearch} />
-
+      }
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-auto sm:flex-initial">
+            <SearchInput defaultValue={search} onSearch={setSearch} />
+          </div>
+        </div>
+      }
+    >
       <DataGrid
         table={table}
         recordCount={totalRecords}
@@ -78,6 +80,6 @@ export default function NotificationTemplateComponent() {
           <DataGridPagination />
         </DataGridContainer>
       </DataGrid>
-    </div>
+    </ListPageShell>
   );
 }

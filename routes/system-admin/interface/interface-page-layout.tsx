@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router";
-import { Loader2, Pencil, Save, X } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Button } from "@/components/ui/button";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { ErrorState } from "@/components/ui/error-state";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
@@ -68,7 +68,7 @@ export function InterfacePageLayout({
   readonly saveLabel: string;
   readonly children: React.ReactNode;
 }) {
-  const tc = useTranslations("common");
+  const t = useTranslations("systemAdmin.interface");
   // เปิดหน้ามาเป็นโหมดอ่านเสมอ — การตั้งค่า interface เป็นของที่คนเข้ามาดูบ่อยกว่าแก้
   // และแก้พลาดแล้วทำให้การเชื่อมต่อล่มทั้ง BU
   const [isEditing, setIsEditing] = useState(false);
@@ -95,61 +95,24 @@ export function InterfacePageLayout({
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">{description}</p>
-        </div>
-        {!isError && !isLoading && (
-          <div className="flex shrink-0 items-center gap-2">
-            {isEditing ? (
-              <>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    onCancel();
-                    setIsEditing(false);
-                  }}
-                  disabled={isSaving}
-                >
-                  <X className="size-3.5" aria-hidden="true" />
-                  {tc("cancel")}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={guardedSave}
-                  disabled={isSaving || isExpired}
-                >
-                  {isSaving ? (
-                    <Loader2
-                      className="size-3.5 animate-spin"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <Save className="size-3.5" aria-hidden="true" />
-                  )}
-                  {saveLabel}
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                disabled={isExpired}
-              >
-                <Pencil className="size-3.5" aria-hidden="true" />
-                {tc("edit")}
-              </Button>
-            )}
-          </div>
-        )}
-      </header>
-
+    <FormPageShell
+      header={
+        <FormToolbar
+          mode={isEditing ? "edit" : "view"}
+          formId="interface-config-form"
+          isPending={isSaving}
+          title={title}
+          subtitle={description}
+          submitLabel={saveLabel}
+          writeDisabledReason={isExpired ? t("expiredNotice") : undefined}
+          onCancel={() => {
+            onCancel();
+            setIsEditing(false);
+          }}
+          onEdit={!isError && !isLoading ? () => setIsEditing(true) : undefined}
+        />
+      }
+    >
       {isError && <ErrorState message={errorMessage} onRetry={onRetry} />}
 
       {!isError && isLoading && (
@@ -163,7 +126,7 @@ export function InterfacePageLayout({
       )}
 
       {!isError && !isLoading && (
-        <form onSubmit={guardedSave}>
+        <form id="interface-config-form" onSubmit={guardedSave}>
           {/* `min-w-0` เพราะ fieldset ตั้ง min-width เป็น min-content เอง ซึ่งทำให้
               grid ข้างในล้นออกนอกกรอบเมื่อจอแคบ */}
           <fieldset disabled={!isEditing} className="min-w-0 border-0 p-0">
@@ -181,6 +144,6 @@ export function InterfacePageLayout({
         onCancel={navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }

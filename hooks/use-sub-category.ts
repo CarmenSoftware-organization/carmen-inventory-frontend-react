@@ -10,6 +10,7 @@ const crud = createConfigCrud<SubCategoryDto, CreateSubCategoryDto>({
 });
 
 export const useSubCategory = crud.useList;
+export const useSubCategoryAll = crud.useListAll;
 
 export const useSubCategoryById = crud.useById;
 

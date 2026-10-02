@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -36,12 +37,26 @@ function fieldError(form: Form, name: FormName): string | undefined {
   return typeof msg === "string" ? msg : undefined;
 }
 
+/**
+ * กรอบของค่าในโหมดดู — ขนาด/เส้นเท่า input ของโหมดแก้ กด Edit แล้ว layout ไม่กระโดด
+ * export ไว้ให้ช่องที่ render เอง (เช่น `LookupCurrency` แบบ readOnly) ใช้กรอบเดียวกัน
+ */
+export const VIEW_BOX_CLASS =
+  "bg-muted/50 min-h-8 w-full rounded-md border px-3 py-1.5 text-sm";
+
+/**
+ * ช่องแบบอ่านอย่างเดียว — ค่าอยู่ในกรอบ `VIEW_BOX_CLASS`
+ *
+ * @param example - ตัวอย่างผลลัพธ์ของค่า (เช่น pattern วันที่ → วันนี้ในรูปแบบนั้น)
+ *   แสดงจาง ๆ ต่อท้ายค่า
+ */
 export function SettingField({
   label,
   value,
   description,
   mono,
   fullWidth,
+  example,
   children,
 }: {
   readonly label: string;
@@ -49,6 +64,7 @@ export function SettingField({
   readonly description?: string;
   readonly mono?: boolean;
   readonly fullWidth?: boolean;
+  readonly example?: string | null;
   readonly children?: React.ReactNode;
 }) {
   const isEmpty =
@@ -62,15 +78,25 @@ export function SettingField({
         </p>
       )}
       {children ?? (
-        <div
+        <FieldPlainText
           className={cn(
-            "bg-muted/50 text-foreground min-h-8 rounded-md border px-3 py-1.5 text-sm break-words",
+            VIEW_BOX_CLASS,
+            "flex flex-wrap items-center gap-x-2 break-words",
             mono && "font-mono text-xs",
             isEmpty && "text-muted-foreground/60",
           )}
         >
-          {isEmpty ? "—" : value}
-        </div>
+          {isEmpty ? null : (
+            <>
+              <span className="min-w-0">{value}</span>
+              {example && (
+                <span className="text-muted-foreground font-sans text-xs font-normal tabular-nums">
+                  → {example}
+                </span>
+              )}
+            </>
+          )}
+        </FieldPlainText>
       )}
     </div>
   );
@@ -130,11 +156,12 @@ export function EditableField({
   readonly mono?: boolean;
   readonly maxLength?: number;
 }) {
+  // โหมดดูไม่โชว์ description — ส่วนใหญ่แค่ทวน label ("Hotel Email: Contact email of
+  // the hotel") ช่วยตอนกรอก แต่ตอนอ่านเป็นแค่เสียงรบกวน
   if (!editing) {
     return (
       <SettingField
         label={label}
-        description={description}
         value={displayValue}
         mono={mono}
         fullWidth={fullWidth}
@@ -187,12 +214,14 @@ function SelectControl({
   options,
   placeholder,
   id,
+  exampleOf,
 }: {
   readonly form: Form;
   readonly name: FormName;
   readonly options: readonly string[];
   readonly placeholder?: string;
   readonly id?: string;
+  readonly exampleOf?: (option: string) => string | null;
 }) {
   return (
     <Controller
@@ -210,11 +239,21 @@ function SelectControl({
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
-              {merged.map((o) => (
-                <SelectItem key={o} value={o} className="text-sm">
-                  {o}
-                </SelectItem>
-              ))}
+              {merged.map((o) => {
+                const ex = exampleOf?.(o);
+                return (
+                  <SelectItem key={o} value={o} className="text-sm">
+                    {o}
+                    {/* ตัวอย่างโชว์เฉพาะในรายการ — ใน trigger มันโดนตัดครึ่ง
+                        (Radix คัดลอก ItemText ทั้งก้อนไปแสดงที่ trigger) */}
+                    {ex && (
+                      <span className="text-muted-foreground text-xs tabular-nums in-data-[slot=select-value]:hidden">
+                        → {ex}
+                      </span>
+                    )}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         );
@@ -233,6 +272,8 @@ export function SelectField({
   placeholder,
   displayValue,
   fullWidth,
+  mono,
+  exampleOf,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -241,16 +282,20 @@ export function SelectField({
   readonly description?: string;
   readonly options: readonly string[];
   readonly placeholder?: string;
-  readonly displayValue?: string | number | null;
+  readonly displayValue?: string | null;
   readonly fullWidth?: boolean;
+  readonly mono?: boolean;
+  /** ตัวอย่างผลลัพธ์ของแต่ละตัวเลือก — โชว์ทั้งตอนดู (ของค่าปัจจุบัน) และใน dropdown */
+  readonly exampleOf?: (option: string) => string | null;
 }) {
   if (!editing) {
     return (
       <SettingField
         label={label}
-        description={description}
         value={displayValue}
         fullWidth={fullWidth}
+        mono={mono}
+        example={displayValue ? exampleOf?.(displayValue) : null}
       />
     );
   }
@@ -267,6 +312,7 @@ export function SelectField({
         options={options}
         placeholder={placeholder}
         id={name}
+        exampleOf={exampleOf}
       />
     </EditShell>
   );
@@ -291,14 +337,11 @@ export function NumberFormatField({
   localesPlaceholder,
   digitsPlaceholder,
   showDigits = true,
+  example,
 }: {
   readonly editing: boolean;
   readonly form: Form;
-  readonly name:
-    | "amount_format"
-    | "quantity_format"
-    | "perpage_format"
-    | "recipe_format";
+  readonly name: "amount_format" | "quantity_format" | "recipe_format";
   readonly label: string;
   readonly description?: string;
   readonly displayValue?: string | null;
@@ -306,14 +349,12 @@ export function NumberFormatField({
   readonly localesPlaceholder: string;
   readonly digitsPlaceholder: string;
   readonly showDigits?: boolean;
+  /** ตัวอย่างตัวเลขที่จัดรูปแบบตามค่าปัจจุบัน (โหมดดูเท่านั้น) */
+  readonly example?: string | null;
 }) {
   if (!editing) {
     return (
-      <SettingField
-        label={label}
-        description={description}
-        value={displayValue}
-      />
+      <SettingField label={label} value={displayValue} example={example} />
     );
   }
   return (

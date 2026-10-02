@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
 import { useTranslations } from "use-intl";
-import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { toast } from "sonner";
@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
 import {
   useStoreRequisition,
   useMyPendingStoreRequisition,
@@ -25,35 +24,51 @@ import {
 } from "./use-sr";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { StoreRequisition } from "@/types/store-requisition";
-import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { ListToolbar } from "@/components/list-filter/list-toolbar";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { FieldLabel } from "@/components/ui/field";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
 import { SR_TYPE } from "@/types/store-requisition";
-import { SrFilterFromLocation } from "./sr-filter-from-location";
-import { SrFilterToLocation } from "./sr-filter-to-location";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import { ACTIVE_ONLY_FILTER } from "@/hooks/use-lookup-pagination";
+import { useConfigLocation } from "@/hooks/use-location";
+import type { Location } from "@/types/location";
 import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
-import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+import {
+  DEPARTMENT_ENTITY,
+  requesterEntity,
+} from "@/components/filter/entity-sources";
+
+// คลังต้นทางของใบเบิกเป็นได้แค่ inventory/consignment (กติกาเดิมของตัวกรองนี้)
+// location_type|enum: ต้องอยู่ท้าย clause — ค่า enum คั่นด้วย `,`
+const FROM_LOCATION_ENTITY = defineEntitySource<Location>({
+  fieldKey: "from_location_id",
+  useListHook: useConfigLocation,
+  getLabel: (l) => `${l.code} - ${l.name}`,
+  serverFilter: `${ACTIVE_ONLY_FILTER},location_type|enum:inventory,consignment`,
+});
+const TO_LOCATION_ENTITY = defineEntitySource<Location>({
+  fieldKey: "to_location_id",
+  useListHook: useConfigLocation,
+  getLabel: (l) => `${l.code} - ${l.name}`,
+});
 
 export default function StoreRequisitionComponent() {
   const t = useTranslations("storeOperation.storeRequisition");
@@ -203,39 +218,29 @@ export default function StoreRequisitionComponent() {
       },
       {
         key: "from_location",
-        control: "custom",
+        control: "entity",
+        entity: FROM_LOCATION_ENTITY,
         labelKey: "field.fromLocation",
         section: "listView.sectionLocation",
-        render: (value, onChange) => (
-          <SrFilterFromLocation
-            value={value}
-            onChange={onChange}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "to_location",
-        control: "custom",
+        control: "entity",
+        entity: TO_LOCATION_ENTITY,
         labelKey: "field.toLocation",
         section: "listView.sectionLocation",
-        render: (value, onChange) => (
-          <SrFilterToLocation
-            value={value}
-            onChange={onChange}
-            className="w-full"
-          />
-        ),
       },
       {
         key: "user_id",
-        control: "requester",
+        control: "entity",
+        entity: requesterEntity(),
         labelKey: "common.requester",
         section: "listView.sectionPeople",
       },
       {
         key: "department",
-        control: "department",
+        control: "entity",
+        entity: DEPARTMENT_ENTITY,
         labelKey: "field.department",
         section: "listView.sectionPeople",
       },
@@ -371,151 +376,90 @@ export default function StoreRequisitionComponent() {
     return <ErrorState error={listError} onRetry={() => listRefetch?.()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        {/* Header */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={handleAdd}
-            addLabel={t("add")}
-            addDisabled={!canCreateSr}
-          />
-        </div>
-
-        {/* Toolbar — ระยะระหว่างกลุ่ม (ค้นหา/กรอง vs มุมมอง) กว้างกว่าระยะในกลุ่ม
-            ไม่งั้นจอแคบลงมาสองก้อนชนกันที่ 8px แล้วอ่านเป็นแถวเดียวกันหมด */}
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <div className="flex w-full min-w-0 items-center gap-2">
-            <div className="flex-1 sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            {/* กรองเยอะจนไม่พอ ให้ตัวกรองขึ้นบรรทัดใหม่กันเอง อย่าไปดัน toggle ตก */}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={handleAdd}
+          addLabel={t("add")}
+          addDisabled={!canCreateSr}
+        />
+      }
+      toolbar={
+        <ListToolbar
+          search={search}
+          onSearch={setSearch}
+          lf={lf}
+          fields={srFilterFields}
+          onSaveViewClick={() => setSaveViewDialogOpen(true)}
+          table={table}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+          beforeViewSelector={
             <ViewModeToggle
               value={viewMode}
               onChange={handleViewModeChange}
               myPendingLabel={t("myPending")}
               allDocumentsLabel={t("allDocuments")}
-              className="hidden sm:flex sm:min-w-0 sm:flex-wrap sm:items-center sm:gap-2"
+              className="hidden items-center gap-2 sm:flex"
             />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={srFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={lf.clearAll}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          {/* กลุ่มขวา = เครื่องมือมุมมอง อยู่บรรทัดใต้ช่องค้นหา ชิดขวา (ml-auto)
-              ปิดท้ายด้วย toggle list/grid ให้เป็นของขวาสุดเสมอ */}
-          <div className="ml-auto hidden shrink-0 items-center gap-2 sm:flex">
-            {displayMode === "list" && (
-              <div className="hidden sm:block">
-                <DataGridSortMenu table={table} />
-                <DataGridColumnVisibility
-                  table={table}
-                  trigger={
-                    <Button
-                      size="icon-sm"
-                      variant="outline"
-                      aria-label={tc("aria.toggleColumns")}
-                    >
-                      <Columns3 className="size-4" />
-                    </Button>
-                  }
-                />
-              </div>
+          }
+        />
+      }
+    >
+      {/* Content */}
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          // 11 คอลัมน์ ยัดให้พอดีจอทำให้ทุกช่องถูกบีบจนอ่านไม่ออก — min-w-max
+          // ให้ตารางกว้างเท่าผลรวม size ของคอลัมน์ที่เปิดอยู่ แล้วเลื่อนแนวนอนเอา
+          // (ผูกกับ column visibility เอง ไม่ต้องฮาร์ดโค้ดตัวเลข)
+          tableClassNames={{ base: "min-w-max" }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
             )}
-            <div className="hidden items-center rounded-md border sm:flex">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {/* Content */}
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            // 11 คอลัมน์ ยัดให้พอดีจอทำให้ทุกช่องถูกบีบจนอ่านไม่ออก — min-w-max
-            // ให้ตารางกว้างเท่าผลรวม size ของคอลัมน์ที่เปิดอยู่ แล้วเลื่อนแนวนอนเอา
-            // (ผูกกับ column visibility เอง ไม่ต้องฮาร์ดโค้ดตัวเลข)
-            tableClassNames={{ base: "min-w-max" }}
-            emptyMessage={<EmptyComponent />}
           >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
-              )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
-        {isGridMode && (
-          <>
-            <SrCardList
-              items={items}
-              isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(item) =>
-                navigate(
-                  `/store-operation/store-requisition/${item.id}`,
-                  listReturnState(),
-                )
-              }
-              onDelete={setDeleteTarget}
-            />
-            {useInfiniteScroll && grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {isGridMode && (
+        <>
+          <SrCardList
+            items={items}
+            isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
+            onEdit={(item) =>
+              navigate(
+                `/store-operation/store-requisition/${item.id}`,
+                listReturnState(),
+              )
+            }
+            onDelete={setDeleteTarget}
+          />
+          {useInfiniteScroll && grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -543,6 +487,6 @@ export default function StoreRequisitionComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

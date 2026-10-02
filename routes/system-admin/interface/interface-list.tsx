@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
@@ -42,7 +43,10 @@ export type CategoryGroup = {
 export function interfaceGroups(
   categories: readonly InterfaceCategoryDef[],
   configs: readonly AppConfig[],
-  entitlementOf: (categoryKey: string, brandKey: string) => InterfaceEntitlement,
+  entitlementOf: (
+    categoryKey: string,
+    brandKey: string,
+  ) => InterfaceEntitlement,
 ): readonly CategoryGroup[] {
   const byKey = new Map(configs.map((c) => [c.key, c]));
   return categories
@@ -64,15 +68,14 @@ export default function InterfaceList() {
   const { entitlementOf } = useInterfaceEntitlement();
   const { data, isLoading, isError, refetch } = useInterfaceConfigs();
 
-  const groups = interfaceGroups(INTERFACE_CATEGORIES, data ?? [], entitlementOf);
+  const groups = interfaceGroups(
+    INTERFACE_CATEGORIES,
+    data ?? [],
+    entitlementOf,
+  );
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6">
-        <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground mt-0.5 text-sm">{t("desc")}</p>
-      </header>
-
+    <ListPageShell title={t("title")} description={t("desc")}>
       {isError && (
         <ErrorState message={t("loadError")} onRetry={() => refetch()} />
       )}
@@ -132,6 +135,6 @@ export default function InterfaceList() {
           })}
         </div>
       )}
-    </div>
+    </ListPageShell>
   );
 }

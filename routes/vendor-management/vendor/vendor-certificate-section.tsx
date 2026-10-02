@@ -18,6 +18,8 @@ import { SettingSection } from "@/components/ui/setting-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Certification } from "@/types/certification";
 import { useCertification } from "../shared/use-certification";
 import {
   useDeleteVendorCertificate,
@@ -48,9 +50,20 @@ export function VendorCertificateSection({
   // สำเร็จ (onSuccess → form.reset + setMode("view")) section นี้ re-render
   // 245,156 รอบใน 60 วิ หน้าค้างสนิท · ใส่ memo แล้วเหลือ 5 รอบ 22ms
   const items = useMemo(() => data?.data ?? [], [data]);
-  const { data: masterData } = useCertification({ perpage: -1 });
-  const masterMap = new Map(
-    (masterData?.data ?? []).map((c) => [c.id, c] as const),
+  // master เฉพาะที่แถวของ vendor นี้อ้างถึง (ดึงตาม id) · memo บน `items` /
+  // `masters` ที่ reference นิ่ง — masterMap เป็น dep ของ columns ถ้าสร้างใหม่ทุก
+  // render section นี้จะวน render แบบเดียวกับบั๊ก 245,156 รอบข้างบน
+  const masterIds = useMemo(
+    () => items.map((i) => i.master_certificate_id),
+    [items],
+  );
+  const { items: masters } = useEntitiesByIds<Certification>({
+    useListHook: useCertification,
+    ids: masterIds,
+  });
+  const masterMap = useMemo(
+    () => new Map(masters.map((c) => [c.id, c] as const)),
+    [masters],
   );
 
   const deleteCert = useDeleteVendorCertificate();
@@ -105,8 +118,7 @@ export function VendorCertificateSection({
         size: 200,
         cell: ({ row }) => (
           <span className="font-medium">
-            {masterMap.get(row.original.master_certificate_id)?.name ??
-              row.original.master_certificate_id}
+            {masterMap.get(row.original.master_certificate_id)?.name ?? ""}
           </span>
         ),
       },
@@ -178,8 +190,7 @@ export function VendorCertificateSection({
             } as ColumnDef<VendorCertificate>,
           ]),
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- masterMap สร้างใหม่ทุก render
-    [readOnly, dateFormat, tfl, tc, masterData],
+    [readOnly, dateFormat, tfl, tc, masterMap],
   );
 
   const table = useReactTable({

@@ -12,7 +12,6 @@ import {
   useCommitInventoryAdjustment,
   useVoidInventoryAdjustment,
 } from "./use-inventory-adjustment";
-import { useAdjustmentType } from "@/hooks/use-adjustment-type";
 import { useProfile } from "@/hooks/use-profile";
 import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";
 import {
@@ -43,6 +42,7 @@ import {
 import { AdjItemFields } from "./ia-item-fields";
 import { DocumentInfo } from "./ia-doc-info";
 import { AdjSummaryFooter } from "./ia-summary";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { IaFormHero } from "./ia-form-hero";
 import { Check } from "lucide-react";
 
@@ -88,12 +88,6 @@ export function InventoryAdjustmentForm({
     adjustmentType === "stock-in"
       ? ADJUSTMENT_TYPE.STOCK_IN
       : ADJUSTMENT_TYPE.STOCK_OUT;
-  const { data: adjTypeData } = useAdjustmentType({ perpage: -1 });
-  const adjTypes =
-    adjTypeData?.data?.filter(
-      (at) => at.is_active && at.type === adjTypeFilter,
-    ) ?? [];
-
   const defaultValues = getDefaultValues(
     inventoryAdjustment,
     currentPeriod?.end_at,
@@ -333,28 +327,40 @@ export function InventoryAdjustmentForm({
     }
   };
 
-  // shell เดียวกับ price-list / company-profile / config forms: กล่องกลางจอ
-  // max-w-4xl, header วางบนพื้นตรง ๆ (ไม่มี card), เนื้อแบ่งเป็น SettingSection
   return (
-    // flex min-h-full flex-col = ให้แถบสรุปที่มี mt-auto ถูกดันไปติดก้นจอจริง
-    // แม้เนื้อหาจะสั้นกว่าหน้าจอ (โครงเดียวกับ po-form)
-    <div className="mx-auto flex min-h-full max-w-4xl flex-col p-[max(1rem,env(safe-area-inset-bottom))]">
-      <IaFormHero
-        adjustmentType={adjustmentType}
-        inventoryAdjustment={inventoryAdjustment}
-        form={form}
-        typeLabel={typeLabel}
-        mode={mode}
-        isReadOnly={isReadOnly}
-        isPending={isPending}
-        deleteIsPending={deleteAdj.isPending}
-        formId="inventory-adjustment-form"
-        onBack={handleBack}
-        onCancel={handleCancel}
-        onEdit={() => setMode("edit")}
-        onDelete={() => setShowDelete(true)}
-      />
-
+    // footer = แถบสรุป (mt-auto) — FormPageShell ยืดเต็มจอให้มันติดก้นจอเมื่อเนื้อสั้น
+    <FormPageShell
+      header={
+        <IaFormHero
+          adjustmentType={adjustmentType}
+          inventoryAdjustment={inventoryAdjustment}
+          form={form}
+          typeLabel={typeLabel}
+          mode={mode}
+          isReadOnly={isReadOnly}
+          isPending={isPending}
+          deleteIsPending={deleteAdj.isPending}
+          formId="inventory-adjustment-form"
+          onBack={handleBack}
+          onCancel={handleCancel}
+          onEdit={() => setMode("edit")}
+          onDelete={() => setShowDelete(true)}
+        />
+      }
+      footer={
+        <AdjSummaryFooter
+          form={form}
+          formatter={formatter}
+          t={t}
+          canVoid={isEdit && !!inventoryAdjustment && !isReadOnly}
+          canCommit={!isView}
+          isPending={isPending}
+          voidIsPending={voidAdj.isPending}
+          onVoid={() => setShowVoid(true)}
+          onCommit={openCommitDialog}
+        />
+      }
+    >
       <form
         id="inventory-adjustment-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -362,13 +368,13 @@ export function InventoryAdjustmentForm({
         )}
         // คอลัมน์เดียว — ยอดรวมย้ายลง footer bar แล้ว ตารางรายการจึงได้ 20rem
         // ที่ sidebar เคยกินคืนไป (DESIGN.md: an ERP table wants the pixels)
-        className="mt-6 min-w-0"
+        className="min-w-0"
       >
         <DocumentInfo
           form={form}
           isView={isView}
           isDisabled={isDisabled}
-          adjTypes={adjTypes}
+          adjustmentKind={adjTypeFilter}
           inventoryAdjustment={inventoryAdjustment}
           currentPeriodStart={currentPeriod?.start_at}
           currentPeriodEnd={currentPeriod?.end_at}
@@ -385,19 +391,6 @@ export function InventoryAdjustmentForm({
           adjustmentType={adjustmentType}
         />
       </form>
-
-      {/* footer อยู่นอก form เป็นพี่น้องกัน (โครงเดียวกับ po-form) */}
-      <AdjSummaryFooter
-        form={form}
-        formatter={formatter}
-        t={t}
-        canVoid={isEdit && !!inventoryAdjustment && !isReadOnly}
-        canCommit={!isView}
-        isPending={isPending}
-        voidIsPending={voidAdj.isPending}
-        onVoid={() => setShowVoid(true)}
-        onCommit={openCommitDialog}
-      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 
@@ -480,6 +473,6 @@ export function InventoryAdjustmentForm({
         isPending={isPending}
         onConfirm={confirmCommit}
       />
-    </div>
+    </FormPageShell>
   );
 }

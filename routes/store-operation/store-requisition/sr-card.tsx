@@ -20,6 +20,7 @@ interface SrCardProps {
 export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const tc = useTranslations("common");
   const { dateFormat } = useProfile();
 
   return (
@@ -27,6 +28,9 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
       title={item.sr_no}
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
+      deleteDisabledTitle={
+        item.doc_status === "draft" ? undefined : tc("deleteOnlyDraft")
+      }
     >
       <ListCardStatusRow status={item.doc_status} label={ts(item.doc_status)} />
       <ListCardSendBackRow lastAction={item.last_action} />

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/input/input-suffix";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import type { PrFormValues } from "./pr-form-schema";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 /**
  * ช่องกรอกส่วนลดกับภาษีของรายการ — ก้อนเดียวจบ
@@ -67,7 +68,10 @@ export function PrDiscountInput({
         disabled={override}
         className="disabled:bg-muted disabled:text-muted-foreground h-8 w-12 flex-none rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
         defaultValue={rate ?? 0}
-        {...form.register(`items.${index}.discount_rate`)}
+        {...form.register(`items.${index}.discount_rate`, {
+          // clamp ซ้ำตอน blur — DOM ยังถือ "150" อยู่แม้ onChange จะ set 100 ไปแล้ว
+          setValueAs: (v) => Math.min(100, Math.max(0, coerceNumberInput(v))),
+        })}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
           // clamp 0–100 (ส่วนลดเกิน 100% ไม่มีความหมาย)

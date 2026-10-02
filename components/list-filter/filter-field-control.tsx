@@ -3,9 +3,11 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { FilterAmountRange } from "@/components/filter/filter-amount-range";
 import { FilterDate } from "@/components/filter/filter-date";
-import { FilterDepartment } from "@/components/filter/filter-department";
-import { FilterRequester } from "@/components/filter/filter-requester";
-import { FilterVendor } from "@/components/filter/filter-vendor";
+import { EntityMultiFilter } from "@/components/filter/entity-multi-filter";
+import {
+  entityGetId,
+  entityServerFilter,
+} from "@/components/filter/entity-filter-source";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { FilterWorkflow } from "@/components/filter/filter-workflow";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
@@ -63,28 +65,24 @@ export function FilterFieldControl({ field, value, onChange, peer }: Props) {
           className="w-full"
         />
       );
-    case "department":
+    case "entity": {
+      const source = field.entity;
       return (
-        <FilterDepartment
+        <EntityMultiFilter
           value={value}
           onChange={onChange}
           className="w-full"
+          fieldKey={source.fieldKey}
+          label={t(field.labelKey)}
+          useListHook={source.useListHook}
+          getId={entityGetId(source)}
+          getLabel={source.getLabel}
+          serverFilter={entityServerFilter(source)}
+          idFilterKey={source.idFilterKey}
+          bareIds={source.bareIds}
         />
       );
-    case "vendor":
-      return (
-        <FilterVendor value={value} onChange={onChange} className="w-full" />
-      );
-    case "requester":
-      return (
-        <FilterRequester
-          value={value}
-          onChange={onChange}
-          fieldKey={field.fieldKey}
-          label={field.labelKey ? t(field.labelKey) : undefined}
-          className="w-full"
-        />
-      );
+    }
     case "stage":
       return (
         <FilterStage

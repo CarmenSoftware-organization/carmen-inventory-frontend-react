@@ -4,16 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useEntityForm } from "@/hooks/use-entity-form";
-import { getSubmitLabel } from "@/lib/form-utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormPageShell } from "@/components/share/form-page-shell";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import {
   useCreateVendor,
   useDeleteVendor,
@@ -33,7 +31,6 @@ import { VendorGeneral } from "./vendor-general";
 import { VendorInfo } from "./vendor-info";
 import { VendorAddress } from "./vendor-address";
 import { VendorContact } from "./vendor-contact";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "vendor-form";
 
@@ -47,12 +44,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
   "use no memo";
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.vendor");
-  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const tc = useTranslations("common");
-  const tform = useTranslations("form");
 
   const createVendor = useCreateVendor();
   const updateVendor = useUpdateVendor();
@@ -75,7 +69,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
       setRemovedContactIds([]);
     },
   });
-  const { form, isView, isAdd, isEdit, isDisabled } = f;
+  const { form, isAdd, isEdit, isDisabled } = f;
 
   const {
     fields: infoFields,
@@ -214,17 +208,21 @@ export function VendorForm({ vendor }: VendorFormProps) {
     });
   };
 
-  const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
-
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-6">
-        <DocFormHeader
-          flush
+    <FormPageShell
+      header={
+        <FormToolbar
+          mode={f.mode}
+          formId={FORM_ID}
+          isPending={isPending}
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
-          backLabel={tc("goBack")}
           onBack={f.handleBack}
+          onCancel={f.handleCancel}
+          onEdit={f.handleEdit}
+          onDelete={vendor ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deleteVendor.isPending}
+          activity={vendor && { id: vendor.id, label: vendor.code }}
           badges={
             <>
               {watchedCode && (
@@ -235,65 +233,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
               {!isAdd && <StatusBadge active={watchedActive} />}
             </>
           }
-          actions={
-            <>
-              {isView ? (
-                <Button size="sm" variant="outline" onClick={f.handleEdit}>
-                  <Pencil />
-                  {tc("edit")}
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={f.handleCancel}
-                    disabled={isPending}
-                  >
-                    <X />
-                    {tc("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    form={FORM_ID}
-                    disabled={isPending}
-                  >
-                    <Save />
-                    {submitLabel}
-                  </Button>
-                </>
-              )}
-              {vendor && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deleteVendor.isPending || isPending}
-                >
-                  <Trash2 />
-                  {tc("delete")}
-                </Button>
-              )}
-              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-              {vendor && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => openActivity(vendor.id, vendor.code)}
-                >
-                  <History />
-                  {tActivity("title")}
-                </Button>
-              )}
-            </>
-          }
         />
-      </div>
-
+      }
+    >
       <form
         id={FORM_ID}
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -356,6 +298,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
           onConfirm={handleConfirmDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

@@ -72,11 +72,7 @@ export function HistoryTimeline({
   groupByDay = false,
 }: HistoryTimelineProps) {
   // เรียก useProfile() ที่นี่เพียงครั้งเดียวต่อ sheet — ไม่ใช่ในทุกแถวของ
-  // HistoryTimelineItem เพราะ hooks/use-profile.ts เปิด
-  // `new BroadcastChannel(BU_SWITCH_CHANNEL)` ใน useEffect ของตัวเอง ถ้าประวัติมี
-  // 20 แถวแล้วแต่ละแถวเรียก useProfile() เอง จะกลายเป็น 20 BroadcastChannel +
-  // 20 query observer พร้อมกัน และการสลับ BU จากแท็บอื่น 1 ครั้งจะยิง
-  // `removeQueries`/`invalidateQueries` ซ้ำทั้งแคช 20 รอบโดยไม่จำเป็น
+  // HistoryTimelineItem จะได้ไม่มี query observer 20 ตัวต่อประวัติ 20 แถว
   const { dateFormat } = useProfile();
 
   // `date_format` ของ BU ใส่ token เวลามาเองได้ (เช่น "DD/MM/YYYY HH:mm") — ต่อ

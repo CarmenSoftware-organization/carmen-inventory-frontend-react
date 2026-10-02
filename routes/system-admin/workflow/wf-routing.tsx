@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useDepartment } from "@/hooks/use-department";
+import { PagedChecklist } from "@/components/lookup/paged-checklist";
+import type { Department } from "@/types/department";
 import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 import { cn } from "@/lib/utils";
@@ -31,7 +33,6 @@ import {
   operatorValues,
 } from "./wf-routing-constants";
 import { CategoryCheckboxList } from "./wf-routing-category-list";
-import { DepartmentCheckboxList } from "./wf-routing-department-list";
 
 interface WfRoutingProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
@@ -54,11 +55,10 @@ export function WfRouting({
   const { fields, append, remove } = fieldArray;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: deptData } = useDepartment();
-  const departments = deptData?.data ?? [];
   const t = useTranslations("systemAdmin.workflow");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const tl = useTranslations("lookup");
 
   const stageNames = stages.map((s) => s.name);
 
@@ -390,17 +390,36 @@ export function WfRouting({
                   )}
 
                 {watchedField === "department" && (
-                  <DepartmentCheckboxList
-                    departments={departments}
-                    value={watchedConditionValue ?? []}
-                    onChange={(val) =>
-                      form.setValue(
-                        `data.routing_rules.${safeIndex}.condition.value`,
-                        val,
-                      )
-                    }
-                    isDisabled={isDisabled}
-                  />
+                  <Field>
+                    <FieldLabel>{t("departments")}</FieldLabel>
+                    {/* ค่าของเงื่อนไขคือ "ชื่อแผนก" ไม่ใช่ id — ดึงชื่อที่เลือกด้วย name|string:
+                        แผนกที่เปลี่ยนชื่อหลังบันทึก rule จะขึ้นเป็นชื่อเดิมดิบและเอาออกได้
+                        key={safeIndex}: สลับ rule แล้วช่องค้นเริ่มใหม่ ไม่ค้างคำค้นของ rule ก่อน */}
+                    <PagedChecklist<Department>
+                      key={safeIndex}
+                      useListHook={useDepartment}
+                      getId={(d) => d.name}
+                      getLabel={(d) => d.name}
+                      idFilterKey="name"
+                      value={watchedConditionValue ?? []}
+                      onChange={(val) =>
+                        form.setValue(
+                          `data.routing_rules.${safeIndex}.condition.value`,
+                          val,
+                        )
+                      }
+                      disabled={isDisabled}
+                      maxHeight={128}
+                      searchPlaceholder={tl("search", {
+                        entity: tfl("department"),
+                      })}
+                      emptyMessage={
+                        <span className="text-muted-foreground text-xs">
+                          {t("noDepartments")}
+                        </span>
+                      }
+                    />
+                  </Field>
                 )}
 
                 {watchedField === "category" && (

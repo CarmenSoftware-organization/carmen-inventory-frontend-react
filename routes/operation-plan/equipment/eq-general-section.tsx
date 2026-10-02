@@ -14,6 +14,11 @@ interface EqGeneralSectionProps {
   readonly imageFile: File | null;
   readonly imageRemoved: boolean;
   readonly onImageChange: (next: EqImageChange) => void;
+  /**
+   * หมวดที่บันทึกไว้ — เป็น `defaultLabel` ของ lookup หมวด ซึ่งโหลดทีละ 30
+   * หมวดที่อยู่หลังหน้าแรกจะขึ้น placeholder ทั้งที่มีค่า
+   */
+  readonly savedCategory?: { id: string | null; name: string | null };
 }
 
 export function EqGeneralSection({
@@ -23,6 +28,7 @@ export function EqGeneralSection({
   imageFile,
   imageRemoved,
   onImageChange,
+  savedCategory,
 }: EqGeneralSectionProps) {
   const t = useTranslations("operationPlan.equipment");
   const tfl = useTranslations("field");
@@ -78,6 +84,11 @@ export function EqGeneralSection({
                 <LookupEquipmentCategory
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  defaultLabel={
+                    field.value && field.value === savedCategory?.id
+                      ? (savedCategory.name ?? undefined)
+                      : undefined
+                  }
                   disabled={isDisabled}
                   error={errors.category_id?.message}
                 />

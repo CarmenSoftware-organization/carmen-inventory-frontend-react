@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { WORKFLOW_TYPE } from "@/types/workflows";
+import type { AnyEntityFilterSource } from "@/components/filter/entity-filter-source";
 
 /**
  * ช่องทางอ่าน/เขียนค่า field อื่นจากใน custom control — ชี้ไปที่ draft ของ
@@ -62,11 +63,10 @@ export type FilterFieldDef =
       readonly control: "amount-range";
       readonly fieldKey: string;
     })
-  | (FilterFieldBase & { readonly control: "department" })
-  | (FilterFieldBase & { readonly control: "vendor" })
   | (FilterFieldBase & {
-      readonly control: "requester";
-      readonly fieldKey?: string;
+      /** เลือกหลายค่าจากทะเบียน — ค้นที่ server, โหลดทีละหน้า, chip ขึ้นชื่อ */
+      readonly control: "entity";
+      readonly entity: AnyEntityFilterSource;
     })
   | (FilterFieldBase & { readonly control: "stage"; readonly stages: string[] })
   | (FilterFieldBase & {

@@ -107,6 +107,12 @@ interface GrnExtraCost {
 
 type GrnPostType = "ap" | "consignment" | "cash";
 
+export interface GrnApInvoiceRef {
+  id: string;
+  doc_no: string;
+  doc_status: string;
+}
+
 export interface GoodsReceiveNote {
   id: string;
   grn_no: string;
@@ -132,6 +138,9 @@ export interface GoodsReceiveNote {
   // detail endpoint เท่านั้น
   vendor?: EntityRef | null;
   currency: EntityRef | null;
+  // `vendor/:vendor_id/cn` (lookup GRN ของหน้า Credit Note) เคยส่ง currency แบบแบนแทน object —
+  // อ่านผ่าน grnCurrencyId() ที่รับได้ทั้งสองรูป อย่าอ่านตรงจากฟิลด์ใดฟิลด์หนึ่ง
+  currency_id?: string | null;
   exchange_rate: number | null;
   exchange_rate_date: string | null;
   total_amount?: number;
@@ -148,6 +157,9 @@ export interface GoodsReceiveNote {
   last_action: LastAction | null;
   // Audit
   doc_version?: number;
+  // AP Invoice ที่ยังไม่ void ซึ่งดึงใบนี้ไปแล้ว — มีสักใบ = ใบ committed แก้ไม่ได้
+  // (optional: backend รุ่นก่อนไม่ส่งมา)
+  ap_invoices?: GrnApInvoiceRef[];
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
   // Detail items (nested: detail → items[])

@@ -51,7 +51,7 @@ export function ListCardSkeleton({
         <>
           <div className="border-t" />
           <div className="flex items-center justify-end px-2 py-1.5">
-            <Skeleton className="h-6 w-9" />
+            <Skeleton className="size-6" />
           </div>
         </>
       )}
@@ -70,6 +70,8 @@ interface ListCardProps {
    * ไม่ต้องห่อ guard เอง (ไม่มีสิทธิ์ = ไม่ถูกเรียก เด้ง dialog แทน)
    */
   readonly onDelete?: () => void;
+  /** เหตุผลที่การ์ดนี้ลบไม่ได้ (ปุ่มลบปิด + title) — กติกาเดียวกับ `DataGridRowActions` */
+  readonly deleteDisabledTitle?: string;
   readonly actions?: ReactNode;
   readonly children: ReactNode;
 }
@@ -258,6 +260,7 @@ export function ListCard({
   badge,
   onOpen,
   onDelete,
+  deleteDisabledTitle,
   actions,
   children,
 }: ListCardProps) {
@@ -279,6 +282,7 @@ export function ListCard({
   };
 
   const hasFooter = !!actions || !!onDelete;
+  const deleteDisabled = writeDisabled || !!deleteDisabledTitle;
 
   return (
     <Card
@@ -321,17 +325,27 @@ export function ListCard({
             {onDelete && (
               /* license มาก่อน permission เสมอ — สัญญาหมดอายุปิดปุ่มจริง ส่วนไม่มีสิทธิ์
                  ยังกดได้แต่ไปจบที่ dialog ไม่ใช่กล่องยืนยันลบ (กติกาเดียวกับ
-                 DataGridRowActions ของแถวในตาราง จะได้ไม่คุมคนละแบบในหน้าเดียวกัน) */
+                 DataGridRowActions ของแถวในตาราง จะได้ไม่คุมคนละแบบในหน้าเดียวกัน) ·
+                 ปุ่มไอคอน ghost สีจาง แดงเฉพาะตอนชี้ — การลบเป็นเรื่องนาน ๆ ครั้ง
+                 เดิมปุ่มแดงเต็มทุกการ์ดกลายเป็นสิ่งเด่นที่สุดในกริด */
               <Button
                 type="button"
-                variant="destructive"
-                size="xs"
-                disabled={writeDisabled}
-                title={writeDisabled ? writeDisabledTitle : undefined}
-                aria-disabled={
-                  !writeDisabled && deleteDenied ? true : undefined
+                variant="ghost"
+                size="icon-xs"
+                disabled={deleteDisabled}
+                title={
+                  writeDisabled
+                    ? writeDisabledTitle
+                    : (deleteDisabledTitle ?? tc("delete"))
                 }
-                className={deleteDenied ? "opacity-50" : undefined}
+                aria-label={tc("delete")}
+                aria-disabled={
+                  !deleteDisabled && deleteDenied ? true : undefined
+                }
+                className={cn(
+                  "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                  deleteDenied && "opacity-50",
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (deleteDenied) {
@@ -342,7 +356,6 @@ export function ListCard({
                 }}
               >
                 <Trash2 aria-hidden="true" />
-                {tc("delete")}
               </Button>
             )}
           </CardFooter>

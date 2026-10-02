@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { SelectContent, SelectItem } from "@/components/ui/select";
-import { FieldSelect } from "@/components/ui/field";
 import { useTaxProfile } from "@/hooks/use-tax-profile";
+import {
+  ACTIVE_ONLY_FILTER,
+  useLookupPagination,
+} from "@/hooks/use-lookup-pagination";
+import type { TaxProfile } from "@/types/tax-profile";
+import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupTaxProfileProps {
   readonly value: string;
@@ -29,31 +34,44 @@ export function LookupTaxProfile({
 }: LookupTaxProfileProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const { data } = useTaxProfile({ perpage: 30 });
-  const resolvedPlaceholder =
-    placeholder ?? tl("select", { entity: tfl("taxProfile") });
-  const taxProfiles = data?.data?.filter((t) => t.is_active) ?? [];
+  const [search, setSearch] = useState("");
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
+    useLookupPagination<TaxProfile>({
+      useListHook: useTaxProfile,
+      search,
+      serverFilter: ACTIVE_ONLY_FILTER,
+      enabled: hasOpened,
+      selectedIds: value ? [value] : [],
+    });
 
   return (
-    <FieldSelect
-      value={value || ""}
-      onValueChange={(v) => {
-        const profile = taxProfiles.find((tp) => tp.id === v);
-        onValueChange(v, profile?.tax_rate ?? 0, profile?.name ?? "");
-      }}
-      disabled={disabled}
-      placeholder={resolvedPlaceholder}
-      className={cn("w-full text-xs", className)}
+    <LookupCombobox
+      allowDeselect={false}
       size={size}
+      value={value}
+      onValueChange={(id, tp) =>
+        onValueChange(id, tp?.tax_rate ?? 0, tp?.name ?? "")
+      }
+      onOpenChange={(open) => {
+        if (open) setHasOpened(true);
+      }}
+      items={items}
+      selectedItems={selectedItems}
+      getId={(tp) => tp.id}
+      getLabel={(tp) => tp.name}
+      placeholder={placeholder ?? tl("select", { entity: tfl("taxProfile") })}
+      searchPlaceholder={tl("search", { entity: tfl("taxProfile") })}
+      disabled={disabled}
+      className={cn("w-full", className)}
+      serverSideSearch
+      onSearchChange={setSearch}
+      onLoadMore={loadMore}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      isLoading={isLoading}
       error={error}
-    >
-      <SelectContent>
-        {taxProfiles.map((tp) => (
-          <SelectItem key={tp.id} value={tp.id} className="text-xs">
-            {tp.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </FieldSelect>
+    />
   );
 }

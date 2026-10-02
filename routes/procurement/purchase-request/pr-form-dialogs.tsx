@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
 import { useListReturn } from "@/hooks/use-list-return";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -88,7 +87,6 @@ export function PrFormDialogs({
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
-  const navigate = useNavigate();
   const { toList } = useListReturn("/procurement/purchase-request");
 
   const actionDialogConfig = {
@@ -172,7 +170,7 @@ export function PrFormDialogs({
       <WarningDialog
         open={showNoDepartment}
         description={t("noDepartment")}
-        onConfirm={() => navigate(-1)}
+        onConfirm={() => toList()}
       />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />

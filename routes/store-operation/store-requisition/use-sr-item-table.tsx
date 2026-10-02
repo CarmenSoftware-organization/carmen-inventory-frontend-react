@@ -38,6 +38,7 @@ import {
   InputSuffixPlain,
   InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 const ProductCell = memo(function ProductCell({
   control,
@@ -140,6 +141,7 @@ const ProductCell = memo(function ProductCell({
               fromLocationId={fromLocationId}
               toLocationId={toLocationId}
               workflowId={workflowId}
+              defaultLabel={productName || undefined}
               disabled={disabled}
               // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
               // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
@@ -328,7 +330,9 @@ const QtyUnitCell = memo(function QtyUnitCell({
       <InputSuffixQty
         placeholder={tfl("qty")}
         defaultValue={qty == null ? undefined : Number(qty)}
-        {...form.register(name)}
+        // setValueAs ต้องมี — onBlur ของ register เขียนค่าดิบ (string) ทับ number
+        // ที่ onChange set ไว้ แล้ว Save ร่างส่งไป 400 (ดู coerceNumberInput)
+        {...form.register(name, { setValueAs: coerceNumberInput })}
         onChange={(e) => {
           // ลบเลขจนช่องว่าง = NaN ซึ่ง zod ตีเป็น "ไม่ใช่ตัวเลข" แล้วขอบแดงค้าง
           // แม้พิมพ์ 0 กลับเข้าไป (ท่าเดียวกับ PO/PRT)

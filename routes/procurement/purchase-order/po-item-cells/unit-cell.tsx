@@ -58,6 +58,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
           productId={productId}
           value={field.value ?? ""}
           onValueChange={field.onChange}
+          defaultLabel={form.getValues(nameName) || undefined}
           onItemChange={(unit) => {
             form.setValue(nameName, unit.name);
             if (unitField === "order") {

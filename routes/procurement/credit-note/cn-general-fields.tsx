@@ -19,17 +19,24 @@ import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupGrnByVendorForCn } from "@/components/lookup/lookup-grn-by-vendor-for-cn";
 import { LookupCnReason } from "@/components/lookup/lookup-cn-reason";
 import type { CnFormValues } from "./cn-form-schema";
+import { grnCurrencyId } from "./cn-grn-currency";
 
 interface CnGeneralFieldsProps {
   readonly form: UseFormReturn<CnFormValues>;
   readonly disabled: boolean;
   readonly vendorName?: string;
+  /**
+   * GRN ที่ผูกกับใบไว้แล้ว — เป็น `defaultLabel` ของ lookup GRN ซึ่งโหลดทีละหน้า
+   * และแสดงเฉพาะ GRN ที่ยังออก CN ได้ ใบที่ผูกไปแล้วจึงอาจไม่อยู่ในรายการเลย
+   */
+  readonly savedGrn?: { id: string | null; no: string | null } | null;
 }
 
 export function CnGeneralFields({
   form,
   disabled,
   vendorName,
+  savedGrn,
 }: CnGeneralFieldsProps) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");
@@ -70,13 +77,18 @@ export function CnGeneralFields({
               onValueChange={field.onChange}
               onItemChange={(grn) => {
                 form.setValue("grn_date", grn.grn_date ?? "");
-                form.setValue("currency_code", grn.currency?.id ?? "");
+                form.setValue("currency_code", grnCurrencyId(grn));
                 form.setValue("exchange_rate", grn.exchange_rate ?? 1);
                 form.setValue("invoice_no", grn.invoice_no ?? "");
                 form.setValue("invoice_date", grn.invoice_date ?? "");
                 form.setValue("items", [], { shouldDirty: true });
               }}
               vendorId={vendorId}
+              defaultLabel={
+                field.value && field.value === savedGrn?.id
+                  ? (savedGrn.no ?? undefined)
+                  : undefined
+              }
               disabled={disabled}
               error={errors.grn_id?.message}
               className="text-xs"

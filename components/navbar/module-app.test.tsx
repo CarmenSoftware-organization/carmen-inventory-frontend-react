@@ -54,6 +54,43 @@ describe("ModuleApp launcher — plain access (neither locked nor denied)", () =
     const link = screen.getByRole("link", { name: /procurementModule/i });
     expect(link).toHaveAttribute("href", "/procurement");
   });
+
+  it("replaces the Accounting tile with its four accounting modules", async () => {
+    visibleModules.mockReturnValue([
+      {
+        ...mod({ name: "accounting", path: "/accounting" }),
+        subModules: [
+          mod({ name: "generalLedger", path: "/accounting" }),
+          mod({
+            name: "accountsPayable",
+            path: "/accounting/accounts-payable",
+          }),
+          mod({
+            name: "accountsReceivable",
+            path: "/accounting/accounts-receivable",
+          }),
+          mod({ name: "asset", path: "/accounting/asset" }),
+        ],
+      },
+    ]);
+
+    await renderAndOpen();
+
+    expect(screen.queryByRole("link", { name: /^accounting$/i })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: /generalLedger/i }),
+    ).toHaveAttribute("href", "/accounting");
+    expect(
+      screen.getByRole("link", { name: /accountsPayable/i }),
+    ).toHaveAttribute("href", "/accounting/accounts-payable");
+    expect(
+      screen.getByRole("link", { name: /accountsReceivable/i }),
+    ).toHaveAttribute("href", "/accounting/accounts-receivable");
+    expect(screen.getByRole("link", { name: /^asset$/i })).toHaveAttribute(
+      "href",
+      "/accounting/asset",
+    );
+  });
 });
 
 describe("ModuleApp launcher — locked (BU has not licensed the feature)", () => {

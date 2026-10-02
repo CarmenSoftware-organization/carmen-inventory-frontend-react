@@ -43,7 +43,13 @@ vi.mock("@/constant/module-list", () => ({
       icon: DummyIcon,
       subModules: [],
     },
+    { name: "accounting", path: "/accounting", icon: DummyIcon },
   ],
+  findAccountingSection: () => ({
+    name: "generalLedger",
+    path: "/accounting",
+    icon: DummyIcon,
+  }),
 }));
 
 // Mock ทั้ง hook ที่ระดับนี้ — ตรรกะการคำนวณ denied/locked เทสต์แยกไว้แล้วที่
@@ -204,5 +210,27 @@ describe("SideMain — เมนูย่อยอีกชั้น", () => {
     visibleSubs.mockReturnValue([parent()]);
     renderSideMain("/procurement/sub-a/child-a/123");
     expect(activeNames()).toEqual(["childA"]);
+  });
+});
+
+describe("SideMain — Accounting", () => {
+  const accountingSubs = [
+    sub({ name: "glDashboard", path: "/accounting" }),
+    sub({ name: "journalVoucher", path: "/accounting/journal-voucher" }),
+    sub({ name: "templateVoucher", path: "/accounting/template-voucher" }),
+  ];
+
+  it.each([
+    ["/accounting", "glDashboard"],
+    ["/accounting/journal-voucher", "journalVoucher"],
+    ["/accounting/template-voucher/123", "templateVoucher"],
+  ])("highlights only %s's menu item", (pathname, expected) => {
+    visibleSubs.mockReturnValue(accountingSubs);
+    renderSideMain(pathname);
+    expect(
+      Array.from(document.querySelectorAll('[data-active="true"]')).map((el) =>
+        el.textContent?.trim(),
+      ),
+    ).toEqual([expected]);
   });
 });

@@ -6,16 +6,17 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useURL } from "@/hooks/use-url";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { LayoutGrid, LayoutList } from "lucide-react";
 import { useTranslations } from "use-intl";
 import SearchInput from "@/components/search-input";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { cn } from "@/lib/utils";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
@@ -184,17 +185,12 @@ export default function ReportComponent() {
   const isGridMode = isMobile || displayMode === "grid";
 
   return (
-    <>
-      <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-          {/* Header */}
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-
-          {/* Toolbar */}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      toolbar={
+        <>
           <div className="flex w-full items-center gap-2">
             <div className="flex-1">
               <SearchInput defaultValue={search} onSearch={setSearch} />
@@ -212,75 +208,61 @@ export default function ReportComponent() {
               onSaveClick={() => setSaveViewDialogOpen(true)}
               activeCount={lf.activeFilters.length}
             />
-            <div className="hidden items-center rounded-md border sm:flex">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={t("listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={t("gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
+            <DisplayModeToggle
+              value={displayMode}
+              onChange={setDisplayMode}
+              className="hidden sm:flex"
+            />
           </div>
 
           <ActiveFilterBar
             filters={lf.activeFilters}
             onClearAll={lf.clearAll}
           />
-        </div>
+        </>
+      }
+    >
+      {error && (
+        <ErrorState message={error} onRetry={() => templatesQuery.refetch()} />
+      )}
 
-        {/* Content */}
-        <div className="mt-3">
-          {error && (
-            <ErrorState
-              message={error}
-              onRetry={() => templatesQuery.refetch()}
-            />
-          )}
-
-          {!error && (
-            <DataGrid
-              table={table}
-              recordCount={totalRecords}
-              isLoading={isLoading}
-              tableLayout={{ headerSticky: true }}
-              emptyMessage={<EmptyComponent />}
-            >
-              <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
-                <div className="flex-1 overflow-auto">
-                  {isGridMode ? (
-                    isLoading && filteredReports.length === 0 ? (
-                      <CardSkeletonGrid count={6} />
-                    ) : (
-                      <div className="grid grid-cols-1 gap-3 p-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredReports.map((report) => (
-                          <ReportCard
-                            key={`${report.ReportGroup}-${report.ReportName}`}
-                            item={report}
-                            onSelect={handleSelect}
-                          />
-                        ))}
-                      </div>
-                    )
-                  ) : (
-                    <DataGridTable />
-                  )}
-                </div>
-                <DataGridPagination />
-              </DataGridContainer>
-            </DataGrid>
-          )}
-        </div>
-      </div>
+      {!error && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <div className="flex-1 overflow-auto">
+              {isGridMode ? (
+                isLoading && filteredReports.length === 0 ? (
+                  <CardSkeletonGrid count={6} />
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 p-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredReports.map((report) => (
+                      <ReportCard
+                        key={`${report.ReportGroup}-${report.ReportName}`}
+                        item={report}
+                        onSelect={handleSelect}
+                      />
+                    ))}
+                  </div>
+                )
+              ) : (
+                <DataGridTable />
+              )}
+            </div>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <ReportParamDialog
         open={dialogOpen}
@@ -297,6 +279,6 @@ export default function ReportComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </>
+    </ListPageShell>
   );
 }

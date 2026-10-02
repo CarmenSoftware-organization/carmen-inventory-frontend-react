@@ -36,9 +36,8 @@ import type {
   PhysicalCountLocation,
   PhysicalCountStatus,
 } from "@/types/physical-count";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
 import {
-  InvListShell,
   InvSearchBar,
   InvStatusSectionsList,
   KpiTile,
@@ -46,7 +45,7 @@ import {
   type InvStatusSection,
   type SectionTone,
 } from "../shared/inv-shared";
-import { Reveal } from "@/components/share/reveal";
+import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { PcLocationCard } from "../shared/pc-location-card";
 
 type StatusKey = PhysicalCountStatus;
@@ -153,8 +152,7 @@ export default function PcComponent() {
     previousPeriodId || undefined,
     includeNotCount,
   );
-  const { open: openPhysicalCount, pendingLocationId } =
-    useOpenPhysicalCount();
+  const { open: openPhysicalCount, pendingLocationId } = useOpenPhysicalCount();
 
   const period = previousPeriodId ? selectedPeriod : currentPeriod;
   const isLoading = previousPeriodId ? isLoadingSelected : isLoadingCurrent;
@@ -244,24 +242,23 @@ export default function PcComponent() {
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
-  const periodTitle = period ? formatPeriodTitle(period.tb_inventory_period.period) : "";
+  const periodTitle = period
+    ? formatPeriodTitle(period.tb_inventory_period.period)
+    : "";
 
   const periodEndDate = period
     ? formatDateUtil(period.tb_inventory_period.end_at, dateFormat)
     : "";
 
   return (
-    <InvListShell>
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={locations.length}
+    >
+      <AnimationStyles />
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
-          <Reveal>
-            <DocumentListHeader
-              title={t("title")}
-              description={t("desc")}
-              count={locations.length}
-            />
-          </Reveal>
-
           <Reveal delay={60}>
             <PeriodSelectorCard
               title={periodTitle}
@@ -411,6 +408,6 @@ export default function PcComponent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </InvListShell>
+    </ListPageShell>
   );
 }

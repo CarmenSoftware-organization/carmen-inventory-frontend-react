@@ -12,6 +12,7 @@ import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { round2 } from "@/lib/currency-utils";
+import type { EntityRef } from "@/types/entity-ref";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
@@ -29,6 +30,19 @@ interface CellProps {
   readonly isView: boolean;
   readonly isDisabled: boolean;
   readonly detailRef?: DetailRef;
+}
+
+/**
+ * ป้ายของสินค้าที่บันทึกไว้ในแถว รูปเดียวกับ getLabel ของ LookupProduct
+ * (`code — name`) — ใช้เฉพาะตอนค่าในช่องยังเป็นสินค้าเดิมของแถว ถ้าผู้ใช้เปลี่ยน
+ * สินค้าแล้ว combobox จำตัวที่เลือกไว้เอง (pickedItem)
+ */
+function productLabel(
+  value: string,
+  product: EntityRef | null | undefined,
+): string | undefined {
+  if (!product?.name || product.id !== value) return undefined;
+  return product.code ? `${product.code} — ${product.name}` : product.name;
 }
 
 function useRowErrors(form: UseFormReturn<PriceListFormValues>, index: number) {
@@ -74,6 +88,7 @@ export function ProductCell({
               confirmDuplicate(() => field.onChange(id), product?.name);
             else field.onChange(id);
           }}
+          defaultLabel={productLabel(field.value, detailRef?.product)}
           disabled={isDisabled}
           className="h-8 w-full text-xs"
           error={errors?.product_id?.message}
@@ -107,6 +122,11 @@ export function UnitCell({
           productId={productId}
           value={field.value}
           onValueChange={field.onChange}
+          defaultLabel={
+            field.value && field.value === detailRef?.unit?.id
+              ? (detailRef.unit.name ?? undefined)
+              : undefined
+          }
           disabled={isDisabled}
           className="w-full text-xs"
           error={errors?.unit_id?.message}

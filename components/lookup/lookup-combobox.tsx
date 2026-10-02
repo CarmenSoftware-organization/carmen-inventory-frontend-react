@@ -49,6 +49,11 @@ interface LookupComboboxProps<T> {
   readonly value: string;
   readonly onValueChange: (value: string, item?: T) => void;
   readonly items: T[];
+  /**
+   * รายการที่เลือกอยู่ซึ่งอาจไม่อยู่ใน `items` (อยู่หลังหน้าแรก / ถูกปิดใช้งาน)
+   * — ใช้หา label บนปุ่มเท่านั้น ไม่แสดงในรายการ
+   */
+  readonly selectedItems?: T[];
   readonly getId: (item: T) => string;
   readonly getLabel: (item: T) => string;
   readonly placeholder?: string;
@@ -94,6 +99,13 @@ interface LookupComboboxProps<T> {
    */
   readonly open?: boolean;
   readonly readOnly?: boolean;
+  /**
+   * คลิกแถวที่เลือกอยู่แล้วให้ล้างค่า (default `true`) — lookup ที่แปลงมาจาก
+   * `<Select>` ต้องส่ง `false` เพราะ Select ไม่เคยล้างค่าเมื่อคลิกซ้ำ ถ้าปล่อยไว้
+   * ฟิลด์การเงิน (ภาษี/เครดิต/สกุลเงิน) จะโดนล้างเงียบ ๆ; เมื่อเป็น `false`
+   * คลิกซ้ำแค่ปิด popover โดยไม่เรียก `onValueChange`
+   */
+  readonly allowDeselect?: boolean;
   readonly estimateSize?: number;
   readonly maxHeight?: number;
 }
@@ -102,6 +114,7 @@ export function LookupCombobox<T>({
   value,
   onValueChange,
   items,
+  selectedItems,
   getId,
   getLabel,
   placeholder,
@@ -135,6 +148,7 @@ export function LookupCombobox<T>({
   open: controlledOpen,
   nextFocusRef,
   readOnly,
+  allowDeselect = true,
   estimateSize,
   maxHeight,
 }: LookupComboboxProps<T>) {
@@ -171,6 +185,7 @@ export function LookupCombobox<T>({
 
   const selectedItem = value
     ? (items.find((item) => getId(item) === value) ??
+      selectedItems?.find((item) => getId(item) === value) ??
       (pickedItem && getId(pickedItem) === value ? pickedItem : undefined))
     : undefined;
   let selectedLabel: string | null = null;
@@ -271,10 +286,7 @@ export function LookupCombobox<T>({
             </TooltipContent>
           )}
           {showTooltip && (
-            <TooltipContent
-              side="top"
-              className="max-w-[20rem]"
-            >
+            <TooltipContent side="top" className="max-w-[20rem]">
               <p className="text-xs font-semibold">{selectedLabel}</p>
             </TooltipContent>
           )}
@@ -335,12 +347,15 @@ export function LookupCombobox<T>({
                     )}
                     onClick={() => {
                       const id = getId(item);
-                      const isUnselect = value === id;
-                      setPickedItem(isUnselect ? null : item);
-                      onValueChange(
-                        isUnselect ? "" : id,
-                        isUnselect ? undefined : item,
-                      );
+                      const isSame = value === id;
+                      if (!(isSame && !allowDeselect)) {
+                        const isUnselect = isSame;
+                        setPickedItem(isUnselect ? null : item);
+                        onValueChange(
+                          isUnselect ? "" : id,
+                          isUnselect ? undefined : item,
+                        );
+                      }
                       // ปิดทั้งสองทาง: uncontrolled ปิดเอง ส่วน controlled ให้
                       // caller เป็นคนปิดผ่าน onOpenChange
                       setUncontrolledOpen(false);

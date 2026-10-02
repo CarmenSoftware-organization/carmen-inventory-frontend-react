@@ -26,7 +26,8 @@ import {
   buildItemChanges,
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
-import FormToolbar from "./pd-form-toolbar";
+import { PdFormToolbar } from "./pd-form-toolbar";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import PdTabGeneral from "./pd-tab-general";
 import PdTabLocations from "./pd-tab-locations";
 import PdTabUnitConversion from "./pd-tab-unit-conversion";
@@ -398,20 +399,23 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full space-y-4 px-4">
-      <FormToolbar
-        product={product}
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        deleteIsPending={deleteProduct.isPending}
-        hasPendingImages={pendingImages.length > 0}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={() => setShowDelete(true)}
-      />
-
+    <FormPageShell
+      width="wide"
+      header={
+        <PdFormToolbar
+          product={product}
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          deleteIsPending={deleteProduct.isPending}
+          hasPendingImages={pendingImages.length > 0}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={() => setShowDelete(true)}
+        />
+      }
+    >
       <form
         id="product-form"
         onSubmit={form.handleSubmit(onSubmit, onInvalid)}
@@ -511,7 +515,7 @@ export function ProductForm({ product }: ProductFormProps) {
         onCancel={f.navGuard.cancel}
         variant="warning"
       />
-    </div>
+    </FormPageShell>
   );
 }
 

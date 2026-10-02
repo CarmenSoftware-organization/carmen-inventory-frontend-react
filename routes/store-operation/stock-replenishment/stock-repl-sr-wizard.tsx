@@ -250,6 +250,7 @@ export function StockReplSrWizard({
             <FieldLabel>{tfl("toLocation")}</FieldLabel>
             <LookupLocation
               value={location?.location_id ?? ""}
+              defaultLabel={location?.location_name}
               onValueChange={() => {}}
               disabled
               className="text-xs"

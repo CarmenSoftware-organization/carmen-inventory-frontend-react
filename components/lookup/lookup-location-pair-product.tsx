@@ -4,6 +4,7 @@ import { PackageSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocationPairProducts } from "@/hooks/use-location-pair-products";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import type { LookupListParams } from "@/hooks/use-entities-by-ids";
 import type { LocationPairProduct } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -76,33 +77,36 @@ export function LookupLocationPairProduct({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) =>
+  const useListHook = (
+    params: LookupListParams,
+    options?: { enabled?: boolean },
+  ) =>
     useLocationPairProducts(
       fromLocationId || undefined,
       toLocationId || undefined,
       workflowId || undefined,
       params,
+      options,
     );
 
   const {
     items: products,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
     loadMore,
   } = useLookupPagination<LocationPairProduct>({
     useListHook,
+    getId: (p) => p.product_id,
     search,
-    perpage: 30,
-    filter: (p: LocationPairProduct) => {
-      if (excludedSet && excludedSet.has(p.product_id)) return false;
-      return true;
-    },
     resetDeps: [fromLocationId, toLocationId, workflowId],
+    // แถวเป็นของตาราง product_location — ดึงตาม `product_id` (`id` ได้ 0 แถว)
+    selectedIds: value ? [value] : [],
+    idFilterKey: "product_id",
+    filter: excludedSet
+      ? (p) => !excludedSet.has(p.product_id)
+      : undefined,
   });
 
   return (
@@ -111,6 +115,7 @@ export function LookupLocationPairProduct({
       value={value}
       onValueChange={onValueChange}
       items={products}
+      selectedItems={selectedItems}
       getId={(p) => p.product_id}
       getLabel={(p) => `${p.product_code} — ${p.product_name}`}
       serverSideSearch

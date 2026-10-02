@@ -7,6 +7,8 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { useCurrency } from "@/hooks/use-currency";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Currency } from "@/types/currency";
 import { useProfile } from "@/hooks/use-profile";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
@@ -41,7 +43,11 @@ export function PoGeneralFields({
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
   const vendorName = useWatch({ control: form.control, name: "vendor_name" });
 
-  const { data: currencyData } = useCurrency({ perpage: -1 });
+  // ดึงเฉพาะสกุลตั้งต้นของ BU ตอนที่ฟอร์มยังไม่มีสกุล (ใบใหม่) — ใช้ตั้ง code + rate
+  const { items: defaultCurrencies } = useEntitiesByIds<Currency>({
+    useListHook: useCurrency,
+    ids: !currencyId && defaultCurrencyId ? [defaultCurrencyId] : [],
+  });
 
   const creditTermId = useWatch({
     control: form.control,
@@ -49,16 +55,16 @@ export function PoGeneralFields({
   });
 
   useEffect(() => {
-    const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
-    if (!currencyId && defaultCurrencyId && currencies.length > 0) {
-      const currency = currencies.find((c) => c.id === defaultCurrencyId);
-      if (currency) {
-        form.setValue("currency_id", defaultCurrencyId);
-        form.setValue("currency_code", currency.code);
-        form.setValue("exchange_rate", currency.exchange_rate);
-      }
+    if (currencyId || !defaultCurrencyId) return;
+    const currency = defaultCurrencies.find(
+      (c) => c.id === defaultCurrencyId && c.is_active,
+    );
+    if (currency) {
+      form.setValue("currency_id", defaultCurrencyId);
+      form.setValue("currency_code", currency.code);
+      form.setValue("exchange_rate", currency.exchange_rate);
     }
-  }, [currencyId, defaultCurrencyId, currencyData?.data, form]);
+  }, [currencyId, defaultCurrencyId, defaultCurrencies, form]);
 
   // Fields editable only when PO is manual (linked PO locks these)
   //

@@ -24,7 +24,8 @@ import type { PriceListTemplate } from "@/types/price-list-template";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { usePriceListTemplateTable } from "./use-plt-table";
@@ -183,27 +184,24 @@ export default function PriceListTemplateComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={() =>
-              navigate(
-                "/vendor-management/price-list-template/new",
-                listReturnState(),
-              )
-            }
-            addLabel={t("add")}
-          />
-        </div>
-
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={() =>
+            navigate(
+              "/vendor-management/price-list-template/new",
+              listReturnState(),
+            )
+          }
+          addLabel={t("add")}
+        />
+      }
+      toolbar={
         <ListToolbar
           search={search}
           onSearch={setSearch}
@@ -214,64 +212,60 @@ export default function PriceListTemplateComponent() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
         />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && templates.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {templates.map((item) => (
-                <PltCard
-                  key={item.id}
-                  item={item}
-                  onEdit={(tpl) =>
-                    navigate(
-                      `/vendor-management/price-list-template/${tpl.id}`,
-                      listReturnState(),
-                    )
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
-              </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && templates.length === 0 && (
-          <EmptyComponent />
-        )}
-
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+      }
+    >
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && templates.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {templates.map((item) => (
+              <PltCard
+                key={item.id}
+                item={item}
+                onEdit={(tpl) =>
+                  navigate(
+                    `/vendor-management/price-list-template/${tpl.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
               )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+            </div>
+          )}
+        </>
+      )}
+      {isGridMode && !grid.isLoading && templates.length === 0 && (
+        <EmptyComponent />
+      )}
+
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(lf.activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -299,6 +293,6 @@ export default function PriceListTemplateComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

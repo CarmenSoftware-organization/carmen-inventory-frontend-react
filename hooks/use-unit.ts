@@ -11,6 +11,8 @@ const crud = createConfigCrud<Unit, CreateUnitDto>({
 
 export const useUnit = crud.useList;
 
+export const useUnitById = crud.useById;
+
 export const useCreateUnit = crud.useCreate;
 
 export const useUpdateUnit = crud.useUpdate;

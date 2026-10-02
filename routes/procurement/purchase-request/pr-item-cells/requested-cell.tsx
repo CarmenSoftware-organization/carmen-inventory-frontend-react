@@ -10,6 +10,7 @@ import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { PrFormValues } from "../pr-form-schema";
 import { useIsRowLocked, WatchedProductUnit, QtyUnitPlain } from "./helpers";
+import { coerceNumberInput } from "@/lib/form-helpers";
 
 export const RequestedCell = memo(function RequestedCell({
   control,
@@ -54,13 +55,17 @@ export const RequestedCell = memo(function RequestedCell({
       // errorMessage ไม่ใช่ error — boolean ได้แค่กรอบแดงเปล่า ๆ ส่วน string
       // ได้ไอคอนเตือน + tooltip บอกเหตุผลด้วย ซึ่งจำเป็นตั้งแต่มีกฎ "ขอ 0 ได้
       // ก็ต่อเมื่อมี FOC" เพราะทางแก้อยู่คนละคอลัมน์ ไม่มีทางเดาเองได้
-      errorMessage={form.formState.errors.items?.[index]?.requested_qty?.message}
+      errorMessage={
+        form.formState.errors.items?.[index]?.requested_qty?.message
+      }
     >
       <InputSuffixQty
         decimals={decimals}
         placeholder={tfl("qty")}
         defaultValue={qty ?? undefined}
-        {...form.register(`items.${index}.requested_qty`)}
+        {...form.register(`items.${index}.requested_qty`, {
+          setValueAs: coerceNumberInput,
+        })}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
           form.setValue(

@@ -20,10 +20,8 @@ import {
   FieldGroup,
   FieldInput,
   FieldLabel,
-  FieldSelect,
 } from "@/components/ui/field";
-import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useCertification } from "../shared/use-certification";
+import { LookupCertification } from "./lookup-certification";
 import {
   useCreateVendorCertificate,
   useUpdateVendorCertificate,
@@ -92,9 +90,6 @@ export function VendorCertificateDialog({
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
-
-  const { data: masterData } = useCertification({ perpage: -1 });
-  const masterCerts = (masterData?.data ?? []).filter((c) => c.is_active);
 
   const form = useForm<VendorCertificateFormValues>({
     resolver: zodResolver(
@@ -185,34 +180,24 @@ export function VendorCertificateDialog({
                   control={form.control}
                   name="master_certificate_id"
                   render={({ field }) => (
-                    <FieldSelect
+                    <LookupCertification
                       value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        // เติม certificate_no เป็น code ของ master cert ที่เลือก
-                        const master = masterCerts.find((c) => c.id === value);
-                        if (master) {
-                          form.setValue("certificate_no", master.code, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }
-                      }}
+                      onValueChange={field.onChange}
+                      // เติม certificate_no เป็น code ของ master cert ที่เลือก
+                      onItemChange={(master) =>
+                        form.setValue("certificate_no", master.code, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
                       disabled={isPending}
                       placeholder={t("selectCertificate")}
-                      className="h-8 text-sm"
+                      className="h-8 w-full text-sm"
                       error={
                         form.formState.errors.master_certificate_id?.message
                       }
-                    >
-                      <SelectContent>
-                        {masterCerts.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.code} · {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </FieldSelect>
+                      modal
+                    />
                   )}
                 />
               </Field>

@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
 import { useProductsByLocation } from "@/hooks/use-products-by-location";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
+import type { LookupListParams } from "@/hooks/use-entities-by-ids";
 import type { ProductLookupItem } from "@/types/product";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
@@ -52,14 +53,15 @@ export function LookupProductInLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: {
-    search?: string;
-    perpage: number;
-    page?: number;
-  }) => useProductsByLocation(locationId || undefined, params, workflowId);
+  const useListHook = (
+    params: LookupListParams,
+    options?: { enabled?: boolean },
+  ) =>
+    useProductsByLocation(locationId || undefined, params, workflowId, options);
 
   const {
     items: products,
+    selectedItems,
     isLoading,
     isLoadingMore,
     hasMore,
@@ -67,11 +69,11 @@ export function LookupProductInLocation({
   } = useLookupPagination<ProductLookupItem>({
     useListHook,
     search,
-    perpage: 30,
-    filter: (p: ProductLookupItem) => {
-      if (excludedSet && excludedSet.has(p.id)) return false;
-      return true;
-    },
+    // ดึงตาม id ได้เฉพาะเส้น workflow (`product_id|string:`) — เส้นธรรมดา
+    // products/locations/:id เมิน filter จึงพึ่ง defaultLabel ของ caller เหมือนเดิม
+    selectedIds: workflowId !== undefined && value ? [value] : [],
+    idFilterKey: "product_id",
+    filter: excludedSet ? (p) => !excludedSet.has(p.id) : undefined,
   });
 
   return (
@@ -83,6 +85,7 @@ export function LookupProductInLocation({
       value={value}
       onValueChange={onValueChange}
       items={products}
+      selectedItems={selectedItems}
       getId={(p) => p.id}
       getLabel={(p) => `${p.code} — ${p.name}`}
       serverSideSearch

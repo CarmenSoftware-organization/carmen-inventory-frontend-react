@@ -18,6 +18,7 @@ import {
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
 import { SectionCard } from "../shared/admin-ui";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
 import { useRolePrint } from "./use-role-print";
@@ -56,7 +57,7 @@ export function RoleForm({ role }: RoleFormProps) {
     listPath: LIST_PATH,
     isPending,
   });
-  const { form, isView, isAdd, isEdit, isDisabled } = f;
+  const { form, isAdd, isEdit, isDisabled } = f;
   const { printRole } = useRolePrint();
 
   /* Live watches — subscribe only to specific fields */
@@ -114,27 +115,25 @@ export function RoleForm({ role }: RoleFormProps) {
   const heroName = watchedName ?? "";
 
   return (
-    // ความกว้างเท่า location form (mx-auto max-w-4xl) — layout แถว label+checkbox
-    // ของ permission picker wrap ตัวเองได้ ไม่ต้องการเต็มจอแบบ matrix เดิม
-    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
+    <FormPageShell
+      header={
+        <Reveal>
+          <RoleHero
+            name={heroName}
+            mode={f.mode}
+            canDelete={!!role}
+            isDeleting={deleteRole.isPending}
+            isSaving={isPending}
+            onBack={f.handleBack}
+            onDelete={() => setShowDelete(true)}
+            onEdit={f.handleEdit}
+            onCancel={f.handleCancel}
+            onPrint={() => printRole(heroName, watchedPermissions ?? [])}
+          />
+        </Reveal>
+      }
+    >
       <AnimationStyles />
-
-      {/* ── Hero ──────────────────────────────────── */}
-      <Reveal>
-        <RoleHero
-          name={heroName}
-          isView={isView}
-          canDelete={isView && !!role}
-          isDeleting={deleteRole.isPending}
-          isSaving={isPending}
-          onBack={f.handleBack}
-          onDelete={() => setShowDelete(true)}
-          onEdit={f.handleEdit}
-          onCancel={f.handleCancel}
-          onPrint={() => printRole(heroName, watchedPermissions ?? [])}
-        />
-      </Reveal>
-
       {/* ── Form ──────────────────────────────────── */}
       <form
         id="role-form"
@@ -218,6 +217,6 @@ export function RoleForm({ role }: RoleFormProps) {
           }}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

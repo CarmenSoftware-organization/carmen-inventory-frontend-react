@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { moduleList } from "@/constant/module-list";
+import { findAccountingSection, moduleList } from "@/constant/module-list";
 import {
   useVisibleModules,
   type ModuleWithAccess,
@@ -71,9 +71,22 @@ export function SideMain() {
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));
-  const visibleSubs = useVisibleModules(activeModule?.subModules ?? []);
+  const sidebarModule =
+    activeModule?.name === "accounting"
+      ? findAccountingSection(pathname)
+      : activeModule;
+  const visibleSubs = useVisibleModules(sidebarModule?.subModules ?? []);
+  const activeSub = visibleSubs
+    .filter(
+      (sub) => pathname === sub.path || pathname.startsWith(sub.path + "/"),
+    )
+    .reduce<ModuleWithAccess | undefined>(
+      (best, sub) =>
+        !best || sub.path.length > best.path.length ? sub : best,
+      undefined,
+    );
 
-  if (!activeModule) {
+  if (!sidebarModule) {
     return null;
   }
 
@@ -81,8 +94,8 @@ export function SideMain() {
     <>
       {/* Module header — links to the module landing */}
       <Link
-        to={activeModule.path}
-        aria-label={t(activeModule.name)}
+        to={sidebarModule.path}
+        aria-label={t(sidebarModule.name)}
         className={cn(
           "relative mx-2 mt-2 mb-1 flex cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5",
           "focus-visible:ring-primary/40 transition-colors outline-none focus-visible:ring-2",
@@ -101,7 +114,14 @@ export function SideMain() {
 
         {/* Module icon — illustrated AppTile (module signature) */}
         <div className="shrink-0">
-          <AppTile name={activeModule.name} size={34} />
+          <AppTile
+            name={
+              activeModule?.name === "accounting"
+                ? "accounting"
+                : sidebarModule.name
+            }
+            size={34}
+          />
         </div>
 
         {/* Title (hidden when collapsed) */}
@@ -109,7 +129,7 @@ export function SideMain() {
           className="min-w-0 flex-1 truncate text-sm leading-tight font-semibold group-data-[collapsible=icon]:hidden"
           style={{ color: ACCENT }}
         >
-          {t(activeModule.name)}
+          {t(sidebarModule.name)}
         </p>
       </Link>
 
@@ -118,15 +138,13 @@ export function SideMain() {
         <SidebarGroup className="pt-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu>
             {visibleSubs.map((sub) => {
-              const onPath =
-                pathname === sub.path || pathname.startsWith(sub.path + "/");
               // อยู่หน้าของลูกตัวไหนอยู่ไหม — ลูกมี path ของตัวเองซึ่งซ้อนอยู่ใต้
               // path ของแม่ ตัวแม่จึง `startsWith` ตรงไปด้วยเสมอ ถ้าไม่หักออก
               // จะสว่างพร้อมกันสองอัน
               const activeChild = sub.subModules?.find(
                 (c) => pathname === c.path || pathname.startsWith(c.path + "/"),
               );
-              const isActive = onPath && !activeChild;
+              const isActive = activeSub === sub && !activeChild;
               // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
               // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
               const content = (

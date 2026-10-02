@@ -101,6 +101,15 @@ export const router = createBrowserRouter([
                   import("./config/chart-of-accounts/chart-of-accounts.route"),
               },
               {
+                path: "account-grouping",
+                lazy: () =>
+                  import("./config/account-grouping/account-grouping.route"),
+              },
+              {
+                path: "title-master",
+                lazy: () => import("./config/title-master/title-master.route"),
+              },
+              {
                 path: "chart-of-account-mapping",
                 lazy: () =>
                   import("./config/chart-of-account-mapping/coam.route"),
@@ -109,7 +118,9 @@ export const router = createBrowserRouter([
               // ถอดออกได้หลังปล่อยไปแล้วหนึ่งรอบ release
               {
                 path: "account-mapping",
-                element: <Navigate to="/config/chart-of-account-mapping" replace />,
+                element: (
+                  <Navigate to="/config/chart-of-account-mapping" replace />
+                ),
               },
               { path: "unit", lazy: () => import("./config/unit/unit.route") },
               {
@@ -279,9 +290,7 @@ export const router = createBrowserRouter([
               {
                 path: "purchase-request/from-template",
                 lazy: () =>
-                  import(
-                    "./procurement/purchase-request/from-template/from-template.route"
-                  ),
+                  import("./procurement/purchase-request/from-template/from-template.route"),
               },
               {
                 path: "purchase-request/:id",
@@ -638,14 +647,14 @@ export const router = createBrowserRouter([
               {
                 path: "inventory-period",
                 lazy: () =>
-                  import(
-                    "./system-admin/inventory-period/inventory-period.route"
-                  ),
+                  import("./system-admin/inventory-period/inventory-period.route"),
               },
               // เดิมหน้านี้อยู่ที่ /system-admin/period — กัน bookmark เก่าพัง
               {
                 path: "period",
-                element: <Navigate to="/system-admin/inventory-period" replace />,
+                element: (
+                  <Navigate to="/system-admin/inventory-period" replace />
+                ),
               },
               {
                 path: "user-activity",
@@ -777,94 +786,142 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                lazy: () => import("./accounting/accounting.route"),
+                lazy: () =>
+                  import("./accounting/dashboard/accounting-dashboard.route"),
               },
               {
                 path: "journal-voucher",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/journal-voucher/journal-voucher-list.route"),
               },
               {
                 path: "journal-voucher/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/journal-voucher/journal-voucher-form.route"),
               },
               {
                 path: "template-voucher",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
               },
               {
                 path: "template-voucher/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
               },
               {
                 path: "recurring-voucher",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
               },
               {
                 path: "recurring-voucher/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
               },
               {
                 path: "allocation-voucher",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
               },
               {
                 path: "allocation-voucher/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
               },
               {
                 path: "accounts-payable",
-                element: (
-                  <Navigate to="/accounting/accounts-payable/invoice" replace />
-                ),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-dashboard.route"),
               },
               {
                 path: "accounts-payable/invoice",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-invoice-list.route"),
               },
               {
                 path: "accounts-payable/invoice/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-invoice-detail.route"),
               },
               {
                 path: "accounts-payable/payment",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-payment-list.route"),
               },
               {
                 path: "accounts-payable/payment/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/accounts-payable/ap-payment-detail.route"),
               },
               {
-                path: "accounts-receivable",
+                path: "accounts-payable/payment-approvals",
                 element: (
                   <Navigate
-                    to="/accounting/accounts-receivable/invoice"
+                    to="/accounting/accounts-payable/payment?lifecycle=submitted"
                     replace
                   />
                 ),
               },
               {
+                path: "accounts-receivable",
+                lazy: () =>
+                  import("./accounting/dashboard/accounting-dashboard.route"),
+              },
+              {
                 path: "accounts-receivable/invoice",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/accounts-receivable/ar-invoice-list.route"),
               },
               {
                 path: "accounts-receivable/invoice/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/accounts-receivable/ar-invoice-detail.route"),
               },
               {
                 path: "accounts-receivable/receipt",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
               },
               {
                 path: "accounts-receivable/receipt/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
               },
               {
                 path: "financial-reports",
-                lazy: () => import("./accounting/accounting-document.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
               },
               {
                 path: "financial-reports/:id",
-                lazy: () => import("./accounting/accounting-detail.route"),
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
+              },
+              {
+                path: "asset",
+                lazy: () =>
+                  import("./accounting/dashboard/accounting-dashboard.route"),
+              },
+              {
+                path: "asset/register",
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
+              },
+              {
+                path: "asset/register/:id",
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
+              },
+              {
+                path: "asset/disposal",
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-list.route"),
+              },
+              {
+                path: "asset/disposal/:id",
+                lazy: () =>
+                  import("./accounting/documents/accounting-document-detail.route"),
               },
             ],
           },

@@ -16,18 +16,31 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCuisine } from "@/components/lookup/lookup-cuisine";
 import { LookupRecipeCategory } from "@/components/lookup/lookup-recipe-category";
 import { LookupUnit } from "@/components/lookup/lookup-unit";
+import { useUnitById } from "@/hooks/use-unit";
 import { SettingSection } from "@/components/ui/setting-section";
+import type { Recipe } from "@/types/recipe";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeGeneralFieldsProps {
   readonly form: UseFormReturn<RecipeFormValues>;
   readonly isDisabled: boolean;
+  /**
+   * สูตรที่บันทึกไว้ — ใช้ชื่อ cuisine/category เป็น `defaultLabel` ของ lookup
+   * (list โหลดทีละ 30 ค่าที่อยู่หลังหน้าแรกหาชื่อไม่เจอแล้วขึ้น placeholder)
+   */
+  readonly recipe?: Recipe;
 }
 
 export function RecipeGeneralFields({
   form,
   isDisabled,
+  recipe,
 }: RecipeGeneralFieldsProps) {
+  // base_yield_unit เป็น unit id เปล่า ๆ — API ไม่ส่งชื่อมาด้วย ดึงหน่วยที่บันทึกไว้
+  // ตัวเดียวมาเป็น defaultLabel ไม่งั้นหน่วยที่อยู่หลัง 30 ตัวแรกจะขึ้น placeholder
+  const { data: savedYieldUnit } = useUnitById(
+    recipe?.base_yield_unit || undefined,
+  );
   const t = useTranslations("operationPlan.recipe");
   const tfl = useTranslations("field");
   const errors = form.formState.errors;
@@ -65,6 +78,11 @@ export function RecipeGeneralFields({
                 <LookupCuisine
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  defaultLabel={
+                    field.value && field.value === recipe?.cuisine?.id
+                      ? recipe.cuisine.name
+                      : undefined
+                  }
                   disabled={isDisabled}
                   error={errors.cuisine_id?.message}
                 />
@@ -81,6 +99,11 @@ export function RecipeGeneralFields({
                 <LookupRecipeCategory
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  defaultLabel={
+                    field.value && field.value === recipe?.category?.id
+                      ? recipe.category.name
+                      : undefined
+                  }
                   disabled={isDisabled}
                   error={errors.category_id?.message}
                 />
@@ -158,6 +181,11 @@ export function RecipeGeneralFields({
                   onValueChange={field.onChange}
                   disabled={isDisabled}
                   placeholder={t("selectUnit")}
+                  defaultLabel={
+                    field.value && field.value === savedYieldUnit?.id
+                      ? savedYieldUnit.name
+                      : undefined
+                  }
                   error={errors.base_yield_unit?.message}
                 />
               )}

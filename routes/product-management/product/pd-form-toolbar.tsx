@@ -2,14 +2,13 @@ import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
-import { DocFormHeader } from "@/components/share/doc-form-header";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import { Save } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
-interface FormToolbarProps {
+interface PdFormToolbarProps {
   readonly product?: ProductDetail;
   readonly form: ProductFormInstance;
   readonly mode: FormMode;
@@ -29,7 +28,7 @@ interface FormToolbarProps {
   readonly onDelete: () => void;
 }
 
-function FormToolbar({
+function PdFormToolbarInner({
   product,
   form,
   mode,
@@ -40,12 +39,11 @@ function FormToolbar({
   onEdit,
   onCancel,
   onDelete,
-}: FormToolbarProps) {
+}: PdFormToolbarProps) {
   const tc = useTranslations("common");
-  const tActivity = useTranslations("activity");
   const tf = useTranslations("form");
   const t = useTranslations("productManagement.product");
-  const isView = mode === "view";
+  const tfl = useTranslations("field");
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
@@ -81,8 +79,8 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้แล้ว
-  // มันมีช่อง Code ของตัวเองอยู่ในแท็บ General
+  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้
+  // แต่อยู่ต้นแถบตัวตนใน subtitle ด้านล่าง
   const badges = (
     <>
       <StatusDotBadge tone={statusTone} size="xs">
@@ -96,81 +94,74 @@ function FormToolbar({
     </>
   );
 
-  // subtitle: add → neverSaved · view/edit → local_name (custom Thai font)
+  // subtitle: add → neverSaved · view/edit → แถบตัวตนของสินค้า = รหัส · ชื่อไทย ·
+  // เส้นทางหมวด (category › sub › item group) · หน่วยนับ — อ่านจบได้โดยไม่ต้อง
+  // เปิดแท็บ General · ใช้ค่าจาก `product` (ที่บันทึกแล้ว) ไม่ใช่ค่าที่กำลังแก้
+  // ในฟอร์ม หัวหน้าจึงไม่เปลี่ยนตามทุกการพิมพ์ · รหัสกลับมาอยู่ในแถบนี้ (ไม่ใช่
+  // ข้าง title แบบเดิมที่ถูกเอาออกใน 39a4da71) เพราะคนคลังค้นกันด้วยรหัส
+  const categoryPath = [
+    product?.product_category?.name,
+    product?.product_sub_category?.name,
+    product?.product_item_group?.name,
+  ].filter(Boolean);
+  const unitName = product?.inventory_unit?.name;
+  const identity = [
+    product?.code && (
+      <span key="code" className="text-foreground font-medium tabular-nums">
+        {product.code}
+      </span>
+    ),
+    product?.local_name && <span key="local">{product.local_name}</span>,
+    categoryPath.length > 0 && (
+      <span key="path">{categoryPath.join(" › ")}</span>
+    ),
+    unitName && (
+      <span key="unit">
+        {tfl("unit")}{" "}
+        <span className="text-foreground font-medium">{unitName}</span>
+      </span>
+    ),
+  ].filter(Boolean);
   const subtitle = isAdd ? (
     t("neverSaved")
-  ) : product?.local_name ? (
-    <span>{product.local_name}</span>
+  ) : identity.length > 0 ? (
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+      {identity.map((part, i) => (
+        <span key={i} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden="true">·</span>}
+          {part}
+        </span>
+      ))}
+    </span>
   ) : undefined;
 
-  const actions = (
-    <>
-      {/* ปุ่มประวัติอยู่ซ้ายสุด — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-      {product && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(product.id, product.code)}
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isEdit && product && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
-          disabled={isPending || deleteIsPending}
-        >
-          <Trash2 aria-hidden="true" />
-          {tc("delete")}
-        </Button>
-      )}
-      {isView ? (
-        <Button size="sm" onClick={onEdit}>
-          <Pencil aria-hidden="true" />
-          {tc("edit")}
-        </Button>
-      ) : (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            <X className="size-4" aria-hidden="true" />
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            form="product-form"
-            disabled={saveDisabled}
-          >
-            <Save className="size-4" aria-hidden="true" />
-            {getButtonLabel()}
-          </Button>
-        </>
-      )}
-    </>
+  // Save ต้อง disabled จน dirty (หรือมีรูปรอ) จึงเป็น submitSlot — ปุ่มนี้ไม่ผ่าน
+  // gate license/permission ของ FormToolbar (Edit ยัง gate อยู่ คนที่ไม่มีสิทธิ์
+  // เข้าโหมดแก้ไม่ได้ตั้งแต่แรก; โหมด add ตกที่ 403 ของ backend)
+  const submitSlot = (
+    <Button type="submit" size="sm" form="product-form" disabled={saveDisabled}>
+      <Save className="size-4" aria-hidden="true" />
+      {getButtonLabel()}
+    </Button>
   );
 
   return (
-    <DocFormHeader
-      title={displayName}
+    <FormToolbar
+      mode={mode}
+      formId="product-form"
+      isPending={isPending}
+      title={displayName ?? ""}
       subtitle={subtitle}
-      backLabel={tc("goBack")}
-      onBack={onBack}
       badges={badges}
-      actions={actions}
-      flush
+      submitSlot={submitSlot}
+      onBack={onBack}
+      onCancel={onCancel}
+      onEdit={onEdit}
+      onDelete={product ? onDelete : undefined}
+      deleteIsPending={deleteIsPending}
+      activity={product ? { id: product.id, label: product.code } : undefined}
     />
   );
 }
 
-export default memo(FormToolbar);
+export const PdFormToolbar = memo(PdFormToolbarInner);

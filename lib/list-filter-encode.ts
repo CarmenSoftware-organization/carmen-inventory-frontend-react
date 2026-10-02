@@ -36,3 +36,22 @@ export function viewMatchesCurrent(
   }
   return (view.sort ?? "") === (sort ?? "");
 }
+
+/**
+ * id/ค่าใน clause ของ field เดียว — อ่านได้ทั้ง `<col>|string:a,b`,
+ * รูปเก่าของ MultiSelectFilter `<col>|string:a,<col>|string:b` และค่าเปล่า `a,b`
+ */
+export function clauseTokens(value: string): string[] {
+  return value
+    .split(",")
+    .map((part) =>
+      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
+    )
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+export function firstPlusRest(names: readonly string[]): string | undefined {
+  if (names.length === 0) return undefined;
+  return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
+}

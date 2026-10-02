@@ -49,8 +49,7 @@ export const API_ENDPOINTS = {
   APP_USER_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-user-config/${key}`,
   EMAIL_SENDERS: (buCode: string) => `/api/proxy/api/${buCode}/email-senders`,
-  EMAIL_MESSAGES: (buCode: string) =>
-    `/api/proxy/api/${buCode}/email-messages`,
+  EMAIL_MESSAGES: (buCode: string) => `/api/proxy/api/${buCode}/email-messages`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
   BUSINESS_UNIT_AVATAR: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/avatar`,
@@ -115,6 +114,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/extra-cost-types`,
   GOODS_RECEIVE_NOTE: (buCode: string) =>
     `/api/proxy/api/${buCode}/good-received-notes`,
+  JOURNAL_VOUCHERS: (buCode: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers`,
+  JOURNAL_VOUCHER: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}`,
+  JOURNAL_VOUCHER_ACTION: (buCode: string, id: string, action: string) =>
+    `/api/proxy/api/${buCode}/accounting/journal-vouchers/${toSafePathSegment(id)}/${toSafePathSegment(action)}`,
   GOODS_RECEIVE_NOTE_STOCK_MOVEMENTS: (buCode: string, grnId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/${grnId}/stock-movements`,
   GOODS_RECEIVE_NOTE_BY_VENDOR: (buCode: string, vendorId: string) =>

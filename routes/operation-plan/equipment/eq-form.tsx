@@ -18,6 +18,7 @@ import {
   getDefaultValues,
   type EquipmentFormValues,
 } from "./eq-form-schema";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { EqToolbar } from "./eq-toolbar";
 import { EqGeneralSection } from "./eq-general-section";
 import type { EqImageChange } from "./eq-image-field";
@@ -146,18 +147,20 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <EqToolbar
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        isDeleting={deleteEquipment.isPending}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={equipment ? () => setShowDelete(true) : undefined}
-      />
-
+    <FormPageShell
+      header={
+        <EqToolbar
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          isDeleting={deleteEquipment.isPending}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={equipment ? () => setShowDelete(true) : undefined}
+        />
+      }
+    >
       <form
         id="equipment-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -171,6 +174,11 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
           imageFile={imageFile}
           imageRemoved={imageRemoved}
           onImageChange={handleImageChange}
+          savedCategory={
+            equipment
+              ? { id: equipment.category_id, name: equipment.category_name }
+              : undefined
+          }
         />
         <EqQuantitySection form={form} isDisabled={isDisabled} />
         <EqInstructionsSection form={form} isDisabled={isDisabled} />
@@ -202,6 +210,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
           onConfirm={handleDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }

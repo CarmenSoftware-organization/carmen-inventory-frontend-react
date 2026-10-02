@@ -143,7 +143,7 @@ function categoryRank(category: string): number {
  * - เรียงหมวดตาม `CATEGORY_META` และเรียง resource ตามชื่อ เพื่อให้หน้าจอนิ่ง
  *   ไม่ขึ้นกับลำดับที่ API ส่งมา
  *
- * @param permissions - ผลลัพธ์ `data` จาก `GET /permissions?perpage=-1`
+ * @param permissions - ทุกแถวของ `GET /permissions` (ดึงครบผ่าน `usePermissionAll`)
  * @param labelOf - ตัวแปลงชื่อ resource เป็นข้อความที่แสดง (ใช้เรียงลำดับ)
  */
 export function groupPermissions(

@@ -4,6 +4,8 @@ import { SendHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
+import { useEntitiesByIds } from "@/hooks/use-entities-by-ids";
+import type { Currency } from "@/types/currency";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type { CnFormValues } from "./cn-form-schema";
 
@@ -25,9 +27,11 @@ export function CnFooterAction({
   const items = useWatch({ control, name: "items" });
   // currency_code เก็บ id → resolve เป็นตัวอักษรสกุลเงินสำหรับต่อท้าย total
   const currencyId = useWatch({ control, name: "currency_code" }) ?? "";
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  const currencyCode =
-    currencyData?.data?.find((c) => c.id === currencyId)?.code ?? "";
+  const { items: currencies } = useEntitiesByIds<Currency>({
+    useListHook: useCurrency,
+    ids: currencyId ? [currencyId] : [],
+  });
+  const currencyCode = currencies.find((c) => c.id === currencyId)?.code ?? "";
 
   // grand summary — โครง 5 ช่องเหมือน PO (subtotal · discount · net · tax · grand)
   // subtotal = net + discount (net_amount = subtotal − discount ต่อบรรทัดแล้ว)

@@ -97,7 +97,6 @@ export interface BusinessUnitDetail {
 
   amount_format: BusinessUnitNumberFormat | null;
   quantity_format: BusinessUnitNumberFormat | null;
-  perpage_format: BusinessUnitNumberFormat | null;
   recipe_format: BusinessUnitNumberFormat | null;
 
   doc_version: number;
@@ -156,7 +155,6 @@ interface BusinessUnitEditable {
 
   amount_format: BusinessUnitNumberFormat | null;
   quantity_format: BusinessUnitNumberFormat | null;
-  perpage_format: BusinessUnitNumberFormat | null;
   recipe_format: BusinessUnitNumberFormat | null;
 
   config: BusinessUnitConfigItem[];

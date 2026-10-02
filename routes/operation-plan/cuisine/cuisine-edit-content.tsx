@@ -2,13 +2,13 @@ import { useTranslations } from "use-intl";
 import { useCuisineById } from "@/hooks/use-cuisine";
 import { CuisineForm } from "./cuisine-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { FormPageSkeleton } from "@/components/loader/form-page-skeleton";
 
 export function CuisineEditContent({ id }: { id: string }) {
   const tErr = useTranslations("operationPlan.cuisine");
   const { data: cuisine, isLoading, error, refetch } = useCuisineById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <FormPageSkeleton />;
   if (error || !cuisine)
     return (
       <ErrorState

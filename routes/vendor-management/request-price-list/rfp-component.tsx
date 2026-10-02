@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { listReturnState } from "@/hooks/use-list-return";
-import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
+import { Columns3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { useProfile } from "@/hooks/use-profile";
@@ -28,9 +28,12 @@ import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { DocumentListHeader } from "@/components/share/document-list-header";
+import { ListPageShell } from "@/components/share/list-page-shell";
+import { listGridMaxH } from "@/components/share/list-grid-max-h";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { defineEntitySource } from "@/components/filter/entity-filter-source";
+import type { PriceListTemplate } from "@/types/price-list-template";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -45,6 +48,14 @@ import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
+
+// ไม่กรองสถานะ — หน้า list ต้องกรอง RFP เก่าที่อ้าง template ที่ปิดไปแล้วได้
+const TEMPLATE_ENTITY = defineEntitySource<PriceListTemplate>({
+  fieldKey: "pricelist_template_id",
+  useListHook: usePriceListTemplate,
+  getLabel: (tmpl) => tmpl.name,
+  serverFilter: null,
+});
 
 export default function RequestPriceListComponent() {
   const navigate = useNavigate();
@@ -64,38 +75,15 @@ export default function RequestPriceListComponent() {
   const { exportRequestPriceList, isExporting } = useExportRequestPriceList();
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  const { data: templateData } = usePriceListTemplate({ perpage: -1 });
-  // ชื่อ template เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
-  // array reference เปลี่ยนทุก render จน rfpFilterFields memo ข้างล่างไม่เคย hit
-  const templateOptions = useMemo(
-    () =>
-      (templateData?.data ?? []).map((tmpl) => ({
-        label: tmpl.name,
-        value: `pricelist_template_id|string:${tmpl.id}`,
-      })),
-    [templateData],
-  );
-
-  // ไม่มี status/vendor filter ในโค้ดเดิม (grep ทั้งไฟล์ยืนยันแล้ว — brief เก่า/
-  // ไม่ตรง) มีแค่ template เดียว literal string จริง จึงต้องใช้ control: "custom"
-  // ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
-  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  // มีแค่ template (control "entity") กับช่วงวันที่
   const rfpFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
         key: "template",
         section: "listView.sectionDocument",
-        control: "custom",
+        control: "entity",
+        entity: TEMPLATE_ENTITY,
         labelKey: "field.template",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            options={templateOptions}
-            searchable
-            className="w-full"
-          />
-        ),
       },
       {
         // กรองที่วันเริ่มเปิดรับราคา (start_date) — คอลัมน์เดียวกับที่ list เรียง
@@ -106,7 +94,7 @@ export default function RequestPriceListComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [templateOptions],
+    [],
   );
 
   const lf = useListFilters({
@@ -222,142 +210,129 @@ export default function RequestPriceListComponent() {
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
-          <DocumentListActions
-            onExport={handleExport}
-            isExporting={isExporting}
-            onAdd={() =>
-              navigate(
-                "/vendor-management/request-price-list/new",
-                listReturnState(),
-              )
-            }
-            addLabel={t("add")}
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
-              <SearchInput defaultValue={search} onSearch={setSearch} />
-            </div>
-            <span className="bg-border hidden h-4 w-px sm:block" />
-            <ViewSelector
-              view={lf.view}
-              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-            />
-            <ListFilter
-              fields={rfpFilterFields}
-              values={lf.values}
-              setValue={lf.setValue}
-              onClearAll={clearAllFilters}
-              onSaveClick={() => setSaveViewDialogOpen(true)}
-              activeCount={lf.activeFilters.length}
-            />
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
-            <DataGridSortMenu table={table} />
-            {!isGridMode && (
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
-            )}
-            <div className="flex items-center rounded-md border">
-              <Button
-                size="icon-sm"
-                variant={displayMode === "list" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("list")}
-                aria-label={tc("aria.listView")}
-              >
-                <LayoutList className="size-4" />
-              </Button>
-              <Button
-                size="icon-sm"
-                variant={displayMode === "grid" ? "secondary" : "ghost"}
-                onClick={() => setDisplayMode("grid")}
-                aria-label={tc("aria.gridView")}
-              >
-                <LayoutGrid className="size-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && items.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
-                <RfpCard
-                  key={item.id}
-                  item={item}
-                  onEdit={(rfp) =>
-                    navigate(
-                      `/vendor-management/request-price-list/${rfp.id}`,
-                      listReturnState(),
-                    )
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
+    <ListPageShell
+      title={t("title")}
+      description={t("desc")}
+      count={totalRecords}
+      actions={
+        <DocumentListActions
+          onExport={handleExport}
+          isExporting={isExporting}
+          onAdd={() =>
+            navigate(
+              "/vendor-management/request-price-list/new",
+              listReturnState(),
+            )
+          }
+          addLabel={t("add")}
+        />
+      }
+      toolbar={
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+              <div className="flex-1 sm:flex-initial">
+                <SearchInput defaultValue={search} onSearch={setSearch} />
               </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && items.length === 0 && (
-          <EmptyComponent />
-        )}
-
-        {!isGridMode && (
-          <DataGrid
-            table={table}
-            recordCount={totalRecords}
-            isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
-            emptyMessage={<EmptyComponent />}
-          >
-            <DataGridContainer
-              className={cn(
-                "flex flex-col",
-                activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+              <span className="bg-border hidden h-4 w-px sm:block" />
+              <ViewSelector
+                view={lf.view}
+                snapshot={{
+                  filters: lf.values,
+                  sort: lf.sortParam || undefined,
+                }}
+              />
+              <ListFilter
+                fields={rfpFilterFields}
+                values={lf.values}
+                setValue={lf.setValue}
+                onClearAll={clearAllFilters}
+                onSaveClick={() => setSaveViewDialogOpen(true)}
+                activeCount={lf.activeFilters.length}
+              />
+            </div>
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <DataGridSortMenu table={table} />
+              {!isGridMode && (
+                <DataGridColumnVisibility
+                  table={table}
+                  trigger={
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      aria-label={tc("aria.toggleColumns")}
+                    >
+                      <Columns3 className="size-4" />
+                    </Button>
+                  }
+                />
               )}
-            >
-              <DataGridScrollArea>
-                <DataGridTable />
-              </DataGridScrollArea>
-              <DataGridPagination />
-            </DataGridContainer>
-          </DataGrid>
-        )}
-      </div>
+              <DisplayModeToggle
+                value={displayMode}
+                onChange={setDisplayMode}
+              />
+            </div>
+          </div>
+
+          <ActiveFilterBar
+            filters={activeFilters}
+            onClearAll={clearAllFilters}
+          />
+        </>
+      }
+    >
+      {isGridMode && grid.isLoading && <CardSkeletonGrid />}
+      {isGridMode && !grid.isLoading && items.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <RfpCard
+                key={item.id}
+                item={item}
+                onEdit={(rfp) =>
+                  navigate(
+                    `/vendor-management/request-price-list/${rfp.id}`,
+                    listReturnState(),
+                  )
+                }
+                onDelete={setDeleteTarget}
+              />
+            ))}
+          </div>
+          {grid.hasMore && (
+            <div ref={grid.sentinelRef} className="flex justify-center py-4">
+              {grid.isLoadingMore && (
+                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              )}
+            </div>
+          )}
+        </>
+      )}
+      {isGridMode && !grid.isLoading && items.length === 0 && (
+        <EmptyComponent />
+      )}
+
+      {!isGridMode && (
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          tableLayout={{ headerSticky: true }}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer
+            className={cn(
+              "flex flex-col",
+              listGridMaxH(activeFilters.length > 0),
+            )}
+          >
+            <DataGridScrollArea>
+              <DataGridTable />
+            </DataGridScrollArea>
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      )}
 
       <DeleteDialog
         open={!!deleteTarget}
@@ -385,6 +360,6 @@ export default function RequestPriceListComponent() {
         existingNames={lf.view.existingNames}
         onSave={lf.view.saveOrUpdate}
       />
-    </div>
+    </ListPageShell>
   );
 }

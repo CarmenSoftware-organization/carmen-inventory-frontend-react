@@ -19,6 +19,7 @@ import {
   mapToPayload,
   type CuisineFormValues,
 } from "./cuisine-form-schema";
+import { FormPageShell } from "@/components/share/form-page-shell";
 import { CuisineToolbar } from "./cuisine-toolbar";
 import { CuisineGeneralFields } from "./cuisine-general-fields";
 import { CuisineDetailFields } from "./cuisine-detail-fields";
@@ -80,19 +81,21 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
-      <CuisineToolbar
-        form={form}
-        mode={f.mode}
-        isPending={isPending}
-        isDeleting={deleteCuisine.isPending}
-        onBack={f.handleBack}
-        onEdit={f.handleEdit}
-        onCancel={f.handleCancel}
-        onDelete={cuisine ? () => setShowDelete(true) : undefined}
-        activityId={cuisine?.id}
-      />
-
+    <FormPageShell
+      header={
+        <CuisineToolbar
+          form={form}
+          mode={f.mode}
+          isPending={isPending}
+          isDeleting={deleteCuisine.isPending}
+          onBack={f.handleBack}
+          onEdit={f.handleEdit}
+          onCancel={f.handleCancel}
+          onDelete={cuisine ? () => setShowDelete(true) : undefined}
+          activityId={cuisine?.id}
+        />
+      }
+    >
       <form
         id="cuisine-form"
         onSubmit={form.handleSubmit(onSubmit, () =>
@@ -128,6 +131,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
           onConfirm={handleDelete}
         />
       )}
-    </div>
+    </FormPageShell>
   );
 }
