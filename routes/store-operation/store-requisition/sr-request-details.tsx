@@ -150,7 +150,7 @@ export function SrRequestDetails({
                 INVENTORY_TYPE.INVENTORY,
                 INVENTORY_TYPE.CONSIGNMENT,
               ]}
-              popoverWidth="31.25rem"
+              popoverWidth="w-[min(92vw,31.25rem)]"
               className="text-xs"
               error={errors.from_location_id?.message}
             />
@@ -179,7 +179,7 @@ export function SrRequestDetails({
               excludeIds={
                 fromLocationId ? new Set([fromLocationId]) : undefined
               }
-              popoverWidth="31.25rem"
+              popoverWidth="w-[min(92vw,31.25rem)]"
               className="text-xs"
               error={errors.to_location_id?.message}
             />

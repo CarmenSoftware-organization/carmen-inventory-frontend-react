@@ -54,17 +54,22 @@ export function GrnInvoiceFilter({
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
-  const { items: grns, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<GoodsReceiveNote>({
-      useListHook: useGoodsReceiveNote,
-      search: debouncedSearch,
-      // หลายใบอ้างใบแจ้งหนี้เดียวกันได้ — หน้าละ 50 ใบให้ได้เลขที่พอล้นกล่อง
-      // (VirtualCommandList โหลดหน้าถัดไปเมื่อเลื่อนถึงท้าย และโหลดต่อเองเมื่อรายการว่างหรือสั้นจนเลื่อนไม่ได้)
-      perpage: 50,
-      sort: "invoice_no:asc",
-      // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
-      enabled: open || inline,
-    });
+  const {
+    items: grns,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<GoodsReceiveNote>({
+    useListHook: useGoodsReceiveNote,
+    search: debouncedSearch,
+    // หลายใบอ้างใบแจ้งหนี้เดียวกันได้ — หน้าละ 50 ใบให้ได้เลขที่พอล้นกล่อง
+    // (VirtualCommandList โหลดหน้าถัดไปเมื่อเลื่อนถึงท้าย และโหลดต่อเองเมื่อรายการว่างหรือสั้นจนเลื่อนไม่ได้)
+    perpage: 50,
+    sort: "invoice_no:asc",
+    // inline (submenu ของ ListFilterMenu) ไม่มีจังหวะ "เปิด popover" — fetch เลย
+    enabled: open || inline,
+  });
 
   // Parse filter value (format: "invoice_no|string:INV-001,INV-002")
   const selected = (() => {
@@ -85,10 +90,7 @@ export function GrnInvoiceFilter({
   })();
 
   // ที่เลือกไว้อยู่บนสุดเสมอ — ยกเลิกได้แม้ไม่อยู่ในหน้าที่โหลดมา
-  const rows = [
-    ...selected,
-    ...invoiceNos.filter((no) => !selected.has(no)),
-  ];
+  const rows = [...selected, ...invoiceNos.filter((no) => !selected.has(no))];
 
   const handleToggle = (no: string) => {
     const next = new Set(selected);
@@ -187,7 +189,7 @@ export function GrnInvoiceFilter({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
         {list}
       </PopoverContent>
     </Popover>

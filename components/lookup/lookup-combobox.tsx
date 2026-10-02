@@ -131,7 +131,7 @@ export function LookupCombobox<T>({
   emptyDescription,
   headerSlot,
   prependItems,
-  popoverWidth = "w-[--radix-popover-trigger-width]",
+  popoverWidth = "w-(--radix-popover-trigger-width)",
   popoverAlign,
   popoverClassName,
   modal,
@@ -363,7 +363,15 @@ export function LookupCombobox<T>({
                       onOpenChange?.(false);
                     }}
                   >
-                    {renderItem ? renderItem(item) : getLabel(item)}
+                    {/* แถวของ VirtualCommandList สูงตายตัว — label ที่ขึ้นบรรทัดใหม่จะทับแถวถัดไป
+                        จึงตัดเป็นบรรทัดเดียว (เต็มดูได้จาก title) */}
+                    {renderItem ? (
+                      renderItem(item)
+                    ) : (
+                      <span className="min-w-0 truncate" title={getLabel(item)}>
+                        {getLabel(item)}
+                      </span>
+                    )}
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4 shrink-0",
