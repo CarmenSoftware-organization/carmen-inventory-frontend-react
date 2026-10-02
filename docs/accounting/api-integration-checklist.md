@@ -11,7 +11,7 @@
 
 | หน้าจอ / งาน | สถานะ frontend | API ที่พบใน Swagger | ตรวจจาก code / ข้อจำกัด |
 | :--- | :--- | :--- | :--- |
-| Config → Chart of Accounts | **API** | `GET/POST /api/config/{bu_code}/chart-of-accounts`; `GET/PUT/PATCH/DELETE .../{id}` | หน้า COA ใช้ `createConfigCrud`; เคยทดสอบ CRUD กับ `CARMEN-FIFO` |
+| Config → Chart of Accounts | **API** | `GET/POST /api/config/{bu_code}/chart-of-accounts`; `GET/PUT/PATCH/DELETE .../{id}` | ข้อมูลพื้นฐานใช้ `createConfigCrud`; Dimension Rules ใช้ API แยก; Account Group อ่านได้แต่การเปลี่ยนกลุ่มยังรอ backend DTO; เคยทดสอบ CRUD พื้นฐานกับ `CARMEN-FIFO` |
 | JV list, detail, create | **API** | `GET/POST /api/{bu_code}/gl-jv`; `GET/PATCH/DELETE .../{id}` | `useJournalVoucher` ใช้ HTTP repository จริง ไม่มี fallback สำหรับรายการจริง; `CARMEN-AVG` สร้าง JV `20260900004` พร้อม Cost Center แล้วอ่านกลับได้ |
 | JV แก้ไขหลังสร้าง | **API เฉพาะ header** | `PATCH /api/{bu_code}/gl-jv/{id}` | API dev ไม่บันทึกการแก้บรรทัด/Cost Center ผ่าน PATCH; frontend แจ้งข้อจำกัดแทน success. `DELETE` มีใน Swagger แต่ frontend ยังไม่ใช้ |
 | JV workflow / Posting | **API ที่ผูกแล้ว** | `POST .../gl-jv/{id}/{submit,approve,reject}`; `POST .../gl-posting/{id}/{post,void,reverse}` | Action ของ JV จริงส่ง HTTP; ยังไม่ได้ smoke test ทุกสถานะ. Mock repository ใช้เฉพาะ id ที่ขึ้นต้น `mock-` |
@@ -58,3 +58,13 @@
 - Backend source มี Prisma CRUD audit เพิ่มเติมจาก Activity registry; การไม่มีรายการใน registry อย่างเดียวไม่ได้แปลว่าไม่มี CRUD audit
 - การเชื่อม API ไม่รับประกันว่าทุก record เก่ามีประวัติ; แสดง empty/error state จาก Activity sheet จริง ไม่มี fallback mock
 - Runtime verification: COA record `101` ใน CARMEN-AVG แสดง Created และรายละเอียด field จาก API จริง; Payment Type แสดง Activity disabled สำหรับ mock (2026-10-02)
+
+## COA form contract repair (2026-10-02)
+
+- Account Group: อ่าน `account_group.id` (fallback `account_group_id` สำหรับ response เดิม) ใน detail และ list; แสดง read-only เพราะ DTO ของ COA ยังไม่รับ field นี้
+- Dimensions: ใช้ `GET/POST/PUT/DELETE /api/config/{bu_code}/gl-account-dimension-rules` พร้อม `chart_of_accounts_id`, `gl_dimension_id`, `requirement` (`mandatory`, `optional`, `prohibited`); GET วน pagination และจำกัด rule ของบัญชีนั้น
+- ไม่ส่ง `allowed_dimensions` / `dimension_required` ที่ COA DTO ไม่รองรับ และไม่บังคับเลือก Account Group ที่ยังบันทึกไม่ได้
+- Save สำเร็จเมื่อข้อมูลพื้นฐานและกฎ Dimension บันทึกครบเท่านั้น; ถ้าบางกฎผิดพลาด แจ้ง partial save และเก็บ ID/version ไว้ให้ retry โดยไม่สร้าง COA ซ้ำ
+- Verified: GET rules ใน CARMEN-AVG โหลดฟอร์มได้จริง; tests ตรวจ create/update/delete/unchanged, pagination, isolation ระหว่างบัญชี และ API failure. ยังไม่ได้ทดสอบ save กฎใหม่บน backend จริง
+- Live GET เมื่อไม่มี rules ส่ง `data: []` โดยไม่มี `paginate`; รองรับกรณีว่างนี้แล้ว ส่วน response ที่มีข้อมูลแต่ไม่มี pagination จะหยุดพร้อม error เพื่อไม่อ่าน rules ขาดโดยเงียบ ๆ
+- Nature: dropdown Debit/Credit; Category ตั้งค่าเริ่มต้น และ Save ส่งค่าที่ผู้ใช้เลือก ตรวจตัวเลือกใน browser แล้ว ยังไม่ได้บันทึกเปลี่ยน Nature ของบัญชีจริง

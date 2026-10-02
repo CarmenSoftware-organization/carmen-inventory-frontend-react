@@ -1,741 +1,504 @@
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useMemo, useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { AlertCircle, FolderTree, Plus } from "lucide-react";
+import { useTranslations } from "use-intl";
+import { FolderTree, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import SearchInput from "@/components/search-input";
-import EmptyComponent from "@/components/empty-component";
 import { ListPageShell } from "@/components/share/list-page-shell";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
-import { CellAction } from "@/components/ui/cell-action";
-import {
-  DataGrid,
-  DataGridContainer,
-} from "@/components/ui/data-grid/data-grid";
-import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
-import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Field,
-  FieldInput,
-  FieldLabel,
-  FieldSelect,
-} from "@/components/ui/field";
-import { SelectContent, SelectItem } from "@/components/ui/select";
-import { StatusSwitch } from "@/components/ui/status-switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WarningDialog } from "@/components/ui/warning-dialog";
-import { ErrorState } from "@/components/ui/error-state";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
-import type { AccountGroupMaster } from "@/types/accounting-master";
+import { useGlAccountGroups, glAccountGroupsKey } from "../shared/use-gl-account-groups";
 import {
-  glAccountGroupsKey,
-  useGlAccountGroups,
-} from "../shared/use-gl-account-groups";
-import type { AccountCategory } from "@/types/chart-of-accounts";
-import { ACCOUNT_CATEGORIES } from "@/types/chart-of-accounts";
-
-const CATEGORY_LABELS: Record<AccountCategory, string> = {
-  asset: "Asset (สินทรัพย์)",
-  liability: "Liability (หนี้สิน)",
-  equity: "Equity (ส่วนของเจ้าของ)",
-  revenue: "Revenue (รายได้)",
-  expense: "Expense (ค่าใช้จ่าย)",
-  statistic: "Statistic (สถิติ)",
-};
-
-function buildHierarchyOrder(
-  groups: AccountGroupMaster[],
-): AccountGroupMaster[] {
-  const result: AccountGroupMaster[] = [];
-  const byParent = new Map<string | null, AccountGroupMaster[]>();
-  for (const g of groups) {
-    const p = g.parent_id ?? null;
-    const list = byParent.get(p) ?? [];
-    list.push(g);
-    byParent.set(p, list);
-  }
-  for (const list of byParent.values()) {
-    list.sort(
-      (a, b) =>
-        (a.sort_order ?? 0) - (b.sort_order ?? 0) ||
-        a.code.localeCompare(b.code),
-    );
-  }
-  function traverse(parentId: string | null) {
-    const children = byParent.get(parentId) ?? [];
-    for (const child of children) {
-      result.push(child);
-      traverse(child.id);
-    }
-  }
-  traverse(null);
-  const addedIds = new Set(result.map((r) => r.id));
-  for (const g of groups) {
-    if (!addedIds.has(g.id)) {
-      result.push(g);
-    }
-  }
-  return result;
-}
-
-function getDescendantGroupIds(groups: AccountGroupMaster[], rootId: string) {
-  const descendants = new Set<string>();
-  const queue = [rootId];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    for (const group of groups) {
-      if (group.parent_id === current && !descendants.has(group.id)) {
-        descendants.add(group.id);
-        queue.push(group.id);
-      }
-    }
-  }
-  return descendants;
-}
+  useChartOfAccountAll,
+  useUpdateChartOfAccount,
+} from "@/hooks/use-chart-of-account";
+import { QUERY_KEYS } from "@/constant/query-keys";
+import type { ChartOfAccount, AccountCategory } from "@/types/chart-of-accounts";
+import type { AccountGroupNode, GroupTreeLevel } from "./account-grouping-types";
+import { useAccountGroupingTree } from "./use-account-grouping-tree";
+import { AccountGroupTreeNode } from "./account-group-tree-node";
+import { AccountGroupDetailPanel } from "./account-group-detail-panel";
+import { AccountGroupFormDialog } from "./account-group-form-dialog";
+import { AccountGroupMoveDialog } from "./account-group-move-dialog";
+import { AccountGroupAssignDialog } from "./account-group-assign-dialog";
+import { AccountGroupUnassignWarningDialog } from "./account-group-unassign-warning-dialog";
 
 export default function AccountGroupingPage() {
+  const t = useTranslations("config.accountGrouping");
+  const tt = useTranslations("toast");
   const buCode = useBuCode();
   const queryClient = useQueryClient();
-  const groupQuery = useGlAccountGroups();
-  const groups = useMemo(() => groupQuery.data ?? [], [groupQuery.data]);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [detailOnly, setDetailOnly] = useState(false);
-  const [editing, setEditing] = useState<
-    AccountGroupMaster | null | undefined
-  >();
-  const [deleting, setDeleting] = useState<AccountGroupMaster | null>(null);
-  const [warning, setWarning] = useState("");
-  const [saving, setSaving] = useState(false);
 
-  const saveGroup = async (
-    value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">,
-  ) => {
-    if (!buCode || saving) return;
-    setSaving(true);
+  // Queries
+  const groupQuery = useGlAccountGroups();
+  const accountsQuery = useChartOfAccountAll();
+  const updateAccount = useUpdateChartOfAccount();
+
+  const groups = useMemo(() => groupQuery.data ?? [], [groupQuery.data]);
+  const accounts = useMemo(() => accountsQuery.data ?? [], [accountsQuery.data]);
+  const isLoading = groupQuery.isLoading || accountsQuery.isLoading;
+
+  const [search, setSearch] = useState("");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  // Modals state
+  const [formOpen, setFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [editingNode, setEditingNode] = useState<AccountGroupNode | null>(null);
+  const [defaultParentNode, setDefaultParentNode] = useState<AccountGroupNode | null>(null);
+  const [targetLevel, setTargetLevel] = useState<GroupTreeLevel>(1);
+
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [movingNode, setMovingNode] = useState<AccountGroupNode | null>(null);
+
+  const [assignOpen, setAssignOpen] = useState(false);
+
+  const [warningOpen, setWarningOpen] = useState(false);
+  const [warningNode, setWarningNode] = useState<AccountGroupNode | null>(null);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingNode, setDeletingNode] = useState<AccountGroupNode | null>(null);
+
+  const [isMutating, setIsMutating] = useState(false);
+
+  // Tree Hook
+  const {
+    fullTree,
+    filteredTree,
+    unassignedAccounts,
+    expanded,
+    toggleExpand,
+    expandAll,
+    collapseAll,
+    findNodeById,
+    getBreadcrumbs,
+    isDescendant,
+    getMaxSubDepth,
+    getNodesByLevel,
+    stats,
+  } = useAccountGroupingTree({ groups, accounts, search });
+
+  // Auto select first node if none selected
+  useEffect(() => {
+    if (!selectedNodeId && fullTree.length > 0) {
+      setSelectedNodeId(fullTree[0].id);
+    }
+  }, [fullTree, selectedNodeId]);
+
+  const selectedNode = useMemo(
+    () => (selectedNodeId ? findNodeById(selectedNodeId) : null),
+    [selectedNodeId, findNodeById],
+  );
+
+  const breadcrumbs = useMemo(
+    () => (selectedNode ? getBreadcrumbs(selectedNode) : []),
+    [selectedNode, getBreadcrumbs],
+  );
+
+  // Parent choices for Add Modal
+  const parentOptionsForLevel = useMemo(() => {
+    if (targetLevel <= 1) return [];
+    return getNodesByLevel((targetLevel - 1) as GroupTreeLevel);
+  }, [targetLevel, getNodesByLevel]);
+
+  // Handler: Add Group (Top Header or Sub-group button)
+  const handleOpenAdd = (parent: AccountGroupNode | null = null, defaultLvl: GroupTreeLevel = 1) => {
+    if (parent) {
+      // BR-GRP-004: If chosen parent has assigned accounts, block and show Warning Modal!
+      if (parent.assignedAccounts && parent.assignedAccounts.length > 0) {
+        setWarningNode(parent);
+        setWarningOpen(true);
+        return;
+      }
+      const nextLvl = Math.min(parent.level + 1, 4) as GroupTreeLevel;
+      setTargetLevel(nextLvl);
+      setDefaultParentNode(parent);
+    } else {
+      setTargetLevel(defaultLvl);
+      setDefaultParentNode(null);
+    }
+    setFormMode("add");
+    setEditingNode(null);
+    setFormOpen(true);
+  };
+
+  const handleOpenEdit = (node: AccountGroupNode) => {
+    setFormMode("edit");
+    setEditingNode(node);
+    setDefaultParentNode(null);
+    setTargetLevel(node.level);
+    setFormOpen(true);
+  };
+
+  const handleOpenMove = (node: AccountGroupNode) => {
+    setMovingNode(node);
+    setMoveOpen(true);
+  };
+
+  const handleOpenDelete = (node: AccountGroupNode) => {
+    if (node.children && node.children.length > 0) {
+      toast.error(t("delete.hasChildren"));
+      return;
+    }
+    if (node.assignedAccounts && node.assignedAccounts.length > 0) {
+      toast.error(t("delete.hasAccounts"));
+      return;
+    }
+    setDeletingNode(node);
+    setDeleteOpen(true);
+  };
+
+  // Submit Add / Edit Group
+  const handleFormSubmit = async (data: {
+    code: string;
+    name: string;
+    name_local?: string;
+    level: GroupTreeLevel;
+    parent_id: string | null;
+    category: AccountCategory;
+    sort_order?: number;
+  }) => {
+    if (!buCode || isMutating) return;
+    setIsMutating(true);
     try {
       const url = API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode);
-      const { level: _level, category, ...fields } = value;
-      const res = editing
-        ? await httpClient.put(`${url}/${editing.id}`, {
-            ...fields,
-            doc_version: editing.doc_version,
+      const isEdit = formMode === "edit" && editingNode;
+
+      const payload = {
+        code: data.code,
+        name: data.name,
+        name_local: data.name_local || null,
+        level: data.level,
+        parent_id: data.parent_id,
+        category: data.category,
+        sort_order: data.sort_order ?? 0,
+      };
+
+      const res = isEdit
+        ? await httpClient.put(`${url}/${editingNode.id}`, {
+            ...payload,
+            doc_version: editingNode.doc_version,
           })
-        : await httpClient.post(url, { ...fields, category });
-      if (!res.ok)
-        throw await ApiError.from(res, "Unable to save account group");
-      await queryClient.invalidateQueries({
-        queryKey: glAccountGroupsKey(buCode),
-      });
-      toast.success(
-        editing ? "Account group updated" : "Account group created",
-      );
-      setEditing(undefined);
-    } catch (error) {
-      setWarning(
-        error instanceof Error ? error.message : "Unable to save account group",
-      );
+        : await httpClient.post(url, payload);
+
+      if (!res.ok) throw await ApiError.from(res, "Unable to save account group");
+
+      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      toast.success(isEdit ? tt("updateSuccess", { entity: data.name }) : tt("createSuccess", { entity: data.name }));
+      setFormOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to save account group");
     } finally {
-      setSaving(false);
+      setIsMutating(false);
     }
   };
 
-  const deleteGroup = async () => {
-    if (!buCode || !deleting || saving) return;
-    setSaving(true);
+  // Submit Move Group
+  const handleMoveConfirm = async (group: AccountGroupNode, targetParentId: string | null) => {
+    if (!buCode || isMutating) return;
+    setIsMutating(true);
     try {
-      const res = await httpClient.delete(
-        `${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${deleting.id}`,
-      );
-      if (!res.ok)
-        throw await ApiError.from(res, "Unable to delete account group");
-      await queryClient.invalidateQueries({
-        queryKey: glAccountGroupsKey(buCode),
+      const targetParent = targetParentId ? findNodeById(targetParentId) : null;
+      const newLevel = targetParent ? ((targetParent.level + 1) as GroupTreeLevel) : (1 as GroupTreeLevel);
+
+      const url = `${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${group.id}`;
+      const res = await httpClient.put(url, {
+        code: group.code,
+        name: group.name,
+        name_local: group.name_local,
+        category: group.category,
+        sort_order: group.sort_order,
+        parent_id: targetParentId,
+        level: newLevel,
+        doc_version: group.doc_version,
       });
-      toast.success("Account group deleted");
-      setDeleting(null);
-    } catch (error) {
-      setWarning(
-        error instanceof Error
-          ? error.message
-          : "Unable to delete account group",
-      );
+
+      if (!res.ok) throw await ApiError.from(res, "Unable to move account group");
+
+      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      toast.success(`Group [${group.code}] moved successfully`);
+      setMoveOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to move account group");
     } finally {
-      setSaving(false);
+      setIsMutating(false);
     }
   };
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const item of groups) {
-      counts[item.category] = (counts[item.category] ?? 0) + 1;
+  // Submit Assign Account to Leaf Group
+  const handleAssignAccount = async (account: ChartOfAccount) => {
+    if (!selectedNode || isMutating) return;
+    setIsMutating(true);
+    try {
+      const nodeBreadcrumbs = getBreadcrumbs(selectedNode);
+      const groupingPath = nodeBreadcrumbs.map((b) => ({
+        code: b.code,
+        name: b.name,
+        level: b.level,
+      }));
+
+      await updateAccount.mutateAsync({
+        id: account.id,
+        doc_version: account.doc_version,
+        code: account.code,
+        description_1: account.description_1,
+        description_2: account.description_2 ?? null,
+        category: account.category,
+        nature: account.nature,
+        type: account.type,
+        is_active: account.is_active,
+        account_group_id: selectedNode.id,
+        grouping_path: groupingPath,
+        allowed_departments: account.allowed_departments ?? null,
+        department_required: Boolean(account.department_required),
+        allowed_dimensions: account.allowed_dimensions ?? null,
+        dimension_required: Boolean(account.dimension_required),
+        attributes: account.attributes ?? null,
+        manual_posting_allowed: account.manual_posting_allowed,
+        control_account_type: account.control_account_type ?? null,
+      });
+
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CHART_OF_ACCOUNTS] });
+      await accountsQuery.refetch();
+      toast.success(`Account [${account.code}] assigned to group [${selectedNode.code}]`);
+      setAssignOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to assign account");
+    } finally {
+      setIsMutating(false);
     }
-    return counts;
-  }, [groups]);
+  };
 
-  const orderedGroups = useMemo(() => buildHierarchyOrder(groups), [groups]);
+  // Submit Unassign Account
+  const handleUnassignAccount = async (account: ChartOfAccount) => {
+    if (isMutating) return;
+    setIsMutating(true);
+    try {
+      await updateAccount.mutateAsync({
+        id: account.id,
+        doc_version: account.doc_version,
+        code: account.code,
+        description_1: account.description_1,
+        description_2: account.description_2 ?? null,
+        category: account.category,
+        nature: account.nature,
+        type: account.type,
+        is_active: account.is_active,
+        account_group_id: null,
+        grouping_path: null,
+        allowed_departments: account.allowed_departments ?? null,
+        department_required: Boolean(account.department_required),
+        allowed_dimensions: account.allowed_dimensions ?? null,
+        dimension_required: Boolean(account.dimension_required),
+        attributes: account.attributes ?? null,
+        manual_posting_allowed: account.manual_posting_allowed,
+        control_account_type: account.control_account_type ?? null,
+      });
 
-  const rows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return orderedGroups.filter((item) => {
-      if (
-        query &&
-        !`${item.code} ${item.name} ${item.name_local ?? ""} ${item.category}`
-          .toLowerCase()
-          .includes(query)
-      ) {
-        return false;
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CHART_OF_ACCOUNTS] });
+      await accountsQuery.refetch();
+      toast.success(`Account [${account.code}] unassigned successfully`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to unassign account");
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  // Confirm Delete
+  const handleConfirmDelete = async () => {
+    if (!buCode || !deletingNode || isMutating) return;
+    setIsMutating(true);
+    try {
+      const url = `${API_ENDPOINTS.GL_ACCOUNT_GROUPS(buCode)}/${deletingNode.id}`;
+      const res = await httpClient.delete(url);
+      if (!res.ok) throw await ApiError.from(res, "Unable to delete account group");
+
+      await queryClient.invalidateQueries({ queryKey: glAccountGroupsKey(buCode) });
+      toast.success(tt("deleteSuccess", { entity: deletingNode.name }));
+      if (selectedNodeId === deletingNode.id) {
+        setSelectedNodeId(null);
       }
-      if (selectedCategory !== "all" && item.category !== selectedCategory) {
-        return false;
-      }
-      if (selectedLevel !== "all" && item.level !== Number(selectedLevel)) {
-        return false;
-      }
-      if (selectedStatus !== "all") {
-        const isActive = selectedStatus === "active";
-        if (item.is_active !== isActive) return false;
-      }
-      return true;
-    });
-  }, [orderedGroups, search, selectedCategory, selectedLevel, selectedStatus]);
-
-  const names = useMemo(
-    () =>
-      new Map(groups.map((item) => [item.id, `${item.code} — ${item.name}`])),
-    [groups],
-  );
-
-  const columns = useMemo<ColumnDef<AccountGroupMaster>[]>(
-    () => [
-      {
-        accessorKey: "code",
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Group Code" />
-        ),
-        cell: ({ row }) => (
-          <CellAction
-            onClick={() => {
-              setDetailOnly(true);
-              setEditing(row.original);
-            }}
-          >
-            <span className="font-mono font-medium">{row.original.code}</span>
-          </CellAction>
-        ),
-        size: 130,
-      },
-      {
-        accessorKey: "name",
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Group Name (EN)" />
-        ),
-        cell: ({ row }) => (
-          <CellAction
-            onClick={() => {
-              setDetailOnly(true);
-              setEditing(row.original);
-            }}
-          >
-            <span
-              className="inline-flex items-center gap-1.5"
-              style={{ paddingLeft: `${(row.original.level - 1) * 20}px` }}
-            >
-              {row.original.level > 1 && (
-                <span className="text-muted-foreground/60 font-mono text-xs select-none">
-                  └─
-                </span>
-              )}
-              <span className="font-medium">{row.original.name}</span>
-            </span>
-          </CellAction>
-        ),
-      },
-      {
-        accessorKey: "name_local",
-        header: ({ column }) => (
-          <DataGridColumnHeader column={column} title="Group Name (TH)" />
-        ),
-        cell: ({ row }) => (
-          <span className="text-muted-foreground text-xs">
-            {row.original.name_local || "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "category",
-        header: "Category",
-        cell: ({ row }) => (
-          <Badge
-            data-standard-chip=""
-            variant="outline"
-            size="sm"
-            className="font-mono uppercase"
-          >
-            {row.original.category}
-          </Badge>
-        ),
-        size: 100,
-      },
-      {
-        accessorKey: "level",
-        header: "Level",
-        cell: ({ row }) => {
-          const l = row.original.level;
-          const variant =
-            l === 1 ? "default" : l === 2 ? "secondary" : "outline";
-          return (
-            <Badge
-              data-standard-chip=""
-              variant={variant}
-              size="sm"
-              className="font-mono"
-            >
-              L{l}
-            </Badge>
-          );
-        },
-        size: 80,
-      },
-      {
-        accessorKey: "parent_id",
-        header: "Parent Group",
-        cell: ({ row }) =>
-          row.original.parent_id ? (
-            <span className="text-muted-foreground font-mono text-xs">
-              {names.get(row.original.parent_id) ?? row.original.parent_id}
-            </span>
-          ) : (
-            <span className="text-muted-foreground/50 text-xs italic">
-              Root
-            </span>
-          ),
-      },
-      {
-        accessorKey: "account_count",
-        header: "Accounts",
-        cell: ({ row }) => (
-          <span className="font-mono text-xs tabular-nums">
-            {row.original.account_count}
-          </span>
-        ),
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-        size: 90,
-      },
-      {
-        accessorKey: "is_active",
-        header: "Status",
-        cell: ({ row }) => <StatusBadge active={row.original.is_active} />,
-        size: 90,
-      },
-      {
-        id: "actions",
-        header: "",
-        cell: ({ row }) => (
-          <DataGridRowActions
-            activity={{ id: row.original.id }}
-
-            onEdit={() => {
-              setDetailOnly(false);
-              setEditing(row.original);
-            }}
-            onDelete={() => setDeleting(row.original)}
-          />
-        ),
-        enableSorting: false,
-        size: 60,
-      },
-    ],
-    [names],
-  );
-
-  const table = useReactTable({
-    data: rows,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+      setDeleteOpen(false);
+      setDeletingNode(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to delete account group");
+    } finally {
+      setIsMutating(false);
+    }
+  };
 
   return (
     <ListPageShell
-      title="Account Code Grouping"
-      description="Four-level hierarchy used to classify Chart of Accounts"
-      toolbar={
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="w-full sm:w-auto sm:flex-initial">
-            <SearchInput
-              defaultValue={search}
-              onSearch={setSearch}
-              onInputChange={setSearch}
-            />
-          </div>
-        </div>
-      }
+      title={t("title")}
+      description={t("desc")}
       actions={
         <DocumentListActions
-          onAdd={() => setEditing(null)}
-          addLabel="Add Group"
+          onAdd={() => handleOpenAdd(null, 1)}
+          addLabel={t("add")}
           hideExportPrint
         />
       }
-    >
-      <div className="space-y-3">
-        {groupQuery.isError && (
-          <ErrorState
-            error={groupQuery.error}
-            onRetry={() => groupQuery.refetch()}
+      toolbar={
+        <div className="w-full">
+          <SearchInput
+            defaultValue={search}
+            onSearch={setSearch}
+            onInputChange={setSearch}
+            placeholder={t("searchPlaceholder")}
           />
-        )}
-        <Tabs
-          value={selectedCategory}
-          onValueChange={setSelectedCategory}
-          className="w-full"
-        >
-          <TabsList
-            variant="line"
-            className="w-full justify-start overflow-x-auto border-b"
-          >
-            <TabsTrigger value="all">All ({groups.length})</TabsTrigger>
-            {ACCOUNT_CATEGORIES.map((cat) => (
-              <TabsTrigger key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)} (
-                {categoryCounts[cat] ?? 0})
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        <div className="bg-muted/30 flex items-center gap-2 rounded-md px-3 py-2 text-xs">
-          <FolderTree className="text-primary size-4 shrink-0" />
-          <span className="font-medium">Hierarchy Tree:</span>
-          <span className="text-muted-foreground">
-            L1–L4 structure classified by account category. Indentation
-            indicates parent-child relationship.
+        </div>
+      }
+    >
+      {/* Summary KPI Counters Bar */}
+      {!isLoading && (
+        <div className="flex flex-wrap items-center gap-2.5 px-1 py-1 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground/80">
+            {t("totalGroups")}: {stats.total}
+          </span>
+          <span className="text-border">|</span>
+          <span>L1: {stats.l1}</span>
+          <span className="text-border">|</span>
+          <span>L2: {stats.l2}</span>
+          <span className="text-border">|</span>
+          <span>L3: {stats.l3}</span>
+          <span className="text-border">|</span>
+          <span>L4: {stats.l4}</span>
+          <span className="text-border">|</span>
+          <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+            {t("assignedAccounts")}: {stats.assignedCount}
+          </span>
+          <span className="text-border">|</span>
+          <span className="text-amber-700 dark:text-amber-400 font-medium">
+            {t("unassignedAccounts")}: {stats.unassignedCount}
           </span>
         </div>
+      )}
 
-        <DataGrid
-          table={table}
-          recordCount={rows.length}
-          emptyMessage={<EmptyComponent />}
-          tableLayout={{ width: "auto", headerSticky: true }}
-          tableClassNames={{ bodyRow: "h-10" }}
-        >
-          <DataGridContainer scroll className="max-h-[calc(100vh-17rem)]">
-            <DataGridTable />
-          </DataGridContainer>
-        </DataGrid>
-      </div>
+      {/* Main Workspace Split Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-17.5rem)] min-h-[500px]">
+        {/* LEFT 7 COLS: TREE VIEW NAVIGATION PANEL */}
+        <div className="lg:col-span-7 flex flex-col rounded-lg border bg-card shadow-xs overflow-hidden">
+          {/* Header Row */}
+          <div className="flex h-11 items-center justify-between border-b bg-muted/40 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-1.5">
+              <FolderTree className="size-4 text-primary" />
+              <span>{t("groupHierarchy")}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button onClick={expandAll} size="sm" variant="ghost" className="text-xs gap-1.5">
+                <ChevronDown className="size-3.5" />
+                <span>{t("expandAll")}</span>
+              </Button>
+              <Button onClick={collapseAll} size="sm" variant="ghost" className="text-xs gap-1.5">
+                <ChevronUp className="size-3.5" />
+                <span>{t("collapseAll")}</span>
+              </Button>
+            </div>
+          </div>
 
-      <GroupDialog
-        readOnly={detailOnly}
-        key={editing?.id ?? "new"}
-        open={editing !== undefined}
-        item={editing ?? null}
-        groups={groups}
-        saving={saving}
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditing(undefined);
-            setDetailOnly(false);
-          }
-        }}
-        onSave={saveGroup}
-      />
-      <DeleteDialog
-        open={!!deleting}
-        onOpenChange={(open) => !open && setDeleting(null)}
-        title="Delete account group?"
-        description={
-          deleting ? `Delete ${deleting.code} — ${deleting.name}?` : undefined
-        }
-        isPending={saving}
-        onConfirm={deleteGroup}
-      />
-      <WarningDialog
-        open={!!warning}
-        title="Action blocked"
-        description={warning}
-        onConfirm={() => setWarning("")}
-      />
-    </ListPageShell>
-  );
-}
-
-function GroupDialog({
-  open,
-  readOnly = false,
-  item,
-  groups,
-  saving,
-  onOpenChange,
-  onSave,
-}: {
-  open: boolean;
-  readOnly?: boolean;
-  item: AccountGroupMaster | null;
-  groups: AccountGroupMaster[];
-  saving: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (
-    value: Omit<AccountGroupMaster, "id" | "account_count" | "doc_version">,
-  ) => void;
-}) {
-  const [code, setCode] = useState(item?.code ?? "");
-  const [name, setName] = useState(item?.name ?? "");
-  const [nameLocal, setNameLocal] = useState(item?.name_local ?? "");
-  const [category, setCategory] = useState<AccountCategory>(
-    item?.category ?? "asset",
-  );
-  const [sortOrder, setSortOrder] = useState<number>(item?.sort_order ?? 0);
-  const [level, setLevel] = useState<AccountGroupMaster["level"]>(
-    item?.level ?? 1,
-  );
-  const [parentId, setParentId] = useState(item?.parent_id ?? "root");
-  const [active, setActive] = useState(item?.is_active ?? true);
-
-  const excludedIds = useMemo(() => {
-    if (!item) return new Set<string>();
-    const desc = getDescendantGroupIds(groups, item.id);
-    desc.add(item.id);
-    return desc;
-  }, [groups, item]);
-
-  const parentOptions = useMemo(() => {
-    if (level === 1) return [];
-    return groups.filter(
-      (group) =>
-        !excludedIds.has(group.id) &&
-        group.level === level - 1 &&
-        group.category === category &&
-        group.is_active,
-    );
-  }, [groups, excludedIds, level, category]);
-
-  const handleCategoryChange = (val: AccountCategory) => {
-    setCategory(val);
-    if (level > 1) {
-      const valid = groups.filter(
-        (g) =>
-          !excludedIds.has(g.id) &&
-          g.level === level - 1 &&
-          g.category === val &&
-          g.is_active,
-      );
-      if (!valid.some((p) => p.id === parentId)) {
-        setParentId(valid[0]?.id ?? "");
-      }
-    }
-  };
-
-  const handleLevelChange = (next: AccountGroupMaster["level"]) => {
-    setLevel(next);
-    if (next === 1) {
-      setParentId("root");
-    } else {
-      const valid = groups.filter(
-        (g) =>
-          !excludedIds.has(g.id) &&
-          g.level === next - 1 &&
-          g.category === category &&
-          g.is_active,
-      );
-      if (!valid.some((p) => p.id === parentId)) {
-        setParentId(valid[0]?.id ?? "");
-      }
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>
-            {readOnly
-              ? "Account Group Detail"
-              : item
-                ? "Edit Account Group"
-                : "Add Account Group"}
-          </DialogTitle>
-          <DialogDescription>
-            Selecting a parent creates the hierarchy path used by Chart of
-            Accounts.
-          </DialogDescription>
-        </DialogHeader>
-        <fieldset
-          disabled={readOnly}
-          className="grid gap-4 py-2 sm:grid-cols-2"
-        >
-          <Field>
-            <FieldLabel htmlFor="group-code" required>
-              Group Code
-            </FieldLabel>
-            <FieldInput
-              id="group-code"
-              value={code}
-              disabled={!!item}
-              maxLength={20}
-              placeholder="e.g. 1000, 1100"
-              onChange={(event) => setCode(event.target.value.toUpperCase())}
-            />
-          </Field>
-          <Field>
-            <FieldLabel required>Category</FieldLabel>
-            <FieldSelect
-              value={category}
-              disabled={!!item}
-              onValueChange={(val) =>
-                handleCategoryChange(val as AccountCategory)
-              }
-            >
-              <SelectContent>
-                {ACCOUNT_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {CATEGORY_LABELS[cat] ?? cat}
-                  </SelectItem>
+          {/* Tree Scrollable Content */}
+          <ScrollArea className="flex-1 p-2.5">
+            {filteredTree.length > 0 ? (
+              <div className="space-y-0.5">
+                {filteredTree.map((node) => (
+                  <AccountGroupTreeNode
+                    key={node.id}
+                    node={node}
+                    level={0}
+                    selectedNodeId={selectedNodeId}
+                    expanded={expanded}
+                    toggleExpand={toggleExpand}
+                    onSelect={(n) => setSelectedNodeId(n.id)}
+                    onAddSubGroup={(n) => handleOpenAdd(n)}
+                    onMoveGroup={handleOpenMove}
+                    onEditGroup={handleOpenEdit}
+                    onDeleteGroup={handleOpenDelete}
+                    search={search}
+                  />
                 ))}
-              </SelectContent>
-            </FieldSelect>
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="group-name" required>
-              Group Name (EN)
-            </FieldLabel>
-            <FieldInput
-              id="group-name"
-              value={name}
-              maxLength={100}
-              placeholder="e.g. Current Assets"
-              onChange={(event) => setName(event.target.value)}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="group-name-local">Group Name (TH)</FieldLabel>
-            <FieldInput
-              id="group-name-local"
-              value={nameLocal}
-              maxLength={100}
-              placeholder="e.g. สินทรัพย์หมุนเวียน"
-              onChange={(event) => setNameLocal(event.target.value)}
-            />
-          </Field>
-          <Field>
-            <FieldLabel required>Level</FieldLabel>
-            <FieldSelect
-              value={String(level)}
-              disabled={
-                !!item &&
-                (item.account_count > 0 ||
-                  groups.some((g) => g.parent_id === item.id))
-              }
-              onValueChange={(value) => {
-                handleLevelChange(Number(value) as AccountGroupMaster["level"]);
-              }}
-            >
-              <SelectContent>
-                {[1, 2, 3, 4].map((value) => (
-                  <SelectItem key={value} value={String(value)}>
-                    Level {value} {value === 1 ? "(Root Category)" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </FieldSelect>
-          </Field>
-          <Field>
-            <FieldLabel required={level > 1}>Parent Group</FieldLabel>
-            <FieldSelect
-              value={parentId}
-              disabled={level === 1 || parentOptions.length === 0}
-              onValueChange={setParentId}
-            >
-              <SelectContent>
-                {level === 1 ? (
-                  <SelectItem value="root">Root (No Parent)</SelectItem>
-                ) : (
-                  parentOptions.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
-                      {group.code} — {group.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </FieldSelect>
-            {level > 1 && parentOptions.length === 0 && (
-              <div className="mt-1 flex items-center gap-1 text-xs text-amber-600">
-                <AlertCircle className="size-3 shrink-0" />
-                <span>
-                  No active L{level - 1} group in {category}
-                </span>
+              </div>
+            ) : (
+              <div className="flex h-40 flex-col items-center justify-center text-xs text-muted-foreground">
+                <FolderTree className="size-8 opacity-20 mb-2" />
+                <span>{search ? "No matching account groups found" : "No account groups configured yet"}</span>
               </div>
             )}
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="group-sort-order">Sort Order</FieldLabel>
-            <FieldInput
-              id="group-sort-order"
-              type="number"
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(Number(event.target.value) || 0)
-              }
-            />
-          </Field>
-          <div className="sm:col-span-2">
-            <StatusSwitch
-              id="account-group-active"
-              checked={active}
-              onCheckedChange={setActive}
-            />
-          </div>
-        </fieldset>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {readOnly ? "Close" : "Cancel"}
-          </Button>
-          {!readOnly && (
-            <Button
-              disabled={
-                saving ||
-                !code.trim() ||
-                !name.trim() ||
-                (level > 1 && (!parentId || parentId === "root"))
-              }
-              onClick={() =>
-                onSave({
-                  code,
-                  name,
-                  name_local: nameLocal || null,
-                  level,
-                  parent_id: level === 1 ? null : parentId,
-                  category,
-                  sort_order: sortOrder,
-                  is_active: active,
-                })
-              }
-            >
-              {item ? "Save" : "Create"}
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </ScrollArea>
+        </div>
+
+        {/* RIGHT 5 COLS: DETAIL & ASSIGNED ACCOUNTS PANEL */}
+        <div className="lg:col-span-5 flex flex-col rounded-lg border bg-card shadow-xs overflow-hidden">
+          <AccountGroupDetailPanel
+            selectedNode={selectedNode}
+            breadcrumbs={breadcrumbs}
+            onAddSubGroup={(n) => handleOpenAdd(n)}
+            onMoveGroup={handleOpenMove}
+            onEditGroup={handleOpenEdit}
+            onDeleteGroup={handleOpenDelete}
+            onOpenAssignDialog={() => setAssignOpen(true)}
+            onUnassignAccount={handleUnassignAccount}
+          />
+        </div>
+      </div>
+
+      {/* MODALS */}
+      <AccountGroupFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        mode={formMode}
+        initialNode={editingNode}
+        defaultParentNode={defaultParentNode}
+        parentOptions={parentOptionsForLevel}
+        onLevelChange={setTargetLevel}
+        onSubmit={handleFormSubmit}
+        isPending={isMutating}
+      />
+
+      <AccountGroupMoveDialog
+        open={moveOpen}
+        onOpenChange={setMoveOpen}
+        targetGroup={movingNode}
+        fullTree={fullTree}
+        isDescendant={isDescendant}
+        getMaxSubDepth={getMaxSubDepth}
+        onConfirmMove={handleMoveConfirm}
+        isPending={isMutating}
+      />
+
+      <AccountGroupAssignDialog
+        open={assignOpen}
+        onOpenChange={setAssignOpen}
+        targetGroup={selectedNode}
+        unassignedAccounts={unassignedAccounts}
+        onAssign={handleAssignAccount}
+        isPending={isMutating}
+      />
+
+      <AccountGroupUnassignWarningDialog
+        open={warningOpen}
+        onOpenChange={setWarningOpen}
+        targetGroup={warningNode}
+      />
+
+      <DeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={t("delete.title")}
+        description={
+          deletingNode
+            ? t("delete.confirm", { name: deletingNode.name, code: deletingNode.code })
+            : ""
+        }
+        onConfirm={handleConfirmDelete}
+        isPending={isMutating}
+      />
+    </ListPageShell>
   );
 }

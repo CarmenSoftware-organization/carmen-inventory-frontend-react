@@ -30,9 +30,22 @@ export function createCoaSchema(tv: TranslationFn, tf: TranslationFn) {
     category: z.enum(ACCOUNT_CATEGORIES, {
       error: tv("required", { field: tf("category") }),
     }),
-    account_group_id: z.string().min(1, "Account Code Grouping Path is required before saving!"),
+    account_group_id: z.string(),
+    req_dept: z.boolean().optional(),
+    allowed_departments: z.array(z.string()).optional(),
+    req_dim: z.boolean().optional(),
     allowed_dimensions: z.array(z.string()).optional(),
-    dimension_required: z.boolean().optional(),
+    dimension_rules: z.record(z.string(), z.enum(["mandatory", "optional", "prohibited"])),
+    attributes: z.record(z.string(), z.string()).optional(),
+    grouping_path: z
+      .array(
+        z.object({
+          code: z.string(),
+          name: z.string(),
+          level: z.number(),
+        }),
+      )
+      .optional(),
     is_active: z.boolean(),
   });
 }

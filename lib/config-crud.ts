@@ -49,7 +49,7 @@ export function createConfigApi<T, TCreate>({
     const res = await httpClient.get(`${endpoint(buCode)}/${id}`);
     if (!res.ok) throw await ApiError.from(res, `Failed to fetch ${label}`);
     const json = await res.json();
-    return json.data;
+    return json.data ?? json;
   }
 
   async function create(buCode: string, data: TCreate): Promise<Response> {

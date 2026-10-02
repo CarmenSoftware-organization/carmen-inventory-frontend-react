@@ -14,6 +14,7 @@ const crud = createConfigCrud<ChartOfAccount, CreateChartOfAccountDto>({
 });
 
 export const useChartOfAccount = crud.useList;
+export const useChartOfAccountAll = crud.useListAll;
 export const useChartOfAccountById = crud.useById;
 export const useCreateChartOfAccount = crud.useCreate;
 export const useUpdateChartOfAccount = crud.useUpdate;

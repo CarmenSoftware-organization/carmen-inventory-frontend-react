@@ -22,9 +22,10 @@ const lookup = (messages: unknown, path: string) =>
     );
 
 describe("COA_FILTER_FIELDS", () => {
-  it("กรองได้สามอย่าง: สถานะ · ด้านบัญชี · ประเภท", () => {
+  it("กรองได้สี่อย่าง: สถานะ · หมวดบัญชี · ด้านบัญชี · ประเภท", () => {
     expect(COA_FILTER_FIELDS.map((f) => f.key)).toEqual([
       "filter",
+      "category",
       "nature",
       "type",
     ]);

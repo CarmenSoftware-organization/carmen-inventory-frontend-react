@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carmen Blue - Account Code Grouping Redesign v1.1</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel CDN for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Google Font: Inter & Sukhumvit/Prompt style -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --radius: 0.625rem;
+      /* Brand ERP — light mode: crisp, vibrant, fast */
+      --background: oklch(0.98 0.004 258.7);
+      --foreground: oklch(0.16 0.02 258.7);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.16 0.02 258.7);
+      --popover: oklch(1 0 0);
+      --popover-foreground: oklch(0.16 0.02 258.7);
+      --primary: oklch(0.4714 0.1794 258.7);
+      --primary-foreground: oklch(0.99 0 0);
+      --secondary: oklch(0.94 0.014 258.7);
+      --secondary-foreground: oklch(0.22 0.02 258.7);
+      --muted: oklch(0.95 0.008 258.7);
+      --muted-foreground: oklch(0.46 0.016 258.7);
+      --accent: oklch(0.93 0.024 258.7);
+      --accent-foreground: oklch(0.22 0.02 258.7);
+      --destructive: oklch(0.666 0.2013 24.11);
+      --destructive-foreground: oklch(1 0 0);
+      --border: oklch(0.91 0.008 258.7);
+      --input: oklch(0.91 0.008 258.7);
+      --ring: oklch(0.4714 0.1794 258.7);
+      --sidebar: oklch(0.97 0.006 258.7);
+      --sidebar-foreground: oklch(0.16 0.02 258.7);
+      --sidebar-primary: oklch(0.4714 0.1794 258.7);
+      --sidebar-primary-foreground: oklch(0.99 0 0);
+      --sidebar-accent: oklch(0.93 0.024 258.7);
+      --sidebar-accent-foreground: oklch(0.22 0.02 258.7);
+      --sidebar-border: oklch(0.90 0.010 258.7);
+      --sidebar-ring: oklch(0.4714 0.1794 258.7);
+      --success: oklch(0.7515 0.1117 188.43);
+      --success-foreground: oklch(0.30 0.08 188.43);
+      --info: oklch(0.5852 0.1706 253.27);
+      --info-foreground: oklch(0.30 0.10 253.27);
+      --warning: oklch(0.78 0.15 75);
+      --warning-foreground: oklch(0.30 0.06 75);
+      --invert: oklch(0.20 0.02 258.7);
+      --invert-foreground: oklch(0.98 0 0);
+    }
+
+    .dark {
+      /* Brand ERP — dark mode: rich, deep, vibrant */
+      --background: oklch(0.18 0.02 258.7);
+      --foreground: oklch(0.94 0.006 258.7);
+      --card: oklch(0.22 0.024 258.7);
+      --card-foreground: oklch(0.94 0.006 258.7);
+      --popover: oklch(0.23 0.026 258.7);
+      --popover-foreground: oklch(0.94 0.006 258.7);
+      --primary: oklch(0.5852 0.1706 253.27);
+      --primary-foreground: oklch(0.99 0 0);
+      --secondary: oklch(0.28 0.026 258.7);
+      --secondary-foreground: oklch(0.92 0.006 258.7);
+      --muted: oklch(0.26 0.022 258.7);
+      --muted-foreground: oklch(0.65 0.016 258.7);
+      --accent: oklch(0.30 0.034 258.7);
+      --accent-foreground: oklch(0.94 0.006 258.7);
+      --destructive: oklch(0.666 0.2013 24.11);
+      --destructive-foreground: oklch(0.98 0 0);
+      --border: oklch(0.32 0.026 258.7);
+      --input: oklch(0.30 0.026 258.7);
+      --ring: oklch(0.5852 0.1706 253.27);
+      --sidebar: oklch(0.16 0.018 258.7);
+      --sidebar-foreground: oklch(0.92 0.006 258.7);
+      --sidebar-primary: oklch(0.5852 0.1706 253.27);
+      --sidebar-primary-foreground: oklch(0.99 0 0);
+      --sidebar-accent: oklch(0.28 0.030 258.7);
+      --sidebar-accent-foreground: oklch(0.94 0.006 258.7);
+      --sidebar-border: oklch(0.30 0.022 258.7);
+      --sidebar-ring: oklch(0.5852 0.1706 253.27);
+      --success: oklch(0.7515 0.1117 188.43);
+      --success-foreground: oklch(0.82 0.08 188.43);
+      --info: oklch(0.5852 0.1706 253.27);
+      --info-foreground: oklch(0.75 0.12 253.27);
+      --warning: oklch(0.82 0.13 75);
+      --warning-foreground: oklch(0.80 0.14 75);
+    }
+
+    body {
+      font-family: 'Prompt', 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--foreground);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="h-full overflow-hidden">
+  <div id="root" class="h-full"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- MOCK INITIAL DATA PER BU (ENGLISH ONLY) ---
+    const INITIAL_GROUPS = [
+      {
+        id: 'g1',
+        code: '1000',
+        nameTH: 'Assets Group',
+        nameEN: 'Assets Group',
+        level: 1,
+        parentId: null,
+        accounts: [],
+        children: [
+          {
+            id: 'g1-1',
+            code: '1100',
+            nameTH: 'Current Assets',
+            nameEN: 'Current Assets',
+            level: 2,
+            parentId: 'g1',
+            accounts: [],
+            children: [
+              {
+                id: 'g1-1-1',
+                code: '1110',
+                nameTH: 'Cash & Bank Deposits',
+                nameEN: 'Cash & Bank Deposits',
+                level: 3,
+                parentId: 'g1-1',
+                accounts: ['1111-001', '1111-002'], // L3 leaf accounts
+                children: [
+                  {
+                    id: 'g1-1-1-1',
+                    code: '1111',
+                    nameTH: 'House Banks & Petty Cash',
+                    nameEN: 'House Banks & Petty Cash',
+                    level: 4,
+                    parentId: 'g1-1-1',
+                    accounts: ['1112-001'],
+                    children: []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'g4',
+        code: '4000',
+        nameTH: 'Revenue Group',
+        nameEN: 'Revenue Group',
+        level: 1,
+        parentId: null,
+        accounts: [],
+        children: [
+          {
+            id: 'g4-1',
+            code: '4100',
+            nameTH: 'Operating Revenue',
+            nameEN: 'Operating Revenue',
+            level: 2,
+            parentId: 'g4',
+            accounts: [],
+            children: [
+              {
+                id: 'g4-1-1',
+                code: '4110',
+                nameTH: 'Room Revenue',
+                nameEN: 'Room Revenue',
+                level: 3,
+                parentId: 'g4-1',
+                accounts: ['4110-001', '4110-002', '4110-003'],
+                children: []
+              },
+              {
+                id: 'g4-1-2',
+                code: '4120',
+                nameTH: 'Food & Beverage Revenue',
+                nameEN: 'Food & Beverage Revenue',
+                level: 3,
+                parentId: 'g4-1',
+                accounts: ['4120-001', '4120-002'],
+                children: []
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const ALL_ACCOUNTS_MASTER = [
+      { code: '1111-001', nameTH: 'Front Desk House Bank', nameEN: 'Front Desk House Bank', nature: 'Debit', type: 'Balance Sheet' },
+      { code: '1111-002', nameTH: 'F&B Petty Cash', nameEN: 'F&B Petty Cash', nature: 'Debit', type: 'Balance Sheet' },
+      { code: '1112-001', nameTH: 'BBL Current Account', nameEN: 'BBL Current Account', nature: 'Debit', type: 'Balance Sheet' },
+      { code: '4110-001', nameTH: 'Transient Room Revenue', nameEN: 'Transient Room Revenue', nature: 'Credit', type: 'Income Statement' },
+      { code: '4110-002', nameTH: 'Group Tour Room Revenue', nameEN: 'Group Tour Room Revenue', nature: 'Credit', type: 'Income Statement' },
+      { code: '4110-003', nameTH: 'OTA Room Revenue', nameEN: 'OTA Room Revenue', nature: 'Credit', type: 'Income Statement' },
+      { code: '4120-001', nameTH: 'Main Restaurant Revenue', nameEN: 'Main Restaurant Revenue', nature: 'Credit', type: 'Income Statement' },
+      { code: '4120-002', nameTH: 'Room Service Revenue', nameEN: 'Room Service Revenue', nature: 'Credit', type: 'Income Statement' },
+      // Unassigned initial pool
+      { code: '5100-001', nameTH: 'Cost of Food & Beverage', nameEN: 'Cost of Food & Beverage', nature: 'Debit', type: 'Income Statement' },
+      { code: '5200-001', nameTH: 'Staff Salaries & Wages', nameEN: 'Staff Salaries & Wages', nature: 'Debit', type: 'Income Statement' },
+      { code: '5300-001', nameTH: 'Electricity & Utilities Cost', nameEN: 'Electricity & Utilities Cost', nature: 'Debit', type: 'Income Statement' }
+    ];
+
+    function App() {
+      // Theme State
+      const [darkMode, setDarkMode] = useState(false);
+      const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+      // ERP Business Unit State
+      const [selectedBU, setSelectedBU] = useState('BU-001');
+      const [userPermission, setUserPermission] = useState('Manage'); // 'Manage' | 'ViewOnly'
+
+      // Tree Data State
+      const [treeData, setTreeData] = useState(INITIAL_GROUPS);
+      const [selectedNodeId, setSelectedNodeId] = useState('g4-1-1');
+      const [searchTerm, setSearchTerm] = useState('');
+      const [expandedNodes, setExpandedNodes] = useState({ 'g1': true, 'g1-1': true, 'g1-1-1': true, 'g4': true, 'g4-1': true });
+
+      // Modals State
+      const [showAddGroupModal, setShowAddGroupModal] = useState(false);
+      const [showMoveGroupModal, setShowMoveGroupModal] = useState(false);
+      const [showAssignAccModal, setShowAssignAccModal] = useState(false);
+      const [showStepUnassignWarning, setShowStepUnassignWarning] = useState(false);
+
+      // Active target items for modal actions
+      const [modalTargetGroup, setModalTargetGroup] = useState(null);
+
+      // Form inputs for Add Group
+      const [selectedAddLevel, setSelectedAddLevel] = useState(1);
+      const [selectedAddParentId, setSelectedAddParentId] = useState('');
+      const [newGroupCode, setNewGroupCode] = useState('');
+      const [newGroupNameEN, setNewGroupNameEN] = useState('');
+      const [targetMoveParentId, setTargetMoveParentId] = useState('');
+
+      // Toggle Dark Mode Class on root element
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+
+      // --- HELPER DICTIONARY (ENGLISH ONLY) ---
+      const t = {
+        appTitle: 'Carmen ERP - GL Account Grouping',
+        buLabel: 'Business Unit (BU):',
+        userRole: 'Role:',
+        roleManage: 'Manager (Edit Allowed)',
+        roleView: 'Accountant (View Only)',
+        logout: 'Log Out',
+        searchPlaceholder: 'Search Group Code, Name or Account Code...',
+        expandAll: 'Expand All',
+        collapseAll: 'Collapse All',
+        addGroupBtn: '+ Add',
+        unassignedPool: 'Unassigned Account Pool',
+        levelLabel: 'Level',
+        assignedAccounts: 'Assigned Accounts',
+        actions: 'Actions',
+        assignedDetail: 'Account Codes in this Group',
+        assignButton: '+ Assign Account Code',
+        unassign: 'Unassign',
+        quickMove: 'Move Group',
+        moveGroup: 'Move Group Node',
+        addChildGroup: '+ Add Sub-Group',
+        deleteGroup: 'Delete Group',
+        confirmUnassignTitle: 'Confirm Account Unassign',
+        stepUnassignWarning: 'Warning! The selected parent group already has Account Codes assigned. (Business Rule: Cannot create child groups while accounts are assigned). You must unassign the account code first before adding a sub-group.',
+        confirmBtn: 'Confirm',
+        cancelBtn: 'Cancel',
+        saveBtn: 'Save Changes',
+        selectTargetGroup: 'Select Target Group:',
+        maxLevelLimit: 'Cannot add sub-group because maximum depth of 4 levels is reached.',
+        l2RestrictionNotice: 'Business Rule: Level 2 Groups can only be moved within Level 2 under another L1 node.'
+      };
+
+      // Recursive Find Node
+      const findNodeRecursive = (nodes, id) => {
+        for (let node of nodes) {
+          if (node.id === id) return node;
+          if (node.children && node.children.length > 0) {
+            const found = findNodeRecursive(node.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      // Flatten tree nodes by level for parent selection dropdowns
+      const getNodesByLevel = (nodes, level) => {
+        let result = [];
+        const collect = (list) => {
+          list.forEach(n => {
+            if (n.level === level) result.push(n);
+            if (n.children) collect(n.children);
+          });
+        };
+        collect(nodes);
+        return result;
+      };
+
+      const selectedNode = useMemo(() => {
+        return findNodeRecursive(treeData, selectedNodeId);
+      }, [treeData, selectedNodeId]);
+
+      // Calculate all assigned account codes across tree to find unassigned ones
+      const assignedAccountCodesSet = useMemo(() => {
+        const set = new Set();
+        const collect = (nodes) => {
+          nodes.forEach(n => {
+            if (n.accounts && n.accounts.length > 0) {
+              n.accounts.forEach(acc => set.add(acc));
+            }
+            if (n.children) collect(n.children);
+          });
+        };
+        collect(treeData);
+        return set;
+      }, [treeData]);
+
+      const unassignedAccountsList = useMemo(() => {
+        return ALL_ACCOUNTS_MASTER.filter(acc => !assignedAccountCodesSet.has(acc.code));
+      }, [assignedAccountCodesSet]);
+
+      // Toggle Tree Node
+      const toggleExpand = (id) => {
+        setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
+      };
+
+      // Handle Open Add Group Modal (Top Add button or Tree Item Add)
+      const handleOpenAddGroup = (defaultParentNode = null, defaultLevel = 1) => {
+        if (defaultParentNode) {
+          const targetLvl = Math.min(defaultParentNode.level + 1, 4);
+          setSelectedAddLevel(targetLvl);
+          setSelectedAddParentId(defaultParentNode.id);
+        } else {
+          setSelectedAddLevel(defaultLevel);
+          setSelectedAddParentId('');
+        }
+        setNewGroupCode('');
+        setNewGroupNameEN('');
+        setShowAddGroupModal(true);
+      };
+
+      // Perform actual Add Sub-Group
+      const handleSaveNewGroup = () => {
+        if (!newGroupCode || !newGroupNameEN) {
+          alert('Please enter both Group Code and Group Name.');
+          return;
+        }
+
+        if (selectedAddLevel > 1 && !selectedAddParentId) {
+          alert(`Please select a Level ${selectedAddLevel - 1} Parent Group before proceeding.`);
+          return;
+        }
+
+        // Check if chosen parent has assigned accounts
+        if (selectedAddLevel > 1) {
+          const parentObj = findNodeRecursive(treeData, selectedAddParentId);
+          if (parentObj && parentObj.accounts && parentObj.accounts.length > 0) {
+            setModalTargetGroup(parentObj);
+            setShowAddGroupModal(false);
+            setShowStepUnassignWarning(true);
+            return;
+          }
+        }
+
+        const newId = 'g_' + Date.now();
+        const newGroupObj = {
+          id: newId,
+          code: newGroupCode,
+          nameTH: newGroupNameEN,
+          nameEN: newGroupNameEN,
+          level: selectedAddLevel,
+          parentId: selectedAddLevel === 1 ? null : selectedAddParentId,
+          accounts: [],
+          children: []
+        };
+
+        if (selectedAddLevel === 1) {
+          // Add L1
+          setTreeData(prev => [...prev, newGroupObj]);
+        } else {
+          // Add Child recursively
+          const updateNodes = (nodes) => {
+            return nodes.map(node => {
+              if (node.id === selectedAddParentId) {
+                return { ...node, children: [...(node.children || []), newGroupObj] };
+              }
+              if (node.children && node.children.length > 0) {
+                return { ...node, children: updateNodes(node.children) };
+              }
+              return node;
+            });
+          };
+          setTreeData(prev => updateNodes(prev));
+          setExpandedNodes(prev => ({ ...prev, [selectedAddParentId]: true }));
+        }
+
+        setShowAddGroupModal(false);
+      };
+
+      // Unassign Account Code from Selected Node
+      const handleUnassignAccount = (accCode) => {
+        if (userPermission === 'ViewOnly') return;
+        const updateNodes = (nodes) => {
+          return nodes.map(node => {
+            if (node.id === selectedNodeId) {
+              return { ...node, accounts: node.accounts.filter(a => a !== accCode) };
+            }
+            if (node.children && node.children.length > 0) {
+              return { ...node, children: updateNodes(node.children) };
+            }
+            return node;
+          });
+        };
+        setTreeData(prev => updateNodes(prev));
+      };
+
+      // Assign Account Code to Selected Node
+      const handleAssignAccount = (accCode) => {
+        if (userPermission === 'ViewOnly') return;
+        if (selectedNode.children && selectedNode.children.length > 0) {
+          alert('Cannot assign Account Code to a node that has child groups.');
+          return;
+        }
+        const updateNodes = (nodes) => {
+          return nodes.map(node => {
+            if (node.id === selectedNodeId) {
+              return { ...node, accounts: [...node.accounts, accCode] };
+            }
+            if (node.children && node.children.length > 0) {
+              return { ...node, children: updateNodes(node.children) };
+            }
+            return node;
+          });
+        };
+        setTreeData(prev => updateNodes(prev));
+        setShowAssignAccModal(false);
+      };
+
+      // Move Group Validation & Save Logic
+      const handleOpenMoveGroup = (groupNode) => {
+        setModalTargetGroup(groupNode);
+        setTargetMoveParentId('');
+        setShowMoveGroupModal(true);
+      };
+
+      const handleSaveMoveGroup = () => {
+        if (!targetMoveParentId) return;
+
+        const targetParent = findNodeRecursive(treeData, targetMoveParentId);
+        if (modalTargetGroup.level === 2) {
+          if (targetParent.level !== 1) {
+            alert(t.l2RestrictionNotice);
+            return;
+          }
+        }
+
+        const isChildOf = (parent, searchId) => {
+          if (!parent.children) return false;
+          for (let child of parent.children) {
+            if (child.id === searchId) return true;
+            if (isChildOf(child, searchId)) return true;
+          }
+          return false;
+        };
+        if (isChildOf(modalTargetGroup, targetMoveParentId)) {
+          alert('Cannot move parent group into its own child hierarchy.');
+          return;
+        }
+
+        const maxSubDepth = (node) => {
+          if (!node.children || node.children.length === 0) return 0;
+          return 1 + Math.max(...node.children.map(maxSubDepth));
+        };
+        if (targetParent.level + 1 + maxSubDepth(modalTargetGroup) > 4) {
+          alert('Moving this group exceeds maximum depth of 4 levels.');
+          return;
+        }
+
+        let extractedNode = null;
+        const removeNode = (nodes) => {
+          return nodes.filter(n => {
+            if (n.id === modalTargetGroup.id) {
+              extractedNode = { ...n, parentId: targetMoveParentId, level: targetParent.level + 1 };
+              return false;
+            }
+            if (n.children && n.children.length > 0) {
+              n.children = removeNode(n.children);
+            }
+            return true;
+          });
+        };
+
+        const treeWithoutNode = removeNode(JSON.parse(JSON.stringify(treeData)));
+
+        const insertNode = (nodes) => {
+          return nodes.map(n => {
+            if (n.id === targetMoveParentId) {
+              return { ...n, children: [...(n.children || []), extractedNode] };
+            }
+            if (n.children && n.children.length > 0) {
+              return { ...n, children: insertNode(n.children) };
+            }
+            return n;
+          });
+        };
+
+        const finalTree = insertNode(treeWithoutNode);
+        setTreeData(finalTree);
+        setShowMoveGroupModal(false);
+      };
+
+      return (
+        <div className="flex h-screen w-full flex-col bg-[var(--background)] text-[var(--foreground)]">
+          {/* TOPBAR HEADER */}
+          <header className="flex h-16 w-full items-center justify-between border-b border-[var(--border)] bg-[var(--card)] px-4 shadow-sm">
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]"
+                title="Toggle Sidebar Navigation"
+              >
+                <i className="fa-solid fa-bars text-lg"></i>
+              </button>
+              <div className="flex items-center space-x-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--primary)] text-white font-bold text-xl shadow">
+                  C
+                </div>
+                <span className="text-lg font-bold tracking-tight text-[var(--primary)] hidden sm:inline">
+                  CARMEN <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[var(--accent)] text-[var(--accent-foreground)]">Blue ERP</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Middle BU & Role Controls */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm">
+                <i className="fa-solid fa-hotel text-[var(--primary)]"></i>
+                <span className="hidden md:inline font-medium">{t.buLabel}</span>
+                <select 
+                  value={selectedBU} 
+                  onChange={(e) => setSelectedBU(e.target.value)}
+                  className="rounded-md border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[var(--ring)] outline-none"
+                >
+                  <option value="BU-001">Grand Hotel & Resort Bangkok (BU-01)</option>
+                  <option value="BU-002">Carmen Restaurant Pattaya (BU-02)</option>
+                  <option value="BU-003">Phuket Beach Club & Spa (BU-03)</option>
+                </select>
+              </div>
+
+              <div className="hidden lg:flex items-center space-x-2 text-xs bg-[var(--muted)] px-3 py-1 rounded-full border border-[var(--border)]">
+                <span className="font-semibold text-[var(--muted-foreground)]">{t.userRole}</span>
+                <button 
+                  onClick={() => setUserPermission(userPermission === 'Manage' ? 'ViewOnly' : 'Manage')}
+                  className={`px-2 py-0.5 rounded font-bold transition-all ${userPermission === 'Manage' ? 'bg-[var(--primary)] text-white' : 'bg-gray-400 text-white'}`}
+                >
+                  {userPermission === 'Manage' ? t.roleManage : t.roleView}
+                </button>
+              </div>
+            </div>
+
+            {/* Right Top Controls: Dark Mode, User Logout */}
+            <div className="flex items-center space-x-3">
+              {/* Dark Mode Toggle */}
+              <button 
+                onClick={() => setDarkMode(!darkMode)}
+                className="rounded-md border border-[var(--border)] p-2 text-xs hover:bg-[var(--secondary)]"
+                title="Toggle Dark Mode"
+              >
+                <i className={`fa-solid ${darkMode ? 'fa-sun text-yellow-400' : 'fa-moon text-indigo-600'} text-base`}></i>
+              </button>
+
+              {/* User Profile */}
+              <div className="flex items-center space-x-2 border-l border-[var(--border)] pl-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-white shadow">
+                  SA
+                </div>
+                <div className="hidden xl:flex flex-col text-left text-xs">
+                  <span className="font-semibold leading-none">Senior SA/BA</span>
+                  <span className="text-[10px] text-[var(--muted-foreground)]">Accounting Admin</span>
+                </div>
+                <button 
+                  onClick={() => alert('Log Out Successful')}
+                  className="ml-1 text-red-500 hover:text-red-700 p-1 text-xs"
+                  title={t.logout}
+                >
+                  <i className="fa-solid fa-right-from-bracket"></i>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex flex-1 overflow-hidden">
+            {/* LEFT SIDEBAR MENU */}
+            <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] flex flex-col`}>
+              <div className="p-3 border-b border-[var(--sidebar-border)] flex items-center justify-between">
+                {!sidebarCollapsed && <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Navigation Menu</span>}
+                <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="mx-auto text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                  <i className={`fa-solid ${sidebarCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+                </button>
+              </div>
+              <nav className="flex-1 space-y-1 p-2">
+                <a href="#" className="flex items-center space-x-3 rounded-lg bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] px-3 py-2.5 text-sm font-medium shadow-sm">
+                  <i className="fa-solid fa-sitemap text-base"></i>
+                  {!sidebarCollapsed && <span>Account Grouping</span>}
+                </a>
+                <a href="#" className="flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]">
+                  <i className="fa-solid fa-list-ol text-base"></i>
+                  {!sidebarCollapsed && <span>Chart of Accounts</span>}
+                </a>
+                <a href="#" className="flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]">
+                  <i className="fa-solid fa-book-journal-whills text-base"></i>
+                  {!sidebarCollapsed && <span>Journal Vouchers</span>}
+                </a>
+                <a href="#" className="flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]">
+                  <i className="fa-solid fa-sliders text-base"></i>
+                  {!sidebarCollapsed && <span>System Settings</span>}
+                </a>
+              </nav>
+            </aside>
+
+            {/* MAIN CONTENT WORKSPACE */}
+            <main className="flex-1 flex flex-col overflow-hidden p-4 space-y-4">
+              {/* SCREEN TITLE BAR */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)] flex items-center gap-2">
+                    <i className="fa-solid fa-folder-tree text-[var(--primary)]"></i>
+                    Account Code Grouping Management
+                  </h1>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                    Configure financial statement tree structure (Max 4 Levels Hierarchy)
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      const expandAllObj = {};
+                      const recExpand = (nodes) => {
+                        nodes.forEach(n => {
+                          expandAllObj[n.id] = true;
+                          if (n.children) recExpand(n.children);
+                        });
+                      };
+                      recExpand(treeData);
+                      setExpandedNodes(expandAllObj);
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--accent)]"
+                  >
+                    <i className="fa-solid fa-square-plus mr-1"></i> {t.expandAll}
+                  </button>
+                  <button 
+                    onClick={() => setExpandedNodes({})}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--accent)]"
+                  >
+                    <i className="fa-solid fa-square-minus mr-1"></i> {t.collapseAll}
+                  </button>
+                  {userPermission === 'Manage' && (
+                    <button 
+                      onClick={() => handleOpenAddGroup(null, 1)}
+                      className="px-4 py-1.5 text-xs font-bold rounded-lg bg-[var(--primary)] text-white hover:opacity-90 shadow-sm flex items-center gap-1.5"
+                    >
+                      <i className="fa-solid fa-plus"></i> Add
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* MAIN CONTENT SPLIT GRID */}
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+                {/* LEFT 7 COLS: TREE VIEW NAVIGATION PANEL */}
+                <div className="lg:col-span-7 flex flex-col bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm overflow-hidden">
+                  <div className="p-3 border-b border-[var(--border)] bg-[var(--muted)] flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-2">
+                      <i className="fa-solid fa-diagram-project text-[var(--primary)]"></i> Account Group Hierarchy (Tree View)
+                    </span>
+                    <div className="relative w-48 sm:w-64">
+                      <input 
+                        type="text" 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={t.searchPlaceholder}
+                        className="w-full text-xs rounded-lg border border-[var(--border)] bg-[var(--background)] pl-8 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
+                      />
+                      <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-xs text-[var(--muted-foreground)]"></i>
+                    </div>
+                  </div>
+
+                  {/* TREE NODES CONTAINER */}
+                  <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                    {treeData.map(node => (
+                      <TreeNodeItem 
+                        key={node.id} 
+                        node={node} 
+                        level={1}
+                        selectedNodeId={selectedNodeId}
+                        onSelectNode={(id) => setSelectedNodeId(id)}
+                        expandedNodes={expandedNodes}
+                        onToggleExpand={toggleExpand}
+                        onAddSubGroup={(parent) => handleOpenAddGroup(parent)}
+                        onMoveGroup={handleOpenMoveGroup}
+                        userPermission={userPermission}
+                        t={t}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* RIGHT 5 COLS: GROUP DETAILS & ASSIGNED ACCOUNTS PANEL */}
+                <div className="lg:col-span-5 flex flex-col bg-[var(--card)] rounded-xl border border-[var(--border)] shadow-sm overflow-hidden">
+                  <div className="p-3 border-b border-[var(--border)] bg-[var(--muted)] flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-2">
+                      <i className="fa-solid fa-circle-info text-[var(--primary)]"></i> Group Details & Account Assignment
+                    </span>
+                    {selectedNode && (
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        selectedNode.level === 1 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' :
+                        selectedNode.level === 2 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                        selectedNode.level === 3 ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' :
+                        'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'
+                      }`}>
+                        Level {selectedNode.level} Group
+                      </span>
+                    )}
+                  </div>
+
+                  {selectedNode ? (
+                    <div className="flex-1 flex flex-col p-4 overflow-y-auto space-y-4">
+                      {/* NODE INFORMATION CARD */}
+                      <div className="bg-[var(--secondary)] p-3 rounded-lg border border-[var(--border)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-[var(--muted-foreground)]">Group Code / Name</span>
+                          <span className="text-xs font-mono font-bold text-[var(--primary)]">{selectedNode.code}</span>
+                        </div>
+                        <div className="text-sm font-bold text-[var(--foreground)]">
+                          {selectedNode.nameEN}
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                          <span>Child Groups: <strong>{selectedNode.children ? selectedNode.children.length : 0}</strong></span>
+                          <span>Assigned Accounts: <strong>{selectedNode.accounts ? selectedNode.accounts.length : 0}</strong></span>
+                        </div>
+                      </div>
+
+                      {/* ASSIGNED ACCOUNTS SECTION */}
+                      <div className="flex-1 flex flex-col space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                            {t.assignedDetail} ({selectedNode.accounts ? selectedNode.accounts.length : 0})
+                          </h3>
+                          {userPermission === 'Manage' && (
+                            <button 
+                              onClick={() => {
+                                if (selectedNode.children && selectedNode.children.length > 0) {
+                                  alert('Cannot assign Account Code to a node that has child groups.');
+                                  return;
+                                }
+                                setShowAssignAccModal(true);
+                              }}
+                              className="px-2.5 py-1 text-xs font-medium rounded bg-[var(--primary)] text-white hover:opacity-90"
+                            >
+                              <i className="fa-solid fa-link mr-1"></i> {t.assignButton}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* ACCOUNTS TABLE LIST */}
+                        <div className="flex-1 border border-[var(--border)] rounded-lg overflow-y-auto bg-[var(--background)]">
+                          {selectedNode.accounts && selectedNode.accounts.length > 0 ? (
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-[var(--muted)] text-[var(--muted-foreground)] sticky top-0 border-b border-[var(--border)]">
+                                <tr>
+                                  <th className="p-2 font-semibold">Account Code</th>
+                                  <th className="p-2 font-semibold">Description</th>
+                                  <th className="p-2 font-semibold text-center">{t.actions}</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[var(--border)]">
+                                {selectedNode.accounts.map(accCode => {
+                                  const accMaster = ALL_ACCOUNTS_MASTER.find(a => a.code === accCode) || { nameEN: accCode };
+                                  return (
+                                    <tr key={accCode} className="hover:bg-[var(--accent)]">
+                                      <td className="p-2 font-mono font-bold text-[var(--primary)]">{accCode}</td>
+                                      <td className="p-2">{accMaster.nameEN}</td>
+                                      <td className="p-2 text-center">
+                                        {userPermission === 'Manage' && (
+                                          <button 
+                                            onClick={() => handleUnassignAccount(accCode)}
+                                            className="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 hover:bg-red-200"
+                                            title={t.unassign}
+                                          >
+                                            <i className="fa-solid fa-xmark mr-1"></i> Unassign
+                                          </button>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center p-8 text-center text-xs text-[var(--muted-foreground)] space-y-2">
+                              <i className="fa-solid fa-folder-open text-3xl text-[var(--border)]"></i>
+                              <span>{selectedNode.children && selectedNode.children.length > 0 ? 'This is a Parent Node (Cannot assign Account Code directly)' : 'No Account Code assigned to this group'}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center p-6 text-xs text-[var(--muted-foreground)]">
+                      Please select a Group Node from the left panel to view details.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </main>
+          </div>
+
+          {}
+          {/* MODAL 1: ADD GROUP MODAL (WITH LEVEL & PARENT SELECTION) */}
+          {showAddGroupModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md bg-[var(--card)] rounded-xl border border-[var(--border)] p-5 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                  <h3 className="text-base font-bold text-[var(--foreground)] flex items-center gap-2">
+                    <i className="fa-solid fa-folder-plus text-[var(--primary)]"></i>
+                    Add Account Group
+                  </h3>
+                  <button onClick={() => setShowAddGroupModal(false)} className="text-gray-400 hover:text-gray-600"><i className="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div className="space-y-3 text-xs">
+                  {/* STEP 1: SELECT TARGET LEVEL */}
+                  <div>
+                    <label className="block font-semibold mb-1">Target Level *</label>
+                    <select 
+                      value={selectedAddLevel} 
+                      onChange={(e) => {
+                        const lvl = Number(e.target.value);
+                        setSelectedAddLevel(lvl);
+                        setSelectedAddParentId('');
+                      }}
+                      className="w-full rounded border border-[var(--border)] bg-[var(--background)] p-2 font-medium"
+                    >
+                      <option value={1}>Level 1 (Top Root Group)</option>
+                      <option value={2}>Level 2 (Sub-group under Level 1)</option>
+                      <option value={3}>Level 3 (Sub-group under Level 2)</option>
+                      <option value={4}>Level 4 (Sub-group under Level 3)</option>
+                    </select>
+                  </div>
+
+                  {/* STEP 2: MANDATORY PRECEDING PARENT SELECTION (IF LEVEL 2, 3, or 4) */}
+                  {selectedAddLevel > 1 && (
+                    <div>
+                      <label className="block font-semibold mb-1 text-[var(--primary)]">
+                        Select Preceding Parent Group (Level {selectedAddLevel - 1}) *
+                      </label>
+                      <select 
+                        value={selectedAddParentId} 
+                        onChange={(e) => setSelectedAddParentId(e.target.value)}
+                        className="w-full rounded border border-[var(--primary)] bg-[var(--background)] p-2 font-medium focus:ring-2 focus:ring-[var(--ring)]"
+                      >
+                        <option value="">-- Select Level {selectedAddLevel - 1} Parent Group --</option>
+                        {getNodesByLevel(treeData, selectedAddLevel - 1).map(pNode => (
+                          <option key={pNode.id} value={pNode.id}>
+                            [{pNode.code}] {pNode.nameEN} {pNode.accounts && pNode.accounts.length > 0 ? `(Has ${pNode.accounts.length} Accs)` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* STEP 3: GROUP DETAILS */}
+                  <div>
+                    <label className="block font-semibold mb-1">Group Code *</label>
+                    <input 
+                      type="text" 
+                      value={newGroupCode} 
+                      onChange={e => setNewGroupCode(e.target.value)} 
+                      placeholder="e.g. 1110" 
+                      className="w-full rounded border border-[var(--border)] bg-[var(--background)] p-2" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Group Name (English) *</label>
+                    <input 
+                      type="text" 
+                      value={newGroupNameEN} 
+                      onChange={e => setNewGroupNameEN(e.target.value)} 
+                      placeholder="e.g. Current Assets" 
+                      className="w-full rounded border border-[var(--border)] bg-[var(--background)] p-2" 
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2 border-t border-[var(--border)] pt-3">
+                  <button onClick={() => setShowAddGroupModal(false)} className="px-4 py-1.5 rounded text-xs border border-[var(--border)]">{t.cancelBtn}</button>
+                  <button onClick={handleSaveNewGroup} className="px-4 py-1.5 rounded text-xs bg-[var(--primary)] text-white font-medium">{t.saveBtn}</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 2: STEP-BY-STEP UNASSIGN WARNING MODAL */}
+          {showStepUnassignWarning && modalTargetGroup && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+              <div className="w-full max-w-lg bg-[var(--card)] rounded-xl border-2 border-amber-500 p-5 shadow-2xl space-y-4">
+                <div className="flex items-center space-x-3 text-amber-600 dark:text-amber-400">
+                  <i className="fa-solid fa-triangle-exclamation text-2xl"></i>
+                  <h3 className="text-base font-bold">Business Rule Warning: Cannot Create Sub-Group</h3>
+                </div>
+                <p className="text-xs text-[var(--foreground)] leading-relaxed bg-amber-50 dark:bg-amber-950/40 p-3 rounded-lg border border-amber-200 dark:border-amber-900">
+                  {t.stepUnassignWarning}
+                </p>
+                <div className="text-xs space-y-1">
+                  <span className="font-semibold text-[var(--muted-foreground)]">Required Step-by-Step Actions:</span>
+                  <ol className="list-decimal list-inside space-y-1 text-xs font-mono">
+                    <li>Go to the right panel under <strong>Assigned Accounts</strong></li>
+                    <li>Click <strong>Unassign</strong> to remove all Account Codes from <strong>[{modalTargetGroup.code}]</strong></li>
+                    <li>Re-try clicking <strong>+ Add Sub-Group</strong></li>
+                  </ol>
+                </div>
+                <div className="flex justify-end border-t border-[var(--border)] pt-3">
+                  <button onClick={() => setShowStepUnassignWarning(false)} className="px-5 py-2 rounded text-xs font-bold bg-amber-500 text-white hover:bg-amber-600">Acknowledged</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 3: ASSIGN ACCOUNT MODAL */}
+          {showAssignAccModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-md bg-[var(--card)] rounded-xl border border-[var(--border)] p-5 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                  <h3 className="text-base font-bold text-[var(--foreground)]">Assign Account Code to [{selectedNode?.code}]</h3>
+                  <button onClick={() => setShowAssignAccModal(false)} className="text-gray-400"><i className="fa-solid fa-xmark"></i></button>
+                </div>
+                <div className="max-h-60 overflow-y-auto border border-[var(--border)] rounded-lg divide-y divide-[var(--border)] bg-[var(--background)]">
+                  {unassignedAccountsList.length > 0 ? (
+                    unassignedAccountsList.map(acc => (
+                      <div key={acc.code} className="p-2.5 flex items-center justify-between hover:bg-[var(--accent)] text-xs">
+                        <div>
+                          <div className="font-mono font-bold text-[var(--primary)]">{acc.code}</div>
+                          <div className="text-[var(--muted-foreground)]">{acc.nameEN}</div>
+                        </div>
+                        <button onClick={() => handleAssignAccount(acc.code)} className="px-3 py-1 rounded bg-[var(--primary)] text-white text-[10px] font-bold">+ Select</button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-xs text-[var(--muted-foreground)]">No remaining accounts in Unassigned Pool</div>
+                  )}
+                </div>
+                <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+                  <button onClick={() => setShowAssignAccModal(false)} className="px-4 py-1.5 rounded text-xs border border-[var(--border)]">{t.cancelBtn}</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL 4: MOVE GROUP MODAL */}
+          {showMoveGroupModal && modalTargetGroup && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+              <div className="w-full max-w-lg bg-[var(--card)] rounded-xl border border-[var(--border)] p-5 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                  <h3 className="text-base font-bold text-[var(--foreground)] flex items-center gap-2">
+                    <i className="fa-solid fa-arrows-up-down-left-right text-[var(--primary)]"></i>
+                    Move Group [{modalTargetGroup.code}] {modalTargetGroup.nameEN}
+                  </h3>
+                  <button onClick={() => setShowMoveGroupModal(false)} className="text-gray-400"><i className="fa-solid fa-xmark"></i></button>
+                </div>
+
+                {modalTargetGroup.level === 2 && (
+                  <div className="text-xs bg-blue-50 dark:bg-blue-950 p-2.5 rounded border border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-300">
+                    <i className="fa-solid fa-circle-info mr-1"></i> {t.l2RestrictionNotice}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold">{t.selectTargetGroup}</label>
+                  <select 
+                    value={targetMoveParentId} 
+                    onChange={e => setTargetMoveParentId(e.target.value)}
+                    className="w-full text-xs rounded border border-[var(--border)] bg-[var(--background)] p-2.5 focus:ring-1 focus:ring-[var(--ring)]"
+                  >
+                    <option value="">-- Select Target Parent Node --</option>
+                    {treeData.map(l1 => (
+                      <React.Fragment key={l1.id}>
+                        {l1.id !== modalTargetGroup.id && (
+                          <option value={l1.id}>[L1] {l1.code} - {l1.nameEN}</option>
+                        )}
+                        {l1.children && l1.children.map(l2 => (
+                          <React.Fragment key={l2.id}>
+                            {l2.id !== modalTargetGroup.id && modalTargetGroup.level !== 2 && (
+                              <option value={l2.id}>&nbsp;&nbsp;&nbsp;&nbsp;[L2] {l2.code} - {l2.nameEN}</option>
+                            )}
+                            {l2.children && l2.children.map(l3 => (
+                              <React.Fragment key={l3.id}>
+                                {l3.id !== modalTargetGroup.id && modalTargetGroup.level !== 2 && (
+                                  <option value={l3.id}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[L3] {l3.code} - {l3.nameEN}</option>
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </React.Fragment>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-2 border-t border-[var(--border)] pt-3">
+                  <button onClick={() => setShowMoveGroupModal(false)} className="px-4 py-1.5 rounded text-xs border border-[var(--border)]">{t.cancelBtn}</button>
+                  <button onClick={handleSaveMoveGroup} className="px-4 py-1.5 rounded text-xs bg-[var(--primary)] text-white font-medium">{t.saveBtn}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function TreeNodeItem({ node, level, selectedNodeId, onSelectNode, expandedNodes, onToggleExpand, onAddSubGroup, onMoveGroup, userPermission, t }) {
+      const isSelected = selectedNodeId === node.id;
+      const isExpanded = !!expandedNodes[node.id];
+      const hasChildren = node.children && node.children.length > 0;
+      const hasAccounts = node.accounts && node.accounts.length > 0;
+
+      return (
+        <div className="space-y-1">
+          <div 
+            onClick={() => onSelectNode(node.id)}
+            className={`flex items-center justify-between p-2 rounded-lg text-xs cursor-pointer border transition-all ${
+              isSelected 
+                ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-sm' 
+                : 'bg-[var(--background)] border-[var(--border)] hover:bg-[var(--accent)] text-[var(--foreground)]'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={(e) => { e.stopPropagation(); onToggleExpand(node.id); }}
+                className={`w-5 h-5 flex items-center justify-center rounded hover:bg-black/10 ${hasChildren ? '' : 'invisible'}`}
+              >
+                <i className={`fa-solid ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'} text-[10px]`}></i>
+              </button>
+
+              <i className={`fa-solid ${hasChildren ? 'fa-folder' : 'fa-folder-open'} ${isSelected ? 'text-white' : 'text-amber-500'}`}></i>
+              <span className="font-mono font-bold">{node.code}</span>
+              <span className="font-medium">{node.nameEN}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              {hasAccounts && (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'}`}>
+                  {node.accounts.length} Accs
+                </span>
+              )}
+
+              {userPermission === 'Manage' && (
+                <div className="flex items-center space-x-1" onClick={e => e.stopPropagation()}>
+                  {node.level < 4 && (
+                    <button 
+                      onClick={() => onAddSubGroup(node)} 
+                      className={`p-1 rounded hover:bg-black/10 ${isSelected ? 'text-white' : 'text-[var(--primary)]'}`}
+                      title={t.addChildGroup}
+                    >
+                      <i className="fa-solid fa-plus text-[11px]"></i>
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => onMoveGroup(node)}
+                    className={`p-1 rounded hover:bg-black/10 ${isSelected ? 'text-white' : 'text-gray-500'}`}
+                    title={t.moveGroup}
+                  >
+                    <i className="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {isExpanded && hasChildren && (
+            <div className="pl-6 border-l-2 border-[var(--border)] ml-3 space-y-1">
+              {node.children.map(child => (
+                <TreeNodeItem 
+                  key={child.id}
+                  node={child}
+                  level={level + 1}
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={onSelectNode}
+                  expandedNodes={expandedNodes}
+                  onToggleExpand={onToggleExpand}
+                  onAddSubGroup={onAddSubGroup}
+                  onMoveGroup={onMoveGroup}
+                  userPermission={userPermission}
+                  t={t}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

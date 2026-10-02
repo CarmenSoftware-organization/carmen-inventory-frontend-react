@@ -1779,7 +1779,7 @@ export function PaymentSections({
                     {currency}
                   </span>
                 </div>
-                <p className="text-muted-foreground pt-1 text-[11px]">
+                <p className="text-muted-foreground pt-1 text-micro">
                   {
                     availableDeposits.find((d) => d.id === selectedDepositId)
                       ?.note

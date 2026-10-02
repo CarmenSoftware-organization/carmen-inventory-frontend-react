@@ -61,11 +61,11 @@ export function useCoaTable({
         <DataGridColumnHeader column={column} title={tfl("code")} />
       ),
       cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
+        <CellAction onClick={() => onEdit(row.original)} className="font-mono font-bold text-primary">
           {row.getValue("code") || "..."}
         </CellAction>
       ),
-      size: 80,
+      size: 100,
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
@@ -73,8 +73,15 @@ export function useCoaTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("accountName")} />
       ),
-      cell: ({ row }) => <CellAction onClick={() => onEdit(row.original)}>{row.original.description_1}</CellAction>,
-      size: 140,
+      cell: ({ row }) => (
+        <CellAction onClick={() => onEdit(row.original)} className="space-y-0.5 text-left">
+          <div className="font-medium text-foreground">{row.original.description_1}</div>
+          {row.original.description_2 && (
+            <div className="text-xs text-muted-foreground">{row.original.description_2}</div>
+          )}
+        </CellAction>
+      ),
+      size: 180,
       meta: { headerTitle: t("accountName"), skeleton: columnSkeletons.text },
     },
     {
@@ -108,23 +115,23 @@ export function useCoaTable({
     {
       accessorKey: "account_group_id",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Account Group" />
+        <DataGridColumnHeader column={column} title={t("labels.groupingTreeLevel")} />
       ),
       cell: ({ row }) => {
-        const id = row.original.account_group_id;
+        const id = row.original.account_group?.id ?? row.original.account_group_id;
         if (!id) return <span className="text-muted-foreground">—</span>;
         const g = groupMap.get(id);
         return g ? (
-          <span className="font-mono text-xs">
-            {g.code} — {g.name}
+          <span className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 font-mono text-xs font-medium text-primary">
+            L{g.level} | {g.code} {g.name}
           </span>
         ) : (
           <span className="text-muted-foreground text-xs">{id}</span>
         );
       },
-      size: 140,
+      size: 160,
       meta: {
-        headerTitle: "Account Group",
+        headerTitle: t("labels.groupingTreeLevel"),
         skeleton: columnSkeletons.textShort,
       },
     },
@@ -133,7 +140,6 @@ export function useCoaTable({
     customActionColumn<ChartOfAccount>(({ row }) => (
       <DataGridRowActions
         activity={{ id: row.original.id, label: row.original.code }}
-
         onEdit={() => navigate(`/config/chart-of-accounts/${row.original.id}?mode=edit`, listReturnState())}
         onDelete={() => onDelete(row.original)}
         {...deleteGate}

@@ -276,7 +276,7 @@ export function InvoiceLines({
                 <div className="rounded-lg border bg-muted/20 p-3 text-xs space-y-1.5">
                   <div className="font-semibold text-sm flex items-center justify-between">
                     <span>1. Purchase Order</span>
-                    <Badge variant="outline" className="text-[10px]">{poNo}</Badge>
+                    <Badge variant="outline" className="text-micro-legal">{poNo}</Badge>
                   </div>
                   <div className="text-muted-foreground pt-1">Ordered Qty: <span className="font-medium text-foreground">{poQty} {line.unit}</span></div>
                   <div className="text-muted-foreground">PO Unit Price: <span className="font-medium text-foreground">{poPrice} {currency}</span></div>
@@ -287,7 +287,7 @@ export function InvoiceLines({
                 <div className="rounded-lg border bg-muted/20 p-3 text-xs space-y-1.5">
                   <div className="font-semibold text-sm flex items-center justify-between">
                     <span>2. Goods Receipt</span>
-                    <Badge variant="outline" className="text-[10px]">{grnNo}</Badge>
+                    <Badge variant="outline" className="text-micro-legal">{grnNo}</Badge>
                   </div>
                   <div className="text-muted-foreground pt-1">Received Qty: <span className="font-medium text-foreground">{grnQty} {line.unit}</span></div>
                   <div className="text-muted-foreground">Quality Check: <span className="font-medium text-emerald-600 dark:text-emerald-400">Accepted 100%</span></div>
@@ -317,7 +317,7 @@ export function InvoiceLines({
                     <div>Quantity Difference: <b className="tabular-nums">{qtyDiff > 0 ? `+${qtyDiff.toFixed(2)}` : qtyDiff.toFixed(2)} {line.unit}</b> (Billed vs GRN)</div>
                     <div>Price Difference: <b className="tabular-nums">{priceDiff > 0 ? `+${priceDiff.toFixed(2)}` : priceDiff.toFixed(2)} {currency}</b> (Billed vs PO)</div>
                   </div>
-                  <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                  <p className="text-micro text-amber-800 dark:text-amber-300">
                     Policy requires GM approval or document adjustment before Submit.
                   </p>
                 </div>

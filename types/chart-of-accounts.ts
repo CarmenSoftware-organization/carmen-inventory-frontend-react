@@ -1,3 +1,4 @@
+import type { EntityRef } from "./entity-ref";
 import type { Audit } from "./audit";
 
 export enum ACCOUNT_NATURE {
@@ -14,6 +15,7 @@ export enum CHART_OF_ACCOUNT_TYPE {
   BALANCE_SHEET = "balance_sheet",
   INCOME_STATEMENT = "income_statement",
   STATISTIC = "statistic",
+  SUMMARY = "summary",
 }
 
 export const ACCOUNT_CATEGORIES = [
@@ -45,6 +47,7 @@ export const CHART_OF_ACCOUNT_TYPES = [
   CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
   CHART_OF_ACCOUNT_TYPE.INCOME_STATEMENT,
   CHART_OF_ACCOUNT_TYPE.STATISTIC,
+  CHART_OF_ACCOUNT_TYPE.SUMMARY,
 ] as const;
 
 export interface ChartOfAccount {
@@ -60,9 +63,18 @@ export interface ChartOfAccount {
   control_account_type?: CONTROL_ACCOUNT_TYPE | null;
   manual_posting_allowed?: boolean;
   allowed_source_types?: string[];
+  account_group?: EntityRef | null;
   account_group_id?: string | null;
   allowed_dimensions?: string[] | null;
   dimension_required?: boolean;
+  current_balance?: number | string | null;
+  is_used?: boolean;
+  attributes?: Record<string, string> | null;
+  allowed_departments?: string[] | null;
+  department_required?: boolean;
+  grouping_path?: Array<{ code: string; name: string; level: number }> | null;
+  group_level?: number | null;
+  group_code?: string | null;
   audit?: Audit;
 }
 
@@ -81,4 +93,9 @@ export interface CreateChartOfAccountDto {
   account_group_id?: string | null;
   allowed_dimensions?: string[] | null;
   dimension_required?: boolean;
+  current_balance?: number | string | null;
+  attributes?: Record<string, string> | null;
+  allowed_departments?: string[] | null;
+  department_required?: boolean;
+  grouping_path?: Array<{ code: string; name: string; level: number }> | null;
 }

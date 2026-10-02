@@ -24,6 +24,37 @@ export const COA_FILTER_FIELDS: FilterFieldDef[] = [
     ],
   },
   {
+    key: "category",
+    control: "multi-select",
+    labelKey: "field.category",
+    options: [
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.asset",
+        value: "category|string:asset",
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.liability",
+        value: "category|string:liability",
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.equity",
+        value: "category|string:equity",
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.revenue",
+        value: "category|string:revenue",
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.expense",
+        value: "category|string:expense",
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountCategory.statistic",
+        value: "category|string:statistic",
+      },
+    ],
+  },
+  {
     key: "nature",
     control: "multi-select",
     labelKey: "field.nature",
@@ -58,6 +89,10 @@ export const COA_FILTER_FIELDS: FilterFieldDef[] = [
       {
         labelKey: "config.chartOfAccounts.accountType.statistic",
         value: `type|string:${CHART_OF_ACCOUNT_TYPE.STATISTIC}`,
+      },
+      {
+        labelKey: "config.chartOfAccounts.accountType.summary",
+        value: `type|string:${CHART_OF_ACCOUNT_TYPE.SUMMARY}`,
       },
     ],
   },

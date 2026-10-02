@@ -5,7 +5,7 @@ import { createCoaSchema, natureFor } from "./coa-form-schema";
 const translate = (key: string) => key;
 
 describe("COA editor rules", () => {
-  it("requires category, type and grouping on create", () => {
+  it("requires category and type; grouping is read-only until the API supports it", () => {
     const schema = createCoaSchema(translate, translate);
     const result = schema.safeParse({
       code: "1000",
@@ -14,20 +14,20 @@ describe("COA editor rules", () => {
       category: "",
       nature: ACCOUNT_NATURE.DEBIT,
       type: "",
-      account_group_id: "",
+      account_group_id: "", dimension_rules: {},
       is_active: true,
     });
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues.map((issue) => issue.path[0])).toEqual(
-        expect.arrayContaining(["category", "type", "account_group_id"]),
+        expect.arrayContaining(["category", "type"]),
       );
     }
     expect(schema.safeParse({
       code: "1000", description_1: "Cash", description_2: "",
       category: "asset", nature: ACCOUNT_NATURE.DEBIT,
       type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
-      account_group_id: "group-1", is_active: true,
+      account_group_id: "", dimension_rules: {}, is_active: true,
     }).success).toBe(true);
   });
 
@@ -46,7 +46,7 @@ describe("COA editor rules", () => {
       code: "1000", description_1: "Cash", description_2: "",
       category: "asset", nature: ACCOUNT_NATURE.DEBIT,
       type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
-      account_group_id: "group-1", is_active: true,
+      account_group_id: "", dimension_rules: {}, is_active: true,
     };
     expect(schema.safeParse({ ...valid, code: "" }).success).toBe(false);
     expect(schema.safeParse({ ...valid, description_1: "" }).success).toBe(false);
@@ -54,4 +54,13 @@ describe("COA editor rules", () => {
     expect(schema.safeParse({ ...valid, nature: "Debit" }).success).toBe(false);
     expect(schema.safeParse({ ...valid, type: "pl" }).success).toBe(false);
   });
+});
+
+it("allows an explicit credit nature for an asset category", () => {
+  expect(createCoaSchema(translate, translate).safeParse({
+    code: "1000", description_1: "Account", description_2: "",
+    category: "asset", nature: ACCOUNT_NATURE.CREDIT,
+    type: CHART_OF_ACCOUNT_TYPE.BALANCE_SHEET,
+    account_group_id: "", dimension_rules: {}, is_active: true,
+  }).success).toBe(true);
 });

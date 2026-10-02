@@ -160,6 +160,6 @@ export default function CoamComponent() {
           <DialogFooter><Button variant="outline" onClick={() => setDetail(null)}>{tc("close")}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
-    </DisplayTemplate>
+    </ListPageShell>
   );
 }
