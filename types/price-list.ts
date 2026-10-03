@@ -91,6 +91,7 @@ export interface CreatePriceListDto {
       moq_qty: number;
       is_preferred: boolean;
     }[];
-    remove?: { id: string }[];
+    // หลังบ้านรับ `delete` เป็น array ของ id (string) — `remove` ถูก zod ตัดทิ้งเงียบ ๆ
+    delete?: string[];
   };
 }

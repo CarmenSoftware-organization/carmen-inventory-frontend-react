@@ -244,7 +244,8 @@ export interface CreatePrtDto {
   purchase_request_template_detail: {
     add?: PrtDetailPayload[];
     update?: (PrtDetailPayload & { id: string })[];
-    remove?: { id: string }[];
+    // หลังบ้าน PR template อ่าน `delete` — `remove` ถูก zod ตัดทิ้งเงียบ ๆ
+    delete?: { id: string }[];
   };
 }
 
