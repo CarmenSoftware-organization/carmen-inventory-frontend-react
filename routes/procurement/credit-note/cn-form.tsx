@@ -160,7 +160,12 @@ export function CnForm({ creditNote }: CnFormProps) {
       tax_amount: values.tax_amount,
       discount_amount: values.discount_amount,
       note: values.notes,
-      credit_note_detail: detail,
+      // หลังบ้าน CN รับบรรทัดที่ลบในชื่อ `delete` (ดู CreateCnDto)
+      credit_note_detail: {
+        add: detail.add,
+        update: detail.update,
+        delete: detail.remove,
+      },
     };
   };
 

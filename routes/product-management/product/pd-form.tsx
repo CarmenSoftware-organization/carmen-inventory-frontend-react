@@ -145,11 +145,19 @@ export const buildPayload = (
   product?: ProductDetail,
   isAdd?: boolean,
 ): CreateProductDto => {
+  const defaultLocations = (product?.locations ?? []).map(toFormLocation);
   const locationDiff = buildItemChanges(
     values.locations,
-    (product?.locations ?? []).map(toFormLocation),
+    defaultLocations,
     mapLocationToPayload,
   );
+  // หลังบ้านลบตามคู่ (product, location) จึงต้องการ location_id ของแถวที่ถูกลบ ไม่ใช่ id ของแถว
+  const locationIdByRowId = new Map(
+    defaultLocations.map((l) => [l.id, l.location_id]),
+  );
+  const removedLocations = (locationDiff.remove ?? []).map(({ id }) => ({
+    location_id: locationIdByRowId.get(id) ?? "",
+  }));
 
   const orderDiff = buildItemChanges(
     values.order_units,
@@ -183,11 +191,11 @@ export const buildPayload = (
     },
     ...((locationDiff.add?.length ||
       locationDiff.update?.length ||
-      locationDiff.remove?.length) && {
+      removedLocations.length) && {
       locations: {
         ...(locationDiff.add?.length && { add: locationDiff.add }),
         ...(locationDiff.update?.length && { update: locationDiff.update }),
-        ...(locationDiff.remove?.length && { remove: locationDiff.remove }),
+        ...(removedLocations.length && { remove: removedLocations }),
       },
     }),
     ...((orderDiff.add?.length ||
@@ -211,13 +219,19 @@ export const buildPayload = (
     ...((ingredientDiff.add?.length ||
       ingredientDiff.update?.length ||
       ingredientDiff.remove?.length) && {
+      // แบบเดียวกับ order_units — หลังบ้านระบุแถวด้วย product_ingredient_unit_id ทั้งแก้และลบ
       ingredient_units: {
         ...(ingredientDiff.add?.length && { add: ingredientDiff.add }),
         ...(ingredientDiff.update?.length && {
-          update: ingredientDiff.update,
+          update: ingredientDiff.update.map(({ id, ...rest }) => ({
+            ...rest,
+            product_ingredient_unit_id: id,
+          })),
         }),
         ...(ingredientDiff.remove?.length && {
-          remove: ingredientDiff.remove,
+          remove: ingredientDiff.remove.map(({ id }) => ({
+            product_ingredient_unit_id: id,
+          })),
         }),
       },
     }),

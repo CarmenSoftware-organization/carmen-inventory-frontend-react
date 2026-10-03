@@ -304,16 +304,20 @@ export interface CreateProductDto {
   locations?: {
     add?: LocationPayload[];
     update?: (LocationPayload & { id: string })[];
-    remove?: { id: string }[];
+    // หลังบ้านลบตามคู่ (product, location) จึงต้องการ location_id ไม่ใช่ id ของแถว — ส่ง { id }
+    // ไป zod ตอบ 400 ทั้งคำขอ
+    remove?: { location_id: string }[];
   };
   order_units?: {
     add?: UnitPayload[];
     update?: (UnitPayload & { product_order_unit_id: string })[];
     remove?: { product_order_unit_id: string }[];
   };
+  // แบบเดียวกับ order_units — หลังบ้านต้องการ product_ingredient_unit_id ทั้งแก้และลบ
+  // (ส่ง id ไป zod ตอบ 400 ทั้งคำขอ)
   ingredient_units?: {
     add?: UnitPayload[];
-    update?: (UnitPayload & { id: string })[];
-    remove?: { id: string }[];
+    update?: (UnitPayload & { product_ingredient_unit_id: string })[];
+    remove?: { product_ingredient_unit_id: string }[];
   };
 }
