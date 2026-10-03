@@ -29,8 +29,13 @@ interface InventoryAdjustmentDetail {
    */
   inventory_unit?: EntityRef;
   inventory_unit_name?: string;
-  cost_per_unit: number;
-  total_cost: number;
+  /**
+   * ใบจ่ายออก (stock-out) ไม่เคยส่งสองฟิลด์นี้กลับมาจนถึง backend #727 — ประกาศเป็น number
+   * บังคับทำให้ฟอร์มเอา undefined ไปคูณจน Total เป็น NaN แล้วกด Save ไม่ไป (e2e SO.2/SO.3)
+   * หลัง #727: ใบที่ commit แล้ว = ต้นทุนที่บัญชีโพสต์ · ใบร่าง = 0 (ต้นทุนของร่างเป็นค่าประมาณ)
+   */
+  cost_per_unit?: number;
+  total_cost?: number;
   doc_version?: number;
   info: unknown;
   dimension: unknown;

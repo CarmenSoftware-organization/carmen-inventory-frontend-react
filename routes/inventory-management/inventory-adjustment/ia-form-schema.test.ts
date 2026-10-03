@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getDefaultValues, mapItemToPayload } from "./ia-form-schema";
+import {
+  createAdjSchema,
+  getDefaultValues,
+  mapItemToPayload,
+} from "./ia-form-schema";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 
 const adjustment = {
@@ -103,5 +107,39 @@ describe("mapItemToPayload", () => {
     });
 
     expect("doc_version" in payload).toBe(false);
+  });
+});
+
+// e2e SO.3 (2026-10-02): the stock-out detail endpoint returned no line cost, the form took
+// undefined, and z.coerce.number turned it into NaN in a hidden field — Save then did nothing,
+// with no request and no toast.
+describe("getDefaultValues — stock-out line without a cost", () => {
+  const stockOut = {
+    id: "so-1",
+    so_date: "2026-07-15T00:00:00.000Z",
+    so_no: "SO260700002",
+    description: "",
+    adjustment_type: { id: "type-1" },
+    doc_status: "draft",
+    location: { id: "loc-1" },
+    stock_out_detail: [
+      {
+        id: "line-1",
+        product: { id: "prod-1", name: "Seaweed snack", local_name: "" },
+        inventory_unit: { id: "u-1", name: "BAG" },
+        description: null,
+        qty: 2,
+        doc_version: 0,
+      },
+    ],
+  } as unknown as InventoryAdjustment;
+
+  it("reads a missing cost as 0, and the form still validates", () => {
+    const values = getDefaultValues(stockOut);
+    expect(values.items[0]).toMatchObject({ cost_per_unit: 0, total_cost: 0 });
+
+    const tv = (key: string) => key;
+    const parsed = createAdjSchema(tv, tv).safeParse(values);
+    expect(parsed.success).toBe(true);
   });
 });

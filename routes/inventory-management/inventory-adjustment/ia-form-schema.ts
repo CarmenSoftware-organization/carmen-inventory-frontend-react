@@ -126,8 +126,10 @@ export function getDefaultValues(
         product_local_name: d.product?.local_name ?? "",
         unit_name: d.inventory_unit?.name ?? d.inventory_unit_name ?? "",
         qty: d.qty,
-        cost_per_unit: d.cost_per_unit,
-        total_cost: d.total_cost,
+        // ใบจ่ายออกอาจไม่มีสองค่านี้ (ดู InventoryAdjustmentDetail) — ปล่อย undefined เข้าฟอร์ม
+        // แล้ว schema (z.coerce.number) ตีกลับเป็น NaN ที่ช่องซ่อน กด Save แล้วเงียบ
+        cost_per_unit: d.cost_per_unit ?? 0,
+        total_cost: d.total_cost ?? 0,
         description: d.description ?? "",
       })),
     };
