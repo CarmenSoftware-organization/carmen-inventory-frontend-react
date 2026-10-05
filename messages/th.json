@@ -940,7 +940,18 @@
       "PERIOD_CURRENT_NOT_EDITABLE": "รอบสินค้าคงคลังปัจจุบันแก้ไขหรือลบไม่ได้",
       "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "เปลี่ยนสถานะรอบสินค้าคงคลังได้ที่หน้า \"ปิดงวด\" เท่านั้น",
       "COMMON_DOC_VERSION_REQUIRED": "ข้อมูลนี้ไม่เป็นปัจจุบัน รีเฟรชหน้าแล้วลองอีกครั้ง",
-      "COMMON_COUNT_MUST_BE_POSITIVE": "จำนวนรอบต้องเป็นจำนวนเต็มที่มากกว่า 0"
+      "COMMON_COUNT_MUST_BE_POSITIVE": "จำนวนรอบต้องเป็นจำนวนเต็มที่มากกว่า 0",
+      "CREDIT_NOTE_LINE_ALREADY_CREDITED": "บรรทัด {line} ({product}) ถูกลดหนี้จากใบรับสินค้านี้ไปแล้วในใบลดหนี้อื่น สินค้าหนึ่งรายการบนใบรับลดหนี้ได้ครั้งเดียว",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_LINE": "บรรทัด {line} ({product}): ส่วนลด {amount} มากกว่ามูลค่าของบรรทัด ({line_amount})",
+      "CREDIT_NOTE_TAX_EXCEEDS_LINE": "บรรทัด {line} ({product}): ภาษี {amount} มากกว่ามูลค่าของบรรทัด ({line_amount})",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_GRN": "บรรทัด {line} ({product}): ส่วนลด {amount} มากกว่าที่ใบรับสินค้าให้ไว้สำหรับจำนวนที่คืน ({allowed})",
+      "CREDIT_NOTE_TAX_EXCEEDS_GRN": "บรรทัด {line} ({product}): ภาษี {amount} มากกว่าที่ใบรับสินค้าเก็บไว้สำหรับจำนวนที่คืน ({allowed})",
+      "CREDIT_NOTE_DATE_NOT_CURRENT_PERIOD": "ใบลดหนี้ลงวันที่ได้เฉพาะในงวดปัจจุบัน ({period}: {start} ถึง {end})",
+      "CREDIT_NOTE_NO_OPEN_PERIOD": "ไม่มีงวดสินค้าคงคลังที่เปิดอยู่ จึงบันทึกใบลดหนี้ไม่ได้",
+      "SR_ISSUE_PERIOD_NOT_CURRENT": "ใบเบิกลงวันที่ในงวด {period} แต่งวดปัจจุบันคือ {current} ต้องปิดงวด {current} ก่อนจึงจะจ่ายของได้",
+      "SR_ISSUE_NOTHING_ISSUED": "ยังไม่ได้กรอกจำนวนจ่ายเลยสักบรรทัด กรอกจำนวนที่จ่าย หรือปฏิเสธใบเบิกถ้าจ่ายไม่ได้",
+      "SR_ISSUE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอจ่าย: คงเหลือ {on_hand} จะจ่าย {requested}",
+      "RFP_VENDOR_REMOVE_ID_REQUIRED": "ลบผู้ขายรายนี้ไม่ได้ เพราะระบุบรรทัดไม่ได้ รีเฟรชหน้าแล้วลองใหม่"
     }
   },
   "validation": {
@@ -4119,6 +4130,7 @@
       "selectFromGrnDesc": "เลือกรายการที่รับเข้าจาก GRN อ้างอิงเพื่อทำใบลดหนี้",
       "searchProduct": "ค้นหาสินค้าด้วยรหัสหรือชื่อ…",
       "alreadyAdded": "เพิ่มแล้ว",
+      "alreadyCredited": "ลดหนี้แล้วใน {cn}",
       "nothingReceived": "ไม่ได้รับของ",
       "noGrnItems": "ไม่มีรายการใน GRN นี้",
       "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
