@@ -75,9 +75,19 @@ const costKey = (productId: string, locationId: string, qty: number) =>
 const CostProbe = memo(function CostProbe({
   form,
   index,
+  isEstimate = false,
+  readOnly = false,
 }: {
   form: UseFormReturn<AdjFormValues>;
   index: number;
+  /**
+   * ต้นทุนบนฟอร์มนี้เป็นค่าประมาณเสมอ ไม่ใช่ค่าที่ผู้ใช้พิมพ์ (ใบจ่ายออก) — ประเมินตั้งแต่ mount
+   * แม้แถวจะมีอยู่แล้ว และไม่ทำให้ฟอร์ม dirty เพราะหลังบ้านไม่รับต้นทุนจาก client อยู่แล้ว
+   * (ต้นทุนจริงคือที่บัญชีตัดตอน commit)
+   */
+  isEstimate?: boolean;
+  /** โหมดดู — เติมแค่ต้นทุนที่ประเมิน ไม่แตะจำนวนหรือหน่วย */
+  readOnly?: boolean;
 }) {
   "use no memo";
   const { buCode } = useProfile();
@@ -101,9 +111,12 @@ const CostProbe = memo(function CostProbe({
   // CostProbe ถูก render เฉพาะตอน `disabled` เป็น false: เปิดใบเก่าอยู่โหมด view
   // (ไม่มี probe) กด Edit ทีเดียว probe เกิดใหม่แล้วดูดราคาจาก cache มาทับ ราคาที่
   // ส่งตอนกด Commit จึงเป็นราคาที่ fetch มา ไม่ใช่ราคาที่พิมพ์ไว้
+  //
+  // ใบจ่ายออก (isEstimate) ไม่มีราคาที่พิมพ์ไว้ให้ต้องรักษา และค่าที่โหลดมาของใบร่างเป็น 0 เสมอ
+  // จึงประเมินตั้งแต่ mount — ไม่งั้นเปิดใบร่างกลับมาต้นทุนเป็น 0.00 ทุกแถว (e2e SO.2)
   const mountedItem = form.getValues(`items.${index}`);
   const appliedKey = useRef<string | null>(
-    mountedItem?.id || mountedItem?.cost_per_unit
+    !isEstimate && (mountedItem?.id || mountedItem?.cost_per_unit)
       ? costKey(productId, locationId, probeQty)
       : null,
   );
@@ -116,11 +129,12 @@ const CostProbe = memo(function CostProbe({
     if (appliedKey.current === key) return;
     appliedKey.current = key;
     form.setValue(`items.${index}.cost_per_unit`, data.average_cost_per_unit, {
-      shouldDirty: true,
+      shouldDirty: !isEstimate,
     });
     form.setValue(`items.${index}.total_cost`, data.total_cost, {
-      shouldDirty: true,
+      shouldDirty: !isEstimate,
     });
+    if (readOnly) return;
     if (
       typeof data.requested_qty === "number" &&
       data.requested_qty !== form.getValues(`items.${index}.qty`)
@@ -133,7 +147,7 @@ const CostProbe = memo(function CostProbe({
     if (unitName && !form.getValues(`items.${index}.unit_name`)) {
       form.setValue(`items.${index}.unit_name`, unitName);
     }
-  }, [data, form, index, productId, locationId, probeQty]);
+  }, [data, form, index, productId, locationId, probeQty, isEstimate, readOnly]);
   return null;
 });
 
@@ -146,6 +160,7 @@ const ProductCell = memo(function ProductCell({
   excludeIds,
   autoOpen,
   onPicked,
+  isCostEstimate = false,
 }: {
   control: Control<AdjFormValues>;
   form: UseFormReturn<AdjFormValues>;
@@ -155,9 +170,12 @@ const ProductCell = memo(function ProductCell({
   excludeIds?: string[];
   autoOpen?: boolean;
   onPicked?: () => void;
+  /** ต้นทุนเป็นค่าประมาณ (ใบจ่ายออก) — ดู CostProbe.isEstimate */
+  isCostEstimate?: boolean;
 }) {
   "use no memo";
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
+  const docStatus = useWatch({ control, name: "doc_status" });
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
@@ -173,6 +191,11 @@ const ProductCell = memo(function ProductCell({
           />
         </div>
         <ProductInventoryDialog control={control} index={index} />
+        {/* ใบจ่ายออกที่ยังเป็นร่างยังไม่มีต้นทุนจริง โชว์ค่าประมาณแม้อยู่โหมดดู ส่วนใบที่ commit แล้ว
+            ใช้ต้นทุนที่บัญชีโพสต์ซึ่งหลังบ้านส่งมา ห้ามเอาค่าประมาณไปทับ */}
+        {isCostEstimate && docStatus === "draft" && (
+          <CostProbe form={form} index={index} isEstimate readOnly />
+        )}
       </div>
     );
   }
@@ -214,7 +237,7 @@ const ProductCell = memo(function ProductCell({
         />
       </div>
       <ProductInventoryDialog control={control} index={index} />
-      <CostProbe form={form} index={index} />
+      <CostProbe form={form} index={index} isEstimate={isCostEstimate} />
     </div>
   );
 });
@@ -268,7 +291,12 @@ export function useAdjItemTable({
         field === "cost_per_unit"
           ? newValue
           : form.getValues(`items.${index}.cost_per_unit`);
-      form.setValue(`items.${index}.total_cost`, qty * cost);
+      // ค่าว่างต้องเป็น 0 ไม่ใช่ NaN — NaN ในช่องที่ซ่อนอยู่ (ใบจ่ายออกไม่มีคอลัมน์ราคา) ทำให้
+      // schema ไม่ผ่านแล้วกด Save เงียบ ไม่มีทั้งคำขอและ toast (e2e SO.3)
+      form.setValue(
+        `items.${index}.total_cost`,
+        (Number(qty) || 0) * (Number(cost) || 0),
+      );
     };
 
     const indexColumn: ColumnDef<AdjItemField> = {
@@ -304,6 +332,7 @@ export function useAdjItemTable({
               excludeIds={selectedIds}
               autoOpen={autoOpenFirst && row.index === 0}
               onPicked={onProductPicked}
+              isCostEstimate={adjustmentType === "stock-out"}
             />
           );
         },

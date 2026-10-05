@@ -940,7 +940,18 @@
       "PERIOD_CURRENT_NOT_EDITABLE": "The current inventory period can't be edited or deleted.",
       "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "An inventory period's status can only be changed on the Period End page.",
       "COMMON_DOC_VERSION_REQUIRED": "This record is out of date. Refresh the page and try again.",
-      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0."
+      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0.",
+      "CREDIT_NOTE_LINE_ALREADY_CREDITED": "Line {line} ({product}) has already been credited on this goods receive note by another credit note. Each product on a receipt can be credited once.",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_LINE": "Line {line} ({product}): the discount {amount} is more than the line is worth ({line_amount}).",
+      "CREDIT_NOTE_TAX_EXCEEDS_LINE": "Line {line} ({product}): the tax {amount} is more than the line is worth ({line_amount}).",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_GRN": "Line {line} ({product}): the discount {amount} is more than the goods receive note gave for the quantity returned ({allowed}).",
+      "CREDIT_NOTE_TAX_EXCEEDS_GRN": "Line {line} ({product}): the tax {amount} is more than the goods receive note charged for the quantity returned ({allowed}).",
+      "CREDIT_NOTE_DATE_NOT_CURRENT_PERIOD": "A credit note can only be dated inside the current period ({period}: {start} to {end}).",
+      "CREDIT_NOTE_NO_OPEN_PERIOD": "No inventory period is open, so a credit note cannot be recorded.",
+      "SR_ISSUE_PERIOD_NOT_CURRENT": "This requisition is dated in period {period}, but the current period is {current}. Close {current} before issuing.",
+      "SR_ISSUE_NOTHING_ISSUED": "No line has an issued quantity. Enter how much was issued, or reject the requisition if nothing can be issued.",
+      "SR_ISSUE_INSUFFICIENT_STOCK": "Not enough {product} at {location} to issue: {on_hand} on hand, issuing {requested}.",
+      "RFP_VENDOR_REMOVE_ID_REQUIRED": "This vendor could not be removed because its line was not identified. Refresh the page and try again."
     }
   },
   "validation": {
@@ -4119,6 +4130,7 @@
       "selectFromGrnDesc": "Pick received lines from the referenced GRN to credit.",
       "searchProduct": "Search product by code or name…",
       "alreadyAdded": "Added",
+      "alreadyCredited": "Credited on {cn}",
       "nothingReceived": "Nothing received",
       "noGrnItems": "No lines in this GRN",
       "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",

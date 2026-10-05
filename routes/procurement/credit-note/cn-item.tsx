@@ -34,6 +34,7 @@ export function CnItem({ form, disabled }: Props) {
   const grnId =
     useWatch({ control: form.control, name: "grn_id" }) || undefined;
   const vendorId = useWatch({ control: form.control, name: "vendor_id" });
+  const cnNo = useWatch({ control: form.control, name: "cn_no" });
   const canAddItem = !disabled && !!grnId;
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -280,6 +281,7 @@ export function CnItem({ form, disabled }: Props) {
         grnId={grnId}
         existingKeys={existingKeys}
         onAdd={handleAddLines}
+        currentCnNo={cnNo}
       />
 
       <DeleteDialog

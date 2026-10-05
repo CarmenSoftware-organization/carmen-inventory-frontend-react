@@ -187,3 +187,33 @@ describe("PriceListForm — ส่วนรายการสินค้า", (
     expect(rows()).toHaveLength(0);
   });
 });
+
+// หลังบ้านรับบรรทัดที่ลบเป็น `delete: string[]` — เดิมส่ง `remove: [{ id }]` ซึ่ง zod ตัดทิ้งเงียบ ๆ
+// ได้ 200 แต่บรรทัดไม่ถูกลบ
+describe("PriceListForm — removing a saved row", () => {
+  const WITH_VALID_ROW = {
+    ...WITH_INVALID_ROW,
+    pricelist_detail: [
+      {
+        ...WITH_INVALID_ROW.pricelist_detail[0],
+        product: { id: "prod-1", name: "Tomato", code: "P1" },
+      },
+    ],
+  } as unknown as PriceList;
+
+  it("sends the removed row ids under `delete`, not `remove`", async () => {
+    renderForm(<PriceListForm priceList={WITH_VALID_ROW} />);
+    await userEvent.click(screen.getByRole("button", { name: en.common.edit }));
+    await userEvent.click(
+      screen.getAllByLabelText(en.vendorManagement.priceList.detail.removeItem)[0],
+    );
+    await userEvent.click(screen.getByRole("button", { name: en.common.delete }));
+    await act(async () => submitForm("pl-form"));
+
+    const payload = firstPayload(updateMut) as {
+      pricelist_detail: { delete?: string[]; remove?: unknown };
+    };
+    expect(payload.pricelist_detail.delete).toEqual(["d1"]);
+    expect(payload.pricelist_detail).not.toHaveProperty("remove");
+  });
+});

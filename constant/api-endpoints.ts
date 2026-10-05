@@ -126,6 +126,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}/cn`,
+  GOODS_RECEIVE_NOTE_REF: (buCode: string, grnId: string) =>
+    `/api/proxy/api/${buCode}/good-received-notes/${grnId}/ref`,
   GOODS_RECEIVE_NOTE_COMMENT: (buCode: string, grnId?: string) =>
     grnId
       ? `/api/proxy/api/${buCode}/good-received-note-comments/${grnId}`

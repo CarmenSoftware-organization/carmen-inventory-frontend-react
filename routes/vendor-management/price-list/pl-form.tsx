@@ -263,11 +263,17 @@ function submitUpdate({
   mutate: ReturnType<typeof useUpdatePriceList>["mutate"];
   onSuccess: () => void;
 }) {
-  const pricelist_detail = buildItemChanges(
+  const changes = buildItemChanges(
     values.pricelist_detail,
     defaultValues.pricelist_detail,
     mapDetailToPayload,
   );
+  // หลังบ้านรับบรรทัดที่ลบเป็น `delete: string[]` (ดู CreatePriceListDto)
+  const pricelist_detail = {
+    add: changes.add,
+    update: changes.update,
+    delete: changes.remove?.map((row) => row.id),
+  };
 
   mutate(
     {

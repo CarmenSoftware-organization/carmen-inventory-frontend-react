@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
+import { useGrnCreditedProducts } from "./use-grn-credited-products";
 
 export interface CnGrnLine {
   key: string;
@@ -98,6 +99,11 @@ interface Props {
   readonly grnId: string | undefined;
   readonly existingKeys: ReadonlySet<string>;
   readonly onAdd: (lines: CnGrnLine[]) => void;
+  /**
+   * เลขของใบลดหนี้ที่กำลังแก้ (ว่างเมื่อเป็นใบใหม่) — สินค้าที่ใบนี้เองถือไว้ไม่นับว่า "ถูกลดหนี้แล้ว"
+   * ไม่งั้นลบบรรทัดออกแล้วจะเพิ่มกลับไม่ได้
+   */
+  readonly currentCnNo?: string;
 }
 
 /**
@@ -111,11 +117,13 @@ export function CnAddItemDialog({
   grnId,
   existingKeys,
   onAdd,
+  currentCnNo = "",
 }: Props) {
   const t = useTranslations("procurement.creditNote");
   const tc = useTranslations("common");
 
   const { data: grn, isLoading, error } = useGoodsReceiveNoteById(grnId);
+  const { data: creditedProducts } = useGrnCreditedProducts(grnId, open);
 
   const [search, setSearch] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());
@@ -200,7 +208,11 @@ export function CnAddItemDialog({
                 const isExisting = existingKeys.has(line.dedupeKey);
                 // รับมา 0 = ไม่มีอะไรให้คืน เลือกไปก็ save ไม่ผ่านเพดาน
                 const isEmpty = line.quantity <= 0;
-                const isLocked = isExisting || isEmpty;
+                // ใบลดหนี้อื่นคืนสินค้านี้จากใบรับนี้ไปแล้ว — หลังบ้านไม่ยอมให้คืนซ้ำ (e2e CN.3)
+                const creditedBy = creditedProducts?.get(line.product_id);
+                const isCredited =
+                  creditedBy !== undefined && creditedBy !== currentCnNo;
+                const isLocked = isExisting || isEmpty || isCredited;
                 const isPicked = picked.has(line.key);
                 const id = `cn-add-${line.key}`;
                 return (
@@ -233,7 +245,12 @@ export function CnAddItemDialog({
                             {t("alreadyAdded")}
                           </Badge>
                         )}
-                        {!isExisting && isEmpty && (
+                        {!isExisting && isCredited && (
+                          <Badge variant="secondary" size="xs">
+                            {t("alreadyCredited", { cn: creditedBy || "—" })}
+                          </Badge>
+                        )}
+                        {!isExisting && !isCredited && isEmpty && (
                           <Badge variant="secondary" size="xs">
                             {t("nothingReceived")}
                           </Badge>
