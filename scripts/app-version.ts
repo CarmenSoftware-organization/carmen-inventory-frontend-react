@@ -55,3 +55,24 @@ export function appCommit(): string {
     return "unknown";
   }
 }
+
+/**
+ * เลข release ล่าสุดจาก `changelog.json` (`current`) — เขียนโดย `bun run build:bump` เท่านั้น
+ *
+ * แยกจาก `appVersion()` เพราะเลขใน package.json ขึ้นทุก build (`scripts/bump-build.ts`)
+ * ถ้า What's New เทียบกับเลขนั้น ผู้ใช้จะเจอ dialog ของ release เดิมซ้ำทุกครั้งที่ deploy
+ *
+ * @returns semver ของ release ล่าสุด หรือ `appVersion()` ถ้ายังไม่มี changelog
+ */
+export function appRelease(): string {
+  const file = path.resolve(import.meta.dirname, "..", "changelog.json");
+  try {
+    const log = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      current?: unknown;
+    };
+    if (typeof log.current === "string") return log.current;
+  } catch {
+    // ไม่มีไฟล์ / อ่านไม่ได้ — ตกไปใช้เลขใน package.json
+  }
+  return appVersion();
+}
