@@ -255,6 +255,16 @@ export function StatusBar() {
                 </dl>
               </TooltipContent>
             </Tooltip>
+            {/* เวลา build แสดงตรง ๆ (ไม่ต้องชี้ tooltip) เพราะเลขเวอร์ชันขึ้นทุก build
+                เวลาคือสิ่งที่บอกได้ทันทีว่าเครื่องนี้โหลดบิลด์ไหนอยู่ — ซ่อนต่ำกว่า sm เหตุผลเดียวกับ api */}
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <span aria-hidden="true" className="opacity-50">
+                ·
+              </span>
+              <time dateTime={APP_BUILD_TIME} className="tabular-nums">
+                {formatDate(APP_BUILD_TIME, dateTimeFormat)}
+              </time>
+            </span>
             {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
                 และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
             {apiVersion && (
