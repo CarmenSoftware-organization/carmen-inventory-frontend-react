@@ -12,6 +12,8 @@ import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
 import { getRuntimeConfig } from "@/lib/runtime-config";
+import { refreshTokens } from "@/lib/auth/auth-api";
+import { tokenStore } from "@/lib/auth/token-store";
 import type {
   Notification,
   NotificationListResponse,
@@ -23,6 +25,10 @@ export type NotificationTab = "all" | "unread";
 const PAGE_SIZE = 20;
 const POPOVER_SIZE = 10;
 const INVALIDATE_DEBOUNCE_MS = 300;
+/** gateway ปิดด้วย code นี้เมื่อ token ไม่ผ่าน/หมดอายุ/ไม่ส่ง auth ภายในเวลา — ต้อง refresh ก่อนต่อใหม่ */
+const WS_AUTH_CLOSE_CODE = 4401;
+/** 4401 ติดกันเกินนี้ทั้งที่ refresh สำเร็จ ⇒ เลิกต่อทันทีแล้วใช้ backoff ปกติ (กัน loop ถี่) */
+const MAX_AUTH_REJECTIONS = 3;
 
 /**
  * คีย์ของรายการทุกตัวแตกจาก prefix `all` เดียวกัน WS จึง invalidate ครั้งเดียวสดทั้งหมด
@@ -150,7 +156,8 @@ function dropFromUnreadCaches(
  * แปลว่า refresh หนึ่งครั้งได้ refetch เท่าจำนวนใบที่ค้างอยู่ (แถม `invalidateQueries`
  * default `cancelRefetch: true` เลยยกเลิกตัวที่ยิงค้างแล้วยิงใหม่ทุกรอบ)
  *
- * @param userId - id ผู้ใช้สำหรับ register กับ gateway (undefined = ไม่เชื่อมต่อ)
+ * @param userId - id ผู้ใช้ (undefined = ไม่เชื่อมต่อ) — ตัวตนจริงที่ gateway ใช้มาจาก access token
+ *   ใน `tokenStore` ซึ่งส่งเป็นข้อความ `auth` แรก ไม่ใช่จากค่านี้
  * @returns สถานะการเชื่อมต่อ
  * @example
  * useNotificationRealtime(userId);
@@ -168,6 +175,8 @@ export function useNotificationRealtime(userId: string | undefined) {
     const wsUrl: string = maybeWsUrl;
 
     let unmounted = false;
+    let isStopped = false;
+    let authRejections = 0;
     let activeWs: WebSocket | null = null;
     reconnectAttempt.current = 0;
 
@@ -176,6 +185,28 @@ export function useNotificationRealtime(userId: string | undefined) {
       invalidateTimer.current = setTimeout(() => {
         void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
       }, INVALIDATE_DEBOUNCE_MS);
+    }
+
+    function scheduleReconnect() {
+      const delay = Math.min(1000 * 2 ** reconnectAttempt.current, 30000);
+      reconnectAttempt.current += 1;
+      reconnectTimer.current = setTimeout(connect, delay);
+    }
+
+    // gateway ปิด 4401 = token ใช้ไม่ได้ ⇒ refresh ก่อนแล้วค่อยต่อใหม่
+    // refresh ไม่สำเร็จและ session ถูกล้าง (tokenStore ว่าง) ⇒ ผู้ใช้หลุดแล้ว หยุดเลย
+    // refresh ไม่สำเร็จแต่ token ยังอยู่ (network) หรือโดน 4401 ติดกันหลายรอบ ⇒ backoff ปกติ
+    async function handleAuthRejected() {
+      authRejections += 1;
+      const isRefreshed = await refreshTokens();
+      if (unmounted) return;
+      if (isRefreshed && authRejections < MAX_AUTH_REJECTIONS) {
+        reconnectAttempt.current = 0;
+        connect();
+        return;
+      }
+      if (!isRefreshed && !tokenStore.get()) return;
+      scheduleReconnect();
     }
 
     function connect() {
@@ -187,8 +218,15 @@ export function useNotificationRealtime(userId: string | undefined) {
           ws.close();
           return;
         }
-        reconnectAttempt.current = 0;
-        setIsConnected(true);
+        const token = tokenStore.get();
+        if (!token) {
+          isStopped = true;
+          ws.close();
+          return;
+        }
+        ws.send(JSON.stringify({ type: "auth", token }));
+        // ชั่วคราวระหว่าง rollout: gateway เก่าไม่รู้จัก `auth` และใช้ `register` แทน
+        // gateway ใหม่เพิกเฉย `register` — ลบบรรทัดนี้หลัง gateway ใหม่ขึ้น production
         ws.send(JSON.stringify({ type: "register", user_id: userId }));
       };
 
@@ -199,22 +237,26 @@ export function useNotificationRealtime(userId: string | undefined) {
         } catch {
           return; // ignore malformed messages
         }
-        if (
-          message !== null &&
-          typeof message === "object" &&
-          (message as { type?: unknown }).type === "notification"
-        ) {
-          scheduleInvalidate();
+        if (message === null || typeof message !== "object") return;
+        const type = (message as { type?: unknown }).type;
+        // `registered` คือคำตอบของ gateway เก่า — ลบออกพร้อมบรรทัด register ข้างบน
+        if (type === "authenticated" || type === "registered") {
+          reconnectAttempt.current = 0;
+          authRejections = 0;
+          setIsConnected(true);
+          return;
         }
+        if (type === "notification") scheduleInvalidate();
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event?: CloseEvent) => {
         setIsConnected(false);
-        if (!unmounted) {
-          const delay = Math.min(1000 * 2 ** reconnectAttempt.current, 30000);
-          reconnectAttempt.current += 1;
-          reconnectTimer.current = setTimeout(connect, delay);
+        if (unmounted || isStopped) return;
+        if (event?.code === WS_AUTH_CLOSE_CODE) {
+          void handleAuthRejected();
+          return;
         }
+        scheduleReconnect();
       };
 
       ws.onerror = () => {
