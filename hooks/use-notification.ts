@@ -177,6 +177,8 @@ export function useNotificationRealtime(userId: string | undefined) {
     let unmounted = false;
     let isStopped = false;
     let authRejections = 0;
+    let sentToken: string | null = null;
+    let unsubscribeToken: (() => void) | null = null;
     let activeWs: WebSocket | null = null;
     reconnectAttempt.current = 0;
 
@@ -193,19 +195,44 @@ export function useNotificationRealtime(userId: string | undefined) {
       reconnectTimer.current = setTimeout(connect, delay);
     }
 
+    // ไม่มี token (เช่นกำลัง refresh ตอน boot หรือ session ถูกล้าง) ⇒ หยุดไว้ แล้วต่อใหม่เองเมื่อ tokenStore มี token
+    function waitForToken() {
+      isStopped = true;
+      if (unsubscribeToken) return;
+      unsubscribeToken = tokenStore.subscribe(() => {
+        if (unmounted || !tokenStore.get()) return;
+        unsubscribeToken?.();
+        unsubscribeToken = null;
+        isStopped = false;
+        reconnectAttempt.current = 0;
+        connect();
+      });
+    }
+
     // gateway ปิด 4401 = token ใช้ไม่ได้ ⇒ refresh ก่อนแล้วค่อยต่อใหม่
-    // refresh ไม่สำเร็จและ session ถูกล้าง (tokenStore ว่าง) ⇒ ผู้ใช้หลุดแล้ว หยุดเลย
-    // refresh ไม่สำเร็จแต่ token ยังอยู่ (network) หรือโดน 4401 ติดกันหลายรอบ ⇒ backoff ปกติ
+    // - token ใน store ใหม่กว่าที่ส่งไปแล้ว (http-client refresh ให้แล้ว) ⇒ ต่อใหม่เลย ไม่ refresh ซ้ำ
+    //   (refresh token อยู่ใน localStorage ร่วมกันทุกแท็บ refresh เกินจำเป็นเพิ่มโอกาสชนกันตอน rotate)
+    // - โดน 4401 ติดกันครบ MAX_AUTH_REJECTIONS ⇒ เลิก refresh ใช้ backoff อย่างเดียว (กัน refresh วนตลอดไป)
+    // - refresh ไม่สำเร็จและ session ถูกล้าง ⇒ รอ token ใหม่; ไม่สำเร็จแต่ token ยังอยู่ (network) ⇒ backoff
     async function handleAuthRejected() {
       authRejections += 1;
-      const isRefreshed = await refreshTokens();
+      if (authRejections >= MAX_AUTH_REJECTIONS) {
+        scheduleReconnect();
+        return;
+      }
+      const current = tokenStore.get();
+      const isRefreshed =
+        (current !== null && current !== sentToken) || (await refreshTokens());
       if (unmounted) return;
-      if (isRefreshed && authRejections < MAX_AUTH_REJECTIONS) {
+      if (isRefreshed) {
         reconnectAttempt.current = 0;
         connect();
         return;
       }
-      if (!isRefreshed && !tokenStore.get()) return;
+      if (!tokenStore.get()) {
+        waitForToken();
+        return;
+      }
       scheduleReconnect();
     }
 
@@ -220,10 +247,11 @@ export function useNotificationRealtime(userId: string | undefined) {
         }
         const token = tokenStore.get();
         if (!token) {
-          isStopped = true;
+          waitForToken();
           ws.close();
           return;
         }
+        sentToken = token;
         ws.send(JSON.stringify({ type: "auth", token }));
         // ชั่วคราวระหว่าง rollout: gateway เก่าไม่รู้จัก `auth` และใช้ `register` แทน
         // gateway ใหม่เพิกเฉย `register` — ลบบรรทัดนี้หลัง gateway ใหม่ขึ้น production
@@ -270,6 +298,7 @@ export function useNotificationRealtime(userId: string | undefined) {
       unmounted = true;
       clearTimeout(reconnectTimer.current);
       clearTimeout(invalidateTimer.current);
+      unsubscribeToken?.();
       activeWs?.close();
     };
   }, [userId, queryClient]);
