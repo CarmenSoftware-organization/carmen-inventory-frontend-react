@@ -66,6 +66,7 @@ vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
 import { httpClient } from "@/lib/http-client";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
+import { tokenStore } from "@/lib/auth/token-store";
 import {
   useNotificationRealtime,
   useMarkNotificationRead,
@@ -118,10 +119,13 @@ describe("useNotificationRealtime", () => {
       X_APP_ID: "app-test",
       WS_URL: "ws://localhost:3001",
     });
+    // hook ส่ง access token เป็นข้อความ auth แรก — ไม่มี token จะปิด socket และไม่ต่อใหม่
+    tokenStore.set("at-1");
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    tokenStore.clear();
   });
 
   it("does not connect when userId is undefined", () => {
@@ -130,7 +134,7 @@ describe("useNotificationRealtime", () => {
     expect(MockWebSocket.instances).toHaveLength(0);
   });
 
-  it("connects to WebSocket and registers user on open", async () => {
+  it("sends auth then register on open and connects once authenticated", async () => {
     vi.useRealTimers();
 
     const { result } = renderRealtime("user-1");
@@ -142,13 +146,19 @@ describe("useNotificationRealtime", () => {
       ws.simulateOpen();
     });
 
+    expect(ws.sent).toEqual([
+      JSON.stringify({ type: "auth", token: "at-1" }),
+      JSON.stringify({ type: "register", user_id: "user-1" }),
+    ]);
+    expect(result.current.isConnected).toBe(false);
+
+    act(() => {
+      ws.simulateMessage({ type: "authenticated", user_id: "user-1" });
+    });
+
     await waitFor(() => {
       expect(result.current.isConnected).toBe(true);
     });
-
-    expect(ws.sent).toContain(
-      JSON.stringify({ type: "register", user_id: "user-1" }),
-    );
   });
 
   it("invalidates the notifications query when a notification message arrives", () => {
@@ -254,6 +264,7 @@ describe("useNotificationRealtime", () => {
     const ws = getLatestWs();
     act(() => {
       ws.simulateOpen();
+      ws.simulateMessage({ type: "authenticated", user_id: "user-1" });
     });
 
     await waitFor(() => {
@@ -384,9 +395,10 @@ describe("useNotificationRealtime", () => {
 
     const ws2 = getLatestWs();
 
-    // Successfully connect → counter resets
+    // Successfully connect (authenticated) → counter resets
     act(() => {
       ws2.simulateOpen();
+      ws2.simulateMessage({ type: "authenticated", user_id: "user-1" });
     });
 
     // Close again → delay should be 1s again (not 2s)
