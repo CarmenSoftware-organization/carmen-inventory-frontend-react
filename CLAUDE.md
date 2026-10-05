@@ -16,6 +16,7 @@ bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> t
 bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/ (config.json = config.prod.json)
 bun run build:{local,dev,uat,prod}   # เหมือน build แต่เลือก public/config.<env>.json → dist/config.json — มีผลกับ `bun run preview` ในเครื่องเท่านั้น (S3/GCS/Docker ใช้ config.json ของ environment เอง; Vercel รัน `bun run build` เปล่า ๆ ไม่ผ่านสคริปต์นี้ และ clone ไม่มี public/config*.json ติดมา — ต้องตั้ง env var `APP_CONFIG_JSON` เป็น JSON ทั้งก้อน — แต่ `vercel --prod` อัปโหลดไฟล์ในเครื่องขึ้นไปด้วย เส้นทางนี้เลยยังไม่เคยถูกใช้จริง; **deploy = `vercel --prod` จากเครื่องเท่านั้น** git-triggered deploy โดน CANCELED ทุกใบ)
+bun run build:force  # ลบ dist/ · node_modules/.vite · tsconfig.tsbuildinfo แล้ว build ใหม่ (ที่มีผลจริงคือบังคับ tsc ตรวจใหม่ทั้งหมด — vite build ไม่ใช้ .vite/deps และล้าง dist เองอยู่แล้ว; dev เสิร์ฟของค้างใช้ `bun dev --force`) · ใช้คู่ BUILD_CONFIG_FILE=… ได้
 bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file

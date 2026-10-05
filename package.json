@@ -14,6 +14,7 @@
     "build:dev": "BUILD_CONFIG_FILE=config.dev.json bun run build",
     "build:uat": "BUILD_CONFIG_FILE=config.uat.json bun run build",
     "build:prod": "BUILD_CONFIG_FILE=config.prod.json bun run build",
+    "build:force": "rm -rf dist node_modules/.vite tsconfig.tsbuildinfo && bun run build",
     "build:bump": "bun scripts/bump.ts",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
