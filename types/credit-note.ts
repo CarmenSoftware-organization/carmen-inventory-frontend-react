@@ -52,7 +52,9 @@ export interface CreateCnDto {
   credit_note_detail: {
     add?: CnItemPayload[];
     update?: (CnItemPayload & { id: string })[];
-    remove?: { id: string }[];
+    // หลังบ้าน CN อ่าน `delete` ไม่ใช่ `remove` — ส่ง `remove` ไป zod ตัดทิ้งเงียบ ๆ ได้ 200
+    // แต่บรรทัดไม่ถูกลบ (e2e CN.4)
+    delete?: { id: string }[];
   };
 }
 

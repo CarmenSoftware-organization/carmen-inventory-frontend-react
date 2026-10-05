@@ -178,7 +178,7 @@ const addAcmeBack = () => addVendorFromDialog("Acme Foods");
 type VendorsPayload = {
   vendors?: {
     add?: { vendor_id: string }[];
-    remove?: { vendor_id: string }[];
+    remove?: { id: string }[];
   };
 };
 
@@ -198,8 +198,10 @@ describe("RequestPriceListForm — เพิ่ม/ลบผู้ขาย", ()
     await removeFirstVendor();
     await act(async () => submitForm("rfp-form"));
 
+    // id ของบรรทัด (rv-1) ไม่ใช่ vendor_id (ven-1) — หลังบ้านลบตาม id ของบรรทัด เดิมส่ง
+    // { vendor_id } ไป หลังบ้านได้ id = undefined แล้วไปลบบรรทัดแรกของตาราง (ใบอื่น)
     const { vendors } = firstPayload(updateMut) as VendorsPayload;
-    expect(vendors?.remove?.map((v) => v.vendor_id)).toEqual(["ven-1"]);
+    expect(vendors?.remove).toEqual([{ id: "rv-1" }]);
     expect(vendors?.add).toBeUndefined();
   });
 
