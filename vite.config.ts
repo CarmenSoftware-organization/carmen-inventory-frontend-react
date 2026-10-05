@@ -3,7 +3,7 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { type Plugin, defineConfig } from "vite";
-import { appVersion } from "./scripts/app-version";
+import { appCommit, appVersion } from "./scripts/app-version";
 
 // Dev-only: เสิร์ฟ config ตาม CONFIG_ENV ที่ /config.json (runtime fetch /config.json เสมอ)
 //   CONFIG_ENV=local|dev|uat|prod (default: local) → public/config.<env>.json
@@ -115,6 +115,8 @@ export default defineConfig(() => ({
   // bump ด้วย `bun run build:bump`
   define: {
     __APP_VERSION__: JSON.stringify(appVersion()),
+    __APP_COMMIT__: JSON.stringify(appCommit()),
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },
