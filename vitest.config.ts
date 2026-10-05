@@ -1,7 +1,7 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
-import { appVersion } from "./scripts/app-version";
+import { appCommit, appVersion } from "./scripts/app-version";
 
 export default defineConfig({
   // React Compiler ต้องเปิดให้ตรงกับ vite.config.ts — ไม่งั้นเทสต์รันคนละไบนารี
@@ -19,6 +19,8 @@ export default defineConfig({
   // ReferenceError: __APP_VERSION__ is not defined
   define: {
     __APP_VERSION__: JSON.stringify(appVersion()),
+    __APP_COMMIT__: JSON.stringify(appCommit()),
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },

@@ -11,7 +11,7 @@ import { useServerTime } from "@/hooks/use-server-time";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 import { formatDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { APP_VERSION } from "@/lib/version";
+import { APP_BUILD_TIME, APP_COMMIT, APP_VERSION } from "@/lib/version";
 
 // Lazy: changelog.json (ยาวขึ้นเรื่อย ๆ ~57 รายการ/release) ต้องไม่ค้างอยู่ใน
 // shared chunk ที่ทุกหน้าโหลด — loader ตัวนี้จะถูกเรียกก็ต่อเมื่อ dialog เปิด
@@ -82,7 +82,8 @@ function toSemverPrefix(version: string): string {
  * root ของ gateway ถ้า backend ยังเป็นรุ่นก่อนหน้า (404) ส่วนนี้หายไปเงียบ ๆ
  * แถบที่เหลือทำงานปกติ จึงปล่อย frontend ก่อน backend ได้
  *
- * เวอร์ชันแอป (`APP_VERSION`) ฉีดตอน build จาก `package.json` คลิกที่ปุ่ม
+ * เวอร์ชันแอป (`APP_VERSION`) ฉีดตอน build จาก `package.json` ชี้ที่ปุ่มเพื่อดู
+ * commit/เวลา build ของ FE (และของ backend ถ้ามี) คลิกที่ปุ่ม
  * เพื่อเปิด What's New dialog และ dialog จะเด้งอัตโนมัติครั้งเดียวเมื่อมี
  * version ใหม่ (`useWhatsNew`) ใช้ `formatDate` ตาม `dateTimeFormat` จาก
  * profile ใส่ `suppressHydrationWarning` บน `<time>` รองรับ SSR/CSR mismatch
@@ -155,7 +156,10 @@ export function StatusBar() {
               ให้ดูเลย — ถ้าปล่อยไว้ ชื่อผู้ใช้จะถูกบีบจนเหลือความกว้างศูนย์ */}
           {buCode && (
             <>
-              <span aria-hidden="true" className="hidden shrink-0 opacity-50 sm:inline">
+              <span
+                aria-hidden="true"
+                className="hidden shrink-0 opacity-50 sm:inline"
+              >
                 ·
               </span>
               <span className="hidden shrink-0 sm:inline">{buCode}</span>
@@ -216,42 +220,50 @@ export function StatusBar() {
             </time>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setManualOpen(true)}
-              aria-label="What's new"
-              className="hover:text-foreground flex items-center gap-1.5 transition-colors"
-            >
-              <Tag aria-hidden="true" className="h-3 w-3" />
-              <span>v{APP_VERSION}</span>
-            </button>
-            {backend && apiVersion && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
-                      และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
-                  <span
-                    tabIndex={0}
-                    aria-label={`Backend API version ${backend.version}, build ${backend.commit}`}
-                    className="focus-visible:ring-ring hidden items-center gap-1.5 rounded-sm outline-none focus-visible:ring-2 sm:flex"
-                  >
-                    <span aria-hidden="true" className="opacity-50">
-                      ·
-                    </span>
-                    <span className="tabular-nums">api {apiVersion}</span>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="top" align="end">
-                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
-                    <dt className="text-muted-foreground">App</dt>
-                    <dd className="tabular-nums">{APP_VERSION}</dd>
-                    <dt className="text-muted-foreground">API</dt>
-                    <dd className="tabular-nums">{backend.version}</dd>
-                    <dt className="text-muted-foreground">Build</dt>
-                    <dd className="tabular-nums">{backend.commit}</dd>
-                  </dl>
-                </TooltipContent>
-              </Tooltip>
+            {/* tooltip ผูกกับปุ่มเวอร์ชันแอป (ไม่ใช่ส่วน api) เพื่อให้ข้อมูลบิลด์ฝั่ง FE
+                เปิดดูได้เสมอ แม้ backend ยังไม่มี `/version` — แถว API โผล่เมื่อดึงได้ */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setManualOpen(true)}
+                  aria-label={`What's new — app version ${APP_VERSION}, build ${APP_COMMIT}`}
+                  className="hover:text-foreground flex items-center gap-1.5 transition-colors"
+                >
+                  <Tag aria-hidden="true" className="h-3 w-3" />
+                  <span>v{APP_VERSION}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="end">
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+                  <dt className="text-muted-foreground">App</dt>
+                  <dd className="tabular-nums">{APP_VERSION}</dd>
+                  <dt className="text-muted-foreground">Build</dt>
+                  <dd className="tabular-nums">{APP_COMMIT}</dd>
+                  <dt className="text-muted-foreground">Built</dt>
+                  <dd className="tabular-nums">
+                    {formatDate(APP_BUILD_TIME, dateTimeFormat)}
+                  </dd>
+                  {backend && (
+                    <>
+                      <dt className="text-muted-foreground">API</dt>
+                      <dd className="tabular-nums">{backend.version}</dd>
+                      <dt className="text-muted-foreground">API build</dt>
+                      <dd className="tabular-nums">{backend.commit}</dd>
+                    </>
+                  )}
+                </dl>
+              </TooltipContent>
+            </Tooltip>
+            {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
+                และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
+            {apiVersion && (
+              <span className="hidden items-center gap-1.5 sm:flex">
+                <span aria-hidden="true" className="opacity-50">
+                  ·
+                </span>
+                <span className="tabular-nums">api {apiVersion}</span>
+              </span>
             )}
           </div>
         </div>

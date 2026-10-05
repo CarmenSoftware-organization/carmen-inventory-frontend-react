@@ -1,3 +1,4 @@
+import { AppVersionLabel } from "@/components/app-version-label";
 import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -267,6 +268,8 @@ export default function LoginForm() {
           ),
         })}
       </p>
+
+      <AppVersionLabel className="mt-4" />
     </AuthSplitShell>
   );
 }
