@@ -4,12 +4,12 @@ import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-wid
 import { useProcurementWidgets } from "@/hooks/use-dashboard-widgets";
 
 const DATASET_TO_SUB_TILE: Record<string, string> = {
-  "workflow.pr-pending-approval": "purchaseRequest",
-  "workflow.po-pending-approval": "purchaseOrder",
-  "workflow.grn-pending": "goodsReceiveNote",
+  "document.pr-pending": "purchaseRequest",
+  "document.po-pending": "purchaseOrder",
+  "document.grn-pending": "goodsReceiveNote",
   "workflow.cn-pending-approval": "creditNote",
   "procurement.pr-by-status": "purchaseRequest",
-  "procurement.po-by-status": "purchaseOrder",
+  "document.po-by-status": "purchaseOrder",
   "procurement.po-by-vendor-top": "vendor",
   "procurement.pr-by-department": "department",
 };
