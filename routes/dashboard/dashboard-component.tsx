@@ -47,7 +47,7 @@ import type {
   WidgetParams,
   WidgetType,
 } from "@/types/dashboard-widget";
-import { SortableWidgetItem } from "./sortable-widget-item";
+import { SortableWidgetItem } from "@/components/dashboard-widget/sortable-widget-item";
 import {
   GROUP_DATASETS,
   groupCreateParams,
@@ -59,8 +59,11 @@ import {
   parseGroupWidget,
 } from "./status-group";
 import { StatusGroupCard } from "./status-group-card";
-import { WidgetConfigDialog } from "./widget-config-dialog";
-import { defaultWidgetTypeFor, SUPPORTED_SHAPES } from "./widget-shape";
+import { WidgetConfigDialog } from "@/components/dashboard-widget/widget-config-dialog";
+import {
+  defaultWidgetTypeFor,
+  SUPPORTED_SHAPES,
+} from "@/components/dashboard-widget/widget-shape";
 
 const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
@@ -267,10 +270,7 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleUpdateParams = (
-    params: WidgetParams,
-    display: WidgetDisplay,
-  ) => {
+  const handleUpdateParams = (params: WidgetParams, display: WidgetDisplay) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(

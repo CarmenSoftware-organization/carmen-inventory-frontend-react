@@ -322,7 +322,7 @@ function LazyWidgetCard({
  * เลือกการ์ดตาม `widget_type` — **ตัวเดียวในระบบ** ทั้งกริดของ module dashboard,
  * การ์ดบน personal dashboard และ preview ในหน้าตั้งค่าใช้ตัวนี้ร่วมกัน
  *
- * เคยมี switch ตัวที่สองอยู่ใน `sortable-widget-item.tsx` แล้วตอนเพิ่มการ์ด gauge
+ * เคยมี switch ตัวที่สองอยู่ใน `components/dashboard-widget/sortable-widget-item.tsx` แล้วตอนเพิ่มการ์ด gauge
  * ใส่ case ไว้ที่นี่ที่เดียว อีกตัวตกไปเข้า `default: return null` — widget หายทั้งใบ
  * โดยไม่มี error ให้เห็น รวมเหลือตัวเดียวเพื่อไม่ให้พลาดซ้ำ
  *
