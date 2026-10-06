@@ -348,9 +348,12 @@ export function ReportParamDialog({
   const sources = collectDataSources(fields);
   const includePeriods = needsPeriods(fields);
 
+  // dialog นี้ mount ค้างไว้ตลอด — ผูก enabled กับ open ให้ทุกครั้งที่เปิดดึงรายการใหม่
+  // (สินค้า/คลังที่คนอื่นเพิ่งเพิ่มต้องขึ้นโดยไม่ต้อง refresh หน้า)
   const { data: lookupResult } = useReportListLookups({
     sources,
     includePeriods,
+    enabled: open,
   });
   const lookupData = lookupResult?.data ?? {};
   const periods = lookupResult?.periods ?? {};

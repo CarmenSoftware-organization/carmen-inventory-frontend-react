@@ -2,10 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
+import { CACHE_DYNAMIC } from "@/lib/cache-config";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/lib/build-query-string";
+import { REPORT_LOOKUP_CACHE } from "../shared/use-report";
 import type {
   CreateReportScheduleDto,
   ReportLookupMap,
@@ -105,6 +106,7 @@ export function useReportLookups(sources: readonly string[]) {
       return mapped;
     },
     enabled: !!buCode && types.length > 0,
-    ...CACHE_STATIC,
+    // ดึงใหม่ทุกครั้งที่เปิดฟอร์ม schedule (ฟอร์ม mount ใหม่ทุกครั้งที่เปิด dialog)
+    ...REPORT_LOOKUP_CACHE,
   });
 }

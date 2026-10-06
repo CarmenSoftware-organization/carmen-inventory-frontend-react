@@ -42,9 +42,25 @@ export function useReportTemplates(params?: ParamsDto) {
   });
 }
 
+/**
+ * รายการตัวเลือกของรายงาน (สินค้า/คลัง/ผู้ขาย/งวด) ดึงใหม่ทุกครั้งที่เปิด dialog
+ *
+ * เดิม cache 30 นาที (`CACHE_STATIC`) — มีคนเพิ่มสินค้าใหม่ คนที่เปิดหน้ารายงาน
+ * ค้างไว้จะไม่เห็นตัวนั้นจนกว่า cache หมดอายุ · staleTime 0 = ดึงใหม่ทุกครั้งที่เปิด
+ * แต่คง gcTime ไว้ ระหว่างรอจึงโชว์รายการเดิมก่อนแล้วค่อยอัปเดต ไม่ต้องเห็น spinner
+ * (ต่างจาก `CACHE_NONE` ที่ทิ้งของเก่าทันที — ตัวเลือกที่ค้างไม่กี่ร้อยมิลลิวินาทีไม่ทำ
+ * ให้ใครตัดสินใจผิด ต่างจากยอดคงเหลือ)
+ */
+export const REPORT_LOOKUP_CACHE = {
+  staleTime: 0,
+  gcTime: CACHE_STATIC.gcTime,
+} as const;
+
 interface ReportListLookupsOptions {
   readonly sources: readonly string[];
   readonly includePeriods?: boolean;
+  /** ผูกกับการเปิด dialog — ทุกครั้งที่เปลี่ยนเป็น true จะดึงรายการใหม่ */
+  readonly enabled?: boolean;
 }
 
 interface ReportListLookupsResult {
@@ -55,6 +71,7 @@ interface ReportListLookupsResult {
 export function useReportListLookups({
   sources,
   includePeriods = false,
+  enabled = true,
 }: ReportListLookupsOptions) {
   const buCode = useBuCode();
   const lowerSources = [...new Set(sources.map((s) => s.toLowerCase()))].sort();
@@ -109,8 +126,8 @@ export function useReportListLookups({
 
       return { data, periods };
     },
-    enabled: !!buCode && allTypes.length > 0,
-    ...CACHE_STATIC,
+    enabled: enabled && !!buCode && allTypes.length > 0,
+    ...REPORT_LOOKUP_CACHE,
   });
 }
 
