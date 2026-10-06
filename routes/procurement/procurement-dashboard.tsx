@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section-lazy";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useProcurementWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -31,9 +31,11 @@ export default function ProcurementDashboard() {
         subTileFor={subTileFor}
         query={query}
       />
-      <div className="px-3 pb-3">
-        <BuWidgetSection module="procurement" title={tBu("sectionModule")} />
-      </div>
+      <BuWidgetSection
+        className="px-3 pb-3"
+        module="procurement"
+        title={tBu("sectionModule")}
+      />
     </>
   );
 }

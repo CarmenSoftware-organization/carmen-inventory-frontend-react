@@ -26,6 +26,7 @@ import {
 } from "@/components/dashboard-widget/widget-shape";
 import { LookupDataset } from "@/components/lookup/lookup-dataset";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { cn } from "@/lib/utils";
 import { PERMISSIONS } from "@/constant/permissions";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
@@ -52,13 +53,19 @@ interface BuWidgetSectionProps {
   /** "main" = หน้า /dashboard หลัก หรือชื่อ module dashboard */
   readonly module: string;
   readonly title: string;
+  /** class ของ <section> — ใส่ระยะห่างที่นี่ เพื่อให้ตอนซ่อนส่วนนี้ไม่เหลือช่องว่าง */
+  readonly className?: string;
 }
 
 /**
  * ส่วน BU widget ที่ทุกคนใน BU เห็น — ใช้ร่วมทั้ง /dashboard และ module dashboard
  * ซ่อนทั้งก้อนเมื่อ backend ยังไม่พร้อม หรือ BU ไม่มี widget และผู้ใช้เพิ่มไม่ได้
  */
-export function BuWidgetSection({ module, title }: BuWidgetSectionProps) {
+export function BuWidgetSection({
+  module,
+  title,
+  className,
+}: BuWidgetSectionProps) {
   const t = useTranslations("dashboard.buWidget");
   const tt = useTranslations("toast");
   const queryClient = useQueryClient();
@@ -254,7 +261,7 @@ export function BuWidgetSection({ module, title }: BuWidgetSectionProps) {
     : undefined;
 
   return (
-    <section className="space-y-3">
+    <section className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
           {title}

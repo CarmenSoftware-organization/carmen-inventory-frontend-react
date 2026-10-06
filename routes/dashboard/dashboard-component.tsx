@@ -132,9 +132,7 @@ export default function DashboardComponent() {
           </h1>
         </Reveal>
 
-        <Reveal delay={100}>
-          <BuWidgetSection module="main" title={tBu("sectionMain")} />
-        </Reveal>
+        <BuWidgetSection module="main" title={tBu("sectionMain")} />
 
         <Reveal delay={150}>
           <SavedWidgetsSection />

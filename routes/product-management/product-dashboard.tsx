@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section-lazy";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useProductWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -33,9 +33,11 @@ export default function ProductDashboard() {
         query={query}
         hiddenDatasets={HIDDEN_DATASETS}
       />
-      <div className="px-3 pb-3">
-        <BuWidgetSection module="product" title={tBu("sectionModule")} />
-      </div>
+      <BuWidgetSection
+        className="px-3 pb-3"
+        module="product"
+        title={tBu("sectionModule")}
+      />
     </>
   );
 }
