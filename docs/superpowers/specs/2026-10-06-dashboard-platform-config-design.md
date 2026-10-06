@@ -296,7 +296,40 @@ system widgets แก้จาก BU ไม่ได้เหมือนเด�
 5. เปิด `/dashboard` และหน้า module ด้วย user ที่มีและไม่มี `dashboard.bu_widget.update` → ปุ่มแก้ขึ้น/ไม่ขึ้น, toast เตือนครั้งแรก
 6. ตั้ง allow/deny ของ system widget → BU ที่ถูก deny ไม่เห็นภายใน 60 วินาที
 
-## 10. ความเสี่ยงที่ยอมรับ
+## 10. แก้ไขหลังสำรวจโค้ดจริง (มีผลเหนือส่วนก่อนหน้า)
+
+ส่วนนี้มาจากการไล่โค้ดทั้ง 4 รีโปตอนเขียน plan ถ้าขัดกับส่วนก่อนหน้า ให้ยึดส่วนนี้
+
+1. **gateway ไม่แตะ Prisma** — ข้อมูล platform ไปผ่าน RPC ไป micro-cluster (แบบ `platform_report-templates` →
+   `ReportTemplates.*` → `apps/micro-cluster/src/cluster/report-template/`) ตาราง template จึงมี CRUD อยู่ที่ micro-cluster
+   และ gateway อ่าน system widgets ผ่าน RPC (cache 60 วินาทีอยู่ที่ gateway)
+2. **micro-data ไม่มี prefix `/internal`** — route ทั้งหมดอยู่ใต้ `/api/...` หลัง `GinInternalAuth` อยู่แล้ว
+   `user_id` / `bu_code` ส่งเป็น query param endpoint จริงคือ `GET/POST /api/dashboard/bu-widgets/deploy[-state]`
+   และ `POST /api/dashboard/bu-widgets/reorder` (body `{items:[{id, order_index}]}` แบบเดียวกับ personal)
+3. **catalog ใช้ของเดิม** `GET /api/dashboard-lab/datasets` (`CatalogueAll()` มี `params` + `supported_renders`) ไม่ต้องทำ endpoint ใหม่
+   และ validation `widget_type ∈ supported_renders` ของ dataset — **ไม่มีตารางจับคู่สองชุด** (ตัดความเสี่ยงข้อสุดท้ายใน §11)
+4. **allow/deny ของ report ไม่มีใครใช้กรองจริง** — dashboard เขียนตัวกรองเอง เก็บเป็น **array ของ BU code**
+   (gateway มี `bu_code` อยู่ในมือ) ว่าง/NULL = ไม่จำกัด; deny มาก่อน allow
+5. **permission ไม่แตะ route-map** — ถ้าเพิ่ม `SUB_PATH_RESOURCE_MAP` จะเกิด license feature ใหม่ `dashboard.bu_widget` อัตโนมัติ
+   (ขัด §4.3) ให้ใช้ `@UseGuards(PermissionGuard)` + `@Permission({ 'dashboard.bu_widget': [...] })` ที่ handler เขียนแทน
+   license ยังเป็น `dashboard.widget` ตาม route-map เดิม ปัจจุบัน route dashboard ทั้งหมดมีแค่ `KeycloakGuard` — GET ยังไม่บังคับ permission ต่อไป
+6. **permission ฝั่ง platform ใช้ `.read`** ไม่ใช่ `.view`: `dashboard_template.read/create/update/delete/deploy`
+7. **endpoint deploy ใช้ `bu_code`** แทน `bu_id` และ status ทีละ BU: `GET /api-system/dashboard-templates/deploy/:bu_code/status`,
+   `POST /api-system/dashboard-templates/deploy/:bu_code` — หน้า platform วนเองด้วย `mapWithConcurrency` (มีอยู่แล้ว) ไม่มี endpoint สถานะรวม
+   และมี `GET /api-system/dashboard-templates/bu-default/version`
+8. **`deploy_state` ใน `GET …/bu`** คือแถว deploy ดิบ `{deployed_version, customized_at} | null` (micro-data ไม่รู้ version ของ platform)
+   FE เตือนเมื่อ `customized_at == null`
+9. **reorder ฝั่ง BU** ใช้ `PATCH /api/:bu_code/dashboard-widgets/bu/reorder` body `{items:[{id, order_index}]}`
+10. **tenant DDL มีสองเจ้าของ** — ต้องเขียนทั้ง micro-data `131_*` และ Prisma tenant migration แบบ `IF NOT EXISTS` ทั้งคู่
+    tenant Prisma migration ไม่ถูก CI รัน ต้อง deploy ต่อ BU ผ่าน `/api-system/tenant/migrations/:bu_id/deploy` หรือพึ่ง micro-data `cmd/migrate`
+11. **ห้าม DROP enum** `enum_dashboard_widget_type` / `enum_dataset_shape` ใน platform — gateway import ไปใช้ ลบแค่สองตาราง
+12. **ไฟล์ FE ที่ย้าย** ไปอยู่ `components/dashboard-widget/` (โฟลเดอร์ widget กลางที่มีอยู่แล้ว) ไม่ใช่ `components/dashboard/`
+    และ `SortableWidgetItem` ต้องได้ prop `editable` (ตอนนี้ปุ่มลาก/ลบ/ตั้งค่าโผล่ให้ทุกคน)
+13. **carmen-platform ไม่มี library ลากวาง** (ห้ามเพิ่มโดยไม่ถาม) — เรียงด้วยปุ่มขึ้น/ลง; DataTable ไม่มี selection แบบ controlled
+    หน้า Deploy จึงทำ checkbox column เองด้วย `Set<string>`
+14. **widget data ของ BU** ใช้ `dashboard-lab/widgets/:id/data?scope=bu` ที่มีอยู่แล้วทั้ง gateway และ micro-data
+
+## 11. ความเสี่ยงที่ยอมรับ
 
 - overwrite ทับทั้งชุด ไม่มีการรวมระดับแถว — กู้ได้จาก soft-delete ด้วยมือ ยังไม่มี UI กู้
 - cache 60 วินาทีต่อ instance — การแก้ system widget ไม่ขึ้นทันทีทุก instance
