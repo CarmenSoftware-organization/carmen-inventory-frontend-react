@@ -1,4 +1,5 @@
 import { useTranslations } from "use-intl";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section-lazy";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useVendorWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -21,14 +22,22 @@ function subTileFor(datasetId: string): string {
 
 export default function VendorDashboard() {
   const t = useTranslations("vendorManagement.dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const query = useVendorWidgets();
   return (
-    <DashboardWidgetGrid
-      title={t("title")}
-      description={t("description")}
-      moduleName="vendorManagement"
-      subTileFor={subTileFor}
-      query={query}
-    />
+    <>
+      <DashboardWidgetGrid
+        title={t("title")}
+        description={t("description")}
+        moduleName="vendorManagement"
+        subTileFor={subTileFor}
+        query={query}
+      />
+      <BuWidgetSection
+        className="px-3 pb-3"
+        module="vendor-management"
+        title={tBu("sectionModule")}
+      />
+    </>
   );
 }

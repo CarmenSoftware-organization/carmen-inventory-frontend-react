@@ -167,6 +167,7 @@ export const PERMISSIONS = {
   dashboard: {
     view: "dashboard.view",
     widget: crud("dashboard.widget"),
+    bu_widget: crud("dashboard.bu_widget"),
     /** resource ของ `app:datasets` / `app:dashboard-lab` ใน route map */
     dataset: {
       view: "dashboard.dataset.view",

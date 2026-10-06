@@ -84,9 +84,18 @@ export const API_ENDPOINTS = {
   CUISINES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/recipe-cuisines`,
   CURRENCIES: (buCode: string) => `/api/proxy/api/config/${buCode}/currencies`,
+  // widget ระดับ BU (ทุกคนใน BU เห็น) — คนละความหมายกับ DASHBOARD_WIDGETS(buCode, "bu")
+  DASHBOARD_BU_WIDGETS: (buCode: string, module?: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu${module ? `?module=${encodeURIComponent(module)}` : ""}`,
+  DASHBOARD_BU_WIDGET_BY_ID: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu/${id}`,
+  DASHBOARD_BU_WIDGET_REORDER: (buCode: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu/reorder`,
   DASHBOARD_DATASETS: (buCode: string) => `/api/proxy/api/${buCode}/datasets`,
   DASHBOARD_DATASET_BY_ID: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/datasets/${id}`,
+  DASHBOARD_LAB_BU_WIDGET_DATA: (buCode: string, widgetId: string) =>
+    `/api/proxy/api/${buCode}/dashboard-lab/widgets/${widgetId}/data?scope=bu`,
   DASHBOARD_LAB_DATASETS: (buCode: string) =>
     `/api/proxy/api/${buCode}/dashboard-lab/datasets`,
   DASHBOARD_LAB_DATASET_EXEC: (buCode: string, id: string) =>

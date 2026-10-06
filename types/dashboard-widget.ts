@@ -171,7 +171,7 @@ export interface WidgetDisplay {
   readonly thresholds?: readonly { readonly value: number; readonly color: string }[];
 }
 
-interface WidgetConfig {
+export interface WidgetConfig {
   readonly id: string;
   readonly dataset_id: string;
   readonly widget_type: WidgetType;
@@ -299,3 +299,21 @@ export type MyDashboardWidget = WidgetConfig;
 export type CreateMyDashboardWidgetDto = CreateWidgetDto;
 export type UpdateMyDashboardWidgetDto = UpdateWidgetDto;
 export type MyDashboardWidgetListResponse = WidgetConfigListResponse;
+
+// BU widget — widget ระดับ BU ที่ทุกคนใน BU เห็น; module null = หน้า /dashboard หลัก
+export type BuDashboardWidget = WidgetConfig & { module: string | null };
+
+/** แถว deploy ของ tenant (null = ยังไม่เคย deploy และยังไม่เคยแก้เอง) */
+export interface BuDeployState {
+  deployed_version: number;
+  deployed_at: string | null;
+  customized_at: string | null;
+}
+
+export interface BuDashboardWidgetListResponse {
+  items: readonly BuDashboardWidget[];
+  count: number;
+  deploy_state: BuDeployState | null;
+}
+
+export type CreateBuDashboardWidgetDto = CreateWidgetDto & { module: string | null };

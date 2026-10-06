@@ -7,6 +7,7 @@ import {
   LazyWidget,
   WidgetSkeleton,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
 import { gridClasses } from "@/components/dashboard-widget/widget-display";
 import { AppTile } from "@/components/icons/tiles";
 import { useOperationPlanWidgets } from "@/hooks/use-dashboard-widgets";
@@ -35,6 +36,7 @@ function subTileFor(datasetId: string): string {
 export default function OperationDashboard() {
   const t = useTranslations("operationPlan.dashboard");
   const td = useTranslations("dashboardWidget");
+  const tBu = useTranslations("dashboard.buWidget");
   const { data, isLoading, isError, error } = useOperationPlanWidgets();
 
   // เรียงจาก config ล้วน — ค่าของแต่ละใบมาทีหลังแยกกัน (ดู `LazyWidget`)
@@ -181,6 +183,8 @@ export default function OperationDashboard() {
           </div>
         </Section>
       )}
+
+      <BuWidgetSection module="operation-plan" title={tBu("sectionModule")} />
     </div>
   );
 }

@@ -4412,6 +4412,16 @@
     },
     "sr": {
       "title": "Store Requisition Dashboard"
+    },
+    "buWidget": {
+      "sectionMain": "Business unit dashboard",
+      "sectionModule": "More from your business unit",
+      "add": "Add widget",
+      "entity": "BU widget",
+      "empty": "No business unit widgets yet. Add one to share it with everyone in this business unit.",
+      "deleteTitle": "Remove BU widget",
+      "deleteConfirm": "Remove \"{title}\" for everyone in this business unit?",
+      "customizeWarning": "This business unit's dashboard now differs from the platform default, so future platform updates will no longer be applied automatically."
     }
   },
   "profile": {
