@@ -23,6 +23,8 @@ export const QUERY_KEYS = {
   CREDIT_TERMS: "credit-terms",
   CUISINES: "cuisines",
   CURRENCIES: "currencies",
+  BU_DASHBOARD_WIDGETS: "bu-dashboard-widgets",
+  BU_DASHBOARD_WIDGET_DATA: "bu-dashboard-widget-data",
   DASHBOARD_DATASETS: "dashboard-datasets",
   DASHBOARD_DATASET_PREVIEW: "dashboard-dataset-preview",
   DASHBOARD_WIDGETS: "dashboard-widgets",
