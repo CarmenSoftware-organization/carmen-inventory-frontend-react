@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api-error";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
+import { createConcurrencyLimiter } from "@/lib/concurrency-limiter";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   DashboardDatasetDetail,
@@ -90,6 +91,17 @@ export function useDashboardDatasetPreview(
  * @param enabled - ส่ง false เพื่อเลื่อนการยิงจนกว่าการ์ดจะเข้า viewport
  * @returns useQuery options ของ dataset นั้น
  */
+/**
+ * คิวกลางของข้อมูล widget ทุกใบ (system widget + BU widget) — หน้า module dashboard
+ * มีการ์ดใน viewport พร้อมกันราว 8 ใบ ถ้ายิงพร้อมกันหมด skeleton จะค้างแล้วโผล่
+ * มาพร้อมกันหลังตัวช้าสุด คิวนี้ปล่อยทีละ 3 ตามลำดับที่การ์ดเข้า viewport
+ * ใบบนจึงขึ้นก่อน
+ *
+ * ไม่ส่ง `signal` ต่อให้ httpClient — จะไปทับ timeout 30 วิตั้งต้นของมัน
+ * เวลารอคิวจึงไม่กินงบ timeout เพราะ fetch ยังไม่ออก
+ */
+export const runWidgetDataTask = createConcurrencyLimiter(3);
+
 export function dashboardDatasetDataQueryOptions(
   buCode: string | undefined,
   datasetId: string,
@@ -97,14 +109,15 @@ export function dashboardDatasetDataQueryOptions(
 ) {
   return {
     queryKey: [QUERY_KEYS.DASHBOARD_DATASET_DATA, buCode, datasetId],
-    queryFn: async (): Promise<DashboardDatasetDetail> => {
-      const res = await httpClient.get(
-        API_ENDPOINTS.DASHBOARD_DATASET_BY_ID(buCode!, datasetId),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch dataset");
-      const json = await res.json();
-      return json.data as DashboardDatasetDetail;
-    },
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      runWidgetDataTask(async (): Promise<DashboardDatasetDetail> => {
+        const res = await httpClient.get(
+          API_ENDPOINTS.DASHBOARD_DATASET_BY_ID(buCode!, datasetId),
+        );
+        if (!res.ok) throw await ApiError.from(res, "Failed to fetch dataset");
+        const json = await res.json();
+        return json.data as DashboardDatasetDetail;
+      }, signal),
     enabled: enabled && !!buCode,
     ...CACHE_DYNAMIC,
   };

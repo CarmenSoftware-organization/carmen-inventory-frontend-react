@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { runWidgetDataTask } from "@/hooks/use-dashboard-dataset";
 import { ApiError } from "@/lib/api-error";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 import { httpClient } from "@/lib/http-client";
@@ -43,15 +44,17 @@ export function buDashboardWidgetDataQueryOptions(
 ) {
   return {
     queryKey: [QUERY_KEYS.BU_DASHBOARD_WIDGET_DATA, buCode, widgetId] as const,
-    queryFn: async (): Promise<DashboardDatasetDetail> => {
-      const res = await httpClient.get(
-        API_ENDPOINTS.DASHBOARD_LAB_BU_WIDGET_DATA(buCode!, widgetId),
-      );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch BU widget data");
-      const json = await res.json();
-      return json.data as DashboardDatasetDetail;
-    },
+    // คิวเดียวกับ system widget — ยิง backend ตัวเดียวกัน ต้องนับรวมกัน
+    queryFn: ({ signal }: { signal: AbortSignal }) =>
+      runWidgetDataTask(async (): Promise<DashboardDatasetDetail> => {
+        const res = await httpClient.get(
+          API_ENDPOINTS.DASHBOARD_LAB_BU_WIDGET_DATA(buCode!, widgetId),
+        );
+        if (!res.ok)
+          throw await ApiError.from(res, "Failed to fetch BU widget data");
+        const json = await res.json();
+        return json.data as DashboardDatasetDetail;
+      }, signal),
     enabled: !!buCode && enabled,
     ...CACHE_DYNAMIC,
   };
@@ -84,7 +87,11 @@ export function useCreateBuDashboardWidget() {
 export function useUpdateBuDashboardWidget() {
   const buCode = useBuCode();
   const invalidate = useInvalidateBuWidgets();
-  return useMutation<unknown, ApiError, UpdateMyDashboardWidgetDto & { id: string }>({
+  return useMutation<
+    unknown,
+    ApiError,
+    UpdateMyDashboardWidgetDto & { id: string }
+  >({
     mutationFn: async ({ id, ...dto }) => {
       const res = await httpClient.patch(
         API_ENDPOINTS.DASHBOARD_BU_WIDGET_BY_ID(buCode!, id),
