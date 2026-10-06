@@ -8,7 +8,7 @@ const DATASET_TO_SUB_TILE: Record<string, string> = {
   "inventory.low-stock-count": "stockReplenishment",
   "inventory.stock-in-pending": "transaction",
   "inventory.stock-out-pending": "transaction",
-  "inventory.store-requisition-pending": "storeRequisition",
+  "document.sr-pending": "storeRequisition",
   "inventory.spot-check-pending": "spotCheck",
   "inventory.issue-open": "document",
   "inventory.stock-in-by-status": "transaction",
