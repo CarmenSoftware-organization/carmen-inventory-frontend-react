@@ -11,7 +11,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { cn } from "@/lib/utils";
-import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { ItemStatusDot } from "@/components/share/item-status-dot";
 import {
   InputSuffixAddon,
   InputSuffixField,
@@ -48,6 +48,7 @@ const ProductCell = memo(function ProductCell({
   fromLocationId,
   toLocationId,
   workflowId,
+  statusSlot,
 }: {
   control: Control<SrFormValues>;
   form: UseFormReturn<SrFormValues>;
@@ -56,6 +57,8 @@ const ProductCell = memo(function ProductCell({
   fromLocationId: string;
   toLocationId: string;
   workflowId: string;
+  /** จุดสถานะของแถว — ท้ายช่องแรกของแถว ทรงเดียวกับช่องคลังของ PR/PO */
+  statusSlot?: ReactNode;
 }) {
   "use no memo";
   const buCode = useBuCode();
@@ -113,6 +116,8 @@ const ProductCell = memo(function ProductCell({
           <NameWithSubtext primary={productName} secondary={productLocalName} />
         </div>
         {inventory}
+        {/* สูงเท่าปุ่มสต็อก (24px) จุดจะได้อยู่แนวเดียวกับไอคอนข้าง ๆ แม้กล่องชิดบน */}
+        {statusSlot && <span className="flex h-6 items-center">{statusSlot}</span>}
       </div>
     );
   }
@@ -155,6 +160,7 @@ const ProductCell = memo(function ProductCell({
         />
       </div>
       {inventory}
+      {statusSlot}
     </div>
   );
 });
@@ -207,6 +213,18 @@ const isItemLocked = (stageStatus: string, currentStatus: string) => {
   return isFinalStatus(stageStatus) || isFinalStatus(currentStatus);
 };
 
+/**
+ * ค่าสถานะแถวของ SR → ชุดสถานะของ `ItemStatusDot` (pending/approved/rejected/review)
+ * SR เก็บเป็นคำกริยา (approve/reject) และ "submit" คือส่งแล้วรอคนอนุมัติ = รอ
+ */
+const SR_ITEM_DOT_STATUS: Record<string, string> = {
+  [SR_ITEM_STAGE.PENDING]: "pending",
+  submit: "pending",
+  [SR_ITEM_STAGE.APPROVE]: "approved",
+  [SR_ITEM_STAGE.REJECT]: "rejected",
+  [SR_ITEM_STAGE.REVIEW]: "review",
+};
+
 const StatusCell = memo(function StatusCell({
   control,
   form,
@@ -254,30 +272,25 @@ const StatusCell = memo(function StatusCell({
     );
   };
 
-  // ไอคอน + คำ ชุดเดียวกับหน้ารายการ SR (`StatusIconLabel` ใน use-sr-table)
-  // ไม่ใช่ป้ายพื้นทึบ — ป้ายมีพื้นกับ padding ของตัวเอง
-  // พอคอลัมน์แคบหรือสถานะภาษาไทยยาว ("ส่งกลับแก้ไข") มันจะถูกบีบจนห่อบรรทัดแล้ว
-  // ดันความสูงทั้งแถว · ตัวหนังสือกว้างเท่าคำพอดี (typography ชุดเดียวกับ
-  // `StatusIconLabel` ของหน้ารายการ แค่ไม่มีไอคอน)
+  // จุดสถานะตัวเดียวกับ PR/PO — ชื่อสถานะกับปุ่มล้างอยู่ใน tooltip
   return (
-    <span className="inline-flex items-center gap-1">
-      <StatusIconLabel
-        status={effective || SR_ITEM_STAGE.PENDING}
-        label={translate(effective) ?? ""}
-        className="uppercase"
-      />
-      {showReset && (
-        <button
-          type="button"
-          aria-label="Reset status"
-          title="Clear"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
-          onClick={handleReset}
-        >
-          <X className="size-3" />
-        </button>
-      )}
-    </span>
+    <ItemStatusDot
+      status={SR_ITEM_DOT_STATUS[effective] ?? "pending"}
+      label={translate(effective) ?? ""}
+      tooltipExtra={
+        showReset && (
+          <button
+            type="button"
+            aria-label="Reset status"
+            title="Clear"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
+            onClick={handleReset}
+          >
+            <X className="size-3.5" />
+          </button>
+        )
+      }
+    />
   );
 });
 
@@ -463,12 +476,22 @@ export function useSrItemTable({
                 fromLocationId={fromLocationId}
                 toLocationId={toLocationId}
                 workflowId={workflowId}
+                statusSlot={
+                  <StatusCell
+                    control={form.control}
+                    form={form}
+                    index={row.index}
+                    translate={translateStageStatus}
+                    role={role}
+                    disabled={disabled}
+                  />
+                }
               />
             </div>
           );
         },
-        // +20 จากเดิม เผื่อที่ปุ่มยอดคงเหลือท้ายเซลล์ ไม่ให้ไปบีบกล่องเลือกสินค้า
-        size: 200,
+        // เผื่อที่ปุ่มยอดคงเหลือ + จุดสถานะท้ายเซลล์ ไม่ให้ไปบีบกล่องเลือกสินค้า
+        size: 220,
       },
       {
         accessorKey: "requested_qty",
@@ -537,22 +560,6 @@ export function useSrItemTable({
         ),
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
-      },
-      {
-        accessorKey: "current_stage_status",
-        header: tfl("status"),
-        cell: ({ row }) => (
-          <StatusCell
-            control={form.control}
-            form={form}
-            index={row.index}
-            translate={translateStageStatus}
-            role={role}
-            disabled={disabled}
-          />
-        ),
-        size: 100,
-        meta: { headerClassName: "text-center", cellClassName: "text-center" },
       },
     ];
 
