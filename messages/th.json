@@ -4412,6 +4412,16 @@
     },
     "sr": {
       "title": "แดชบอร์ดใบเบิกสินค้า"
+    },
+    "buWidget": {
+      "sectionMain": "Dashboard ของ BU",
+      "sectionModule": "เพิ่มเติมของ BU",
+      "add": "เพิ่ม widget",
+      "entity": "widget ของ BU",
+      "empty": "ยังไม่มี widget ของ BU เพิ่มเพื่อให้ทุกคนใน BU นี้เห็น",
+      "deleteTitle": "ลบ widget ของ BU",
+      "deleteConfirm": "ลบ \"{title}\" ออกสำหรับทุกคนใน BU นี้?",
+      "customizeWarning": "dashboard ของ BU นี้ต่างจากค่า default ของ platform แล้ว การอัปเดตจาก platform ครั้งต่อไปจะไม่ถูกนำมาใช้อัตโนมัติ"
     }
   },
   "profile": {
