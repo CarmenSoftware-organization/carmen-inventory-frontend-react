@@ -16,7 +16,8 @@ export type PeriodDateChoice = "open-period" | "document";
  * เพราะเอกสารย้อนหลังที่โยนเข้างวดปัจจุบันควรไปกองที่ต้นงวด ไม่ใช่ไปปนกับ
  * รายการปลายงวดที่เกิดจริงช่วงนั้น
  *
- * @param docDate - วันที่บนเอกสาร (`grn_date` / `sr_date`)
+ * @param docDate - วันที่บนเอกสาร (`grn_date`) — ใบเบิก (SR) ไม่ใช้ตัวนี้ เพราะ backend
+ *   ไม่ใช้ `sr_date` บนฟอร์มตอนส่ง ดู `sr-submit-dialog.tsx`
  * @param value - ตัวเลือกปัจจุบัน
  * @param onChange - ผู้เรียกเก็บ state เอง เพราะต้องเอาไปใช้ตอนยิง API
  */

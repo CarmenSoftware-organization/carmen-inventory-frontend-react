@@ -29,10 +29,11 @@ vi.mock("@/lib/api-error-handler", () => ({
 vi.mock("@/hooks/use-bu-code", () => ({ useBuCode: () => "BU1" }));
 
 // fetch ปลอมด้านล่างคืน object ของใบเบิกให้ทุก request รวม /user/profile ด้วย —
-// ปล่อยไว้ useProfile จะอ่าน business_unit ที่ไม่มีแล้วพัง · เทสต์นี้ไม่ได้สนใจ
-// งวดบัญชี (ไม่มี currentPeriod = ไม่มีคำถามเรื่องวันที่)
+// ปล่อยไว้ useProfile จะอ่าน business_unit ที่ไม่มีแล้วพัง · งวด active ตั้งต่อเทสต์
+// (ไม่มี currentPeriod = ไม่มีคำถามเรื่องวันที่)
+let currentPeriod: { start_at: string; end_at: string } | undefined;
 vi.mock("@/hooks/use-profile", () => ({
-  useProfile: () => ({ currentPeriod: undefined, dateFormat: "DD/MM/YYYY" }),
+  useProfile: () => ({ currentPeriod, dateFormat: "DD/MM/YYYY" }),
 }));
 
 type MutateOpts = {
@@ -54,12 +55,13 @@ function fakeMutation() {
 }
 
 const approveSr = fakeMutation();
+const submitSr = fakeMutation();
 const otherMutation = fakeMutation();
 
 vi.mock("./use-sr", () => ({
   useCreateStoreRequisition: () => otherMutation,
   useUpdateStoreRequisition: () => otherMutation,
-  useSubmitStoreRequisition: () => otherMutation,
+  useSubmitStoreRequisition: () => submitSr,
   useApproveStoreRequisition: () => approveSr,
   useIssueStoreRequisition: () => approveSr,
   useRejectStoreRequisition: () => otherMutation,
@@ -81,16 +83,22 @@ const catalogError = (appCode: string) =>
   );
 
 /** ตอบตามสคริปต์ทีละครั้ง — `null` = สำเร็จ */
-function scriptApprove(script: (ApiError | null)[]) {
-  approveSr.mutate.mockImplementation(
+function scriptMutation(
+  mutation: ReturnType<typeof fakeMutation>,
+  script: (ApiError | null)[],
+) {
+  mutation.mutate.mockImplementation(
     (payload: Record<string, unknown>, opts?: MutateOpts) => {
-      approveSr.payloads.push(payload);
+      mutation.payloads.push(payload);
       const err = script.shift();
       if (err) opts?.onError?.(err);
       else opts?.onSuccess?.({});
     },
   );
 }
+
+const scriptApprove = (script: (ApiError | null)[]) =>
+  scriptMutation(approveSr, script);
 
 const storeRequisition = {
   id: "sr-1",
@@ -135,12 +143,19 @@ function renderActions() {
 beforeEach(() => {
   setRuntimeConfigForTests({ BACKEND_URL: "", X_APP_ID: "app-test" });
   reportApiError.mockClear();
-  approveSr.mutate.mockReset();
-  approveSr.payloads.length = 0;
+  currentPeriod = undefined;
+  for (const m of [approveSr, submitSr]) {
+    m.mutate.mockReset();
+    m.payloads.length = 0;
+  }
+  // Response ใหม่ทุกครั้ง — body อ่านได้รอบเดียว และ submit ดึงใบสดหลัง save อีกรอบ
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: storeRequisition }), { status: 200 }),
+    vi.fn(
+      async () =>
+        new Response(JSON.stringify({ data: storeRequisition }), {
+          status: 200,
+        }),
     ),
   );
 });
@@ -177,5 +192,68 @@ describe("issue blocked by the open-period question", () => {
 
     await waitFor(() => expect(reportApiError).toHaveBeenCalledTimes(1));
     expect(result.current.datePattern).toBeNull();
+  });
+});
+
+describe("submit asks for the date inside the submit dialog", () => {
+  // งวดที่วันนี้ไม่มีทางอยู่ข้างใน / งวดที่ครอบวันนี้แน่ ๆ — ไม่ต้องแช่นาฬิกา
+  const PAST_PERIOD = {
+    start_at: "2000-01-01T00:00:00.000Z",
+    end_at: "2000-01-31T00:00:00.000Z",
+  };
+  const WIDE_PERIOD = {
+    start_at: "2000-01-01T00:00:00.000Z",
+    end_at: "2100-12-31T00:00:00.000Z",
+  };
+
+  it("sends the pattern picked in the submit dialog on the first request", async () => {
+    currentPeriod = PAST_PERIOD;
+    scriptMutation(submitSr, [null]);
+
+    const { result } = renderActions();
+    expect(result.current.submitDatePatternPeriod).toEqual(PAST_PERIOD);
+
+    act(() => result.current.setSubmitDatePattern("open-period"));
+    await act(() => result.current.confirmSubmitSr());
+
+    await waitFor(() => expect(submitSr.payloads).toHaveLength(1));
+    expect(submitSr.payloads[0]).toMatchObject({
+      id: "sr-1",
+      sr_date_pattern: "open-period",
+    });
+    // ไม่มีกล่องที่สองเด้งตาม
+    expect(result.current.datePattern).toBeNull();
+  });
+
+  it("asks nothing and sends no pattern while today is inside the period", async () => {
+    currentPeriod = WIDE_PERIOD;
+    scriptMutation(submitSr, [null]);
+
+    const { result } = renderActions();
+    expect(result.current.submitDatePatternPeriod).toBeUndefined();
+
+    await act(() => result.current.confirmSubmitSr());
+
+    await waitFor(() => expect(submitSr.payloads).toHaveLength(1));
+    expect(submitSr.payloads[0]).not.toHaveProperty("sr_date_pattern");
+  });
+
+  it("falls back to the date dialog, alone, when the backend still asks", async () => {
+    // profile ค้าง (เช่น เพิ่งปิดงวด) — FE คิดว่าวันนี้อยู่ในงวด แต่ backend ไม่
+    currentPeriod = WIDE_PERIOD;
+    scriptMutation(submitSr, [catalogError("SR_DATE_PATTERN_REQUIRED"), null]);
+
+    const { result } = renderActions();
+    act(() => result.current.setShowSubmit(true));
+    await act(() => result.current.confirmSubmitSr());
+
+    await waitFor(() =>
+      expect(result.current.datePattern?.field).toBe("sr_date_pattern"),
+    );
+    expect(result.current.showSubmit).toBe(false);
+    expect(reportApiError).not.toHaveBeenCalled();
+
+    act(() => result.current.datePattern?.retry("today"));
+    expect(submitSr.payloads[1]).toMatchObject({ sr_date_pattern: "today" });
   });
 });
