@@ -1,4 +1,5 @@
 import { useTranslations } from "use-intl";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useProcurementWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -19,14 +20,20 @@ function subTileFor(datasetId: string): string {
 
 export default function ProcurementDashboard() {
   const t = useTranslations("procurement.dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const query = useProcurementWidgets();
   return (
-    <DashboardWidgetGrid
-      title={t("title")}
-      description={t("description")}
-      moduleName="procurement"
-      subTileFor={subTileFor}
-      query={query}
-    />
+    <>
+      <DashboardWidgetGrid
+        title={t("title")}
+        description={t("description")}
+        moduleName="procurement"
+        subTileFor={subTileFor}
+        query={query}
+      />
+      <div className="px-3 pb-3">
+        <BuWidgetSection module="procurement" title={tBu("sectionModule")} />
+      </div>
+    </>
   );
 }

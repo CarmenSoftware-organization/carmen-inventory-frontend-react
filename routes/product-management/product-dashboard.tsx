@@ -1,4 +1,5 @@
 import { useTranslations } from "use-intl";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useProductWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -20,15 +21,21 @@ function subTileFor(datasetId: string): string {
 
 export default function ProductDashboard() {
   const t = useTranslations("productManagement.dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const query = useProductWidgets();
   return (
-    <DashboardWidgetGrid
-      title={t("title")}
-      description={t("description")}
-      moduleName="productManagement"
-      subTileFor={subTileFor}
-      query={query}
-      hiddenDatasets={HIDDEN_DATASETS}
-    />
+    <>
+      <DashboardWidgetGrid
+        title={t("title")}
+        description={t("description")}
+        moduleName="productManagement"
+        subTileFor={subTileFor}
+        query={query}
+        hiddenDatasets={HIDDEN_DATASETS}
+      />
+      <div className="px-3 pb-3">
+        <BuWidgetSection module="product" title={tBu("sectionModule")} />
+      </div>
+    </>
   );
 }

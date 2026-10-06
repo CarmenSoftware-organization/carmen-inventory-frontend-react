@@ -30,6 +30,8 @@ import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
+import { useBuDashboardWidgets } from "@/hooks/use-bu-dashboard-widgets";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
 import {
@@ -102,6 +104,7 @@ const useClientNow = (): Date | null => {
 
 export default function DashboardComponent() {
   const t = useTranslations("dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const locale = useLocale();
   const { data: profile } = useProfile();
   const now = useClientNow();
@@ -130,6 +133,10 @@ export default function DashboardComponent() {
         </Reveal>
 
         <Reveal delay={100}>
+          <BuWidgetSection module="main" title={tBu("sectionMain")} />
+        </Reveal>
+
+        <Reveal delay={150}>
           <SavedWidgetsSection />
         </Reveal>
       </div>
@@ -152,6 +159,13 @@ const SavedWidgetsSection = () => {
     null,
   );
   const { data, isLoading, isError, error } = useMyDashboardWidgets();
+  // query key เดียวกับ BuWidgetSection → TanStack dedupe ไม่ยิงซ้ำ
+  const buQuery = useBuDashboardWidgets("main");
+  // ระหว่างโหลดยังไม่ถือว่าว่าง กัน EmptyState วาบก่อนส่วน BU โผล่
+  const buEmpty =
+    !buQuery.isLoading &&
+    ((buQuery.isError && !buQuery.data) ||
+      (buQuery.data?.items.length ?? 0) === 0);
   // id ของ widget ที่เลื่อนถึงแล้ว — เพิ่มอย่างเดียว ไม่ถอดออกตอน scroll ผ่านไป
   const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(
     () => new Set(),
@@ -439,7 +453,8 @@ const SavedWidgetsSection = () => {
       {!isLoading &&
         !isError &&
         renderable.length === 0 &&
-        groupItems.length === 0 && <EmptyState />}
+        groupItems.length === 0 &&
+        buEmpty && <EmptyState />}
 
       {groupItems.length > 0 && (
         <div className="space-y-3">

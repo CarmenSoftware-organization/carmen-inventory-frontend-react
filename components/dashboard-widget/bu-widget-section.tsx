@@ -128,8 +128,10 @@ export function BuWidgetSection({ module, title }: BuWidgetSectionProps) {
     [items],
   );
 
-  if (isError) return null; // backend ยังไม่ deploy / ล่ม → ซ่อนเงียบ ๆ
-  if (!isLoading && items.length === 0 && !canCreate) return null;
+  // backend ยังไม่ deploy / ล่ม → ซ่อนเงียบ ๆ (refetch พังตอนมีข้อมูลแล้ว ยังโชว์ของเดิม)
+  if (isError && !data) return null;
+  // คนเพิ่มไม่ได้: ไม่โชว์หัว/skeleton ระหว่างโหลด จนกว่าจะรู้ว่ามี widget จริง
+  if (items.length === 0 && !canCreate) return null;
 
   const handleAdd = (ds: DashboardDataset) => {
     if (ds.params?.length) {
