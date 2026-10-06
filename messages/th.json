@@ -3690,7 +3690,10 @@
       "srDatePatternDesc": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด เลือกว่าจะลงวันที่ใบเบิกเป็นวันไหน",
       "issueDatePatternDesc": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด เลือกว่าจะจ่ายของลงวันที่ไหน",
       "datePatternOpenPeriod": "ใช้วันที่ในงวดที่เปิดอยู่",
-      "datePatternToday": "ใช้วันที่วันนี้"
+      "datePatternToday": "ใช้วันที่วันนี้",
+      "submitDatePatternDesc": "วันนี้อยู่นอกงวดที่เปิดอยู่ ({from} – {to}) เลือกว่าจะลงวันที่ใบเบิกเป็นวันไหน",
+      "submitDateOpenPeriod": "ลงวันสุดท้ายของงวดที่เปิดอยู่ ({date})",
+      "submitDateToday": "ใช้วันที่วันนี้ ({date})"
     },
     "stockReplenishment": {
       "entity": "เติมสินค้า",

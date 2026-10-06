@@ -3690,7 +3690,10 @@
       "srDatePatternDesc": "Today is outside every open accounting period. Pick the date this requisition should carry.",
       "issueDatePatternDesc": "Today is outside every open accounting period. Pick the date this issue should carry.",
       "datePatternOpenPeriod": "Use a date inside the open period",
-      "datePatternToday": "Use today anyway"
+      "datePatternToday": "Use today anyway",
+      "submitDatePatternDesc": "Today is outside the open period ({from} – {to}). Pick the date this requisition should carry.",
+      "submitDateOpenPeriod": "Last day of the open period ({date})",
+      "submitDateToday": "Today ({date})"
     },
     "stockReplenishment": {
       "entity": "Stock Replenishment",

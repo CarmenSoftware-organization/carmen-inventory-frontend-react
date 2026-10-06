@@ -14,10 +14,7 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
-import {
-  resolvePeriodDate,
-  type PeriodDateChoice as PeriodDateChoiceValue,
-} from "@/components/share/period-date-choice";
+import { isOutsideOpenPeriod } from "@/lib/date-utils";
 import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
 import { reportApiError } from "@/lib/api-error-handler";
@@ -107,10 +104,9 @@ export function useSrFormActions({
   const [datePattern, setDatePattern] = useState<PendingDatePattern | null>(
     null,
   );
-  // วันที่บนใบอยู่นอกงวดที่เปิดอยู่ → dialog ส่งใบถามว่าจะย้ายเข้างวดหรือคงวันเดิม
-  // (`PeriodDateChoice` เรนเดอร์เองเฉพาะตอนต้องถาม) default = คงวันเดิม
-  const [periodDateChoice, setPeriodDateChoice] =
-    useState<PeriodDateChoiceValue>("document");
+  // คำตอบเรื่องวันที่ที่ถามในกล่องส่งใบ — ใช้เฉพาะตอนวันนี้อยู่นอกงวด active
+  const [submitDatePattern, setSubmitDatePattern] =
+    useState<SrDatePattern | null>(null);
 
   // mutations
   const createSr = useCreateStoreRequisition();
@@ -164,6 +160,14 @@ export function useSrFormActions({
   const currentRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
   const buCode = useBuCode();
   const { currentPeriod } = useProfile();
+  // ส่งใบแล้ว backend ลงวันนี้ ถ้าวันนี้อยู่นอกงวด active (งวดที่ profile ส่งมา) มันจะตีกลับ
+  // SR_DATE_PATTERN_REQUIRED แน่ ๆ — รู้ล่วงหน้าได้ จึงถามในกล่องส่งใบเลย
+  const submitDatePatternPeriod = isOutsideOpenPeriod(
+    new Date().toISOString(),
+    currentPeriod,
+  )
+    ? currentPeriod
+    : undefined;
 
   // GET SR สดจาก DB ก่อนยิง save/workflow event — กัน 409 optimistic lock จาก
   // doc_version ที่ค้างเก่าใน prop หลัง bump (แบบเดียวกับ PO)
@@ -371,18 +375,6 @@ export function useSrFormActions({
   const handleSubmitSr = async (values: SrFormValues) => {
     // ปิด guard ก่อนยิง mutation → sentinel ถูกลบทันการ navigate(list) ตอนสำเร็จ
     setIsSubmitting(true);
-    // เลือก "ย้ายเข้างวด" → เขียน sr_date ลงค่าที่กำลังจะส่ง (ทั้งตัวที่ save และ
-    // ตัวที่ฟอร์มถือไว้) ให้ create/update พามันขึ้นไปเอง · ตั้งใน values ตรง ๆ
-    // ด้วยเพราะ buildSaveDetails อ่านจากตัวนี้ ไม่ได้อ่านจากฟอร์มอีกรอบ
-    const periodDate = resolvePeriodDate(
-      periodDateChoice,
-      values.sr_date,
-      currentPeriod,
-    );
-    if (periodDate) {
-      values.sr_date = periodDate;
-      form.setValue("sr_date", periodDate, { shouldDirty: true });
-    }
     let srId = storeRequisition?.id;
     try {
       if (!srId) {
@@ -412,7 +404,12 @@ export function useSrFormActions({
     const details: SrStageDetail[] = (
       saved?.store_requisition_detail ?? []
     ).map((d) => ({ id: d.id, stage_status: "submit", stage_message: null }));
-    fireSubmit(srId, saved?.doc_version ?? 0, details);
+    fireSubmit(
+      srId,
+      saved?.doc_version ?? 0,
+      details,
+      submitDatePatternPeriod ? (submitDatePattern ?? undefined) : undefined,
+    );
   };
 
   const revealInvalid = (errors: FieldErrors<SrFormValues>) => {
@@ -424,8 +421,12 @@ export function useSrFormActions({
   };
 
   // ตรวจก่อนเปิด dialog — ไม่เอาใบที่กรอกไม่ครบมาถามว่า "จะส่งไหม"
+  // ล้างคำตอบเรื่องวันที่ทุกครั้งที่เปิด ให้ผู้ใช้เลือกใหม่ ไม่พาค่ารอบก่อนมาเงียบ ๆ
   const openSubmitDialog = () =>
-    form.handleSubmit(() => setShowSubmit(true), revealInvalid)();
+    form.handleSubmit(() => {
+      setSubmitDatePattern(null);
+      setShowSubmit(true);
+    }, revealInvalid)();
 
   const confirmSubmitSr = () => form.handleSubmit(handleSubmitSr)();
 
@@ -548,8 +549,9 @@ export function useSrFormActions({
     setShowComment,
     actionDialog,
     setActionDialog,
-    periodDateChoice,
-    setPeriodDateChoice,
+    submitDatePatternPeriod,
+    submitDatePattern,
+    setSubmitDatePattern,
     datePattern,
     closeDatePattern: () => setDatePattern(null),
     // discard
