@@ -17,12 +17,15 @@ interface VirtualCommandListProps<T> {
   readonly measureRows?: boolean;
 }
 
+/** เริ่มโหลดหน้าถัดไปเมื่อเหลืออีกกี่แถวก่อนถึงท้าย — ข้อมูลมาทันก่อนผู้ใช้เลื่อนถึง */
+const PREFETCH_ROWS = 5;
+
 /**
  * Virtualized list ใช้แทน CommandList ของ shadcn เมื่อรายการเยอะ
  *
  * ใช้ @tanstack/react-virtual เพื่อ render เฉพาะแถวที่มองเห็น ลด DOM nodes
  * และทำให้ lookup ที่มี options หลายพันรายการยังลื่นอยู่ รองรับ infinite
- * scroll ผ่าน onLoadMore (trigger เมื่อ scroll ใกล้ถึงขอบ 50px) และ
+ * scroll ผ่าน onLoadMore (trigger เมื่อเหลืออีก 5 แถวก่อนถึงท้าย) และ
  * spinner ระหว่างโหลดเพิ่ม ถ้า items ว่างจะ render empty slot
  *
  * @param props - items, children (render-prop), estimateSize, maxHeight,
@@ -64,10 +67,13 @@ export function VirtualCommandList<T>({
     const el = parentRef.current;
     if (!el || !onLoadMore || !hasMore || isLoadingMore) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
-    if (scrollHeight - scrollTop - clientHeight < 50) {
+    if (
+      scrollHeight - scrollTop - clientHeight <
+      PREFETCH_ROWS * estimateSize
+    ) {
       onLoadMore();
     }
-  }, [onLoadMore, hasMore, isLoadingMore]);
+  }, [onLoadMore, hasMore, isLoadingMore, estimateSize]);
 
   // onScroll ยิงได้เฉพาะเมื่อมีแถบเลื่อน — ถ้ารายการว่าง (ไม่มี scroll element) หรือสั้นจนไม่พอให้เลื่อน
   // (เช่น กรองฝั่ง client เหลือไม่กี่แถว ทั้งที่ยังมีหน้าถัดไป) จะไม่มีทางโหลดต่อ จึงโหลดหน้าถัดไปเอง
