@@ -4,6 +4,191 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.4.0] - 2026-10-07
+
+### Added
+- **version:** แสดงเวอร์ชันแอป + API รูปแบบ "App v… <commit> · API v…" ทุกหน้า (#252) — Thammanoon Semapru `deab5b68`
+- ใบจ่ายออกดูสต๊อกและราคา ณ วันที่ของใบ + คู่ From–To ของพารามิเตอร์รายงานอยู่แถวเดียวและเติมค่าให้กัน (#251) — Khafang `6e1ee12a`
+- **auth:** ตัดข้อความใต้ปุ่ม Google ออก เหลือแค่ปุ่ม disabled (#250) — Thammanoon Semapru `d386ce77`
+- **auth:** แสดงปุ่ม Google เป็น disabled พร้อมข้อความเมื่อยังไม่เปิด แทนการซ่อน (#250) — Thammanoon Semapru `ac227a1c`
+- **auth:** แสดงปุ่ม Google เฉพาะเมื่อ gateway เปิดสวิตช์ google_sign_in.app และแปล error google_disabled (#249) — Thammanoon Semapru `9fe8e8ca`
+- **report:** จำค่าพารามิเตอร์ที่เรียกดูรายงานล่าสุด 30 นาที + แปลรหัส error ของพอ ณ วันที่เอกสาร (#248) — Khafang `4e618801`
+- **report:** ค้นตัวเลือกของรายงานฝั่ง server ตอนพิมพ์ในช่องเลือก (#247) — Khafang `7dfe05d1`
+- **dashboard:** โหลดข้อมูล widget ผ่านคิวทีละ 3 ใบ ใบบนขึ้นก่อนแทนการยิงพร้อมกันทั้งหน้า (#241) — Thammanoon Semapru `9acb2b9b`
+- **dashboard:** แสดง BU widget บนหน้า dashboard หลักและต่อท้ายทุกหน้า module dashboard (#239) — Thammanoon Semapru `09bcd7af`
+- **dashboard:** เพิ่มส่วน BU widget ที่ทุกคนใน BU เห็นและแก้ได้ตามสิทธิ์ (#239) — Thammanoon Semapru `cb98a8b7`
+- **dashboard:** เพิ่ม endpoint, สิทธิ์ และ hook ของ BU dashboard widget (#239) — Thammanoon Semapru `778295b4`
+- **version:** เพิ่มเลข patch อัตโนมัติทุกครั้งที่ build และแสดงเวลา build ที่ footer/หน้า login (#237) — Thammanoon Semapru `88d3de2b`
+- **version:** แสดง commit/เวลา build ของ FE ที่ footer และเวอร์ชันแอปที่หน้า login (#233) — Thammanoon Semapru `ddef87f2`
+- **form:** FormToolbar รับ ribbon ส่งต่อ DocFormHeader (สำหรับหัว PR) — Thammanoon Semapru `c37515a9`
+- **form:** DocPageSkeleton สำหรับหน้าเอกสาร + แก้ comment ribbon ของ DocFormHeader — Thammanoon Semapru `f65d2cd7`
+- **form:** FormToolbar เป็นชุดปุ่มมาตรฐาน — รับ title/badges/leading/submitLabel, Edit primary, gate เฉพาะ key ใน catalog — Thammanoon Semapru `34fc6ba1`
+- **form:** FormPageShell โครงหน้า form เดียวกัน + FormPageSkeleton — Thammanoon Semapru `89879ceb`
+- **permissions:** PERMISSION_KEYS + isKnownPermission กันการ gate ด้วย key ที่ไม่มีใน catalog — Thammanoon Semapru `cbeef7b8`
+- **list:** เพิ่ม ListPageShell โครงหน้า list กลาง + listGridMaxH — Thammanoon Semapru `97331e72`
+- **lookup:** fetchAllPages วนหน้าละ 100 แทน perpage=-1, useListAll ใน createConfigCrud และ useLookupPagination คืน total/error/refetch — Thammanoon Semapru `fffd2a59`
+- **lookup:** PagedChecklist checklist เลือกหลายค่าโหลดทีละหน้า + loadMore ไม่ข้ามหน้าใต้ StrictMode + VirtualCommandList วัดความสูงแถวจริง — Thammanoon Semapru `cb400503`
+- **lookup:** adjustment type eco label และ certificate ในฟอร์มเป็น combobox แบบ lazy load ค่าที่ปิดใช้งานแล้วยังขึ้นชื่อ — Thammanoon Semapru `eca83903`
+- **list-filter:** ตัวกรองแผนกผู้ใช้ คลัง SR ผู้ใช้ใน log และเลขที่ใบแจ้งหนี้ GRN โหลดทีละหน้า เลิกดึงทะเบียนทั้งก้อน — Thammanoon Semapru `ee1735e9`
+- **list-filter:** ตัวกรองหมวด/ประเภท/template/สกุลเงินของหน้า list สินค้า ผู้ขาย สูตร อุปกรณ์ IA RFP price list ใช้ entity และชื่อในตารางดึงตาม id — Thammanoon Semapru `87aeb9e1`
+- **lookup:** lookup ที่ผูก parent ดึงค่าที่เลือกตาม id เมื่อ endpoint รองรับ + แก้ dropdown งวดตรวจนับที่ว่างเสมอ — Thammanoon Semapru `1ac0f190`
+- **lookup:** lookup ทะเบียน config 10 ตัวส่ง selectedIds ชื่อค่าที่เลือกขึ้นทันทีโดยไม่ต้องเปิด popover และกรอง active ที่ server — Thammanoon Semapru `92b28f9f`
+- **list-filter:** control entity ตัวกรองเลือกหลายค่าจากทะเบียนแบบทั่วไป ย้ายผู้ขาย/แผนก/ผู้ขอมาใช้ แล้วลบ control เฉพาะทาง — Thammanoon Semapru `0cc1cee9`
+- **list-filter:** chip แผนก/ผู้ขอ/ผู้ขาย ดึงชื่อเฉพาะ id ที่เลือก เลิกลากทะเบียนทั้ง BU — Thammanoon Semapru `f997d6a1`
+- **filter:** ตัวกรอง vendor/แผนก/ผู้ขอ ค้นที่ server + โหลดทีละหน้า รวมเป็น EntityMultiFilter — Thammanoon Semapru `1f33a4d5`
+- **lookup:** category/sub-category/item group/department/noti template/user เลิกดึง perpage=-1 — Thammanoon Semapru `ec683391`
+- **lookup:** currency/credit term/tax/CN reason/extra cost/shelf เปลี่ยนเป็น combobox แบบ lazy load — Thammanoon Semapru `2adae37c`
+- **lookup:** useLookupPagination ดึงค่าที่เลือกไว้ตาม id ได้ + serverFilter — Thammanoon Semapru `91986170`
+- **product:** ใส่รหัสสินค้าไว้ต้นแถบตัวตนใต้ชื่อ — Thammanoon Semapru `78626ad8`
+- **product:** โหมดดูอ่านชัดขึ้น หัวหน้ามีแถบตัวตนสินค้า รหัสในตารางไม่เป็นลิงก์ — Thammanoon Semapru `a35f4464`
+- **list-card:** ปุ่มลบบนการ์ดเป็นไอคอนสีจาง แดงเฉพาะตอนชี้ — Thammanoon Semapru `66ae17f3`
+- **grn:** หน้ารายการใบรับสินค้ามีคอลัมน์และตัวกรองวันที่ใบแจ้งหนี้ — Thammanoon Semapru `a125a2cb`
+- **grn:** ใบ committed แก้ได้เฉพาะหัวใบ ②–⑦ และปุ่ม Save คงสถานะเดิม — Thammanoon Semapru `1dbe9c09`
+- **grn:** ใบ committed มีปุ่มแก้ไข เว้นแต่ถูกดึงเข้า AP Invoice แล้ว (ปุ่มกดไม่ได้ + บอกเลข AP) — Thammanoon Semapru `0ff38ea6`
+- **company-profile:** ปรับโหมดดูให้อ่านง่าย + ตัวอย่างสดของรูปแบบวันที่/ตัวเลข — Thammanoon Semapru `2b878d00`
+- **inventory-period:** toast แสดงข้อความ error จาก backend — Thammanoon Semapru `6e09a459`
+- **inventory-period:** แถบปีบัญชีบอกรอบปัจจุบันและรอบค้างปิด — Thammanoon Semapru `54d095d1`
+- **inventory-adjustment:** เพิ่มตัวกรองประเภทการปรับปรุง (adjustment type) — Khafang `0ef5dc79`
+- **profile:** เตือนเมื่อ BU ไม่มี default currency ที่ใช้ได้ — Thammanoon Semapru `827cd967`
+- add account categories and remove journal staging feature — llHorizonll `4dd3d5af`
+- add AR invoice list component and model with related tests — llHorizonll `f781d65c`
+- **company-profile:** รองรับวิธีคิดต้นทุน average_per_location — Thammanoon Semapru `83bb0624`
+- update payment lifecycle and capabilities, enhance invoice handling — llHorizonll `0aefd2fb`
+- add accounting document model and tests — llHorizonll `c66f3d8f`
+- **accounting:** add General Ledger implementation readiness documentation and mock repository for Journal Vouchers — llHorizonll `de39ea6d`
+- add cash forecast functionality and dashboard access control — llHorizonll `10e70dd2`
+- add payment tax allocation component and related functionality — llHorizonll `6638b1db`
+- enhance UI consistency guidelines and refactor Accounting Settings page — llHorizonll `b3666165`
+- refactor journal voucher and staging functionalities with mock data — llHorizonll `27ea0fad`
+- **accounting:** implement Journal Voucher and Journal Staging features — llHorizonll `9102b486`
+- **auth:** เพิ่มการเข้าสู่ระบบด้วย Google ที่หน้า login และหน้าคำเชิญ พร้อมกัน token หลุดเข้า telemetry — PhiranatCsb `4b215378`
+- **theme:** mirror light/dark choice to a parent-domain cookie for the Keycloak login page — PhiranatCsb `7524ae7b`
+- **sso:** Move Google OAuth to Keycloak — PhiranatCsb `19e11f31`
+- sso — PhiranatCsb `ed6341f1`
+- Google OAuth — PhiranatCsb `94b87931`
+
+### Fixed
+- **inventory-adjustment:** เตือนจำนวนเกินยอดตัดได้เป็นไอคอน (i) แทนข้อความใต้ช่อง (#253) — Khafang `6246934c`
+- **report:** ดึงตัวเลือกใหม่ทุกครั้งที่กดเปิดช่องเลือกใน dialog รายงาน (#245) — Khafang `b984a4af`
+- **store-requisition:** แสดงสถานะรายบรรทัดเป็นจุดสีแบบเดียวกับ PR/PO (#244) — Khafang `c2a2fb5f`
+- **store-requisition:** ถามวันที่ในกล่องส่งใบ เหลือกล่องเดียวแทนสองกล่องซ้อน (#243) — Khafang `7bca06a0`
+- **report:** ดึงตัวเลือก filter ของรายงานใหม่ทุกครั้งที่เปิด dialog (#242) — Khafang `ceb77dbb`
+- **dashboard:** ใช้ dataset id document.* ใน map ไอคอนของหน้า procurement/inventory ให้ตรงกับ template ที่ย้ายแล้ว (#240) — Thammanoon Semapru `f0324b27`
+- **dashboard:** โหลด BU widget section แบบ lazy ที่ module dashboard และไม่เว้นช่องว่างเมื่อซ่อน (#239) — Thammanoon Semapru `5d54e8e9`
+- **version:** แสดงเวลา build เป็นรูปแบบ yyMMdd-HHmmss ทั้ง footer, tooltip และหน้า login (#238) — Thammanoon Semapru `12548150`
+- **i18n:** เพิ่มคำแปล error catalog ของ GRN แก้หลังบันทึก/ยืนยัน และ SR จ่ายเกินจำนวนอนุมัติ (backend v4.0.0) (#236) — Thammanoon Semapru `5cf136b9`
+- **notification:** ไม่ refresh ซ้ำเมื่อมี token ใหม่แล้ว, รอ token แทนการหยุดถาวร, เลิก refresh หลังโดน 4401 ครบกำหนด (#235) — Thammanoon Semapru `a18f3992`
+- **notification:** ส่ง access token เป็นข้อความ auth แรกของ /ws และ refresh เมื่อโดนปิด 4401 (#235) — Thammanoon Semapru `512c5280`
+- **credit-note:** dialog เลือกรายการล็อกสินค้าที่ใบลดหนี้อื่นคืนไปแล้ว + คำแปลรหัสใหม่จากหลังบ้าน (#231) — Khafang `fa18ba25`
+- **stock-out:** ใบจ่ายออกร่างโชว์ต้นทุนประมาณ และแก้จำนวนแล้วกด Save ได้ (#230) — Khafang `2f1a04bf`
+- **forms:** ส่งบรรทัดที่ลบด้วยคีย์ที่หลังบ้านรับจริง — CN, PR template, price list, product, RFP (#229) — Khafang `48edc588`
+- **i18n:** เติมคีย์แปลที่โค้ดใช้แต่ภาษาหนึ่งไม่มี (#226) — Thammanoon Semapru `2107d23a`
+- **lookup:** dropdown กว้างเท่าช่อง และ label ไม่ทับแถวถัดไป (#225) — Thammanoon Semapru `e26d90de`
+- **role:** หน้า role แสดงสิทธิ์ตาม is_granted ไม่ใช่ catalog ทั้งก้อน (#224) — Thammanoon Semapru `93785c34`
+- **permission:** แก้คอมเมนต์ที่บอกผิดว่าคีย์ระดับ module ไม่มีอยู่ + คืนคีย์ใน PERMISSIONS (#222) — Khafang `92e41eb9`
+- **permission:** เมนู 11 หน้าคุมด้วย permission ระดับ resource แทนระดับ module (#222) — Khafang `75f6ddba`
+- **ui:** แถวยอดรวมใน SummaryFooterBar ตัดบรรทัดแทนการล้นจอ — Thammanoon Semapru `87ed773e`
+- **form:** ปุ่ม Save ของ PO/PR/SR ตอนสร้างใบใหม่ขึ้น Saving… ตามป้าย แทน Creating… — Thammanoon Semapru `6d84b156`
+- **errors:** 409 ที่มีรหัส catalog ไม่ใช่ "มีคนแก้ใบนี้" — บอกให้รีเฟรชแล้วลองใหม่ผิดทั้งเหตุและทางแก้ — Khafang `10921d9a`
+- **form:** Back ของหน้า review pc/sc ใช้ toList() ให้ filter ของหน้า list กลับมา แทน path เปล่า — Thammanoon Semapru `e7cca13c`
+- **form:** ลบ tc/tf ที่ไม่ได้ใช้ใน wf-new-form หลังย้ายมา FormToolbar — Thammanoon Semapru `624b57a6`
+- **list:** บล็อก sticky ของ ListPageShell ใส่พื้นหลัง ไม่ให้แถวเลื่อนทะลุหัวบนมือถือ — Thammanoon Semapru `0ad5d856`
+- **list:** AP payment ปิดแท็ก ListPageShell ให้ถูก (commit ก่อนหน้า parse ไม่ผ่าน) — Thammanoon Semapru `0784cd13`
+- **sr:** ใบ SR ที่จ่ายแล้วแสดงต้นทุนที่ลงบัญชีจริง ไม่ใช่ราคาประมาณที่คิดใหม่ทุกครั้งที่เปิด — Khafang `e9f39013`
+- **forms:** บันทึกร่าง SR/PR/PO ไม่ติด 400 เมื่อแก้จำนวนแล้วโฟกัสหลุด — Thammanoon Semapru `c2914147`
+- **sr:** ซ่อนปุ่ม Submit เมื่อผู้ใช้เป็น view_only ของใบนั้น — Thammanoon Semapru `03025a2b`
+- **sr:** ลบใบเบิกที่พ้น draft แสดงเหตุผลจริง และปิดปุ่มลบตั้งแต่ต้น — Thammanoon Semapru `aaedf17d`
+- **bu-switch:** สลับ BU บนหน้า dashboard ไม่ยิง widget ของ BU เก่าซ้ำ — Thitiphong Srisavat `97ca257e`
+- **lookup:** final review — role matrix ดึงผ่าน fetchAllPages, useEntitiesByIds จำกัด 100 id, useLookupPagination กัน NaN ของ paginate — Thammanoon Semapru `e9ba7c01`
+- **lookup:** หยุดแบ่งหน้าเมื่อ error ไม่ให้ auto-load ข้ามหน้าที่พัง — Thammanoon Semapru `6fabe68b`
+- **lookup:** useLookupPagination จำ pages/total ล่าสุด ปุ่มโหลดเพิ่มและยอดรวมไม่หายระหว่าง fetch หน้าถัดไป — Thammanoon Semapru `71fe2d86`
+- **lookup:** PagedChecklist ไม่ปักค่าที่เลือกไว้ตอนค้นหา, การ์ด role กด Enter ได้ใน cmdk และค้นไม่พบแยกข้อความจากทะเบียนว่าง — Thammanoon Semapru `e11cd2c2`
+- **lookup:** รายการว่างหรือสั้นเกินเลื่อนโหลดหน้าถัดไปเอง และกันแถวงวดนับสต็อกที่ไม่มี relation — Thammanoon Semapru `1492a7e9`
+- **cn:** สกุลเงินของใบลดหนี้อ่านจาก GRN ได้ทั้งรูป object และรูปแบน — สร้าง CN จากหน้าจอได้อีกครั้ง — Khafang `e2012dc3`
+- **lookup:** lookup ที่เคยเป็น Select ไม่ล้างค่าเมื่อคลิกตัวที่เลือกซ้ำ + ข้อความว่าง/กำลังโหลดของ filter เป็นภาษาไทย — Thammanoon Semapru `5e062267`
+- **lookup:** เลือก "—" ใน shelf แล้วปิด popover — Thammanoon Semapru `c8943a04`
+- **lookup:** getId ของ location-pair-product, dedupe ข้าม key ว่าง, และ hook ที่ไม่รับ enabled — Thammanoon Semapru `64784bd7`
+- **grn,po:** ชื่อหน่วย GRN และคลังใน wizard PO จาก price list หายเมื่อหาในรายการไม่เจอ — Thammanoon Semapru `364bb78d`
+- ค่าที่บันทึกไว้แต่ถูกปิดใช้งานแล้วขึ้นว่างตอนแก้ไข (IA / eco label / certificate / noti template) — Thammanoon Semapru `6425c649`
+- **user:** กำหนด role ให้ user เห็นแค่ 10 role แรก — Thammanoon Semapru `79f824a6`
+- **po:** PO จาก price list ได้ exchange_rate 1 เมื่อสกุลเงินอยู่หลัง 30 ตัวแรก — Thammanoon Semapru `80b3955b`
+- **vendor:** เปิดที่อยู่ไทยแล้วตำบลถูกล้างเป็นค่าว่าง กด Save แล้วหาย — Thammanoon Semapru `a14a97ba`
+- **lookup:** dropdown อ้างอิงขึ้นว่างเมื่อค่าที่บันทึกถูกปิดใช้งานหรืออยู่หลัง 30 ตัวแรก — Thammanoon Semapru `56bc6d7e`
+- **lookup:** LookupProductUnit ไม่เขียนทับหน่วยที่บันทึกไว้ด้วยหน่วยแรกอีก — Thammanoon Semapru `82590c27`
+- **operation-plan:** lookup ของ recipe/equipment/หมวดแม่ ขึ้น placeholder ทั้งที่มีค่า — Thammanoon Semapru `ff90c17f`
+- **rfp:** ช่อง template ขึ้น placeholder เมื่อ template อยู่หลังหน้าแรก — Thammanoon Semapru `1daf2af8`
+- **cn:** ช่อง GRN ขึ้น Select GRN ทั้งที่ใบผูก GRN ไว้แล้ว — Thammanoon Semapru `5e3b98b7`
+- **sr:** คลังต้นทาง/ปลายทางขึ้น Select Location ทั้งที่บันทึกไว้แล้ว — Thammanoon Semapru `fd387c51`
+- **price-list:** ช่องสินค้าโหมดแก้ไขขึ้น placeholder เมื่อสินค้าอยู่หลังหน้าแรก — Thammanoon Semapru `e117487a`
+- **workflow:** เงื่อนไข routing ตามแผนกเห็นแค่ 10 แผนกแรก — Thammanoon Semapru `b0972b71`
+- **lookup:** ค่าที่บันทึกไว้ขึ้น placeholder เมื่อไม่อยู่ในหน้าแรกของรายการ — Thammanoon Semapru `c2291c6a`
+- **product:** ช่องหน่วยนับโหมดแก้ไขขึ้น Select Unit ทั้งที่มีค่า — Thammanoon Semapru `ce9034cb`
+- **grn:** ใบ committed ตรวจ/ส่งเฉพาะหัวใบ, แถวที่ไม่ได้แก้ไม่ถูกส่งเป็น update, ซ่อน Delete ใบ saved — Thammanoon Semapru `3a8ae3f4`
+- **grn:** ใบ saved กดแก้ไขได้ ยกเว้นผู้ขายกับวันที่รับ — Thammanoon Semapru `aad1136b`
+- **accounting:** แก้ lint/เทสต์ที่ติดมาจาก dev2 และเพิ่ม route account-grouping — Thammanoon Semapru `a8652ef9`
+- **accounting:** ผูก license feature ให้เมนูบัญชีและ config ใหม่จาก dev2 — Thammanoon Semapru `28c87fd4`
+- **config:** แก้ permission key ที่ไม่มีอยู่จริงใน 5 หน้า config — Thammanoon Semapru `86c05b22`
+- **inventory-period:** เลิกเขียนตัวอย่างคลาส Tailwind ในคอมเมนต์ — Thammanoon Semapru `3b20840c`
+- **cn:** กรอก Tax Invoice # แล้ว Submit ยังฟ้องว่าว่าง — Khafang `960725e5`
+- **build:** กรองคำเตือน build ที่ไม่มีผล และย้าย vercel ไป devDependencies — Thammanoon Semapru `6b70a4d1`
+- **auth:** centralize silent-SSO guard, fix StrictMode double-fire, allow reload to retry — PhiranatCsb `19770f78`
+- **auth:** try silent SSO check on /login too, not just protected routes — PhiranatCsb `3c435727`
+
+### Changed
+- **dashboard:** ย้ายชิ้นส่วน widget ที่ใช้ร่วมไป components/dashboard-widget และเพิ่มโหมดอ่านอย่างเดียว (#239) — Thammanoon Semapru `5d271cb9`
+- **form:** purchase-request — หัวใช้ FormToolbar (ribbon + ปุ่มจาก PrFormActions), ฟอร์มเข้า FormPageShell (footer slot), DocPageSkeleton — Thammanoon Semapru `089cf3aa`
+- **form:** store-requisition — หัวใช้ FormToolbar (Save ไม่มีแผนกผ่าน submitSlot), ฟอร์มเข้า FormPageShell (footer slot), DocPageSkeleton — Thammanoon Semapru `77445ddb`
+- **form:** purchase-order — หัวใช้ FormToolbar (Close/Send email เป็น children), ฟอร์มเข้า FormPageShell (footer slot), DocPageSkeleton — Thammanoon Semapru `9b5b8dd0`
+- **form:** goods-receive-note — หัวใช้ FormToolbar (Save draft/AP-lock ผ่าน submitSlot/writeDisabledReason), ฟอร์มเข้า FormPageShell, DocPageSkeleton — Thammanoon Semapru `bbfeadd2`
+- **form:** credit-note — หัวใช้ FormToolbar, ฟอร์มเข้า FormPageShell (footer slot), DocPageSkeleton — Thammanoon Semapru `2e0c8a38`
+- **form:** ปุ่มย้อนกลับของ wizard 4 หน้า + sc-form ใช้ BackButton, review pc/sc กลับหน้า list แทน history — Thammanoon Semapru `4de8c346`
+- **form:** interface detail ใช้ FormToolbar (หมดอายุ = writeDisabledReason) + FormPageShell — Thammanoon Semapru `a89c45d5`
+- **form:** company-profile/default-setting ใช้ FormToolbar (ไม่มีปุ่มย้อนกลับ) + FormPageShell — Thammanoon Semapru `8535ef23`
+- **form:** user edit ใช้ FormToolbar (avatar เป็น leading) + FormPageShell แทนหัวที่ก๊อป DocFormHeader — Thammanoon Semapru `7c9bc0ae`
+- **form:** notification-template ใช้ FormToolbar + FormPageShell แทนหัว ChevronLeft ที่เขียนเอง — Thammanoon Semapru `52240ba9`
+- **form:** period-end review เข้า FormPageShell (DocFormHeader ตรง ไม่ใช่ฟอร์ม) — Thammanoon Semapru `1fa150c5`
+- **form:** inventory-adjustment — IaFormHero ใช้ FormToolbar, ia-form เข้า FormPageShell พร้อม footer slot — Thammanoon Semapru `81909806`
+- **form:** workflow detail — WfHeader ใช้ FormToolbar, wf-detail เข้า FormPageShell แบบ wide — Thammanoon Semapru `ff2ad306`
+- **form:** role — RoleHero ใช้ FormToolbar (Print เป็นปุ่มเพิ่ม), role-form เข้า FormPageShell — Thammanoon Semapru `47410b9e`
+- **form:** product — PdFormToolbar ใช้ FormToolbar (แก้ชื่อชนกับของกลาง), pd-form เข้า FormPageShell แบบ wide — Thammanoon Semapru `f6acf106`
+- **form:** operation-plan toolbar 4 ตัวใช้ FormToolbar, ฟอร์ม 8 หน้าเข้า FormPageShell — Thammanoon Semapru `c8b2a807`
+- **form:** workflow/new ใช้ FormToolbar + FormPageShell — Thammanoon Semapru `0eac61a6`
+- **form:** vendor-management 4 ฟอร์มใช้ FormToolbar + FormPageShell แทนหัวและปุ่มที่เขียนเอง — Thammanoon Semapru `6acabeb0`
+- **form:** department/location/PR template/physical-count ใช้ FormPageShell + FormPageSkeleton — Thammanoon Semapru `e4936464`
+- **form:** DocFormHeader — onBack เป็น optional, ตัด workflowStep ที่ไม่มีผู้เรียก — Thammanoon Semapru `11f6377d`
+- **list:** physical-count/spot-check/transaction ใช้ ListPageShell เลิก full-bleed — Thammanoon Semapru `b8e2c4e0`
+- **list:** AP payment/JV/AR invoice ใช้ ListPageShell (คงข้อความอังกฤษและ filter เดิม) — Thammanoon Semapru `f6cea057`
+- **list:** IA/product/category/accounting-document/AP invoice ใช้ ListPageShell — Thammanoon Semapru `6e318502`
+- **list:** email-profile/email-template/interface ใช้ ListPageShell + ย้าย body ออกจาก .route.tsx — Thammanoon Semapru `633570ee`
+- **list:** 4 หน้า DisplayTemplate ย้ายมา ListPageShell — Thammanoon Semapru `ccfb1076`
+- **list:** history/schedules/notification-template/dashboard-dataset ใช้ ListPageShell — Thammanoon Semapru `7e71ee51`
+- **list:** exchange-rate/report list ใช้ ListPageShell + DisplayModeToggle — Thammanoon Semapru `14ae705c`
+- **list:** inventory-period/running-code/role/workflow ใช้ ListPageShell — Thammanoon Semapru `c3fe01ea`
+- **list:** 5 หน้า operation-plan ใช้ ListPageShell + ตัดปุ่ม Export/Print ที่ยังไม่ทำงาน — Thammanoon Semapru `9d83ba6d`
+- **list:** activity-log/document/user-activity/user ใช้ ListPageShell — Thammanoon Semapru `ec51e8ed`
+- **list:** Stock replenishment ใช้ ListPageShell แทน DisplayTemplate — Thammanoon Semapru `43a2209e`
+- **list:** Approval/Wastage ใช้ ListPageShell แทน DisplayTemplate — Thammanoon Semapru `c94cf5dc`
+- **list:** RFP ใช้ ListPageShell + DisplayModeToggle (คง toolbar ที่มี chip คำค้น) — Thammanoon Semapru `b2d299ec`
+- **list:** SR ใช้ ListPageShell + ListToolbar ให้โครงเดียวกับ PO/PR — Thammanoon Semapru `29b5e916`
+- **list:** PR template ใช้ ListPageShell + DocumentListActions แทนปุ่มที่เขียนซ้ำ — Thammanoon Semapru `e745b23a`
+- **list:** CN/GRN/PR/PO/PLT/PL/Vendor ใช้ ListPageShell — Thammanoon Semapru `2f77b773`
+- **config-list:** ให้ ConfigListTemplate ใช้ ListPageShell + DisplayModeToggle — Thammanoon Semapru `d50b2bde`
+- **list:** สกัดปุ่มสลับ list/grid เป็น DisplayModeToggle ตัวเดียว — Thammanoon Semapru `2e27b7db`
+- **bu-switch:** สลับ BU ไม่ดึงซ้ำ — listener ข้าม tab เหลือจุดเดียว, ตัด optimistic, refetch profile ทางเดียว — Thitiphong Srisavat `b27b9a10`
+- **lookup:** department/plt หน้าดูไม่ดึงผู้ใช้/สินค้าทั้งทะเบียน โหลดเฉพาะตอนแก้ไข และลบ useAllUsers/useAllProducts — Thammanoon Semapru `29570cf8`
+- **location:** หน้าดูไม่ดึงผู้ใช้/สินค้าทั้งทะเบียน ใช้ local_name/หน่วยจาก payload และอีเมลตาม id · Transfer/ต้นไม้โหลดเฉพาะตอนแก้ไข — Thammanoon Semapru `a93716ed`
+- **spot-check:** ประวัติกรอง/ค้น/เรียงที่ server และโหลดทีละหน้า เลิกดึงทั้งก้อน · ตัวกรอง status เหลือแค่ค่าที่ backend รับ — Thammanoon Semapru `5c789932`
+- **lookup:** ทะเบียนที่ต้องได้ครบ (permission, หมวดหมู่, งวดบัญชี, สกุลเงิน, คลังของผู้ใช้, report form, workflow) ดึงผ่าน useListAll แทน perpage=-1 — Thammanoon Semapru `0bac08d4`
+- **system-admin:** role ของผู้ใช้โหลดทีละหน้าผ่าน PagedChecklist ใน RolesSection เลิกดึง role ทั้งก้อน — Thammanoon Semapru `447217d0`
+- **workflow:** เงื่อนไขแผนกของ routing ใช้ PagedChecklist โหลดทีละหน้า เลือกแผนกที่ 31+ ได้ และลบ DepartmentCheckboxList — Thammanoon Semapru `56362c10`
+- **report:** ผู้รับรายงานของ schedule ใช้ PagedChecklist ค้นที่ server โหลดทีละหน้า เลิกดึงผู้ใช้ทั้งทะเบียน — Thammanoon Semapru `7e5fb05a`
+- **procurement:** สกุลเงินและคลังในฟอร์ม CN GRN PO PR ดึงตาม id แทน perpage=-1 และกันติ๊กแถวสกุลต่างประเทศก่อนเรตมาถึง — Thammanoon Semapru `3828f982`
+- **lookup:** ชื่อหน่วย eco label certificate และหมวดแม่ของสูตรดึงเฉพาะ id ที่อยู่บนหน้า เลิกลากทะเบียนทั้งก้อน — Thammanoon Semapru `c932931d`
+- **company-profile:** ลบ perpage_format ที่ไม่มีโค้ดไหนอ่านออกจากหน้าและ type — Thammanoon Semapru `ca482157`
+- streamline DocFormHeader actions and improve readability — llHorizonll `4d343423`
+- remove outdated UI rules section from AGENTS.md — llHorizonll `a7fe2ab6`
+- **auth:** rename google-callback route to auth-callback (/login/callback) and condense comments — PhiranatCsb `15d433da`
+
 ## [2.3.0] - 2026-09-29
 
 ### Added
