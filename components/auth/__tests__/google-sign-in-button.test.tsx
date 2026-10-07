@@ -7,6 +7,11 @@ import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { buildGoogleAuthorizeUrl } from "@/lib/auth/google-authorize-url";
 
+// The gateway status check — on by default so the button renders; the switch itself is gateway logic.
+vi.mock("@/lib/auth/google-sign-in-status", () => ({
+  fetchGoogleSignInEnabled: () => Promise.resolve(true),
+}));
+
 describe("buildGoogleAuthorizeUrl", () => {
   it("targets the gateway authorize endpoint for the App with the UI language", () => {
     const url = new URL(buildGoogleAuthorizeUrl("https://api.test", "th"));
@@ -63,7 +68,7 @@ describe("GoogleSignInButton", () => {
     renderButton();
 
     await userEvent.click(
-      screen.getByRole("button", { name: /continue with google/i }),
+      await screen.findByRole("button", { name: /continue with google/i }),
     );
 
     expect(assign).toHaveBeenCalledTimes(1);
@@ -78,7 +83,7 @@ describe("GoogleSignInButton", () => {
     renderButton("/invitations/tok-1");
 
     await userEvent.click(
-      screen.getByRole("button", { name: /continue with google/i }),
+      await screen.findByRole("button", { name: /continue with google/i }),
     );
 
     const url = new URL(assign.mock.calls[0][0] as string);
