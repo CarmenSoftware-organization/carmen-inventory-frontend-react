@@ -2,18 +2,14 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSubCategory } from "@/hooks/use-sub-category";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { SubCategoryDto } from "@/types/category";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupCodeName, type LookupItem } from "@/types/lookup";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupSubCategoryProps {
   readonly value: string;
-  readonly onValueChange: (value: string, item?: SubCategoryDto) => void;
+  readonly onValueChange: (value: string, item?: LookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -39,16 +35,11 @@ export function LookupSubCategory({
   const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
 
-  // กรองตามหมวดที่ server — กรองหลังโหลดทีละ 30 แถว หน้าแรกอาจว่างทั้งที่มีข้อมูล
-  const serverFilter = filterCategoryId
-    ? `${ACTIVE_ONLY_FILTER},product_category_id|string:${filterCategoryId}`
-    : ACTIVE_ONLY_FILTER;
-
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<SubCategoryDto>({
-      useListHook: useSubCategory,
+    useLookupResource("product_sub_category", {
       search,
-      serverFilter,
+      // กรองตามหมวดที่ server — กรองหลังโหลดทีละ 30 แถว หน้าแรกอาจว่างทั้งที่มีข้อมูล
+      serverFilter: { product_category_id: filterCategoryId },
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -68,8 +59,8 @@ export function LookupSubCategory({
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
       getId={(s) => s.id}
-      getLabel={(s) => `${s.code} — ${s.name}`}
-      getSearchValue={(s) => `${s.code} ${s.name}`}
+      getLabel={lookupCodeName}
+      getSearchValue={(s) => `${s.code ?? ""} ${s.name ?? ""}`}
       size={size}
       renderItem={(s) => (
         <>

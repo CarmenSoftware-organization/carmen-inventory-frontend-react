@@ -9,7 +9,7 @@ import {
 } from "react-hook-form";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import type { ItemGroupDto, SubCategoryDto } from "@/types/category";
+import type { ItemGroupDto } from "@/types/category";
 import type { LookupItem } from "@/types/lookup";
 import {
   Field,
@@ -103,7 +103,7 @@ function PdTabGeneral({
     setField("product_item_group_id", "");
   };
 
-  const handleSubCategoryChange = (id: string, item?: SubCategoryDto) => {
+  const handleSubCategoryChange = (id: string, item?: LookupItem) => {
     setField("product_sub_category_id", id);
     setSubCategoryName(item?.name ?? "");
     setField("product_item_group_id", "");
