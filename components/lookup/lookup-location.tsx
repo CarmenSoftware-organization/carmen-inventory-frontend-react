@@ -2,12 +2,8 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLocation } from "@/hooks/use-location";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Location } from "@/types/location";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupCodeName, type LocationLookup } from "@/types/lookup";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
@@ -16,7 +12,7 @@ import { LookupCombobox } from "./lookup-combobox";
 interface LookupLocationProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (location: Location) => void;
+  readonly onItemChange?: (location: LocationLookup) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -33,10 +29,10 @@ interface LookupLocationProps {
 /**
  * Lookup Popover สำหรับเลือก Location (สถานที่เก็บสินค้า)
  *
- * ดึงข้อมูลผ่าน `useLocation` hook พร้อม server-side search และ infinite scroll (perpage 30)
- * กรอง `is_active` และ `locationTypes` ที่ server รองรับ `excludeIds` กัน duplicate
+ * ดึงข้อมูลผ่าน Lookup API (`location`, scope all) พร้อม server-side search และ infinite scroll
+ * (perpage 30) endpoint กรอง active ให้เอง `locationTypes` กรองที่ server รองรับ `excludeIds` กัน duplicate
  * ตามประเภท (inventory/direct/consignment) พร้อม badge แสดงประเภทใน item มี `onItemChange`
- * ส่ง object `Location` เต็ม
+ * ส่ง `LocationLookup` (มี `location_type` และ `delivery_point`)
  *
  * @param value - id ของ location ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -71,16 +67,6 @@ export function LookupLocation({
   const [hasOpened, setHasOpened] = useState(false);
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
-  // location_type|enum: ต้องอยู่ท้ายสุด — ค่า enum คั่นด้วย `,` เหมือนตัวคั่นเงื่อนไข
-  const serverFilter = [
-    ACTIVE_ONLY_FILTER,
-    locationTypes?.length
-      ? `location_type|enum:${locationTypes.join(",")}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(",");
-
   const {
     items: locations,
     selectedItems,
@@ -88,10 +74,11 @@ export function LookupLocation({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Location>({
-    useListHook: useLocation,
+  } = useLookupResource<LocationLookup>("location", {
     search,
-    serverFilter,
+    // list เดิมคือ /config/locations = ทุกคลังของ BU · `mine` จะเหลือแค่คลังที่ assign ให้ user
+    scope: "all",
+    serverFilter: { location_type: locationTypes },
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
     filter: excludedSet ? (l) => !excludedSet.has(l.id) : undefined,
@@ -110,7 +97,7 @@ export function LookupLocation({
       items={locations}
       selectedItems={selectedItems}
       getId={(l) => l.id}
-      getLabel={(l) => `${l.code} — ${l.name}`}
+      getLabel={lookupCodeName}
       size={size}
       serverSideSearch
       onSearchChange={setSearch}

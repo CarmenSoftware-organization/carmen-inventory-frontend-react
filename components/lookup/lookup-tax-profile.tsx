@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useTaxProfile } from "@/hooks/use-tax-profile";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { TaxProfile } from "@/types/tax-profile";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type TaxProfileLookup } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupTaxProfileProps {
@@ -38,10 +34,8 @@ export function LookupTaxProfile({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<TaxProfile>({
-      useListHook: useTaxProfile,
+    useLookupResource<TaxProfileLookup>("tax_profile", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -52,7 +46,7 @@ export function LookupTaxProfile({
       size={size}
       value={value}
       onValueChange={(id, tp) =>
-        onValueChange(id, tp?.tax_rate ?? 0, tp?.name ?? "")
+        onValueChange(id, tp?.tax_rate ?? 0, tp ? lookupLabel(tp) : "")
       }
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
@@ -60,7 +54,7 @@ export function LookupTaxProfile({
       items={items}
       selectedItems={selectedItems}
       getId={(tp) => tp.id}
-      getLabel={(tp) => tp.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("taxProfile") })}
       searchPlaceholder={tl("search", { entity: tfl("taxProfile") })}
       disabled={disabled}

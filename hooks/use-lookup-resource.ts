@@ -7,28 +7,39 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/lib/build-query-string";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 import { MAX_PERPAGE } from "@/lib/fetch-all-pages";
 import type { PaginatedResponse } from "@/types/params";
-import type { LookupItem, LookupResource, LookupScope } from "@/types/lookup";
+import {
+  LOOKUP_EXTRA_FIELDS,
+  type LookupItem,
+  type LookupResource,
+  type LookupScope,
+  type LookupServerFilter,
+} from "@/types/lookup";
 
-interface UseLookupResourceOptions {
+interface UseLookupResourceOptions<T extends LookupItem> {
   /** คำค้น (combobox debounce ให้แล้ว) — เปลี่ยนแล้วเริ่มหน้า 1 ใหม่ */
   search: string;
-  /** ไม่ส่ง = `mine` ของ backend · department ต้องส่ง `"all"` */
+  /** ไม่ส่ง = `mine` ของ backend · department/location ทั้ง BU ต้องส่ง `"all"` */
   scope?: LookupScope;
   /** id ที่เลือกอยู่ — ดึงตาม id แยกเสมอ ให้ปุ่มแสดงชื่อได้แม้อยู่หลังหน้าแรกหรือถูกปิดใช้งานแล้ว */
   selectedIds?: readonly string[];
   /** false = ไม่ดึงรายการ (lazy คู่กับ `onOpenChange`) — ไม่มีผลกับ `selectedIds` */
   enabled?: boolean;
   /** กรองฝั่ง client หลังโหลด (เช่น excludeIds) — ค่าที่เลือกอยู่ผ่านเสมอ */
-  filter?: (item: LookupItem) => boolean;
+  filter?: (item: T) => boolean;
+  /** filter ฝั่ง server (ชื่อตาม catalog) — เปลี่ยนแล้วเริ่มหน้า 1 ใหม่ */
+  serverFilter?: LookupServerFilter;
   perpage?: number;
 }
 
+/** prefix ของทุก query ของ Lookup API — invalidate ตัวนี้ = ล้าง lookup ทุก resource ทุก BU */
+export const LOOKUP_QUERY_ROOT = "lookup";
+
 // reference คงที่ — ผู้เรียกเอาไปใส่ deps ได้โดยไม่คำนวณใหม่ทุก render
-const EMPTY: LookupItem[] = [];
+const EMPTY: never[] = [];
 
 // Number(undefined) เป็น NaN ซึ่ง `??` ไม่จับ — คืน undefined เพื่อให้ตกไป fallback ถัดไป
 const num = (v: unknown) => {
@@ -36,26 +47,60 @@ const num = (v: unknown) => {
   return Number.isFinite(n) ? n : undefined;
 };
 
-async function fetchLookup(
+/** `{ a: ["x","y"], b: "z" }` → `a:x,y;b:z` · ข้ามค่าว่าง · ไม่เหลืออะไรคืน undefined */
+export function serializeLookupFilter(
+  filter?: LookupServerFilter,
+): string | undefined {
+  if (!filter) return undefined;
+  const parts = Object.entries(filter).flatMap(([key, raw]) => {
+    const values = (typeof raw === "string" ? [raw] : (raw ?? [])).filter(
+      Boolean,
+    );
+    return values.length > 0 ? [`${key}:${values.join(",")}`] : [];
+  });
+  return parts.length > 0 ? parts.join(";") : undefined;
+}
+
+// backend เก่ากว่า FE จะไม่มีฟิลด์เพิ่ม — throw ให้ lookup ว่าง (เลือกไม่ได้) ดีกว่าให้ฟอร์ม
+// ได้ undefined แล้วคำนวณภาษี/อัตราแลกเปลี่ยนเป็น 0 เงียบ ๆ
+function assertExtraFields(
+  resource: LookupResource,
+  page: PaginatedResponse<LookupItem>,
+) {
+  const first = page.data?.[0];
+  const missing = first
+    ? LOOKUP_EXTRA_FIELDS[resource]?.find((field) => !(field in first))
+    : undefined;
+  if (missing) {
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      `Lookup ${resource} is missing ${missing} — backend older than this frontend`,
+    );
+  }
+}
+
+async function fetchLookup<T extends LookupItem>(
   buCode: string,
   resource: LookupResource,
   params: Record<string, string | number | undefined>,
-): Promise<PaginatedResponse<LookupItem>> {
+): Promise<PaginatedResponse<T>> {
   const url = buildUrl(`${API_ENDPOINTS.LOOKUP(buCode)}/${resource}`, params);
   const res = await httpClient.get(url);
   if (!res.ok) throw await ApiError.from(res, `Failed to fetch ${resource}`);
-  return res.json();
+  const page = (await res.json()) as PaginatedResponse<T>;
+  assertExtraFields(resource, page);
+  return page;
 }
 
 /**
  * รายการของ lookup แบบแบ่งหน้าจาก `GET /api/:bu_code/lookup/:resource`
  *
  * คืน shape เดียวกับ `useLookupPagination` — component ที่ย้ายมาเปลี่ยนแค่บรรทัดเรียก hook
- * endpoint กรอง active ให้เอง จึงไม่มี `serverFilter` · ค่าที่เลือกดึงผ่าน `?ids=`
+ * endpoint กรอง active ให้เอง `serverFilter` ใช้กับ filter เพิ่มของ resource (เช่น `location_type`) · ค่าที่เลือกดึงผ่าน `?ids=`
  * ซึ่ง backend ข้ามตัวกรอง active/page ให้
  *
  * @param resource - ชื่อ resource ใน catalog ของ backend
- * @param options - search / scope / selectedIds / enabled / filter / perpage
+ * @param options - search / scope / selectedIds / enabled / filter / serverFilter / perpage
  * @returns items, selectedItems, สถานะโหลด, loadMore สำหรับเลื่อนแล้วโหลดต่อ
  * @example
  * ```ts
@@ -64,7 +109,7 @@ async function fetchLookup(
  * });
  * ```
  */
-export function useLookupResource(
+export function useLookupResource<T extends LookupItem = LookupItem>(
   resource: LookupResource,
   {
     search,
@@ -72,10 +117,12 @@ export function useLookupResource(
     selectedIds,
     enabled = true,
     filter,
+    serverFilter,
     perpage = 30,
-  }: UseLookupResourceOptions,
+  }: UseLookupResourceOptions<T>,
 ) {
   const buCode = useBuCode();
+  const filterParam = serializeLookupFilter(serverFilter);
 
   // useInfiniteQuery แทน state ของหน้า + effect ต่อท้าย — คำค้น/scope อยู่ใน key
   // จึงเริ่มหน้า 1 ใหม่เอง และ response ของคำค้นเก่าที่ตอบช้าไปลง cache ของ key เก่า
@@ -89,13 +136,22 @@ export function useLookupResource(
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["lookup", buCode, resource, scope, search, perpage],
+    queryKey: [
+      LOOKUP_QUERY_ROOT,
+      buCode,
+      resource,
+      scope,
+      filterParam,
+      search,
+      perpage,
+    ],
     queryFn: ({ pageParam }) =>
-      fetchLookup(buCode!, resource, {
+      fetchLookup<T>(buCode!, resource, {
         page: pageParam,
         perpage,
         search: search || undefined,
         scope,
+        filter: filterParam,
       }),
     initialPageParam: 1,
     getNextPageParam: (last, _all, lastPageParam) => {
@@ -107,7 +163,7 @@ export function useLookupResource(
   });
 
   // ตัดตัวซ้ำด้วย id — offset pagination อาจคืนแถวซ้ำข้ามหน้าเมื่อข้อมูลเปลี่ยนระหว่างเลื่อน
-  const allItems: LookupItem[] = [];
+  const allItems: T[] = [];
   const seen = new Set<string>();
   for (const pg of data?.pages ?? []) {
     for (const it of pg.data ?? EMPTY) {
@@ -124,23 +180,32 @@ export function useLookupResource(
     .sort()
     .slice(0, MAX_PERPAGE);
   const { data: selectedData } = useQuery({
-    queryKey: ["lookup", buCode, resource, scope, "ids", ids],
+    queryKey: [
+      LOOKUP_QUERY_ROOT,
+      buCode,
+      resource,
+      scope,
+      filterParam,
+      "ids",
+      ids,
+    ],
     queryFn: () =>
-      fetchLookup(buCode!, resource, {
+      fetchLookup<T>(buCode!, resource, {
         ids: ids.join(","),
         perpage: ids.length,
         scope,
+        filter: filterParam,
       }),
     ...CACHE_DYNAMIC,
     enabled: ids.length > 0 && !!buCode,
   });
 
-  const known = new Map<string, LookupItem>();
+  const known = new Map<string, T>();
   for (const it of allItems) known.set(it.id, it);
   for (const it of selectedData?.data ?? EMPTY) known.set(it.id, it);
   const selectedItems = (selectedIds ?? [])
     .map((id) => known.get(id))
-    .filter((it): it is LookupItem => it !== undefined);
+    .filter((it): it is T => it !== undefined);
 
   const selectedSet = new Set(selectedIds ?? []);
   const items = filter
@@ -182,7 +247,7 @@ export function useInvalidateLookup(resource: LookupResource) {
   const buCode = useBuCode();
   return () => {
     void queryClient.invalidateQueries({
-      queryKey: ["lookup", buCode, resource],
+      queryKey: [LOOKUP_QUERY_ROOT, buCode, resource],
     });
   };
 }
