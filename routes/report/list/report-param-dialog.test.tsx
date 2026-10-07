@@ -227,3 +227,134 @@ describe("ReportParamDialog remembers the last run", () => {
     expect(typeof stored.savedAt).toBe("number");
   });
 });
+
+// คู่ From–To ของช่องเดียวกัน: ตอนทั้งคู่เป็น All เลือกฝั่งไหนก่อน อีกฝั่งได้ค่าเดียวกัน หลังจากนั้นไม่แตะกันอีก
+// จนกว่าทั้งสองฝั่งจะกลับเป็น All
+describe("ReportParamDialog From–To pair", () => {
+  const rangeReport = {
+    Id: 2,
+    ReportName: "Stock Card",
+    _templateId: "tpl-range",
+    Dialog:
+      '<Dialog><Label Text="Product From"/><Lookup Name="ProductFrom" DataSource="@product_list"/>' +
+      '<Label Text="Product To"/><Lookup Name="ProductTo" DataSource="@product_list"/></Dialog>',
+  } as unknown as Report;
+
+  const twoProducts = () =>
+    new Response(
+      JSON.stringify({
+        data: {
+          product: [
+            { code: "P1", name: "Product 1" },
+            { code: "P2", name: "Product 2" },
+          ],
+        },
+      }),
+      { status: 200 },
+    );
+
+  function renderRange(onRun = vi.fn()) {
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={qc}>
+        <IntlProvider locale="en" messages={en}>
+          <ReportParamDialog
+            open
+            onOpenChange={() => {}}
+            report={rangeReport}
+            buCode="BU1"
+            onRun={onRun}
+          />
+        </IntlProvider>
+      </QueryClientProvider>,
+    );
+    return onRun;
+  }
+
+  const pick = async (
+    user: ReturnType<typeof userEvent.setup>,
+    trigger: HTMLElement,
+    label: string,
+  ) => {
+    await user.click(trigger);
+    // the open list is portaled after the triggers, so its entry is the last match
+    // รายการที่เปิดอยู่ถูก portal ไว้หลังปุ่ม ตัวเลือกจึงเป็นตัวสุดท้ายที่เจอ
+    const matches = await screen.findAllByText(label);
+    await user.click(matches[matches.length - 1]);
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => twoProducts()),
+    );
+  });
+
+  it("copies the first pick to the other side, then leaves the sides alone", async () => {
+    const onRun = renderRange();
+    const user = userEvent.setup();
+    const [fromTrigger] = await screen.findAllByRole("button", { name: "All" });
+
+    await pick(user, fromTrigger, "P1 - Product 1");
+    const [, toTrigger] = await screen.findAllByRole("button", {
+      name: "P1 - Product 1",
+    });
+
+    await pick(user, toTrigger, "P2 - Product 2");
+    expect(
+      screen
+        .getAllByRole("button", { name: /Product \d/ })
+        .map((b) => b.textContent),
+    ).toEqual(["P1 - Product 1", "P2 - Product 2"]);
+
+    await user.click(screen.getByRole("button", { name: en.report.runReport }));
+    expect(onRun).toHaveBeenCalledWith(rangeReport, {
+      ProductFrom: "P1",
+      ProductTo: "P2",
+    });
+  });
+
+  it("copies again once both sides are back to All", async () => {
+    renderRange();
+    const user = userEvent.setup();
+    const [fromTrigger] = await screen.findAllByRole("button", { name: "All" });
+    await pick(user, fromTrigger, "P1 - Product 1");
+
+    const [fromAgain, toAgain] = await screen.findAllByRole("button", {
+      name: "P1 - Product 1",
+    });
+    await pick(user, fromAgain, "All");
+    // To still P1 — one side at All is not "both"
+    expect(
+      screen.getAllByRole("button", { name: "P1 - Product 1" }),
+    ).toHaveLength(1);
+    await pick(user, toAgain, "All");
+
+    const [, toAll] = await screen.findAllByRole("button", { name: "All" });
+    await pick(user, toAll, "P2 - Product 2");
+    expect(
+      await screen.findAllByRole("button", { name: "P2 - Product 2" }),
+    ).toHaveLength(2);
+  });
+
+  it("does not copy when the dialog opens with remembered values", async () => {
+    saveReportParams(reportParamKey("BU1", "tpl-range"), {
+      values: { ProductFrom: "P1", ProductTo: "P2" },
+      labels: { ProductFrom: "P1 - Product 1", ProductTo: "P2 - Product 2" },
+    });
+    renderRange();
+    const user = userEvent.setup();
+    const fromTrigger = await screen.findByRole("button", {
+      name: "P1 - Product 1",
+    });
+
+    await pick(user, fromTrigger, "P2 - Product 2");
+    expect(
+      await screen.findAllByRole("button", { name: "P2 - Product 2" }),
+    ).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "P1 - Product 1" })).toBeNull();
+  });
+});

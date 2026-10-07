@@ -1,4 +1,10 @@
-import { createContext, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslations } from "use-intl";
 import {
   Dialog,
@@ -145,6 +151,24 @@ interface LookupOption {
  */
 const CLIENT_SEARCH_ONLY_SOURCES = new Set(["period"]);
 
+/** ค่าที่ "ทั้งหมด" ส่งไป — micro-data/micro-report ไม่กรองฝั่งนั้น */
+const ALL = "ALL";
+
+/**
+ * ค่าตั้งต้นของช่องเลือก: ค่าที่จำไว้ (ภายใน 30 นาที) ถ้ามี ไม่งั้นตัวแรกของรายการ
+ *
+ * ค่าที่จำไว้อาจมาจากการค้นฝั่ง server ซึ่งไม่อยู่ในรายการตั้งต้น — ใช้ป้ายที่จำไว้แสดงบนปุ่ม
+ */
+function useInitialChoice(id: string, options: LookupOption[]): LookupOption {
+  const remembered = useContext(RememberedParamsContext);
+  const value = remembered?.values[id] || options[0].value;
+  const label =
+    options.find((o) => o.value === value)?.label ??
+    remembered?.labels[id] ??
+    "";
+  return { value, label };
+}
+
 function SearchableLookupControl({
   options,
   id,
@@ -154,17 +178,36 @@ function SearchableLookupControl({
   readonly id: string;
   readonly dataSource: string;
 }) {
-  const remembered = useContext(RememberedParamsContext);
-  // ค่าที่จำไว้อาจมาจากการค้นฝั่ง server ซึ่งไม่อยู่ในรายการตั้งต้น — ใช้ป้ายที่จำไว้แสดงบนปุ่ม
-  const rememberedValue = remembered?.values[id];
-  const initialValue = rememberedValue || options[0].value;
-  const [value, setValue] = useState(initialValue);
-  const [label, setLabel] = useState(
-    () =>
-      options.find((o) => o.value === initialValue)?.label ??
-      remembered?.labels[id] ??
-      "",
+  const initial = useInitialChoice(id, options);
+  const [choice, setChoice] = useState(initial);
+  return (
+    <SearchableLookupSelect
+      options={options}
+      id={id}
+      dataSource={dataSource}
+      choice={choice}
+      onChoose={setChoice}
+    />
   );
+}
+
+/**
+ * ช่องเลือกที่ค้นหาได้ แบบ controlled — ค่าและป้ายอยู่ที่ผู้เรียก (ช่องเดี่ยว หรือคู่ From–To ที่เติมค่าให้กัน)
+ */
+function SearchableLookupSelect({
+  options,
+  id,
+  dataSource,
+  choice,
+  onChoose,
+}: {
+  readonly options: LookupOption[];
+  readonly id: string;
+  readonly dataSource: string;
+  readonly choice: LookupOption;
+  readonly onChoose: (choice: LookupOption) => void;
+}) {
+  const { value, label } = choice;
   const { refresh, isFetching } = useContext(LookupRefreshContext);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -195,12 +238,13 @@ function SearchableLookupControl({
       />
       <LookupCombobox<LookupOption>
         value={value}
-        onValueChange={(v, item) => {
-          setValue(v);
-          setLabel(
-            item?.label ?? options.find((o) => o.value === v)?.label ?? "",
-          );
-        }}
+        onValueChange={(v, item) =>
+          onChoose({
+            value: v,
+            label:
+              item?.label ?? options.find((o) => o.value === v)?.label ?? "",
+          })
+        }
         defaultLabel={label}
         // กดเปิด = ดึงรายการใหม่ · โชว์ skeleton จนของใหม่มาถึง ไม่ให้เลือกจากรายการเก่า
         onOpenChange={(o) => {
@@ -232,15 +276,20 @@ function SearchableLookupControl({
   );
 }
 
-function LookupControl({ node, id }: LookupControlProps) {
+/** ตัวเลือกของ lookup จาก XML + รายการที่ดึงมา ("ALL" แสดงเป็นคำว่าทั้งหมดของภาษานั้น) */
+function useLookupOptions(node: LookupNode): LookupOption[] {
   const tc = useTranslations("common");
-  const remembered = useContext(RememberedParamsContext);
-  const options: LookupOption[] = node.items
+  return node.items
     .map((item, idx) => ({
       value: node.values[idx] || item,
-      label: item === "ALL" ? tc("all") : item,
+      label: item === ALL ? tc("all") : item,
     }))
     .filter((o) => o.value !== "");
+}
+
+function LookupControl({ node, id }: LookupControlProps) {
+  const remembered = useContext(RememberedParamsContext);
+  const options = useLookupOptions(node);
 
   // Data-source-backed lookups (product/location/vendor/category/...) can be
   // long → searchable combobox. Hard-coded enum lookups (Status/GroupBy/Day)
@@ -389,25 +438,147 @@ interface FieldControlProps {
   readonly periods?: ReportPeriodMap;
 }
 
-function FieldControl({ field, periods }: FieldControlProps) {
+/** ช่อง From กับ To วางคู่กันในแถวเดียว */
+function RangeRow({
+  from,
+  to,
+}: {
+  readonly from: ReactNode;
+  readonly to: ReactNode;
+}) {
   const tc = useTranslations("common");
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <div>
+        <span className="text-muted-foreground text-micro-legal">
+          {tc("from")}
+        </span>
+        {from}
+      </div>
+      <div>
+        <span className="text-muted-foreground text-micro-legal">
+          {tc("to")}
+        </span>
+        {to}
+      </div>
+    </div>
+  );
+}
 
+/** คู่ From–To ที่เป็นช่องเลือกค้นหาได้ทั้งสองฝั่ง — เติมค่าให้กันได้ (LinkedLookupRange) */
+const isLinkableRange = (
+  field: FormField,
+): field is FormField & { from: LookupNode; to: LookupNode } =>
+  field.kind === "range" &&
+  field.from.type === "lookup" &&
+  field.to.type === "lookup" &&
+  !field.from.multi &&
+  !field.to.multi &&
+  !!field.from.dataSource &&
+  !!field.to.dataSource;
+
+/**
+ * คู่ From–To ของช่องเลือกตัวเดียวกัน (สินค้า/คลัง/…) ที่เติมค่าให้กันครั้งแรก
+ *
+ * ตอนทั้งสองฝั่งเป็น "ทั้งหมด" เลือกฝั่งไหนก่อน อีกฝั่งได้ค่าเดียวกัน — ส่วนใหญ่ต้องการดูตัวเดียว
+ * จะได้ไม่ต้องเลือกซ้ำ หลังจากนั้นแก้ฝั่งไหนก็ไม่ไปแตะอีกฝั่ง (From = A, To ตามเป็น A แล้วแก้ To เป็น B
+ * From ยังเป็น A) จนกว่าทั้งสองฝั่งจะกลับเป็น "ทั้งหมด" อีกครั้ง — ผู้ใช้เลือกเอง หรือเปิดใหม่หลังค่าที่จำไว้
+ * หมดอายุ/กดใช้ค่าเริ่มต้น เปิดมาพร้อมค่าที่จำไว้ซึ่งไม่ใช่ "ทั้งหมด" จึงยังไม่เติมให้
+ *
+ * ช่วงที่ได้คือ between ตามรหัส (micro-data: รหัส >= From และ <= To) ไม่ใช่แค่สองตัวที่เลือก
+ */
+function LinkedLookupRange({
+  from,
+  to,
+}: {
+  readonly from: LookupNode;
+  readonly to: LookupNode;
+}) {
+  const fromOptions = useLookupOptions(from);
+  const toOptions = useLookupOptions(to);
+  // รายการมาแบบ async — ก่อนมาถึง ใช้ช่องเดิม (placeholder) แล้วค่อยเริ่ม state เมื่อมีตัวเลือกแล้ว
+  if (fromOptions.length === 0 || toOptions.length === 0) {
+    return (
+      <RangeRow
+        from={<LookupControl node={from} id={from.name} />}
+        to={<LookupControl node={to} id={to.name} />}
+      />
+    );
+  }
+  return (
+    <LinkedLookupRangeInner
+      from={from}
+      to={to}
+      fromOptions={fromOptions}
+      toOptions={toOptions}
+    />
+  );
+}
+
+function LinkedLookupRangeInner({
+  from,
+  to,
+  fromOptions,
+  toOptions,
+}: {
+  readonly from: LookupNode;
+  readonly to: LookupNode;
+  readonly fromOptions: LookupOption[];
+  readonly toOptions: LookupOption[];
+}) {
+  const [fromChoice, setFromChoice] = useState(
+    useInitialChoice(from.name, fromOptions),
+  );
+  const [toChoice, setToChoice] = useState(
+    useInitialChoice(to.name, toOptions),
+  );
+
+  const choose =
+    (side: "from" | "to") =>
+    (choice: LookupOption): void => {
+      // ตัดสินจากค่าก่อนเปลี่ยน: เติมให้เฉพาะตอนที่ทั้งสองฝั่งยังเป็น "ทั้งหมด"
+      const isArmed = fromChoice.value === ALL && toChoice.value === ALL;
+      if (side === "from") setFromChoice(choice);
+      else setToChoice(choice);
+      if (!isArmed || choice.value === ALL) return;
+      if (side === "from") setToChoice(choice);
+      else setFromChoice(choice);
+    };
+
+  return (
+    <RangeRow
+      from={
+        <SearchableLookupSelect
+          options={fromOptions}
+          id={from.name}
+          dataSource={from.dataSource}
+          choice={fromChoice}
+          onChoose={choose("from")}
+        />
+      }
+      to={
+        <SearchableLookupSelect
+          options={toOptions}
+          id={to.name}
+          dataSource={to.dataSource}
+          choice={toChoice}
+          onChoose={choose("to")}
+        />
+      }
+    />
+  );
+}
+
+function FieldControl({ field, periods }: FieldControlProps) {
+  if (isLinkableRange(field)) {
+    return <LinkedLookupRange from={field.from} to={field.to} />;
+  }
   if (field.kind === "range") {
     return (
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <span className="text-muted-foreground text-micro-legal">
-            {tc("from")}
-          </span>
-          <Control node={field.from} periods={periods} />
-        </div>
-        <div>
-          <span className="text-muted-foreground text-micro-legal">
-            {tc("to")}
-          </span>
-          <Control node={field.to} periods={periods} />
-        </div>
-      </div>
+      <RangeRow
+        from={<Control node={field.from} periods={periods} />}
+        to={<Control node={field.to} periods={periods} />}
+      />
     );
   }
   return <Control node={field.control} periods={periods} />;

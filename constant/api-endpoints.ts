@@ -24,6 +24,10 @@ const toSafePathSegment = (value: string): string => {
   return encodeURIComponent(normalized);
 };
 
+/** `?at_date=…` เมื่อมีวันที่ของเอกสาร — ไม่มีก็ไม่ต่อท้ายอะไร (endpoint ทำงานแบบเดิม) */
+const atDateQuery = (atDate?: string) =>
+  atDate ? `?at_date=${encodeURIComponent(atDate)}` : "";
+
 export const API_ENDPOINTS = {
   ACTIVITY_LOGS: (buCode: string) => `/api/proxy/api/${buCode}/activity-logs`,
   ACTIVITY_LOGS_BY_RECORD: (buCode: string, entityId: string) =>
@@ -296,10 +300,18 @@ export const API_ENDPOINTS = {
     productId: string,
     locationId: string,
     qty: number | string,
+    // วันที่ของเอกสาร — ตีราคาจากของที่มีอยู่ในวันนั้น (ไม่หยิบล็อตที่รับเข้าหลังวันนั้น)
+    atDate?: string,
   ) =>
-    `/api/proxy/api/${buCode}/cost/products/${productId}/location/${locationId}/qty/${qty}`,
-  PRODUCT_INVENTORY: (buCode: string, locationId: string, productId: string) =>
-    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}`,
+    `/api/proxy/api/${buCode}/cost/products/${productId}/location/${locationId}/qty/${qty}${atDateQuery(atDate)}`,
+  PRODUCT_INVENTORY: (
+    buCode: string,
+    locationId: string,
+    productId: string,
+    // วันที่ของเอกสาร — on_hand_qty เป็นยอด ณ สิ้นวันนั้น และได้ available_qty (ยอดที่ตัดได้) มาด้วย
+    atDate?: string,
+  ) =>
+    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}${atDateQuery(atDate)}`,
   PRODUCT_INVENTORY_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/inventory-movement`,
   PRODUCT_ITEM_GROUPS: (buCode: string) =>

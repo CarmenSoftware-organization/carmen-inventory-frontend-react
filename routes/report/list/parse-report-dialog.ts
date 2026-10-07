@@ -74,6 +74,20 @@ const isToLabel = (node: DialogNode | undefined): boolean => {
   return !node.visible || node.text === "to";
 };
 
+/**
+ * คู่ control ชื่อ `<X>From` กับ `<X>To` — dialog ปัจจุบันมีป้ายของทั้งสองฝั่ง ("Location From" /
+ * "Location To") ซึ่ง isToLabel ไม่จับ จึงเคยขึ้นเป็นสี่แถวแยกกัน ชื่อ control คือสิ่งที่ micro-data ใช้จับคู่
+ * ช่วงอยู่แล้ว (<X>From → >=, <X>To → <=)
+ */
+const isNamedPair = (
+  from: LookupNode | DateNode,
+  to: DialogNode | undefined,
+): boolean =>
+  isControl(to) &&
+  to.type === from.type &&
+  from.name.endsWith("From") &&
+  to.name === `${from.name.slice(0, -"From".length)}To`;
+
 export function parseReportDialog(xml: string): FormField[] {
   const doc = new DOMParser().parseFromString(xml, "text/xml");
   const dialogEl = doc.querySelector("Dialog");
@@ -141,7 +155,10 @@ const groupFields = (nodes: DialogNode[]): FormField[] => {
     const afterControl = nodes[i + 2];
     const toControl = nodes[i + 3];
 
-    if (isToLabel(afterControl) && isControl(toControl)) {
+    const isPaired =
+      (isToLabel(afterControl) && isControl(toControl)) ||
+      (afterControl?.type === "label" && isNamedPair(next, toControl));
+    if (isPaired && isControl(toControl)) {
       fields.push({
         kind: "range",
         label: node.text,
