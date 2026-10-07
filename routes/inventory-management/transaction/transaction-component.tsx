@@ -226,7 +226,7 @@ export default function TransactionComponent() {
             onValueChange={(id, item) => {
               onChange(id);
               if (!id) setCategoryLabel("");
-              else if (item) setCategoryLabel(item.name);
+              else if (item) setCategoryLabel(item.name ?? "");
             }}
             size="sm"
             className="w-full"

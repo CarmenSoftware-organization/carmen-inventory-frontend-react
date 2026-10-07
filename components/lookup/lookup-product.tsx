@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
-import { useProduct } from "@/hooks/use-product";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
-import type { Product } from "@/types/product";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type LookupItem } from "@/types/lookup";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductProps {
   readonly value: string;
-  readonly onValueChange: (value: string, product?: Product) => void;
+  readonly onValueChange: (value: string, product?: LookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -28,20 +27,17 @@ interface LookupProductProps {
 /**
  * Lookup Popover สำหรับเลือกสินค้า (Product)
  *
- * ดึงข้อมูลผ่าน `useProduct` hook พร้อม server-side search และ infinite scroll (perpage 30)
- * กรอง `product_status_type = active` ที่ server รองรับ `excludeIds` กัน duplicate ใน item list
- * onValueChange ส่งทั้ง id และ object `Product` เต็มสำหรับ side effects (set default unit, tax)
+ * ดึงข้อมูลผ่าน Lookup API (`useLookupResource`) พร้อม server-side search และ infinite scroll (perpage 30)
+ * endpoint กรองสินค้า active ให้เอง รองรับ `excludeIds` กัน duplicate ใน item list
+ * onValueChange ส่ง id และแถว lookup (`LookupItem` — id/code/name/description/status เท่านั้น)
  *
  * @param value - product id ที่เลือกอยู่
- * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และ object Product
+ * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่ง id และแถว lookup
  * @returns JSX popover element ของ product lookup
  * @example
  * ```tsx
  * <Controller name="product_id" control={control} render={({ field }) => (
- *   <LookupProduct value={field.value} onValueChange={(id, p) => {
- *     field.onChange(id);
- *     if (p) form.setValue("unit_id", p.inventory_unit_id);
- *   }} />
+ *   <LookupProduct value={field.value} onValueChange={(id) => field.onChange(id)} />
  * )} />
  * ```
  */
@@ -72,11 +68,9 @@ export function LookupProduct({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Product>({
-    useListHook: useProduct,
+  } = useLookupResource("product", {
     search,
     // defaultOpen = เปิด popover ทันทีตอน mount (ฟอร์มพากรอกทีละช่อง) ต้องมีรายการรอ
-    serverFilter: "product_status_type|string:active",
     enabled: hasOpened || !!defaultOpen,
     selectedIds: value ? [value] : [],
     filter: excludedSet ? (p) => !excludedSet.has(p.id) : undefined,
@@ -95,9 +89,9 @@ export function LookupProduct({
       items={products}
       selectedItems={selectedItems}
       getId={(p) => p.id}
-      getLabel={(p) => `${p.code} — ${p.name}`}
+      getLabel={(p) => `${p.code ?? ""} — ${lookupLabel(p)}`}
       defaultLabel={defaultLabel}
-      getSearchValue={(p) => `${p.code} ${p.name}`}
+      getSearchValue={(p) => `${p.code ?? ""} ${p.name ?? ""}`}
       serverSideSearch
       onSearchChange={setSearch}
       onLoadMore={loadMore}

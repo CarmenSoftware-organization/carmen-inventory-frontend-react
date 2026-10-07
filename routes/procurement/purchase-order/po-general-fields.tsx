@@ -110,7 +110,7 @@ export function PoGeneralFields({
               value={field.value}
               onValueChange={field.onChange}
               onItemChange={(vendor) => {
-                form.setValue("vendor_name", vendor.name);
+                form.setValue("vendor_name", vendor.name ?? "");
               }}
               defaultLabel={vendorName || undefined}
               disabled={manualFieldDisabled}

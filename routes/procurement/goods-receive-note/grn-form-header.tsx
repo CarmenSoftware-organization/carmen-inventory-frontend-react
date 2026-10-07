@@ -75,7 +75,7 @@ export function GrnFormHeader({
               <LookupVendor
                 value={field.value ?? ""}
                 onValueChange={field.onChange}
-                onItemChange={(v) => form.setValue("vendor_name", v.name)}
+                onItemChange={(v) => form.setValue("vendor_name", v.name ?? "")}
                 defaultLabel={vendorName || undefined}
                 disabled={disabled || isPo || lockIdentity}
                 error={errors.vendor_id?.message}

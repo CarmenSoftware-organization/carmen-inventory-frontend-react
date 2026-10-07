@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { WarehouseIcon } from "lucide-react";
-import { useVendor } from "@/hooks/use-vendor";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Vendor } from "@/types/vendor";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type LookupItem } from "@/types/lookup";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupVendorProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (vendor: Vendor) => void;
+  readonly onItemChange?: (vendor: LookupItem) => void;
   readonly excludeIds?: Set<string>;
   readonly disabled?: boolean;
   readonly placeholder?: string;
@@ -50,10 +46,8 @@ export function LookupVendor({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Vendor>({
-    useListHook: useVendor,
+  } = useLookupResource("vendor", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
     filter: excludeIds ? (v) => !excludeIds.has(v.id) : undefined,
@@ -73,8 +67,8 @@ export function LookupVendor({
       items={vendors}
       selectedItems={selectedItems}
       getId={(v) => v.id}
-      getLabel={(v) => v.name}
-      getSearchValue={(v) => `${v.code} ${v.name}`}
+      getLabel={lookupLabel}
+      getSearchValue={(v) => `${v.code ?? ""} ${v.name ?? ""}`}
       renderItem={(v) => (
         <>
           <Badge size="xs" variant="secondary" className="shrink-0">
@@ -83,7 +77,7 @@ export function LookupVendor({
           <span className="flex-1 truncate text-left">{v.name}</span>
         </>
       )}
-      renderSelected={(v) => `${v.code} - ${v.name}`}
+      renderSelected={(v) => `${v.code ?? ""} - ${lookupLabel(v)}`}
       defaultLabel={defaultLabel}
       serverSideSearch
       onSearchChange={setSearch}
