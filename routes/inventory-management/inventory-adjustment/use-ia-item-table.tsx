@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/popover";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { InventoryDialog } from "@/components/share/inventory-dialog";
+import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
 import { useProductCostByLocationQty } from "@/hooks/use-product-cost";
@@ -51,15 +52,29 @@ const ProductInventoryDialog = memo(function ProductInventoryDialog({
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
+  const atDate = isStockOut ? docDate : undefined;
+  // กด "On hand" ในกล่องแล้วเปิดยอดรายคลัง — ทรงเดียวกับ SR/PR/PO และใช้วันเดียวกับกล่อง
+  const [onHandOpen, setOnHandOpen] = useState(false);
   return (
-    <InventoryDialog
-      buCode={buCode}
-      locationId={locationId}
-      productId={productId}
-      productName={productName}
-      productLocalName={productLocalName}
-      atDate={isStockOut ? docDate : undefined}
-    />
+    <>
+      <InventoryDialog
+        buCode={buCode}
+        locationId={locationId}
+        productId={productId}
+        productName={productName}
+        productLocalName={productLocalName}
+        atDate={atDate}
+        onOnHandClick={productId ? () => setOnHandOpen(true) : undefined}
+      />
+      {productId && (
+        <OnHandDialog
+          open={onHandOpen}
+          onOpenChange={setOnHandOpen}
+          productId={productId}
+          atDate={atDate}
+        />
+      )}
+    </>
   );
 });
 

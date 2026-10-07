@@ -35,6 +35,13 @@ vi.mock("@/components/share/inventory-dialog", () => ({
     return null;
   },
 }));
+const onHandProps: Record<string, unknown>[] = [];
+vi.mock("@/components/share/on-hand-dialog", () => ({
+  OnHandDialog: (props: Record<string, unknown>) => {
+    onHandProps.push(props);
+    return null;
+  },
+}));
 vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => ({ buCode: "BU-1" }),
 }));
@@ -80,6 +87,7 @@ function Harness({
 beforeEach(() => {
   costCalls.length = 0;
   dialogProps.length = 0;
+  onHandProps.length = 0;
   inventory = { available_qty: 3, as_of_date: "2026-07-15" };
 });
 
@@ -91,6 +99,16 @@ describe("AdjItemFields — stock-out reads stock on its own date", () => {
     expect(costCalls.at(-1)).toEqual(["BU-1", "prod-1", "loc-1", 2, DOC_DATE]);
     expect(dialogProps.at(-1)).toEqual(
       expect.objectContaining({ atDate: DOC_DATE }),
+    );
+  });
+
+  it("opens the per-location on-hand list from the box, on the same date", async () => {
+    renderForm(<Harness type="stock-out" qty={2} />);
+
+    await waitFor(() => expect(onHandProps.length).toBeGreaterThan(0));
+    expect(typeof dialogProps.at(-1)?.onOnHandClick).toBe("function");
+    expect(onHandProps.at(-1)).toEqual(
+      expect.objectContaining({ productId: "prod-1", atDate: DOC_DATE }),
     );
   });
 
@@ -128,6 +146,9 @@ describe("AdjItemFields — stock-in is not dated", () => {
     await waitFor(() => expect(costCalls.length).toBeGreaterThan(0));
     expect(costCalls.at(-1)?.[4]).toBeUndefined();
     expect(dialogProps.at(-1)?.atDate).toBeUndefined();
+    // the per-location list is there too, on the current period like the box
+    expect(typeof dialogProps.at(-1)?.onOnHandClick).toBe("function");
+    expect(onHandProps.at(-1)?.atDate).toBeUndefined();
     expect(
       screen.queryByRole("button", { name: /More than can be issued/ }),
     ).toBeNull();

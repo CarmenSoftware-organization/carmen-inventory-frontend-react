@@ -16,7 +16,7 @@ import { INVENTORY_TYPE } from "@/constant/location";
 import { formatDate } from "@/lib/date-utils";
 import type { ADJUSTMENT_TYPE, AdjustmentType } from "@/types/adjustment-type";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
-import type { AdjFormValues } from "./ia-form-schema";
+import { latestIssuableDate, type AdjFormValues } from "./ia-form-schema";
 import { LookupAdjustmentType } from "./lookup-adjustment-type";
 
 interface DocumentInfoProps {
@@ -70,9 +70,8 @@ export function DocumentInfo({
                 fromDate={
                   currentPeriodStart ? new Date(currentPeriodStart) : undefined
                 }
-                toDate={
-                  currentPeriodEnd ? new Date(currentPeriodEnd) : undefined
-                }
+                // ไม่เกินวันนี้ และไม่เกินท้ายงวด — ใบรับ/จ่ายลงวันที่อนาคตไม่ได้
+                toDate={latestIssuableDate(currentPeriodEnd)}
                 error={form.formState.errors.date?.message}
               />
             )}

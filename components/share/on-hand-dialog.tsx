@@ -39,15 +39,24 @@ interface Props {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly productId: string;
+  /**
+   * วันที่ของเอกสาร — ยอดแต่ละคลังเป็นยอด ณ สิ้นวันนั้น ใช้วันเดียวกับกล่อง on hand
+   * ของหน้านั้น ตัวเลขรวมจึงตรงกัน ไม่ส่ง = งวดปัจจุบันแบบเดิม
+   */
+  readonly atDate?: string;
 }
 
-export function OnHandDialog({ open, onOpenChange, productId }: Props) {
+export function OnHandDialog({ open, onOpenChange, productId, atDate }: Props) {
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tloc = useTranslations("config.location");
 
-  const { data, isLoading } = useProductOnHand(open ? productId : undefined);
+  const { data, isLoading } = useProductOnHand(
+    open ? productId : undefined,
+    undefined,
+    atDate || undefined,
+  );
 
   const rows: OnHandLocationRow[] = data?.locations ?? [];
   const totalQty = Number(data?.total_on_hand ?? 0);
@@ -153,6 +162,11 @@ export function OnHandDialog({ open, onOpenChange, productId }: Props) {
             <div className="flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-base">{t("onHand")}</DialogTitle>
+                {data?.as_of_date && (
+                  <p className="text-muted-foreground text-xs">
+                    {t("asOfDate", { date: data.as_of_date })}
+                  </p>
+                )}
                 <DialogDescription asChild>
                   <div className="mt-1 space-y-0.5">
                     <span className="text-foreground text-sm font-semibold">

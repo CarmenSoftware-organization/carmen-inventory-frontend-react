@@ -1000,6 +1000,7 @@
     "maxMonth": "สูงสุด {max}",
     "invalidJson": "{field} ต้องเป็น JSON ที่ถูกต้อง",
     "dateOutsidePeriod": "วันที่ต้องอยู่ในช่วงเวลาปัจจุบัน",
+    "dateAfterToday": "วันที่ต้องไม่เกินวันนี้",
     "mustNotExceed": "{field} ต้องไม่เกิน{target}",
     "formIncomplete": "กรุณากรอกข้อมูลให้ครบก่อนยืนยัน",
     "incompleteItems": "ยังกรอกไม่ครบ {count} รายการ พาไปที่ช่องแรกที่ต้องแก้ให้แล้ว",

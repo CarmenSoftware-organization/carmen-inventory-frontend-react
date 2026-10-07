@@ -55,7 +55,11 @@ export function createAdjSchema(
           return d >= new Date(periodStart) && d <= new Date(periodEnd);
         },
         { message: tv("dateOutsidePeriod") },
-      ),
+      )
+      // ใบรับ/จ่ายลงวันที่อนาคตไม่ได้ (ผู้ใช้ขอ 2026-10-07) — ดักหน้าบ้านอย่างเดียว
+      .refine((v) => !v || new Date(v) <= endOfToday(), {
+        message: tv("dateAfterToday"),
+      }),
     location_id: z.string().min(1, tv("required", { field: tf("location") })),
     items: z
       .array(createDetailSchema(tv, tf))
@@ -94,6 +98,23 @@ export function mapItemToPayload(
 
 function minDate(a: Date, b: Date): Date {
   return new Date(Math.min(a.getTime(), b.getTime()));
+}
+
+/** เวลาสุดท้ายของวันนี้ตามเวลาเครื่อง — วันที่ที่เลือกจากปฏิทินเป็นเที่ยงคืนของวันนั้น */
+export function endOfToday(): Date {
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  return end;
+}
+
+/**
+ * วันสุดท้ายที่ SI/SO เลือกได้: วันนี้ หรือท้ายงวดถ้างวดจบก่อนวันนี้
+ * @param periodEnd - ท้ายงวดปัจจุบัน (ไม่ส่ง = จำกัดแค่วันนี้)
+ * @returns วันสุดท้ายที่เลือกได้
+ */
+export function latestIssuableDate(periodEnd?: string): Date {
+  const today = endOfToday();
+  return periodEnd ? minDate(new Date(periodEnd), today) : today;
 }
 
 export function resolveDefaultDate(periodEnd?: string): string {

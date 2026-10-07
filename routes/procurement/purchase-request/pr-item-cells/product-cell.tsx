@@ -46,6 +46,8 @@ export const ProductCell = memo(function ProductCell({
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const isRowLocked = useIsRowLocked(control, index);
+  // วันเดียวกับกล่อง on hand (InventoryDialogCell) ยอดรวมรายคลังจึงตรงกัน
+  const prDate = useWatch({ control, name: "pr_date" }) || undefined;
   const [onHandOpen, setOnHandOpen] = useState(false);
   const [onOrderOpen, setOnOrderOpen] = useState(false);
 
@@ -66,6 +68,7 @@ export const ProductCell = memo(function ProductCell({
             open={onHandOpen}
             onOpenChange={setOnHandOpen}
             productId={productId}
+            atDate={prDate}
           />
           <OnOrderDialog
             open={onOrderOpen}
