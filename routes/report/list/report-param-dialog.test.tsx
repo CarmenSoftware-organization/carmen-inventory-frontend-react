@@ -16,6 +16,17 @@ import type { Report } from "@/types/report";
 
 vi.mock("@/hooks/use-bu-code", () => ({ useBuCode: () => "BU1" }));
 
+// jsdom ไม่มีความสูงให้ virtualizer วัด รายการจริงจึงไม่ render แถวไหนเลย — แทนด้วยรายการธรรมดา
+vi.mock("@/components/ui/virtual-command-list", () => ({
+  VirtualCommandList: <T,>({
+    items,
+    children,
+  }: {
+    items: T[];
+    children: (item: T, index: number) => React.ReactNode;
+  }) => <div>{items.map((item, i) => children(item, i))}</div>,
+}));
+
 const { ReportParamDialog } = await import("./report-param-dialog");
 
 const report = {
@@ -67,5 +78,39 @@ describe("ReportParamDialog lookup fields", () => {
     await user.keyboard("{Escape}");
     await user.click(screen.getByRole("button", { name: "All" }));
     await waitFor(() => expect(lookupCalls(fetchMock)).toBe(3));
+  });
+});
+
+describe("ReportParamDialog server-side search", () => {
+  it("searches the server with what the user types, and shows the match", async () => {
+    const fetchMock = vi.fn(async (url: string) =>
+      String(url).includes("search=")
+        ? new Response(
+            JSON.stringify({
+              data: {
+                product: [{ code: "55000209", name: "Dead Mouth Wrench" }],
+              },
+            }),
+            { status: 200 },
+          )
+        : lookupResponse(),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+
+    renderDialog();
+    await user.click(await screen.findByRole("button", { name: "All" }));
+    await user.keyboard("wrench");
+
+    await waitFor(() => {
+      const searchCall = fetchMock.mock.calls
+        .map(([url]) => new URL(String(url), "http://x"))
+        .find((u) => u.searchParams.get("search") === "wrench");
+      expect(searchCall?.searchParams.get("types")).toBe("product");
+      expect(searchCall?.searchParams.get("limit")).toBe("50");
+    });
+    expect(
+      await screen.findByText("55000209 - Dead Mouth Wrench"),
+    ).toBeInTheDocument();
   });
 });

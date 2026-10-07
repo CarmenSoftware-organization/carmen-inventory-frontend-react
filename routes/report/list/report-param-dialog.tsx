@@ -18,7 +18,10 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
-import { useReportListLookups } from "../shared/use-report";
+import {
+  useReportListLookups,
+  useReportLookupSearch,
+} from "../shared/use-report";
 import type { ReportPeriodMap } from "@/types/report";
 import type { Report } from "@/types/report";
 import {
@@ -107,16 +110,40 @@ interface LookupOption {
   readonly label: string;
 }
 
+/**
+ * source ที่ค้นในเครื่องอย่างเดียว — งวดมีไม่กี่แถว micro-report ไม่ค้นให้
+ */
+const CLIENT_SEARCH_ONLY_SOURCES = new Set(["period"]);
+
 function SearchableLookupControl({
   options,
   id,
+  dataSource,
 }: {
   readonly options: LookupOption[];
   readonly id: string;
+  readonly dataSource: string;
 }) {
   const [value, setValue] = useState(options[0].value);
   const { refresh, isFetching } = useContext(LookupRefreshContext);
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // พิมพ์ค้นหา → ค้นทั้งตารางฝั่ง server (สด + ไม่ติดเพดาน 500 แถวของรายการตอนเปิด)
+  // combobox ยังกรองผลในเครื่องซ้ำอีกชั้น ซึ่งไม่ตัดอะไรเพราะผลจาก server ตรงคำค้นอยู่แล้ว
+  // แต่ถ้า micro-report/gateway ยังเป็นรุ่นที่ไม่รู้จัก search ก็ยังได้พฤติกรรมเดิม
+  const canSearchServer = !CLIENT_SEARCH_ONLY_SOURCES.has(dataSource);
+  const isServerSearch = canSearchServer && search.trim() !== "";
+  const { data: found, isLoading: isSearching } = useReportLookupSearch({
+    source: dataSource,
+    search,
+    enabled: isOpen && canSearchServer,
+  });
+  const items =
+    isServerSearch && found
+      ? found.map((i) => ({ value: i.code, label: i.name }))
+      : options;
+
   return (
     <>
       <input type="hidden" name={id} value={value} readOnly />
@@ -128,8 +155,11 @@ function SearchableLookupControl({
           setIsOpen(o);
           if (o) refresh();
         }}
-        isLoading={isOpen && isFetching}
-        items={options}
+        onSearchChange={setSearch}
+        isLoading={isOpen && (isFetching || (isServerSearch && isSearching))}
+        items={items}
+        // ระหว่างค้นหา items คือผลจาก server ซึ่งไม่มี "ทั้งหมด" — ให้ป้ายบนปุ่มหาจากรายการตั้งต้นได้
+        selectedItems={options}
         getId={(o) => o.value}
         getLabel={(o) => o.label}
         getSearchValue={(o) => o.label}
@@ -163,7 +193,13 @@ function LookupControl({ node, id }: LookupControlProps) {
   // long → searchable combobox. Hard-coded enum lookups (Status/GroupBy/Day)
   // have few options and stay a plain select.
   if (node.dataSource && options.length > 0) {
-    return <SearchableLookupControl options={options} id={id} />;
+    return (
+      <SearchableLookupControl
+        options={options}
+        id={id}
+        dataSource={node.dataSource}
+      />
+    );
   }
 
   if (options.length > 0) {
