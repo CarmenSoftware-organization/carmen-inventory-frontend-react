@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { buildGoogleAuthorizeUrl } from "@/lib/auth/google-authorize-url";
+import { fetchGoogleSignInEnabled } from "@/lib/auth/google-sign-in-status";
 import { getRuntimeConfig } from "@/lib/runtime-config";
 import { Button } from "@/components/ui/button";
 
@@ -28,12 +30,26 @@ function GoogleLogo() {
 
 /**
  * "Continue with Google" button with its "or" divider. Shared by the login page and the invitation page.
+ * Always shown, but clickable only once the gateway says Google sign-in is on for the App
+ * (`google_sign_in.app`). While asking, when the answer is "off", or when the check fails it stays
+ * disabled — the gateway would refuse the flow anyway.
  * @param props - `next`: same-site path to return to after signing in
  * @returns The divider and the button
  */
 export function GoogleSignInButton({ next }: { readonly next?: string }) {
   const t = useTranslations("auth");
   const locale = useLocale();
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetchGoogleSignInEnabled(getRuntimeConfig().BACKEND_URL).then((on) => {
+      if (active) setEnabled(on);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const start = () => {
     window.location.assign(
@@ -58,6 +74,7 @@ export function GoogleSignInButton({ next }: { readonly next?: string }) {
         variant="outline"
         className="h-10 w-full gap-2"
         onClick={start}
+        disabled={!enabled}
       >
         <GoogleLogo />
         {t("google.continue")}

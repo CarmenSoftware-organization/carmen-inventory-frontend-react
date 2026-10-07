@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IntlProvider } from "use-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -6,6 +6,20 @@ import en from "@/messages/en.json";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { buildGoogleAuthorizeUrl } from "@/lib/auth/google-authorize-url";
+
+// The gateway status check — on by default so the button renders; the switch itself is gateway logic.
+vi.mock("@/lib/auth/google-sign-in-status", () => ({
+  fetchGoogleSignInEnabled: () => Promise.resolve(true),
+}));
+
+// The button renders at once but stays disabled until the status check answers — wait before clicking.
+async function findEnabledGoogleButton() {
+  const button = await screen.findByRole("button", {
+    name: /continue with google/i,
+  });
+  await waitFor(() => expect(button).toBeEnabled());
+  return button;
+}
 
 describe("buildGoogleAuthorizeUrl", () => {
   it("targets the gateway authorize endpoint for the App with the UI language", () => {
@@ -38,7 +52,10 @@ describe("GoogleSignInButton", () => {
   const assign = vi.fn();
 
   beforeEach(() => {
-    setRuntimeConfigForTests({ BACKEND_URL: "https://api.test", X_APP_ID: "app-1" });
+    setRuntimeConfigForTests({
+      BACKEND_URL: "https://api.test",
+      X_APP_ID: "app-1",
+    });
     Object.defineProperty(window, "location", {
       configurable: true,
       value: { ...originalLocation, assign },
@@ -62,9 +79,7 @@ describe("GoogleSignInButton", () => {
   it("sends the browser to the gateway when clicked", async () => {
     renderButton();
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /continue with google/i }),
-    );
+    await userEvent.click(await findEnabledGoogleButton());
 
     expect(assign).toHaveBeenCalledTimes(1);
     const url = new URL(assign.mock.calls[0][0] as string);
@@ -77,9 +92,7 @@ describe("GoogleSignInButton", () => {
   it("passes the page to return to", async () => {
     renderButton("/invitations/tok-1");
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /continue with google/i }),
-    );
+    await userEvent.click(await findEnabledGoogleButton());
 
     const url = new URL(assign.mock.calls[0][0] as string);
     expect(url.searchParams.get("next")).toBe("/invitations/tok-1");

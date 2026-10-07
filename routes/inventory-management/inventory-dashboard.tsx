@@ -1,4 +1,5 @@
 import { useTranslations } from "use-intl";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section-lazy";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useInventoryWidgets } from "@/hooks/use-dashboard-widgets";
 
@@ -7,7 +8,7 @@ const DATASET_TO_SUB_TILE: Record<string, string> = {
   "inventory.low-stock-count": "stockReplenishment",
   "inventory.stock-in-pending": "transaction",
   "inventory.stock-out-pending": "transaction",
-  "inventory.store-requisition-pending": "storeRequisition",
+  "document.sr-pending": "storeRequisition",
   "inventory.spot-check-pending": "spotCheck",
   "inventory.issue-open": "document",
   "inventory.stock-in-by-status": "transaction",
@@ -22,14 +23,22 @@ function subTileFor(datasetId: string): string {
 
 export default function InventoryDashboard() {
   const t = useTranslations("inventoryManagement.dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const query = useInventoryWidgets();
   return (
-    <DashboardWidgetGrid
-      title={t("title")}
-      description={t("description")}
-      moduleName="inventoryManagement"
-      subTileFor={subTileFor}
-      query={query}
-    />
+    <>
+      <DashboardWidgetGrid
+        title={t("title")}
+        description={t("description")}
+        moduleName="inventoryManagement"
+        subTileFor={subTileFor}
+        query={query}
+      />
+      <BuWidgetSection
+        className="px-3 pb-3"
+        module="inventory"
+        title={tBu("sectionModule")}
+      />
+    </>
   );
 }

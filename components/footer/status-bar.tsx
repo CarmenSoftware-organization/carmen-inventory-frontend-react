@@ -11,7 +11,12 @@ import { useServerTime } from "@/hooks/use-server-time";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 import { formatDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { APP_BUILD_TIME, APP_COMMIT, APP_VERSION } from "@/lib/version";
+import {
+  APP_BUILD_TIME,
+  APP_COMMIT,
+  APP_VERSION,
+  BUILD_TIME_FORMAT,
+} from "@/lib/version";
 
 // Lazy: changelog.json (ยาวขึ้นเรื่อย ๆ ~57 รายการ/release) ต้องไม่ค้างอยู่ใน
 // shared chunk ที่ทุกหน้าโหลด — loader ตัวนี้จะถูกเรียกก็ต่อเมื่อ dialog เปิด
@@ -242,7 +247,7 @@ export function StatusBar() {
                   <dd className="tabular-nums">{APP_COMMIT}</dd>
                   <dt className="text-muted-foreground">Built</dt>
                   <dd className="tabular-nums">
-                    {formatDate(APP_BUILD_TIME, dateTimeFormat)}
+                    {formatDate(APP_BUILD_TIME, BUILD_TIME_FORMAT)}
                   </dd>
                   {backend && (
                     <>
@@ -255,6 +260,16 @@ export function StatusBar() {
                 </dl>
               </TooltipContent>
             </Tooltip>
+            {/* เวลา build แสดงตรง ๆ (ไม่ต้องชี้ tooltip) เพราะเลขเวอร์ชันขึ้นทุก build
+                เวลาคือสิ่งที่บอกได้ทันทีว่าเครื่องนี้โหลดบิลด์ไหนอยู่ — ซ่อนต่ำกว่า sm เหตุผลเดียวกับ api */}
+            <span className="hidden items-center gap-1.5 sm:flex">
+              <span aria-hidden="true" className="opacity-50">
+                ·
+              </span>
+              <time dateTime={APP_BUILD_TIME} className="tabular-nums">
+                {formatDate(APP_BUILD_TIME, BUILD_TIME_FORMAT)}
+              </time>
+            </span>
             {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
                 และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
             {apiVersion && (

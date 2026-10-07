@@ -1,3 +1,11 @@
+# ช่องทางสำรองฉุกเฉินเท่านั้น (EMERGENCY FALLBACK ONLY)
+# การ deploy หลักใช้ Cloud Build: .cloudbuild/build.yaml + deploy.yaml (trigger อ่านจาก branch `prod`, deploy ต้อง Approve)
+# workflow นี้ใช้เฉพาะเมื่อ Cloud Build ใช้ไม่ได้ (เช่น free credit หมดแต่ GitHub Actions ยังเหลือ) — เข้า GCP ผ่าน
+# Workload Identity Federation (carmen-infra-gcp/iam.tf) ก่อนใช้ให้เทียบขั้นตอนกับ .cloudbuild/deploy.yaml ให้ตรงกัน และอ่าน
+# carmen-infra-gcp/docs/known-issues.md หัวข้อ "ช่องทางสำรอง: GitHub Actions + WIF"
+# Primary deploy path is Cloud Build (.cloudbuild/*.yaml). This workflow is an emergency fallback only — verify it against
+# .cloudbuild/deploy.yaml before relying on it.
+
 name: Deploy to GCP (Cloud Storage + CDN)
 
 on:
@@ -14,7 +22,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,9 +37,9 @@ jobs:
       - name: Authenticate to Google Cloud (Workload Identity Federation)
         uses: google-github-actions/auth@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -69,14 +76,13 @@ jobs:
           WS_URL: ${{ vars.WS_URL }}
           LICENSE_ENFORCEMENT: ${{ vars.LICENSE_ENFORCEMENT }}
           OTEL_ENABLED: ${{ vars.OTEL_ENABLED }}
+          OTEL_ENVIRONMENT: ${{ vars.OTEL_ENVIRONMENT }}
         run: |
           set -euo pipefail
 
-          # ค่า default เป็น false โดยตั้งใจ — ตัวแปรที่ยังไม่ได้ตั้งต้องได้พฤติกรรมที่ปลอดภัยที่สุด
-          # (ไม่บล็อกใคร) ไม่ใช่บังคับใช้โดยไม่มีใครสั่ง
-          # Defaults to false on purpose: an unset variable must land on the safe behaviour
-          # (block nobody), never on enforcing without anyone asking for it.
-          LICENSE_ENFORCEMENT="${LICENSE_ENFORCEMENT:-false}"
+          # default true ให้ตรง prod: ทุก environment เปิด LICENSE_ENFORCEMENT อยู่ และ Cloud Build ก็ default true
+          # Defaults to true to match prod and the Cloud Build trigger; set vars.LICENSE_ENFORCEMENT=false to opt out.
+          LICENSE_ENFORCEMENT="${LICENSE_ENFORCEMENT:-true}"
           case "$LICENSE_ENFORCEMENT" in
             true|false) ;;
             *)
@@ -93,6 +99,7 @@ jobs:
           #
           # เขียน false ลงไปแทนที่จะปล่อยให้คีย์หายไป เพราะ "ปิดเพราะตั้งใจ" กับ
           # "ปิดเพราะลืมเขียน" ให้ผลเหมือนกันทุกประการ แยกไม่ออกเวลามาอ่านทีหลัง
+          OTEL_ENVIRONMENT="${OTEL_ENVIRONMENT:-prod}"
           OTEL_ENABLED="${OTEL_ENABLED:-false}"
           case "$OTEL_ENABLED" in
             true|false) ;;
@@ -119,7 +126,8 @@ jobs:
             --arg ws_url "$WS_URL" \
             --argjson license_enforcement "$LICENSE_ENFORCEMENT" \
             --argjson otel_enabled "$OTEL_ENABLED" \
-            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: $otel_enabled}
+            --arg otel_environment "$OTEL_ENVIRONMENT" \
+            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: $otel_enabled, OTEL_ENVIRONMENT: $otel_environment}
              + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)' > /tmp/config.json
 
           echo "config.json ที่จะอัปโหลด (ไม่มีความลับในไฟล์นี้):"

@@ -1,11 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { APP_VERSION } from "@/lib/version";
+import { APP_RELEASE } from "@/lib/version";
 
-// เดี๋ยวนี้ useWhatsNew() ใช้ APP_VERSION (จาก package.json, ฉีดตอน build) แทน
-// CURRENT_VERSION ของ lib/changelog.ts สำหรับเช็ค "เห็น version นี้หรือยัง" —
-// ทั้งสองค่าเท่ากันเสมอเพราะ build:bump เขียนคู่กัน (ดู docblock ของ hook) mock
-// นี้จึงเหลือแค่ LATEST ที่ hook ยัง dynamic-import ตอน version เปลี่ยนจริง
+// useWhatsNew() เช็ค "เห็น version นี้หรือยัง" ด้วย APP_RELEASE (ฉีดตอน build จาก
+// changelog.json) ไม่ต้อง import lib/changelog.ts — mock นี้จึงเหลือแค่ LATEST
+// ที่ hook ยัง dynamic-import ตอน version เปลี่ยนจริง
 vi.mock("@/lib/changelog", () => ({
   LATEST: {
     changes: {
@@ -36,7 +35,7 @@ describe("useWhatsNew", () => {
     // จะทำอะไร (เคย regress มาแล้วตอน hook เปลี่ยนเป็น async)
     await act(async () => {});
     expect(result.current.shouldAutoOpen).toBe(false);
-    expect(localStorage.getItem(KEY)).toBe(APP_VERSION);
+    expect(localStorage.getItem(KEY)).toBe(APP_RELEASE);
   });
 
   it("auto-opens when stored version differs and there are changes", async () => {
@@ -47,7 +46,7 @@ describe("useWhatsNew", () => {
   });
 
   it("does not auto-open when stored version matches current", async () => {
-    localStorage.setItem(KEY, APP_VERSION);
+    localStorage.setItem(KEY, APP_RELEASE);
     const { result } = renderHook(() => useWhatsNew());
     // เหตุผลเดียวกับเคสแรก — ต้องรอ decision แบบ async ให้จบก่อน assert
     await act(async () => {});
@@ -59,7 +58,7 @@ describe("useWhatsNew", () => {
     const { result } = renderHook(() => useWhatsNew());
     await waitFor(() => expect(result.current.shouldAutoOpen).toBe(true));
     act(() => result.current.markSeen());
-    expect(localStorage.getItem(KEY)).toBe(APP_VERSION);
+    expect(localStorage.getItem(KEY)).toBe(APP_RELEASE);
     expect(result.current.shouldAutoOpen).toBe(false);
   });
 });
