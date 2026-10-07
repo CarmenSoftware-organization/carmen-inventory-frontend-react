@@ -22,11 +22,14 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  // ยอด ณ วันที่ขอ (PR Date) — key เดียวกับกล่อง on hand ในช่องสินค้า จึงยิงครั้งเดียว
+  const prDate = useWatch({ control, name: "pr_date" }) || undefined;
 
   const { data, isLoading } = useProductInventory(
     buCode,
     locationId,
     productId,
+    prDate,
   );
 
   if (!locationId || !productId) return null;
@@ -98,6 +101,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
         open={onHandOpen}
         onOpenChange={setOnHandOpen}
         productId={productId}
+        atDate={prDate}
       />
       <OnOrderDialog
         open={onOrderOpen}

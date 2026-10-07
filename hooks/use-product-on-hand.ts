@@ -30,11 +30,15 @@ export interface ProductOnHandResponse {
   locations: OnHandLocationRow[];
   transactions: unknown[];
   last_price?: LastPrice | null;
+  /** วันที่ของยอด (YYYY-MM-DD) มีเฉพาะเมื่อส่ง at_date */
+  as_of_date?: string;
 }
 
 export function useProductOnHand(
   productId: string | undefined,
   locationId?: string,
+  /** วันที่ของเอกสาร — on_hand_qty ของแต่ละคลังเป็นยอด ณ สิ้นวันนั้น */
+  atDate?: string,
 ) {
   const buCode = useBuCode();
 
@@ -44,11 +48,15 @@ export function useProductOnHand(
       buCode,
       productId,
       locationId ?? null,
+      atDate ?? null,
     ],
     queryFn: async () => {
       const url = buildUrl(
         API_ENDPOINTS.PRODUCT_ON_HAND(buCode!, productId!),
-        locationId ? { location_id: locationId } : {},
+        {
+          ...(locationId ? { location_id: locationId } : {}),
+          ...(atDate ? { at_date: atDate } : {}),
+        },
       );
       const res = await httpClient.get(url);
       if (!res.ok) throw new Error("Failed to fetch on-hand");

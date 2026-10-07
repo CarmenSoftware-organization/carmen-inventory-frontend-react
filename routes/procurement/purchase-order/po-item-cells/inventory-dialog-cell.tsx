@@ -25,6 +25,8 @@ export const PoInventoryDialog = memo(function PoInventoryDialog({
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
+  // on hand ณ วันที่สั่ง (Order Date) ไม่ใช่ยอดวันนี้ — ใบเก่าที่เปิดดูทีหลังจึงเห็นยอดที่ใช้ตอนสั่ง
+  const orderDate = useWatch({ control, name: "order_date" }) || undefined;
   const [onHandOpen, setOnHandOpen] = useState(false);
   const [onOrderOpen, setOnOrderOpen] = useState(false);
 
@@ -41,6 +43,7 @@ export const PoInventoryDialog = memo(function PoInventoryDialog({
         className={productId ? "text-primary" : "text-muted-foreground"}
         onOnHandClick={productId ? () => setOnHandOpen(true) : undefined}
         onOnOrderClick={productId ? () => setOnOrderOpen(true) : undefined}
+        atDate={orderDate}
       />
       {productId && (
         <>
@@ -48,6 +51,7 @@ export const PoInventoryDialog = memo(function PoInventoryDialog({
             open={onHandOpen}
             onOpenChange={setOnHandOpen}
             productId={productId}
+            atDate={orderDate}
           />
           <OnOrderDialog
             open={onOrderOpen}

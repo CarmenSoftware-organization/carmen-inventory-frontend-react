@@ -1000,6 +1000,7 @@
     "maxMonth": "Max {max}",
     "invalidJson": "{field} must be valid JSON",
     "dateOutsidePeriod": "Date must be within the current period",
+    "dateAfterToday": "Date cannot be later than today",
     "mustNotExceed": "{field} must not exceed {target}",
     "formIncomplete": "Please complete all required fields before confirming",
     "incompleteItems": "{count, plural, =1 {# item is} other {# items are}} still incomplete — jumped to the first field to fix.",
