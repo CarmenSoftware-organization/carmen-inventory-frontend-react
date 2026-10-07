@@ -321,7 +321,7 @@ export function usePrtItemTable({
                     // ลงฟอร์มเลย แถวที่เพิ่งเลือกคลังจึงว่างเปล่าจนกว่าจะโหลดใหม่
                     form.setValue(
                       `items.${row.index}.location_name`,
-                      location.name,
+                      location.name ?? "",
                     );
                     form.setValue(
                       `items.${row.index}.location_code`,

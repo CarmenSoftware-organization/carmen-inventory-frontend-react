@@ -102,11 +102,11 @@ export const LocationCell = memo(function LocationCell({
                     onItemChange={(location) => {
                       form.setValue(
                         `items.${index}.location_code`,
-                        location.code,
+                        location.code ?? "",
                       );
                       form.setValue(
                         `items.${index}.location_name`,
-                        location.name,
+                        location.name ?? "",
                       );
                       form.setValue(
                         `items.${index}.location_type`,
@@ -131,10 +131,7 @@ export const LocationCell = memo(function LocationCell({
                   />
                 </TooltipTrigger>
                 {hasLocation && (
-                  <TooltipContent
-                    side="top"
-                    className="max-w-[20rem]"
-                  >
+                  <TooltipContent side="top" className="max-w-[20rem]">
                     <div className="space-y-1">
                       <p className="text-foreground/60 text-micro font-semibold">
                         {locationCode}

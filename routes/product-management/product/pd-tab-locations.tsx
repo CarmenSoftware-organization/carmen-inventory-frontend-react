@@ -198,11 +198,11 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
                     form.setValue(`locations.${fieldIndex}.shelf_id`, null);
                     form.setValue(
                       `locations.${fieldIndex}.location_code`,
-                      loc.code,
+                      loc.code ?? "",
                     );
                     form.setValue(
                       `locations.${fieldIndex}.location_name`,
-                      loc.name,
+                      loc.name ?? "",
                     );
                     form.setValue(
                       `locations.${fieldIndex}.location_type`,
@@ -210,7 +210,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
                     );
                     form.setValue(
                       `locations.${fieldIndex}.is_active`,
-                      loc.is_active,
+                      loc.status === "active",
                     );
                     form.setValue(
                       `locations.${fieldIndex}.delivery_point`,

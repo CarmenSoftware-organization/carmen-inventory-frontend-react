@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChevronsUpDown, CircleAlert, Warehouse } from "lucide-react";
-import { useUserLocation } from "@/hooks/use-user-location";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Location } from "@/types/location";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupCodeName, type LocationLookup } from "@/types/lookup";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { Badge } from "@/components/ui/badge";
 import { LocationTypeLabel } from "@/components/share/location-type-label";
@@ -17,7 +13,7 @@ import { LookupCombobox } from "./lookup-combobox";
 interface LookupUserLocationProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (location: Location) => void;
+  readonly onItemChange?: (location: LocationLookup) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -120,16 +116,6 @@ function LookupUserLocationInner({
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
 
-  // location_type|enum: ต้องอยู่ท้ายสุด — ค่า enum คั่นด้วย `,` เหมือนตัวคั่นเงื่อนไข
-  const serverFilter = [
-    ACTIVE_ONLY_FILTER,
-    locationTypes?.length
-      ? `location_type|enum:${locationTypes.join(",")}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(",");
-
   const {
     items: locations,
     selectedItems,
@@ -137,10 +123,11 @@ function LookupUserLocationInner({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Location>({
-    useListHook: useUserLocation,
+  } = useLookupResource<LocationLookup>("location", {
     search,
-    serverFilter,
+    // คลังที่ assign ให้ user (การ assign ที่ถูกถอนแล้วไม่นับ — /user-locations เดิมนับ)
+    scope: "mine",
+    serverFilter: { location_type: locationTypes },
     selectedIds: value ? [value] : [],
     filter: excludeIds ? (l) => !excludeIds.has(l.id) : undefined,
   });
@@ -156,7 +143,7 @@ function LookupUserLocationInner({
       items={locations}
       selectedItems={selectedItems}
       getId={(l) => l.id}
-      getLabel={(l) => `${l.code} — ${l.name}`}
+      getLabel={lookupCodeName}
       serverSideSearch
       onSearchChange={setSearch}
       onLoadMore={loadMore}
