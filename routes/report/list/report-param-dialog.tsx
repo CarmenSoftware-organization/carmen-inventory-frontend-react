@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
   Dialog,
@@ -86,6 +86,17 @@ function resolveDateKeyword(value: string, periods?: ReportPeriodMap): string {
   }
 }
 
+/**
+ * ช่องเลือกที่ดึงข้อมูลจากที่อื่นใช้ดึงรายการใหม่ตอนผู้ใช้กดเปิด
+ *
+ * dialog ดึงรายการรอบแรกตอนเปิดอยู่แล้ว แต่ถ้าเปิด dialog ค้างไว้แล้วมีคนเพิ่มสินค้า/คลัง
+ * กดช่องเลือกกี่ครั้งก็ยังเห็นรายการเดิม — กดเปิดช่องจึงดึงใหม่ทุกครั้ง
+ */
+const LookupRefreshContext = createContext<{
+  readonly refresh: () => void;
+  readonly isFetching: boolean;
+}>({ refresh: () => {}, isFetching: false });
+
 interface LookupControlProps {
   readonly node: LookupNode;
   readonly id: string;
@@ -104,12 +115,20 @@ function SearchableLookupControl({
   readonly id: string;
 }) {
   const [value, setValue] = useState(options[0].value);
+  const { refresh, isFetching } = useContext(LookupRefreshContext);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <input type="hidden" name={id} value={value} readOnly />
       <LookupCombobox<LookupOption>
         value={value}
         onValueChange={(v) => setValue(v)}
+        // กดเปิด = ดึงรายการใหม่ · โชว์ skeleton จนของใหม่มาถึง ไม่ให้เลือกจากรายการเก่า
+        onOpenChange={(o) => {
+          setIsOpen(o);
+          if (o) refresh();
+        }}
+        isLoading={isOpen && isFetching}
         items={options}
         getId={(o) => o.value}
         getLabel={(o) => o.label}
@@ -350,7 +369,11 @@ export function ReportParamDialog({
 
   // dialog นี้ mount ค้างไว้ตลอด — ผูก enabled กับ open ให้ทุกครั้งที่เปิดดึงรายการใหม่
   // (สินค้า/คลังที่คนอื่นเพิ่งเพิ่มต้องขึ้นโดยไม่ต้อง refresh หน้า)
-  const { data: lookupResult } = useReportListLookups({
+  const {
+    data: lookupResult,
+    refetch: refetchLookups,
+    isFetching: isFetchingLookups,
+  } = useReportListLookups({
     sources,
     includePeriods,
     enabled: open,
@@ -414,32 +437,39 @@ export function ReportParamDialog({
           <DialogTitle className="text-sm">{report.ReportName}</DialogTitle>
         </DialogHeader>
 
-        <form ref={formRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
-          {enrichedFields.length === 0 ? (
-            <p className="text-muted-foreground text-xs">
-              {t("noFiltersConfigured")}
-            </p>
-          ) : (
-            <FieldGroup className="gap-3">
-              {enrichedFields.map((field) => {
-                const key =
-                  field.kind === "range"
-                    ? `${field.from.name}-${field.to.name}`
-                    : field.control.name;
-                const label =
-                  field.kind === "range"
-                    ? field.label.replace(/ From$/, "")
-                    : field.label;
-                return (
-                  <Field key={key}>
-                    <FieldLabel className="text-xs">{label}</FieldLabel>
-                    <FieldControl field={field} periods={periods} />
-                  </Field>
-                );
-              })}
-            </FieldGroup>
-          )}
-        </form>
+        <LookupRefreshContext.Provider
+          value={{
+            refresh: () => void refetchLookups(),
+            isFetching: isFetchingLookups,
+          }}
+        >
+          <form ref={formRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
+            {enrichedFields.length === 0 ? (
+              <p className="text-muted-foreground text-xs">
+                {t("noFiltersConfigured")}
+              </p>
+            ) : (
+              <FieldGroup className="gap-3">
+                {enrichedFields.map((field) => {
+                  const key =
+                    field.kind === "range"
+                      ? `${field.from.name}-${field.to.name}`
+                      : field.control.name;
+                  const label =
+                    field.kind === "range"
+                      ? field.label.replace(/ From$/, "")
+                      : field.label;
+                  return (
+                    <Field key={key}>
+                      <FieldLabel className="text-xs">{label}</FieldLabel>
+                      <FieldControl field={field} periods={periods} />
+                    </Field>
+                  );
+                })}
+              </FieldGroup>
+            )}
+          </form>
+        </LookupRefreshContext.Provider>
 
         <DialogFooter className="shrink-0 pt-1">
           <Button
