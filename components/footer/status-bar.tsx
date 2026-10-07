@@ -56,19 +56,6 @@ function formatPeriodLabel(period: {
 }
 
 /**
- * ตัดเวอร์ชัน backend ให้เหลือแค่ส่วน semver สำหรับแสดงบนแถบ
- *
- * ของจริงยาวแบบ `3.0.0-build.20260918.808270486` ซึ่งกินแถบทั้งแถบ —
- * ส่วนที่ตัดทิ้งไม่ได้หายไปไหน ยังอยู่ครบใน tooltip
- *
- * @param version - เวอร์ชันเต็มจาก `GET /version`
- * @returns เฉพาะส่วนหน้าเครื่องหมาย `-` ตัวแรก
- */
-function toSemverPrefix(version: string): string {
-  return version.split("-")[0];
-}
-
-/**
  * Footer status bar
  *
  * Render `<footer role="contentinfo">` สูง h-6 แบ่งเป็นสองกลุ่มตามชนิดของข้อมูล
@@ -138,7 +125,6 @@ export function StatusBar() {
     ? formatDate(now.toISOString(), dateTimeFormat)
     : "";
   const periodLabel = currentPeriod ? formatPeriodLabel(currentPeriod) : null;
-  const apiVersion = backend ? toSemverPrefix(backend.version) : null;
 
   const handleOpenChange = (next: boolean) => {
     setManualOpen(next);
@@ -236,7 +222,10 @@ export function StatusBar() {
                   className="hover:text-foreground flex items-center gap-1.5 transition-colors"
                 >
                   <Tag aria-hidden="true" className="h-3 w-3" />
-                  <span>v{APP_VERSION}</span>
+                  <span className="font-mono tabular-nums">
+                    <span className="opacity-70">App</span> v{APP_VERSION}
+                    <span className="ml-2">{APP_COMMIT}</span>
+                  </span>
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top" align="end">
@@ -260,24 +249,17 @@ export function StatusBar() {
                 </dl>
               </TooltipContent>
             </Tooltip>
-            {/* เวลา build แสดงตรง ๆ (ไม่ต้องชี้ tooltip) เพราะเลขเวอร์ชันขึ้นทุก build
-                เวลาคือสิ่งที่บอกได้ทันทีว่าเครื่องนี้โหลดบิลด์ไหนอยู่ — ซ่อนต่ำกว่า sm เหตุผลเดียวกับ api */}
-            <span className="hidden items-center gap-1.5 sm:flex">
-              <span aria-hidden="true" className="opacity-50">
-                ·
-              </span>
-              <time dateTime={APP_BUILD_TIME} className="tabular-nums">
-                {formatDate(APP_BUILD_TIME, BUILD_TIME_FORMAT)}
-              </time>
-            </span>
-            {/* ซ่อนต่ำกว่า sm: แถบ 24px บนจอ 375px รับไม่ไหวทั้งสองเวอร์ชัน
-                และเวอร์ชัน backend เป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
-            {apiVersion && (
-              <span className="hidden items-center gap-1.5 sm:flex">
+            {/* รูปแบบเดียวกับ `AppVersionLabel` ของหน้า auth: `App v… <commit> · API v<เต็ม>`
+                เวลา build อยู่ใน tooltip — ซ่อน API ต่ำกว่า md: สตริงเต็มยาว ~35 ตัว
+                แถบ 24px บนจอแคบรับไม่ไหว และเป็นของที่ใช้ตอนแจ้งปัญหา ไม่ใช่ตอนทำงาน */}
+            {backend && (
+              <span className="hidden items-center gap-1.5 md:flex">
                 <span aria-hidden="true" className="opacity-50">
                   ·
                 </span>
-                <span className="tabular-nums">api {apiVersion}</span>
+                <span className="font-mono tabular-nums">
+                  <span className="opacity-70">API</span> v{backend.version}
+                </span>
               </span>
             )}
           </div>

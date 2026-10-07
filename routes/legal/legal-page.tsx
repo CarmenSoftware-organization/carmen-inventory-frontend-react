@@ -1,3 +1,4 @@
+import { AppVersionLabel } from "@/components/app-version-label";
 import { Link } from "react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
@@ -74,6 +75,8 @@ export function LegalPage({
           <LegalFooter document={document} crossTo={crossTo} />
         </article>
       </main>
+
+      <AppVersionLabel className="px-6 pb-6" />
     </div>
   );
 }
