@@ -60,3 +60,11 @@ export function getLocalItem<T>(key: string): T | undefined {
 export function setLocalItem<T>(key: string, value: T): void {
   setItem("local", key, value);
 }
+
+export function removeLocalItem(key: string): void {
+  try {
+    getStore("local")?.removeItem(key);
+  } catch {
+    // blocked storage — ignore
+  }
+}

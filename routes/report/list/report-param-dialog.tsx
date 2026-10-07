@@ -30,6 +30,13 @@ import {
   type FormField,
   type LookupNode,
 } from "./parse-report-dialog";
+import {
+  forgetReportParams,
+  loadReportParams,
+  reportParamKey,
+  saveReportParams,
+  type RememberedReportParams,
+} from "./report-param-memory";
 
 interface ReportParamDialogProps {
   readonly open: boolean;
@@ -100,6 +107,29 @@ const LookupRefreshContext = createContext<{
   readonly isFetching: boolean;
 }>({ refresh: () => {}, isFetching: false });
 
+/**
+ * ค่าที่กดเรียกดูครั้งล่าสุด (ภายใน 30 นาที) — control ใช้เป็นค่าตั้งต้นแทนค่าของรายงาน
+ * ดู `report-param-memory.ts`
+ */
+const RememberedParamsContext = createContext<
+  RememberedReportParams | undefined
+>(undefined);
+
+/**
+ * ค่าที่จำไว้ของ control นี้ ถ้ายังเป็นตัวเลือกที่มีอยู่ — ตัวเลือกที่หายไปแล้ว
+ * (เช่นงวดที่ถูกลบ) กลับไปใช้ค่าตั้งต้น
+ */
+function pickRemembered(
+  remembered: RememberedReportParams | undefined,
+  name: string,
+  options: readonly { value: string }[],
+): string | undefined {
+  const value = remembered?.values[name];
+  return value !== undefined && options.some((o) => o.value === value)
+    ? value
+    : undefined;
+}
+
 interface LookupControlProps {
   readonly node: LookupNode;
   readonly id: string;
@@ -124,7 +154,17 @@ function SearchableLookupControl({
   readonly id: string;
   readonly dataSource: string;
 }) {
-  const [value, setValue] = useState(options[0].value);
+  const remembered = useContext(RememberedParamsContext);
+  // ค่าที่จำไว้อาจมาจากการค้นฝั่ง server ซึ่งไม่อยู่ในรายการตั้งต้น — ใช้ป้ายที่จำไว้แสดงบนปุ่ม
+  const rememberedValue = remembered?.values[id];
+  const initialValue = rememberedValue || options[0].value;
+  const [value, setValue] = useState(initialValue);
+  const [label, setLabel] = useState(
+    () =>
+      options.find((o) => o.value === initialValue)?.label ??
+      remembered?.labels[id] ??
+      "",
+  );
   const { refresh, isFetching } = useContext(LookupRefreshContext);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -146,10 +186,22 @@ function SearchableLookupControl({
 
   return (
     <>
-      <input type="hidden" name={id} value={value} readOnly />
+      <input
+        type="hidden"
+        name={id}
+        value={value}
+        data-label={label}
+        readOnly
+      />
       <LookupCombobox<LookupOption>
         value={value}
-        onValueChange={(v) => setValue(v)}
+        onValueChange={(v, item) => {
+          setValue(v);
+          setLabel(
+            item?.label ?? options.find((o) => o.value === v)?.label ?? "",
+          );
+        }}
+        defaultLabel={label}
         // กดเปิด = ดึงรายการใหม่ · โชว์ skeleton จนของใหม่มาถึง ไม่ให้เลือกจากรายการเก่า
         onOpenChange={(o) => {
           setIsOpen(o);
@@ -182,6 +234,7 @@ function SearchableLookupControl({
 
 function LookupControl({ node, id }: LookupControlProps) {
   const tc = useTranslations("common");
+  const remembered = useContext(RememberedParamsContext);
   const options: LookupOption[] = node.items
     .map((item, idx) => ({
       value: node.values[idx] || item,
@@ -204,7 +257,13 @@ function LookupControl({ node, id }: LookupControlProps) {
 
   if (options.length > 0) {
     return (
-      <FieldSelect name={id} defaultValue={options[0].value} className="h-8">
+      <FieldSelect
+        name={id}
+        defaultValue={
+          pickRemembered(remembered, id, options) ?? options[0].value
+        }
+        className="h-8"
+      >
         <SelectContent className="max-h-[min(60vh,400px)]" position="popper">
           {options.map((o) => (
             <SelectItem key={o.value} value={o.value}>
@@ -231,12 +290,17 @@ function MultiLookupControl({
   readonly id: string;
 }) {
   const tc = useTranslations("common");
+  const remembered = useContext(RememberedParamsContext);
   const options = node.items
     .map((item, idx) => ({ item, value: node.values[idx] || item }))
     .filter((o) => o.value !== "");
   // empty selection = no filter (all). Submitted as a comma-joined string;
   // micro-data splits it into an IN (...) predicate.
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() =>
+    (remembered?.values[id] ?? "")
+      .split(",")
+      .filter((v) => options.some((o) => o.value === v)),
+  );
   const toggle = (value: string, checked: boolean) =>
     setSelected((prev) =>
       checked ? [...prev, value] : prev.filter((v) => v !== value),
@@ -268,7 +332,12 @@ interface DateControlProps {
 }
 
 function DateControl({ node, periods }: DateControlProps) {
-  const initial = resolveDateKeyword(node.value, periods);
+  const remembered = useContext(RememberedParamsContext)?.values;
+  // ค่าว่างที่จำไว้ก็คือค่าที่ผู้ใช้ตั้งใจล้าง (ช่องวันที่ที่ไม่บังคับ) — ใช้ตามนั้น
+  const initial =
+    remembered && node.name in remembered
+      ? remembered[node.name]
+      : resolveDateKeyword(node.value, periods);
   // key={initial}: periods มาจาก query async — render แรก periods ว่าง ทำให้ field
   // ที่ใช้ @current_period/@previous_period ได้ initial = "" เมื่อ periods โหลดเสร็จ
   // initial เปลี่ยน → remount ด้วยค่าใหม่ (เกิดครั้งเดียวก่อนผู้ใช้แก้ เพราะ periods
@@ -388,11 +457,28 @@ export function ReportParamDialog({
   open,
   onOpenChange,
   report,
+  buCode,
   onRun,
 }: ReportParamDialogProps) {
   const tc = useTranslations("common");
   const t = useTranslations("report");
   const formRef = useRef<HTMLFormElement>(null);
+  // เปลี่ยน key ของ form = remount ทุก control ให้กลับไปอ่านค่าตั้งต้นใหม่ (ปุ่มค่าเริ่มต้น)
+  const [formKey, setFormKey] = useState(0);
+
+  const memoryKey = report
+    ? reportParamKey(buCode ?? "", report._templateId ?? String(report.Id))
+    : undefined;
+  // อ่าน localStorage ครั้งเดียวตอนเปิด (หรือเปลี่ยนรายงาน) แล้วถือไว้ใน state — control ใช้แค่ใน
+  // useState ตั้งต้น การแก้ระหว่างเปิดจึงไม่ถูกทับ และปุ่มค่าเริ่มต้นล้างได้จริง (ถ้าคำนวณสดทุก render
+  // React Compiler จะ memo ผลไว้ตาม open/memoryKey แล้วค่าที่ลบไปแล้วจะกลับมา)
+  const openKey = open && memoryKey ? memoryKey : null;
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
+  const [remembered, setRemembered] = useState<RememberedReportParams>();
+  if (openKey !== loadedFor) {
+    setLoadedFor(openKey);
+    setRemembered(openKey ? loadReportParams(openKey) : undefined);
+  }
 
   const dialogXml = report?.Dialog;
   const fields: FormField[] =
@@ -454,12 +540,19 @@ export function ReportParamDialog({
     if (!report || !onRun) return;
 
     const filters: Record<string, string> = {};
+    const labels: Record<string, string> = {};
     if (formRef.current) {
       const formData = new FormData(formRef.current);
       for (const [key, value] of formData.entries()) {
         filters[key] = value.toString();
       }
+      for (const input of formRef.current.querySelectorAll<HTMLInputElement>(
+        "input[data-label]",
+      )) {
+        if (input.dataset.label) labels[input.name] = input.dataset.label;
+      }
     }
+    if (memoryKey) saveReportParams(memoryKey, { values: filters, labels });
 
     onRun(report, filters);
   };
@@ -471,6 +564,11 @@ export function ReportParamDialog({
       <DialogContent className="flex max-h-[90dvh] flex-col gap-3 p-4">
         <DialogHeader className="shrink-0 gap-0 pb-1">
           <DialogTitle className="text-sm">{report.ReportName}</DialogTitle>
+          {remembered && (
+            <p className="text-muted-foreground text-xs">
+              {t("rememberedParams")}
+            </p>
+          )}
         </DialogHeader>
 
         <LookupRefreshContext.Provider
@@ -479,35 +577,56 @@ export function ReportParamDialog({
             isFetching: isFetchingLookups,
           }}
         >
-          <form ref={formRef} className="min-h-0 flex-1 overflow-y-auto pr-1">
-            {enrichedFields.length === 0 ? (
-              <p className="text-muted-foreground text-xs">
-                {t("noFiltersConfigured")}
-              </p>
-            ) : (
-              <FieldGroup className="gap-3">
-                {enrichedFields.map((field) => {
-                  const key =
-                    field.kind === "range"
-                      ? `${field.from.name}-${field.to.name}`
-                      : field.control.name;
-                  const label =
-                    field.kind === "range"
-                      ? field.label.replace(/ From$/, "")
-                      : field.label;
-                  return (
-                    <Field key={key}>
-                      <FieldLabel className="text-xs">{label}</FieldLabel>
-                      <FieldControl field={field} periods={periods} />
-                    </Field>
-                  );
-                })}
-              </FieldGroup>
-            )}
-          </form>
+          <RememberedParamsContext.Provider value={remembered}>
+            <form
+              key={formKey}
+              ref={formRef}
+              className="min-h-0 flex-1 overflow-y-auto pr-1"
+            >
+              {enrichedFields.length === 0 ? (
+                <p className="text-muted-foreground text-xs">
+                  {t("noFiltersConfigured")}
+                </p>
+              ) : (
+                <FieldGroup className="gap-3">
+                  {enrichedFields.map((field) => {
+                    const key =
+                      field.kind === "range"
+                        ? `${field.from.name}-${field.to.name}`
+                        : field.control.name;
+                    const label =
+                      field.kind === "range"
+                        ? field.label.replace(/ From$/, "")
+                        : field.label;
+                    return (
+                      <Field key={key}>
+                        <FieldLabel className="text-xs">{label}</FieldLabel>
+                        <FieldControl field={field} periods={periods} />
+                      </Field>
+                    );
+                  })}
+                </FieldGroup>
+              )}
+            </form>
+          </RememberedParamsContext.Provider>
         </LookupRefreshContext.Provider>
 
         <DialogFooter className="shrink-0 pt-1">
+          {remembered && memoryKey && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="sm:mr-auto"
+              onClick={() => {
+                forgetReportParams(memoryKey);
+                setRemembered(undefined);
+                setFormKey((k) => k + 1);
+              }}
+            >
+              {t("resetParams")}
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"

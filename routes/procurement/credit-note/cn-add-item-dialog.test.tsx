@@ -105,7 +105,10 @@ describe("error messages for the codes the credit note, SR issue and RFP flows n
     ["CREDIT_NOTE_TAX_EXCEEDS_GRN", { line: 1, product: "A", amount: 9, allowed: 4.5 }],
     ["CREDIT_NOTE_DATE_NOT_CURRENT_PERIOD", { period: "2607", start: "2026-07-01", end: "2026-07-31" }],
     ["SR_ISSUE_PERIOD_NOT_CURRENT", { period: "2608", current: "2607" }],
-    ["SR_ISSUE_INSUFFICIENT_STOCK", { product: "Sugar", location: "Main Store", on_hand: 2, requested: 3 }],
+    ["SR_ISSUE_INSUFFICIENT_STOCK", { product: "Sugar", location: "Main Store", on_hand: 2, requested: 3, date: "2026-07-28", short_on: "2026-07-31" }],
+    ["STOCK_OUT_INSUFFICIENT_STOCK", { product: "Sugar", location: "Main Store", on_hand: 2, requested: 3, date: "2026-07-28", short_on: "2026-07-31" }],
+    ["CREDIT_NOTE_INSUFFICIENT_STOCK", { product: "Sugar", location: "Main Store", on_hand: 2, requested: 3, date: "2026-07-28", short_on: "2026-07-31" }],
+    ["STOCK_IN_VOID_INSUFFICIENT_STOCK", { product: "Sugar", location: "Main Store", on_hand: 2, requested: 3, date: "2026-07-28", short_on: "2026-07-31" }],
   ];
 
   it.each(cases)("%s renders every param in both languages", (code, params) => {

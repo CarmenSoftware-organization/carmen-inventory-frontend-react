@@ -950,7 +950,10 @@
       "CREDIT_NOTE_NO_OPEN_PERIOD": "ไม่มีงวดสินค้าคงคลังที่เปิดอยู่ จึงบันทึกใบลดหนี้ไม่ได้",
       "SR_ISSUE_PERIOD_NOT_CURRENT": "ใบเบิกลงวันที่ในงวด {period} แต่งวดปัจจุบันคือ {current} ต้องปิดงวด {current} ก่อนจึงจะจ่ายของได้",
       "SR_ISSUE_NOTHING_ISSUED": "ยังไม่ได้กรอกจำนวนจ่ายเลยสักบรรทัด กรอกจำนวนที่จ่าย หรือปฏิเสธใบเบิกถ้าจ่ายไม่ได้",
-      "SR_ISSUE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอจ่าย: คงเหลือ {on_hand} จะจ่าย {requested}",
+      "SR_ISSUE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอจ่าย ณ วันที่ {date}: จ่ายได้ {on_hand} จะจ่าย {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "STOCK_OUT_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอ ณ วันที่ {date}: ตัดออกได้ {on_hand} ต้องการ {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "CREDIT_NOTE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอคืน ณ วันที่ {date}: คืนได้ {on_hand} จะคืน {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "STOCK_IN_VOID_INSUFFICIENT_STOCK": "ยกเลิกใบรับเข้านี้ไม่ได้: {product} ที่ {location} เหลือตั้งแต่วันที่ {date} เพียง {on_hand} (ต่ำสุดวันที่ {short_on}) ไม่พอดึงคืน {requested} ที่รับเข้ามา",
       "SR_ISSUED_QTY_EXCEEDS_APPROVED": "จำนวนที่จ่ายต้องไม่เกินจำนวนที่อนุมัติ (จ่าย > อนุมัติ): {lines} ลดจำนวนที่จ่ายแล้วลองอีกครั้ง",
       "GRN_VOIDED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกยกเลิกแล้ว จึงแก้ไขไม่ได้",
       "GRN_AP_LINKED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกดึงไปที่ AP Invoice {doc_nos} แล้ว จึงแก้ไขไม่ได้",
@@ -4649,6 +4652,8 @@
     "loading": "กำลังโหลด…",
     "runReport": "เรียกดูรายงาน",
     "noFiltersConfigured": "รายงานนี้ไม่มีตัวกรอง",
+    "rememberedParams": "ใส่ค่าที่เรียกดูล่าสุดไว้ให้แล้ว (จำไว้ 30 นาที)",
+    "resetParams": "ใช้ค่าเริ่มต้น",
     "openFilters": "เปิดตัวกรอง"
   },
   "reportSchedule": {

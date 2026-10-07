@@ -6,6 +6,7 @@ import { IntlProvider } from "use-intl";
 import en from "@/messages/en.json";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import type { Report } from "@/types/report";
+import { reportParamKey, saveReportParams } from "./report-param-memory";
 
 /**
  * กดเปิดช่องเลือกที่ดึงข้อมูลจากที่อื่น ต้องดึงรายการใหม่ทุกครั้ง
@@ -112,5 +113,117 @@ describe("ReportParamDialog server-side search", () => {
     expect(
       await screen.findByText("55000209 - Dead Mouth Wrench"),
     ).toBeInTheDocument();
+  });
+});
+
+// ผู้ใช้เปิดรายงานเดิมซ้ำเพื่อเทียบผล — ค่าที่กดเรียกดูล่าสุด (ภายใน 30 นาที) ต้องถูกเติมไว้ให้
+describe("ReportParamDialog remembers the last run", () => {
+  const templated = { ...report, _templateId: "tpl-stock-card" } as Report;
+  const memoryKey = reportParamKey("BU1", "tpl-stock-card");
+
+  function renderWith(onRun = vi.fn()) {
+    const qc = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={qc}>
+        <IntlProvider locale="en" messages={en}>
+          <ReportParamDialog
+            open
+            onOpenChange={() => {}}
+            report={templated}
+            buCode="BU1"
+            onRun={onRun}
+          />
+        </IntlProvider>
+      </QueryClientProvider>,
+    );
+    return onRun;
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => lookupResponse()),
+    );
+  });
+
+  it("fills in the last run, and runs with it", async () => {
+    saveReportParams(memoryKey, {
+      values: { Product: "P1" },
+      labels: { Product: "P1 - Product 1" },
+    });
+    const onRun = renderWith();
+    const user = userEvent.setup();
+
+    expect(
+      await screen.findByRole("button", { name: "P1 - Product 1" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(en.report.rememberedParams)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: en.report.runReport }));
+    expect(onRun).toHaveBeenCalledWith(templated, { Product: "P1" });
+  });
+
+  // ตัวเลือกที่ได้จากการค้นฝั่ง server ไม่อยู่ในรายการตั้งต้น — ปุ่มต้องโชว์ป้ายที่จำไว้ ไม่ใช่ว่าง
+  it("shows the remembered label for a value found by searching", async () => {
+    saveReportParams(memoryKey, {
+      values: { Product: "55000209" },
+      labels: { Product: "55000209 - Dead Mouth Wrench" },
+    });
+    renderWith();
+
+    expect(
+      await screen.findByRole("button", {
+        name: "55000209 - Dead Mouth Wrench",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("starts from the report defaults once 30 minutes have passed", async () => {
+    saveReportParams(
+      memoryKey,
+      { values: { Product: "P1" }, labels: { Product: "P1 - Product 1" } },
+      Date.now() - 31 * 60_000,
+    );
+    renderWith();
+
+    expect(
+      await screen.findByRole("button", { name: "All" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(en.report.rememberedParams)).toBeNull();
+  });
+
+  it("the reset button goes back to the defaults and forgets the last run", async () => {
+    saveReportParams(memoryKey, {
+      values: { Product: "P1" },
+      labels: { Product: "P1 - Product 1" },
+    });
+    renderWith();
+    const user = userEvent.setup();
+    await screen.findByRole("button", { name: "P1 - Product 1" });
+
+    await user.click(
+      screen.getByRole("button", { name: en.report.resetParams }),
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "All" }),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem(memoryKey)).toBeNull();
+  });
+
+  it("remembers what was run, labels included", async () => {
+    renderWith();
+    const user = userEvent.setup();
+    await screen.findByRole("button", { name: "All" });
+
+    await user.click(screen.getByRole("button", { name: en.report.runReport }));
+
+    const stored = JSON.parse(localStorage.getItem(memoryKey) ?? "{}");
+    expect(stored.values).toEqual({ Product: "ALL" });
+    expect(stored.labels).toEqual({ Product: "All" });
+    expect(typeof stored.savedAt).toBe("number");
   });
 });
