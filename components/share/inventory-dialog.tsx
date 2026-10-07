@@ -31,6 +31,11 @@ interface InventoryDialogProps {
   readonly className?: string;
   readonly onOnHandClick?: () => void;
   readonly onOnOrderClick?: () => void;
+  /**
+   * วันที่ของเอกสาร (ใบจ่ายออก) — ยอดคงเหลือเป็นยอด ณ สิ้นวันนั้น และโชว์ "ตัดได้" ถ้าไม่เท่ายอดคงเหลือ
+   * (เอกสารที่ลงวันที่หลังกว่านับของบางส่วนไว้แล้ว) ไม่ส่ง = ยอดทั้งงวดแบบเดิม
+   */
+  readonly atDate?: string;
 }
 
 function InventoryStat({
@@ -94,6 +99,7 @@ export const InventoryDialog = memo(function InventoryDialog({
   className,
   onOnHandClick,
   onOnOrderClick,
+  atDate,
 }: InventoryDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
 
@@ -101,6 +107,7 @@ export const InventoryDialog = memo(function InventoryDialog({
     buCode || undefined,
     locationId || undefined,
     productId || undefined,
+    atDate || undefined,
   );
 
   const {
@@ -109,7 +116,11 @@ export const InventoryDialog = memo(function InventoryDialog({
     re_order_qty = 0,
     re_stock_qty = 0,
     last_price,
+    available_qty,
+    as_of_date,
   } = data ?? {};
+  const showAvailable =
+    available_qty !== undefined && available_qty !== on_hand_qty;
   const pct =
     re_stock_qty > 0
       ? Math.min(Math.round((on_hand_qty / re_stock_qty) * 1000) / 10, 100)
@@ -149,9 +160,7 @@ export const InventoryDialog = memo(function InventoryDialog({
         </TooltipTrigger>
         <TooltipContent>{t("inventoryInfo")}</TooltipContent>
       </Tooltip>
-      <DialogContent
-        className={hasProduct ? "sm:max-w-lg" : "sm:max-w-sm"}
-      >
+      <DialogContent className={hasProduct ? "sm:max-w-lg" : "sm:max-w-sm"}>
         <DialogHeader>
           <DialogTitle>{t("inventoryInfo")}</DialogTitle>
           {/* ยอดพวกนี้เป็นของสินค้าตัวไหน — กล่องเปิดจากไอคอนเล็ก ๆ ในแถว พอเปิด
@@ -161,6 +170,11 @@ export const InventoryDialog = memo(function InventoryDialog({
               primary={productName}
               secondary={productLocalName}
             />
+          )}
+          {hasProduct && as_of_date && (
+            <p className="text-muted-foreground text-micro">
+              {t("asOfDate", { date: as_of_date })}
+            </p>
           )}
         </DialogHeader>
         {!hasProduct && (
@@ -196,7 +210,20 @@ export const InventoryDialog = memo(function InventoryDialog({
                 unitName={unitName}
                 muted
               />
+              {showAvailable && (
+                <InventoryStat
+                  label={t("availableToIssue")}
+                  value={available_qty}
+                  unitName={unitName}
+                  alert
+                />
+              )}
             </div>
+            {showAvailable && (
+              <p className="text-muted-foreground text-micro">
+                {t("availableToIssueHint")}
+              </p>
+            )}
 
             <Progress
               value={pct}

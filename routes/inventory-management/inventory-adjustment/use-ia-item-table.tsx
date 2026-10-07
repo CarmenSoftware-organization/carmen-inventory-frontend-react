@@ -21,6 +21,7 @@ import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
 import { useProductCostByLocationQty } from "@/hooks/use-product-cost";
+import { useProductInventory } from "@/hooks/use-product-inventory";
 import { cn } from "@/lib/utils";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
@@ -28,12 +29,16 @@ import type { AdjFormValues } from "./ia-form-schema";
 const ProductInventoryDialog = memo(function ProductInventoryDialog({
   control,
   index,
+  isStockOut = false,
 }: {
   control: Control<AdjFormValues>;
   index: number;
+  /** ใบจ่ายออก — ดูยอด ณ วันที่ของใบ ไม่ใช่ยอดทั้งงวด */
+  isStockOut?: boolean;
 }) {
   "use no memo";
   const { buCode } = useProfile();
+  const docDate = useWatch({ control, name: "date" }) ?? "";
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
@@ -48,7 +53,51 @@ const ProductInventoryDialog = memo(function ProductInventoryDialog({
       productId={productId}
       productName={productName}
       productLocalName={productLocalName}
+      atDate={isStockOut ? docDate : undefined}
     />
+  );
+});
+
+/**
+ * ใบจ่ายออก: เตือนทันทีที่กรอกจำนวนเกินยอดที่ตัดได้ ณ วันที่ของใบ
+ *
+ * ใช้ query เดียวกับหน้าต่างดูสต๊อกของแถวนั้น (inventory-info?at_date — key ตรงกัน) จึงไม่ยิงเพิ่ม
+ * เทียบกับ available_qty ไม่ใช่ on_hand_qty: ของที่รับเข้าหลังวันที่ของใบไม่นับ และเอกสารที่ลงวันที่หลังกว่า
+ * อาจนับของก้อนนี้ไว้แล้ว หลังบ้านปฏิเสธตอนบันทึกอยู่แล้ว ตรงนี้แค่บอกให้รู้ก่อนกด
+ */
+const QtyOnDateWarning = memo(function QtyOnDateWarning({
+  control,
+  index,
+}: {
+  control: Control<AdjFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const t = useTranslations("inventoryManagement.inventoryAdjustment");
+  const { buCode } = useProfile();
+  const docDate = useWatch({ control, name: "date" }) ?? "";
+  const locationId = useWatch({ control, name: "location_id" }) ?? "";
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const qty = useWatch({ control, name: `items.${index}.qty` });
+  const { data } = useProductInventory(
+    buCode || undefined,
+    locationId || undefined,
+    productId || undefined,
+    docDate || undefined,
+  );
+  const available = data?.available_qty;
+  if (
+    available === undefined ||
+    typeof qty !== "number" ||
+    !(qty > available)
+  ) {
+    return null;
+  }
+  return (
+    <p className="text-destructive text-micro-legal mt-0.5 text-right">
+      {t("exceedsAvailable", { date: data?.as_of_date ?? "", available })}
+    </p>
   );
 });
 
@@ -69,8 +118,12 @@ const TotalCostCell = memo(function TotalCostCell({
 });
 
 /** ชุดค่าที่ราคาจาก API ผูกอยู่ด้วย — ต่างจากเดิมเมื่อไหร่ถึงจะเขียนราคาทับ */
-const costKey = (productId: string, locationId: string, qty: number) =>
-  `${productId}|${locationId}|${qty}`;
+const costKey = (
+  productId: string,
+  locationId: string,
+  qty: number,
+  atDate = "",
+) => `${productId}|${locationId}|${qty}|${atDate}`;
 
 const CostProbe = memo(function CostProbe({
   form,
@@ -97,11 +150,15 @@ const CostProbe = memo(function CostProbe({
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const qty = useWatch({ control, name: `items.${index}.qty` });
   const probeQty = typeof qty === "number" ? qty : 0;
+  // ใบจ่ายออกตีราคาจากของที่มีอยู่ ณ วันที่ของใบ — ล็อตที่รับเข้าหลังวันนั้นต้องไม่ถูกเสนอ
+  const docDate = useWatch({ control, name: "date" }) ?? "";
+  const atDate = isEstimate && docDate ? docDate : undefined;
   const { data } = useProductCostByLocationQty(
     buCode,
     productId || undefined,
     locationId || undefined,
     probeQty,
+    atDate,
   );
   // ชุดค่าที่ราคาผูกอยู่ด้วยของรอบที่เขียนไปล่าสุด — ref อยู่กับ component instance
   // ซึ่งติดไปกับแถวเดิมเพราะตาราง getRowId ด้วย id ของ field array (ไม่ใช่ index)
@@ -117,12 +174,12 @@ const CostProbe = memo(function CostProbe({
   const mountedItem = form.getValues(`items.${index}`);
   const appliedKey = useRef<string | null>(
     !isEstimate && (mountedItem?.id || mountedItem?.cost_per_unit)
-      ? costKey(productId, locationId, probeQty)
+      ? costKey(productId, locationId, probeQty, atDate)
       : null,
   );
   useEffect(() => {
     if (!data) return;
-    const key = costKey(productId, locationId, probeQty);
+    const key = costKey(productId, locationId, probeQty, atDate);
     // เขียนทับเฉพาะตอน สินค้า/คลัง/จำนวน เปลี่ยนจริง — effect ตัวนี้ยิงซ้ำได้จาก
     // หลายทางที่ไม่ใช่การแก้ข้อมูล (กดเพิ่มแถวซึ่ง prepend ดัน index ของทุกแถว +1,
     // ลบแถว, refetch ตาม staleTime: 0) ทุกครั้งมันเคยลบราคาที่ผู้ใช้พิมพ์เองทิ้ง
@@ -147,7 +204,17 @@ const CostProbe = memo(function CostProbe({
     if (unitName && !form.getValues(`items.${index}.unit_name`)) {
       form.setValue(`items.${index}.unit_name`, unitName);
     }
-  }, [data, form, index, productId, locationId, probeQty, isEstimate, readOnly]);
+  }, [
+    data,
+    form,
+    index,
+    productId,
+    locationId,
+    probeQty,
+    atDate,
+    isEstimate,
+    readOnly,
+  ]);
   return null;
 });
 
@@ -190,7 +257,11 @@ const ProductCell = memo(function ProductCell({
             secondary={productLocalName}
           />
         </div>
-        <ProductInventoryDialog control={control} index={index} />
+        <ProductInventoryDialog
+          control={control}
+          index={index}
+          isStockOut={isCostEstimate}
+        />
         {/* ใบจ่ายออกที่ยังเป็นร่างยังไม่มีต้นทุนจริง โชว์ค่าประมาณแม้อยู่โหมดดู ส่วนใบที่ commit แล้ว
             ใช้ต้นทุนที่บัญชีโพสต์ซึ่งหลังบ้านส่งมา ห้ามเอาค่าประมาณไปทับ */}
         {isCostEstimate && docStatus === "draft" && (
@@ -236,7 +307,11 @@ const ProductCell = memo(function ProductCell({
           )}
         />
       </div>
-      <ProductInventoryDialog control={control} index={index} />
+      <ProductInventoryDialog
+        control={control}
+        index={index}
+        isStockOut={isCostEstimate}
+      />
       <CostProbe form={form} index={index} isEstimate={isCostEstimate} />
     </div>
   );
@@ -361,24 +436,29 @@ export function useAdjItemTable({
           const errorMessage =
             form.formState.errors.items?.[row.index]?.qty?.message;
           return (
-            <FieldInput
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="any"
-              placeholder={tfl("qty")}
-              className={cn(
-                "text-right text-xs md:text-xs",
-                errorMessage && "pl-7",
+            <>
+              <FieldInput
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                placeholder={tfl("qty")}
+                className={cn(
+                  "text-right text-xs md:text-xs",
+                  errorMessage && "pl-7",
+                )}
+                error={errorMessage}
+                errorIconAlign="left"
+                {...form.register(`items.${row.index}.qty`, {
+                  valueAsNumber: true,
+                  onChange: (e) =>
+                    recalcTotal(row.index, "qty", Number(e.target.value) || 0),
+                })}
+              />
+              {adjustmentType === "stock-out" && (
+                <QtyOnDateWarning control={form.control} index={row.index} />
               )}
-              error={errorMessage}
-              errorIconAlign="left"
-              {...form.register(`items.${row.index}.qty`, {
-                valueAsNumber: true,
-                onChange: (e) =>
-                  recalcTotal(row.index, "qty", Number(e.target.value) || 0),
-              })}
-            />
+            </>
           );
         },
         size: 80,

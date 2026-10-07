@@ -2766,7 +2766,8 @@
       "docInfo": "ข้อมูลเอกสาร",
       "docInfoDesc": "วันที่ เหตุผล คลัง และหมายเหตุของใบนี้",
       "grandTotal": "รวมทั้งสิ้น",
-      "selectLocationFirst": "เลือกคลังก่อน ถึงจะเพิ่มรายการได้"
+      "selectLocationFirst": "เลือกคลังก่อน ถึงจะเพิ่มรายการได้",
+      "exceedsAvailable": "เกินยอดที่ตัดได้ ณ วันที่ {date} (ตัดได้ {available})"
     },
     "physicalCount": {
       "entity": "ตรวจนับสินค้า",
@@ -3884,7 +3885,10 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
-      }
+      },
+      "asOfDate": "ณ วันที่ {date}",
+      "availableToIssue": "ตัดได้",
+      "availableToIssueHint": "น้อยกว่ายอดคงเหลือ เพราะเอกสารที่ลงวันที่หลังวันนี้นับของส่วนหนึ่งไว้แล้ว"
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",
