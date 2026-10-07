@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useCuisine } from "@/hooks/use-cuisine";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Cuisine } from "@/types/cuisine";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCuisineProps {
@@ -46,10 +42,8 @@ export function LookupCuisine({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Cuisine>({
-    useListHook: useCuisine,
+  } = useLookupResource("recipe_cuisine", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
   });
@@ -65,7 +59,7 @@ export function LookupCuisine({
       items={cuisines}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.name}
+      getLabel={lookupLabel}
       defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("cuisine") })}
       searchPlaceholder={tl("search", { entity: tfl("cuisine") })}

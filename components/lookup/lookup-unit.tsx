@@ -3,12 +3,11 @@ import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UnitDialog } from "@/components/share/unit-dialog";
-import { useUnit } from "@/hooks/use-unit";
 import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Unit } from "@/types/unit";
+  useInvalidateLookup,
+  useLookupResource,
+} from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupUnitProps {
@@ -31,8 +30,8 @@ interface LookupUnitProps {
 /**
  * Lookup Popover สำหรับเลือกหน่วยนับ (Unit)
  *
- * ดึงข้อมูลผ่าน `useUnit` hook พร้อม server-side search และ infinite scroll (perpage 30)
- * filter เฉพาะ `is_active = true` รองรับ `excludeIds` กัน duplicate
+ * ดึงข้อมูลผ่าน Lookup API (`useLookupResource`) พร้อม server-side search และ infinite scroll (perpage 30)
+ * รองรับ `excludeIds` กัน duplicate
  * มีปุ่ม "+" เปิด `UnitDialog` เพื่อสร้างหน่วยใหม่แบบ inline และ auto-select หลัง create สำเร็จ
  *
  * @param value - unit id ที่เลือกอยู่
@@ -70,15 +69,14 @@ export function LookupUnit({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<Unit>({
-    useListHook: useUnit,
+  } = useLookupResource("unit", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
     filter: excludedSet ? (u) => !excludedSet.has(u.id) : undefined,
   });
 
+  const invalidateUnits = useInvalidateLookup("unit");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -92,7 +90,7 @@ export function LookupUnit({
         items={units}
         selectedItems={selectedItems}
         getId={(u) => u.id}
-        getLabel={(u) => u.name}
+        getLabel={lookupLabel}
         defaultLabel={defaultLabel}
         placeholder={placeholder ?? tl("select", { entity: tfl("unit") })}
         searchPlaceholder={tl("search", { entity: tfl("unit") })}
@@ -121,7 +119,11 @@ export function LookupUnit({
       <UnitDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onSuccess={(id) => onValueChange(id)}
+        onSuccess={(id) => {
+          // UnitDialog invalidate แค่ key ของ list เดิม — lookup ต้องล้างเองไม่งั้นชื่อของ id ใหม่ไม่ขึ้น
+          invalidateUnits();
+          onValueChange(id);
+        }}
       />
     </>
   );

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useCnReason } from "@/hooks/use-cn-reason";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
-import type { CnReason } from "@/types/cn-reason";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCnReasonProps {
@@ -32,10 +31,8 @@ export function LookupCnReason({
   const [search, setSearch] = useState("");
   const [hasOpened, setHasOpened] = useState(false);
 
-  // credit-note-reasons ไม่มีคอลัมน์ is_active — ส่ง is_active filter แล้ว 400
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<CnReason>({
-      useListHook: useCnReason,
+    useLookupResource("credit_note_reason", {
       search,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
@@ -53,7 +50,7 @@ export function LookupCnReason({
       items={items}
       selectedItems={selectedItems}
       getId={(r) => r.id}
-      getLabel={(r) => r.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("cnReason") })}
       searchPlaceholder={tl("search", { entity: tfl("cnReason") })}
       disabled={disabled}

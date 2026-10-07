@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useExtraCost } from "@/hooks/use-extra-cost";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { ExtraCost } from "@/types/extra-cost";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupExtraCostProps {
@@ -34,10 +30,8 @@ export function LookupExtraCost({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<ExtraCost>({
-      useListHook: useExtraCost,
+    useLookupResource("extra_cost_type", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -54,7 +48,7 @@ export function LookupExtraCost({
       items={items}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("extraCost") })}
       searchPlaceholder={tl("search", { entity: tfl("extraCost") })}
       disabled={disabled}
