@@ -1,17 +1,13 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useCategory } from "@/hooks/use-category";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { CategoryDto } from "@/types/category";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type LookupItem } from "@/types/lookup";
 import { Badge } from "@/components/ui/badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCategoryProps {
   readonly value: string;
-  readonly onValueChange: (value: string, item?: CategoryDto) => void;
+  readonly onValueChange: (value: string, item?: LookupItem) => void;
   readonly disabled?: boolean;
   readonly className?: string;
   readonly size?: "xs" | "sm";
@@ -35,10 +31,8 @@ export function LookupCategory({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<CategoryDto>({
-      useListHook: useCategory,
+    useLookupResource("product_category", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -58,8 +52,8 @@ export function LookupCategory({
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
       getId={(c) => c.id}
-      getLabel={(c) => `${c.code} — ${c.name}`}
-      getSearchValue={(c) => `${c.code} ${c.name}`}
+      getLabel={(c) => `${c.code ?? ""} — ${lookupLabel(c)}`}
+      getSearchValue={(c) => `${c.code ?? ""} ${c.name ?? ""}`}
       size={size}
       renderItem={(c) => (
         <>

@@ -27,6 +27,12 @@ import { VirtualCommandList } from "@/components/ui/virtual-command-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import EmptyComponent from "@/components/empty-component";
 
+/**
+ * หน่วงก่อนส่งคำค้นให้ server — สั้นกว่านี้ยิงทุกตัวอักษร ยาวกว่านี้ (เคยคุยกันที่ 2 วิ)
+ * ผู้ใช้หยุดพิมพ์แล้วนึกว่าค้าง ระหว่างรอมี spinner ในช่องค้นหา
+ */
+export const LOOKUP_SEARCH_DEBOUNCE_MS = 400;
+
 const SKELETON_WIDTHS = ["w-3/4", "w-2/3", "w-1/2", "w-4/5", "w-3/5", "w-5/6"];
 
 const LookupSkeletonList = () => {
@@ -163,7 +169,9 @@ export function LookupCombobox<T>({
   const resolvedSearchPlaceholder = searchPlaceholder ?? t("searchPlaceholder");
 
   const searchFn = getSearchValue ?? getLabel;
-  const debouncedSearch = useDebouncedValue(search, 150);
+  const debouncedSearch = useDebouncedValue(search, LOOKUP_SEARCH_DEBOUNCE_MS);
+  // พิมพ์แล้วยังไม่ครบเวลาหน่วง — โชว์ spinner ให้รู้ว่ากำลังจะค้น
+  const isSearchPending = search !== debouncedSearch;
 
   useEffect(() => {
     onSearchChange?.(debouncedSearch);
@@ -309,10 +317,22 @@ export function LookupCombobox<T>({
           <div className="relative w-full">
             <CommandInput
               placeholder={resolvedSearchPlaceholder}
-              className={cn("placeholder:text-xs", headerSlot && "pr-8")}
+              className={cn(
+                "placeholder:text-xs",
+                headerSlot ? "pr-14" : isSearchPending && "pr-8",
+              )}
               value={search}
               onValueChange={setSearch}
             />
+            {isSearchPending && (
+              <Loader2
+                aria-hidden="true"
+                className={cn(
+                  "text-muted-foreground absolute top-1/2 size-3.5 -translate-y-1/2 animate-spin",
+                  headerSlot ? "right-9" : "right-2",
+                )}
+              />
+            )}
             {headerSlot}
           </div>
           {isLoading ? (

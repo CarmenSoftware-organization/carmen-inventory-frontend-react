@@ -1,4 +1,5 @@
 import { createConfigCrud } from "@/hooks/use-config-crud";
+import { LOOKUP_QUERY_ROOT } from "@/hooks/use-lookup-resource";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import type { Location, CreateLocationDto } from "@/types/location";
@@ -8,6 +9,8 @@ const crud = createConfigCrud<Location, CreateLocationDto>({
   endpoint: API_ENDPOINTS.LOCATIONS,
   label: "location",
   updateMethod: "PATCH",
+  // lookup อ่านฟิลด์เพิ่มของ resource นี้ — แก้แล้วต้องไม่ค้างใน cache ของ Lookup API
+  extraInvalidateKeys: [LOOKUP_QUERY_ROOT],
 });
 
 /**

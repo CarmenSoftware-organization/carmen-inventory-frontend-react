@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useNotificationTemplates } from "@/hooks/use-notification-template";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type {
-  NotificationTemplate,
-  NotificationTemplateType,
-} from "@/types/noti-tmpl";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
+import type { NotificationTemplateType } from "@/types/noti-tmpl";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupNotificationTemplateProps {
@@ -38,11 +32,10 @@ export function LookupNotificationTemplate({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<NotificationTemplate>({
-      useListHook: useNotificationTemplates,
+    useLookupResource("notification_template", {
       search,
       // template ที่ stage ผูกไว้คงแสดงแม้ถูกปิดใช้งาน — มาทาง selectedItems
-      serverFilter: `${ACTIVE_ONLY_FILTER},type|string:${channelType}`,
+      serverFilter: { type: channelType },
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -58,10 +51,10 @@ export function LookupNotificationTemplate({
       items={items}
       selectedItems={selectedItems}
       renderItem={(tpl) => (
-        <span className="flex-1 truncate text-left">{tpl.name}</span>
+        <span className="flex-1 truncate text-left">{lookupLabel(tpl)}</span>
       )}
       getId={(tpl) => tpl.id}
-      getLabel={(tpl) => tpl.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tnt("entity") })}
       searchPlaceholder={tl("search", { entity: tnt("entity") })}
       disabled={disabled}

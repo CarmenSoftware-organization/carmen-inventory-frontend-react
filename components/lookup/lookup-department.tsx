@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useDepartment } from "@/hooks/use-department";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Department } from "@/types/department";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupDepartmentProps {
@@ -22,8 +18,8 @@ interface LookupDepartmentProps {
 /**
  * Lookup Popover สำหรับเลือกแผนก (Department)
  *
- * ดึงข้อมูลผ่าน `useDepartment` hook (endpoint `/departments`) พร้อม server-side search
- * และ filter เฉพาะ `is_active = true` ใช้ `LookupCombobox` เป็น UI หลัก
+ * ดึงข้อมูลผ่าน Lookup API (`useLookupResource`, scope `all` = ทั้ง BU) พร้อม server-side search
+ * ใช้ `LookupCombobox` เป็น UI หลัก
  * เหมาะสำหรับใช้ในฟอร์ม PR/PO/SR เพื่อกำหนดแผนกที่รับผิดชอบ
  *
  * @param value - id ของ department ที่เลือกอยู่
@@ -60,10 +56,10 @@ export function LookupDepartment({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Department>({
-      useListHook: useDepartment,
+    useLookupResource("department", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
+      // ของเดิมเห็นทั้ง BU — `mine` (ค่าเริ่มต้นของ backend) คืนเฉพาะแผนกที่ assign ให้ user
+      scope: "all",
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -84,7 +80,7 @@ export function LookupDepartment({
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
       getId={(d) => d.id}
-      getLabel={(d) => d.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("department") })}
       searchPlaceholder={tl("search", { entity: tfl("department") })}
       disabled={disabled}

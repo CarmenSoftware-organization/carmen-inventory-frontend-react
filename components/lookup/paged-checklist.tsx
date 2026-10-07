@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandInput } from "@/components/ui/command";
 import { VirtualCommandList } from "@/components/ui/virtual-command-list";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { LOOKUP_SEARCH_DEBOUNCE_MS } from "./lookup-combobox";
 import type { LookupListHook } from "@/hooks/use-entities-by-ids";
 import {
   ACTIVE_ONLY_FILTER,
@@ -77,7 +78,7 @@ export function PagedChecklist<T>({
   const tc = useTranslations("common");
   const tl = useTranslations("lookup");
   const [search, setSearch] = useState("");
-  const debouncedSearch = useDebouncedValue(search, 150);
+  const debouncedSearch = useDebouncedValue(search, LOOKUP_SEARCH_DEBOUNCE_MS);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
     useLookupPagination<T>({
@@ -172,12 +173,15 @@ export function PagedChecklist<T>({
             {(item) => {
               const id = getId(item);
               const checked = selectedSet.has(id);
-              if (renderItem) return renderItem(item, checked, () => toggle(id));
+              if (renderItem)
+                return renderItem(item, checked, () => toggle(id));
               return (
                 <label
                   className={cn(
                     ROW_CLASS,
-                    disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+                    disabled
+                      ? "cursor-not-allowed opacity-60"
+                      : "cursor-pointer",
                   )}
                 >
                   <Checkbox

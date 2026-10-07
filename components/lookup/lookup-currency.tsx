@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/hooks/use-currency";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Currency } from "@/types/currency";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import type { CurrencyLookup } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCurrencyProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (currency: Currency) => void;
+  readonly onItemChange?: (currency: CurrencyLookup) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -44,10 +40,8 @@ export function LookupCurrency({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Currency>({
-      useListHook: useCurrency,
+    useLookupResource<CurrencyLookup>("currency", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
       filter: excludeIds ? (c) => !excludeIds.has(c.id) : undefined,
@@ -68,8 +62,8 @@ export function LookupCurrency({
       items={items}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.code}
-      getSearchValue={(c) => `${c.code} ${c.name}`}
+      getLabel={(c) => c.code ?? ""}
+      getSearchValue={(c) => `${c.code ?? ""} ${c.name ?? ""}`}
       renderItem={(c) => (
         <>
           <span className="w-10 shrink-0 font-semibold">{c.code}</span>

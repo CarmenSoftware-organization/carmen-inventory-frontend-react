@@ -13,6 +13,7 @@ import {
 } from "@/hooks/use-recipe-category";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RecipeCategory } from "@/types/recipe-category";
+import type { RecipeCategoryLookup } from "@/types/lookup";
 import {
   recipeCategorySchema,
   getDefaultValues,
@@ -52,8 +53,8 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   });
   const { form, isEdit, isDisabled } = f;
 
-  const handleParentChange = (parent?: RecipeCategory) => {
-    form.setValue("level", parent ? parent.level + 1 : 1);
+  const handleParentChange = (parent?: RecipeCategoryLookup) => {
+    form.setValue("level", parent ? (parent.level ?? 1) + 1 : 1);
   };
 
   const onSubmit = (values: RecipeCategoryFormValues) => {

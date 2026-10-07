@@ -9,11 +9,8 @@ import {
 } from "react-hook-form";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import type {
-  ItemGroupDto,
-  CategoryDto,
-  SubCategoryDto,
-} from "@/types/category";
+import type { ItemGroupDto } from "@/types/category";
+import type { LookupItem } from "@/types/lookup";
 import {
   Field,
   FieldError,
@@ -97,7 +94,7 @@ function PdTabGeneral({
     form.setValue(name, value, { shouldDirty: true, shouldValidate: true });
   };
 
-  const handleCategoryChange = (id: string, item?: CategoryDto) => {
+  const handleCategoryChange = (id: string, item?: LookupItem) => {
     setField("product_category_id", id);
     setCategoryName(item?.name ?? "");
     // เปลี่ยนหมวดแล้วหมวดย่อย/กลุ่มเดิมไม่เกี่ยวกันอีกต่อไป ล้างทิ้ง
@@ -106,7 +103,7 @@ function PdTabGeneral({
     setField("product_item_group_id", "");
   };
 
-  const handleSubCategoryChange = (id: string, item?: SubCategoryDto) => {
+  const handleSubCategoryChange = (id: string, item?: LookupItem) => {
     setField("product_sub_category_id", id);
     setSubCategoryName(item?.name ?? "");
     setField("product_item_group_id", "");
@@ -485,10 +482,7 @@ function PdTabGeneral({
         description={t("sectionFlagsDesc")}
       >
         <div className="flex flex-col gap-3 sm:col-span-2">
-          <ToggleRow
-            title={tfl("status")}
-            desc={t("statusToggleDesc")}
-          >
+          <ToggleRow title={tfl("status")} desc={t("statusToggleDesc")}>
             <Controller
               control={form.control}
               name="product_status_type"
@@ -504,10 +498,7 @@ function PdTabGeneral({
               )}
             />
           </ToggleRow>
-          <ToggleRow
-            title={t("usedInRecipe")}
-            desc={t("usedInRecipeShort")}
-          >
+          <ToggleRow title={t("usedInRecipe")} desc={t("usedInRecipeShort")}>
             <Controller
               control={form.control}
               name="is_used_in_recipe"
@@ -521,10 +512,7 @@ function PdTabGeneral({
               )}
             />
           </ToggleRow>
-          <ToggleRow
-            title={t("soldDirectly")}
-            desc={t("soldDirectlyShort")}
-          >
+          <ToggleRow title={t("soldDirectly")} desc={t("soldDirectlyShort")}>
             <Controller
               control={form.control}
               name="is_sold_directly"
