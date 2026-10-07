@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { ExchangeRateItem, ExchangeRateDto } from "@/types/exchange-rate";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_NORMAL } from "@/lib/cache-config";
+import { LOOKUP_QUERY_ROOT } from "@/hooks/use-lookup-resource";
 
 interface ExternalRateResponse {
   result: string;
@@ -50,7 +51,7 @@ export function useExchangeRateQuery(
 
 /**
  * Hook สำหรับอัปเดตอัตราแลกเปลี่ยนแบบหลายรายการพร้อมกัน (bulk POST)
- * Invalidate ทั้ง EXCHANGE_RATES และ CURRENCIES เพราะ currency display rate ต้องอัปเดตตาม
+ * Invalidate ทั้ง EXCHANGE_RATES, CURRENCIES และ lookup เพราะ currency display rate และเรตที่ LookupCurrency เติมให้ฟอร์มต้องอัปเดตตาม
  * @returns UseMutationResult รับ ExchangeRateDto[]
  * @example
  * const bulk = useExchangeRateMutation();
@@ -60,7 +61,11 @@ export function useExchangeRateMutation() {
   return useApiMutation<ExchangeRateDto[]>({
     mutationFn: (data, buCode) =>
       httpClient.post(API_ENDPOINTS.EXCHANGE_RATES(buCode), data),
-    invalidateKeys: [QUERY_KEYS.EXCHANGE_RATES, QUERY_KEYS.CURRENCIES],
+    invalidateKeys: [
+      QUERY_KEYS.EXCHANGE_RATES,
+      QUERY_KEYS.CURRENCIES,
+      LOOKUP_QUERY_ROOT,
+    ],
     errorMessage: "Failed to update exchange rates",
   });
 }
@@ -73,7 +78,11 @@ export function useExchangeRateUpdate() {
   }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.patch(`${API_ENDPOINTS.EXCHANGE_RATES(buCode)}/${id}`, data),
-    invalidateKeys: [QUERY_KEYS.EXCHANGE_RATES, QUERY_KEYS.CURRENCIES],
+    invalidateKeys: [
+      QUERY_KEYS.EXCHANGE_RATES,
+      QUERY_KEYS.CURRENCIES,
+      LOOKUP_QUERY_ROOT,
+    ],
     errorMessage: "Failed to update exchange rate",
   });
 }
@@ -82,7 +91,11 @@ export function useExchangeRateCreate() {
   return useApiMutation<ExchangeRateDto>({
     mutationFn: (data, buCode) =>
       httpClient.post(API_ENDPOINTS.EXCHANGE_RATES(buCode), [data]),
-    invalidateKeys: [QUERY_KEYS.EXCHANGE_RATES, QUERY_KEYS.CURRENCIES],
+    invalidateKeys: [
+      QUERY_KEYS.EXCHANGE_RATES,
+      QUERY_KEYS.CURRENCIES,
+      LOOKUP_QUERY_ROOT,
+    ],
     errorMessage: "Failed to create exchange rate",
   });
 }
@@ -91,7 +104,11 @@ export function useExchangeRateDelete() {
   return useApiMutation<{ id: string }>({
     mutationFn: ({ id }, buCode) =>
       httpClient.delete(`${API_ENDPOINTS.EXCHANGE_RATES(buCode)}/${id}`),
-    invalidateKeys: [QUERY_KEYS.EXCHANGE_RATES, QUERY_KEYS.CURRENCIES],
+    invalidateKeys: [
+      QUERY_KEYS.EXCHANGE_RATES,
+      QUERY_KEYS.CURRENCIES,
+      LOOKUP_QUERY_ROOT,
+    ],
     errorMessage: "Failed to delete exchange rate",
   });
 }

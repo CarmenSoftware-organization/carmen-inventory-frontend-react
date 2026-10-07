@@ -35,6 +35,9 @@ interface UseLookupResourceOptions<T extends LookupItem> {
   perpage?: number;
 }
 
+/** prefix ของทุก query ของ Lookup API — invalidate ตัวนี้ = ล้าง lookup ทุก resource ทุก BU */
+export const LOOKUP_QUERY_ROOT = "lookup";
+
 // reference คงที่ — ผู้เรียกเอาไปใส่ deps ได้โดยไม่คำนวณใหม่ทุก render
 const EMPTY: never[] = [];
 
@@ -133,7 +136,15 @@ export function useLookupResource<T extends LookupItem = LookupItem>(
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["lookup", buCode, resource, scope, filterParam, search, perpage],
+    queryKey: [
+      LOOKUP_QUERY_ROOT,
+      buCode,
+      resource,
+      scope,
+      filterParam,
+      search,
+      perpage,
+    ],
     queryFn: ({ pageParam }) =>
       fetchLookup<T>(buCode!, resource, {
         page: pageParam,
@@ -169,7 +180,15 @@ export function useLookupResource<T extends LookupItem = LookupItem>(
     .sort()
     .slice(0, MAX_PERPAGE);
   const { data: selectedData } = useQuery({
-    queryKey: ["lookup", buCode, resource, scope, filterParam, "ids", ids],
+    queryKey: [
+      LOOKUP_QUERY_ROOT,
+      buCode,
+      resource,
+      scope,
+      filterParam,
+      "ids",
+      ids,
+    ],
     queryFn: () =>
       fetchLookup<T>(buCode!, resource, {
         ids: ids.join(","),
@@ -228,7 +247,7 @@ export function useInvalidateLookup(resource: LookupResource) {
   const buCode = useBuCode();
   return () => {
     void queryClient.invalidateQueries({
-      queryKey: ["lookup", buCode, resource],
+      queryKey: [LOOKUP_QUERY_ROOT, buCode, resource],
     });
   };
 }
