@@ -128,8 +128,8 @@ export function PoGeneralFields({
           onValueChange={(val, creditTerm) => {
             form.setValue("credit_term_id", val);
             if (creditTerm) {
-              form.setValue("credit_term_name", creditTerm.name);
-              form.setValue("credit_term_value", creditTerm.value);
+              form.setValue("credit_term_name", creditTerm.name ?? "");
+              form.setValue("credit_term_value", creditTerm.value ?? 0);
             }
           }}
           disabled={fieldDisabled}
@@ -192,8 +192,8 @@ export function PoGeneralFields({
                   value={field.value}
                   onValueChange={field.onChange}
                   onItemChange={(currency) => {
-                    form.setValue("currency_code", currency.code);
-                    form.setValue("exchange_rate", currency.exchange_rate);
+                    form.setValue("currency_code", currency.code ?? "");
+                    form.setValue("exchange_rate", currency.exchange_rate ?? 1);
                   }}
                   disabled={manualFieldDisabled}
                   className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
