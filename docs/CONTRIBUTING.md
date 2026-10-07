@@ -28,15 +28,16 @@ Every command and every config key is tabled in [README.md](../README.md) —
 
 <!-- AUTO-GENERATED: .github/workflows/ci.yml -->
 
-CI (`.github/workflows/ci.yml`) runs on every push and pull request to `main`:
+CI (`.github/workflows/ci.yml`) is **manual-only** (`workflow_dispatch` — Actions → CI →
+Run workflow); nothing runs on push or pull request, so the local run below *is* the gate:
 
 | Step | Command | Notes |
 |---|---|---|
 | Lint | `bun run lint` | ESLint — includes the `next*`-import guard and the module-boundary rules |
 | Test | `bun run test:run` | Vitest, single run |
-| Build | `bun run build` | `tsc --noEmit` + `vite build`; uses `BUILD_CONFIG_FILE=config.sample.json` because the real configs are gitignored |
+| Build | `bun run build` | `tsc --noEmit` + patch bump + `vite build` (the bump is skipped under `CI`); uses `BUILD_CONFIG_FILE=config.sample.json` because the real configs are gitignored |
 
-Run the same three locally before pushing. `bun run typecheck` is the standalone
+Run the same three locally before merging. `bun run typecheck` is the standalone
 `tsc --noEmit` if you only need the type gate.
 
 <!-- /AUTO-GENERATED -->
@@ -66,7 +67,7 @@ Enforced by `eslint.config.mjs` and `tsconfig.json`, not by review:
 
 Vitest + Testing Library, run with `bun test:run` (add a path for one file) or
 `bun test` to watch. Tests sit flat beside the code they cover, or in a `__tests__/`
-folder. The suite is **1,522 tests across 195 files** and must be green before merge.
+folder. The suite is **238 test files** and must be green before merge.
 
 End-to-end tests are **not** in this repo — they live in
 `../carmen-inventory-frontend-e2e` and are run against this SPA with:
@@ -77,8 +78,10 @@ E2E_FRONTEND_DIR=../carmen-inventory-frontend-react VITE_DEV_PROXY_TARGET=<backe
 
 ## Branches and commits
 
-Branch off `main` — this repo has **no `develop`**; `DEV` and `UAT` are deploy branches,
-not integration branches.
+Branch off `main` — this repo has **no `develop`**. `prod` (production), `vercel` and
+`dev2` are deploy branches, not integration branches; never delete or force-push `prod`.
+`.github/workflows/deploy-dev.yml` deploys on every push to `main`;
+`deploy-gcp.yml` is manual-only.
 
 | Prefix | For |
 |---|---|
@@ -112,8 +115,9 @@ Pull request titles and descriptions stay in **English**.
 
 - [ ] Branched off `main` with a `feature/` or `fix/` prefix
 - [ ] `bun run lint` clean
-- [ ] `bun run test:run` green (all 195 files)
-- [ ] `bun run build` passes (this is the `tsc --noEmit` gate too)
+- [ ] `bun run test:run` green (all 238 files)
+- [ ] `bun run build` passes (this is the `tsc --noEmit` gate too; it also bumps the patch
+      in `package.json` — use `SKIP_VERSION_BUMP=1` if you don't want that in your diff)
 - [ ] Commits are Conventional Commits in Thai, so the changelog picks them up
 - [ ] If a route was added, moved or renamed: `bun run gen:route-map` and commit the
       `docs/modules/README.md` diff — the tables there are generated from
