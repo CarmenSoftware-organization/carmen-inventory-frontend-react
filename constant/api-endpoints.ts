@@ -473,6 +473,7 @@ export const API_ENDPOINTS = {
   TRANSACTIONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-transactions`,
   UNITS: (buCode: string) => `/api/proxy/api/config/${buCode}/units`,
+  LOOKUP: (buCode: string) => `/api/proxy/api/${buCode}/lookup`,
   USERS: (buCode: string) => `/api/proxy/api/${buCode}/users`,
   USER_APPLICATION_ROLES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/user-application-roles`,
