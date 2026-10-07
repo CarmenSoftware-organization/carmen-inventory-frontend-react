@@ -85,10 +85,7 @@ export function ProductCell({
             const isDup =
               !!id && rows.some((r, i) => i !== index && r.product_id === id);
             if (isDup)
-              confirmDuplicate(
-                () => field.onChange(id),
-                product?.name ?? undefined,
-              );
+              confirmDuplicate(() => field.onChange(id), product?.name);
             else field.onChange(id);
           }}
           defaultLabel={productLabel(field.value, detailRef?.product)}

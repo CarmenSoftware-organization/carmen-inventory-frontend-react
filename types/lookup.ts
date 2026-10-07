@@ -15,6 +15,8 @@ export interface LookupItem {
  * resource ที่ FE ใช้จริง — ชื่อต้องตรงกับ `LOOKUP_CATALOG` ของ backend
  * (`apps/backend-gateway/src/application/lookup/lookup-catalog.ts`)
  * เพิ่มเมื่อย้าย lookup ตัวใหม่ ไม่ดึง catalog ตอน runtime
+ * `product` ยังไม่ใส่ — registry ของ backend กรอง active ด้วย `is_active` ซึ่งไม่มีใครเขียน
+ * (สถานะจริงอยู่ที่ `product_status_type`) ใช้แล้วสินค้าที่ปิดจะโผล่ใน lookup
  */
 export type LookupResource =
   | "unit"
@@ -27,7 +29,6 @@ export type LookupResource =
   | "department"
   | "pricelist_template"
   | "vendor"
-  | "product"
   | "product_category";
 
 /** `mine` = ค่าเริ่มต้นของ backend · master ที่ผูก user (department/location) `mine` คืนเฉพาะที่ assign ให้ user */
