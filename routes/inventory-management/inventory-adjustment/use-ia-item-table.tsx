@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Controller,
   useWatch,
@@ -13,9 +13,14 @@ import {
 } from "@tanstack/react-table";
 import { memo, useMemo } from "react";
 import { useTranslations } from "use-intl";
-import { Trash2 } from "lucide-react";
+import { Info, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { InventoryDialog } from "@/components/share/inventory-dialog";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
@@ -64,15 +69,25 @@ const ProductInventoryDialog = memo(function ProductInventoryDialog({
  * ใช้ query เดียวกับหน้าต่างดูสต๊อกของแถวนั้น (inventory-info?at_date — key ตรงกัน) จึงไม่ยิงเพิ่ม
  * เทียบกับ available_qty ไม่ใช่ on_hand_qty: ของที่รับเข้าหลังวันที่ของใบไม่นับ และเอกสารที่ลงวันที่หลังกว่า
  * อาจนับของก้อนนี้ไว้แล้ว หลังบ้านปฏิเสธตอนบันทึกอยู่แล้ว ตรงนี้แค่บอกให้รู้ก่อนกด
+ *
+ * แสดงเป็นไอคอน (i) สีแดงในช่อง Qty ข้อความเต็มเปิดดูเมื่อ hover หรือคลิก/แตะ — เดิมเป็นบรรทัดใต้ช่อง
+ * ซึ่งยาวเกินคอลัมน์จนทับช่องกรอก ไม่แสดงเมื่อช่องมี error ของฟอร์มอยู่แล้ว เพราะไอคอน error อยู่ที่เดียวกัน
  */
 const QtyOnDateWarning = memo(function QtyOnDateWarning({
   control,
   index,
+  hasError,
+  children,
 }: {
   control: Control<AdjFormValues>;
   index: number;
+  /** ช่องมี error ของฟอร์มอยู่ — ไอคอน error ใช้ตำแหน่งเดียวกัน */
+  hasError: boolean;
+  /** ช่องกรอก Qty */
+  children: ReactNode;
 }) {
   "use no memo";
+  const [open, setOpen] = useState(false);
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const { buCode } = useProfile();
   const docDate = useWatch({ control, name: "date" }) ?? "";
@@ -87,17 +102,47 @@ const QtyOnDateWarning = memo(function QtyOnDateWarning({
     docDate || undefined,
   );
   const available = data?.available_qty;
-  if (
-    available === undefined ||
-    typeof qty !== "number" ||
-    !(qty > available)
-  ) {
-    return null;
-  }
+  const isOver =
+    !hasError &&
+    available !== undefined &&
+    typeof qty === "number" &&
+    qty > available;
+  const message = isOver
+    ? t("exceedsAvailable", { date: data?.as_of_date ?? "", available })
+    : "";
   return (
-    <p className="text-destructive text-micro-legal mt-0.5 text-right">
-      {t("exceedsAvailable", { date: data?.as_of_date ?? "", available })}
-    </p>
+    <div className={cn("relative", isOver && "[&_input]:pl-7")}>
+      {children}
+      {isOver && (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label={message}
+              className="text-destructive absolute top-1/2 left-2 -translate-y-1/2 cursor-help rounded-full"
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+              onClick={(e) => {
+                // hover เปิดไว้แล้ว คลิกต้องไม่ toggle ปิด — ปิดด้วยการคลิกที่อื่น/Esc/เอาเมาส์ออก
+                e.preventDefault();
+                setOpen(true);
+              }}
+            >
+              <Info className="size-4" aria-hidden="true" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            side="top"
+            align="start"
+            className="bg-background text-destructive w-max max-w-[min(24rem,calc(100vw-2rem))] px-3 py-2 text-xs font-semibold"
+            // เปิดตอน hover ระหว่างพิมพ์ — อย่าดึง focus ออกจากช่องกรอก
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            {message}
+          </PopoverContent>
+        </Popover>
+      )}
+    </div>
   );
 });
 
@@ -435,30 +480,35 @@ export function useAdjItemTable({
           }
           const errorMessage =
             form.formState.errors.items?.[row.index]?.qty?.message;
-          return (
-            <>
-              <FieldInput
-                type="number"
-                inputMode="decimal"
-                min={0}
-                step="any"
-                placeholder={tfl("qty")}
-                className={cn(
-                  "text-right text-xs md:text-xs",
-                  errorMessage && "pl-7",
-                )}
-                error={errorMessage}
-                errorIconAlign="left"
-                {...form.register(`items.${row.index}.qty`, {
-                  valueAsNumber: true,
-                  onChange: (e) =>
-                    recalcTotal(row.index, "qty", Number(e.target.value) || 0),
-                })}
-              />
-              {adjustmentType === "stock-out" && (
-                <QtyOnDateWarning control={form.control} index={row.index} />
+          const input = (
+            <FieldInput
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              placeholder={tfl("qty")}
+              className={cn(
+                "text-right text-xs md:text-xs",
+                errorMessage && "pl-7",
               )}
-            </>
+              error={errorMessage}
+              errorIconAlign="left"
+              {...form.register(`items.${row.index}.qty`, {
+                valueAsNumber: true,
+                onChange: (e) =>
+                  recalcTotal(row.index, "qty", Number(e.target.value) || 0),
+              })}
+            />
+          );
+          if (adjustmentType !== "stock-out") return input;
+          return (
+            <QtyOnDateWarning
+              control={form.control}
+              index={row.index}
+              hasError={!!errorMessage}
+            >
+              {input}
+            </QtyOnDateWarning>
           );
         },
         size: 80,
