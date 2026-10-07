@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { IntlProvider } from "use-intl";
@@ -22,10 +22,14 @@ vi.mock("@/lib/auth/google-sign-in-status", () => ({
   fetchGoogleSignInEnabled: () => Promise.resolve(true),
 }));
 
-const preview = (overrides: Partial<InvitationPreview> = {}): InvitationPreview => ({
+const preview = (
+  overrides: Partial<InvitationPreview> = {},
+): InvitationPreview => ({
   cluster_name: "Hotel Group",
   cluster_role: "member",
-  business_units: [{ business_unit_id: "bu-1", name: "Bangkok", role: "buyer" }],
+  business_units: [
+    { business_unit_id: "bu-1", name: "Bangkok", role: "buyer" },
+  ],
   expires_at: "2099-01-01T00:00:00.000Z",
   email_masked: "j***@example.com",
   account_state: "free",
@@ -35,7 +39,11 @@ const preview = (overrides: Partial<InvitationPreview> = {}): InvitationPreview 
 
 function renderInvitation(token = "tok-1") {
   return render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
       <IntlProvider locale="en" messages={en}>
         <MemoryRouter initialEntries={[`/invitations/${token}`]}>
           <Routes>
@@ -47,13 +55,25 @@ function renderInvitation(token = "tok-1") {
   );
 }
 
+// The button renders at once but stays disabled until the status check answers — wait before clicking.
+async function findEnabledGoogleButton() {
+  const button = await screen.findByRole("button", {
+    name: /continue with google/i,
+  });
+  await waitFor(() => expect(button).toBeEnabled());
+  return button;
+}
+
 describe("invitation page — Google sign-in", () => {
   const originalLocation = window.location;
   const assign = vi.fn();
 
   beforeEach(() => {
     tokenStore.clear();
-    setRuntimeConfigForTests({ BACKEND_URL: "https://api.test", X_APP_ID: "app-1" });
+    setRuntimeConfigForTests({
+      BACKEND_URL: "https://api.test",
+      X_APP_ID: "app-1",
+    });
     Object.defineProperty(window, "location", {
       configurable: true,
       value: { ...originalLocation, assign },
@@ -76,9 +96,7 @@ describe("invitation page — Google sign-in", () => {
       );
       renderInvitation("tok-1");
 
-      await userEvent.click(
-        await screen.findByRole("button", { name: /continue with google/i }),
-      );
+      await userEvent.click(await findEnabledGoogleButton());
 
       const url = new URL(assign.mock.calls[0][0] as string);
       expect(url.searchParams.get("next")).toBe("/invitations/tok-1");
@@ -89,9 +107,7 @@ describe("invitation page — Google sign-in", () => {
     getInvitation.mockResolvedValue(preview());
     renderInvitation("a%2Fb");
 
-    await userEvent.click(
-      await screen.findByRole("button", { name: /continue with google/i }),
-    );
+    await userEvent.click(await findEnabledGoogleButton());
 
     const url = new URL(assign.mock.calls[0][0] as string);
     expect(url.searchParams.get("next")).toBe("/invitations/a%2Fb");
@@ -110,7 +126,9 @@ describe("invitation page — Google sign-in", () => {
 
   it("does not show the Google button once signed in: the page shows Accept instead", async () => {
     tokenStore.set("at-1");
-    getInvitation.mockResolvedValue(preview({ account_state: "owned", has_account: true }));
+    getInvitation.mockResolvedValue(
+      preview({ account_state: "owned", has_account: true }),
+    );
     renderInvitation();
 
     await screen.findByRole("button", { name: /accept/i });

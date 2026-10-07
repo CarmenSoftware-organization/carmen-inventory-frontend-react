@@ -30,10 +30,11 @@ function GoogleLogo() {
 
 /**
  * "Continue with Google" button with its "or" divider. Shared by the login page and the invitation page.
- * Renders nothing until the gateway says Google sign-in is on for the App (`google_sign_in.app`), and
- * nothing at all when that check fails — the gateway would refuse the flow anyway.
+ * Always shown, but clickable only once the gateway says Google sign-in is on for the App
+ * (`google_sign_in.app`). While asking, when the answer is "off", or when the check fails it stays
+ * disabled — the gateway would refuse the flow anyway.
  * @param props - `next`: same-site path to return to after signing in
- * @returns The divider and the button, or null
+ * @returns The divider and the button
  */
 export function GoogleSignInButton({ next }: { readonly next?: string }) {
   const t = useTranslations("auth");
@@ -56,8 +57,6 @@ export function GoogleSignInButton({ next }: { readonly next?: string }) {
     );
   };
 
-  if (!enabled) return null;
-
   return (
     <div className="mt-4 flex flex-col gap-3">
       <div className="relative" aria-hidden>
@@ -75,6 +74,7 @@ export function GoogleSignInButton({ next }: { readonly next?: string }) {
         variant="outline"
         className="h-10 w-full gap-2"
         onClick={start}
+        disabled={!enabled}
       >
         <GoogleLogo />
         {t("google.continue")}
