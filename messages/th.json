@@ -955,6 +955,8 @@
       "STOCK_OUT_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอ ณ วันที่ {date}: ตัดออกได้ {on_hand} ต้องการ {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
       "CREDIT_NOTE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอคืน ณ วันที่ {date}: คืนได้ {on_hand} จะคืน {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
       "STOCK_IN_VOID_INSUFFICIENT_STOCK": "ยกเลิกใบรับเข้านี้ไม่ได้: {product} ที่ {location} เหลือตั้งแต่วันที่ {date} เพียง {on_hand} (ต่ำสุดวันที่ {short_on}) ไม่พอดึงคืน {requested} ที่รับเข้ามา",
+      "GRN_DATE_BEFORE_LATEST_RECEIPT": "วันที่รับ {date} อยู่ก่อนใบรับล่าสุดของ {product} ที่ {location} ในงวดนี้ ({latest_doc} วันที่ {latest}) ระบบ FIFO ต้องลงวันที่ {latest} หรือหลังจากนั้น",
+      "STOCK_IN_DATE_BEFORE_LATEST_RECEIPT": "วันที่รับเข้า {date} อยู่ก่อนใบรับล่าสุดของ {product} ที่ {location} ในงวดนี้ ({latest_doc} วันที่ {latest}) ระบบ FIFO ต้องลงวันที่ {latest} หรือหลังจากนั้น",
       "SR_ISSUED_QTY_EXCEEDS_APPROVED": "จำนวนที่จ่ายต้องไม่เกินจำนวนที่อนุมัติ (จ่าย > อนุมัติ): {lines} ลดจำนวนที่จ่ายแล้วลองอีกครั้ง",
       "GRN_VOIDED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกยกเลิกแล้ว จึงแก้ไขไม่ได้",
       "GRN_AP_LINKED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกดึงไปที่ AP Invoice {doc_nos} แล้ว จึงแก้ไขไม่ได้",

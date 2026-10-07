@@ -955,6 +955,8 @@
       "STOCK_OUT_INSUFFICIENT_STOCK": "Not enough {product} at {location} on {date}: {on_hand} can be taken out, {requested} requested. The balance from that date on is lowest on {short_on}.",
       "CREDIT_NOTE_INSUFFICIENT_STOCK": "Not enough {product} at {location} to return on {date}: {on_hand} can be returned, returning {requested}. The balance from that date on is lowest on {short_on}.",
       "STOCK_IN_VOID_INSUFFICIENT_STOCK": "Cannot void: {product} at {location} has only {on_hand} from {date} on (lowest on {short_on}), not enough to take back the {requested} this stock-in received.",
+      "GRN_DATE_BEFORE_LATEST_RECEIPT": "Receipt date {date} is before the latest receipt of {product} at {location} in this period ({latest_doc} on {latest}). Under FIFO, date it {latest} or later.",
+      "STOCK_IN_DATE_BEFORE_LATEST_RECEIPT": "Stock-in date {date} is before the latest receipt of {product} at {location} in this period ({latest_doc} on {latest}). Under FIFO, date it {latest} or later.",
       "SR_ISSUED_QTY_EXCEEDS_APPROVED": "Issued quantity cannot be more than the approved quantity (issued > approved): {lines}. Lower the issued quantity and try again.",
       "GRN_VOIDED_NOT_EDITABLE": "This goods receive note has been voided, so it can no longer be edited.",
       "GRN_AP_LINKED_NOT_EDITABLE": "This goods receive note is already on AP invoice {doc_nos}, so it can no longer be edited.",
