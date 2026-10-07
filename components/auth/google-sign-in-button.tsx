@@ -31,17 +31,15 @@ function GoogleLogo() {
 /**
  * "Continue with Google" button with its "or" divider. Shared by the login page and the invitation page.
  * Always shown, but clickable only once the gateway says Google sign-in is on for the App
- * (`google_sign_in.app`). Until the answer arrives it is disabled with no explanation (no flicker when the
- * switch is on); when the answer is "off" or the check fails it stays disabled with a short note — the gateway
- * would refuse the flow anyway.
+ * (`google_sign_in.app`). While asking, when the answer is "off", or when the check fails it stays
+ * disabled — the gateway would refuse the flow anyway.
  * @param props - `next`: same-site path to return to after signing in
  * @returns The divider and the button
  */
 export function GoogleSignInButton({ next }: { readonly next?: string }) {
   const t = useTranslations("auth");
   const locale = useLocale();
-  // null = still asking the gateway
-  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -76,20 +74,11 @@ export function GoogleSignInButton({ next }: { readonly next?: string }) {
         variant="outline"
         className="h-10 w-full gap-2"
         onClick={start}
-        disabled={enabled !== true}
-        aria-describedby={enabled === false ? "google-unavailable" : undefined}
+        disabled={!enabled}
       >
         <GoogleLogo />
         {t("google.continue")}
       </Button>
-      {enabled === false && (
-        <p
-          id="google-unavailable"
-          className="text-muted-foreground -mt-1 text-center text-xs"
-        >
-          {t("google.unavailable")}
-        </p>
-      )}
     </div>
   );
 }

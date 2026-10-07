@@ -719,8 +719,7 @@
     },
     "google": {
       "or": "or",
-      "continue": "Continue with Google",
-      "unavailable": "Google sign-in is not available."
+      "continue": "Continue with Google"
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",
