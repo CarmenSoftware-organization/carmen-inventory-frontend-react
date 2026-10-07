@@ -4,6 +4,11 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.4.1] - 2026-10-07
+
+### Added
+- **errors:** แปลข้อความ FIFO ห้ามลงวันที่ใบรับก่อนใบรับล่าสุด (GRN / Stock In) (#256) — Khafang `35408558`
+
 ## [2.4.0] - 2026-10-07
 
 ### Added

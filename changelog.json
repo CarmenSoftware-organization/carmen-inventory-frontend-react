@@ -1,7 +1,26 @@
 {
-  "current": "2.4.0",
-  "generated_at": "2026-10-07T06:53:40.981Z",
+  "current": "2.4.1",
+  "generated_at": "2026-10-07T08:48:06.185Z",
   "versions": [
+    {
+      "version": "2.4.1",
+      "build": "2.4.1-build.20261007.4cd6e9bb",
+      "date": "2026-10-07",
+      "commit": "4cd6e9bb",
+      "changes": {
+        "added": [
+          {
+            "scope": "errors",
+            "summary": "แปลข้อความ FIFO ห้ามลงวันที่ใบรับก่อนใบรับล่าสุด (GRN / Stock In)",
+            "hash": "35408558",
+            "author": "Khafang",
+            "pr": 256
+          }
+        ],
+        "fixed": [],
+        "changed": []
+      }
+    },
     {
       "version": "2.4.0",
       "build": "2.4.0-build.20261007.ccc09d3b",
