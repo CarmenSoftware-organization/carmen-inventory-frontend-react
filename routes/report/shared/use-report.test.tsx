@@ -13,7 +13,8 @@ import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 
 vi.mock("@/hooks/use-bu-code", () => ({ useBuCode: () => "BU1" }));
 
-const { useReportListLookups } = await import("./use-report");
+const { useReportListLookups, useReportLookupSearch } =
+  await import("./use-report");
 
 const lookupResponse = (products: string[]) =>
   new Response(
@@ -28,9 +29,8 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }
 
-const productCodes = (
-  data: ReturnType<typeof useReportListLookups>["data"],
-) => data?.data.product?.map((p) => p.code);
+const productCodes = (data: ReturnType<typeof useReportListLookups>["data"]) =>
+  data?.data.product?.map((p) => p.code);
 
 beforeEach(() => {
   setRuntimeConfigForTests({ BACKEND_URL: "", X_APP_ID: "app-test" });
@@ -62,7 +62,9 @@ describe("useReportListLookups", () => {
         useReportListLookups({ sources: ["product"], enabled: open }),
       { wrapper, initialProps: { open: true } },
     );
-    await waitFor(() => expect(productCodes(result.current.data)).toEqual(["P1"]));
+    await waitFor(() =>
+      expect(productCodes(result.current.data)).toEqual(["P1"]),
+    );
 
     rerender({ open: false });
     rerender({ open: true });
@@ -71,5 +73,51 @@ describe("useReportListLookups", () => {
       expect(productCodes(result.current.data)).toEqual(["P1", "P2"]),
     );
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("useReportLookupSearch", () => {
+  it("does not call the server for a blank search", () => {
+    const fetchMock = vi.fn(async () => lookupResponse([]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderHook(
+      () => useReportLookupSearch({ source: "product", search: "  " }),
+      {
+        wrapper,
+      },
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("asks the server for the typed text with a 50-row limit", async () => {
+    const fetchMock = vi.fn<(input: string) => Promise<Response>>(
+      async () =>
+        new Response(
+          JSON.stringify({
+            data: {
+              product: [{ code: "55000209", name: "Dead Mouth Ring Wrench" }],
+            },
+          }),
+          { status: 200 },
+        ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(
+      () => useReportLookupSearch({ source: "product", search: " wrench " }),
+      { wrapper },
+    );
+
+    await waitFor(() =>
+      expect(result.current.data).toEqual([
+        { code: "55000209", name: "55000209 - Dead Mouth Ring Wrench" },
+      ]),
+    );
+    const url = new URL(String(fetchMock.mock.calls[0][0]), "http://x");
+    expect(url.searchParams.get("types")).toBe("product");
+    expect(url.searchParams.get("search")).toBe("wrench");
+    expect(url.searchParams.get("limit")).toBe("50");
   });
 });
