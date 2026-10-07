@@ -142,7 +142,9 @@ export default function LoginForm() {
           ? t("errors.googleAccountConflict")
           : errorCode === "google_too_many_attempts"
             ? t("errors.googleTooManyAttempts")
-            : t("errors.googleFailed");
+            : errorCode === "google_disabled"
+              ? t("errors.googleDisabled")
+              : t("errors.googleFailed");
 
   const onSubmit = (values: LoginFormValues) => {
     loginMutation.reset();

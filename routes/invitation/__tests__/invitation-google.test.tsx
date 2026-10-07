@@ -17,6 +17,11 @@ vi.mock("@/lib/invitation-api", async (importOriginal) => ({
 
 import { Component as InvitationRoute } from "../invitation.route";
 
+// The gateway status check — on by default so the button renders; the switch itself is gateway logic.
+vi.mock("@/lib/auth/google-sign-in-status", () => ({
+  fetchGoogleSignInEnabled: () => Promise.resolve(true),
+}));
+
 const preview = (overrides: Partial<InvitationPreview> = {}): InvitationPreview => ({
   cluster_name: "Hotel Group",
   cluster_role: "member",
