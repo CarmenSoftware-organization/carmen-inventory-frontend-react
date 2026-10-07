@@ -5,6 +5,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+
 const FLOATING_INPUT_CLASS = cn(
   "border-border bg-background hover:border-foreground/40 focus-visible:border-primary",
   "h-12 rounded-lg border px-3 pt-4 pb-1 text-sm shadow-none transition-colors",
