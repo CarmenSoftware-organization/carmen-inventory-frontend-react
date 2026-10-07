@@ -546,22 +546,16 @@ export const moduleList: ModuleDto[] = [
     icon: Settings2,
     subModules: [
       {
-        name: "chartOfAccounts",
-        path: "/config/chart-of-accounts",
-        licenseFeature: "configuration.chart_of_accounts", // config:chart-of-accounts
-        icon: BookText,
-      },
-      {
         name: "accountGrouping",
         path: "/config/account-grouping",
         licenseFeature: "configuration.chart_of_accounts", // จัดกลุ่มผังบัญชี — ใช้คีย์เดียวกับหน้า chart-of-accounts
         icon: FolderTree,
       },
       {
-        name: "titleMaster",
-        path: "/config/title-master",
-        licenseFeature: "accounting.config", // master ของงานบัญชี (อ่านจาก accounting-master-mock)
-        icon: UserRoundSearch,
+        name: "chartOfAccounts",
+        path: "/config/chart-of-accounts",
+        licenseFeature: "configuration.chart_of_accounts", // config:chart-of-accounts
+        icon: BookText,
       },
       {
         // คีย์นี้มาจาก `LICENSE_ONLY_RESOURCES` ของ backend (ไม่มี endpoint รองรับ
@@ -573,9 +567,16 @@ export const moduleList: ModuleDto[] = [
         icon: Link2,
       },
       {
+        name: "titleMaster",
+        path: "/config/title-master",
+        licenseFeature: "accounting.config", // master ของงานบัญชี (อ่านจาก accounting-master-mock)
+        icon: UserRoundSearch,
+      },
+      {
         name: "storeLocation",
         path: "/config/location",
         icon: Building,
+        separatorBefore: true,
         permission: PERMISSIONS.configuration.location.view,
       },
       {
