@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useForm } from "react-hook-form";
 import { renderForm } from "@/lib/test-utils/form-characterization";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
@@ -13,6 +13,7 @@ import type { AdjFormValues } from "./ia-form-schema";
  */
 
 const DOC_DATE = "2026-07-14T17:00:00.000Z";
+const OVER_MESSAGE = "More than can be issued on 2026-07-15 (3 available)";
 
 const costCalls: unknown[][] = [];
 vi.mock("@/hooks/use-product-cost", () => ({
@@ -93,21 +94,30 @@ describe("AdjItemFields — stock-out reads stock on its own date", () => {
     );
   });
 
-  it("warns while typing a quantity above what can be issued that day", async () => {
+  it("flags a quantity above what can be issued that day with an icon that opens on hover", async () => {
     renderForm(<Harness type="stock-out" qty={5} />);
 
-    expect(
-      await screen.findByText(
-        "More than can be issued on 2026-07-15 (3 available)",
-      ),
-    ).toBeTruthy();
+    const icon = await screen.findByRole("button", { name: OVER_MESSAGE });
+    // the full line used to sit under the field and overlap it — now it waits behind the icon
+    expect(screen.queryByText(OVER_MESSAGE)).toBeNull();
+    fireEvent.mouseEnter(icon);
+    expect(await screen.findByText(OVER_MESSAGE)).toBeTruthy();
+  });
+
+  it("opens the message on click too, for touch screens", async () => {
+    renderForm(<Harness type="stock-out" qty={5} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: OVER_MESSAGE }));
+    expect(await screen.findByText(OVER_MESSAGE)).toBeTruthy();
   });
 
   it("stays quiet when the quantity fits", async () => {
     renderForm(<Harness type="stock-out" qty={3} />);
 
     await waitFor(() => expect(costCalls.length).toBeGreaterThan(0));
-    expect(screen.queryByText(/More than can be issued/)).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /More than can be issued/ }),
+    ).toBeNull();
   });
 });
 
@@ -118,6 +128,8 @@ describe("AdjItemFields — stock-in is not dated", () => {
     await waitFor(() => expect(costCalls.length).toBeGreaterThan(0));
     expect(costCalls.at(-1)?.[4]).toBeUndefined();
     expect(dialogProps.at(-1)?.atDate).toBeUndefined();
-    expect(screen.queryByText(/More than can be issued/)).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /More than can be issued/ }),
+    ).toBeNull();
   });
 });
