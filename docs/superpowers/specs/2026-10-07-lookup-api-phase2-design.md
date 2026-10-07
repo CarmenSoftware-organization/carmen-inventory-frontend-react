@@ -1,6 +1,6 @@
 # Lookup API เฟส 2 — ฟิลด์เพิ่ม + filter ราย resource — design
 
-**วันที่:** 2026-10-07 · **สถานะ:** รอรีวิว
+**วันที่:** 2026-10-07 · **สถานะ:** อนุมัติแล้ว — plan: `docs/superpowers/plans/2026-10-07-lookup-api-phase2.md`
 **repo:** carmen-turborepo-backend-v2 (micro-business + gateway) และ carmen-inventory-frontend-react
 **FE branch:** `feature/lookup-endpoint-phase2` (stack บน `feature/lookup-endpoint` / PR #257) · **BE branch:** `feature/lookup-extra-fields`
 **ต่อจาก:** `docs/superpowers/specs/2026-10-07-lookup-endpoint-migration-design.md` (เฟส 1) และ backend `docs/superpowers/specs/2026-10-07-lookup-api-design.md`
@@ -34,7 +34,13 @@ type LookupExtraField =
 interface LookupResourceDef {
   // ...ของเดิม
   extra?: Record<string, LookupExtraField>; // ชื่อฟิลด์ใน response → วิธีอ่าน
-  filters?: Record<string, string>;         // ชื่อ filter ที่อนุญาต → คอลัมน์จริง
+  filters?: Record<string, LookupFilterDef>; // ชื่อ filter ที่อนุญาต → คอลัมน์ + ชุดค่าที่ยอมรับ
+}
+
+interface LookupFilterDef {
+  column: string;
+  enumValues?: readonly string[]; // ค่านอกชุดนี้ไม่ตรงกับแถวใด (ไม่ส่งเข้า Prisma ซึ่งจะ 500)
+  uuid?: boolean;                 // ค่าที่ไม่ใช่ uuid ไม่ตรงกับแถวใด
 }
 ```
 
@@ -44,14 +50,14 @@ interface LookupResourceDef {
 
 | resource | extra | filters | อื่น ๆ |
 |---|---|---|---|
-| `product` | — | — | `status: enumStatus('product_status_type', enum_product_status_type, ['inactive'])` |
+| `product` | — | — | `status: enumStatus('product_status_type', enum_product_status_type, ['inactive', 'discontinued'])` — lookup เดิมกรอง `active` อย่างเดียว |
 | `tax_profile` | `tax_rate`: number | — | |
 | `currency` | `exchange_rate`: number, `decimal_places`: number | — | |
 | `credit_term` | `value`: number | — | |
 | `recipe_category` | `level`: number | — | |
 | `product_sub_category` | — | `product_category_id` | |
 | `location` | `location_type`: string, `delivery_point`: object `{ id: 'delivery_point_id', name: 'delivery_point_name' }` | `location_type` | `tb_location` เก็บ delivery point แบบ denormalized ไม่ต้อง join |
-| `notification_template` (**ใหม่**) | — | `type` | `defineMaster('tb_notification_template', …)` — ตรวจชื่อคอลัมน์ code/name/description/is_active ตอนทำ plan |
+| `notification_template` (**ใหม่**) | — | `type` | `defineMaster('tb_notification_template', { code: undefined, … })` — ตารางไม่มี `code`; `type` เป็น `enum_notification_channel` |
 
 ชื่อคอลัมน์และ enum ทุกตัวต้องยืนยันกับ `packages/prisma-shared-schema-tenant/prisma/schema.prisma` ตอนทำ plan
 
@@ -78,7 +84,7 @@ interface LookupResourceDef {
 
 ### 2.6 เทสต์กันหลุดซิงก์ (jest)
 
-`apps/backend-gateway/src/application/lookup/lookup-catalog.spec.ts` (หรือที่ที่ import registry ของ micro ได้ — ตัดสินตอนทำ plan): ทุก resource ใน `LOOKUP_CATALOG` ต้องมีใน `LOOKUP_REGISTRY` และ `filters` ของสองที่ต้องตรงกัน
+`apps/backend-gateway/src/application/lookup/lookup-catalog.spec.ts` — `require` registry ของ micro-business ด้วย path ที่คำนวณตอนรัน (`check-types` ของ gateway ใช้ `--rootDir .` import แบบ static ข้ามแอปจะได้ TS6059): ทุก resource ใน `LOOKUP_CATALOG` ต้องมีใน `LOOKUP_REGISTRY` และ `filters` ของสองที่ต้องตรงกัน
 
 ### 2.7 รูปแบบ filter ที่ต้องรู้
 
