@@ -3,6 +3,7 @@ import { Hotel, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
 import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
 import { LocaleToggle } from "@/components/locale-toggle";
+import { AppVersionLabel } from "@/components/app-version-label";
 
 /**
  * โครงหน้า auth แบบแบ่งครึ่ง — ซ้ายเป็นการ์ดฟอร์ม ขวาเป็น hero (ซ่อนบนจอเล็ก)
@@ -63,6 +64,10 @@ export function AuthSplitShell({
               </p>
               {children}
             </div>
+
+            {/* เวอร์ชันแอป + API ใต้การ์ด — ทุกหน้า auth ได้ไปด้วย ไว้ให้ผู้ใช้
+                อ่านบอกตอนแจ้งปัญหาทั้งที่ยังเข้าระบบไม่ได้ */}
+            <AppVersionLabel className="mt-4" />
           </div>
         </div>
 

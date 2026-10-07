@@ -1,4 +1,5 @@
 import { useParams } from "react-router";
+import { AppVersionLabel } from "@/components/app-version-label";
 import PriceListExternalComponent from "./price-list-external-component";
 
 /**
@@ -12,6 +13,7 @@ export function Component() {
   return (
     <div className="bg-background min-h-screen py-8">
       <PriceListExternalComponent urlToken={url_token} />
+      <AppVersionLabel className="mt-8 px-6" />
     </div>
   );
 }
