@@ -4,6 +4,25 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.5.0] - 2026-10-07
+
+### Added
+- **inventory:** on hand ณ วันที่เอกสาร (PR/PO) + ยอดรายคลังใน SI/SO + SI/SO ลงวันที่เกินวันนี้ไม่ได้ (#259) — Khafang `90018c6d`
+- **lookup:** useLookupResource รับ generic และ serverFilter · ตรวจฟิลด์เพิ่มจาก backend ก่อนใช้ (#257) — Thammanoon Semapru `1f7736ce`
+- **lookup:** หน่วงค้นหา 400ms พร้อม spinner และโหลดหน้าถัดไปล่วงหน้า 5 แถว (#257) — Thammanoon Semapru `a9907a7d`
+- **lookup:** เพิ่ม useLookupResource เรียก Lookup API ของ backend แบบแบ่งหน้า + ดึงค่าที่เลือกด้วย ids (#257) — Thammanoon Semapru `eea10fcd`
+
+### Fixed
+- **lookup:** แก้อัตราแลกเปลี่ยน/currency/tax profile/credit term/location แล้วล้าง cache ของ Lookup API ด้วย — ไม่งั้นฟอร์มได้เรตเก่าภายใน 1 นาที (#257) — Thammanoon Semapru `05dce9ce`
+- **lookup:** คง lookup สินค้าไว้กับ list เดิม — registry ของ backend กรอง active ด้วย is_active ที่ไม่มีใครเขียน สินค้าที่ปิดจะโผล่ (#257) — Thammanoon Semapru `4a82d634`
+
+### Changed
+- **lookup:** ย้าย lookup คลัง (ทั้ง BU และของ user) ไปใช้ Lookup API พร้อม location_type และจุดส่งของ (#257) — Thammanoon Semapru `2910aec3`
+- **lookup:** ย้าย lookup สินค้า/หมวดย่อย/เทมเพลตแจ้งเตือนไปใช้ Lookup API — backend กรองสถานะสินค้าด้วย product_status_type แล้ว (#257) — Thammanoon Semapru `7e36cf0b`
+- **lookup:** ย้าย lookup tax profile/currency/credit term/recipe category ไปใช้ Lookup API พร้อมฟิลด์เพิ่ม (#257) — Thammanoon Semapru `c80f15e8`
+- **lookup:** ย้าย lookup vendor/product/category ไปใช้ Lookup API และให้ผู้เรียกรับ name ที่เป็น null ได้ (#257) — Thammanoon Semapru `37c68716`
+- **lookup:** ย้าย lookup 9 ตัวที่ใช้แค่ id/ชื่อ ไปใช้ Lookup API (#257) — Thammanoon Semapru `473fea30`
+
 ## [2.4.1] - 2026-10-07
 
 ### Added

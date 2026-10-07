@@ -1,7 +1,98 @@
 {
-  "current": "2.4.1",
-  "generated_at": "2026-10-07T08:48:06.185Z",
+  "current": "2.5.0",
+  "generated_at": "2026-10-07T11:15:02.652Z",
   "versions": [
+    {
+      "version": "2.5.0",
+      "build": "2.5.0-build.20261007.b4b1bd5f",
+      "date": "2026-10-07",
+      "commit": "b4b1bd5f",
+      "changes": {
+        "added": [
+          {
+            "scope": "inventory",
+            "summary": "on hand ณ วันที่เอกสาร (PR/PO) + ยอดรายคลังใน SI/SO + SI/SO ลงวันที่เกินวันนี้ไม่ได้",
+            "hash": "90018c6d",
+            "author": "Khafang",
+            "pr": 259
+          },
+          {
+            "scope": "lookup",
+            "summary": "useLookupResource รับ generic และ serverFilter · ตรวจฟิลด์เพิ่มจาก backend ก่อนใช้",
+            "hash": "1f7736ce",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "หน่วงค้นหา 400ms พร้อม spinner และโหลดหน้าถัดไปล่วงหน้า 5 แถว",
+            "hash": "a9907a7d",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "เพิ่ม useLookupResource เรียก Lookup API ของ backend แบบแบ่งหน้า + ดึงค่าที่เลือกด้วย ids",
+            "hash": "eea10fcd",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          }
+        ],
+        "fixed": [
+          {
+            "scope": "lookup",
+            "summary": "แก้อัตราแลกเปลี่ยน/currency/tax profile/credit term/location แล้วล้าง cache ของ Lookup API ด้วย — ไม่งั้นฟอร์มได้เรตเก่าภายใน 1 นาที",
+            "hash": "05dce9ce",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "คง lookup สินค้าไว้กับ list เดิม — registry ของ backend กรอง active ด้วย is_active ที่ไม่มีใครเขียน สินค้าที่ปิดจะโผล่",
+            "hash": "4a82d634",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          }
+        ],
+        "changed": [
+          {
+            "scope": "lookup",
+            "summary": "ย้าย lookup คลัง (ทั้ง BU และของ user) ไปใช้ Lookup API พร้อม location_type และจุดส่งของ",
+            "hash": "2910aec3",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "ย้าย lookup สินค้า/หมวดย่อย/เทมเพลตแจ้งเตือนไปใช้ Lookup API — backend กรองสถานะสินค้าด้วย product_status_type แล้ว",
+            "hash": "7e36cf0b",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "ย้าย lookup tax profile/currency/credit term/recipe category ไปใช้ Lookup API พร้อมฟิลด์เพิ่ม",
+            "hash": "c80f15e8",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "ย้าย lookup vendor/product/category ไปใช้ Lookup API และให้ผู้เรียกรับ name ที่เป็น null ได้",
+            "hash": "37c68716",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          },
+          {
+            "scope": "lookup",
+            "summary": "ย้าย lookup 9 ตัวที่ใช้แค่ id/ชื่อ ไปใช้ Lookup API",
+            "hash": "473fea30",
+            "author": "Thammanoon Semapru",
+            "pr": 257
+          }
+        ]
+      }
+    },
     {
       "version": "2.4.1",
       "build": "2.4.1-build.20261007.4cd6e9bb",
