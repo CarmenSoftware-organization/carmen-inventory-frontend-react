@@ -17,4 +17,18 @@ describe("parseScheduleDialog", () => {
       ["DateTo", "Date To"],
     ]);
   });
+
+  it("uses a control's own Label before the preceding <Label>, and Name when it is blank", () => {
+    const fields = parseScheduleDialog(`<Dialog>
+      <Label Text="Ignored"/><Lookup Name="Vendor" Label="Supplier" Items="ALL" Values="ALL"/>
+      <Label Text="Ignored too"/><Date Name="AsAt" Label=" "/>
+      <Label Text="Location"/><Lookup Name="Location" Items="ALL" Values="ALL"/>
+    </Dialog>`);
+
+    expect(fields.map((f) => [f.name, f.label])).toEqual([
+      ["Vendor", "Supplier"],
+      ["AsAt", "AsAt"],
+      ["Location", "Location"],
+    ]);
+  });
 });
