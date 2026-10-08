@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseReportDialog } from "./parse-report-dialog";
+import { flattenFields, parseReportDialog } from "./parse-report-dialog";
 
 // Stock Card / Inventory Balance: ป้ายของทั้งสองฝั่ง ("Location From" / "Location To") — เคยขึ้นเป็นสี่แถวแยกกัน
 const CURRENT_DIALOG = `<Dialog>
@@ -45,5 +45,38 @@ describe("parseReportDialog", () => {
     expect(fields).toEqual([
       expect.objectContaining({ kind: "range", label: "Vendor" }),
     ]);
+  });
+
+  it("orphan label before a group neither swallows nor shifts the group", () => {
+    const { cells } = parseReportDialog(`<Dialog Cols="2">
+      <Label Text="Dangling"/>
+      <Group ColSpan="2">
+        <Label Text="Date From"/><Date Name="DateFrom"/>
+        <Label Text="Date To"/><Date Name="DateTo"/>
+      </Group>
+    </Dialog>`);
+
+    expect(cells).toEqual([
+      expect.objectContaining({
+        kind: "group",
+        colSpan: 2,
+        fields: [
+          expect.objectContaining({ label: "Date From", control: expect.objectContaining({ name: "DateFrom" }) }),
+          expect.objectContaining({ label: "Date To", control: expect.objectContaining({ name: "DateTo" }) }),
+        ],
+      }),
+    ]);
+  });
+
+  it("flattenFields includes grouped fields in document order", () => {
+    const { cells } = parseReportDialog(`<Dialog>
+      <Label Text="A"/><Lookup Name="A" Items="x" Values="x"/>
+      <Group><Label Text="B"/><Lookup Name="B" Items="x" Values="x"/></Group>
+      <Label Text="C"/><Lookup Name="C" Items="x" Values="x"/>
+    </Dialog>`);
+
+    expect(
+      flattenFields(cells).map((f) => (f.kind === "single" ? f.control.name : f.from.name)),
+    ).toEqual(["A", "B", "C"]);
   });
 });

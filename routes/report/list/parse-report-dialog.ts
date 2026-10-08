@@ -28,7 +28,14 @@ type DialogNode = LabelNode | LookupNode | DateNode;
 /** เพดานคอลัมน์ของ dialog — modal กว้างได้จำกัด เกินนี้ Lookup จะแคบจนอ่านไม่ออก */
 export const MAX_COLS = 4;
 
-export type DialogCell = FormField;
+/** <Group> — กล่องจัด layout ที่ผู้เขียนกำหนดเอง ข้างในไม่จับคู่ From/To อัตโนมัติ */
+export interface GroupCell {
+  kind: "group";
+  colSpan: number;
+  fields: SingleField[];
+}
+
+export type DialogCell = FormField | GroupCell;
 
 export interface ParsedDialog {
   cols: number;
@@ -123,15 +130,39 @@ export function parseReportDialog(xml: string): ParsedDialog {
   if (!dialogEl) return { cols: 1, cells: [] };
 
   const cols = readCols(dialogEl);
-  const cells: DialogCell[] = groupFields(
-    parseNodes(Array.from(dialogEl.children), cols),
-  );
+  const cells: DialogCell[] = [];
+  let run: Element[] = [];
+  const flush = () => {
+    if (run.length) cells.push(...groupFields(parseNodes(run, cols)));
+    run = [];
+  };
+  for (const child of Array.from(dialogEl.children)) {
+    if (child.tagName !== "Group") {
+      run.push(child);
+      continue;
+    }
+    flush();
+    const fields = groupFields(
+      parseNodes(groupChildren(child), cols),
+      false,
+    ) as SingleField[];
+    if (fields.length > 0) {
+      cells.push({ kind: "group", colSpan: readSpan(child, cols), fields });
+    }
+  }
+  flush();
   return { cols, cells };
 }
 
+/** Group ซ้อน Group ไม่รองรับ — ยกลูกของกลุ่มในขึ้นมาแทนที่ เพื่อไม่ให้ field หาย */
+const groupChildren = (group: Element): Element[] =>
+  Array.from(group.children).flatMap((c) =>
+    c.tagName === "Group" ? groupChildren(c) : [c],
+  );
+
 /** รวมทุก field เป็น list แบนสำหรับงานที่ไม่สนใจ layout (data source, period, ส่งค่า filter) */
 export function flattenFields(cells: DialogCell[]): FormField[] {
-  return cells;
+  return cells.flatMap((c) => (c.kind === "group" ? c.fields : [c]));
 }
 
 const parseNodes = (elements: Element[], cols: number): DialogNode[] => {
@@ -173,7 +204,7 @@ const parseNodes = (elements: Element[], cols: number): DialogNode[] => {
   return nodes;
 };
 
-const groupFields = (nodes: DialogNode[]): FormField[] => {
+const groupFields = (nodes: DialogNode[], pairRanges = true): FormField[] => {
   const fields: FormField[] = [];
   let i = 0;
 
@@ -197,7 +228,7 @@ const groupFields = (nodes: DialogNode[]): FormField[] => {
     const isPaired =
       (isToLabel(afterControl) && isControl(toControl)) ||
       (afterControl?.type === "label" && isNamedPair(next, toControl));
-    if (isPaired && isControl(toControl)) {
+    if (pairRanges && isPaired && isControl(toControl)) {
       fields.push({
         kind: "range",
         label: node.text,

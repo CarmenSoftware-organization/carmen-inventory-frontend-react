@@ -39,6 +39,8 @@ import {
   type FormField,
   type LookupNode,
   type ParsedDialog,
+  type SingleField,
+  MAX_COLS,
 } from "./parse-report-dialog";
 import { COL_SPAN, GRID_COLS, MODAL_W } from "./dialog-layout";
 import {
@@ -605,8 +607,10 @@ function ReportField({
   );
 }
 
-const cellKey = (cell: DialogCell): string =>
-  cell.kind === "range" ? `${cell.from.name}-${cell.to.name}` : cell.control.name;
+const cellKey = (cell: DialogCell): string => {
+  if (cell.kind === "group") return `group-${cell.fields[0]?.control.name ?? ""}`;
+  return cell.kind === "range" ? `${cell.from.name}-${cell.to.name}` : cell.control.name;
+};
 
 function collectDataSources(fields: FormField[]): string[] {
   const sources = new Set<string>();
@@ -723,7 +727,16 @@ export function ReportParamDialog({
     field.kind === "range"
       ? { ...field, from: injectLookup(field.from), to: injectLookup(field.to) }
       : { ...field, control: injectLookup(field.control) };
-  const enrichedCells: DialogCell[] = parsed.cells.map(enrichField);
+  const enrichedCells: DialogCell[] = parsed.cells.map((cell) =>
+    cell.kind === "group"
+      ? {
+          ...cell,
+          fields: cell.fields.map(
+            (f): SingleField => ({ ...f, control: injectLookup(f.control) }),
+          ),
+        }
+      : enrichField(cell),
+  );
 
   const handleSubmit = () => {
     if (!report || !onRun) return;
@@ -785,14 +798,29 @@ export function ReportParamDialog({
                 <FieldGroup
                   className={cn("grid grid-cols-1 gap-3", GRID_COLS[parsed.cols])}
                 >
-                  {enrichedCells.map((cell) => (
-                    <ReportField
-                      key={cellKey(cell)}
-                      field={cell}
-                      periods={periods}
-                      className={COL_SPAN[cell.colSpan]}
-                    />
-                  ))}
+                  {enrichedCells.map((cell) =>
+                    cell.kind === "group" ? (
+                      <div
+                        key={cellKey(cell)}
+                        className={cn(
+                          "grid grid-cols-1 gap-3",
+                          GRID_COLS[Math.min(cell.fields.length, MAX_COLS)],
+                          COL_SPAN[cell.colSpan],
+                        )}
+                      >
+                        {cell.fields.map((f) => (
+                          <ReportField key={f.control.name} field={f} periods={periods} />
+                        ))}
+                      </div>
+                    ) : (
+                      <ReportField
+                        key={cellKey(cell)}
+                        field={cell}
+                        periods={periods}
+                        className={COL_SPAN[cell.colSpan]}
+                      />
+                    ),
+                  )}
                 </FieldGroup>
               )}
             </form>
