@@ -54,6 +54,8 @@ export interface ReportSchedule {
   is_active: boolean;
   last_run_at?: string;
   next_run_at?: string;
+  /** false = report นี้ใช้กับ BU นี้ไม่ได้แล้ว รอบที่ตั้งเวลาไว้จะถูกข้าม */
+  template_available?: boolean;
 }
 
 export interface CreateReportScheduleDto {
