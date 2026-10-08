@@ -1,6 +1,6 @@
 # Widget title หลายภาษา (EN default) — design
 
-**วันที่:** 2026-10-08 · **สถานะ:** รอ user รีวิว spec
+**วันที่:** 2026-10-08 · **สถานะ:** อนุมัติแล้ว — plan: `docs/superpowers/plans/2026-10-08-widget-title-i18n.md`
 **repo:** carmen-turborepo-backend-v2 (prisma schema ×2 · gateway · micro-cluster) · micro-data · carmen-platform · carmen-inventory-frontend-react
 **FE branch:** `feature/widget-title-i18n`
 
@@ -15,6 +15,7 @@ title ของ dashboard widget แสดงตามภาษาของ UI (
 - **รูปข้อมูล jsonb `{ en, th? }` (แนวทาง 2)** ไม่ใช้คอลัมน์ `title_th` แยก
 - **rollout แบบ expand/contract** ห้าม `ALTER COLUMN title TYPE jsonb` ตรง ๆ เพราะ GORM (`*string`) และ Prisma client ที่ generate ไว้จะพังทันทีที่ migration รัน
 - **API ไม่ break:** `title` (string) ยังอยู่ใน response ข้าง ๆ `title_i18n` ใหม่ (§3)
+- **title ใน seed (A):** 58 จาก 71 รายการใน `seed.dashboard-widget-template.data.ts` เป็นภาษาไทยปน ถ้า backfill เป็น `{en: title}` ค่าไทยจะไปอยู่ในช่อง `en` จึงเพิ่ม `title_i18n: {en, th}` ให้ทุก entry และให้ seeder ตั้ง `title_i18n` ใหม่ **เฉพาะแถวที่ `title` ยังตรงกับไฟล์** (operator ยังไม่แก้) — ดู §4.1
 
 ### นอกขอบเขต
 
@@ -39,8 +40,8 @@ UPDATE <table> SET title_i18n = jsonb_build_object('en', title)
 
 รูปข้อมูล: `{ "en": string, "th"?: string }`
 - `en` บังคับเมื่อ object ไม่เป็น null
-- key ที่รับได้: `en`, `th` (key อื่นตอบ 422)
-- ค่า: trim แล้วยาวไม่เกิน 255 สตริงว่างถือว่าไม่มี key นั้น
+- key ที่รับได้: `en`, `th` (key อื่นตอบ 400 — ใช้ error เดิมของแต่ละ service: `ErrInvalidWidget` ใน micro-data, zod 400 ที่ gateway)
+- ค่า: trim แล้วยาวไม่เกิน 255 ตัวอักษร (นับ rune — คอลัมน์เดิมเป็น VARCHAR(255)) สตริงว่างถือว่าไม่มี key นั้น
 - ถ้าตัด key ว่างออกแล้วไม่เหลืออะไรเลย ให้เก็บเป็น `null` (กลับไปใช้ชื่อตั้งต้น)
 
 ## 3. API contract
@@ -55,7 +56,7 @@ UPDATE <table> SET title_i18n = jsonb_build_object('en', title)
 - `title_i18n` (object หรือ `null`) เป็นช่องทางหลัก ส่งมาเมื่อไหร่ให้ replace ทั้งก้อน
 - ถ้าส่งมาแค่ `title` (string, client เก่า) → merge: `{ ...existing, en: title }` เพื่อไม่ให้ client เก่าลบค่า `th` ทิ้ง ถ้า `title` เป็นค่าว่าง/`null` → `title_i18n = null`
 - ส่งมาทั้งคู่ → ใช้ `title_i18n` แล้วไม่สนใจ `title`
-- ตรวจ validation ที่ gateway (class-validator/zod ตามแบบเดิมของ DTO นั้น ๆ) และตรวจซ้ำใน micro-data / micro-cluster ก่อนเขียน
+- ตรวจ validation: template → zod ที่ gateway + normalize ใน micro-cluster · BU/personal → gateway ส่งผ่าน body ตรง ๆ (`Record<string, unknown>`) micro-data เป็นคนตรวจ
 
 **เหตุผลที่ไม่เปลี่ยน `title` เป็น object:** ถ้า BE ขึ้นก่อน FE ตัวเก่าจะ render `{widget.title}` ที่เป็น object แล้ว React throw "Objects are not valid as a React child" ทำให้หน้า dashboard พังทั้งหน้า
 
@@ -72,7 +73,15 @@ UPDATE <table> SET title_i18n = jsonb_build_object('en', title)
 | system widgets | `system-widget-cache.service.ts`, `system-widget-config.type.ts`, `system-widgets.controller.ts` | อ่าน `title_i18n` แล้วส่งออกทั้งสองฟิลด์ |
 | FE | §5 | |
 
-ต้องเช็ก serializer ของ gateway ทั้ง micro และ gateway `@Serialize` response schema ไม่งั้น GET จะตัด `title_i18n` ทิ้ง (memory: backend-add-field-serializer-gotcha)
+ตรวจแล้ว: controller ของ widget/template ไม่มี `@Serialize` — response ส่งผ่านตรง ๆ แต่จุดที่ map field เอง (system-widget cache, `/me` composite ใน `system-widgets.controller.ts`, deploy service) ต้องเติม `title_i18n` เองทุกจุด
+
+### 4.1 Seed ของ template
+
+- `DashboardWidgetTemplateSeedEntry` เพิ่ม `title_i18n: { en: string; th: string }` (ทุก entry) — `title` เดิมคงไว้เป็น "ค่าที่เคย seed" ใช้จับว่าแถวยังไม่ถูกแก้
+- `createRow`: `title = title_i18n.en`, `title_i18n = entry.title_i18n`
+- `applyEntry` (แถวที่มีอยู่แล้ว): ถ้า `row.title === entry.title` และ `row.title_i18n` เป็น null หรือเท่ากับ `{en: row.title}` (ค่าจาก backfill) → เขียน `title`/`title_i18n` ตามไฟล์ outcome ใหม่ `retitled` (นับเป็นการเปลี่ยน → bump version ของ bu_default)
+- รันซ้ำ idempotent: รอบถัดไป `row.title` เป็นค่า en ใหม่แล้ว ไม่ตรง `entry.title` จึงไม่แตะ
+- BU widget ที่ deploy ไปแล้วได้ชื่อใหม่ก็ต่อเมื่อ deploy ซ้ำ (`skip_customized` ข้าม BU ที่ปรับเอง) — ไม่ทำ data fix ฝั่ง tenant
 
 ## 5. Frontend (รีโปนี้)
 
@@ -121,7 +130,7 @@ export interface LocalizedTitle {
 
 ### 5.5 คำแปล
 
-- `messages/{en,th}.json` เพิ่ม `dashboard.datasets.<dataset_id>` ของ dataset ระบบทุกตัว (ดึงรายการ id จริงจาก catalogue ตอนเขียน plan) dataset id มีจุด (`rfp.active`) ซึ่ง use-intl อ่านเป็น path ซ้อน จึงต้องแปลงเป็น key ที่ไม่มีจุด (เช่นแทน `.` ด้วย `_`) ใน helper
+- `messages/{en,th}.json` เพิ่ม `dashboard.datasets` ของ dataset ระบบทั้ง 94 ตัว (ดึงจาก catalogue ของ dev 2026-10-08) เก็บเป็น object ซ้อนตามจุดของ id (`datasets.workflow["cn-pending-approval"]`) use-intl อ่าน path `datasets.workflow.cn-pending-approval` ได้ตรง ๆ ไม่ต้องแปลง id
 - label ใหม่ของ dialog: `dashboard.savedWidget.title*` (EN/TH, hint, error)
 - ห้ามใส่ `{{` `}}` ในข้อความ (ICU, memory: icu-messages-cannot-contain-braces) และต้องผ่าน key-parity test
 
@@ -137,6 +146,6 @@ export interface LocalizedTitle {
 
 - ตามค่าตั้งของผู้ใช้ plan จะ**ไม่**มีขั้นเขียนเทสต์ใหม่ แต่ต้องรัน typecheck + lint ทุกรีโป และเทสต์เดิมต้องยังผ่าน (FE `bun test:run` · backend `jest` · micro-data `go test ./...`)
 - ตรวจด้วยมือ:
-  - curl: create/update ด้วย `title_i18n`, ด้วย `title` อย่างเดียว (ต้องไม่ลบ `th`), ด้วย `{th}` อย่างเดียว (ต้อง 422) และ GET ต้องมีทั้ง `title` และ `title_i18n`
+  - curl: create/update ด้วย `title_i18n`, ด้วย `title` อย่างเดียว (ต้องไม่ลบ `th`), ด้วย `{th}` อย่างเดียว (ต้อง 400) และ GET ต้องมีทั้ง `title` และ `title_i18n`
   - platform: สร้าง template สองภาษา → deploy ลง BU → BU widget ต้องได้ `title_i18n` ครบ
   - เบราว์เซอร์ (FE) ทั้ง `en` และ `th`: widget ที่ไม่ตั้ง title แสดงชื่อ dataset ที่แปลแล้ว, widget ที่ตั้งเฉพาะ EN แสดง EN ทั้งสองภาษา, widget สองภาษาสลับตาม locale, widget เก่าที่ title = ชื่อ dataset แสดงคำแปล
