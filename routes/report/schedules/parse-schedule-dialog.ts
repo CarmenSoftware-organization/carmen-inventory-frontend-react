@@ -18,6 +18,12 @@ import type { ReportScheduleDialogField } from "@/types/report-schedule";
  * @example
  * const fields = parseScheduleDialog(template.dialog);
  */
+/** ลูกของ <Dialog> ตามลำดับเอกสาร โดยเปิด <Group> (รวมที่ซ้อนกัน) ออก — layout ไม่มีผลกับฟอร์ม schedule แต่ field ห้ามหาย */
+const flattenGroups = (el: Element): Element[] =>
+  Array.from(el.children).flatMap((c) =>
+    c.tagName === "Group" ? flattenGroups(c) : [c],
+  );
+
 export function parseScheduleDialog(
   raw: string | undefined | null,
 ): ReportScheduleDialogField[] {
@@ -40,9 +46,7 @@ export function parseScheduleDialog(
     const fields: ReportScheduleDialogField[] = [];
     let currentLabel = "";
 
-    for (const node of Array.from(dialogEl.childNodes)) {
-      if (node.nodeType !== 1) continue;
-      const child = node as Element;
+    for (const child of flattenGroups(dialogEl)) {
       const tag = child.tagName;
 
       if (tag === "Label") {

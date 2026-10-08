@@ -24,6 +24,7 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
+import { cn } from "@/lib/utils";
 import {
   useReportListLookups,
   useReportLookupSearch,
@@ -31,11 +32,17 @@ import {
 import type { ReportPeriodMap } from "@/types/report";
 import type { Report } from "@/types/report";
 import {
+  flattenFields,
   parseReportDialog,
   type DateNode,
+  type DialogCell,
   type FormField,
   type LookupNode,
+  type ParsedDialog,
+  type SingleField,
+  MAX_COLS,
 } from "./parse-report-dialog";
+import { COL_SPAN, GRID_COLS, MODAL_W } from "./dialog-layout";
 import {
   forgetReportParams,
   loadReportParams,
@@ -584,6 +591,27 @@ function FieldControl({ field, periods }: FieldControlProps) {
   return <Control node={field.control} periods={periods} />;
 }
 
+/** ช่องหนึ่งของ dialog: ป้าย + control — range ตัด " From" ท้ายป้ายเพราะ RangeRow มีป้าย From/To ของตัวเอง */
+function ReportField({
+  field,
+  periods,
+  className,
+}: FieldControlProps & { readonly className?: string }) {
+  const label =
+    field.kind === "range" ? field.label.replace(/ From$/, "") : field.label;
+  return (
+    <Field className={className}>
+      <FieldLabel className="text-xs">{label}</FieldLabel>
+      <FieldControl field={field} periods={periods} />
+    </Field>
+  );
+}
+
+const cellKey = (cell: DialogCell): string => {
+  if (cell.kind === "group") return `group-${cell.fields[0]?.control.name ?? ""}`;
+  return cell.kind === "range" ? `${cell.from.name}-${cell.to.name}` : cell.control.name;
+};
+
 function collectDataSources(fields: FormField[]): string[] {
   const sources = new Set<string>();
   for (const field of fields) {
@@ -652,10 +680,11 @@ export function ReportParamDialog({
   }
 
   const dialogXml = report?.Dialog;
-  const fields: FormField[] =
+  const parsed: ParsedDialog =
     !dialogXml || dialogXml.trim().length === 0
-      ? []
+      ? { cols: 1, cells: [] }
       : parseReportDialog(dialogXml);
+  const fields: FormField[] = flattenFields(parsed.cells);
 
   const sources = collectDataSources(fields);
   const includePeriods = needsPeriods(fields);
@@ -675,37 +704,39 @@ export function ReportParamDialog({
   const periods = lookupResult?.periods ?? {};
 
   // Inject lookup data into fields
-  const enrichedFields = fields.map((field) => {
-    const injectLookup = (
-      ctrl: LookupNode | DateNode,
-    ): LookupNode | DateNode => {
-      if (ctrl.type !== "lookup") return ctrl;
-      const ds = ctrl.dataSource;
-      if (!ds) return ctrl;
-      const items = lookupData[ds];
-      if (!items || items.length === 0) return ctrl;
-      // Period is a single-period selection (business rule): no "ALL" option, and the
-      // newest period — first in the DESC-ordered list — becomes the default (options[0]).
-      const includeAll = ds !== "period";
-      return {
-        ...ctrl,
-        items: includeAll
-          ? ["ALL", ...items.map((i) => i.name)]
-          : items.map((i) => i.name),
-        values: includeAll
-          ? ["ALL", ...items.map((i) => i.code)]
-          : items.map((i) => i.code),
-      };
+  const injectLookup = (ctrl: LookupNode | DateNode): LookupNode | DateNode => {
+    if (ctrl.type !== "lookup") return ctrl;
+    const ds = ctrl.dataSource;
+    if (!ds) return ctrl;
+    const items = lookupData[ds];
+    if (!items || items.length === 0) return ctrl;
+    // Period is a single-period selection (business rule): no "ALL" option, and the
+    // newest period — first in the DESC-ordered list — becomes the default (options[0]).
+    const includeAll = ds !== "period";
+    return {
+      ...ctrl,
+      items: includeAll
+        ? ["ALL", ...items.map((i) => i.name)]
+        : items.map((i) => i.name),
+      values: includeAll
+        ? ["ALL", ...items.map((i) => i.code)]
+        : items.map((i) => i.code),
     };
-    if (field.kind === "range") {
-      return {
-        ...field,
-        from: injectLookup(field.from),
-        to: injectLookup(field.to),
-      };
-    }
-    return { ...field, control: injectLookup(field.control) };
-  });
+  };
+  const enrichField = (field: FormField): FormField =>
+    field.kind === "range"
+      ? { ...field, from: injectLookup(field.from), to: injectLookup(field.to) }
+      : { ...field, control: injectLookup(field.control) };
+  const enrichedCells: DialogCell[] = parsed.cells.map((cell) =>
+    cell.kind === "group"
+      ? {
+          ...cell,
+          fields: cell.fields.map(
+            (f): SingleField => ({ ...f, control: injectLookup(f.control) }),
+          ),
+        }
+      : enrichField(cell),
+  );
 
   const handleSubmit = () => {
     if (!report || !onRun) return;
@@ -732,7 +763,12 @@ export function ReportParamDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90dvh] flex-col gap-3 p-4">
+      <DialogContent
+        className={cn(
+          "flex max-h-[90dvh] flex-col gap-3 p-4",
+          MODAL_W[parsed.cols],
+        )}
+      >
         <DialogHeader className="shrink-0 gap-0 pb-1">
           <DialogTitle className="text-sm">{report.ReportName}</DialogTitle>
           {remembered && (
@@ -754,28 +790,37 @@ export function ReportParamDialog({
               ref={formRef}
               className="min-h-0 flex-1 overflow-y-auto pr-1"
             >
-              {enrichedFields.length === 0 ? (
+              {enrichedCells.length === 0 ? (
                 <p className="text-muted-foreground text-xs">
                   {t("noFiltersConfigured")}
                 </p>
               ) : (
-                <FieldGroup className="gap-3">
-                  {enrichedFields.map((field) => {
-                    const key =
-                      field.kind === "range"
-                        ? `${field.from.name}-${field.to.name}`
-                        : field.control.name;
-                    const label =
-                      field.kind === "range"
-                        ? field.label.replace(/ From$/, "")
-                        : field.label;
-                    return (
-                      <Field key={key}>
-                        <FieldLabel className="text-xs">{label}</FieldLabel>
-                        <FieldControl field={field} periods={periods} />
-                      </Field>
-                    );
-                  })}
+                <FieldGroup
+                  className={cn("grid grid-cols-1 gap-3", GRID_COLS[parsed.cols])}
+                >
+                  {enrichedCells.map((cell) =>
+                    cell.kind === "group" ? (
+                      <div
+                        key={cellKey(cell)}
+                        className={cn(
+                          "grid grid-cols-1 gap-3",
+                          GRID_COLS[Math.min(cell.fields.length, MAX_COLS)],
+                          COL_SPAN[cell.colSpan],
+                        )}
+                      >
+                        {cell.fields.map((f) => (
+                          <ReportField key={f.control.name} field={f} periods={periods} />
+                        ))}
+                      </div>
+                    ) : (
+                      <ReportField
+                        key={cellKey(cell)}
+                        field={cell}
+                        periods={periods}
+                        className={COL_SPAN[cell.colSpan]}
+                      />
+                    ),
+                  )}
                 </FieldGroup>
               )}
             </form>
