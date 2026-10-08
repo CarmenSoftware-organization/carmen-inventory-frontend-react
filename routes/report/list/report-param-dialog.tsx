@@ -802,15 +802,25 @@ export function ReportParamDialog({
                     cell.kind === "group" ? (
                       <div
                         key={cellKey(cell)}
-                        className={cn(
-                          "grid grid-cols-1 gap-3",
-                          GRID_COLS[Math.min(cell.fields.length, MAX_COLS)],
-                          COL_SPAN[cell.colSpan],
-                        )}
+                        role={cell.label ? "group" : undefined}
+                        aria-labelledby={cell.label ? `${cellKey(cell)}-heading` : undefined}
+                        className={cn("space-y-2", COL_SPAN[cell.colSpan])}
                       >
-                        {cell.fields.map((f) => (
-                          <ReportField key={f.control.name} field={f} periods={periods} />
-                        ))}
+                        {cell.label && (
+                          <p id={`${cellKey(cell)}-heading`} className="text-sm font-medium">
+                            {cell.label}
+                          </p>
+                        )}
+                        <div
+                          className={cn(
+                            "grid grid-cols-1 gap-3",
+                            GRID_COLS[Math.min(cell.fields.length, MAX_COLS)],
+                          )}
+                        >
+                          {cell.fields.map((f) => (
+                            <ReportField key={f.control.name} field={f} periods={periods} />
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <ReportField

@@ -60,20 +60,24 @@ export function parseScheduleDialog(
         continue;
       }
 
+      // Label บน control ชนะ <Label> ข้างหน้าเสมอ — ค่าว่างแสดง Name (ตรงกับหน้ารัน report)
+      const own = child.getAttribute("Label");
+      const label = own !== null ? own.trim() || name : currentLabel || name;
+
       if (tag === "Date") {
-        fields.push({ name, type: "date", label: currentLabel || name });
+        fields.push({ name, type: "date", label });
       } else if (tag === "Lookup") {
         const items = (child.getAttribute("Items") ?? "").split("~");
         const source = child.getAttribute("DataSource") ?? undefined;
         fields.push({
           name,
           type: "select",
-          label: currentLabel || name,
+          label,
           options: items.length > 1 || items[0] !== "ALL" ? items : undefined,
           source,
         });
       } else {
-        fields.push({ name, type: "text", label: currentLabel || name });
+        fields.push({ name, type: "text", label });
       }
       currentLabel = "";
     }

@@ -14,6 +14,8 @@ export interface LookupNode {
   value: string;
   multi: boolean; // Multi="true" → render as checkbox group, submit comma-joined values
   colSpan: number;
+  /** ค่า attribute Label บน control เอง — null = ไม่มี (ใช้ <Label> ข้างหน้าแบบเดิม) */
+  selfLabel: string | null;
 }
 
 export interface DateNode {
@@ -21,6 +23,8 @@ export interface DateNode {
   name: string;
   value: string;
   colSpan: number;
+  /** ค่า attribute Label บน control เอง — null = ไม่มี (ใช้ <Label> ข้างหน้าแบบเดิม) */
+  selfLabel: string | null;
 }
 
 type DialogNode = LabelNode | LookupNode | DateNode;
@@ -32,6 +36,8 @@ export const MAX_COLS = 4;
 export interface GroupCell {
   kind: "group";
   colSpan: number;
+  /** หัวข้อจาก <Group Label> (trim แล้ว) — "" = ไม่แสดง */
+  label: string;
   fields: SingleField[];
 }
 
@@ -147,7 +153,12 @@ export function parseReportDialog(xml: string): ParsedDialog {
       false,
     ) as SingleField[];
     if (fields.length > 0) {
-      cells.push({ kind: "group", colSpan: readSpan(child, cols), fields });
+      cells.push({
+        kind: "group",
+        colSpan: readSpan(child, cols),
+        label: (child.getAttribute("Label") ?? "").trim(),
+        fields,
+      });
     }
   }
   flush();
@@ -190,6 +201,7 @@ const parseNodes = (elements: Element[], cols: number): DialogNode[] => {
         value: attr(child, "Value"),
         multi: attr(child, "Multi") === "true",
         colSpan: readSpan(child, cols),
+        selfLabel: child.getAttribute("Label"),
       });
     } else if (tag === "Date") {
       nodes.push({
@@ -197,6 +209,7 @@ const parseNodes = (elements: Element[], cols: number): DialogNode[] => {
         name: attr(child, "Name"),
         value: attr(child, "Value"),
         colSpan: readSpan(child, cols),
+        selfLabel: child.getAttribute("Label"),
       });
     }
   }
@@ -211,13 +224,25 @@ const groupFields = (nodes: DialogNode[], pairRanges = true): FormField[] => {
   while (i < nodes.length) {
     const node = nodes[i];
 
+    // control ที่มี Label ในตัวเป็น field เดี่ยวเสมอ — ไม่หยิบ <Label> ข้างหน้า ไม่จับคู่ช่วง
+    if (isControl(node) && node.selfLabel !== null) {
+      fields.push({
+        kind: "single",
+        label: node.selfLabel.trim() || node.name,
+        control: node,
+        colSpan: node.colSpan,
+      });
+      i++;
+      continue;
+    }
+
     if (node.type !== "label" || !node.visible) {
       i++;
       continue;
     }
 
     const next = nodes[i + 1];
-    if (!isControl(next)) {
+    if (!isControl(next) || next.selfLabel !== null) {
       i++;
       continue;
     }
@@ -228,7 +253,7 @@ const groupFields = (nodes: DialogNode[], pairRanges = true): FormField[] => {
     const isPaired =
       (isToLabel(afterControl) && isControl(toControl)) ||
       (afterControl?.type === "label" && isNamedPair(next, toControl));
-    if (pairRanges && isPaired && isControl(toControl)) {
+    if (pairRanges && isPaired && isControl(toControl) && toControl.selfLabel === null) {
       fields.push({
         kind: "range",
         label: node.text,
