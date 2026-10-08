@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { ApiError } from "@/lib/api-error";
 import {
   DataGrid,
   DataGridContainer,
@@ -163,13 +164,19 @@ export default function ReportComponent() {
           onClick: () => globalThis.window.open(url, "_blank"),
         },
       });
-    } catch {
+    } catch (err) {
       viewerWindow?.close();
       // ไม่ใส่ err.message ลงบรรทัดสอง — เป็นข้อความของ dev (ภาษาอังกฤษ บางที
       // เป็น stack trace ยาวเป็นสิบบรรทัด) ซึ่งเป็นกับดักเดียวกับที่
       // hooks/use-error-toast.ts ปิดไปแล้วที่ท่อกลาง หน้านี้ยิง toast เอง
       // เลยหลุดมาได้ · รายละเอียดจริงดูได้ที่ Report History
-      toast.error(t("runError"), { id: toastId });
+      // REPORT_TEMPLATE_UNAVAILABLE = report นี้ใช้กับ BU นี้ไม่ได้ — บอกตรง ๆ แทนข้อความกลาง
+      toast.error(
+        err instanceof ApiError && err.appCode === "REPORT_TEMPLATE_UNAVAILABLE"
+          ? t("unavailableForBu")
+          : t("runError"),
+        { id: toastId },
+      );
     }
   };
 

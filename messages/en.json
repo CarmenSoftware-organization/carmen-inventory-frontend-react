@@ -4958,7 +4958,8 @@
     "noFiltersConfigured": "No filters configured for this report.",
     "rememberedParams": "Filled in with the values you last ran (kept for 30 minutes).",
     "resetParams": "Reset to defaults",
-    "openFilters": "Open filters"
+    "openFilters": "Open filters",
+    "unavailableForBu": "This report is not available for this business unit"
   },
   "reportSchedule": {
     "title": "Report Schedules",
@@ -5011,7 +5012,9 @@
     "notifyAtColumn": "Notify",
     "namePlaceholder": "Daily Inventory Report",
     "creating": "Creating…",
-    "createFailed": "Failed to create schedule"
+    "createFailed": "Failed to create schedule",
+    "templateUnavailable": "Report unavailable",
+    "templateUnavailableHint": "This report is no longer available for this business unit, so scheduled runs are skipped. Delete the schedule or ask an admin to change the report's settings."
   },
   "reportHistory": {
     "title": "Report History",

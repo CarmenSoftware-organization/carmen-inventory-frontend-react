@@ -101,15 +101,27 @@ export function useScheduleTableColumns({
     {
       accessorKey: "is_active",
       header: t("active"),
-      cell: ({ getValue }) => (
-        <Badge
-          variant={getValue<boolean>() ? "default" : "secondary"}
-          size="sm"
-        >
-          {getValue<boolean>() ? ts("active") : ts("inactive")}
-        </Badge>
+      cell: ({ getValue, row }) => (
+        <div className="flex flex-wrap items-center gap-1">
+          <Badge
+            variant={getValue<boolean>() ? "default" : "secondary"}
+            size="sm"
+          >
+            {getValue<boolean>() ? ts("active") : ts("inactive")}
+          </Badge>
+          {/* template ใช้กับ BU นี้ไม่ได้แล้ว (allow/deny BU หรือวิธีคิดต้นทุน) — รอบรันถูกข้าม */}
+          {row.original.template_available === false && (
+            <Badge
+              variant="warning"
+              size="sm"
+              title={t("templateUnavailableHint")}
+            >
+              {t("templateUnavailable")}
+            </Badge>
+          )}
+        </div>
       ),
-      size: 90,
+      size: 160,
     },
     {
       accessorKey: "next_run_at",
