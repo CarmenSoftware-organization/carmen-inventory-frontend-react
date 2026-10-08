@@ -175,7 +175,8 @@ export function BuWidgetSection({
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        ...(titleI18n ? { title_i18n: titleI18n } : {}),
+        // title คู่กับ title_i18n เป็น fallback ของ backend รุ่นเก่า (backend ใหม่ใช้ title_i18n เป็นหลัก)
+        ...(titleI18n ? { title: titleI18n.en, title_i18n: titleI18n } : {}),
         params,
         display,
         module: wireModule,
@@ -199,7 +200,13 @@ export function BuWidgetSection({
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display, title_i18n: titleI18n },
+      {
+        id: target.id,
+        params,
+        display,
+        title: titleI18n?.en ?? null,
+        title_i18n: titleI18n,
+      },
       {
         onSuccess: () => {
           warnOnce();

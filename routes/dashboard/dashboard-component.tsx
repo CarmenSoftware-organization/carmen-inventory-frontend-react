@@ -273,7 +273,7 @@ const SavedWidgetsSection = () => {
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        ...(titleI18n ? { title_i18n: titleI18n } : {}),
+        ...(titleI18n ? { title: titleI18n.en, title_i18n: titleI18n } : {}),
         params,
         display,
       },
@@ -294,7 +294,13 @@ const SavedWidgetsSection = () => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display, title_i18n: titleI18n },
+      {
+        id: target.id,
+        params,
+        display,
+        title: titleI18n?.en ?? null,
+        title_i18n: titleI18n,
+      },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));

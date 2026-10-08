@@ -192,7 +192,7 @@ interface CreateWidgetDto {
 }
 
 interface UpdateWidgetDto {
-  readonly title?: string;
+  readonly title?: string | null;
   readonly title_i18n?: LocalizedTitle | null;
   readonly order_index?: number;
   readonly params?: WidgetParams;
