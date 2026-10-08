@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useInViewport } from "@/hooks/use-in-viewport";
+import { useWidgetTitle } from "./use-widget-title";
 import { cn } from "@/lib/utils";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
@@ -90,6 +91,7 @@ export function SortableWidgetItem({
   editable = true,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
+  const titleOf = useWidgetTitle();
   const {
     attributes,
     listeners,
@@ -109,7 +111,7 @@ export function SortableWidgetItem({
     transition,
   };
 
-  const displayTitle = widget.title || detail?.meta.name || widget.dataset_id;
+  const displayTitle = titleOf(widget, dataset?.name ?? detail?.meta.name);
   const moduleName = inferModuleName(widget.dataset_id);
   const gridClass = gridClasses(widget.widget_type, widget.display);
   // shape มาจาก catalogue ก่อน (รู้ตั้งแต่ยังไม่โหลดข้อมูล) แล้วค่อย fallback ไป meta

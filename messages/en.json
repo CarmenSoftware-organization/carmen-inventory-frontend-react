@@ -4337,6 +4337,10 @@
       "deleteAria": "Delete widget {title}",
       "configureTitle": "Configure Widget",
       "configureDescription": "Choose parameters for \"{name}\"",
+      "titleSection": "Title",
+      "titleEn": "English",
+      "titleTh": "Thai (optional)",
+      "titleEnRequired": "Enter the English title before the Thai one",
       "configureAria": "Configure widget {title}",
       "paramsAll": "All",
       "preview": "Preview",
@@ -4436,6 +4440,126 @@
       "deleteTitle": "Remove BU widget",
       "deleteConfirm": "Remove \"{title}\" for everyone in this business unit?",
       "customizeWarning": "This business unit's dashboard now differs from the platform default, so future platform updates will no longer be applied automatically."
+    },
+    "datasets": {
+      "config": {
+        "cn-by-reason": "Credit notes by reason",
+        "exchange-rate-latest": "Latest exchange rates",
+        "location-active-count": "Active locations",
+        "tax-profile-by-rate": "Tax profiles by rate",
+        "vendor-by-business-type": "Vendors by business type"
+      },
+      "document": {
+        "grn-by-status": "Good Received Note by status",
+        "grn-count": "Good Received Note count",
+        "grn-created-series": "Good Received Note created (series)",
+        "grn-pending": "Good Received Note pending",
+        "po-by-status": "Purchase Order by status",
+        "po-count": "Purchase Order count",
+        "po-created-series": "Purchase Order created (series)",
+        "po-pending": "Purchase Order pending",
+        "po-rejected": "Rejected POs",
+        "po-sent-back": "Sent Back POs",
+        "pr-by-status": "Purchase Request by status",
+        "pr-count": "Purchase Request count",
+        "pr-created-series": "Purchase Request created (series)",
+        "pr-pending": "Purchase Request pending",
+        "pr-rejected": "Rejected PRs",
+        "pr-sent-back": "Sent Back PRs",
+        "pr-table": "Purchase Request table",
+        "sr-by-status": "Store Requisition by status",
+        "sr-count": "Store Requisition count",
+        "sr-created-series": "Store Requisition created (series)",
+        "sr-issued": "Store Requisition issued",
+        "sr-pending": "Store Requisition pending",
+        "sr-rejected": "Rejected SRs",
+        "sr-sent-back": "Sent Back SRs"
+      },
+      "equipment": {
+        "by-category": "Equipment by category",
+        "total-active": "Active equipment"
+      },
+      "inventory": {
+        "below-par-by-location": "Below par by location",
+        "below-par-count": "Items below par",
+        "below-par-items": "Replenishment list",
+        "issue-by-priority": "Issues by priority",
+        "issue-open": "Open issues",
+        "low-stock-count": "Low stock items",
+        "most-active-products": "Most active products (inventory)",
+        "physical-count-by-status": "Physical count by status",
+        "physical-count-pending": "Pending physical counts",
+        "spot-check-by-status": "Spot Check by status",
+        "spot-check-pending": "Pending Spot Checks",
+        "stock-in-by-status": "Stock In by status",
+        "stock-in-pending": "Pending Stock In",
+        "stock-out-by-status": "Stock Out by status",
+        "stock-out-pending": "Pending Stock Out",
+        "transactions-by-location-month": "Inventory tx by location × month",
+        "transactions-daily": "Inventory transactions (daily)"
+      },
+      "lab": {
+        "po-issued-series": "PO issued (series)",
+        "po-spend-series": "PO spend (series)",
+        "pr-amount-by-department": "PR amount by department",
+        "pr-by-status-recent": "PR by status (recent)",
+        "pr-count-recent": "PR count (recent)",
+        "pr-created-series": "PR created (series)"
+      },
+      "pricelist": {
+        "active-count": "Active pricelists",
+        "by-status": "Pricelists by status",
+        "by-vendor-top": "Pricelists by vendor (top N)",
+        "expiring-soon": "Pricelists expiring (≤30d)"
+      },
+      "procurement": {
+        "po-by-vendor-top": "Top vendors by PO spend",
+        "pr-by-department": "PR by department",
+        "pr-by-status": "PR by status",
+        "slowest-po-approvals": "Slowest PO approvals",
+        "slowest-pr-approvals": "Slowest PR approvals",
+        "spend-by-vendor-month": "Spend by vendor × month",
+        "spend-daily": "PO spend (daily)",
+        "top-products-by-quantity": "Top products by PR quantity"
+      },
+      "product": {
+        "added-7d": "Products added (7d)",
+        "added-daily": "Products added (daily)",
+        "by-category-top": "Products by category (top N)",
+        "by-item-group-top": "Products by item group (top N)",
+        "by-status": "Products by status",
+        "by-unit": "Products by inventory unit",
+        "category-total": "Product categories",
+        "top-vendors-by-product-count": "Top vendors by product coverage",
+        "total-active": "Active products",
+        "total-inactive": "Inactive products",
+        "updated-daily": "Products updated (daily)",
+        "without-vendor": "Products without vendor"
+      },
+      "recipe": {
+        "added-7d": "Recipes added (7d)",
+        "added-daily": "Recipes added (daily)",
+        "average-ingredients": "Avg ingredients per recipe",
+        "by-category-top": "Recipes by category (top N)",
+        "by-cuisine-top": "Recipes by cuisine (top N)",
+        "cuisines-total": "Cuisine types",
+        "most-complex": "Most complex recipes",
+        "total-active": "Active recipes"
+      },
+      "rfp": {
+        "active": "Active RFPs",
+        "issued-daily": "RFPs issued (daily)",
+        "upcoming-7d": "Upcoming RFPs (7d)"
+      },
+      "vendor": {
+        "added-7d": "Vendors added (7d)",
+        "total-active": "Active vendors",
+        "without-products": "Vendors without products"
+      },
+      "workflow": {
+        "cn-pending-approval": "Pending CN approvals",
+        "my-pending-pr": "My pending PRs"
+      }
     }
   },
   "profile": {

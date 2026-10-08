@@ -34,6 +34,8 @@ import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section
 import { useBuDashboardWidgets } from "@/hooks/use-bu-dashboard-widgets";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
+import { useWidgetTitle } from "@/components/dashboard-widget/use-widget-title";
+import { customWidgetTitle } from "@/components/dashboard-widget/widget-title";
 import {
   myDashboardWidgetDataQueryOptions,
   useCreateMyDashboardWidget,
@@ -44,6 +46,7 @@ import {
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,
+  LocalizedTitle,
   MyDashboardWidgetListResponse,
   WidgetDisplay,
   WidgetParams,
@@ -147,6 +150,7 @@ const SavedWidgetsSection = () => {
   const tt = useTranslations("toast");
   const queryClient = useQueryClient();
   const buCode = useBuCode();
+  const titleOf = useWidgetTitle();
   const [pendingDelete, setPendingDelete] = useState<MyDashboardWidget | null>(
     null,
   );
@@ -251,7 +255,6 @@ const SavedWidgetsSection = () => {
       {
         dataset_id: ds.id,
         widget_type: defaultWidgetTypeFor(ds),
-        title: ds.name,
       },
       {
         onSuccess: () =>
@@ -263,13 +266,14 @@ const SavedWidgetsSection = () => {
   const handleCreateWithParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        title: pendingAdd.name,
+        ...(titleI18n ? { title: titleI18n.en, title_i18n: titleI18n } : {}),
         params,
         display,
       },
@@ -282,11 +286,21 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleUpdateParams = (params: WidgetParams, display: WidgetDisplay) => {
+  const handleUpdateParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display },
+      {
+        id: target.id,
+        params,
+        display,
+        title: titleI18n?.en ?? null,
+        title_i18n: titleI18n,
+      },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -397,8 +411,9 @@ const SavedWidgetsSection = () => {
     });
   };
 
-  const deleteTitleText =
-    pendingDelete?.title || pendingDelete?.dataset_id || "";
+  const deleteTitleText = pendingDelete
+    ? titleOf(pendingDelete, datasetById.get(pendingDelete.dataset_id)?.name)
+    : "";
   // dataset ที่ไม่อยู่ใน catalogue (ถูกถอดออกไปแล้ว) เปิด dialog ไม่ได้ เพราะฟอร์ม
   // param สร้างจาก descriptor ของมัน
   const configDataset = pendingConfig
@@ -532,6 +547,7 @@ const SavedWidgetsSection = () => {
           dataset={configDataset}
           initialParams={pendingConfig.params}
           initialDisplay={pendingConfig.display}
+          initialTitle={customWidgetTitle(pendingConfig, configDataset.name)}
           widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleUpdateParams}

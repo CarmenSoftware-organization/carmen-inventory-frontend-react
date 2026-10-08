@@ -39,11 +39,14 @@ import {
   useUpdateBuDashboardWidget,
 } from "@/hooks/use-bu-dashboard-widgets";
 import { useCan } from "@/hooks/use-can";
+import { useWidgetTitle } from "./use-widget-title";
+import { customWidgetTitle } from "./widget-title";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   BuDashboardWidget,
   BuDashboardWidgetListResponse,
+  LocalizedTitle,
   WidgetDisplay,
   WidgetParams,
   WidgetType,
@@ -86,6 +89,7 @@ export function BuWidgetSection({
     null,
   );
   const [pendingAdd, setPendingAdd] = useState<DashboardDataset | null>(null);
+  const titleOf = useWidgetTitle();
   const [pendingConfig, setPendingConfig] = useState<BuDashboardWidget | null>(
     null,
   );
@@ -149,7 +153,6 @@ export function BuWidgetSection({
       {
         dataset_id: ds.id,
         widget_type: defaultWidgetTypeFor(ds),
-        title: ds.name,
         module: wireModule,
         order_index: nextOrder,
       },
@@ -165,13 +168,15 @@ export function BuWidgetSection({
   const handleCreateWithParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        title: pendingAdd.name,
+        // title คู่กับ title_i18n เป็น fallback ของ backend รุ่นเก่า (backend ใหม่ใช้ title_i18n เป็นหลัก)
+        ...(titleI18n ? { title: titleI18n.en, title_i18n: titleI18n } : {}),
         params,
         display,
         module: wireModule,
@@ -187,11 +192,21 @@ export function BuWidgetSection({
     );
   };
 
-  const handleConfigure = (params: WidgetParams, display: WidgetDisplay) => {
+  const handleConfigure = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display },
+      {
+        id: target.id,
+        params,
+        display,
+        title: titleI18n?.en ?? null,
+        title_i18n: titleI18n,
+      },
       {
         onSuccess: () => {
           warnOnce();
@@ -252,9 +267,7 @@ export function BuWidgetSection({
   };
 
   const deleteTitleText = pendingDelete
-    ? pendingDelete.title ||
-      datasetsById.get(pendingDelete.dataset_id)?.name ||
-      pendingDelete.dataset_id
+    ? titleOf(pendingDelete, datasetsById.get(pendingDelete.dataset_id)?.name)
     : "";
   const configDataset = pendingConfig
     ? datasetsById.get(pendingConfig.dataset_id)
@@ -345,6 +358,7 @@ export function BuWidgetSection({
           dataset={configDataset}
           initialParams={pendingConfig.params}
           initialDisplay={pendingConfig.display}
+          initialTitle={customWidgetTitle(pendingConfig, configDataset.name)}
           widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleConfigure}
