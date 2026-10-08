@@ -35,6 +35,7 @@ import { useBuDashboardWidgets } from "@/hooks/use-bu-dashboard-widgets";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
 import { useWidgetTitle } from "@/components/dashboard-widget/use-widget-title";
+import { customWidgetTitle } from "@/components/dashboard-widget/widget-title";
 import {
   myDashboardWidgetDataQueryOptions,
   useCreateMyDashboardWidget,
@@ -45,6 +46,7 @@ import {
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,
+  LocalizedTitle,
   MyDashboardWidgetListResponse,
   WidgetDisplay,
   WidgetParams,
@@ -264,12 +266,14 @@ const SavedWidgetsSection = () => {
   const handleCreateWithParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
+        ...(titleI18n ? { title_i18n: titleI18n } : {}),
         params,
         display,
       },
@@ -282,11 +286,15 @@ const SavedWidgetsSection = () => {
     );
   };
 
-  const handleUpdateParams = (params: WidgetParams, display: WidgetDisplay) => {
+  const handleUpdateParams = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display },
+      { id: target.id, params, display, title_i18n: titleI18n },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -533,6 +541,7 @@ const SavedWidgetsSection = () => {
           dataset={configDataset}
           initialParams={pendingConfig.params}
           initialDisplay={pendingConfig.display}
+          initialTitle={customWidgetTitle(pendingConfig, configDataset.name)}
           widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleUpdateParams}

@@ -40,11 +40,13 @@ import {
 } from "@/hooks/use-bu-dashboard-widgets";
 import { useCan } from "@/hooks/use-can";
 import { useWidgetTitle } from "./use-widget-title";
+import { customWidgetTitle } from "./widget-title";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   BuDashboardWidget,
   BuDashboardWidgetListResponse,
+  LocalizedTitle,
   WidgetDisplay,
   WidgetParams,
   WidgetType,
@@ -166,12 +168,14 @@ export function BuWidgetSection({
   const handleCreateWithParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
+        ...(titleI18n ? { title_i18n: titleI18n } : {}),
         params,
         display,
         module: wireModule,
@@ -187,11 +191,15 @@ export function BuWidgetSection({
     );
   };
 
-  const handleConfigure = (params: WidgetParams, display: WidgetDisplay) => {
+  const handleConfigure = (
+    params: WidgetParams,
+    display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
+  ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display },
+      { id: target.id, params, display, title_i18n: titleI18n },
       {
         onSuccess: () => {
           warnOnce();
@@ -343,6 +351,7 @@ export function BuWidgetSection({
           dataset={configDataset}
           initialParams={pendingConfig.params}
           initialDisplay={pendingConfig.display}
+          initialTitle={customWidgetTitle(pendingConfig, configDataset.name)}
           widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleConfigure}
