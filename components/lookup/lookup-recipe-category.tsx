@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useRecipeCategory } from "@/hooks/use-recipe-category";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { RecipeCategory } from "@/types/recipe-category";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type RecipeCategoryLookup } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupRecipeCategoryProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
   /** ส่ง object เต็มของหมวดที่ผู้ใช้เพิ่งเลือก (ฟอร์มหมวดใช้คำนวณ level จากหมวดแม่) */
-  readonly onItemChange?: (category: RecipeCategory) => void;
+  readonly onItemChange?: (category: RecipeCategoryLookup) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -29,8 +25,8 @@ interface LookupRecipeCategoryProps {
 /**
  * Lookup Popover สำหรับเลือกหมวดหมู่ของสูตรอาหาร (Recipe Category)
  *
- * ดึงข้อมูลผ่าน `useRecipeCategory` hook พร้อม server-side search และ infinite scroll
- * (perpage 30) filter เฉพาะ `is_active = true` และรองรับ `excludeIds` กัน duplicate
+ * ดึงข้อมูลผ่าน Lookup API (`recipe_category`) พร้อม server-side search และ infinite scroll
+ * (perpage 30) endpoint กรอง active ให้เอง รองรับ `excludeIds` กัน duplicate
  *
  * @param value - recipe category id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -67,10 +63,8 @@ export function LookupRecipeCategory({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<RecipeCategory>({
-    useListHook: useRecipeCategory,
+  } = useLookupResource<RecipeCategoryLookup>("recipe_category", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
     filter: excludeIds ? (c) => !excludeIds.has(c.id) : undefined,
@@ -90,7 +84,7 @@ export function LookupRecipeCategory({
       items={categories}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.name}
+      getLabel={lookupLabel}
       defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("category") })}
       searchPlaceholder={tl("search", { entity: tfl("category") })}

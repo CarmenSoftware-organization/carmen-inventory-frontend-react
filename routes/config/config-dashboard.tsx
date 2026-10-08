@@ -6,6 +6,7 @@ import {
   LazyWidget,
   WidgetSkeleton,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
 import { gridClasses } from "@/components/dashboard-widget/widget-display";
 import { AppTile } from "@/components/icons/tiles";
 import { useConfigWidgets } from "@/hooks/use-dashboard-widgets";
@@ -29,6 +30,7 @@ function subTileFor(datasetId: string): string {
 export default function ConfigDashboard() {
   const t = useTranslations("config.dashboard");
   const td = useTranslations("dashboardWidget");
+  const tBu = useTranslations("dashboard.buWidget");
   const { data, isLoading, isError, error } = useConfigWidgets();
 
   // เรียงจาก config ล้วน — ค่าของแต่ละใบมาทีหลังแยกกัน (ดู `LazyWidget`)
@@ -150,6 +152,8 @@ export default function ConfigDashboard() {
           </div>
         </Section>
       )}
+
+      <BuWidgetSection module="config" title={tBu("sectionModule")} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { AppVersionLabel } from "@/components/app-version-label";
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Link } from "react-router";
@@ -49,6 +50,7 @@ export function NotFoundComponent() {
 
       <footer className="text-muted-foreground border-border text-micro border-t px-6 py-3 text-center">
         {t("footer", { year })}
+        <AppVersionLabel className="mt-1" />
       </footer>
     </div>
   );

@@ -60,7 +60,7 @@ export function LocationCell({
             if (value) onPicked?.();
           }}
           onItemChange={(location) => {
-            form.setValue(`items.${index}.location_name`, location.name);
+            form.setValue(`items.${index}.location_name`, location.name ?? "");
             form.setValue(`items.${index}.location_code`, location.code ?? "");
             form.setValue(
               `items.${index}.location_type`,

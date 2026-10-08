@@ -20,6 +20,11 @@ interface ConfigCrudOptions {
   cacheProfile?: CacheProfile;
   /** ส่งต่อให้ create/update/delete — เช่น `{ preferServerMessage: true }` */
   mutationMeta?: ApiErrorMeta;
+  /**
+   * key อื่นที่ mutation ต้องล้างด้วย — เช่น `["lookup"]` ของ resource ที่ lookup อ่านค่าเงิน/ภาษี
+   * (exchange_rate, tax_rate) จาก Lookup API ซึ่ง cache แยกจาก list ของ crud นี้
+   */
+  extraInvalidateKeys?: readonly unknown[];
 }
 
 /**
@@ -50,6 +55,7 @@ export function createConfigCrud<T, TCreate>({
   updateMethod = "PUT",
   cacheProfile = CACHE_STATIC,
   mutationMeta,
+  extraInvalidateKeys = [],
 }: ConfigCrudOptions): {
   useList: (
     params?: ParamsDto,
@@ -162,7 +168,7 @@ export function createConfigCrud<T, TCreate>({
   function useCreate() {
     return useApiMutation<TCreate>({
       mutationFn: (data, buCode) => api.create(buCode, data),
-      invalidateKeys: [queryKey],
+      invalidateKeys: [queryKey, ...extraInvalidateKeys],
       errorMessage: `Failed to create ${label}`,
       meta: mutationMeta,
     });
@@ -172,7 +178,7 @@ export function createConfigCrud<T, TCreate>({
     return useApiMutation<TCreate & { id: string; doc_version?: number }>({
       mutationFn: ({ id, ...data }, buCode) =>
         api.update(buCode, id, data as TCreate),
-      invalidateKeys: [queryKey],
+      invalidateKeys: [queryKey, ...extraInvalidateKeys],
       errorMessage: `Failed to update ${label}`,
       meta: mutationMeta,
     });
@@ -181,7 +187,7 @@ export function createConfigCrud<T, TCreate>({
   function useDelete() {
     return useApiMutation<string>({
       mutationFn: (id, buCode) => api.remove(buCode, id),
-      invalidateKeys: [queryKey],
+      invalidateKeys: [queryKey, ...extraInvalidateKeys],
       errorMessage: `Failed to delete ${label}`,
       meta: mutationMeta,
     });

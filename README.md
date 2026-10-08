@@ -55,11 +55,12 @@ account.
 | `bun run dev:dev` | Dev server serving `public/config.dev.json` |
 | `bun run dev:uat` | Dev server serving `public/config.uat.json` |
 | `bun run dev:prod` | Dev server serving `public/config.prod.json` |
-| `bun run build` | `tsc --noEmit` + `vite build` → `dist/` (bakes `config.prod.json` as `dist/config.json`) |
+| `bun run build` | `tsc --noEmit` + bump the patch in `package.json` (`scripts/bump-build.ts`) + `vite build` → `dist/` (bakes `config.prod.json` as `dist/config.json`). The bump is skipped when `CI` is set, there is no `.git`, or `SKIP_VERSION_BUMP=1` |
 | `bun run build:local` | Same, but `dist/config.json` = `public/config.local.json` |
 | `bun run build:dev` | Same, but `dist/config.json` = `public/config.dev.json` |
 | `bun run build:uat` | Same, but `dist/config.json` = `public/config.uat.json` |
 | `bun run build:prod` | Same, but `dist/config.json` = `public/config.prod.json` |
+| `bun run build:force` | Delete `dist/`, `node_modules/.vite` and `tsconfig.tsbuildinfo`, then `build` — forces a full `tsc` re-check (combine with `BUILD_CONFIG_FILE=…`) |
 | `bun run build:bump [patch\|minor\|major]` | Cut a release: bump `package.json` + release commit + annotated tag (local only, never pushes); run on `main` with a clean tree; gates on typecheck + lint + `test:run`; prompts for the level if omitted |
 | `bun run typecheck` | `tsc --noEmit` only |
 | `bun run preview` | Serve the production build locally |
@@ -97,7 +98,7 @@ scripts/setup-gcs-cdn.sh                            # GCS CDN + security headers
 | `BACKEND_URL` | Yes | Backend origin. `""` means same-origin (Docker nginx proxy, or the Vite dev proxy) | `https://backend.example.com` |
 | `X_APP_ID` | Yes | App id this deployment is registered under in the backend's allowlist | `carmen-inventory` |
 | `WS_URL` | No | WebSocket endpoint; omit to disable real-time notifications | `wss://backend.example.com/ws` |
-| `LICENSE_ENFORCEMENT` | No | `false` (default) = shadow mode — the license banner and write locks do nothing. Turn on only after the backend has enforcement on **and** every BU is backfilled | `true` |
+| `LICENSE_ENFORCEMENT` | No | `false` (default) = shadow mode — the license banner and write locks do nothing. Turn on only after the backend has enforcement on **and** every BU is backfilled. **Already `true` in every real environment's config** | `true` |
 | `OTEL_ENABLED` | No | Ship traces/errors to SigNoz via `${BACKEND_URL}/telemetry/v1`. Not set = off, and the OTel SDK is never even downloaded | `true` |
 | `OTEL_ENVIRONMENT` | No | Environment name attached to every trace/error. Not set = `dev` | `prod` |
 
@@ -114,6 +115,8 @@ scripts/setup-gcs-cdn.sh                            # GCS CDN + security headers
 | `VITE_DEV_PROXY_TARGET` | No | Dev only — proxy `/api/*` to this backend so dev never needs CORS | `http://localhost:4000` |
 | `BUILD_CONFIG_FILE` | No | Which `public/<file>` is emitted as `dist/config.json` (default `config.prod.json`) | `config.uat.json` |
 | `APP_CONFIG_JSON` | No | Whole `config.json` as a JSON string; the fallback when `public/<BUILD_CONFIG_FILE>` is absent (git clones, e.g. CI). Validated at build time | `{"BACKEND_URL":"…","X_APP_ID":"…"}` |
+| `SKIP_VERSION_BUMP` | No | `1` = `bun run build` does not bump the patch version (also skipped automatically when `CI` is set or `.git` is absent) | `1` |
+| `APP_COMMIT_SHA` | No | Commit shown in the version line; falls back to `VERCEL_GIT_COMMIT_SHA`, then `git rev-parse`, then `unknown` — set it where `.git` is absent (Docker) | `4fd0efb` |
 | `BACKEND_REPO` | For `gen:license-fixture` | Path to a `carmen-turborepo-backend-v2` checkout | `../carmen-turborepo-backend-v2` |
 
 Container runtime (`docker-compose.yml`): `BACKEND_URL`, `X_APP_ID`, `WS_URL`,
@@ -167,11 +170,12 @@ starts (as of 2026-09-08); `vercel --prod` from a developer machine is the only 
 
 ## Testing
 
-- **1,522 tests across 195 files** (Vitest + Testing Library) — auth flows (refresh
+- **238 test files** (Vitest + Testing Library) — auth flows (refresh
   mutex, 401 retry), http-client URL rewrite, route guards, i18n, security-header/CSP
   hashes, license gating, and per-module hook/component tests.
-- CI (`.github/workflows/ci.yml`) runs `lint` → `test:run` → `build` on every push and PR
-  to `main`; `build` includes `tsc --noEmit`.
+- CI (`.github/workflows/ci.yml`) runs `lint` → `test:run` → `build`, but is
+  **manual-only** (`workflow_dispatch`) — nothing runs on push or PR, so run the three
+  locally before merging; `build` includes `tsc --noEmit`.
 - **Playwright e2e** lives in the dedicated suite
   [carmen-inventory-frontend-e2e](../carmen-inventory-frontend-e2e) (191+ TC-annotated
   tests, frontend-agnostic). Run it against this SPA with:

@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useDeliveryPoint } from "@/hooks/use-delivery-point";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { DeliveryPoint } from "@/types/delivery-point";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupDeliveryPointProps {
@@ -48,10 +44,8 @@ export function LookupDeliveryPoint({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<DeliveryPoint>({
-    useListHook: useDeliveryPoint,
+  } = useLookupResource("delivery_point", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
   });
@@ -62,7 +56,7 @@ export function LookupDeliveryPoint({
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);
-        if (item) onItemChange?.(item);
+        if (item) onItemChange?.({ id: item.id, name: lookupLabel(item) });
       }}
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
@@ -70,7 +64,7 @@ export function LookupDeliveryPoint({
       items={deliveryPoints}
       selectedItems={selectedItems}
       getId={(d) => d.id}
-      getLabel={(d) => d.name}
+      getLabel={lookupLabel}
       placeholder={
         placeholder ?? tl("select", { entity: tfl("deliveryPoint") })
       }

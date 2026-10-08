@@ -218,6 +218,8 @@ export function StoreRequisitionForm({
     toLocationId: toLocationId ?? "",
     workflowId: workflowId ?? "",
     role: storeRequisition ? storeRequisition.role : STAGE_ROLE.CREATE,
+    srId: storeRequisition?.id,
+    docStatus: storeRequisition?.doc_status,
   };
 
   return (

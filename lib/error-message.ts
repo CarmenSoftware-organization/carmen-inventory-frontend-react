@@ -80,11 +80,20 @@ function fieldLabels(
   return [...seen];
 }
 
-function fallbackKey(code: ErrorCode, statusCode?: number): string {
+function fallbackKey(
+  code: ErrorCode,
+  statusCode?: number,
+  appCode?: string,
+): string {
   // 400 ทั่วไปไม่ได้แปลว่า "กรอกไม่ครบ" เสมอไป กรอกครบแต่ค่าผิดก็ 400 —
   // บอกให้ตรวจฟอร์มอีกรอบตรงกว่า ส่วนโค้ดที่บอกชัดว่าขาด field ค่อยใช้ missingField
   if (code === ERROR_CODES.MISSING_REQUIRED_FIELD) return "missingField";
-  if (statusCode === 409) return "documentChanged";
+  // 409 ที่ไม่มีรหัส catalog คือ doc_version ชนกันจริง (OptimisticLockError →
+  // TryCatch ของ backend คืน 409 เปล่า ๆ) ส่วน 409 ที่มีรหัสคือกฎธุรกิจปฏิเสธ —
+  // ซ้ำ ถูกใช้อยู่ หรือของที่รับเข้าถูกเบิกไปแล้ว — "มีคนแก้ใบนี้ รีเฟรชแล้วลองใหม่"
+  // ผิดทั้งเหตุและทางแก้ ผู้ใช้จะรีเฟรชแล้วกดซ้ำไปเรื่อย ๆ โดยไม่มีวันผ่าน
+  // (void GRN ที่ของถูกเบิกไปแล้ว: GRN_RECEIPT_ALREADY_CONSUMED)
+  if (statusCode === 409) return appCode ? "conflictsWithData" : "documentChanged";
   return "invalidForm";
 }
 
@@ -144,7 +153,7 @@ export function getUserErrorMessage(
         return t("checkFields", { fields: labels.join(", ") });
       }
     }
-    return t(fallbackKey(err.code, err.statusCode));
+    return t(fallbackKey(err.code, err.statusCode, err.appCode));
   }
 
   const key = CODE_TO_KEY[err.code];

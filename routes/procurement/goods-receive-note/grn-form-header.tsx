@@ -75,7 +75,7 @@ export function GrnFormHeader({
               <LookupVendor
                 value={field.value ?? ""}
                 onValueChange={field.onChange}
-                onItemChange={(v) => form.setValue("vendor_name", v.name)}
+                onItemChange={(v) => form.setValue("vendor_name", v.name ?? "")}
                 defaultLabel={vendorName || undefined}
                 disabled={disabled || isPo || lockIdentity}
                 error={errors.vendor_id?.message}
@@ -122,8 +122,11 @@ export function GrnFormHeader({
                     value={field.value ?? ""}
                     onValueChange={field.onChange}
                     onItemChange={(currency) => {
-                      form.setValue("currency_name", currency.code);
-                      form.setValue("exchange_rate", currency.exchange_rate);
+                      form.setValue("currency_name", currency.code ?? "");
+                      form.setValue(
+                        "exchange_rate",
+                        currency.exchange_rate ?? 1,
+                      );
                     }}
                     disabled={disabled || fromWizard || lockCommercial}
                     className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
@@ -183,11 +186,11 @@ export function GrnFormHeader({
                 onValueChange={(value, creditTerm) => {
                   field.onChange(value);
                   if (creditTerm) {
-                    form.setValue("credit_term_name", creditTerm.name);
-                    form.setValue("credit_term_days", creditTerm.value);
+                    form.setValue("credit_term_name", creditTerm.name ?? "");
+                    form.setValue("credit_term_days", creditTerm.value ?? 0);
                     syncDueDate(
                       form.getValues("invoice_date"),
-                      creditTerm.value,
+                      creditTerm.value ?? 0,
                     );
                   }
                 }}

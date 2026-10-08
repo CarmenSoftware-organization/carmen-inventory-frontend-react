@@ -245,7 +245,10 @@ export function PrItemExpand({
                   // จะ refresh (ทางอื่นที่ตั้งผู้ขายเซ็ตสองช่องคู่กันหมดอยู่แล้ว
                   // ดู pr-auto-allocate)
                   onItemChange={(vendor) =>
-                    form.setValue(`items.${index}.vendor_name`, vendor.name)
+                    form.setValue(
+                      `items.${index}.vendor_name`,
+                      vendor.name ?? "",
+                    )
                   }
                   // list โหลดทีละ 30 — ผู้ขายที่อยู่หลังหน้าแรกหาชื่อไม่เจอ
                   defaultLabel={watchVendorName || undefined}

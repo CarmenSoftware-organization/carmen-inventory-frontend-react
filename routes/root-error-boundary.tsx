@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useRouteError } from "react-router";
 import { I18nProvider } from "@/components/i18n-provider";
+import { VersionLine } from "@/components/app-version-label";
 import ModuleError from "@/components/ui/module-error-boundary";
 
 /**
@@ -40,6 +41,9 @@ export function RootErrorBoundary() {
     <I18nProvider>
       <div className="bg-background flex min-h-dvh flex-col">
         <ModuleError error={error} reset={() => void navigate(0)} />
+        {/* VersionLine ไม่ใช่ AppVersionLabel: ที่นี่ไม่มี QueryClientProvider ให้
+            useBackendVersion — แสดงแค่ส่วน App ซึ่งเป็นตัวที่ใช้แจ้งปัญหาหน้าพังอยู่แล้ว */}
+        <VersionLine className="mt-auto py-3" />
       </div>
     </I18nProvider>
   );

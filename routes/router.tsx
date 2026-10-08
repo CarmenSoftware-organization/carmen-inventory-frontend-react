@@ -18,6 +18,11 @@ export const router = createBrowserRouter([
     ErrorBoundary: RootErrorBoundary,
     children: [
       { path: "/login", lazy: () => import("./login/login.route") },
+      // ปลายทางของ Google sign-in — public เพราะมาถึงโดยยังไม่มี token (token อยู่ใน URL fragment)
+      {
+        path: "/login/callback",
+        lazy: () => import("./login/auth-callback.route"),
+      },
       { path: "/register", lazy: () => import("./register/register.route") },
       {
         path: "/register/verify",

@@ -30,8 +30,12 @@ import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section";
+import { useBuDashboardWidgets } from "@/hooks/use-bu-dashboard-widgets";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
+import { useWidgetTitle } from "@/components/dashboard-widget/use-widget-title";
+import { customWidgetTitle } from "@/components/dashboard-widget/widget-title";
 import {
   myDashboardWidgetDataQueryOptions,
   useCreateMyDashboardWidget,
@@ -42,12 +46,13 @@ import {
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,
+  LocalizedTitle,
   MyDashboardWidgetListResponse,
   WidgetDisplay,
   WidgetParams,
   WidgetType,
 } from "@/types/dashboard-widget";
-import { SortableWidgetItem } from "./sortable-widget-item";
+import { SortableWidgetItem } from "@/components/dashboard-widget/sortable-widget-item";
 import {
   GROUP_DATASETS,
   groupCreateParams,
@@ -59,8 +64,11 @@ import {
   parseGroupWidget,
 } from "./status-group";
 import { StatusGroupCard } from "./status-group-card";
-import { WidgetConfigDialog } from "./widget-config-dialog";
-import { defaultWidgetTypeFor, SUPPORTED_SHAPES } from "./widget-shape";
+import { WidgetConfigDialog } from "@/components/dashboard-widget/widget-config-dialog";
+import {
+  defaultWidgetTypeFor,
+  SUPPORTED_SHAPES,
+} from "@/components/dashboard-widget/widget-shape";
 
 const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
@@ -99,6 +107,7 @@ const useClientNow = (): Date | null => {
 
 export default function DashboardComponent() {
   const t = useTranslations("dashboard");
+  const tBu = useTranslations("dashboard.buWidget");
   const locale = useLocale();
   const { data: profile } = useProfile();
   const now = useClientNow();
@@ -126,7 +135,9 @@ export default function DashboardComponent() {
           </h1>
         </Reveal>
 
-        <Reveal delay={100}>
+        <BuWidgetSection module="main" title={tBu("sectionMain")} />
+
+        <Reveal delay={150}>
           <SavedWidgetsSection />
         </Reveal>
       </div>
@@ -139,6 +150,7 @@ const SavedWidgetsSection = () => {
   const tt = useTranslations("toast");
   const queryClient = useQueryClient();
   const buCode = useBuCode();
+  const titleOf = useWidgetTitle();
   const [pendingDelete, setPendingDelete] = useState<MyDashboardWidget | null>(
     null,
   );
@@ -149,6 +161,13 @@ const SavedWidgetsSection = () => {
     null,
   );
   const { data, isLoading, isError, error } = useMyDashboardWidgets();
+  // query key เดียวกับ BuWidgetSection → TanStack dedupe ไม่ยิงซ้ำ
+  const buQuery = useBuDashboardWidgets("main");
+  // ระหว่างโหลดยังไม่ถือว่าว่าง กัน EmptyState วาบก่อนส่วน BU โผล่
+  const buEmpty =
+    !buQuery.isLoading &&
+    ((buQuery.isError && !buQuery.data) ||
+      (buQuery.data?.items.length ?? 0) === 0);
   // id ของ widget ที่เลื่อนถึงแล้ว — เพิ่มอย่างเดียว ไม่ถอดออกตอน scroll ผ่านไป
   const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(
     () => new Set(),
@@ -236,7 +255,6 @@ const SavedWidgetsSection = () => {
       {
         dataset_id: ds.id,
         widget_type: defaultWidgetTypeFor(ds),
-        title: ds.name,
       },
       {
         onSuccess: () =>
@@ -248,13 +266,14 @@ const SavedWidgetsSection = () => {
   const handleCreateWithParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingAdd) return;
     createWidget.mutate(
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        title: pendingAdd.name,
+        ...(titleI18n ? { title: titleI18n.en, title_i18n: titleI18n } : {}),
         params,
         display,
       },
@@ -270,11 +289,18 @@ const SavedWidgetsSection = () => {
   const handleUpdateParams = (
     params: WidgetParams,
     display: WidgetDisplay,
+    titleI18n: LocalizedTitle | null,
   ) => {
     if (!pendingConfig) return;
     const target = pendingConfig;
     updateWidget.mutate(
-      { id: target.id, params, display },
+      {
+        id: target.id,
+        params,
+        display,
+        title: titleI18n?.en ?? null,
+        title_i18n: titleI18n,
+      },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -385,8 +411,9 @@ const SavedWidgetsSection = () => {
     });
   };
 
-  const deleteTitleText =
-    pendingDelete?.title || pendingDelete?.dataset_id || "";
+  const deleteTitleText = pendingDelete
+    ? titleOf(pendingDelete, datasetById.get(pendingDelete.dataset_id)?.name)
+    : "";
   // dataset ที่ไม่อยู่ใน catalogue (ถูกถอดออกไปแล้ว) เปิด dialog ไม่ได้ เพราะฟอร์ม
   // param สร้างจาก descriptor ของมัน
   const configDataset = pendingConfig
@@ -439,7 +466,8 @@ const SavedWidgetsSection = () => {
       {!isLoading &&
         !isError &&
         renderable.length === 0 &&
-        groupItems.length === 0 && <EmptyState />}
+        groupItems.length === 0 &&
+        buEmpty && <EmptyState />}
 
       {groupItems.length > 0 && (
         <div className="space-y-3">
@@ -519,6 +547,7 @@ const SavedWidgetsSection = () => {
           dataset={configDataset}
           initialParams={pendingConfig.params}
           initialDisplay={pendingConfig.display}
+          initialTitle={customWidgetTitle(pendingConfig, configDataset.name)}
           widgetType={pendingConfig.widget_type}
           isPending={updateWidget.isPending}
           onSubmit={handleUpdateParams}

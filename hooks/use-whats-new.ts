@@ -1,5 +1,5 @@
 import { startTransition, useEffect, useState } from "react";
-import { APP_VERSION } from "@/lib/version";
+import { APP_RELEASE } from "@/lib/version";
 
 const STORAGE_KEY = "carmen.whatsNew.lastSeen";
 
@@ -23,10 +23,10 @@ function writeLastSeen(version: string): void {
  * จัดการ logic "What's New" auto-popup
  *
  * อ่าน version ที่ผู้ใช้เห็นล่าสุดจาก localStorage ใน `useEffect` (กัน
- * hydration mismatch) แล้วเทียบกับ `APP_VERSION` (ฉีดตอน build จาก
- * `package.json` — เท่ากับฟิลด์ `current` ของ `changelog.json` เสมอ เพราะ
- * `bun run build:bump` เขียนทั้งคู่พร้อมกันในสคริปต์เดียว จึงใช้แทนกันได้โดยไม่
- * ต้อง import `lib/changelog.ts`) โหลดครั้งแรกสุด (ยังไม่มีค่าเดิม) จะตั้ง
+ * hydration mismatch) แล้วเทียบกับ `APP_RELEASE` (ฉีดตอน build จากฟิลด์
+ * `current` ของ `changelog.json` จึงไม่ต้อง import `lib/changelog.ts` — ห้ามใช้
+ * `APP_RELEASE` เพราะเลขนั้นขึ้นทุก build ผู้ใช้จะเจอ release เดิมซ้ำทุก deploy)
+ * โหลดครั้งแรกสุด (ยังไม่มีค่าเดิม) จะตั้ง
  * baseline เงียบๆ โดยไม่เด้ง dialog · version เดิม (ผู้ใช้เห็นแล้ว) ก็ไม่เด้ง
  * เช่นกัน — สองเคสนี้จบแบบ sync ไม่แตะ `changelog.json` เลย
  *
@@ -52,10 +52,10 @@ export function useWhatsNew() {
   useEffect(() => {
     const lastSeen = readLastSeen();
     if (lastSeen === null) {
-      writeLastSeen(APP_VERSION);
+      writeLastSeen(APP_RELEASE);
       return;
     }
-    if (lastSeen === APP_VERSION) return;
+    if (lastSeen === APP_RELEASE) return;
 
     let cancelled = false;
     import("@/lib/changelog")
@@ -77,7 +77,7 @@ export function useWhatsNew() {
   }, []);
 
   const markSeen = () => {
-    writeLastSeen(APP_VERSION);
+    writeLastSeen(APP_RELEASE);
     setShouldAutoOpen(false);
   };
 

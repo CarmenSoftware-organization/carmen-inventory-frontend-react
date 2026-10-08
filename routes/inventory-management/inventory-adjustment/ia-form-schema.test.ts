@@ -1,5 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { getDefaultValues, mapItemToPayload } from "./ia-form-schema";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
+import {
+  createAdjSchema,
+  getDefaultValues,
+  latestIssuableDate,
+  mapItemToPayload,
+} from "./ia-form-schema";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 
 const adjustment = {
@@ -103,5 +108,90 @@ describe("mapItemToPayload", () => {
     });
 
     expect("doc_version" in payload).toBe(false);
+  });
+});
+
+// e2e SO.3 (2026-10-02): the stock-out detail endpoint returned no line cost, the form took
+// undefined, and z.coerce.number turned it into NaN in a hidden field — Save then did nothing,
+// with no request and no toast.
+describe("getDefaultValues — stock-out line without a cost", () => {
+  const stockOut = {
+    id: "so-1",
+    so_date: "2026-07-15T00:00:00.000Z",
+    so_no: "SO260700002",
+    description: "",
+    adjustment_type: { id: "type-1" },
+    doc_status: "draft",
+    location: { id: "loc-1" },
+    stock_out_detail: [
+      {
+        id: "line-1",
+        product: { id: "prod-1", name: "Seaweed snack", local_name: "" },
+        inventory_unit: { id: "u-1", name: "BAG" },
+        description: null,
+        qty: 2,
+        doc_version: 0,
+      },
+    ],
+  } as unknown as InventoryAdjustment;
+
+  it("reads a missing cost as 0, and the form still validates", () => {
+    const values = getDefaultValues(stockOut);
+    expect(values.items[0]).toMatchObject({ cost_per_unit: 0, total_cost: 0 });
+
+    const tv = (key: string) => key;
+    const parsed = createAdjSchema(tv, tv).safeParse(values);
+    expect(parsed.success).toBe(true);
+  });
+});
+
+// SI/SO ลงวันที่อนาคตไม่ได้ (ผู้ใช้ขอ 2026-10-07) — ทั้งปฏิทินและ validation
+describe("SI/SO date — never after today", () => {
+  const tv = (key: string) => key;
+  const NOW = new Date(2026, 9, 7, 14, 30); // 7 ต.ค. 14:30 เวลาเครื่อง
+  const at = (y: number, m: number, d: number) => new Date(y, m, d).toISOString();
+  const form = (date: string) => ({
+    description: "",
+    doc_status: "draft",
+    adjustment_type_id: "type-1",
+    date,
+    location_id: "loc-1",
+    items: [
+      {
+        product_id: "prod-1",
+        product_name: "Sugar",
+        product_local_name: "",
+        unit_name: "KG",
+        qty: 1,
+        cost_per_unit: 0,
+        total_cost: 0,
+        description: "",
+      },
+    ],
+  });
+  const errorsOf = (date: string) => {
+    const parsed = createAdjSchema(tv, tv).safeParse(form(date));
+    return parsed.success ? [] : parsed.error.issues.map((i) => i.message);
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it("accepts today and any earlier day", () => {
+    expect(errorsOf(at(2026, 9, 7))).toEqual([]);
+    expect(errorsOf(at(2026, 9, 1))).toEqual([]);
+  });
+
+  it("refuses tomorrow", () => {
+    expect(errorsOf(at(2026, 9, 8))).toContain("dateAfterToday");
+  });
+
+  it("stops the calendar at today, or at the period end when that comes first", () => {
+    expect(latestIssuableDate().getDate()).toBe(7);
+    expect(latestIssuableDate(at(2026, 9, 31)).getDate()).toBe(7);
+    expect(latestIssuableDate(at(2026, 8, 30)).toISOString()).toBe(at(2026, 8, 30));
   });
 });

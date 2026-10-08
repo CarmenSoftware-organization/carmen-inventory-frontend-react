@@ -56,6 +56,8 @@ export function useProductCostByLocationQty(
   productId: string | undefined,
   locationId: string | undefined,
   qty: number | undefined,
+  /** วันที่ของเอกสาร (ใบจ่ายออก) — ราคาจากของที่มีอยู่ในวันนั้นเท่านั้น */
+  atDate?: string,
 ) {
   return useQuery<ProductCostByLocationQty>({
     queryKey: [
@@ -64,6 +66,7 @@ export function useProductCostByLocationQty(
       productId,
       locationId,
       qty,
+      atDate,
     ],
     queryFn: async () => {
       if (!buCode || !productId || !locationId || qty === undefined) {
@@ -75,6 +78,7 @@ export function useProductCostByLocationQty(
           productId,
           locationId,
           qty,
+          atDate,
         ),
       );
       if (!res.ok) throw new Error("Failed to fetch product cost");

@@ -2,18 +2,14 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useShelf } from "@/hooks/use-shelf";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { Shelf } from "@/types/shelf";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type LookupItem } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupShelfProps {
   readonly value: string;
   readonly onValueChange: (value: string) => void;
-  readonly onItemChange?: (shelf: Shelf) => void;
+  readonly onItemChange?: (shelf: LookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -36,10 +32,8 @@ export function LookupShelf({
   const [open, setOpen] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Shelf>({
-      useListHook: useShelf,
+    useLookupResource("location_shelf", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -61,7 +55,7 @@ export function LookupShelf({
       items={items}
       selectedItems={selectedItems}
       getId={(s) => s.id}
-      getLabel={(s) => s.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("shelf") })}
       searchPlaceholder={tl("search", { entity: tfl("shelf") })}
       disabled={disabled}

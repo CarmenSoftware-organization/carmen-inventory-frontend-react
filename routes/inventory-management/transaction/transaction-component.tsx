@@ -207,7 +207,7 @@ export default function TransactionComponent() {
               onChange(id);
               if (!id) setLocationLabel("");
             }}
-            onItemChange={(loc) => setLocationLabel(loc.name)}
+            onItemChange={(loc) => setLocationLabel(loc.name ?? "")}
             placeholder={t("allLocations")}
             size="sm"
           />
@@ -226,7 +226,7 @@ export default function TransactionComponent() {
             onValueChange={(id, item) => {
               onChange(id);
               if (!id) setCategoryLabel("");
-              else if (item) setCategoryLabel(item.name);
+              else if (item) setCategoryLabel(item.name ?? "");
             }}
             size="sm"
             className="w-full"

@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { usePriceListTemplate } from "@/hooks/use-price-list-template";
-import { useLookupPagination } from "@/hooks/use-lookup-pagination";
-import type { PriceListTemplate } from "@/types/price-list-template";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type LookupItem } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupPrtProps {
   readonly value: string;
-  readonly onValueChange: (value: string, template?: PriceListTemplate) => void;
+  readonly onValueChange: (value: string, template?: LookupItem) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -43,11 +42,8 @@ export function LookupPrt({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<PriceListTemplate>({
-    useListHook: usePriceListTemplate,
+  } = useLookupResource("pricelist_template", {
     search,
-    // ห้ามส่ง is_active — endpoint นี้ตอบ 500 ใช้ status แทน
-    serverFilter: "status|string:active",
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
   });
@@ -63,7 +59,7 @@ export function LookupPrt({
       items={templates}
       selectedItems={selectedItems}
       getId={(t) => t.id}
-      getLabel={(t) => t.name}
+      getLabel={lookupLabel}
       defaultLabel={defaultLabel}
       serverSideSearch
       onSearchChange={setSearch}

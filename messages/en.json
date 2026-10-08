@@ -715,7 +715,16 @@
       "tooManyAttempts": "Too many login attempts. Try again in {seconds}s.",
       "tooManyAttemptsFallback": "Too many login attempts. Please try again later.",
       "registerConflict": "This email or username is already in use",
-      "networkUnavailable": "Could not reach the server. Check your connection and try again."
+      "networkUnavailable": "Could not reach the server. Check your connection and try again.",
+      "googleFailed": "Google sign-in failed. Please try again.",
+      "googleNoAccount": "No account exists for this Google email address.",
+      "googleAccountConflict": "This email address conflicts with another account. Please contact your administrator.",
+      "googleTooManyAttempts": "Too many sign-in attempts. Please wait a moment and try again.",
+      "googleDisabled": "Google sign-in is turned off. Please sign in with your email and password."
+    },
+    "google": {
+      "or": "or",
+      "continue": "Continue with Google"
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",
@@ -867,6 +876,7 @@
     "missingField": "A required field is missing.",
     "invalidForm": "Some fields aren't filled in correctly. Check them and try again.",
     "documentChanged": "Someone else changed this document. Refresh the page and try again.",
+    "conflictsWithData": "This can't be done because it conflicts with data already recorded in the system.",
     "tryAgain": "Try again",
     "goBack": "Go back",
     "contactSupport": "Contact support",
@@ -922,6 +932,7 @@
       "SR_DELETE_FORBIDDEN": "You can only delete requisitions you created yourself.",
       "SR_ONLY_DRAFT_DELETABLE": "This requisition is past draft, so it can no longer be deleted. Refresh to see its current status.",
       "GRN_ONLY_DRAFT_DELETABLE": "This goods receive note is past draft, so it can no longer be deleted. Refresh to see its current status.",
+      "GRN_RECEIPT_ALREADY_CONSUMED": "Stock received on this goods receive note has already been issued, so it can no longer be voided or changed.",
       "CREDIT_NOTE_ONLY_DRAFT_DELETABLE": "This credit note is past draft, so it can no longer be deleted. Refresh to see its current status.",
       "SR_DATE_PATTERN_REQUIRED": "Today is outside every open accounting period. Choose whether this requisition should be dated inside the open period or today.",
       "SR_NO_OPEN_PERIOD": "No accounting period is open, so this requisition cannot be dated. Ask accounting to open one.",
@@ -935,7 +946,29 @@
       "PERIOD_CURRENT_NOT_EDITABLE": "The current inventory period can't be edited or deleted.",
       "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "An inventory period's status can only be changed on the Period End page.",
       "COMMON_DOC_VERSION_REQUIRED": "This record is out of date. Refresh the page and try again.",
-      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0."
+      "COMMON_COUNT_MUST_BE_POSITIVE": "The number of periods must be a whole number greater than 0.",
+      "CREDIT_NOTE_LINE_ALREADY_CREDITED": "Line {line} ({product}) has already been credited on this goods receive note by another credit note. Each product on a receipt can be credited once.",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_LINE": "Line {line} ({product}): the discount {amount} is more than the line is worth ({line_amount}).",
+      "CREDIT_NOTE_TAX_EXCEEDS_LINE": "Line {line} ({product}): the tax {amount} is more than the line is worth ({line_amount}).",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_GRN": "Line {line} ({product}): the discount {amount} is more than the goods receive note gave for the quantity returned ({allowed}).",
+      "CREDIT_NOTE_TAX_EXCEEDS_GRN": "Line {line} ({product}): the tax {amount} is more than the goods receive note charged for the quantity returned ({allowed}).",
+      "CREDIT_NOTE_DATE_NOT_CURRENT_PERIOD": "A credit note can only be dated inside the current period ({period}: {start} to {end}).",
+      "CREDIT_NOTE_NO_OPEN_PERIOD": "No inventory period is open, so a credit note cannot be recorded.",
+      "SR_ISSUE_PERIOD_NOT_CURRENT": "This requisition is dated in period {period}, but the current period is {current}. Close {current} before issuing.",
+      "SR_ISSUE_NOTHING_ISSUED": "No line has an issued quantity. Enter how much was issued, or reject the requisition if nothing can be issued.",
+      "SR_ISSUE_INSUFFICIENT_STOCK": "Not enough {product} at {location} to issue on {date}: {on_hand} can be issued, issuing {requested}. The balance from that date on is lowest on {short_on}.",
+      "STOCK_OUT_INSUFFICIENT_STOCK": "Not enough {product} at {location} on {date}: {on_hand} can be taken out, {requested} requested. The balance from that date on is lowest on {short_on}.",
+      "CREDIT_NOTE_INSUFFICIENT_STOCK": "Not enough {product} at {location} to return on {date}: {on_hand} can be returned, returning {requested}. The balance from that date on is lowest on {short_on}.",
+      "STOCK_IN_VOID_INSUFFICIENT_STOCK": "Cannot void: {product} at {location} has only {on_hand} from {date} on (lowest on {short_on}), not enough to take back the {requested} this stock-in received.",
+      "GRN_DATE_BEFORE_LATEST_RECEIPT": "Receipt date {date} is before the latest receipt of {product} at {location} in this period ({latest_doc} on {latest}). Under FIFO, date it {latest} or later.",
+      "STOCK_IN_DATE_BEFORE_LATEST_RECEIPT": "Stock-in date {date} is before the latest receipt of {product} at {location} in this period ({latest_doc} on {latest}). Under FIFO, date it {latest} or later.",
+      "SR_ISSUED_QTY_EXCEEDS_APPROVED": "Issued quantity cannot be more than the approved quantity (issued > approved): {lines}. Lower the issued quantity and try again.",
+      "GRN_VOIDED_NOT_EDITABLE": "This goods receive note has been voided, so it can no longer be edited.",
+      "GRN_AP_LINKED_NOT_EDITABLE": "This goods receive note is already on AP invoice {doc_nos}, so it can no longer be edited.",
+      "GRN_SAVED_HEADER_ONLY": "A saved goods receive note only allows post type, credit term, invoice no./date, due date, note and description to change — anything that moves stock is fixed once saved. Not allowed: {fields}",
+      "GRN_COMMITTED_HEADER_ONLY": "A committed goods receive note only allows post type, credit term, invoice no./date, due date, note and description to change. Not allowed: {fields}",
+      "GRN_STATUS_CHANGE_NOT_ALLOWED": "A goods receive note changes status only through its own buttons (Save, Commit, Void), not by editing it ({from} → {to}). Refresh to see its current status.",
+      "RFP_VENDOR_REMOVE_ID_REQUIRED": "This vendor could not be removed because its line was not identified. Refresh the page and try again."
     }
   },
   "validation": {
@@ -972,6 +1005,7 @@
     "maxMonth": "Max {max}",
     "invalidJson": "{field} must be valid JSON",
     "dateOutsidePeriod": "Date must be within the current period",
+    "dateAfterToday": "Date cannot be later than today",
     "mustNotExceed": "{field} must not exceed {target}",
     "formIncomplete": "Please complete all required fields before confirming",
     "incompleteItems": "{count, plural, =1 {# item is} other {# items are}} still incomplete — jumped to the first field to fix.",
@@ -2717,11 +2751,6 @@
         "removeItemTitle": "Remove Product",
         "removeItemConfirm": "Are you sure you want to remove this product?"
       },
-      "statusDescription": {
-        "draft": "Draft price lists are not visible to procurement agents or available for automated ordering.",
-        "active": "This price list is active and will be used for purchasing from this vendor.",
-        "inactive": "Inactive price lists are archived and will not be used for new orders."
-      },
       "notFound": "Price list not found"
     },
     "priceListTemplate": {
@@ -2912,7 +2941,8 @@
       "docInfo": "Document Information",
       "docInfoDesc": "Date, reason, location and a note for this adjustment.",
       "grandTotal": "Grand Total",
-      "selectLocationFirst": "Choose a store before adding items"
+      "selectLocationFirst": "Choose a store before adding items",
+      "exceedsAvailable": "More than can be issued on {date} ({available} available)"
     },
     "physicalCount": {
       "entity": "Physical Count",
@@ -2933,6 +2963,7 @@
       "tabNotStarted": "Not Started",
       "tabComplete": "Complete",
       "progress": "Progress",
+      "nItems": "{count} items",
       "count": "Count",
       "notCount": "Not count",
       "started": "Started {date}",
@@ -3767,7 +3798,6 @@
       "desc": "Requests to move stock from a store to a department — what was asked for, what was issued.",
       "add": "New Store Requisition",
       "noCreatableWorkflow": "None of the approval flows let you start a store requisition.",
-      "nItems": "{count} items",
       "edit": "Edit Store Requisition",
       "deleteTitle": "Delete Store Requisition",
       "deleteConfirm": "Are you sure you want to delete \"{srNo}\"? This action cannot be undone.",
@@ -3840,7 +3870,10 @@
       "srDatePatternDesc": "Today is outside every open accounting period. Pick the date this requisition should carry.",
       "issueDatePatternDesc": "Today is outside every open accounting period. Pick the date this issue should carry.",
       "datePatternOpenPeriod": "Use a date inside the open period",
-      "datePatternToday": "Use today anyway"
+      "datePatternToday": "Use today anyway",
+      "submitDatePatternDesc": "Today is outside the open period ({from} – {to}). Pick the date this requisition should carry.",
+      "submitDateOpenPeriod": "Last day of the open period ({date})",
+      "submitDateToday": "Today ({date})"
     },
     "stockReplenishment": {
       "entity": "Stock Replenishment",
@@ -4027,7 +4060,10 @@
         "healthy": "Healthy",
         "low": "Low Stock",
         "critical": "Critical"
-      }
+      },
+      "asOfDate": "As of {date}",
+      "availableToIssue": "Can issue",
+      "availableToIssueHint": "Less than on hand: documents dated after this day already count on part of this stock."
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
@@ -4286,6 +4322,7 @@
       "selectFromGrnDesc": "Pick received lines from the referenced GRN to credit.",
       "searchProduct": "Search product by code or name…",
       "alreadyAdded": "Added",
+      "alreadyCredited": "Credited on {cn}",
       "nothingReceived": "Nothing received",
       "noGrnItems": "No lines in this GRN",
       "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",
@@ -4472,6 +4509,10 @@
       "deleteAria": "Delete widget {title}",
       "configureTitle": "Configure Widget",
       "configureDescription": "Choose parameters for \"{name}\"",
+      "titleSection": "Title",
+      "titleEn": "English",
+      "titleTh": "Thai (optional)",
+      "titleEnRequired": "Enter the English title before the Thai one",
       "configureAria": "Configure widget {title}",
       "paramsAll": "All",
       "preview": "Preview",
@@ -4561,6 +4602,136 @@
     },
     "sr": {
       "title": "Store Requisition Dashboard"
+    },
+    "buWidget": {
+      "sectionMain": "Business unit dashboard",
+      "sectionModule": "More from your business unit",
+      "add": "Add widget",
+      "entity": "BU widget",
+      "empty": "No business unit widgets yet. Add one to share it with everyone in this business unit.",
+      "deleteTitle": "Remove BU widget",
+      "deleteConfirm": "Remove \"{title}\" for everyone in this business unit?",
+      "customizeWarning": "This business unit's dashboard now differs from the platform default, so future platform updates will no longer be applied automatically."
+    },
+    "datasets": {
+      "config": {
+        "cn-by-reason": "Credit notes by reason",
+        "exchange-rate-latest": "Latest exchange rates",
+        "location-active-count": "Active locations",
+        "tax-profile-by-rate": "Tax profiles by rate",
+        "vendor-by-business-type": "Vendors by business type"
+      },
+      "document": {
+        "grn-by-status": "Good Received Note by status",
+        "grn-count": "Good Received Note count",
+        "grn-created-series": "Good Received Note created (series)",
+        "grn-pending": "Good Received Note pending",
+        "po-by-status": "Purchase Order by status",
+        "po-count": "Purchase Order count",
+        "po-created-series": "Purchase Order created (series)",
+        "po-pending": "Purchase Order pending",
+        "po-rejected": "Rejected POs",
+        "po-sent-back": "Sent Back POs",
+        "pr-by-status": "Purchase Request by status",
+        "pr-count": "Purchase Request count",
+        "pr-created-series": "Purchase Request created (series)",
+        "pr-pending": "Purchase Request pending",
+        "pr-rejected": "Rejected PRs",
+        "pr-sent-back": "Sent Back PRs",
+        "pr-table": "Purchase Request table",
+        "sr-by-status": "Store Requisition by status",
+        "sr-count": "Store Requisition count",
+        "sr-created-series": "Store Requisition created (series)",
+        "sr-issued": "Store Requisition issued",
+        "sr-pending": "Store Requisition pending",
+        "sr-rejected": "Rejected SRs",
+        "sr-sent-back": "Sent Back SRs"
+      },
+      "equipment": {
+        "by-category": "Equipment by category",
+        "total-active": "Active equipment"
+      },
+      "inventory": {
+        "below-par-by-location": "Below par by location",
+        "below-par-count": "Items below par",
+        "below-par-items": "Replenishment list",
+        "issue-by-priority": "Issues by priority",
+        "issue-open": "Open issues",
+        "low-stock-count": "Low stock items",
+        "most-active-products": "Most active products (inventory)",
+        "physical-count-by-status": "Physical count by status",
+        "physical-count-pending": "Pending physical counts",
+        "spot-check-by-status": "Spot Check by status",
+        "spot-check-pending": "Pending Spot Checks",
+        "stock-in-by-status": "Stock In by status",
+        "stock-in-pending": "Pending Stock In",
+        "stock-out-by-status": "Stock Out by status",
+        "stock-out-pending": "Pending Stock Out",
+        "transactions-by-location-month": "Inventory tx by location × month",
+        "transactions-daily": "Inventory transactions (daily)"
+      },
+      "lab": {
+        "po-issued-series": "PO issued (series)",
+        "po-spend-series": "PO spend (series)",
+        "pr-amount-by-department": "PR amount by department",
+        "pr-by-status-recent": "PR by status (recent)",
+        "pr-count-recent": "PR count (recent)",
+        "pr-created-series": "PR created (series)"
+      },
+      "pricelist": {
+        "active-count": "Active pricelists",
+        "by-status": "Pricelists by status",
+        "by-vendor-top": "Pricelists by vendor (top N)",
+        "expiring-soon": "Pricelists expiring (≤30d)"
+      },
+      "procurement": {
+        "po-by-vendor-top": "Top vendors by PO spend",
+        "pr-by-department": "PR by department",
+        "pr-by-status": "PR by status",
+        "slowest-po-approvals": "Slowest PO approvals",
+        "slowest-pr-approvals": "Slowest PR approvals",
+        "spend-by-vendor-month": "Spend by vendor × month",
+        "spend-daily": "PO spend (daily)",
+        "top-products-by-quantity": "Top products by PR quantity"
+      },
+      "product": {
+        "added-7d": "Products added (7d)",
+        "added-daily": "Products added (daily)",
+        "by-category-top": "Products by category (top N)",
+        "by-item-group-top": "Products by item group (top N)",
+        "by-status": "Products by status",
+        "by-unit": "Products by inventory unit",
+        "category-total": "Product categories",
+        "top-vendors-by-product-count": "Top vendors by product coverage",
+        "total-active": "Active products",
+        "total-inactive": "Inactive products",
+        "updated-daily": "Products updated (daily)",
+        "without-vendor": "Products without vendor"
+      },
+      "recipe": {
+        "added-7d": "Recipes added (7d)",
+        "added-daily": "Recipes added (daily)",
+        "average-ingredients": "Avg ingredients per recipe",
+        "by-category-top": "Recipes by category (top N)",
+        "by-cuisine-top": "Recipes by cuisine (top N)",
+        "cuisines-total": "Cuisine types",
+        "most-complex": "Most complex recipes",
+        "total-active": "Active recipes"
+      },
+      "rfp": {
+        "active": "Active RFPs",
+        "issued-daily": "RFPs issued (daily)",
+        "upcoming-7d": "Upcoming RFPs (7d)"
+      },
+      "vendor": {
+        "added-7d": "Vendors added (7d)",
+        "total-active": "Active vendors",
+        "without-products": "Vendors without products"
+      },
+      "workflow": {
+        "cn-pending-approval": "Pending CN approvals",
+        "my-pending-pr": "My pending PRs"
+      }
     }
   },
   "profile": {
@@ -4785,6 +4956,8 @@
     "loading": "Loading…",
     "runReport": "Run Report",
     "noFiltersConfigured": "No filters configured for this report.",
+    "rememberedParams": "Filled in with the values you last ran (kept for 30 minutes).",
+    "resetParams": "Reset to defaults",
     "openFilters": "Open filters"
   },
   "reportSchedule": {

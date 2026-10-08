@@ -117,10 +117,12 @@ export function buildVendorChanges(
       id: "",
     }));
 
+  // ส่ง id ของบรรทัด ไม่ใช่ vendor_id — หลังบ้านลบตาม id ของบรรทัด เดิมส่ง vendor_id ไป
+  // หลังบ้านได้ id = undefined แล้วไปลบบรรทัดแรกของตาราง (มักเป็นของคำขอราคาใบอื่น)
   const currentVendorIds = new Set(current.map((v) => v.vendor_id));
   const remove = original
-    .filter((v) => !currentVendorIds.has(v.vendor_id))
-    .map((v) => ({ vendor_id: v.vendor_id }));
+    .filter((v) => !currentVendorIds.has(v.vendor_id) && !!v.id)
+    .map((v) => ({ id: v.id }));
 
   return {
     add: add.length > 0 ? add : undefined,

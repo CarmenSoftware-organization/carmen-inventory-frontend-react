@@ -63,6 +63,8 @@ export interface CreateRequestPriceListDto {
       dimension: string;
       id: string;
     }[];
-    remove?: { vendor_id: string }[];
+    // id ของบรรทัดผู้ขายในคำขอราคา ไม่ใช่ vendor_id — เดิมส่ง { vendor_id } หลังบ้านอ่าน id
+    // ได้ undefined แล้วไปลบบรรทัดแรกของตาราง (มักเป็นของคำขอราคาใบอื่น)
+    remove?: { id: string }[];
   };
 }

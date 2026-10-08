@@ -715,7 +715,16 @@
       "tooManyAttempts": "พยายามเข้าสู่ระบบบ่อยเกินไป ลองอีกครั้งใน {seconds} วินาที",
       "tooManyAttemptsFallback": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง",
       "registerConflict": "อีเมลหรือชื่อผู้ใช้นี้ถูกใช้ไปแล้ว",
-      "networkUnavailable": "ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+      "networkUnavailable": "ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่",
+      "googleFailed": "เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่",
+      "googleNoAccount": "ไม่พบบัญชีสำหรับอีเมล Google นี้",
+      "googleAccountConflict": "อีเมลนี้ขัดแย้งกับบัญชีอื่น กรุณาติดต่อผู้ดูแลระบบ",
+      "googleTooManyAttempts": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่",
+      "googleDisabled": "ปิดการเข้าสู่ระบบด้วย Google อยู่ กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน"
+    },
+    "google": {
+      "or": "หรือ",
+      "continue": "ดำเนินการต่อด้วย Google"
     },
     "eyebrow": "เข้าสู่ระบบ",
     "subtitle": "เข้าสู่พื้นที่ทำงานระบบสินค้าคงคลังของโรงแรมคุณ",
@@ -867,6 +876,7 @@
     "missingField": "ข้อมูลที่จำเป็นไม่ครบถ้วน",
     "invalidForm": "ข้อมูลในฟอร์มยังไม่ถูกต้อง ตรวจอีกครั้งแล้วลองใหม่",
     "documentChanged": "มีคนแก้ใบนี้ไปก่อนหน้า รีเฟรชหน้าแล้วทำใหม่อีกครั้ง",
+    "conflictsWithData": "ทำรายการนี้ไม่ได้ เพราะขัดกับข้อมูลที่มีอยู่ในระบบแล้ว",
     "tryAgain": "ลองอีกครั้ง",
     "goBack": "ย้อนกลับ",
     "contactSupport": "ติดต่อทีมงาน",
@@ -922,6 +932,7 @@
       "SR_DELETE_FORBIDDEN": "ลบได้เฉพาะใบเบิกที่คุณสร้างเองเท่านั้น",
       "SR_ONLY_DRAFT_DELETABLE": "ใบเบิกนี้พ้นขั้นร่างแล้ว จึงลบไม่ได้ รีเฟรชหน้าเพื่อดูสถานะล่าสุด",
       "GRN_ONLY_DRAFT_DELETABLE": "ใบรับสินค้านี้พ้นขั้นร่างแล้ว จึงลบไม่ได้ รีเฟรชหน้าเพื่อดูสถานะล่าสุด",
+      "GRN_RECEIPT_ALREADY_CONSUMED": "ของที่รับเข้าด้วยใบรับสินค้านี้ถูกเบิกออกไปแล้ว จึงยกเลิกหรือแก้ไขใบนี้ไม่ได้อีก",
       "CREDIT_NOTE_ONLY_DRAFT_DELETABLE": "ใบลดหนี้นี้พ้นขั้นร่างแล้ว จึงลบไม่ได้ รีเฟรชหน้าเพื่อดูสถานะล่าสุด",
       "SR_DATE_PATTERN_REQUIRED": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด เลือกก่อนว่าจะลงวันที่ใบเบิกเป็นวันในงวดที่เปิด หรือเป็นวันนี้",
       "SR_NO_OPEN_PERIOD": "ไม่มีงวดบัญชีเปิดอยู่เลย จึงลงวันที่ใบเบิกไม่ได้ ให้ฝ่ายบัญชีเปิดงวดก่อน",
@@ -935,7 +946,29 @@
       "PERIOD_CURRENT_NOT_EDITABLE": "รอบสินค้าคงคลังปัจจุบันแก้ไขหรือลบไม่ได้",
       "PERIOD_STATUS_VIA_PERIOD_END_ONLY": "เปลี่ยนสถานะรอบสินค้าคงคลังได้ที่หน้า \"ปิดงวด\" เท่านั้น",
       "COMMON_DOC_VERSION_REQUIRED": "ข้อมูลนี้ไม่เป็นปัจจุบัน รีเฟรชหน้าแล้วลองอีกครั้ง",
-      "COMMON_COUNT_MUST_BE_POSITIVE": "จำนวนรอบต้องเป็นจำนวนเต็มที่มากกว่า 0"
+      "COMMON_COUNT_MUST_BE_POSITIVE": "จำนวนรอบต้องเป็นจำนวนเต็มที่มากกว่า 0",
+      "CREDIT_NOTE_LINE_ALREADY_CREDITED": "บรรทัด {line} ({product}) ถูกลดหนี้จากใบรับสินค้านี้ไปแล้วในใบลดหนี้อื่น สินค้าหนึ่งรายการบนใบรับลดหนี้ได้ครั้งเดียว",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_LINE": "บรรทัด {line} ({product}): ส่วนลด {amount} มากกว่ามูลค่าของบรรทัด ({line_amount})",
+      "CREDIT_NOTE_TAX_EXCEEDS_LINE": "บรรทัด {line} ({product}): ภาษี {amount} มากกว่ามูลค่าของบรรทัด ({line_amount})",
+      "CREDIT_NOTE_DISCOUNT_EXCEEDS_GRN": "บรรทัด {line} ({product}): ส่วนลด {amount} มากกว่าที่ใบรับสินค้าให้ไว้สำหรับจำนวนที่คืน ({allowed})",
+      "CREDIT_NOTE_TAX_EXCEEDS_GRN": "บรรทัด {line} ({product}): ภาษี {amount} มากกว่าที่ใบรับสินค้าเก็บไว้สำหรับจำนวนที่คืน ({allowed})",
+      "CREDIT_NOTE_DATE_NOT_CURRENT_PERIOD": "ใบลดหนี้ลงวันที่ได้เฉพาะในงวดปัจจุบัน ({period}: {start} ถึง {end})",
+      "CREDIT_NOTE_NO_OPEN_PERIOD": "ไม่มีงวดสินค้าคงคลังที่เปิดอยู่ จึงบันทึกใบลดหนี้ไม่ได้",
+      "SR_ISSUE_PERIOD_NOT_CURRENT": "ใบเบิกลงวันที่ในงวด {period} แต่งวดปัจจุบันคือ {current} ต้องปิดงวด {current} ก่อนจึงจะจ่ายของได้",
+      "SR_ISSUE_NOTHING_ISSUED": "ยังไม่ได้กรอกจำนวนจ่ายเลยสักบรรทัด กรอกจำนวนที่จ่าย หรือปฏิเสธใบเบิกถ้าจ่ายไม่ได้",
+      "SR_ISSUE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอจ่าย ณ วันที่ {date}: จ่ายได้ {on_hand} จะจ่าย {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "STOCK_OUT_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอ ณ วันที่ {date}: ตัดออกได้ {on_hand} ต้องการ {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "CREDIT_NOTE_INSUFFICIENT_STOCK": "มี {product} ที่ {location} ไม่พอคืน ณ วันที่ {date}: คืนได้ {on_hand} จะคืน {requested} (ยอดตั้งแต่วันนั้นต่ำสุดที่วันที่ {short_on})",
+      "STOCK_IN_VOID_INSUFFICIENT_STOCK": "ยกเลิกใบรับเข้านี้ไม่ได้: {product} ที่ {location} เหลือตั้งแต่วันที่ {date} เพียง {on_hand} (ต่ำสุดวันที่ {short_on}) ไม่พอดึงคืน {requested} ที่รับเข้ามา",
+      "GRN_DATE_BEFORE_LATEST_RECEIPT": "วันที่รับ {date} อยู่ก่อนใบรับล่าสุดของ {product} ที่ {location} ในงวดนี้ ({latest_doc} วันที่ {latest}) ระบบ FIFO ต้องลงวันที่ {latest} หรือหลังจากนั้น",
+      "STOCK_IN_DATE_BEFORE_LATEST_RECEIPT": "วันที่รับเข้า {date} อยู่ก่อนใบรับล่าสุดของ {product} ที่ {location} ในงวดนี้ ({latest_doc} วันที่ {latest}) ระบบ FIFO ต้องลงวันที่ {latest} หรือหลังจากนั้น",
+      "SR_ISSUED_QTY_EXCEEDS_APPROVED": "จำนวนที่จ่ายต้องไม่เกินจำนวนที่อนุมัติ (จ่าย > อนุมัติ): {lines} ลดจำนวนที่จ่ายแล้วลองอีกครั้ง",
+      "GRN_VOIDED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกยกเลิกแล้ว จึงแก้ไขไม่ได้",
+      "GRN_AP_LINKED_NOT_EDITABLE": "ใบรับสินค้านี้ถูกดึงไปที่ AP Invoice {doc_nos} แล้ว จึงแก้ไขไม่ได้",
+      "GRN_SAVED_HEADER_ONLY": "ใบรับสินค้าที่บันทึกแล้วแก้ได้เฉพาะ post type, credit term, เลข/วันที่ใบแจ้งหนี้, วันครบกำหนด, หมายเหตุ และคำอธิบาย — ส่วนที่กระทบสต๊อกแก้ไม่ได้หลังบันทึก ช่องที่แก้ไม่ได้: {fields}",
+      "GRN_COMMITTED_HEADER_ONLY": "ใบรับสินค้าที่ยืนยันแล้วแก้ได้เฉพาะ post type, credit term, เลข/วันที่ใบแจ้งหนี้, วันครบกำหนด, หมายเหตุ และคำอธิบาย ช่องที่แก้ไม่ได้: {fields}",
+      "GRN_STATUS_CHANGE_NOT_ALLOWED": "ใบรับสินค้าเปลี่ยนสถานะได้ผ่านปุ่มของมันเท่านั้น (บันทึก, ยืนยัน, ยกเลิก) ไม่ใช่ด้วยการแก้ไขใบ ({from} → {to}) รีเฟรชเพื่อดูสถานะล่าสุด",
+      "RFP_VENDOR_REMOVE_ID_REQUIRED": "ลบผู้ขายรายนี้ไม่ได้ เพราะระบุบรรทัดไม่ได้ รีเฟรชหน้าแล้วลองใหม่"
     }
   },
   "validation": {
@@ -972,6 +1005,7 @@
     "maxMonth": "สูงสุด {max}",
     "invalidJson": "{field} ต้องเป็น JSON ที่ถูกต้อง",
     "dateOutsidePeriod": "วันที่ต้องอยู่ในช่วงเวลาปัจจุบัน",
+    "dateAfterToday": "วันที่ต้องไม่เกินวันนี้",
     "mustNotExceed": "{field} ต้องไม่เกิน{target}",
     "formIncomplete": "กรุณากรอกข้อมูลให้ครบก่อนยืนยัน",
     "incompleteItems": "ยังกรอกไม่ครบ {count} รายการ พาไปที่ช่องแรกที่ต้องแก้ให้แล้ว",
@@ -2907,7 +2941,8 @@
       "docInfo": "ข้อมูลเอกสาร",
       "docInfoDesc": "วันที่ เหตุผล คลัง และหมายเหตุของใบนี้",
       "grandTotal": "รวมทั้งสิ้น",
-      "selectLocationFirst": "เลือกคลังก่อน ถึงจะเพิ่มรายการได้"
+      "selectLocationFirst": "เลือกคลังก่อน ถึงจะเพิ่มรายการได้",
+      "exceedsAvailable": "เกินยอดที่ตัดได้ ณ วันที่ {date} (ตัดได้ {available})"
     },
     "physicalCount": {
       "entity": "ตรวจนับสินค้า",
@@ -3835,7 +3870,10 @@
       "srDatePatternDesc": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด เลือกว่าจะลงวันที่ใบเบิกเป็นวันไหน",
       "issueDatePatternDesc": "วันนี้อยู่นอกงวดบัญชีที่เปิดอยู่ทุกงวด เลือกว่าจะจ่ายของลงวันที่ไหน",
       "datePatternOpenPeriod": "ใช้วันที่ในงวดที่เปิดอยู่",
-      "datePatternToday": "ใช้วันที่วันนี้"
+      "datePatternToday": "ใช้วันที่วันนี้",
+      "submitDatePatternDesc": "วันนี้อยู่นอกงวดที่เปิดอยู่ ({from} – {to}) เลือกว่าจะลงวันที่ใบเบิกเป็นวันไหน",
+      "submitDateOpenPeriod": "ลงวันสุดท้ายของงวดที่เปิดอยู่ ({date})",
+      "submitDateToday": "ใช้วันที่วันนี้ ({date})"
     },
     "stockReplenishment": {
       "entity": "เติมสินค้า",
@@ -4022,7 +4060,10 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
-      }
+      },
+      "asOfDate": "ณ วันที่ {date}",
+      "availableToIssue": "ตัดได้",
+      "availableToIssueHint": "น้อยกว่ายอดคงเหลือ เพราะเอกสารที่ลงวันที่หลังวันนี้นับของส่วนหนึ่งไว้แล้ว"
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",
@@ -4281,6 +4322,7 @@
       "selectFromGrnDesc": "เลือกรายการที่รับเข้าจาก GRN อ้างอิงเพื่อทำใบลดหนี้",
       "searchProduct": "ค้นหาสินค้าด้วยรหัสหรือชื่อ…",
       "alreadyAdded": "เพิ่มแล้ว",
+      "alreadyCredited": "ลดหนี้แล้วใน {cn}",
       "nothingReceived": "ไม่ได้รับของ",
       "noGrnItems": "ไม่มีรายการใน GRN นี้",
       "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
@@ -4467,6 +4509,10 @@
       "deleteAria": "ลบวิดเจ็ต {title}",
       "configureTitle": "ตั้งค่าวิดเจ็ต",
       "configureDescription": "เลือกพารามิเตอร์สำหรับ \"{name}\"",
+      "titleSection": "ชื่อวิดเจ็ต",
+      "titleEn": "อังกฤษ",
+      "titleTh": "ไทย (ไม่บังคับ)",
+      "titleEnRequired": "กรอกชื่ออังกฤษก่อนจึงจะใส่ชื่อไทยได้",
       "configureAria": "ตั้งค่าวิดเจ็ต {title}",
       "paramsAll": "ทั้งหมด",
       "preview": "ตัวอย่าง",
@@ -4556,6 +4602,136 @@
     },
     "sr": {
       "title": "แดชบอร์ดใบเบิกสินค้า"
+    },
+    "buWidget": {
+      "sectionMain": "Dashboard ของ BU",
+      "sectionModule": "เพิ่มเติมของ BU",
+      "add": "เพิ่ม widget",
+      "entity": "widget ของ BU",
+      "empty": "ยังไม่มี widget ของ BU เพิ่มเพื่อให้ทุกคนใน BU นี้เห็น",
+      "deleteTitle": "ลบ widget ของ BU",
+      "deleteConfirm": "ลบ \"{title}\" ออกสำหรับทุกคนใน BU นี้?",
+      "customizeWarning": "dashboard ของ BU นี้ต่างจากค่า default ของ platform แล้ว การอัปเดตจาก platform ครั้งต่อไปจะไม่ถูกนำมาใช้อัตโนมัติ"
+    },
+    "datasets": {
+      "config": {
+        "cn-by-reason": "ใบลดหนี้แยกตามเหตุผล",
+        "exchange-rate-latest": "อัตราแลกเปลี่ยนล่าสุด",
+        "location-active-count": "สถานที่ที่ใช้งาน",
+        "tax-profile-by-rate": "Tax profile แยกตามอัตรา",
+        "vendor-by-business-type": "Vendor แยกตามประเภทธุรกิจ"
+      },
+      "document": {
+        "grn-by-status": "ใบรับสินค้าแยกตามสถานะ",
+        "grn-count": "จำนวนใบรับสินค้า",
+        "grn-created-series": "ใบรับสินค้าที่สร้าง (ซีรีส์)",
+        "grn-pending": "ใบรับสินค้าที่รอดำเนินการ",
+        "po-by-status": "ใบสั่งซื้อแยกตามสถานะ",
+        "po-count": "จำนวนใบสั่งซื้อ",
+        "po-created-series": "ใบสั่งซื้อที่สร้าง (ซีรีส์)",
+        "po-pending": "ใบสั่งซื้อที่รอดำเนินการ",
+        "po-rejected": "ใบสั่งซื้อที่ถูกปฏิเสธ",
+        "po-sent-back": "ใบสั่งซื้อที่ถูกส่งกลับ",
+        "pr-by-status": "ใบขอซื้อแยกตามสถานะ",
+        "pr-count": "จำนวนใบขอซื้อ",
+        "pr-created-series": "ใบขอซื้อที่สร้าง (ซีรีส์)",
+        "pr-pending": "ใบขอซื้อที่รอดำเนินการ",
+        "pr-rejected": "ใบขอซื้อที่ถูกปฏิเสธ",
+        "pr-sent-back": "ใบขอซื้อที่ถูกส่งกลับ",
+        "pr-table": "ตารางใบขอซื้อ",
+        "sr-by-status": "ใบเบิกสินค้าแยกตามสถานะ",
+        "sr-count": "จำนวนใบเบิกสินค้า",
+        "sr-created-series": "ใบเบิกสินค้าที่สร้าง (ซีรีส์)",
+        "sr-issued": "ใบเบิกสินค้าที่จ่ายแล้ว",
+        "sr-pending": "ใบเบิกสินค้าที่รอดำเนินการ",
+        "sr-rejected": "ใบเบิกสินค้าที่ถูกปฏิเสธ",
+        "sr-sent-back": "ใบเบิกสินค้าที่ถูกส่งกลับ"
+      },
+      "equipment": {
+        "by-category": "อุปกรณ์แยกตามหมวดหมู่",
+        "total-active": "อุปกรณ์ที่ใช้งาน"
+      },
+      "inventory": {
+        "below-par-by-location": "สินค้าต่ำกว่า par แยกตามสถานที่",
+        "below-par-count": "สินค้าที่ต่ำกว่า par",
+        "below-par-items": "รายการที่ต้องเติมสต๊อก",
+        "issue-by-priority": "ปัญหาแยกตามความสำคัญ",
+        "issue-open": "ปัญหาที่ยังเปิดอยู่",
+        "low-stock-count": "สินค้าใกล้หมด",
+        "most-active-products": "สินค้าที่เคลื่อนไหวมากที่สุด (สต๊อก)",
+        "physical-count-by-status": "ตรวจนับสินค้าแยกตามสถานะ",
+        "physical-count-pending": "ตรวจนับสินค้าที่ค้างอยู่",
+        "spot-check-by-status": "ตรวจสอบเฉพาะจุดแยกตามสถานะ",
+        "spot-check-pending": "ตรวจสอบเฉพาะจุดที่ค้างอยู่",
+        "stock-in-by-status": "Stock In แยกตามสถานะ",
+        "stock-in-pending": "Stock In ที่ค้างอยู่",
+        "stock-out-by-status": "Stock Out แยกตามสถานะ",
+        "stock-out-pending": "Stock Out ที่ค้างอยู่",
+        "transactions-by-location-month": "รายการสต๊อกแยกตามสถานที่ × เดือน",
+        "transactions-daily": "รายการเคลื่อนไหวสต๊อก (รายวัน)"
+      },
+      "lab": {
+        "po-issued-series": "ใบสั่งซื้อที่ออก (ซีรีส์)",
+        "po-spend-series": "ยอดสั่งซื้อ (ซีรีส์)",
+        "pr-amount-by-department": "ยอดใบขอซื้อแยกตามแผนก",
+        "pr-by-status-recent": "ใบขอซื้อแยกตามสถานะ (ล่าสุด)",
+        "pr-count-recent": "จำนวนใบขอซื้อ (ล่าสุด)",
+        "pr-created-series": "ใบขอซื้อที่สร้าง (ซีรีส์)"
+      },
+      "pricelist": {
+        "active-count": "รายการราคาที่ใช้งาน",
+        "by-status": "รายการราคาแยกตามสถานะ",
+        "by-vendor-top": "รายการราคาแยกตาม vendor (Top N)",
+        "expiring-soon": "รายการราคาใกล้หมดอายุ (≤30 วัน)"
+      },
+      "procurement": {
+        "po-by-vendor-top": "Vendor ที่มียอดสั่งซื้อสูงสุด",
+        "pr-by-department": "ใบขอซื้อแยกตามแผนก",
+        "pr-by-status": "ใบขอซื้อแยกตามสถานะ",
+        "slowest-po-approvals": "ใบสั่งซื้อที่อนุมัติช้าที่สุด",
+        "slowest-pr-approvals": "ใบขอซื้อที่อนุมัติช้าที่สุด",
+        "spend-by-vendor-month": "ยอดสั่งซื้อแยกตาม vendor × เดือน",
+        "spend-daily": "ยอดสั่งซื้อ (รายวัน)",
+        "top-products-by-quantity": "สินค้าที่ขอซื้อมากที่สุด"
+      },
+      "product": {
+        "added-7d": "สินค้าที่เพิ่ม (7 วัน)",
+        "added-daily": "สินค้าที่เพิ่ม (รายวัน)",
+        "by-category-top": "สินค้าแยกตามหมวดหมู่ (Top N)",
+        "by-item-group-top": "สินค้าแยกตามกลุ่มสินค้า (Top N)",
+        "by-status": "สินค้าแยกตามสถานะ",
+        "by-unit": "สินค้าแยกตามหน่วยสต๊อก",
+        "category-total": "หมวดหมู่สินค้า",
+        "top-vendors-by-product-count": "Vendor ที่ครอบคลุมสินค้ามากที่สุด",
+        "total-active": "สินค้าที่ใช้งาน",
+        "total-inactive": "สินค้าที่ไม่ใช้งาน",
+        "updated-daily": "สินค้าที่แก้ไข (รายวัน)",
+        "without-vendor": "สินค้าที่ไม่มี vendor"
+      },
+      "recipe": {
+        "added-7d": "สูตรอาหารที่เพิ่ม (7 วัน)",
+        "added-daily": "สูตรอาหารที่เพิ่ม (รายวัน)",
+        "average-ingredients": "วัตถุดิบเฉลี่ยต่อสูตร",
+        "by-category-top": "สูตรอาหารแยกตามหมวดหมู่ (Top N)",
+        "by-cuisine-top": "สูตรอาหารแยกตามประเภทอาหาร (Top N)",
+        "cuisines-total": "ประเภทอาหาร",
+        "most-complex": "สูตรอาหารที่ซับซ้อนที่สุด",
+        "total-active": "สูตรอาหารที่ใช้งาน"
+      },
+      "rfp": {
+        "active": "RFP ที่เปิดอยู่",
+        "issued-daily": "RFP ที่ออก (รายวัน)",
+        "upcoming-7d": "RFP ที่จะเปิด (7 วัน)"
+      },
+      "vendor": {
+        "added-7d": "Vendor ที่เพิ่ม (7 วัน)",
+        "total-active": "Vendor ที่ใช้งาน",
+        "without-products": "Vendor ที่ไม่มีสินค้า"
+      },
+      "workflow": {
+        "cn-pending-approval": "ใบลดหนี้รออนุมัติ",
+        "my-pending-pr": "ใบขอซื้อที่รอฉันดำเนินการ"
+      }
     }
   },
   "profile": {
@@ -4630,7 +4806,12 @@
     "removeBuAvatarConfirmTitle": "ยืนยันการลบอวาตาร์?",
     "removeBuAvatarConfirmDesc": "การลบอวาตาร์ของ {name} ออกอย่างถาวร คุณสามารถอัปโหลดใหม่ได้ตลอด",
     "uploadAvatar": "อัปโหลดรูปโปรไฟล์",
+    "removeAvatar": "ลบรูปโปรไฟล์",
+    "removingAvatar": "กำลังลบ…",
+    "removeAvatarConfirmTitle": "ลบรูปโปรไฟล์?",
+    "removeAvatarConfirmDesc": "รูปโปรไฟล์จะถูกลบถาวร อัปโหลดรูปใหม่ได้ทุกเมื่อ",
     "avatarUploaded": "อัปโหลดรูปโปรไฟล์สำเร็จ",
+    "avatarRemoved": "ลบรูปโปรไฟล์แล้ว",
     "cropAvatarTitle": "ปรับรูปโปรไฟล์",
     "cropAvatarDesc": "ลากเพื่อจัดตำแหน่งและเลื่อนแถบเพื่อซูม กดยืนยันเพื่ออัปโหลด",
     "zoom": "ซูม",
@@ -4775,6 +4956,8 @@
     "loading": "กำลังโหลด…",
     "runReport": "เรียกดูรายงาน",
     "noFiltersConfigured": "รายงานนี้ไม่มีตัวกรอง",
+    "rememberedParams": "ใส่ค่าที่เรียกดูล่าสุดไว้ให้แล้ว (จำไว้ 30 นาที)",
+    "resetParams": "ใช้ค่าเริ่มต้น",
     "openFilters": "เปิดตัวกรอง"
   },
   "reportSchedule": {

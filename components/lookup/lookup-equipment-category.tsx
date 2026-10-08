@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useEquipmentCategory } from "@/hooks/use-equipment-category";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { EquipmentCategory } from "@/types/equipment-category";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupEquipmentCategoryProps {
@@ -27,8 +23,8 @@ interface LookupEquipmentCategoryProps {
 /**
  * Lookup Popover สำหรับเลือกหมวดหมู่ของอุปกรณ์ (Equipment Category)
  *
- * ดึงข้อมูลผ่าน `useEquipmentCategory` hook พร้อม server-side search และ infinite scroll
- * (perpage 30) filter เฉพาะ `is_active = true` และรองรับ `excludeIds` กัน duplicate
+ * ดึงข้อมูลผ่าน Lookup API (`useLookupResource`) พร้อม server-side search และ infinite scroll
+ * (perpage 30) และรองรับ `excludeIds` กัน duplicate
  *
  * @param value - id ของ equipment category ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -64,10 +60,8 @@ export function LookupEquipmentCategory({
     isLoadingMore,
     hasMore,
     loadMore,
-  } = useLookupPagination<EquipmentCategory>({
-    useListHook: useEquipmentCategory,
+  } = useLookupResource("recipe_equipment_category", {
     search,
-    serverFilter: ACTIVE_ONLY_FILTER,
     enabled: hasOpened,
     selectedIds: value ? [value] : [],
     filter: excludeIds ? (c) => !excludeIds.has(c.id) : undefined,
@@ -84,7 +78,7 @@ export function LookupEquipmentCategory({
       items={categories}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.name}
+      getLabel={lookupLabel}
       defaultLabel={defaultLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("category") })}
       searchPlaceholder={tl("search", { entity: tfl("category") })}

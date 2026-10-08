@@ -24,6 +24,10 @@ const toSafePathSegment = (value: string): string => {
   return encodeURIComponent(normalized);
 };
 
+/** `?at_date=…` เมื่อมีวันที่ของเอกสาร — ไม่มีก็ไม่ต่อท้ายอะไร (endpoint ทำงานแบบเดิม) */
+const atDateQuery = (atDate?: string) =>
+  atDate ? `?at_date=${encodeURIComponent(atDate)}` : "";
+
 export const API_ENDPOINTS = {
   ACTIVITY_LOGS: (buCode: string) => `/api/proxy/api/${buCode}/activity-logs`,
   ACTIVITY_LOGS_BY_RECORD: (buCode: string, entityId: string) =>
@@ -84,9 +88,18 @@ export const API_ENDPOINTS = {
   CUISINES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/recipe-cuisines`,
   CURRENCIES: (buCode: string) => `/api/proxy/api/config/${buCode}/currencies`,
+  // widget ระดับ BU (ทุกคนใน BU เห็น) — คนละความหมายกับ DASHBOARD_WIDGETS(buCode, "bu")
+  DASHBOARD_BU_WIDGETS: (buCode: string, module?: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu${module ? `?module=${encodeURIComponent(module)}` : ""}`,
+  DASHBOARD_BU_WIDGET_BY_ID: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu/${id}`,
+  DASHBOARD_BU_WIDGET_REORDER: (buCode: string) =>
+    `/api/proxy/api/${buCode}/dashboard-widgets/bu/reorder`,
   DASHBOARD_DATASETS: (buCode: string) => `/api/proxy/api/${buCode}/datasets`,
   DASHBOARD_DATASET_BY_ID: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/datasets/${id}`,
+  DASHBOARD_LAB_BU_WIDGET_DATA: (buCode: string, widgetId: string) =>
+    `/api/proxy/api/${buCode}/dashboard-lab/widgets/${widgetId}/data?scope=bu`,
   DASHBOARD_LAB_DATASETS: (buCode: string) =>
     `/api/proxy/api/${buCode}/dashboard-lab/datasets`,
   DASHBOARD_LAB_DATASET_EXEC: (buCode: string, id: string) =>
@@ -160,6 +173,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}`,
   GOODS_RECEIVE_NOTE_BY_VENDOR_FOR_CN: (buCode: string, vendorId: string) =>
     `/api/proxy/api/${buCode}/good-received-notes/vendor/${vendorId}/cn`,
+  GOODS_RECEIVE_NOTE_REF: (buCode: string, grnId: string) =>
+    `/api/proxy/api/${buCode}/good-received-notes/${grnId}/ref`,
   GOODS_RECEIVE_NOTE_COMMENT: (buCode: string, grnId?: string) =>
     grnId
       ? `/api/proxy/api/${buCode}/good-received-note-comments/${grnId}`
@@ -319,10 +334,18 @@ export const API_ENDPOINTS = {
     productId: string,
     locationId: string,
     qty: number | string,
+    // วันที่ของเอกสาร — ตีราคาจากของที่มีอยู่ในวันนั้น (ไม่หยิบล็อตที่รับเข้าหลังวันนั้น)
+    atDate?: string,
   ) =>
-    `/api/proxy/api/${buCode}/cost/products/${productId}/location/${locationId}/qty/${qty}`,
-  PRODUCT_INVENTORY: (buCode: string, locationId: string, productId: string) =>
-    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}`,
+    `/api/proxy/api/${buCode}/cost/products/${productId}/location/${locationId}/qty/${qty}${atDateQuery(atDate)}`,
+  PRODUCT_INVENTORY: (
+    buCode: string,
+    locationId: string,
+    productId: string,
+    // วันที่ของเอกสาร — on_hand_qty เป็นยอด ณ สิ้นวันนั้น และได้ available_qty (ยอดที่ตัดได้) มาด้วย
+    atDate?: string,
+  ) =>
+    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}${atDateQuery(atDate)}`,
   PRODUCT_INVENTORY_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/inventory-movement`,
   PRODUCT_ITEM_GROUPS: (buCode: string) =>
@@ -484,6 +507,7 @@ export const API_ENDPOINTS = {
   TRANSACTIONS: (buCode: string) =>
     `/api/proxy/api/${buCode}/inventory-transactions`,
   UNITS: (buCode: string) => `/api/proxy/api/config/${buCode}/units`,
+  LOOKUP: (buCode: string) => `/api/proxy/api/${buCode}/lookup`,
   USERS: (buCode: string) => `/api/proxy/api/${buCode}/users`,
   USER_APPLICATION_ROLES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/user-application-roles`,

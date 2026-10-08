@@ -23,11 +23,7 @@ export type WidgetType =
   | "sparkline";
 
 type DatasetCategory =
-  | "inventory"
-  | "workflow"
-  | "movement"
-  | "spend"
-  | "variance";
+  "inventory" | "workflow" | "movement" | "spend" | "variance";
 
 // -------------------------------------------------------------
 // Dataset metadata (from GET /api/:bu/datasets)
@@ -97,13 +93,7 @@ interface MatrixData {
  * `id` ไม่ใช่คอลัมน์ที่โชว์ — เป็นค่าที่ client เอาไปทำลิงก์ไปหาเอกสารของแถวนั้น
  * (label ของมันว่างเสมอ) ตารางต้องข้ามไม่เอาไปวาดเป็นคอลัมน์
  */
-type TableColumnType =
-  | "text"
-  | "number"
-  | "currency"
-  | "date"
-  | "icon"
-  | "id";
+type TableColumnType = "text" | "number" | "currency" | "date" | "icon" | "id";
 
 export interface TableColumn {
   readonly key: string;
@@ -168,14 +158,24 @@ export interface WidgetDisplay {
   /** ปลายสเกลของ gauge — ไม่ใส่ = เดาจากค่าปัจจุบัน ซึ่งอ่านความหมายไม่ได้ */
   readonly max?: number;
   /** เปลี่ยนสีเมื่อค่าถึงขีด เรียงจากน้อยไปมาก (UI ปัจจุบันแก้ได้ตัวแรกตัวเดียว) */
-  readonly thresholds?: readonly { readonly value: number; readonly color: string }[];
+  readonly thresholds?: readonly {
+    readonly value: number;
+    readonly color: string;
+  }[];
 }
 
-interface WidgetConfig {
+/** ชื่อ widget แยกภาษา — มี object เมื่อไรต้องมี en (backend ปฏิเสธ th ที่ไม่มี en) */
+export interface LocalizedTitle {
+  readonly en: string;
+  readonly th?: string;
+}
+
+export interface WidgetConfig {
   readonly id: string;
   readonly dataset_id: string;
   readonly widget_type: WidgetType;
   readonly title?: string | null;
+  readonly title_i18n?: LocalizedTitle | null;
   readonly order_index: number;
   readonly params?: WidgetParams | null;
   readonly display?: WidgetDisplay | null;
@@ -185,13 +185,15 @@ interface CreateWidgetDto {
   readonly dataset_id: string;
   readonly widget_type: WidgetType;
   readonly title?: string;
+  readonly title_i18n?: LocalizedTitle | null;
   readonly order_index?: number;
   readonly params?: WidgetParams;
   readonly display?: WidgetDisplay;
 }
 
 interface UpdateWidgetDto {
-  readonly title?: string;
+  readonly title?: string | null;
+  readonly title_i18n?: LocalizedTitle | null;
   readonly order_index?: number;
   readonly params?: WidgetParams;
   readonly widget_type?: WidgetType;
@@ -299,3 +301,23 @@ export type MyDashboardWidget = WidgetConfig;
 export type CreateMyDashboardWidgetDto = CreateWidgetDto;
 export type UpdateMyDashboardWidgetDto = UpdateWidgetDto;
 export type MyDashboardWidgetListResponse = WidgetConfigListResponse;
+
+// BU widget — widget ระดับ BU ที่ทุกคนใน BU เห็น; module null = หน้า /dashboard หลัก
+export type BuDashboardWidget = WidgetConfig & { module: string | null };
+
+/** แถว deploy ของ tenant (null = ยังไม่เคย deploy และยังไม่เคยแก้เอง) */
+export interface BuDeployState {
+  deployed_version: number;
+  deployed_at: string | null;
+  customized_at: string | null;
+}
+
+export interface BuDashboardWidgetListResponse {
+  items: readonly BuDashboardWidget[];
+  count: number;
+  deploy_state: BuDeployState | null;
+}
+
+export type CreateBuDashboardWidgetDto = CreateWidgetDto & {
+  module: string | null;
+};

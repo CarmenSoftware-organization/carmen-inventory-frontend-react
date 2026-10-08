@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useInViewport } from "@/hooks/use-in-viewport";
+import { useWidgetTitle } from "./use-widget-title";
 import { cn } from "@/lib/utils";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
@@ -64,6 +65,8 @@ interface SortableWidgetItemProps {
   readonly onConfigure?: () => void;
   readonly onVisible: (widgetId: string) => void;
   readonly onChangeType?: (widgetType: WidgetType) => void;
+  /** false = อ่านอย่างเดียว: ไม่มีปุ่มลาก ลบ ตั้งค่า และเปลี่ยนชนิดกราฟ (BU widget สำหรับผู้ไม่มีสิทธิ์แก้) */
+  readonly editable?: boolean;
 }
 
 const RENDER_ICON: Record<string, LucideIcon> = {
@@ -85,8 +88,10 @@ export function SortableWidgetItem({
   onConfigure,
   onVisible,
   onChangeType,
+  editable = true,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
+  const titleOf = useWidgetTitle();
   const {
     attributes,
     listeners,
@@ -94,7 +99,7 @@ export function SortableWidgetItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: widget.id });
+  } = useSortable({ id: widget.id, disabled: !editable });
   const { ref: viewRef, inView } = useInViewport<HTMLLIElement>();
 
   useEffect(() => {
@@ -106,7 +111,7 @@ export function SortableWidgetItem({
     transition,
   };
 
-  const displayTitle = widget.title || detail?.meta.name || widget.dataset_id;
+  const displayTitle = titleOf(widget, dataset?.name ?? detail?.meta.name);
   const moduleName = inferModuleName(widget.dataset_id);
   const gridClass = gridClasses(widget.widget_type, widget.display);
   // shape มาจาก catalogue ก่อน (รู้ตั้งแต่ยังไม่โหลดข้อมูล) แล้วค่อย fallback ไป meta
@@ -131,75 +136,77 @@ export function SortableWidgetItem({
         isDragging && "z-10 opacity-50",
       )}
     >
-      <div className="absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/sortable:opacity-100 focus-within:opacity-100">
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          aria-label="Drag to reorder"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/60 inline-flex size-6 cursor-grab touch-none items-center justify-center rounded-md"
-        >
-          <GripVertical className="size-3.5" aria-hidden="true" />
-        </button>
-        {renders.length > 1 && onChangeType && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label={t("chartTypeAria", { title: displayTitle })}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <CurrentIcon className="size-3.5" aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-36">
-              <DropdownMenuLabel>{t("chartType.label")}</DropdownMenuLabel>
-              {renders.map((r) => {
-                const Icon = RENDER_ICON[r] ?? BarChart3;
-                return (
-                  <DropdownMenuItem
-                    key={r}
-                    onSelect={() => onChangeType(r)}
-                    className="gap-2"
-                  >
-                    <Icon className="size-3.5" aria-hidden="true" />
-                    <span className="flex-1">{t(`chartType.${r}`)}</span>
-                    {r === widget.widget_type && (
-                      <Check className="size-3.5" aria-hidden="true" />
-                    )}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-        {/* เฟืองโผล่ทุกใบแล้ว — dialog คุมทั้ง param และการแสดงผล ซึ่งตั้งได้แม้
-            dataset จะไม่มี param เลย */}
-        {!!dataset && onConfigure && (
+      {editable && (
+        <div className="absolute top-1 right-1 z-10 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/sortable:opacity-100 focus-within:opacity-100">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label="Drag to reorder"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 inline-flex size-6 cursor-grab touch-none items-center justify-center rounded-md"
+          >
+            <GripVertical className="size-3.5" aria-hidden="true" />
+          </button>
+          {renders.length > 1 && onChangeType && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={t("chartTypeAria", { title: displayTitle })}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <CurrentIcon className="size-3.5" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-36">
+                <DropdownMenuLabel>{t("chartType.label")}</DropdownMenuLabel>
+                {renders.map((r) => {
+                  const Icon = RENDER_ICON[r] ?? BarChart3;
+                  return (
+                    <DropdownMenuItem
+                      key={r}
+                      onSelect={() => onChangeType(r)}
+                      className="gap-2"
+                    >
+                      <Icon className="size-3.5" aria-hidden="true" />
+                      <span className="flex-1">{t(`chartType.${r}`)}</span>
+                      {r === widget.widget_type && (
+                        <Check className="size-3.5" aria-hidden="true" />
+                      )}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {/* เฟืองโผล่ทุกใบแล้ว — dialog คุมทั้ง param และการแสดงผล ซึ่งตั้งได้แม้
+              dataset จะไม่มี param เลย */}
+          {!!dataset && onConfigure && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={onConfigure}
+              aria-label={t("configureAria", { title: displayTitle })}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Settings2 className="size-3.5" aria-hidden="true" />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
-            onClick={onConfigure}
-            aria-label={t("configureAria", { title: displayTitle })}
-            className="text-muted-foreground hover:text-foreground"
+            onClick={onDelete}
+            aria-label={t("deleteAria", { title: displayTitle })}
+            className="text-muted-foreground hover:text-destructive"
           >
-            <Settings2 className="size-3.5" aria-hidden="true" />
+            <Trash2 className="size-3.5" aria-hidden="true" />
           </Button>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          onClick={onDelete}
-          aria-label={t("deleteAria", { title: displayTitle })}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-        </Button>
-      </div>
+        </div>
+      )}
 
       {isLoading || !detail ? (
         <WidgetSkeleton />

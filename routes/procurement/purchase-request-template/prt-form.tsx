@@ -92,11 +92,17 @@ export function PrtForm({ template }: PrtFormProps) {
   );
 
   const onSubmit = (values: PrtFormValues) => {
-    const purchase_request_template_detail = buildItemChanges(
+    const changes = buildItemChanges(
       values.items,
       defaultValues.items,
       mapItemToPayload,
     );
+    // หลังบ้าน PR template รับบรรทัดที่ลบในชื่อ `delete` (ดู CreatePrtDto)
+    const purchase_request_template_detail = {
+      add: changes.add,
+      update: changes.update,
+      delete: changes.remove,
+    };
 
     const payload: CreatePrtDto = {
       name: values.name,

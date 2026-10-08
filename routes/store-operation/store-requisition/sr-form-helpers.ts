@@ -1,5 +1,8 @@
 import { addDays } from "@/lib/date-utils";
-import type { StoreRequisition } from "@/types/store-requisition";
+import type {
+  SrStockMovementItem,
+  StoreRequisition,
+} from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 
 export function buildSrDefaultValues(
@@ -121,6 +124,41 @@ export function srItemAmount(item: SrFormValues["items"][number]): number {
  */
 export function srStockVisible(docStatus?: string): boolean {
   return docStatus === "completed";
+}
+
+/**
+ * ต้นทุนที่ลงบัญชีจริงต่อบรรทัด SR — ใช้กับใบที่จ่ายแล้ว (`srStockVisible`)
+ *
+ * รวม `total_cost` ของรายการ**ขาออก** (`qty_out > 0` ที่คลังต้นทาง) ที่ผูกกับบรรทัดนั้น
+ * ฝั่งขาเข้าที่คลังปลายทางเป็นต้นทุนก้อนเดียวกันจึงไม่นับซ้ำ · ต้นทุนต่อหน่วย = ยอดรวม ÷ จำนวนที่จ่ายจริง
+ *
+ * ใบที่จ่ายแล้วต้องโชว์ตัวนี้ ไม่ใช่ราคาประมาณจาก `SrItemCostSync` ซึ่งคิดจากล็อตที่เหลือ
+ * ณ วันที่เปิดดูและจำนวนที่**ขอ** — ของหมดคลังแล้วจะได้ 0, ราคาล็อตเปลี่ยนก็เพี้ยนตาม,
+ * จ่ายไม่ครบตามที่ขอก็ผิด
+ */
+export function srPostedCostByDetail(
+  items: SrStockMovementItem[],
+): Map<string, { total_cost: number; cost_per_unit: number }> {
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const sums = new Map<string, { total: number; qty: number }>();
+  for (const row of items) {
+    if (!(row.qty_out > 0)) continue;
+    const acc = sums.get(row.store_requisition_detail_id) ?? {
+      total: 0,
+      qty: 0,
+    };
+    acc.total += Number(row.total_cost) || 0;
+    acc.qty += Number(row.qty_out) || 0;
+    sums.set(row.store_requisition_detail_id, acc);
+  }
+  const out = new Map<string, { total_cost: number; cost_per_unit: number }>();
+  for (const [detailId, { total, qty }] of sums) {
+    out.set(detailId, {
+      total_cost: round2(total),
+      cost_per_unit: qty > 0 ? round2(total / qty) : 0,
+    });
+  }
+  return out;
 }
 
 export function srGrandTotal(items: SrFormValues["items"]): number {

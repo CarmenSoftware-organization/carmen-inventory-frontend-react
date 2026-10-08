@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
-import { useCreditTerm } from "@/hooks/use-credit-term";
-import {
-  ACTIVE_ONLY_FILTER,
-  useLookupPagination,
-} from "@/hooks/use-lookup-pagination";
-import type { CreditTerm } from "@/types/credit-term";
+import { useLookupResource } from "@/hooks/use-lookup-resource";
+import { lookupLabel, type CreditTermLookup } from "@/types/lookup";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupCreditTermProps {
   readonly value: string;
-  readonly onValueChange: (value: string, creditTerm?: CreditTerm) => void;
+  readonly onValueChange: (
+    value: string,
+    creditTerm?: CreditTermLookup,
+  ) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
@@ -34,10 +33,8 @@ export function LookupCreditTerm({
   const [hasOpened, setHasOpened] = useState(false);
 
   const { items, selectedItems, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<CreditTerm>({
-      useListHook: useCreditTerm,
+    useLookupResource<CreditTermLookup>("credit_term", {
       search,
-      serverFilter: ACTIVE_ONLY_FILTER,
       enabled: hasOpened,
       selectedIds: value ? [value] : [],
     });
@@ -54,7 +51,7 @@ export function LookupCreditTerm({
       items={items}
       selectedItems={selectedItems}
       getId={(c) => c.id}
-      getLabel={(c) => c.name}
+      getLabel={lookupLabel}
       placeholder={placeholder ?? tl("select", { entity: tfl("creditTerm") })}
       searchPlaceholder={tl("search", { entity: tfl("creditTerm") })}
       disabled={disabled}
