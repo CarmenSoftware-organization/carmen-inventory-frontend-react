@@ -1,5 +1,11 @@
 import type { ReportScheduleDialogField } from "@/types/report-schedule";
 
+/** ลูกของ <Dialog> ตามลำดับเอกสาร โดยเปิด <Group> (รวมที่ซ้อนกัน) ออก — layout ไม่มีผลกับฟอร์ม schedule แต่ field ห้ามหาย */
+const flattenGroups = (el: Element): Element[] =>
+  Array.from(el.children).flatMap((c) =>
+    c.tagName === "Group" ? flattenGroups(c) : [c],
+  );
+
 /**
  * แปลง XML/JSON `<Dialog>` ของ report template เป็น flat field list
  * สำหรับใช้กับ `CreateScheduleDialog` (ต่างจาก parser ของหน้า list ที่จับคู่
@@ -18,12 +24,6 @@ import type { ReportScheduleDialogField } from "@/types/report-schedule";
  * @example
  * const fields = parseScheduleDialog(template.dialog);
  */
-/** ลูกของ <Dialog> ตามลำดับเอกสาร โดยเปิด <Group> (รวมที่ซ้อนกัน) ออก — layout ไม่มีผลกับฟอร์ม schedule แต่ field ห้ามหาย */
-const flattenGroups = (el: Element): Element[] =>
-  Array.from(el.children).flatMap((c) =>
-    c.tagName === "Group" ? flattenGroups(c) : [c],
-  );
-
 export function parseScheduleDialog(
   raw: string | undefined | null,
 ): ReportScheduleDialogField[] {
