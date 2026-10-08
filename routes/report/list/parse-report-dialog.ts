@@ -13,27 +13,56 @@ export interface LookupNode {
   values: string[];
   value: string;
   multi: boolean; // Multi="true" → render as checkbox group, submit comma-joined values
+  colSpan: number;
 }
 
 export interface DateNode {
   type: "date";
   name: string;
   value: string;
+  colSpan: number;
 }
 
 type DialogNode = LabelNode | LookupNode | DateNode;
+
+/** เพดานคอลัมน์ของ dialog — modal กว้างได้จำกัด เกินนี้ Lookup จะแคบจนอ่านไม่ออก */
+export const MAX_COLS = 4;
+
+export type DialogCell = FormField;
+
+export interface ParsedDialog {
+  cols: number;
+  cells: DialogCell[];
+}
+
+const INT = /^\s*\d+\s*$/;
+
+/** จำนวนเต็ม ≥ 1 หรือ undefined ถ้าไม่ใช่ — ค่าผิดทุกแบบถอยไปค่าเริ่มต้น ไม่ throw */
+const readPositiveInt = (raw: string | null): number | undefined => {
+  if (raw === null || !INT.test(raw)) return undefined;
+  const n = Number.parseInt(raw, 10);
+  return n >= 1 ? n : undefined;
+};
+
+const readCols = (el: Element): number =>
+  Math.min(readPositiveInt(el.getAttribute("Cols")) ?? 1, MAX_COLS);
+
+const readSpan = (el: Element, cols: number): number =>
+  Math.min(readPositiveInt(el.getAttribute("ColSpan")) ?? 1, cols);
 
 export interface RangeField {
   kind: "range";
   label: string;
   from: LookupNode | DateNode;
   to: LookupNode | DateNode;
+  colSpan: number;
 }
 
 export interface SingleField {
   kind: "single";
   label: string;
   control: LookupNode | DateNode;
+  colSpan: number;
 }
 
 export type FormField = RangeField | SingleField;
@@ -88,19 +117,27 @@ const isNamedPair = (
   from.name.endsWith("From") &&
   to.name === `${from.name.slice(0, -"From".length)}To`;
 
-export function parseReportDialog(xml: string): FormField[] {
+export function parseReportDialog(xml: string): ParsedDialog {
   const doc = new DOMParser().parseFromString(xml, "text/xml");
   const dialogEl = doc.querySelector("Dialog");
-  if (!dialogEl) return [];
+  if (!dialogEl) return { cols: 1, cells: [] };
 
-  const nodes = parseNodes(dialogEl);
-  return groupFields(nodes);
+  const cols = readCols(dialogEl);
+  const cells: DialogCell[] = groupFields(
+    parseNodes(Array.from(dialogEl.children), cols),
+  );
+  return { cols, cells };
 }
 
-const parseNodes = (dialogEl: Element): DialogNode[] => {
+/** รวมทุก field เป็น list แบนสำหรับงานที่ไม่สนใจ layout (data source, period, ส่งค่า filter) */
+export function flattenFields(cells: DialogCell[]): FormField[] {
+  return cells;
+}
+
+const parseNodes = (elements: Element[], cols: number): DialogNode[] => {
   const nodes: DialogNode[] = [];
 
-  for (const child of Array.from(dialogEl.children)) {
+  for (const child of elements) {
     const tag = child.tagName;
 
     if (tag === "Label") {
@@ -121,12 +158,14 @@ const parseNodes = (dialogEl: Element): DialogNode[] => {
         values: rawValues ? rawValues.split("~") : [],
         value: attr(child, "Value"),
         multi: attr(child, "Multi") === "true",
+        colSpan: readSpan(child, cols),
       });
     } else if (tag === "Date") {
       nodes.push({
         type: "date",
         name: attr(child, "Name"),
         value: attr(child, "Value"),
+        colSpan: readSpan(child, cols),
       });
     }
   }
@@ -164,10 +203,16 @@ const groupFields = (nodes: DialogNode[]): FormField[] => {
         label: node.text,
         from: next,
         to: toControl,
+        colSpan: next.colSpan,
       });
       i += 4;
     } else {
-      fields.push({ kind: "single", label: node.text, control: next });
+      fields.push({
+        kind: "single",
+        label: node.text,
+        control: next,
+        colSpan: next.colSpan,
+      });
       i += 2;
     }
   }

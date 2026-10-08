@@ -12,7 +12,7 @@ const CURRENT_DIALOG = `<Dialog>
 
 describe("parseReportDialog", () => {
   it("pairs <X>From with <X>To into one range, whatever the second label says", () => {
-    const fields = parseReportDialog(CURRENT_DIALOG);
+    const { cells: fields } = parseReportDialog(CURRENT_DIALOG);
 
     expect(fields.map((f) => f.kind)).toEqual(["range", "range", "single"]);
     expect(fields[0]).toMatchObject({
@@ -28,7 +28,7 @@ describe("parseReportDialog", () => {
   });
 
   it("does not pair controls of different fields", () => {
-    const fields = parseReportDialog(`<Dialog>
+    const { cells: fields } = parseReportDialog(`<Dialog>
       <Label Text="Product From"/><Lookup Name="ProductFrom" DataSource="@product_list"/>
       <Label Text="Location To"/><Lookup Name="LocationTo" DataSource="@location_list"/>
     </Dialog>`);
@@ -37,7 +37,7 @@ describe("parseReportDialog", () => {
   });
 
   it("still pairs the legacy layout with a hidden second label", () => {
-    const fields = parseReportDialog(`<Dialog>
+    const { cells: fields } = parseReportDialog(`<Dialog>
       <Label Text="Vendor"/><Lookup Name="VendorFrom" DataSource="@vendor_list"/>
       <Label Text="to" Visible="false"/><Lookup Name="VendorTo" DataSource="@vendor_list"/>
     </Dialog>`);
