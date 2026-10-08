@@ -10,9 +10,11 @@ import type {
 import { makeWidget, SHAPES } from "./widget-router.fixtures";
 
 vi.mock("use-intl", () => ({
-  useTranslations: () => Object.assign((key: string) => key, {
-    has: () => true,
-  }),
+  useTranslations: () =>
+    Object.assign((key: string) => key, {
+      has: () => true,
+    }),
+  useLocale: () => "en",
 }));
 
 // เมนูสลับกราฟเสนอชนิดไหนได้ การ์ดของชนิดนั้นต้องมีอยู่จริง — `WidgetRouter` จบด้วย
@@ -29,7 +31,10 @@ describe("WidgetRouter covers every render the menu can offer", () => {
   });
 
   it.each(cases)("%s → %s renders a card", (shape, type) => {
-    const widget = makeWidget(shape as DatasetShape, type) as ResolvedWidgetLike;
+    const widget = makeWidget(
+      shape as DatasetShape,
+      type,
+    ) as ResolvedWidgetLike;
     const { container } = render(
       <WidgetRouter
         widget={widget}
@@ -38,8 +43,9 @@ describe("WidgetRouter covers every render the menu can offer", () => {
       />,
       { wrapper: MemoryRouter },
     );
-    expect(container.innerHTML, `${type} on ${shape} rendered nothing`).not.toBe(
-      "",
-    );
+    expect(
+      container.innerHTML,
+      `${type} on ${shape} rendered nothing`,
+    ).not.toBe("");
   });
 });

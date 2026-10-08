@@ -34,6 +34,7 @@ import { BuWidgetSection } from "@/components/dashboard-widget/bu-widget-section
 import { useBuDashboardWidgets } from "@/hooks/use-bu-dashboard-widgets";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
+import { useWidgetTitle } from "@/components/dashboard-widget/use-widget-title";
 import {
   myDashboardWidgetDataQueryOptions,
   useCreateMyDashboardWidget,
@@ -147,6 +148,7 @@ const SavedWidgetsSection = () => {
   const tt = useTranslations("toast");
   const queryClient = useQueryClient();
   const buCode = useBuCode();
+  const titleOf = useWidgetTitle();
   const [pendingDelete, setPendingDelete] = useState<MyDashboardWidget | null>(
     null,
   );
@@ -251,7 +253,6 @@ const SavedWidgetsSection = () => {
       {
         dataset_id: ds.id,
         widget_type: defaultWidgetTypeFor(ds),
-        title: ds.name,
       },
       {
         onSuccess: () =>
@@ -269,7 +270,6 @@ const SavedWidgetsSection = () => {
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        title: pendingAdd.name,
         params,
         display,
       },
@@ -397,8 +397,9 @@ const SavedWidgetsSection = () => {
     });
   };
 
-  const deleteTitleText =
-    pendingDelete?.title || pendingDelete?.dataset_id || "";
+  const deleteTitleText = pendingDelete
+    ? titleOf(pendingDelete, datasetById.get(pendingDelete.dataset_id)?.name)
+    : "";
   // dataset ที่ไม่อยู่ใน catalogue (ถูกถอดออกไปแล้ว) เปิด dialog ไม่ได้ เพราะฟอร์ม
   // param สร้างจาก descriptor ของมัน
   const configDataset = pendingConfig

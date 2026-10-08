@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useMemo, type ReactNode } from "react";
+import { useWidgetTitle } from "./use-widget-title";
 import {
   useReactTable,
   getCoreRowModel,
@@ -234,6 +235,7 @@ function resolveWidget(
     dataset_id: config.dataset_id,
     widget_type: config.widget_type,
     title: config.title,
+    title_i18n: config.title_i18n,
     order_index: config.order_index,
     params: config.params,
   };
@@ -398,6 +400,7 @@ export function WidgetRouter({
 }
 
 function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
+  const titleOf = useWidgetTitle();
   // widget กลุ่ม document.* ที่กรอง status → ไอคอนหลักเปลี่ยนตาม workflow status
   // ที่เหลือ (by-status / series / dataset ทั่วไป) → SubTile รูป doc-type เดิม
   const status = statusOf(widget.params);
@@ -418,7 +421,7 @@ function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
       </span>
       <div className="min-w-0 space-y-0.5">
         <CardTitle className="text-sm leading-snug font-semibold">
-          {widget.title}
+          {titleOf(widget, widget.meta.name)}
         </CardTitle>
         {!isDocumentWidget && widget.meta.description && (
           <CardDescription className="text-micro leading-snug">

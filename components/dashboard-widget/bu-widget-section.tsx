@@ -39,6 +39,7 @@ import {
   useUpdateBuDashboardWidget,
 } from "@/hooks/use-bu-dashboard-widgets";
 import { useCan } from "@/hooks/use-can";
+import { useWidgetTitle } from "./use-widget-title";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
@@ -86,6 +87,7 @@ export function BuWidgetSection({
     null,
   );
   const [pendingAdd, setPendingAdd] = useState<DashboardDataset | null>(null);
+  const titleOf = useWidgetTitle();
   const [pendingConfig, setPendingConfig] = useState<BuDashboardWidget | null>(
     null,
   );
@@ -149,7 +151,6 @@ export function BuWidgetSection({
       {
         dataset_id: ds.id,
         widget_type: defaultWidgetTypeFor(ds),
-        title: ds.name,
         module: wireModule,
         order_index: nextOrder,
       },
@@ -171,7 +172,6 @@ export function BuWidgetSection({
       {
         dataset_id: pendingAdd.id,
         widget_type: defaultWidgetTypeFor(pendingAdd),
-        title: pendingAdd.name,
         params,
         display,
         module: wireModule,
@@ -252,9 +252,7 @@ export function BuWidgetSection({
   };
 
   const deleteTitleText = pendingDelete
-    ? pendingDelete.title ||
-      datasetsById.get(pendingDelete.dataset_id)?.name ||
-      pendingDelete.dataset_id
+    ? titleOf(pendingDelete, datasetsById.get(pendingDelete.dataset_id)?.name)
     : "";
   const configDataset = pendingConfig
     ? datasetsById.get(pendingConfig.dataset_id)
