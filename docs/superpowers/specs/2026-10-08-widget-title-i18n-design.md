@@ -142,6 +142,20 @@ export interface LocalizedTitle {
 
 ทุกขั้นถอยกลับได้ทีละขั้น ถ้า BE ขึ้นแล้วแต่ FE ยังเป็นตัวเก่า FE เก่าจะอ่าน `title` string ได้ตามปกติ และ client เก่าที่บันทึก title จะไม่ลบค่า TH เพราะเป็น merge (§3)
 
+### Reconcile หลัง roll-forward / rollback
+
+ถ้า code เก่าเขียน `title` หลัง migration (ช่วง deploy คาบเกี่ยวหรือ rollback) `title_i18n.en` อาจ drift จาก `title` — รัน SQL นี้หลังทุกครั้งที่ roll-forward บนทั้ง 3 ตาราง: `tb_dashboard_widget_template` (platform) · `tb_dashboard_bu_widget` และ `tb_dashboard_personal_widget` (ทุก tenant schema) · idempotent และแตะเฉพาะแถวที่ drift เพราะ code ใหม่รักษา title = en เสมอ
+
+```sql
+UPDATE <table>
+   SET title_i18n = CASE WHEN title IS NULL OR btrim(title) = '' THEN NULL
+                         ELSE coalesce(title_i18n, '{}'::jsonb) || jsonb_build_object('en', btrim(title)) END
+ WHERE (title_i18n->>'en') IS DISTINCT FROM nullif(btrim(title), '');
+```
+
+- build ของ micro-cluster/gateway ต้อง rebuild `packages/prisma-shared-schema-platform` (`db:generate` + `build`) ไม่งั้น `title_i18n` หายจาก compiled types
+- หลัง seed ขยับ version ของ `bu_default` ผู้ดูแลต้อง redeploy ลง BU เพื่อให้ BU widget เดิมได้ title สองภาษา
+
 ## 7. การตรวจสอบ
 
 - ตามค่าตั้งของผู้ใช้ plan จะ**ไม่**มีขั้นเขียนเทสต์ใหม่ แต่ต้องรัน typecheck + lint ทุกรีโป และเทสต์เดิมต้องยังผ่าน (FE `bun test:run` · backend `jest` · micro-data `go test ./...`)
