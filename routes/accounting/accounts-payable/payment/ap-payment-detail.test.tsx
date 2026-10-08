@@ -61,6 +61,26 @@ beforeEach(() => {
   clearApMockStorage("AP-UI-TEST");
 });
 describe("Payment document interaction", () => {
+  it("switches the sticky footer to journal totals and back to payment totals", async () => {
+    state.payment =
+      await createApMockRepository("AP-UI-TEST").getPayment("pv-1");
+    mount("/payment/pv-1");
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "3. Journal GL" }), {
+      button: 0,
+      ctrlKey: false,
+    });
+    expect(screen.getByText("Base Debit").closest(".sticky")).toHaveClass(
+      "bottom-0",
+    );
+    expect(screen.getByText("Base Credit")).toBeInTheDocument();
+    expect(screen.queryByText("Net cash")).not.toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: /1\. / }), {
+      button: 0,
+      ctrlKey: false,
+    });
+    expect(screen.getByText("Net cash")).toBeInTheDocument();
+    expect(screen.queryByText("Base Debit")).not.toBeInTheDocument();
+  });
   it("shows a recoverable missing document state", () => {
     mount("/payment/missing");
     expect(screen.getByText("Payment not found")).toBeInTheDocument();

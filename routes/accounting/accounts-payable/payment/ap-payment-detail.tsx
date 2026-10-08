@@ -255,6 +255,7 @@ function ApPaymentEditor({
   const saveMutation = useSaveApPayment();
   const actionMutation = useApPaymentAction();
   const [editing, setEditing] = useState(id === "new");
+  const [activeTab, setActiveTab] = useState("invoices");
   const [confirmation, setConfirmation] = useState<
     "submit" | "approve" | "void" | "reject" | "clarify" | null
   >(null);
@@ -268,6 +269,9 @@ function ApPaymentEditor({
   const applied = addDecimal(applications.map((item) => item.apply_amount));
   const wht = addDecimal(applications.map((item) => item.wht_amount));
   const summary = paymentSummary(form);
+  const journalDebit = addDecimal(summary.journal.map((row) => row.debit));
+  const journalCredit = addDecimal(summary.journal.map((row) => row.credit));
+  const journalVariance = subtractDecimal(journalDebit, journalCredit);
   const netCash = summary.net_cash;
   const editable = id === "new" || (loaded?.capabilities.can_edit && editing);
   const addInvoice = (invoiceId: string) => {
@@ -342,7 +346,7 @@ function ApPaymentEditor({
     }
   };
   return (
-    <div className="flex min-h-[calc(100dvh-3rem)] flex-col gap-5 pb-24">
+    <div className="flex w-full min-w-0 shrink-0 grow flex-col gap-5">
       <DocFormHeader
         title={loaded?.pv_no ?? "New Payment Voucher"}
         subtitle={approvalContext ? "Approval review" : "Supplier disbursement"}
@@ -601,6 +605,8 @@ function ApPaymentEditor({
         </div>
       </section>
       <PaymentSections
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         form={form}
         onChange={setForm}
         editable={Boolean(editable)}
@@ -614,29 +620,64 @@ function ApPaymentEditor({
       />
       <SummaryFooterBar
         hasRecord
-        items={[
-          {
-            key: "applied",
-            label: "Applied",
-            value: <Money value={applied} currency={form.currency_code} />,
-          },
-          {
-            key: "wht",
-            label: "WHT",
-            value: <Money value={wht} currency={form.currency_code} />,
-          },
-          {
-            key: "net",
-            label: "Net cash",
-            value: <Money value={netCash} currency={form.currency_code} />,
-            emphasis: true,
-          },
-          {
-            key: "fx",
-            label: "Realized FX",
-            value: <Money value={summary.fx} currency="THB" />,
-          },
-        ]}
+        items={
+          activeTab === "journal"
+            ? [
+                { key: "rows", label: "Rows", value: summary.journal.length },
+                {
+                  key: "balance",
+                  label: "Base Balance",
+                  value:
+                    compareDecimal(journalVariance, "0") === 0
+                      ? "Balanced"
+                      : "Variance",
+                },
+                {
+                  key: "debit",
+                  label: "Base Debit",
+                  value: <Money value={journalDebit} currency="THB" />,
+                  emphasis: true,
+                },
+                {
+                  key: "credit",
+                  label: "Base Credit",
+                  value: <Money value={journalCredit} currency="THB" />,
+                  emphasis: true,
+                },
+                {
+                  key: "variance",
+                  label: "Variance",
+                  value: <Money value={journalVariance} currency="THB" />,
+                },
+              ]
+            : [
+                {
+                  key: "applied",
+                  label: "Applied",
+                  value: (
+                    <Money value={applied} currency={form.currency_code} />
+                  ),
+                },
+                {
+                  key: "wht",
+                  label: "WHT",
+                  value: <Money value={wht} currency={form.currency_code} />,
+                },
+                {
+                  key: "net",
+                  label: "Net cash",
+                  value: (
+                    <Money value={netCash} currency={form.currency_code} />
+                  ),
+                  emphasis: true,
+                },
+                {
+                  key: "fx",
+                  label: "Realized FX",
+                  value: <Money value={summary.fx} currency="THB" />,
+                },
+              ]
+        }
       >
         {editing && (
           <Button

@@ -9,6 +9,8 @@ import { ChevronDown, Columns3, Plus } from "lucide-react";
 import { useNavigate } from "react-router";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
+import { DisplayModeToggle } from "@/components/share/display-mode-toggle";
+import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +72,9 @@ export function Component() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
-  const [docTypeFilter, setDocTypeFilter] = useState<string>("ALL");
+  const [docTypeFilter, setDocTypeFilter] = useState("");
+  const [status, setStatus] = useState("");
+  const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [sorting, setSorting] = useState<SortingState>([]);
   const rows = useMemo(() => {
     const term = search.toLowerCase();
@@ -80,10 +84,12 @@ export function Component() {
           .toLowerCase()
           .includes(term);
       const matchesType =
-        docTypeFilter === "ALL" || invoice.docType === docTypeFilter;
-      return matchesSearch && matchesType;
+        !docTypeFilter || (invoice.docType ?? "ARIV") === docTypeFilter;
+      return (
+        matchesSearch && matchesType && (!status || invoice.status === status)
+      );
     });
-  }, [search, docTypeFilter]);
+  }, [search, docTypeFilter, status]);
   const columns = useMemo<ColumnDef<ArInvoice>[]>(
     () => [
       {
@@ -201,7 +207,7 @@ export function Component() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <DocumentListHeader
           title="AR Document Directory"
-          description="Invoices, Credit/Debit Notes, Deposits & Receipts (FRD v1.07)"
+          description="Invoices, Credit/Debit Notes, Deposits & Receipts"
           count={rows.length}
         />
         <DropdownMenu>
@@ -233,50 +239,60 @@ export function Component() {
         </DropdownMenu>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="min-w-48 sm:w-60">
+        <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto">
+          <div className="w-full sm:w-auto sm:flex-initial">
             <SearchInput
               defaultValue={search}
               onSearch={setSearch}
               onInputChange={setSearch}
             />
           </div>
-          <div className="flex items-center gap-1 overflow-x-auto text-xs">
-            {(["ALL", "ARIV", "ARCN", "ARDN", "ARDP", "ARRC"] as const).map(
-              (t) => (
-                <Button
-                  key={t}
-                  type="button"
-                  variant={docTypeFilter === t ? "default" : "outline"}
-                  size="sm"
-                  className="h-8 px-2.5 text-xs"
-                  onClick={() => setDocTypeFilter(t)}
-                >
-                  {t === "ALL" ? "All Types" : t}
-                </Button>
-              ),
-            )}
-          </div>
+          <span className="bg-border hidden h-4 w-px sm:block" />
+          <StatusFilter
+            value={status}
+            onChange={setStatus}
+            placeholder="Status"
+            defaultLabel="All Statuses"
+            options={Object.keys(statusTone).map((value) => ({
+              value,
+              label: value,
+            }))}
+            className="w-36 text-xs"
+          />
+          <StatusFilter
+            value={docTypeFilter}
+            onChange={setDocTypeFilter}
+            placeholder="Document Type"
+            defaultLabel="All Types"
+            options={Object.keys(docTypeTone).map((value) => ({
+              value,
+              label: value,
+            }))}
+            className="w-36 text-xs"
+          />
         </div>
         <div className="hidden items-center gap-2 sm:flex">
           <DataGridSortMenu table={table} />
-          <DataGridColumnVisibility
-            table={table}
-            trigger={
-              <Button
-                size="icon-sm"
-                variant="outline"
-                aria-label="Toggle columns"
-              >
-                <Columns3 className="size-4" />
-              </Button>
-            }
-          />
+          {displayMode === "list" && (
+            <DataGridColumnVisibility
+              table={table}
+              trigger={
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  aria-label="Toggle columns"
+                >
+                  <Columns3 className="size-4" />
+                </Button>
+              }
+            />
+          )}
+          <DisplayModeToggle value={displayMode} onChange={setDisplayMode} />
         </div>
       </div>
-      {isMobile ? (
+      {isMobile || displayMode === "grid" ? (
         rows.length ? (
-          <div className="grid gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((invoice) => {
               const totals = invoiceTotals(invoice);
               return (

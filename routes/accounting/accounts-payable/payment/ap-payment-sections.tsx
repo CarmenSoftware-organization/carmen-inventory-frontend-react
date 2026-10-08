@@ -87,19 +87,22 @@ function Section({
 }
 
 export function PaymentSections({
+  activeTab,
+  onTabChange,
   form,
   onChange,
   editable,
   invoices,
   onAddInvoice,
 }: {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   form: ApPaymentInput;
   onChange: (next: ApPaymentInput) => void;
   editable: boolean;
   invoices: ApInvoice[];
   onAddInvoice: (id: string) => void;
 }) {
-  const [activeTab, setActiveTab] = useState("invoices");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [_methodEditor, setMethodEditor] = useState<string | null>(
     editable ? "primary" : null,
@@ -440,7 +443,11 @@ export function PaymentSections({
   ];
   return (
     <>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={onTabChange}
+        className="flex-1 gap-4"
+      >
         <div className="flex flex-col gap-2 border-b pb-2 sm:flex-row sm:items-center sm:justify-between">
           <TabsList variant="line">
             <TabsTrigger value="invoices">
@@ -501,7 +508,7 @@ export function PaymentSections({
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => setActiveTab("tax")}
+                    onClick={() => onTabChange("tax")}
                   >
                     Go to Tax Allocation
                   </Button>
@@ -1434,10 +1441,6 @@ export function PaymentSections({
                 },
               ]}
             />
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">
-              Balanced: Debit {money(summary.journal_total, "", true)} / Credit{" "}
-              {money(summary.journal_total, "", true)}
-            </p>
           </Section>
         </TabsContent>
       </Tabs>
@@ -1779,7 +1782,7 @@ export function PaymentSections({
                     {currency}
                   </span>
                 </div>
-                <p className="text-muted-foreground pt-1 text-micro">
+                <p className="text-muted-foreground text-micro pt-1">
                   {
                     availableDeposits.find((d) => d.id === selectedDepositId)
                       ?.note
