@@ -1,5 +1,5 @@
 import { Ban, RotateCw, Wrench } from "lucide-react";
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { useLogout } from "@/hooks/use-logout";
@@ -26,6 +26,7 @@ export function AppStatusScreen({
   readonly isChecking: boolean;
 }) {
   const t = useTranslations("appStatus");
+  const locale = useLocale();
   const logoutMutation = useLogout();
   const disabled = snapshot.status === "disabled";
   const Icon = disabled ? Ban : Wrench;
@@ -58,14 +59,16 @@ export function AppStatusScreen({
 
         {/* ข้อความของแอดมิน — ไม่ผ่านระบบแปล แสดงตามที่พิมพ์ */}
         {snapshot.message && (
-          <p className="text-foreground mt-3 text-xs leading-relaxed whitespace-pre-line break-words">
+          <p className="text-foreground mt-3 text-xs leading-relaxed break-words whitespace-pre-line">
             {snapshot.message}
           </p>
         )}
 
         {!disabled && snapshot.until && (
           <p className="text-muted-foreground mt-3 text-xs">
-            {t("untilLine", { time: formatAppStatusTime(snapshot.until) })}
+            {t("untilLine", {
+              time: formatAppStatusTime(snapshot.until, locale),
+            })}
           </p>
         )}
 

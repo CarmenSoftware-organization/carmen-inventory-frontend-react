@@ -6,6 +6,7 @@ import { LicenseExpiredBanner } from "./license-expired-banner";
 vi.mock("use-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) =>
     values ? `${key}:${JSON.stringify(values)}` : key,
+  useLocale: () => "en",
 }));
 
 const license = vi.fn();

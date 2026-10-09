@@ -76,9 +76,12 @@ export function parseAppStatus(raw: unknown): AppStatusSnapshot {
 export const isAppBlocked = (s: AppStatusSnapshot): boolean =>
   s.status === "disabled" || (s.status === "maintenance" && !s.bypass);
 
-/** เวลา `until` ในรูปที่คนอ่าน — locale ของเบราว์เซอร์ เหมือน `LicenseExpiredBanner` */
-export const formatAppStatusTime = (iso: string): string =>
-  new Date(iso).toLocaleString(undefined, {
+/**
+ * เวลา `until` ในรูปที่คนอ่าน — ตามภาษาที่เลือกในแอป (`useLocale()`) ไม่ใช่ locale ของเบราว์เซอร์
+ * ไม่งั้น UI ภาษาไทยจะขึ้น "Oct 9, 2026, 6:24 PM" ปนกลางประโยค (ภาษาไทยได้ปี พ.ศ. ตาม Intl)
+ */
+export const formatAppStatusTime = (iso: string, locale: string): string =>
+  new Date(iso).toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
