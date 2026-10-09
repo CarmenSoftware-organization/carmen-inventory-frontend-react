@@ -5282,6 +5282,21 @@
     "featureLabel": "Feature:",
     "buLabel": "Business unit:"
   },
+  "appStatus": {
+    "maintenanceEyebrow": "Maintenance",
+    "maintenanceTitle": "We're doing some maintenance",
+    "maintenanceDesc": "This application is temporarily unavailable. You stay signed in — this page comes back on its own when it's ready.",
+    "untilLine": "Expected back {time}",
+    "checkNow": "Check again",
+    "disabledEyebrow": "Unavailable",
+    "disabledTitle": "This application has been disabled",
+    "disabledDesc": "Contact your administrator if you need access.",
+    "signOut": "Sign out",
+    "readOnlyBanner": "Read-only mode — you can view data, but saving is disabled for now.",
+    "readOnlyBannerUntil": "Read-only mode until {time} — you can view data, but saving is disabled for now.",
+    "bypassMaintenanceBanner": "Maintenance mode is on — you have access as an exempt user. Other users are blocked.",
+    "bypassReadOnlyBanner": "Read-only mode is on — you can still save as an exempt user. Other users can only view."
+  },
   "license": {
     "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
     "inactiveBanner": "Your subscription has been suspended — you can still view data, but saving or editing is disabled.",
