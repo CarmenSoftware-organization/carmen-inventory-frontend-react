@@ -26,7 +26,12 @@ interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
    * ยังเด้งเหมือนเดิม เพราะเป็นเรื่องระดับสัญญาที่ผู้ใช้ต้องรู้ ไม่ใช่ข้อจำกัดของหน้าใดหน้าหนึ่ง
    */
   silentForbidden?: boolean;
-  /** คืน 401 ดิบ ไม่ refresh/เคลียร์ session — ใช้กับ probe สาธารณะอย่าง app-status เท่านั้น */
+  /**
+   * คืน 401 ดิบ ไม่ refresh/เคลียร์ session — ใช้กับ probe สาธารณะอย่าง app-status เท่านั้น
+   *
+   * เงื่อนไขก่อนใช้: เฉพาะ endpoint ที่ 401 **ไม่มีทาง** แปลว่า access token หมดอายุ
+   * (เช่น แปลว่า app id ไม่รู้จัก) ไม่งั้นจะข้าม refresh แล้วผู้ใช้ค้างกับ token เสีย
+   */
   rawUnauthorized?: boolean;
 }
 

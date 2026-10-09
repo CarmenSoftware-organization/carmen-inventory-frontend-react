@@ -9,6 +9,7 @@ import {
   parseAppStatus,
   type AppStatusSnapshot,
 } from "@/lib/app-status-store";
+import { refreshTokens } from "@/lib/auth/auth-api";
 import { httpClient } from "@/lib/http-client";
 
 // ตรงกับรอบรีเฟรช allowlist ของ gateway (APP_ALLOWLIST_TTL_MS = 60 s) — ถี่กว่านี้ก็ไม่ได้ค่าใหม่กว่า
@@ -19,6 +20,18 @@ const unwrap = (json: unknown): unknown =>
   typeof json === "object" && json !== null && "data" in json
     ? (json as { data: unknown }).data
     : json;
+
+async function probe(): Promise<AppStatusSnapshot> {
+  // silentForbidden: 403 ที่ไม่ใช่สถานะแอปต้องไม่เด้ง PermissionDeniedDialog ทุก 60 วินาที
+  // (APP_DISABLED 403 ยังเข้า store เพราะ http-client รายงานก่อนเช็ค flag นี้)
+  const res = await httpClient.get(API_ENDPOINTS.APP_STATUS, {
+    rawUnauthorized: true,
+    silentForbidden: true,
+  });
+  if (res.status === 404 || res.status === 401) return APP_STATUS_RUNNING;
+  if (res.ok) return parseAppStatus(unwrap(await res.json().catch(() => null)));
+  throw new Error(`Failed to fetch app status (${res.status})`);
+}
 
 /**
  * Hook สถานะการให้บริการของแอป — **mount ครั้งเดียวใน root-layout** (เป็นตัว poll ตัวเดียว)
@@ -41,21 +54,24 @@ export function useAppStatus(): {
   isChecking: boolean;
 } {
   const queryClient = useQueryClient();
+  const retriedFor = useRef<string | null>(null);
 
   const query = useQuery<AppStatusSnapshot>({
     queryKey: [QUERY_KEYS.APP_STATUS],
     queryFn: async () => {
       const token = appStatusStore.probeToken();
-      const res = await httpClient.get(API_ENDPOINTS.APP_STATUS, {
-        rawUnauthorized: true,
-      });
-      let snapshot: AppStatusSnapshot;
-      if (res.status === 404 || res.status === 401) {
-        snapshot = APP_STATUS_RUNNING;
-      } else if (res.ok) {
-        snapshot = parseAppStatus(unwrap(await res.json().catch(() => null)));
+      let snapshot = await probe();
+      // ผู้ใช้ที่ได้รับยกเว้นแต่ access token หมดอายุ: backend มองเป็น "ไม่มีผู้ใช้" (200, bypass:false)
+      // และหน้าบล็อกเต็มจอจะไม่ยิงคำขออื่นให้เกิด 401→refresh เลย จึงต้อง refresh เองหนึ่งครั้ง
+      // แล้ว probe ซ้ำก่อนตัดสิน — ทำครั้งเดียวต่อสถานะบล็อกหนึ่งชุด ไม่ refresh ทุก 60 วินาที
+      if (snapshot.status !== "running" && !snapshot.bypass) {
+        const key = `${snapshot.status}|${snapshot.until ?? ""}`;
+        if (retriedFor.current !== key) {
+          retriedFor.current = key;
+          if (await refreshTokens()) snapshot = await probe();
+        }
       } else {
-        throw new Error(`Failed to fetch app status (${res.status})`);
+        retriedFor.current = null;
       }
       appStatusStore.setFromProbe(snapshot, token);
       return snapshot;
