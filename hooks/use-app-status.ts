@@ -78,7 +78,14 @@ export function useAppStatus(): {
       } else {
         retriedFor.current = null;
       }
-      appStatusStore.setFromProbe(snapshot, token);
+      // ผลถูกทิ้งเพราะมี 503/403 ของสถานะแอปเข้ามาระหว่าง probe (เช่นตอนเปิดหน้าแรก query ของหน้า
+      // ล้มพร้อมกัน) — probe ซ้ำทันทีหนึ่งครั้ง ไม่งั้นข้อความแอดมินหายไปจนรอบ poll ถัดไป (≤ 60 วินาที)
+      // และปุ่ม "ตรวจสอบอีกครั้ง" ดูเหมือนไม่ทำอะไร · ครั้งเดียวพอ: หน้าบล็อกไม่ยิงคำขออื่นต่อแล้ว
+      if (!appStatusStore.setFromProbe(snapshot, token)) {
+        const retryToken = appStatusStore.probeToken();
+        snapshot = await probe();
+        appStatusStore.setFromProbe(snapshot, retryToken);
+      }
       return snapshot;
     },
     refetchInterval: POLL_MS,
