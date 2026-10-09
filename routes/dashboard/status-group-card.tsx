@@ -131,8 +131,10 @@ export function StatusGroupCard({
         </div>
       )}
       <CardHeader className="px-4 pb-0">
-        {/* pr-6 = เว้นที่ให้ปุ่มลบมุมขวาบน ไม่ให้ date ทับ */}
-        <div className="flex items-center justify-between gap-2 pr-6">
+        {/* pr-6 = เว้นที่ให้ปุ่มลบมุมขวาบน ไม่ให้ date ทับ
+            min-w-0 = แถวนี้เป็น grid item ของ CardHeader — ถ้าไม่มี ชื่อที่ truncate (nowrap) จะดันคอลัมน์
+            ให้กว้างเท่าชื่อเต็ม แล้วตัวเลือกช่วงเวลาหลุดขอบการ์ดบนจอแคบ (390px) */}
+        <div className="flex min-w-0 items-center justify-between gap-2 pr-6">
           <h3 className="text-foreground truncate text-base leading-tight font-semibold">
             {title}
           </h3>
