@@ -1,9 +1,11 @@
 import {
   ApiError,
   ERROR_CODES,
+  appStatusErrorCodeFrom,
   licenseContextFrom,
   licenseErrorCodeFrom,
 } from "@/lib/api-error";
+import { appStatusStore } from "@/lib/app-status-store";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
@@ -252,6 +254,22 @@ const handleClientErrors = async (
       typeof (body as { message?: unknown } | undefined)?.message === "string"
         ? (body as { message: string }).message
         : undefined;
+    // แอปถูกปิด (APP_DISABLED) ไม่ใช่เรื่องสิทธิ์ — ห้ามเด้ง PermissionDeniedDialog
+    // root-layout อ่าน store แล้วแทนทั้งแอปด้วยหน้าเต็มจอเอง
+    const appStatusCode = appStatusErrorCodeFrom(body);
+    if (appStatusCode) {
+      appStatusStore.reportBlocked(appStatusCode, body);
+      throw new ApiError(
+        ERROR_CODES.FORBIDDEN,
+        message || "Application disabled",
+        403,
+        false,
+        undefined,
+        undefined,
+        appStatusCode,
+      );
+    }
+
     const licenseCode = licenseErrorCodeFrom(body);
 
     if (licenseCode) {
@@ -274,6 +292,16 @@ const handleClientErrors = async (
     }
 
     throw new ApiError(ERROR_CODES.FORBIDDEN, message || "Access denied", 403);
+  }
+
+  if (response.status === 503) {
+    // ปิดปรับปรุง/อ่านอย่างเดียว — แจ้ง store ทันทีไม่ต้องรอรอบ poll ของ useAppStatus
+    // แล้วคืน response เดิม: hook ของแต่ละหน้ายังทำ ApiError.from เอง (ได้ appCode
+    // ไปแปลเป็น toast) · 503 ตอน gateway ล่มจริงไม่มี code นี้ จึงไม่แตะ store
+    const body = await readErrorBody(response);
+    const appStatusCode = appStatusErrorCodeFrom(body);
+    if (appStatusCode) appStatusStore.reportBlocked(appStatusCode, body);
+    return response;
   }
 
   if (response.status === 429) {
