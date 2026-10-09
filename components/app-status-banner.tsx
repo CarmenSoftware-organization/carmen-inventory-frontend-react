@@ -1,5 +1,5 @@
 import { Lock, ShieldCheck } from "lucide-react";
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import {
   formatAppStatusTime,
   type AppStatusSnapshot,
@@ -21,6 +21,7 @@ export function AppStatusBanner({
   readonly snapshot: AppStatusSnapshot;
 }) {
   const t = useTranslations("appStatus");
+  const locale = useLocale();
 
   if (snapshot.status === "running" || snapshot.status === "disabled") {
     return null;
@@ -55,7 +56,7 @@ export function AppStatusBanner({
       <span className="text-muted-foreground">
         {snapshot.until
           ? t("readOnlyBannerUntil", {
-              time: formatAppStatusTime(snapshot.until),
+              time: formatAppStatusTime(snapshot.until, locale),
             })
           : t("readOnlyBanner")}
         {snapshot.message && <> — {snapshot.message}</>}

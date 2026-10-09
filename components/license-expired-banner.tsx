@@ -1,4 +1,4 @@
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { CalendarX } from "lucide-react";
 import { useLicense } from "@/hooks/use-license";
 
@@ -21,12 +21,14 @@ import { useLicense } from "@/hooks/use-license";
 export function LicenseExpiredBanner() {
   const { enforced, state, endDate } = useLicense();
   const t = useTranslations("license");
+  const locale = useLocale();
 
   if (!enforced) return null;
   if (state !== "expired" && state !== "inactive") return null;
 
   const formatted = endDate
-    ? new Date(endDate).toLocaleDateString(undefined, {
+    ? // ตามภาษาที่เลือกในแอป ไม่ใช่ locale ของเบราว์เซอร์ — เหมือน formatAppStatusTime
+      new Date(endDate).toLocaleDateString(locale, {
         year: "numeric",
         month: "short",
         day: "numeric",
