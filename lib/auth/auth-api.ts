@@ -56,6 +56,9 @@ export async function login(
       res.status,
       false,
       retryAfter !== undefined ? { retryAfter } : undefined,
+      undefined,
+      // `error.code` เช่น APP_DISABLED — หน้า login ต้องบอกว่าแอปถูกปิด ไม่ใช่รหัสผ่านผิด
+      typeof json?.error?.code === "string" ? json.error.code : undefined,
     );
   }
 
@@ -330,7 +333,11 @@ async function doRefresh(): Promise<boolean> {
   }
 
   if (!res.ok) {
-    clearSession();
+    // ล้าง session เฉพาะตอน refresh token ถูกปฏิเสธจริง (400/401/403) — 5xx/429/อื่น ๆ
+    // เป็นปัญหาชั่วคราวฝั่ง server เหมือน network error: คืน false แต่เก็บ session ไว้
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      clearSession();
+    }
     return false;
   }
 

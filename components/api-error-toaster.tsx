@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useErrorToastWithOptions } from "@/hooks/use-error-toast";
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import {
+  APP_STATUS_ERROR_CODES,
+  ApiError,
+  ERROR_CODES,
+} from "@/lib/api-error";
 import { setApiErrorHandler } from "@/lib/api-error-handler";
 
 export function ApiErrorToaster() {
@@ -10,7 +14,7 @@ export function ApiErrorToaster() {
     setApiErrorHandler((error, options) => {
       // 401/403 มี UI ของตัวเองอยู่แล้ว (redirect ไป login / PermissionDeniedDialog)
       // — toast ซ้ำจะกลายเป็นเสียงรบกวนที่ user ทำอะไรกับมันไม่ได้
-      if (error instanceof ApiError && isHandledElsewhere(error.code)) return;
+      if (error instanceof ApiError && isHandledElsewhere(error)) return;
       errorToast(error, options);
     });
     return () => setApiErrorHandler(null);
@@ -19,7 +23,11 @@ export function ApiErrorToaster() {
   return null;
 }
 
-const isHandledElsewhere = (code: string) =>
-  code === ERROR_CODES.UNAUTHORIZED ||
-  code === ERROR_CODES.SESSION_EXPIRED ||
-  code === ERROR_CODES.FORBIDDEN;
+// ปิดปรับปรุง/ถูกปิดใช้งาน → root-layout แทนทั้งแอปด้วยหน้าเต็มจอแล้ว ·
+// APP_READ_ONLY ยังขึ้น toast (errors.byCode) เพราะผู้ใช้เพิ่งกดบันทึกแล้วต้องรู้ว่าไม่ได้บันทึก
+const isHandledElsewhere = (error: ApiError) =>
+  error.code === ERROR_CODES.UNAUTHORIZED ||
+  error.code === ERROR_CODES.SESSION_EXPIRED ||
+  error.code === ERROR_CODES.FORBIDDEN ||
+  error.appCode === APP_STATUS_ERROR_CODES.APP_MAINTENANCE ||
+  error.appCode === APP_STATUS_ERROR_CODES.APP_DISABLED;

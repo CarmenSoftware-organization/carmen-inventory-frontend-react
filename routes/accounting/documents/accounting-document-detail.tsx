@@ -73,7 +73,8 @@ import { useCostCenter } from "@/hooks/use-cost-center";
 import { useGlPeriods } from "@/hooks/use-accounting-master";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, isAppStatusErrorCode } from "@/lib/api-error";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { httpClient } from "@/lib/http-client";
 import type { DimensionMaster, DimensionValueMaster } from "@/types/accounting-master";
 import { multiplyDecimal } from "../accounts-payable/shared/ap-decimal";
@@ -240,6 +241,7 @@ export default function AccountingDocumentDetail() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations("accounting.documents");
   const tc = useTranslations("common");
+  const errorToast = useErrorToast();
   const config = accountingDocumentFromPath(pathname);
   const isJournalVoucher = config.kind === "journalVoucher";
   const isGlVoucher = isJournalVoucher || config.kind === "templateVoucher" ||
@@ -817,6 +819,10 @@ export default function AccountingDocumentDetail() {
         toast.success(intent === "draft" ? t("draftSaved") : t("submitted"));
         navigate(`${config.path}/${targetId}`, { replace: true });
       } catch (error) {
+        if (error instanceof ApiError && isAppStatusErrorCode(error.appCode)) {
+          errorToast(error);
+          return;
+        }
         toast.error(
           error instanceof Error
             ? error.message
@@ -843,6 +849,10 @@ export default function AccountingDocumentDetail() {
         navigate(`${config.path}/${copied.id}`);
         toast.success(t("copiedToNew"));
       } catch (error) {
+        if (error instanceof ApiError && isAppStatusErrorCode(error.appCode)) {
+          errorToast(error);
+          return;
+        }
         toast.error(
           error instanceof Error
             ? error.message
@@ -2299,7 +2309,12 @@ export default function AccountingDocumentDetail() {
                   action === "void" ? t("voided") : "Journal Voucher reversed",
                 );
               },
-              onError: (error) => toast.error(error.message),
+              // รหัสสถานะแอปต้องแปลผ่าน errorToast — message เป็นประโยค default ของ gateway
+              onError: (error) =>
+                error instanceof ApiError &&
+                isAppStatusErrorCode(error.appCode)
+                  ? errorToast(error)
+                  : toast.error(error.message),
             },
           );
         }}

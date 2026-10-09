@@ -7,7 +7,12 @@ import { useTranslations } from "use-intl";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
-import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
+import {
+  APP_STATUS_ERROR_CODES,
+  ApiError,
+  ERROR_CODES,
+  isTransportError,
+} from "@/lib/api-error";
 import { login } from "@/lib/auth/auth-api";
 import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
@@ -81,6 +86,12 @@ export default function LoginForm() {
       try {
         return await login(credentials.email, credentials.password);
       } catch (err) {
+        if (
+          err instanceof ApiError &&
+          err.appCode === APP_STATUS_ERROR_CODES.APP_DISABLED
+        ) {
+          throw new Error(t("errors.appDisabled"));
+        }
         if (err instanceof ApiError && err.code === ERROR_CODES.UNAUTHORIZED) {
           throw new Error(t("errors.invalidCredentials"));
         }

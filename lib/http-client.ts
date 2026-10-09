@@ -1,9 +1,11 @@
 import {
   ApiError,
   ERROR_CODES,
+  appStatusErrorCodeFrom,
   licenseContextFrom,
   licenseErrorCodeFrom,
 } from "@/lib/api-error";
+import { appStatusStore } from "@/lib/app-status-store";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
@@ -24,6 +26,13 @@ interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
    * ยังเด้งเหมือนเดิม เพราะเป็นเรื่องระดับสัญญาที่ผู้ใช้ต้องรู้ ไม่ใช่ข้อจำกัดของหน้าใดหน้าหนึ่ง
    */
   silentForbidden?: boolean;
+  /**
+   * คืน 401 ดิบ ไม่ refresh/เคลียร์ session — ใช้กับ probe สาธารณะอย่าง app-status เท่านั้น
+   *
+   * เงื่อนไขก่อนใช้: เฉพาะ endpoint ที่ 401 **ไม่มีทาง** แปลว่า access token หมดอายุ
+   * (เช่น แปลว่า app id ไม่รู้จัก) ไม่งั้นจะข้าม refresh แล้วผู้ใช้ค้างกับ token เสีย
+   */
+  rawUnauthorized?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -197,18 +206,29 @@ const readErrorBody = async (response: Response): Promise<unknown> => {
   }
 };
 
+const readStatusErrorMessage = (body: unknown): string | undefined => {
+  const m = (body as { error?: { message?: unknown } } | null | undefined)
+    ?.error?.message;
+  return typeof m === "string" && m ? m : undefined;
+};
+
 const handleClientErrors = async (
   response: Response,
   url: string,
   init: RequestInit,
   isRetry = false,
   silentForbidden = false,
+  rawUnauthorized = false,
 ): Promise<Response> => {
   // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
   // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
   // "ลิงก์หมดอายุ" กลายเป็น dead code และ retry วน refresh บนหน้า public ปล่อยให้
   // raw response ไปถึง handleResponse ของ hook เอง
   if (url.startsWith(EXTERNAL_PREFIX)) return response;
+
+  // probe สาธารณะ (app-status) — 401 ของมัน = app id ไม่รู้จัก ไม่ใช่ session หมดอายุ
+  // ห้าม refresh/เคลียร์ token (จะเตะผู้ใช้ออกจากระบบ) ปล่อย response ดิบให้ caller ตัดสินเอง
+  if (response.status === 401 && rawUnauthorized) return response;
 
   if (response.status === 401) {
     // refresh + retry ก่อนเสมอ — 401 หมายถึง "token ใช้ไม่ได้" เท่านั้น
@@ -252,6 +272,22 @@ const handleClientErrors = async (
       typeof (body as { message?: unknown } | undefined)?.message === "string"
         ? (body as { message: string }).message
         : undefined;
+    // แอปถูกปิด (APP_DISABLED) ไม่ใช่เรื่องสิทธิ์ — ห้ามเด้ง PermissionDeniedDialog
+    // root-layout อ่าน store แล้วแทนทั้งแอปด้วยหน้าเต็มจอเอง
+    const appStatusCode = appStatusErrorCodeFrom(body);
+    if (appStatusCode) {
+      appStatusStore.reportBlocked(appStatusCode, body);
+      throw new ApiError(
+        ERROR_CODES.FORBIDDEN,
+        message || readStatusErrorMessage(body) || "Application disabled",
+        403,
+        false,
+        undefined,
+        undefined,
+        appStatusCode,
+      );
+    }
+
     const licenseCode = licenseErrorCodeFrom(body);
 
     if (licenseCode) {
@@ -274,6 +310,16 @@ const handleClientErrors = async (
     }
 
     throw new ApiError(ERROR_CODES.FORBIDDEN, message || "Access denied", 403);
+  }
+
+  if (response.status === 503) {
+    // ปิดปรับปรุง/อ่านอย่างเดียว — แจ้ง store ทันทีไม่ต้องรอรอบ poll ของ useAppStatus
+    // แล้วคืน response เดิม: hook ของแต่ละหน้ายังทำ ApiError.from เอง (ได้ appCode
+    // ไปแปลเป็น toast) · 503 ตอน gateway ล่มจริงไม่มี code นี้ จึงไม่แตะ store
+    const body = await readErrorBody(response);
+    const appStatusCode = appStatusErrorCodeFrom(body);
+    if (appStatusCode) appStatusStore.reportBlocked(appStatusCode, body);
+    return response;
   }
 
   if (response.status === 429) {
@@ -302,7 +348,8 @@ const request = async (
 ): Promise<Response> => {
   checkRateLimit();
 
-  const { body, headers, silentForbidden, ...rest } = options ?? {};
+  const { body, headers, silentForbidden, rawUnauthorized, ...rest } =
+    options ?? {};
 
   // FormData (multipart) ต้องปล่อยให้ browser ตั้ง Content-Type + boundary เอง
   // และห้าม JSON.stringify — ไม่งั้น payload จะเสีย
@@ -323,7 +370,14 @@ const request = async (
 
   const response = await safeFetch(url, init);
 
-  return handleClientErrors(response, url, init, false, silentForbidden);
+  return handleClientErrors(
+    response,
+    url,
+    init,
+    false,
+    silentForbidden,
+    rawUnauthorized,
+  );
 };
 
 /**

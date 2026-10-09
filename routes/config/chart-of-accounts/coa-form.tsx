@@ -31,7 +31,8 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { useGlAccountGroups } from "../shared/use-gl-account-groups";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { httpClient } from "@/lib/http-client";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, isAppStatusErrorCode } from "@/lib/api-error";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { cn } from "@/lib/utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { DimensionMaster, AccountGroupMaster } from "@/types/accounting-master";
@@ -105,6 +106,7 @@ export function CoaForm({
   const tfl = useTranslations("field");
   const tv = useTranslations("validation");
   const tt = useTranslations("toast");
+  const errorToast = useErrorToast();
 
   const create = useCreateChartOfAccount();
   const update = useUpdateChartOfAccount();
@@ -156,7 +158,12 @@ export function CoaForm({
       }
       await queryClient.invalidateQueries({ queryKey: coaRulesKey(buCode, record.id) });
     },
-    onError: (error) => toast.error(error.message),
+    // รหัสสถานะแอป (APP_READ_ONLY ฯลฯ) ต้องแปลผ่าน errorToast — `err.message` เป็นประโยค
+    // default ภาษาอังกฤษของ gateway
+    onError: (error) =>
+      error instanceof ApiError && isAppStatusErrorCode(error.appCode)
+        ? errorToast(error)
+        : toast.error(error.message),
   });
 
   const dimensionQuery = useQuery({

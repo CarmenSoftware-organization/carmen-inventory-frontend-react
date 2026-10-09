@@ -720,7 +720,8 @@
       "googleNoAccount": "No account exists for this Google email address.",
       "googleAccountConflict": "This email address conflicts with another account. Please contact your administrator.",
       "googleTooManyAttempts": "Too many sign-in attempts. Please wait a moment and try again.",
-      "googleDisabled": "Google sign-in is turned off. Please sign in with your email and password."
+      "googleDisabled": "Google sign-in is turned off. Please sign in with your email and password.",
+      "appDisabled": "This application has been disabled. Contact your administrator."
     },
     "google": {
       "or": "or",
@@ -895,6 +896,9 @@
     "checkFields": "Check these fields again: {fields}",
     "srDateOutsideOpenPeriod": "The requisition date is outside every open accounting period. Change the date, or ask accounting to open that period.",
     "byCode": {
+      "APP_READ_ONLY": "The system is in read-only mode — this action isn't available right now.",
+      "APP_MAINTENANCE": "The system is under maintenance. Please try again later.",
+      "APP_DISABLED": "This application has been disabled.",
       "PO_NOT_FOUND": "This purchase order no longer exists. Someone may have deleted it.",
       "PO_VENDOR_NOT_FOUND": "The vendor on this order no longer exists. Pick another one.",
       "PO_CURRENCY_NOT_FOUND": "The currency on this order no longer exists. Pick another one.",
@@ -5277,6 +5281,21 @@
     "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats.",
     "featureLabel": "Feature:",
     "buLabel": "Business unit:"
+  },
+  "appStatus": {
+    "maintenanceEyebrow": "Maintenance",
+    "maintenanceTitle": "We're doing some maintenance",
+    "maintenanceDesc": "This application is temporarily unavailable. You stay signed in — this page comes back on its own when it's ready.",
+    "untilLine": "Expected back {time}",
+    "checkNow": "Check again",
+    "disabledEyebrow": "Unavailable",
+    "disabledTitle": "This application has been disabled",
+    "disabledDesc": "Contact your administrator if you need access.",
+    "signOut": "Sign out",
+    "readOnlyBanner": "Read-only mode — you can view data, but saving is disabled for now.",
+    "readOnlyBannerUntil": "Read-only mode until {time} — you can view data, but saving is disabled for now.",
+    "bypassMaintenanceBanner": "Maintenance mode is on — you have access as an exempt user. Other users are blocked.",
+    "bypassReadOnlyBanner": "Read-only mode is on — you can still save as an exempt user. Other users can only view."
   },
   "license": {
     "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",

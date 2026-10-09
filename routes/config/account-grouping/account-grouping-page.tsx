@@ -11,7 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, isAppStatusErrorCode } from "@/lib/api-error";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { httpClient } from "@/lib/http-client";
 import { useGlAccountGroups, glAccountGroupsKey } from "../shared/use-gl-account-groups";
 import {
@@ -32,6 +33,16 @@ import { AccountGroupUnassignWarningDialog } from "./account-group-unassign-warn
 export default function AccountGroupingPage() {
   const t = useTranslations("config.accountGrouping");
   const tt = useTranslations("toast");
+  const errorToast = useErrorToast();
+  // รหัสสถานะแอป (APP_READ_ONLY ฯลฯ) ต้องแปลผ่าน errorToast — `err.message` เป็นประโยค
+  // default ภาษาอังกฤษของ gateway
+  const toastMutationError = (err: unknown, fallback: string) => {
+    if (err instanceof ApiError && isAppStatusErrorCode(err.appCode)) {
+      errorToast(err);
+      return;
+    }
+    toast.error(err instanceof Error ? err.message : fallback);
+  };
   const buCode = useBuCode();
   const queryClient = useQueryClient();
 
@@ -193,7 +204,7 @@ export default function AccountGroupingPage() {
       toast.success(isEdit ? tt("updateSuccess", { entity: data.name }) : tt("createSuccess", { entity: data.name }));
       setFormOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to save account group");
+      toastMutationError(err, "Unable to save account group");
     } finally {
       setIsMutating(false);
     }
@@ -225,7 +236,7 @@ export default function AccountGroupingPage() {
       toast.success(`Group [${group.code}] moved successfully`);
       setMoveOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to move account group");
+      toastMutationError(err, "Unable to move account group");
     } finally {
       setIsMutating(false);
     }
@@ -269,7 +280,7 @@ export default function AccountGroupingPage() {
       toast.success(`Account [${account.code}] assigned to group [${selectedNode.code}]`);
       setAssignOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to assign account");
+      toastMutationError(err, "Unable to assign account");
     } finally {
       setIsMutating(false);
     }
@@ -305,7 +316,7 @@ export default function AccountGroupingPage() {
       await accountsQuery.refetch();
       toast.success(`Account [${account.code}] unassigned successfully`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to unassign account");
+      toastMutationError(err, "Unable to unassign account");
     } finally {
       setIsMutating(false);
     }
@@ -328,7 +339,7 @@ export default function AccountGroupingPage() {
       setDeleteOpen(false);
       setDeletingNode(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Unable to delete account group");
+      toastMutationError(err, "Unable to delete account group");
     } finally {
       setIsMutating(false);
     }
