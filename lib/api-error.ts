@@ -142,7 +142,8 @@ export class ApiError extends Error {
       code,
       serverMessage || fallbackMessage,
       res.status,
-      res.status >= 500,
+      // 503 ของสถานะแอปยิงซ้ำก็ได้คำตอบเดิมจนกว่าแอดมินจะเปิดแอป — ไม่ใช่ความล้มเหลวชั่วคราว
+      res.status >= 500 && !isAppStatusErrorCode(appCode),
       data,
       serverMessage,
       appCode,
@@ -196,6 +197,59 @@ export function licenseErrorCodeFrom(
     code === LICENSE_ERROR_CODES.SEAT_LIMIT_EXCEEDED
     ? code
     : undefined;
+}
+
+/**
+ * error code สามตัวที่ `AppIdGuard` ฝั่ง gateway ส่งมาเมื่อแอป (x-app-id) ไม่ได้อยู่ในสถานะ
+ * `running` — แอดมินตั้งไว้ที่หน้า Applications ของ carmen-platform
+ *
+ * `APP_MAINTENANCE` / `APP_READ_ONLY` มากับ 503, `APP_DISABLED` มากับ 403 · แยกด้วย
+ * `body.error.code` เท่านั้น (เหมือน license) — 503 ตัวจริงตอน gateway ล่มไม่มี code นี้
+ */
+export const APP_STATUS_ERROR_CODES = {
+  APP_MAINTENANCE: "APP_MAINTENANCE",
+  APP_READ_ONLY: "APP_READ_ONLY",
+  APP_DISABLED: "APP_DISABLED",
+} as const;
+
+export type AppStatusErrorCode =
+  (typeof APP_STATUS_ERROR_CODES)[keyof typeof APP_STATUS_ERROR_CODES];
+
+const APP_STATUS_ERROR_CODE_SET: ReadonlySet<string> = new Set(
+  Object.values(APP_STATUS_ERROR_CODES),
+);
+
+/**
+ * เป็นรหัสสถานะแอปหรือไม่ — ใช้กับ `ApiError.appCode` ที่อ่านมาแล้ว
+ *
+ * @param code - ค่าอะไรก็ได้
+ * @returns true เมื่อเป็นหนึ่งในสามรหัสของ `APP_STATUS_ERROR_CODES`
+ */
+export function isAppStatusErrorCode(
+  code: unknown,
+): code is AppStatusErrorCode {
+  return typeof code === "string" && APP_STATUS_ERROR_CODE_SET.has(code);
+}
+
+/**
+ * อ่านรหัสสถานะแอปจาก error body ดิบ — รูปเดียวกับ `licenseErrorCodeFrom`
+ *
+ * @param body - error body ที่ parse แล้ว (ชนิดอะไรก็ได้)
+ * @returns รหัสเมื่อแมตช์ ไม่งั้น undefined (body รูปแปลกทุกแบบไม่ throw)
+ * @example
+ * ```ts
+ * appStatusErrorCodeFrom({ error: { code: "APP_MAINTENANCE" } }); // "APP_MAINTENANCE"
+ * appStatusErrorCodeFrom({ error: { message: "Forbidden" } });    // undefined
+ * ```
+ */
+export function appStatusErrorCodeFrom(
+  body: unknown,
+): AppStatusErrorCode | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const error = (body as { error?: unknown }).error;
+  if (typeof error !== "object" || error === null) return undefined;
+  const code = (error as { code?: unknown }).code;
+  return isAppStatusErrorCode(code) ? code : undefined;
 }
 
 /**

@@ -56,6 +56,9 @@ export async function login(
       res.status,
       false,
       retryAfter !== undefined ? { retryAfter } : undefined,
+      undefined,
+      // `error.code` เช่น APP_DISABLED — หน้า login ต้องบอกว่าแอปถูกปิด ไม่ใช่รหัสผ่านผิด
+      typeof json?.error?.code === "string" ? json.error.code : undefined,
     );
   }
 

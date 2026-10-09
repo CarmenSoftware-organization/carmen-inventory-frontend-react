@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { ApiErrorToaster } from "@/components/api-error-toaster";
 import { PermissionDeniedDialog } from "@/components/permission-denied-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, isAppStatusErrorCode } from "@/lib/api-error";
 import {
   prefersServerMessage,
   reportApiError,
@@ -33,6 +33,13 @@ export const makeQueryClient = () =>
         // 4xx ยิงซ้ำก็ได้คำตอบเดิม (ใบถูกลบไปแล้ว/ไม่มีสิทธิ์) — retry มีแต่ทำให้
         // คนเปิดหน้าต้องรอนานเป็นเท่าตัวกว่าจะเห็นว่าเกิดอะไรขึ้น
         retry: (failureCount, error) => {
+          // ปิดปรับปรุง/อ่านอย่างเดียว — ยิงซ้ำมีแต่เพิ่มโหลดให้ gateway ที่ตั้งใจปิดอยู่
+          if (
+            error instanceof ApiError &&
+            isAppStatusErrorCode(error.appCode)
+          ) {
+            return false;
+          }
           const status =
             error instanceof ApiError ? (error.statusCode ?? 0) : 0;
           if (status >= 400 && status < 500) return false;
