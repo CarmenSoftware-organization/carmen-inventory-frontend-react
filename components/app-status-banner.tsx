@@ -48,7 +48,7 @@ export function AppStatusBanner({
 
   return (
     <div
-      role="alert"
+      role="status"
       className="bg-muted flex items-center justify-center gap-2 border-b px-4 py-2 text-xs"
     >
       <Lock className="text-warning-ink size-4 shrink-0" aria-hidden />

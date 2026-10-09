@@ -64,7 +64,12 @@ export function useAppStatus(): {
       // ผู้ใช้ที่ได้รับยกเว้นแต่ access token หมดอายุ: backend มองเป็น "ไม่มีผู้ใช้" (200, bypass:false)
       // และหน้าบล็อกเต็มจอจะไม่ยิงคำขออื่นให้เกิด 401→refresh เลย จึงต้อง refresh เองหนึ่งครั้ง
       // แล้ว probe ซ้ำก่อนตัดสิน — ทำครั้งเดียวต่อสถานะบล็อกหนึ่งชุด ไม่ refresh ทุก 60 วินาที
-      if (snapshot.status !== "running" && !snapshot.bypass) {
+      // disabled ไม่มีข้อยกเว้น (bypass ใช้ไม่ได้) — refresh ไปก็ไม่ได้อะไร จึงจำกัดที่ maintenance/read_only
+      if (
+        (snapshot.status === "maintenance" ||
+          snapshot.status === "read_only") &&
+        !snapshot.bypass
+      ) {
         const key = `${snapshot.status}|${snapshot.until ?? ""}`;
         if (retriedFor.current !== key) {
           retriedFor.current = key;
@@ -92,9 +97,12 @@ export function useAppStatus(): {
   const wasBlocked = useRef(blocked);
   useEffect(() => {
     if (wasBlocked.current && !blocked) {
-      void queryClient.invalidateQueries({
-        predicate: (q) => q.queryKey[0] !== QUERY_KEYS.APP_STATUS,
-      });
+      void queryClient.invalidateQueries(
+        {
+          predicate: (q) => q.queryKey[0] !== QUERY_KEYS.APP_STATUS,
+        },
+        { cancelRefetch: false },
+      );
     }
     wasBlocked.current = blocked;
   }, [blocked, queryClient]);

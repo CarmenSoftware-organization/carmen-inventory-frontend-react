@@ -25,7 +25,7 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useErrorToast } from "@/hooks/use-error-toast";
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, isAppStatusErrorCode } from "@/lib/api-error";
 import { VoidDialog } from "@/components/share/void-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -146,7 +146,13 @@ export function InventoryAdjustmentForm({
     // backend คืน business error (เช่น "Insufficient stock. Requested: 3,
     // Available: 1") เป็น HTTP 500 → INTERNAL_ERROR ซึ่ง errorToast จะกลบเป็น
     // ข้อความ generic — กรณีนี้แสดง message จาก server ตรง ๆ
-    if (err instanceof ApiError && err.code === ERROR_CODES.INTERNAL_ERROR) {
+    // รหัสสถานะแอป (เช่น 503 APP_READ_ONLY) ก็เป็น INTERNAL_ERROR แต่ message คือประโยค default
+    // ภาษาอังกฤษของ gateway — ปล่อยให้ errorToast แปลตาม appCode แทน
+    if (
+      err instanceof ApiError &&
+      err.code === ERROR_CODES.INTERNAL_ERROR &&
+      !isAppStatusErrorCode(err.appCode)
+    ) {
       toast.error(err.message);
       return;
     }

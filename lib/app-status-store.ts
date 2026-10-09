@@ -1,4 +1,5 @@
 import type { AppStatusErrorCode } from "@/lib/api-error";
+import { tokenStore } from "@/lib/auth/token-store";
 
 /**
  * สถานะการให้บริการของแอปนี้ (x-app-id) ที่แอดมินตั้งไว้ที่หน้า Applications ของ carmen-platform
@@ -134,10 +135,14 @@ export const appStatusStore = {
       typeof body === "object" && body !== null
         ? (body as { error?: Record<string, unknown> }).error
         : undefined;
+    const status = CODE_TO_STATUS[code];
     // ถูกบล็อก = ไม่ได้อยู่ในรายชื่อยกเว้นแน่นอน
     replace({
-      status: CODE_TO_STATUS[code],
-      message: readMessage(error?.message),
+      status,
+      // ข้อความแอดมินเชื่อจาก probe เท่านั้น — `error.message` ใน body อาจเป็นประโยค default
+      // ภาษาอังกฤษของ gateway (ไม่ใช่ข้อความที่แอดมินตั้ง) ถ้าใช้ตรงนี้จะโชว์เป็น "หมายเหตุแอดมิน"
+      // แล้วกะพริบหายเมื่อ poll รอบถัดไป จึงคงข้อความเดิมไว้เมื่อสถานะไม่เปลี่ยน ไม่งั้นว่างไว้รอ probe
+      message: current.status === status ? current.message : undefined,
       // gateway วาง `until` ไว้ระดับบนสุดของ body ไม่ใช่ใน `error` (exception filter ตัดคีย์อื่นใน error ทิ้ง)
       until: readUntil(
         (typeof body === "object" && body !== null
@@ -148,3 +153,9 @@ export const appStatusStore = {
     });
   },
 };
+
+// store นี้เป็น state ระดับโมดูล — redirect ไป /login แบบไม่ reload จะพาสถานะบล็อกของ session
+// ที่ถูกล้างไปติดด้วย จึงรีเซ็ตเป็น running ทุกครั้งที่ session ถูกล้าง (probe รอบถัดไปตั้งค่าจริงใหม่)
+tokenStore.subscribe(() => {
+  if (tokenStore.get() === null) replace(APP_STATUS_RUNNING);
+});

@@ -896,7 +896,7 @@
     "checkFields": "Check these fields again: {fields}",
     "srDateOutsideOpenPeriod": "The requisition date is outside every open accounting period. Change the date, or ask accounting to open that period.",
     "byCode": {
-      "APP_READ_ONLY": "The system is in read-only mode — your changes were not saved.",
+      "APP_READ_ONLY": "The system is in read-only mode — this action isn't available right now.",
       "APP_MAINTENANCE": "The system is under maintenance. Please try again later.",
       "APP_DISABLED": "This application has been disabled.",
       "PO_NOT_FOUND": "This purchase order no longer exists. Someone may have deleted it.",
