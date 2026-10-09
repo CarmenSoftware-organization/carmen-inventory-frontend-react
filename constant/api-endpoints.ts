@@ -253,6 +253,9 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/inventory-periods`,
   // root ของ gateway ไม่ใช่ `/api/...` — endpoint นี้สาธารณะ ไม่ผูก BU ไม่ต้อง auth
   BACKEND_VERSION: "/api/proxy/version",
+  // สถานะการให้บริการของแอป (x-app-id) — gateway ตอบได้แม้แอปปิดปรับปรุง/ปิดใช้งาน
+  // ไม่ต้องมี token (มีก็ใช้คำนวณ `bypass`)
+  APP_STATUS: "/api/proxy/api/app-status",
   PERIOD_ENDS: (buCode: string) => `/api/proxy/api/${buCode}/period-ends`,
   PERIOD_END_CURRENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/current`,

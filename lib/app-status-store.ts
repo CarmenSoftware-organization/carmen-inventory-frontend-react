@@ -86,6 +86,9 @@ type Listener = () => void;
 
 let current: AppStatusSnapshot = APP_STATUS_RUNNING;
 const listeners = new Set<Listener>();
+// นับจำนวนครั้งที่ http-client รายงานว่าถูกบล็อก — probe ที่ออกก่อนรายงานล่าสุดเป็นข้อมูลเก่ากว่า
+// ต้องไม่เขียนทับกลับเป็น running
+let reportCount = 0;
 
 const sameSnapshot = (a: AppStatusSnapshot, b: AppStatusSnapshot) =>
   a.status === b.status &&
@@ -113,8 +116,20 @@ export const appStatusStore = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  setFromProbe: (snapshot: AppStatusSnapshot): void => replace(snapshot),
+  /** เรียกก่อนยิง probe — ส่งค่าที่ได้กลับเข้า `setFromProbe` เพื่อกันผลที่ล้าสมัย */
+  probeToken: (): number => reportCount,
+  /**
+   * @param snapshot - ผลจาก probe
+   * @param token - ค่าจาก `probeToken()` ตอนเริ่มยิง; ถ้ามี `reportBlocked` เกิดขึ้นระหว่างนั้น ผลนี้ถูกทิ้ง
+   * @returns true เมื่อนำไปใช้
+   */
+  setFromProbe: (snapshot: AppStatusSnapshot, token?: number): boolean => {
+    if (token !== undefined && token !== reportCount) return false;
+    replace(snapshot);
+    return true;
+  },
   reportBlocked: (code: AppStatusErrorCode, body: unknown): void => {
+    reportCount += 1;
     const error =
       typeof body === "object" && body !== null
         ? (body as { error?: Record<string, unknown> }).error
@@ -124,7 +139,11 @@ export const appStatusStore = {
       status: CODE_TO_STATUS[code],
       message: readMessage(error?.message),
       // gateway วาง `until` ไว้ระดับบนสุดของ body ไม่ใช่ใน `error` (exception filter ตัดคีย์อื่นใน error ทิ้ง)
-      until: readUntil((body as { until?: unknown }).until ?? error?.until),
+      until: readUntil(
+        (typeof body === "object" && body !== null
+          ? (body as { until?: unknown }).until
+          : undefined) ?? error?.until,
+      ),
       bypass: false,
     });
   },

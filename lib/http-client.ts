@@ -26,6 +26,8 @@ interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
    * ยังเด้งเหมือนเดิม เพราะเป็นเรื่องระดับสัญญาที่ผู้ใช้ต้องรู้ ไม่ใช่ข้อจำกัดของหน้าใดหน้าหนึ่ง
    */
   silentForbidden?: boolean;
+  /** คืน 401 ดิบ ไม่ refresh/เคลียร์ session — ใช้กับ probe สาธารณะอย่าง app-status เท่านั้น */
+  rawUnauthorized?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -199,18 +201,29 @@ const readErrorBody = async (response: Response): Promise<unknown> => {
   }
 };
 
+const readStatusErrorMessage = (body: unknown): string | undefined => {
+  const m = (body as { error?: { message?: unknown } } | null | undefined)
+    ?.error?.message;
+  return typeof m === "string" && m ? m : undefined;
+};
+
 const handleClientErrors = async (
   response: Response,
   url: string,
   init: RequestInit,
   isRetry = false,
   silentForbidden = false,
+  rawUnauthorized = false,
 ): Promise<Response> => {
   // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
   // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
   // "ลิงก์หมดอายุ" กลายเป็น dead code และ retry วน refresh บนหน้า public ปล่อยให้
   // raw response ไปถึง handleResponse ของ hook เอง
   if (url.startsWith(EXTERNAL_PREFIX)) return response;
+
+  // probe สาธารณะ (app-status) — 401 ของมัน = app id ไม่รู้จัก ไม่ใช่ session หมดอายุ
+  // ห้าม refresh/เคลียร์ token (จะเตะผู้ใช้ออกจากระบบ) ปล่อย response ดิบให้ caller ตัดสินเอง
+  if (response.status === 401 && rawUnauthorized) return response;
 
   if (response.status === 401) {
     // refresh + retry ก่อนเสมอ — 401 หมายถึง "token ใช้ไม่ได้" เท่านั้น
@@ -261,7 +274,7 @@ const handleClientErrors = async (
       appStatusStore.reportBlocked(appStatusCode, body);
       throw new ApiError(
         ERROR_CODES.FORBIDDEN,
-        message || "Application disabled",
+        message || readStatusErrorMessage(body) || "Application disabled",
         403,
         false,
         undefined,
@@ -330,7 +343,8 @@ const request = async (
 ): Promise<Response> => {
   checkRateLimit();
 
-  const { body, headers, silentForbidden, ...rest } = options ?? {};
+  const { body, headers, silentForbidden, rawUnauthorized, ...rest } =
+    options ?? {};
 
   // FormData (multipart) ต้องปล่อยให้ browser ตั้ง Content-Type + boundary เอง
   // และห้าม JSON.stringify — ไม่งั้น payload จะเสีย
@@ -351,7 +365,14 @@ const request = async (
 
   const response = await safeFetch(url, init);
 
-  return handleClientErrors(response, url, init, false, silentForbidden);
+  return handleClientErrors(
+    response,
+    url,
+    init,
+    false,
+    silentForbidden,
+    rawUnauthorized,
+  );
 };
 
 /**
